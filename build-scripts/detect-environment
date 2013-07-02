@@ -1,0 +1,290 @@
+# -*- mode:sh -*-
+
+detect_os()
+{
+  case "$CROSS_TARGET" in
+    '')
+      KERNEL_NAME=`uname -s`
+      case "$KERNEL_NAME" in
+	Linux)
+          OS_FAMILY=linux
+          detect_distribution;;
+	SunOS)
+          OS_FAMILY=solaris
+          OS=solaris
+          OS_VERSION=`uname -r | sed -e 's/^5\.//'`
+          ;;
+	AIX)
+          OS_FAMILY=aix
+          OS=aix;;
+	Darwin)
+          OS_FAMILY=darwin
+          OS=darwin;;
+	FreeBSD)
+          OS_FAMILY=freebsd
+          OS=freebsd;;
+	NetBSD)
+          OS_FAMILY=netbsd
+          OS=netbsd;;
+        HP-UX)
+          OS_FAMILY=hpux
+          OS=hpux;;
+	*)
+	  echo "Unable to detect operating system: $KERNEL_NAME"
+	  exit 42;;
+      esac
+      ;;
+    *)
+      echo "Unknown cross-compilation target: $CROSS_TARGET"
+      exit 42;;
+  esac
+
+  export OS
+}
+
+detect_distribution()
+{
+  if [ -f /etc/redhat-release ]; then
+    REL=$(cat /etc/redhat-release)
+    case "$REL" in
+      "CentOS "*)
+        VER=${REL#CentOS release }
+        VER=${VER% \(Final\)}
+        case "$VER" in
+          [0-9].[0-9]);;
+          *)
+            echo "Unknown CentOS version: $VER"
+            exit 42;;
+        esac
+
+        OS=centos
+        OS_VERSION="$VER"
+        ;;
+      "Red Hat Enterprise Linux AS release "*)
+        VER=${REL#Red Hat Enterprise Linux AS release }
+        case "$VER" in
+          [0-9]" "*)
+            MAJOR=${VER%% *};;
+          *)
+            echo "Unknown RHEL AS major version: $VER"
+            exit 42;;
+        esac
+
+        case "$VER" in
+          *Update" "[0-9]")")
+            MINOR=${VER#*Update }
+            MINOR=${MINOR%\)};;
+          *)
+            echo "Unknnown RHEL AS minor version: $VER"
+            exit 42;;
+        esac
+
+        OS=rhel
+        OS_VERSION="$MAJOR.$MINOR"
+        ;;
+      "Red Hat Enterprise Linux Server release "*)
+        VER=${REL#Red Hat Enterprise Linux Server release }
+        VER=${VER% \(*};
+        case "$VER" in
+          [0-9].[0-9]);;
+          *)
+          echo "Unknown RHEL Server version: $VER"
+          exit 42;;
+        esac
+
+        OS=rhel
+        OS_VERSION="$VER"
+        ;;
+      *)
+        echo "Unknown RedHat-like distribution: $REL"
+        exit 42;;
+    esac
+  elif [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release; then
+    REL=$(grep DISTRIB_RELEASE= /etc/lsb-release)
+    REL=${REL#DISTRIB_RELEASE=}
+    case "$REL" in
+      [0-9].[0-9][0-9]|[0-9][0-9].[0-9][0-9])
+        ;;
+      *)
+        echo "Unknown Ubuntu release: $REL"
+        exit 42;;
+    esac
+
+    OS=ubuntu
+    OS_VERSION="$REL"
+  elif [ -f /etc/debian_version ]; then
+    REL=$(cat /etc/debian_version)
+    case "$REL" in
+      [0-9].[0-9])
+        ;;
+      [0-9].[0-9].[0-9])
+        REL=${REL%.[0-9]}
+        ;;
+      [0-9].[0-9].[0-9][0-9])
+        REL=${REL%.[0-9][0-9]}
+        ;;
+      "wheezy/sid")
+        REL=7.0
+        ;;
+      *)
+        echo "Unable to detect version of Debian: $REL"
+        exit 42;;
+    esac
+
+    OS=debian
+    OS_VERSION="$REL"
+  elif [ -f /etc/SuSE-release ]; then
+    REL=$(head -n1 /etc/SuSE-release)
+    case "$REL" in
+      "SUSE Linux Enterprise Server "*)
+        MAJOR=$(grep '^VERSION' /etc/SuSE-release | awk '{print $3}')
+        MINOR=$(grep '^PATCHLEVEL' /etc/SuSE-release | awk '{print $3}')
+
+        if [ -z "$MAJOR" -o -z "$MINOR" ]; then
+          echo "Unable to detect version of SLES: $MAJOR.$MINOR"
+        fi
+
+        OS=sles
+        OS_VERSION="$MAJOR.$MINOR"
+        ;;
+      "openSUSE "*)
+        VERSION=$(grep '^VERSION' /etc/SuSE-release | awk '{print $3}')
+        OS=opensuse
+        OS_VERSION="$VERSION"
+        ;;
+      *)
+        echo "Unknown SUSE distribution: $REL"
+        exit 42;;
+    esac
+  fi
+
+  if [ -z "$OS" ]; then
+    echo "Failed to detect Linux distribution"
+    exit 42
+  fi
+
+  if [ -z "$OS_VERSION" ]; then
+    echo "Failed to detect Linux distribution version"
+    exit 42
+  fi
+}
+
+detect_packaging()
+{
+  if [ -f /bin/rpm ]; then
+    DEP_PACKAGING=rpm
+  elif [ -f /usr/bin/dpkg ]; then
+    DEP_PACKAGING=deb
+  elif [ -f /usr/sbin/pkgadd ]; then
+    DEP_PACKAGING=solaris
+  elif [ -f /usr/sbin/pkg_add ]; then
+    SYSTEM=`uname -s`
+	case "$SYSTEM" in
+	  FreeBSD)
+	    DEP_PACKAGING=freebsd;;
+	esac
+  elif [ -f /usr/sbin/swinstall ]; then
+    DEP_PACKAGING=hpux
+  else
+    echo "Unknown packaging system"
+    exit 42
+  fi
+
+  case "$OS" in
+    aix)
+      PACKAGING=lpp;;
+    *)
+      PACKAGING=$DEP_PACKAGING;;
+  esac
+
+  export DEP_PACKAGING PACKAGING
+}
+
+detect_arch()
+{
+  case "$DEP_PACKAGING" in
+    deb)
+      ARCH=`dpkg --print-architecture`;;
+    rpm)
+      ARCH=`rpm --eval '%{_arch}'`;;
+    solaris)
+      case `uname -m` in
+        sun*)
+          ARCH=sparc;;
+        i86pc)
+          ARCH=i86pc;;
+        *)
+          echo "Unknown Solaris architecture: `uname -m`";;
+      esac;;
+
+    freebsd)
+      ARCH=`uname -m`
+      OS_VERSION=`uname -r`;;
+    hpux)
+      ARCH=`uname -m`
+      OS_VERSION=`uname -r`;;
+    *)
+      echo "Unknown packaging system"
+      exit 42;;
+  esac
+
+  case "$CROSS_TARGET" in
+    '')
+      ;;
+    x86-*)
+      ARCH=x86;;
+    x64-*)
+      ARCH=x64;;
+    *)
+      echo "Unknown cross-compilation target: $CROSS_TARGET"
+      exit 42;;
+  esac
+
+  export ARCH
+}
+
+detect_tools()
+{
+# This is the idea, we check if we have a 'make' executable.
+# Then we check if 'make -v' returns 'GNU'. If so, that is our
+# make.
+# If it does not, then we check if we have 'gmake' executable. 
+# If so we make it our make.
+    MAKE=""
+    MAKE_VERSION=$(make -v || :)
+    case "$MAKE_VERSION" in
+    GNU*)
+        MAKE="make"
+        ;;
+    *)
+        GMAKE_=`which gmake`
+        case "$GMAKE_" in
+        /*)
+            MAKE="gmake"
+            ;;
+        *)
+            MAKE="Unknown make"
+            ;;
+        esac
+        ;;
+    esac
+    export MAKE
+}
+
+detect_environment()
+{
+detect_os
+detect_packaging
+detect_arch
+detect_tools
+}
+
+detect_environment
+
+#
+# We need to detect the following pieces of data:
+#  - distribution
+#  - version
+#  - architecture
+#  - packaging tool (dpkg, rpm, solaris pkg, ...)
+#

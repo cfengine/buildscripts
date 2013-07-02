@@ -1,0 +1,79 @@
+# -*- mode:sh -*-
+
+# Detect version of the software
+
+parse_version_string()
+{
+  VARNAME="$1"
+
+  VERSION=$(awk '/^ ?'$VARNAME'=/ {print}' < $BASEDIR/core/configure)
+
+  VERSION=${VERSION#*=}
+
+  if [ -z "$VERSION" ]; then
+    echo "Unable to detect version (variable $VARNAME). Bailing out" >&2
+    exit 42
+  fi
+
+  echo $VERSION
+}
+
+ci_version()
+{
+  echo "ci_version"
+  VERSION=$(parse_version_string VERSION)
+  echo "Using VERSION: $VERSION"
+
+  # Insert ~, so pre-releases get sorted before releases
+
+  MAIN_VERSION=$(printf "$VERSION" | perl -ne 'if (/^(\d+\.\d+\.\d+)([a-z][^.]+)?/) { print $1 }')
+  SUPP_VERSION=$(printf "$VERSION" | perl -ne 'if (/^(\d+\.\d+\.\d+)([a-z][^.]+)?/) { print $2 }')
+
+  if [ -z "$MAIN_VERSION" ]; then
+    echo "Unable to parse version $VERSION. Bailing out."
+    exit 42
+  fi
+
+  if [ -z "$SUPP_VERSION" ]; then
+    VERSION="$MAIN_VERSION"
+  else
+    VERSION="$MAIN_VERSION~$SUPP_VERSION"
+  fi
+  echo "VERSION: $VERSION"
+}
+
+release_version()
+{
+  echo "release_version"
+  VERSION=$(parse_version_string VERSION)
+  echo "Using VERSION: $VERSION"
+  echo "VERSION: $VERSION"
+}
+
+continuous_version()
+{
+  MONTH=`date +"%m"`
+  YEAR=`date +"%g"`
+  MY_BUILD_NUMBER=$BUILD_NUMBER
+  MY_MAJOR_VERSION=$MAJOR_VERSION
+  echo "version is $MY_MAJOR_VERSION.$YEAR.$MONTH-$MY_BUILD_NUMBER"
+  VERSION=$MY_MAJOR_VERSION.$YEAR.$MONTH-$MY_BUILD_NUMBER
+}
+
+if [ -z "$EXPLICIT_VERSION" ]; then 
+  case "$BUILD_TYPE" in
+    quick|full|smoke)
+      ci_version;;
+    debug)
+      ci_version
+      VERSION="$VERSION.debug";;
+    release|debug_and_release)
+      release_version;;
+    *)
+      echo "Unknown build type: $BUILD_TYPE"
+      exit 1;;
+  esac
+else
+  VERSION=$EXPLICIT_VERSION
+fi
+

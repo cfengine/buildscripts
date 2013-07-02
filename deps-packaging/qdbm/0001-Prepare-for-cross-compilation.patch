@@ -1,0 +1,101 @@
+From 667b56dc420f41268cf4fa74bf33b033665fd353 Mon Sep 17 00:00:00 2001
+From: Mikhail Gusarov <mikhail.gusarov@cfengine.com>
+Date: Fri, 16 Sep 2011 13:33:13 +0200
+Subject: [PATCH] Prepare for cross-compilation
+
+---
+ configure.in |   64 ++++++++++++++++++++++++++++++++-------------------------
+ 1 files changed, 36 insertions(+), 28 deletions(-)
+
+diff --git a/configure.in b/configure.in
+index 9a6f4c4..e996298 100644
+--- a/configure.in
++++ b/configure.in
+@@ -17,8 +17,6 @@ TARGETS="all"
+ MYDEFS=""
+ MYOPTS=""
+ MGWLIBS=""
+-LD="ld"
+-AR="ar"
+ 
+ # Building paths
+ pathtmp="$PATH"
+@@ -191,39 +189,49 @@ then
+   MYOPTS="-O1 -fno-omit-frame-pointer -fno-force-addr"
+ fi
+ 
+-# Linker
+-printf 'checking for ld... '
+-if which ld | grep '/ld$' > /dev/null 2>&1
+-then
+-  LD=`which ld`
+-  printf '%s\n' "$LD"
+-else
+-  printf 'no\n'
+-  if test "$isnowarn" != "yes"
++check_tool()
++{
++  var_name="$1"
++  tool_name="$2"
++
++  tool=$(eval printf "$"${var_name} 2>/dev/null)
++
++  printf "checking for ${tool_name}... "
++
++  if test -n "$tool"
+   then
+-    printf '#================================================================\n' 1>&2
+-    printf '# WARNING: ld is not found in PATH.\n' 1>&2
+-    printf '#================================================================\n' 1>&2
++    printf "$tool\n"
++    return
+   fi
+-fi
+ 
+-# Archiver
+-printf 'checking for ar... '
+-if which ar | grep '/ar$' > /dev/null 2>&1
+-then
+-  AR=`which ar`
+-  printf '%s\n' "$AR"
+-else
+-  printf 'no\n'
+-  if test "$isnowarn" != "yes"
++  if test "x$cross_compiling" = "xyes" && \
++       which "${host_alias}-${tool_name}" | \
++         grep "/${host_alias}-${tool_name}" > /dev/null 2>&1
+   then
+-    printf '#================================================================\n' 1>&2
+-    printf '# WARNING: ar is not found in PATH.\n' 1>&2
+-    printf '#================================================================\n' 1>&2
++    eval "${var_name}=${host_alias}-${tool_name}"
++    eval printf "$""${var_name}"
++    printf "\n"
++    return
+   fi
+-fi
+ 
++  if test "x$cross_compiling" = "xno" && \
++      which "${tool_name}" | grep "/${tool_name}" > /dev/null 2>&1
++  then
++    eval "${var_name}=${tool_name}"
++    eval printf "$""${var_name}"
++    printf "\n"
++    return
++  fi
++
++  printf "no\n"
++
++  printf '#================================================================\n' 1>&2
++  printf "# WARNING: ${tool_name} is not found in PATH.\n" 1>&2
++  printf '#================================================================\n' 1>&2
++}
+ 
++check_tool LD ld
++check_tool AR ar
+ 
+ #================================================================
+ # Checking Libraries
+-- 
+1.7.5.4
+

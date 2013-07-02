@@ -1,0 +1,80 @@
+#!/bin/sh -x
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+P=$BUILDPREFIX
+
+ARGS="--prefix=$P --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre=$P"
+
+case "$SQL" in
+  yes)
+    ARGS="$ARGS --with-postgresql=$P --without-mysql";;
+  no)
+    ARGS="$ARGS --without-sql";;
+esac
+
+case "$LIBACL" in
+  yes)
+    ARGS="$ARGS --with-libacl=$P";;
+  no)
+    ARGS="$ARGS --without-libacl";;
+esac
+
+case "$EMBEDDED_DB" in
+  qdbm)
+    ARGS="$ARGS --with-qdbm=$P";;
+  tokyocabinet)
+    ARGS="$ARGS --with-tokyocabinet=$P";;
+  *)
+    echo "Unknown embedded DB: $EMBEDDED_DB"
+    exit 42;;
+esac
+
+case "$LIBVIRT" in
+  yes)
+    ARGS="$ARGS --with-libvirt=$P";;
+  no)
+    ARGS="$ARGS --without-libvirt";;
+  *)
+    echo "Unknown libvirt selection: $LIBVIRT"
+    exit 42;;
+esac
+
+case "$LIBXML2" in
+  yes)
+    ARGS="$ARGS --with-libxml2=$P";;
+  no)
+    ARGS="$ARGS --without-libxml2";;
+  *)
+    echo "Unknown libxml2 selection: $LIBXML2"
+    exit 42;;
+esac
+
+case "$OPTIMIZE" in
+  yes)
+    ;;
+  no)
+    ARGS="$ARGS --enable-debug";;
+  *)
+    echo "Unknown optimize selection: $OPTIMIZE"
+    exit 42;;
+esac
+
+case "$BUILD_TYPE" in
+  debug_and_release)
+      CFLAGS="$CFLAGS -g -O2 -Wall -DNDEBUG";;
+  debug)
+      ;;
+  quick)
+      ARGS="$ARGS --enable-debug"
+      ;;
+  smoke|full|release)
+      ;;
+  *)
+      echo "Unknown build type: $BUILD_TYPE"
+      exit 42;;
+esac
+
+cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS

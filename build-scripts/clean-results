@@ -1,0 +1,8 @@
+#!/bin/sh -ex
+
+. `dirname "$0"`/functions
+. version
+
+rm -rf ../../output/.tmp/${SCHEDULER}
+
+(cd ../../output/${SCHEDULER} && find . -mindepth 1 -maxdepth 1 -type d -and -not -name '.*' -printf '%T@ %f\n' | sort -n | head -n-5 | awk '{print $2}' | xargs --no-run-if-empty rm -rf) || true

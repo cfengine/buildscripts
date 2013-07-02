@@ -1,0 +1,174 @@
+#!/bin/sh
+
+set -e
+
+usage() {
+  echo
+  echo "Usage: build-remote [--branch=<branch>]"
+  echo "                    [--source=<url>]"
+  echo "                    [--full|--release|--debug|--docs|--release-and-debug]"
+  echo "                    <user@host>"
+  echo
+  echo "Branch defaults to 'master'"
+  echo "Build type defaults to quick. You may request a full build using --full"
+  echo "Source defaults to git@github.com:cfengine/"
+  echo
+  echo
+}
+
+opts() {
+  OPTS=`getopt -o p:b:w:c:h --long branch:,source:,full,release,debug,docs,release-and-debug,help -n build-remote -- "$@"`
+
+  eval set -- "$OPTS"
+
+  if [ $? != 0 ]; then
+    usage
+    exit 1
+  fi
+
+  PROJECT=community
+  BRANCH=master
+  BUILD_TYPE=quick
+  SOURCE=git@github.com:cfengine
+  BUILD_NUMBER=1
+
+  while true; do
+    case "$1" in
+      -b|--branch)
+        BRANCH="$2"
+        shift 2;;
+      --full)
+        BUILD_TYPE=full
+        shift;;
+      --release)
+        BUILD_TYPE=release
+        shift;;
+      --debug)
+        BUILD_TYPE=debug
+        shift;;
+	  --release-and-debug)
+	    BUILD_TYPE=debug_and_release
+		shift;;
+      --source)
+        SOURCE="$2"
+        shift 2;;
+      -h|--help)
+        usage
+        exit 0;;
+      --)
+        shift
+        break;;
+      *)
+        echo "Internal error!"
+        exit 1;;
+    esac
+  done
+
+  if [ $# -ne 1 ]; then
+    usage
+    exit 1
+  fi
+  
+  REPOSITORY=$PROJECT-$BRANCH
+  HOST=$1
+
+  export PROJECT BRANCH HOST BUILD_TYPE BUILD_NUMBER
+
+  export SCHEDULER=$PROJECT-$BRANCH-localbuild
+}
+
+prepare_workdir() {
+  mkdir -p "workdir-$PROJECT-$BRANCH-$HOST"
+  rm -rf "workdir-$PROJECT-$BRANCH-$HOST"/*
+  cd "workdir-$PROJECT-$BRANCH-$HOST"
+}
+
+checkout() {
+  mkdir -p build
+  rsync -avr --exclude='workdir-*' ../ build/autobuild
+  (cd build/autobuild && git add -A || :; git commit -a -m "Commit for build" || :)
+
+  case "$PROJECT-$BRANCH" in
+    community-master)
+      git clone $SOURCE/core build/core
+      ;;
+    community-3.4.x)
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout 3.4.x) || false
+     ;;
+    community-3.3.x)
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout -b 3.3.x remotes/origin/3.3.x || git checkout 3.3.x) || false
+      ;;
+    community-3.4.*)
+      VERSION=$BRANCH
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout $VERSION) || false
+      ;;
+    *)
+      echo "WAT?"
+      exit 42;;
+  esac
+}
+
+run() {
+  NAME="$1"
+  shift
+  echo "---> $NAME"
+  if ! "$@" > "$NAME.log" 2>&1; then
+    echo "Failed. See the $NAME.log. Last lines are:"
+    tail $NAME.log
+    exit 1
+  fi
+}
+
+local_script() {
+  SCRIPT="$1"
+  run "$SCRIPT" "build/autobuild/build-scripts/$SCRIPT" "$HOST"
+}
+
+remote_script() {
+  SCRIPT="$1"
+  ENVVARS="PROJECT=$PROJECT"
+  if [ -n "$BUILD_TYPE" ]; then
+    ENVVARS="$ENVVARS BUILD_TYPE=$BUILD_TYPE"
+  fi
+  if [ -n "$BUILD_NUMBER" ]; then
+    ENVVARS="$ENVVARS BUILD_NUMBER=$BUILD_NUMBER"
+  fi
+
+  ENVVARS="$ENVVARS BRANCH=$REPOSITORY"
+
+  run "$SCRIPT" ssh -o BatchMode=yes "$HOST" env $ENVVARS build/autobuild/build-scripts/"$SCRIPT"
+}
+
+build() {
+  remote_script configure
+  remote_script compile
+  case "$BUILD_TYPE" in
+    debug_and_release)
+	  remote_script produce-debug-symbols
+	  ;;
+  esac
+  remote_script test
+  remote_script package
+  remote_script prepare-results
+
+  local_script transfer-results
+  local_script install-results
+  local_script clean-results
+}
+
+common_build() {
+
+  checkout
+  local_script autogen
+  local_script transfer-to-buildmachine
+  remote_script clean-buildmachine
+  remote_script install-dependencies
+  build
+}
+
+opts "$@"
+prepare_workdir
+common_build

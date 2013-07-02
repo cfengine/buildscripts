@@ -1,0 +1,111 @@
+#!/bin/sh -ex
+
+case "$0" in
+  /*) SCRIPTDIR=`dirname "$0"`;;
+  *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
+esac
+BASEDIR=`dirname "$SCRIPTDIR"`
+BASEDIR=`dirname "$BASEDIR"`
+
+PATH="$PATH:$SCRIPTDIR"
+
+usage()
+{
+  exec >&2
+  echo "$0 <pkgname> <tests> <optimize> <debugsymbols> <version>"
+  exit 1
+}
+
+fatal()
+{
+  echo "$@" >&2
+  exit 42
+}
+
+if [ $# -ne 5 ]; then
+  usage
+fi
+
+PKGNAME="$1"
+TESTS="$2"
+OPTIMIZE="$3"
+DEBUGSYM="$4"
+VERSION="$5"
+
+P=$BASEDIR/autobuild/deps-packaging/$PKGNAME
+PKGDIR=$BASEDIR/$PKGNAME/pkg
+
+# Copy source code
+
+rm -rf $BASEDIR/$PKGNAME
+mkdir -p $PKGDIR
+
+SRCFILES=$(pkg-get-autobuild-src $P)
+
+echo "$SRCFILES" | while read srcfile opts; do
+
+  case "$srcfile" in
+    *.gz|*.tgz)
+      UNCOMPRESS=zcat;;
+    *.bz2)
+      UNCOMPRESS=bzcat;;
+    *)
+      echo "Unknown compression: $srcfile"
+      exit 42;;
+  esac
+
+  if [ x$opts = xsubdir ]; then
+    $UNCOMPRESS $srcfile | tar -C $PKGDIR -xf -
+  else
+    TD=/tmp/`basename $srcfile`.$$
+    mkdir -p "$TD"
+    $UNCOMPRESS $srcfile | tar -C $TD -xf -
+    mv $TD/*/* $PKGDIR
+    rm -r "$TD"
+  fi
+done
+cp -a $P/* $PKGDIR
+
+# Prepare options
+
+case "$TESTS" in
+  no)
+    DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nocheck";;
+  yes)
+    ;;
+  *)
+    fatal "Unknown tests option: $TESTS";;
+esac
+
+case "$OPTIMIZE" in
+  no)
+    DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS noopt";;
+  yes)
+    ;;
+  *)
+    fatal "Unknown optimize option: $OPTIMIZE";;
+esac
+
+case "$DEBUGSYM" in
+  yes)
+    DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS nostrip";;
+  no)
+    ;;
+  *)
+    fatal "Unknown debugsym option: $DEBUGSYM";;
+esac
+
+BUILDDATE=$(date -R)
+
+cat << EOF > $PKGDIR/debian/changelog
+cfbuild-$PKGNAME ($VERSION) unstable; urgency=low
+
+  * New build.
+
+ -- CFEngine Autobuild System <autobuild@cfengine.com>  $BUILDDATE
+EOF
+
+# Build!
+
+cd $PKGDIR
+DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS" dpkg-buildpackage -b -us -uc -rfakeroot

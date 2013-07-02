@@ -1,0 +1,44 @@
+#!/bin/sh
+
+# Options
+
+PREFIX=/var/cfengine
+
+TT=${BUILD_ROOT}/cfbuild-tokyocabinet${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-tokyocabinet-devel${PREFIX}
+
+# Configure
+
+./configure --enable-shared --enable-pthread --prefix=$PREFIX --disable-zlib --disable-bzip
+
+# Build
+
+gmake
+
+# Test
+
+if [ "$TESTS" != no ]; then
+  gmake check-util
+  gmake check-hdb
+  rm -rf casket*
+fi
+
+# Install
+
+gmake install prefix=${TTD}
+# Package
+
+rm -f ${TTD}/bin/tca*
+rm -f ${TTD}/bin/tcb*
+rm -f ${TTD}/bin/tcf*
+rm -f ${TTD}/bin/tchmttest
+rm -f ${TTD}/bin/tchtest
+rm -f ${TTD}/bin/tct*
+rm -f ${TTD}/bin/tcu*
+rm -f ${TTD}/lib/libtokyocabinet.a
+rm -f ${TTD}/libexec/tcawmgr.cgi
+rm -rf ${TTD}/share
+
+mkdir -p ${TT}/bin ${TT}/lib
+mv ${TTD}/bin/tchmgr ${TT}/bin
+mv ${TTD}/lib/libtokyocabinet.so* ${TT}/lib

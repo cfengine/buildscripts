@@ -1,0 +1,18 @@
+Source: cfbuild-libacl
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-libacl
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- libacl
+ CFEngine Build Automation --libacl
+
+Package: cfbuild-libacl-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- libacl -- development files
+  CFEngine Build Automation -- libacl --development files

@@ -1,0 +1,81 @@
+#!/bin/sh -e
+
+CACHEDIR=$HOME/.cache/cfengine-autobuild-pkgs
+
+usage()
+{
+  exec >&2
+  echo "$0 find <pkg>-<version>-<release>"
+  echo "  looks up package in cache"
+  echo
+  echo "$0 store <pkg>-<version>-<release> <pkgfile> [<pkgfile> ...]"
+  echo "  stores new package in cache. refuses to do that if package already exists"
+  echo
+  echo "$0 list <pkg>-<version>-<release>"
+  echo "  lists cached package files"
+  echo
+  echo "$0 prune <pkg>-<version>-<release>"
+  echo "  removes cached package files"
+  exit 1
+}
+
+fatal()
+{
+  echo "$@" >&2
+  exit 42
+}
+
+opts()
+{
+  if [ $# -lt 2 ]; then
+    usage
+  fi
+
+  CMD="$1"
+  PKGVR="$2"
+  shift 2
+
+  PKGCACHEDIR="$CACHEDIR/$PKGVR"
+
+  case "$CMD" in
+    find|list|prune)
+      if [ $# -ne 0 ]; then
+        usage
+      fi;;
+    store)
+      if [ $# -eq 0 ]; then
+        usage
+      fi
+      PKGFILES="$@";;
+    *)
+      fatal "Unknown command: $CMD";;
+  esac
+}
+
+opts "$@"
+
+case "$CMD" in
+  find)
+    [ -d "$PKGCACHEDIR" ];;
+  store)
+    if [ -d "$PKGCACHEDIR" ]; then
+      fatal "Package $PKGVR is already cached."
+    fi
+    mkdir -p "$PKGCACHEDIR"
+
+    # Force-remove cache directory if cp(1) fails, otherwise cache might become
+    # inconsistent
+    cp $PKGFILES "$PKGCACHEDIR" || (rm -rf "$PKGCACHEDIR"; false);;
+  list)
+    if [ -d "$PKGCACHEDIR" ]; then
+      echo "$PKGCACHEDIR"/*
+    else
+      fatal "Package $PKGVR is not in cache."
+    fi;;
+  prune)
+    if [ -d "$PKGCACHEDIR" ]; then
+      rm -rf "$PKGCACHEDIR"
+    else
+      fatal "Package $PKGVR is not in cache."
+    fi;;
+esac

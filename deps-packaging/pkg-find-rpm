@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+# Finds RPMs in specified directory (except useless)
+
+if [ $# -ne 1 ]; then
+  echo "Usage: $0 <dir>" >&2
+  exit 1
+fi
+
+find "$1" -name '*.rpm' -a -not -name '*debuginfo*'

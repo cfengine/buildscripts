@@ -1,0 +1,11 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. version
+
+mkdir -p $BASEDIR/../../output/${SCHEDULER}
+mkdir -p $BASEDIR/../../output/${SCHEDULER}/${BRANCH}
+mv $BASEDIR/../../output/.tmp/${SCHEDULER}/${BRANCH}/* $BASEDIR/../../output/${SCHEDULER}/${BRANCH}
+rmdir --ignore-fail-on-non-empty $BASEDIR/../../output/.tmp/${SCHEDULER}/${BRANCH}
+rm -f $BASEDIR/../../output/${SCHEDULER}/current
+ln -fs ${BRANCH} $BASEDIR/../../output/${SCHEDULER}/current

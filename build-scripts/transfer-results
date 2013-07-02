@@ -1,0 +1,13 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. version
+
+set -x
+
+BUILDMACHINE="$1"
+
+mkdir -p $BASEDIR/../../output/.tmp/${SCHEDULER}/${BRANCH}
+rsync -ar "$BUILDMACHINE:build/output/*" $BASEDIR/../../output/.tmp/${SCHEDULER}/${BRANCH}
+
+ssh "$BUILDMACHINE" "rm -rf build/output"

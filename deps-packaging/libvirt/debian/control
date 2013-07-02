@@ -1,0 +1,18 @@
+Source: cfbuild-libvirt
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-libvirt
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- libvirt
+ CFEngine Build Automation -- libvirt
+
+Package: cfbuild-libvirt-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- libvirt -- development files
+ CFEngine Build Automation -- libvirt -- development files

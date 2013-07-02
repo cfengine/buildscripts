@@ -1,0 +1,42 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. detect-environment
+. version
+
+set -x
+
+OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
+mkdir -p "$OUTDIR"
+
+for dir in cfengine-community; do
+  if [ -d $BASEDIR/$dir ]; then
+    case "$PACKAGING" in
+      rpm)
+        cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
+        ;;
+      deb)
+        cp $BASEDIR/$dir/*.deb "$OUTDIR"
+        ;;
+      msi)
+        cp $BASEDIR/$dir/*.msi "$OUTDIR"
+        ;;
+      solaris)
+        cp $BASEDIR/$dir/*.pkg "$OUTDIR"
+        ;;
+	  freebsd)
+		cp build/$dir/pkg/*.tbz "$OUTDIR"
+		;;
+      hpux)
+        cp build/$dir/pkg/*.depot "$OUTDIR"
+        ;;
+      *)
+        echo "Unknown packaging system: $PACKAGING"
+        exit 1;;
+    esac
+  fi
+done
+
+if [ -f $BASEDIR/core/tests/acceptance/summary.log ]; then
+  cp $BASEDIR/core/tests/acceptance/*.log "$OUTDIR"
+fi

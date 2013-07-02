@@ -1,0 +1,32 @@
+From 869adaaa88092b79a9345dd2d67edb636dc698f0 Mon Sep 17 00:00:00 2001
+From: Mikhail Gusarov <mikhail.gusarov@cfengine.com>
+Date: Mon, 26 Sep 2011 11:12:44 +0200
+Subject: [PATCH] Only test for virtualport if Macvtap is requested
+
+---
+ configure.ac |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 0dbe38b..7e8daab 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -2095,6 +2095,7 @@ if test "$with_macvtap" != "no" ; then
+ fi
+ AM_CONDITIONAL([WITH_MACVTAP], [test "$with_macvtap" = "yes"])
+ 
++if test "$with_macvtap" != "no"; then
+ AC_TRY_COMPILE([ #include <sys/socket.h>
+                  #include <linux/rtnetlink.h> ],
+                  [ int x = IFLA_PORT_MAX; ],
+@@ -2107,6 +2108,7 @@ else
+ fi
+ AC_DEFINE_UNQUOTED([WITH_VIRTUALPORT], $val,
+                    [whether vsi vepa support is enabled])
++fi
+ AM_CONDITIONAL([WITH_VIRTUALPORT], [test "$with_virtualport" = "yes"])
+ 
+ 
+-- 
+1.7.5.4
+

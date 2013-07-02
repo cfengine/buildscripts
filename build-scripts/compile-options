@@ -1,0 +1,147 @@
+# -*- mode:sh -*-
+
+# Export to which directory the packages will be installed, using the define buildprefix in environment or /var/cfengine as default. 
+export BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
+
+#
+# We need to know what project are we building.
+#
+
+
+export PROJECT=community
+
+# Should we package libgcc_s.so.1?
+
+case "$OS_FAMILY" in
+  solaris)
+    LIBGCC=yes;;
+  *)
+    LIBGCC=no;;
+esac
+
+# libsasl needed for solaris
+
+case "$OS_FAMILY" in
+  solaris|hpux)
+    LIBSASL=yes;;
+  *)
+    LIBSASL=no;;
+esac
+
+# iconv is needed for libxml2
+case "$OS_FAMILY" in
+  solaris)
+    LIBICONV=yes;;
+  *)
+    LIBICONV=no;;
+esac
+
+# Embedded DB selection
+
+case "$OS_FAMILY" in
+  hpux)
+    EMBEDDED_DB=qdbm;;
+  *)
+    EMBEDDED_DB=tokyocabinet;;
+esac
+
+export EMBEDDED_DB
+
+# libxml2
+
+case "$OS_FAMILY" in
+  hpux)
+    LIBXML2=no;;
+  *)
+    LIBXML2=yes;;
+esac
+
+export LIBXML2
+
+# libvirt
+
+case "$ARCH-${OS_FAMILY}" in
+  s390*-*)
+    LIBVIRT=no;;
+  *-linux)
+    case "${OS}-${OS_VERSION}" in
+      debian-3.1)
+        LIBVIRT=no;;
+      *-*)
+        LIBVIRT=yes;;
+    esac;;
+  *-aix|*-*bsd|*-solaris|*-hpux)
+    LIBVIRT=no;;
+  *)
+    echo "Unknown combination of architecture and OS family: $ARCH-${OS_FAMILY}"
+    exit 42;;
+esac
+
+export LIBVIRT
+
+#SQL drivers
+
+SQL=yes
+
+export SQL
+
+# libacl & libattr
+case "$OS_FAMILY" in
+  hpux)
+    LIBACL=no
+    LIBATTR=no;;
+  solaris)
+    LIBACL=no
+    LIBATTR=no;;
+  freebsd)
+    LIBACL=no
+    LIBATTR=no;;
+  *)
+    LIBACL=yes
+    LIBATTR=yes;;
+esac
+
+export LIBATTR LIBACL
+
+# libSegFault, only on glibc-based systems
+
+case "$OS_FAMILY" in
+  linux)
+    LIBSEGFAULT=yes;;
+  *)
+    LIBSEGFAULT=no;;
+esac
+
+export LIBSEGFAULT
+
+
+    # Tests
+
+case "$OS_FAMILY-$BUILD_TYPE" in
+  solaris-*)
+    TESTS=no;;
+  freebsd-*)
+    TESTS=no;;
+  hpux-*)
+    TEST=no;;
+  *-smoke)
+    TESTS=unit;;
+  *)
+    TESTS=all;;
+esac
+
+export TESTS
+
+# Optimization
+
+case "$BUILD_TYPE" in
+  debug)
+    OPTIMIZE=no;;
+  release|quick|full|smoke|debug_and_release)
+    OPTIMIZE=yes;;
+  *)
+    echo "Unknown build type: $BUILD_TYPE"
+    exit 42;;
+esac
+
+export OPTIMIZE

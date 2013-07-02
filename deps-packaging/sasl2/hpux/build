@@ -1,0 +1,36 @@
+#!/bin/sh -e
+
+#Options
+
+PREFIX=/var/cfengine
+
+LS=${BUILD_ROOT}/cfbuild-sasl2${PREFIX}
+LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
+
+#Patch
+
+#Configure
+
+./configure --prefix=$PREFIX LDFLAGS=-L/var/cfengine/lib CPPFLAGS=-I/var/cfengine/include
+
+#Build
+
+gmake -C include
+gmake -C lib
+
+#Test
+
+#Install
+
+gmake -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+gmake -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+
+#Package
+
+rm -rf ${LSD}/etc
+rm -rf ${LSD}/lib/*.a
+rm -rf ${LSD}/lib/*.la
+
+mkdir -p ${LS}/lib
+mv ${LSD}/lib/libsasl2* ${LS}/lib
+

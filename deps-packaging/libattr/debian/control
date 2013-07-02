@@ -1,0 +1,18 @@
+Source: cfbuild-libattr
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-libattr
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- libattr
+ CFEngine Build Automation --libattr
+
+Package: cfbuild-libattr-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- libattr -- development files
+  CFEngine Build Automation -- libattr --development files

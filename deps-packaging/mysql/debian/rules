@@ -1,0 +1,65 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure --prefix=$(PREFIX) --without-server --enable-shared --enable-thread-safe-client
+	for i in include zlib mysys libmysql libmysql_r scripts; do make -C $$i; done
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	for i in include libmysql libmysql_r scripts; do $(MAKE) -C $$i install DESTDIR=$(CURDIR)/debian/tmp; done
+
+	mv $(CURDIR)/debian/tmp$(PREFIX)/lib/mysql/libmysqlclient*.so* $(CURDIR)/debian/tmp$(PREFIX)/lib
+
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/msql2mysql
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysql_convert_table_format
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysql_find_rows
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysql_fix_extensions
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysql_fix_privilege_tables
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysql_secure_installation
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysql_setpermission
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysql_zap
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysqlaccess
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysqlbug
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysqld_multi
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysqldumpslow
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/mysqlhotcopy
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/mysql
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/mysql/libmysqlclient.a
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/mysql/libmysqlclient.la
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/mysql/libmysqlclient_r.a
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/mysql/libmysqlclient_r.la
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

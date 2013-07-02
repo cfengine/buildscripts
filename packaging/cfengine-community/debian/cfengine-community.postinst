@@ -1,0 +1,43 @@
+#!/bin/sh
+
+if [ $1 = configure ]; then
+
+  #
+  # Register CFEngine initscript, if not yet.
+  #
+  if [ -x /etc/init.d/cfengine3 ]; then
+    update-rc.d cfengine3 defaults
+  fi
+
+  #
+  # Generating a host key
+  #
+  if [ ! -f /var/cfengine/ppkeys/localhost.priv ]; then
+    /var/cfengine/bin/cf-key >/dev/null || :
+  fi
+
+  #
+  # Copy the stock policy for the new installations
+  #
+  if ! [ -f /var/cfengine/masterfiles/promises.cf ]; then
+    /bin/cp -R /var/cfengine/share/CoreBase/* /var/cfengine/masterfiles
+  fi
+
+  #
+  # Remove the old file (created by CoreBase policy) on upgrades
+  #
+  # To be removed in 3.4.x
+  #
+  /bin/rm -f /var/cfengine/bin/cf-twin
+  /bin/rm -f /usr/local/sbin/cf-twin
+
+  #
+  # Start CFEngine after installation/upgrade
+  #
+
+  if [ -x /etc/init.d/cfengine3 ]; then
+    /etc/init.d/cfengine3 start
+  fi
+fi
+
+exit 0

@@ -1,0 +1,100 @@
+#!/bin/sh -e
+
+CACHEDIR=$HOME/.cache/cfengine-autobuild-distfiles
+
+usage()
+{
+  exec >&2
+  echo "Usage: $0 <distfile> <URL> [<URL> ...]"
+  echo "  downloads all files specified in distfile using URLs"
+  exit 1
+}
+
+info()
+{
+  echo "I: $@" >&2
+}
+
+fatal()
+{
+  echo "$@" >&2
+  exit 42
+}
+
+opts()
+{
+  if [ $# -lt 2 ]; then
+    usage
+  fi
+
+  DISTFILE="$1"
+  shift
+  URLS="$@"
+}
+
+checksum()
+{
+  FILENAME="$1"
+  CHECKSUM="$2"
+
+  echo "$CHECKSUM  $CACHEDIR/$FILENAME" | md5sum -c >/dev/null
+}
+
+file_in_cache() 
+{
+  FILENAME="$1"
+  CHECKSUM="$2"
+
+  if [ -f "$CACHEDIR/$FILENAME" ]; then
+    if checksum "$FILENAME" "$CHECKSUM"; then
+      return 0
+    else
+      info "Cached file $FILENAME has wrong checksum."
+      rm -f "$CACHEDIR/$FILENAME"
+      return 1
+    fi
+  else
+    info "File $FILENAME is not in cache"
+    return 1
+  fi
+}
+
+fetch_file()
+{
+  FILENAME="$1"
+  CHECKSUM="$2"
+
+  mkdir -p "$CACHEDIR"
+
+  for URL in $URLS; do
+    if wget -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME"; then
+      if checksum "$FILENAME" "$CHECKSUM"; then
+        return 0
+      else
+        info "Downloaded $URL$FILENAME has wrong checksum. Continuing"
+        rm -f "$CACHEDIR/$FILENAME"
+      fi
+    else
+      # wget(1) tends to create empty files even if download did not finish
+      rm -f "$CACHEDIR/$FILENAME"
+    fi
+  done
+
+  return 1
+}
+
+get_src()
+{
+  cat "$DISTFILE" | while read CHECKSUM FILENAME OPTS; do
+    file_in_cache "$FILENAME" "$CHECKSUM" || \
+      fetch_file "$FILENAME" "$CHECKSUM" || \
+      fatal "Unable to fetch $FILENAME"
+  done
+
+  cat "$DISTFILE" | while read CHECKSUM FILENAME OPTS; do
+    echo "$CACHEDIR/$FILENAME" $OPTS
+  done
+}
+
+opts "$@"
+get_src

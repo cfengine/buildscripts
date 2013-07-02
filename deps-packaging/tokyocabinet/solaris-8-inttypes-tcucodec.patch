@@ -1,0 +1,10 @@
+--- tcucodec.c.orig	2012-02-15 18:39:52.696176923 +0100
++++ tcucodec.c	2012-02-15 18:40:07.364176400 +0100
+@@ -17,6 +17,7 @@
+ #include <tcutil.h>
+ #include "myconf.h"
+ 
++#define INTPTR_MAX 0
+ 
+ /* global variables */
+ const char *g_progname;                  // program name

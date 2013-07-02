@@ -1,0 +1,21 @@
+Source: cfengine-community
+Section: utils
+Priority: extra
+Maintainer: CFEngine AS <contact@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfengine-community
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: cfengine3
+Conflicts: cfengine3
+Replaces: cfengine3
+Description: CFEngine 3 Community
+ CFEngine, or the configuration engine is an agent/software robot and a
+ very high level language for building expert systems to administrate
+ and configure large computer networks. CFEngine uses the idea of
+ classes and a primitive form of intelligence to define and automate
+ the configuration and maintenance of system state, for small to huge
+ configurations. CFEngine is designed to be a part of a computer immune
+ system.

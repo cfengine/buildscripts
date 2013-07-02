@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. detect-environment
+
+uninstall_cfbuild
+sudo rm -rf /var/cfengine

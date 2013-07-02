@@ -1,0 +1,58 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+INCLUDEPREFIX=/usr/include
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+# we need to patch attr sources cause by default they don't support DESTDIR
+
+	zcat attr.destdir.diff.gz | patch -p1 --verbose || true
+
+# installing header files in usr/include is a hack required to compile libacl
+# configure of acl is not able to find headers in any other location than usr/include
+# libraries are installed in var/cfengine as usual
+
+	./configure --prefix=$(PREFIX) --includedir=$(INCLUDEPREFIX) --enable-gettext=no
+
+	make
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	make install-dev install-lib DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.a
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/libexec
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

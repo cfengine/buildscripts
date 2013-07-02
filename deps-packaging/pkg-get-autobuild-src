@@ -1,0 +1,24 @@
+#!/bin/sh -e
+
+#
+# This small helper script runs pkg-get-src with distfiles and URLs obtained
+# from deps-packaging/$pkg directory.
+#
+
+usage()
+{
+  exec >&2
+  echo "Usage: $0 <basedir>"
+  exit 1
+}
+
+if [ $# -ne 1 ]; then
+  usage
+fi
+
+P=$1
+
+DIST_SERVER=`cat $P/source`
+ALT_DIST_SERVER=http://server-with-files.com/path_to_files/
+
+pkg-get-src "$P/distfiles" $DIST_SERVER $ALT_DIST_SERVER

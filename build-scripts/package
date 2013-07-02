@@ -1,0 +1,159 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+. version
+
+# Select what to build
+
+PKG=cfengine-community
+
+case "$BUILD_TYPE" in
+  debug)
+    DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS noopt nostrip"
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_optimize 0"
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_debugsym 1";;
+  quick|smoke|full|release|debug_and_release)
+    ;;
+  *)
+    echo "Unknown build type: $BUILD_TYPE"
+    exit 42;;
+esac
+
+# Clean -devel packages, so their contents doesn't end up in our packages
+
+uninstall_cfbuild_devel
+
+# Build it
+
+P="$BASEDIR/autobuild/packaging/$PKG"
+
+#ensure that the initd scripts contaings the right path to executables
+escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
+
+case "$VERSION" in
+  *~*)
+    MAIN_VERSION=${VERSION%\~*}
+    SUPP_VERSION=${VERSION#*~};;
+  *)
+    MAIN_VERSION=${VERSION}
+    SUPP_VERSION=;;
+esac
+
+case "$PACKAGING" in
+  rpm)
+    mkdir -p $BASEDIR/$PKG/BUILD
+    mkdir -p $BASEDIR/$PKG/RPMS
+    mkdir -p $BASEDIR/$PKG/SOURCES
+    mkdir -p $BASEDIR/$PKG/SRPMS
+
+    SPEC=$P/$PKG.spec
+    SPECIN=$P/$PKG.spec.in
+
+    if [ -z "$SUPP_VERSION" ]; then
+      RPM_VERSION=$MAIN_VERSION
+
+      if [ $BUILD_TYPE = release -o $BUILD_TYPE = debug_and_release ]; then
+        RPM_RELEASE=1
+      else
+        RPM_RELEASE=0.$BUILD_NUMBER
+      fi
+    else
+      RPM_VERSION=$MAIN_VERSION
+
+      if [ $BUILD_TYPE = release -o $BUILD_TYPE = debug_and_release ]; then
+        RPM_RELEASE=0.$SUPP_VERSION.1
+      else
+        RPM_RELEASE=0.$SUPP_VERSION.0.$BUILD_NUMBER
+      fi
+    fi
+
+    sed \
+      -e "s/@@VERSION@@/$RPM_VERSION/g" \
+      -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
+      $SPECIN > $SPEC
+
+    for i in `find $BASEDIR/autobuild/packaging/$PKG ! -name "*.spec"`; do
+      (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
+    done
+
+    rpmbuild -bb --define="_topdir $BASEDIR/$PKG" --define="buildprefix $BUILDPREFIX" --define="_basedir $BASEDIR" ${RPMBUILD_OPTIONS:+"${RPMBUILD_OPTIONS}"} $SPEC
+    ;;
+  deb)
+    if [ "$BUILDPREFIX" = "/opt/cfengine" ];
+    then
+       #change the base path of cfengine files
+        for i in $P/debian/$PKG*;  do
+          sed -i "s/var/opt/g" $i
+        done 
+    fi
+
+    rm -rf $BASEDIR/$PKG/pkg
+    mkdir -p $BASEDIR/$PKG/pkg
+    cp -a $P/* $BASEDIR/$PKG/pkg    
+
+    if [ $BUILD_TYPE = release -o $BUILD_TYPE = debug_and_release ]; then
+      DEB_VERSION=$VERSION-1
+    else
+      DEB_VERSION=$VERSION~$BUILD_NUMBER
+    fi
+     
+  
+    sed -e "s/@@VERSION@@/$DEB_VERSION/" $BASEDIR/$PKG/pkg/debian/changelog.in > $BASEDIR/$PKG/pkg/debian/changelog
+
+    (cd $BASEDIR/$PKG/pkg; DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS" dpkg-buildpackage -b -us -uc -rfakeroot) || false
+    ;;
+
+  solaris)
+    rm -rf $BASEDIR/$PKG/pkg
+    mkdir -p $BASEDIR/$PKG/pkg
+
+#    cp -pr $P/solaris/etc/ $BASEDIR/$PKG/pkg/
+#    cp -pr $P/solaris/postinstall $BASEDIR/$PKG/pkg/
+#    cp -pr $P/solaris/preremove $BASEDIR/$PKG/pkg/
+    cp -pr $P/solaris/* $BASEDIR/$PKG/pkg/
+    cp -pr $BASEDIR/core/dist/var/cfengine/* $BASEDIR/$PKG/pkg
+    cp -pr /var/cfengine/bin/* $BASEDIR/$PKG/pkg/bin
+    cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg/lib
+    
+    ARCH=`uname -p`
+    sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION/g" $BASEDIR/$PKG/pkg/pkginfo.in > $BASEDIR/$PKG/pkg/pkginfo
+    
+    cd $BASEDIR/$PKG/pkg
+    cat prototype.head > prototype.tmp && find . | egrep -v 'postinstall|pkginfo|prototype|preremove|./etc|prototype.head|pkginfo.in' | pkgproto >> prototype.tmp
+
+    # Old build system
+    sed -e "s/build/root/g;s/sudoers/root/g" prototype.tmp > prototype
+    # New build system
+    sed -e "s/jenkins/root/g;s/sudoers/root/g" prototype.tmp > prototype
+#    pkgmk -o -r `pwd`
+    pkgmk -o -r `pwd` -d $BASEDIR/$PKG/pkg
+#    cd /var/spool/pkg/
+    NAME=CFE$PKG-$VERSION-$ARCH.pkg
+#    echo "$NAME"
+    pkgtrans -o -s $BASEDIR/$PKG/pkg $BASEDIR/$PKG/$NAME CFE$PKG
+    ;;
+  hpux)
+      PREFIX=/var/cfengine
+      ARCH=`uname -m`
+      OS_VER=`uname -r`
+
+      rm -rf $BASEDIR/$PKG/pkg
+      mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
+
+      cp -pr $P/hpux/* $BASEDIR/$PKG/pkg/
+      cp -pr $BASEDIR/core/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
+      cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
+
+      cd $BASEDIR/$PKG/pkg${PREFIX}/
+
+      $BASEDIR/$PKG/pkg/psf.pl . $PKG $VERSION > $PKG-$VERSION.psf
+      /usr/sbin/swpackage -s $PWD/$PKG-$VERSION.psf -x media_type=tape @ $BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot
+      ;;
+  msi)
+    package-msi;;
+  *)
+    echo "Unknown packaging system: $PACKAGING"
+    exit 1;;
+esac

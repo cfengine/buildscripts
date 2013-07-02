@@ -1,0 +1,94 @@
+#!/bin/sh -ex
+
+case "$0" in
+  /*) SCRIPTDIR=`dirname "$0"`;;
+  *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
+esac
+BASEDIR=`dirname "$SCRIPTDIR"`
+BASEDIR=`dirname "$BASEDIR"`
+
+PATH="$PATH:$SCRIPTDIR"
+
+usage()
+{
+  exec >&2
+  echo "$0 <pkgname> <tests> <optimize> <debugsymbols> <version>"
+  exit 1
+}
+
+fatal()
+{
+  echo "$@" >&2
+  exit 42
+}
+
+if [ $# -ne 5 ]; then
+  usage
+fi
+
+PKGNAME="$1"
+TESTS="$2"
+OPTIMIZE="$3"
+DEBUGSYM="$4"
+VERSION="$5"
+
+P=$BASEDIR/autobuild/deps-packaging/$PKGNAME
+SPEC="$P/cfbuild-$PKGNAME.spec"
+
+# Copy source code
+
+rm -rf $BASEDIR/$PKGNAME
+
+mkdir -p $BASEDIR/$PKGNAME/BUILD
+mkdir -p $BASEDIR/$PKGNAME/RPMS
+mkdir -p $BASEDIR/$PKGNAME/SOURCES
+mkdir -p $BASEDIR/$PKGNAME/SRPMS
+
+SRCFILES=$(pkg-get-autobuild-src $P)
+
+echo "$SRCFILES" | while read srcfile opts; do
+  ln -sf $srcfile $BASEDIR/$PKGNAME/SOURCES
+done
+
+cp -a $P/* $BASEDIR/$PKGNAME/SOURCES
+
+# Prepare options
+
+if [ $TARGET != native ]; then
+  echo "WAT?"
+  exit 42
+fi
+
+case "$TESTS" in
+  no)
+    RPMBUILD_OPTIONS=--define="with_testsuite 0";;
+  yes)
+    RPMBUILD_OPTIONS=--define="with_testsuite 1";;
+  *)
+    fatal "Unknown tests option: $TESTS";;
+esac
+
+case "$OPTIMIZE" in
+  no)
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_optimize 0";;
+  yes)
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_optimize 1";;
+  *)
+    fatal "Unknown optimize option: $OPTIMIZE";;
+esac
+
+case "$DEBUGSYM" in
+  yes)
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_debugsym 1";;
+  no)
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_debugsym 0";;
+  *)
+    fatal "Unknown debugsym option: $DEBUGSYM";;
+esac
+
+rpmbuild -bb \
+  --define="_topdir $BASEDIR/$PKGNAME" \
+  --define="version $VERSION" \
+  --define="buildprefix $BUILDPREFIX" \
+  "$RPMBUILD_OPTIONS" \
+  $SPEC

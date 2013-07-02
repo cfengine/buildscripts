@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ -x /etc/init.d/cfengine3 ]; then
+   /etc/init.d/cfengine3 stop
+fi
+
+exit 0

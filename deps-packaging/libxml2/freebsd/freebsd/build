@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# Options
+
+PREFIX=/var/cfengine
+
+OL=${BUILD_ROOT}/cfbuild-openldap${PREFIX}
+OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
+
+# Patch
+
+# Configure
+
+./configure --prefix=$PREFIX --enable-shared --disable-slapd --disable-backends \
+            --with-tls=openssl --without-gssapi \
+            LDFLAGS=-L/var/cfengine/lib CPPFLAGS=-I/var/cfengine/include
+
+# Build
+
+make -C include
+make -C libraries
+
+# Test
+
+# Install
+
+make -C include install DESTDIR=${BUILD_ROOT}/cfbuild-openldap-devel
+make -C libraries install DESTDIR=${BUILD_ROOT}/cfbuild-openldap-devel
+# Package
+
+rm -rf ${OLD}/etc
+rm -f ${OLD}/lib/*.a
+rm -f ${OLD}/lib/*.la
+
+mkdir -p ${OL}/lib
+mv ${OLD}/lib/*.so* ${OL}/lib
+

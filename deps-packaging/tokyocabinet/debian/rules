@@ -1,0 +1,74 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+CONFIGURE_OPTS = --host=$(DEB_HOST_GNU_TYPE) --enable-off64 --enable-shared \
+                --enable-pthread --prefix=${PREFIX} --disable-zlib --disable-bzip
+
+ifneq (,$(filter noopt,$(DEB_BUILD_OPTIONS)))
+CONFIGURE_OPTS += --enable-debug
+endif
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure $(CONFIGURE_OPTS)
+	make
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	make check-util
+	make check-hdb
+	rm -rf casket*
+endif
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/bin/tca*
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/bin/tcb*
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/bin/tcf*
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/bin/tchmttest
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/bin/tchtest
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/bin/tct*
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/bin/tcu*
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/lib/libtokyocabinet.a
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/libexec/tcawmgr.cgi
+	rm -rf $(CURDIR)/debian/tmp${PREFIX}/share/man
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/share/tokyocabinet/tokyocabinet.idl
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/share/tokyocabinet/ChangeLog
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/share/tokyocabinet/COPYING
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/share/tokyocabinet/THANKS
+	rm -rf $(CURDIR)/debian/tmp${PREFIX}/share/tokyocabinet/doc
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip
+endif
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

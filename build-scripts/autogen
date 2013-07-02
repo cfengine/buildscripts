@@ -1,0 +1,12 @@
+#!/bin/sh -ex
+
+. `dirname "$0"`/functions
+
+(cd $BASEDIR/core && NO_CONFIGURE=1 ./autogen.sh) || false
+
+for i in autobuild autobuild/deps-packaging core; do
+  if [ -d $BASEDIR/$i ]; then
+    R=$(cd $BASEDIR/$i && git log --pretty='format:%h' -1 -- .) || false
+    echo $R | tr -d '\n' > $BASEDIR/$i/revision
+  fi
+done

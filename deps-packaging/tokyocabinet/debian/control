@@ -1,0 +1,18 @@
+Source: cfbuild-tokyocabinet
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-tokyocabinet
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- tokyocabinet
+ CFEngine Build Automation -- tokyocabinet
+
+Package: cfbuild-tokyocabinet-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- tokyocabinet -- development files
+ CFEngine Build Automation -- tokyocabinet -- development files

@@ -1,0 +1,14 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+# Package
+
+#
+# Gross hack, but what we could do?
+#
+
+mkdir -p ${BUILD_ROOT}/cfbuild-libgcc/${PREFIX}/lib
+cp /usr/local/lib/libgcc_s.so.1 ${BUILD_ROOT}/cfbuild-libgcc/${PREFIX}/lib

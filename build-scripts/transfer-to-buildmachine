@@ -1,0 +1,7 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+
+BUILDMACHINE="$1"
+
+rsync -avr --exclude=output --delete $BASEDIR/ $BUILDMACHINE:build

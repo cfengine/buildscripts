@@ -1,0 +1,124 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+#
+# We use packaging scripts
+PATH=$PATH:$BASEDIR/autobuild/deps-packaging/
+#
+
+#export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
+for i in $(ls $BASEDIR/autobuild/deps-packaging);  do
+
+if [ -d "$BASEDIR/autobuild/deps-packaging/$i/debian" ] ; then
+   echo "$i"
+   case "$BUILDPREFIX" in
+  *opt*)
+      sed -i "s/var/opt/" $BASEDIR/autobuild/deps-packaging/$i/debian/*.install
+   esac
+     
+fi
+ done
+
+set -x
+DEPS=""
+
+case "$LIBGCC" in
+  yes)
+    DEPS="$DEPS libgcc";;
+esac
+
+DEPS="$DEPS zlib $EMBEDDED_DB openssl pcre"
+
+case "$LIBSASL" in
+  yes)
+    DEPS="$DEPS sasl2";;
+esac
+
+case "$LIBICONV" in
+  yes)
+    DEPS="$DEPS libiconv";;
+esac
+
+case "$SQL" in
+  yes)
+    # MySQL is disabled until we sort out legal issues
+    #DEPS="$DEPS mysql"
+    DEPS="$DEPS postgresql";;
+esac
+
+case "$LIBXML2" in
+  yes)
+    DEPS="$DEPS libxml2";;
+esac
+
+case "$LIBVIRT" in
+  yes)
+    DEPS="$DEPS libvirt";;
+esac
+
+case "$LIBATTR" in
+  yes)
+    DEPS="$DEPS libattr";;
+esac
+
+case "$LIBACL" in
+  yes)
+    DEPS="$DEPS libacl";;
+esac
+
+#
+# Override for manual testing
+#
+if [ "x$1" != x ]; then
+  DEPS="$@"
+fi
+
+for dep in $DEPS; do
+
+  case "$BUILD_TYPE" in
+    quick|smoke)
+      optimize=yes
+      debugsym=no
+      versuffix=+untested
+      tests=no;;
+    debug_and_release)
+      optimize=yes
+      debugsym=yes
+      versuffix=+dr
+      tests=yes;;
+    debug)
+      optimize=no
+      debugsym=yes
+      versuffix=+debug
+      tests=no;;
+    full|release)
+      optimize=yes
+      debugsym=no
+      versuffix=
+      tests=yes;;
+    *)
+      echo "Unknown build type: $BUILD_TYPE"
+      exit 42;;
+  esac
+
+     version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
+  if pkg-cache find $dep-$version; then
+    case "$BUILD_TYPE" in
+      full|release|debug_and_release) pkg-cache prune $dep-$version;;
+      quick|smoke|debug) echo "Package found in cache, skipping compilation";;
+      *) echo "WAT?!"; exit 42;;
+    esac
+  fi
+
+  if pkg-cache find $dep-$version; then
+    :
+  else
+    $BASEDIR/autobuild/deps-packaging/pkg-build-${DEP_PACKAGING} $dep $tests $optimize $debugsym $version
+    pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
+  fi
+
+  pkg-install-${DEP_PACKAGING} $(pkg-cache list $dep-$version)
+done

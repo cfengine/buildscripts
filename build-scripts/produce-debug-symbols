@@ -1,0 +1,103 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+if [ $BUILD_TYPE != "debug_and_release" ];
+then
+    echo "Debug symbols not requested";
+    exit 0;
+else
+    echo "Producing debug symbols"
+fi
+
+EXECUTABLES_DIR=$BASEDIR/core/dist/var/cfengine/bin
+EXECUTABLES_LIST=`ls $EXECUTABLES_DIR/cf-*`
+DEBUG_SUFFIX=debug
+PAYLOAD_DIR=payload
+
+# Print build information
+echo "EXECUTABLES_DIR  = $EXECUTABLES_DIR"
+echo "EXECUTABLES_LIST = $EXECUTABLES_LIST"
+echo "DEBUG_SUFFIX     = $DEBUG_SUFFIX"
+echo "PAYLOAD_DIR      = $PAYLOAD_DIR"
+
+# Make a temporary folder to store the debug symbols once they are produced
+mkdir $PAYLOAD_DIR
+
+# We put the debug symbols on the same folder as the executables.
+# This way debugging gets a little bit simpler.
+
+for i in $EXECUTABLES_LIST;
+do
+    echo "Taking debug symbols from: $i and putting it into: $i.$DEBUG_SUFFIX"
+    objcopy --only-keep-debug "$i" "$i.$DEBUG_SUFFIX"
+    strip --strip-debug --strip-unneeded "$i"
+    objcopy --add-gnu-debuglink="$i.$DEBUG_SUFFIX" "$i"
+    chmod -x "$i.$DEBUG_SUFFIX"
+    gzip "$i.$DEBUG_SUFFIX"
+    mv "$i.$DEBUG_SUFFIX.gz" $PAYLOAD_DIR
+done
+
+# Write the installation script
+echo "Writing the installation script"
+echo "#!/bin/sh" > $PAYLOAD_DIR/install-ds.sh
+echo "for i in \`ls *.gz\`; do" >> $PAYLOAD_DIR/install-ds.sh
+echo "  gunzip \$i" >> $PAYLOAD_DIR/install-ds.sh
+echo "done" >> $PAYLOAD_DIR/install-ds.sh
+echo "mv *.$DEBUG_SUFFIX /var/cfengine/bin" >> $PAYLOAD_DIR/install-ds.sh
+echo "exit 0" >> $PAYLOAD_DIR/install-ds.sh
+
+# Write the decompression script
+echo "Writing the decompression script"
+echo "#!/bin/sh" > decompress-ds.sh
+echo "echo \"Installing debug symbols\"" >> decompress-ds.sh
+echo "export TMPDIR=\`mktemp -d /tmp/ds.XXXXXX\`"  >> decompress-ds.sh
+echo "ARCHIVE=\`awk '/^__ARCHIVE_BELOW__/ {print NR + 1; exit 0; }' \$0\`"  >> decompress-ds.sh
+echo "tail -n+\$ARCHIVE \$0 | tar xzv -C \$TMPDIR"  >> decompress-ds.sh
+echo "echo \"Installer ready - starting installation\""
+echo "CDIR=\`pwd\`"  >> decompress-ds.sh
+echo "cd \$TMPDIR/$PAYLOAD_DIR"  >> decompress-ds.sh
+echo "chmod 755 install-ds.sh" >> decompress-ds.sh
+echo "chmod 755 uninstall-ds.sh" >> decompress-ds.sh
+echo "./install-ds.sh"  >> decompress-ds.sh
+echo "cd \$CDIR"  >> decompress-ds.sh
+#echo "rm -rf \$TMPDIR"  >> decompress-ds.sh
+echo "exit 0"  >> decompress-ds.sh
+echo "__ARCHIVE_BELOW__" >> decompress-ds.sh
+
+# Write the uninstall script
+echo "Writing the uninstall script"
+echo "#!/bin/sh" > $PAYLOAD_DIR/uninstall-ds.sh
+echo "echo \"Uninstalling debug symbols\"" >> $PAYLOAD_DIR/uninstall-ds.sh
+echo "rm -f /var/cfengine/bin/*.\$DEBUG_SUFFIX" >> $PAYLOAD_DIR/uninstall-ds.sh
+echo "echo \"Done\"" >> $PAYLOAD_DIR/uninstall-ds.sh
+
+# Now create the self extracting script
+echo "Creating the self extracting script"
+tar cf payload.tar $PAYLOAD_DIR
+if [ -e "payload.tar" ]; then
+    gzip payload.tar
+    if [ -e "payload.tar.gz" ]; then
+        cat decompress-ds.sh payload.tar.gz > cfengine-ds-$OS-$OS_VERSION-$ARCH.bsx
+    else
+        echo "File not found"
+        exit 1
+    fi
+    echo "cfengine-ds-$OS-$OS_VERSION-$ARCH.bsx created"
+fi
+# Put the script in a sensible place
+mkdir -p output/debug_symbols
+mv *.bsx output/debug_symbols
+
+# Clean up after ourserlves
+rm -f decompress-ds.sh
+rm -f install-ds.sh
+rm -f uninstall-ds.sh
+rm -rf $PAYLOAD_DIR
+
+echo "Debug symbols produced."
+
+exit 0
+

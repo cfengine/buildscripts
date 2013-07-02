@@ -1,0 +1,58 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+BASEDIR=../..
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build:
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)
+	cp -a $(PREFIX)/* $(CURDIR)/debian/tmp$(PREFIX)
+	cp -a ${BASEDIR}/core/dist/* $(CURDIR)/debian/tmp
+
+	mkdir -p $(CURDIR)/debian/tmp/etc/init.d
+	cp -a $(CURDIR)/initscript $(CURDIR)/debian/tmp/etc/init.d/cfengine3
+	chmod 755 $(CURDIR)/debian/tmp/etc/init.d/cfengine3
+
+	mkdir -p $(CURDIR)/debian/tmp/etc/default
+	cp -a $(CURDIR)/sysconfig $(CURDIR)/debian/tmp/etc/default/cfengine3
+	chmod 644 $(CURDIR)/debian/tmp/etc/default/cfengine3
+
+	mkdir -p $(CURDIR)/debian/tmp/etc/profile.d
+	cp -a $(CURDIR)/profile.sh $(CURDIR)/debian/tmp/etc/profile.d/cfengine3.sh
+	chmod 644 $(CURDIR)/debian/tmp/etc/profile.d/cfengine3.sh
+
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.so
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip
+endif
+	dh_compress
+	dh_fixperms -X $(PREFIX)/inputs -X $(PREFIX)/outputs -X $(PREFIX)/ppkeys -X $(PREFIX)/modules
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

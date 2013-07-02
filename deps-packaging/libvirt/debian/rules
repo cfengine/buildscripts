@@ -1,0 +1,103 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+#
+# FIXME: is there any other way to have RPATH?
+#
+LDFLAGS=-Wl,--rpath=$(PREFIX)/lib
+
+#
+# Newer ld(1) does not allow implicit linking through intermediate
+# libraries. Add -lxml2 explicitly.
+#
+# https://fedoraproject.org/wiki/UnderstandingDSOLinkChange
+#
+LDFLAGS+=-L$(PREFIX)/lib -lxml2
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	patch -p1 < 0001-Disable-GnuTLS-in-remote-driver.patch
+	patch -p1 < 0001-Only-test-for-virtualport-if-Macvtap-is-requested.patch
+	patch -p1 < 0002-autoreconf-produced-files.patch
+
+	LDFLAGS="$(LDFLAGS)" \
+	    PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
+	    ./configure \
+	    --prefix=$(PREFIX) \
+	    --localstatedir=/var \
+	    --with-remote \
+            --without-hal \
+            --without-udev \
+            --without-python \
+            --without-xen \
+            --without-qemu \
+            --without-openvz \
+            --without-lxc \
+            --without-sasl \
+            --without-avahi \
+            --without-esx \
+            --without-test \
+            --without-uml \
+            --without-libvirtd \
+            --without-storage-mpath \
+            --without-storage-scsi \
+            --without-storage-iscsi \
+            --without-storage-lvm \
+            --without-storage-fs \
+	    --without-macvtap \
+	    --without-gnutls \
+	    --without-selinux
+# gcc in Debian Etch does not provide for ULLONG_MAX.
+	make CFLAGS=-DULLONG_MAX=18446744073709551615ULL
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	make install DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/etc
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/libvirt/drivers
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/*.a
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libvirt-qemu*
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/libexec
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/sbin
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/libvirt
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/doc
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/gtk-doc
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/locale
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/man
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/var
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
