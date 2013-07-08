@@ -114,34 +114,6 @@ uninstall_debs()
   fi
 }
 
-install_solaris_pkgs()
-{
-  echo "OWHOO!"
-  exit 1
-}
-
-uninstall_solaris_pkgs()
-{
-  PKGS=`pkginfo | awk '{print $2}' | grep '^'$1'$' || true`
-  if [ -n "$PKGS" ]; then
-    execute-wrapper.sh sudo /usr/sbin/pkgrm -n $PKGS
-  fi
-}
-
-install_hpux_pkgs()
-{
-  echo "$@"
-}
-
-uninstall_hpux_pkgs()
-{
-  PKGS=`swlist | awk '{print $1}' | grep '^'$1'$' || true`
-
-  for p in $PKGS
-  do
-    sudo /usr/sbin/swremove $p
-  done
-}
 
 #
 # Dealing with packages
@@ -152,9 +124,6 @@ uninstall_cfbuild()
   case "$DEP_PACKAGING" in
     rpm) uninstall_rpms 'cfbuild-.*';;
     deb) uninstall_debs 'cfbuild-.*';;
-    solaris) uninstall_solaris_pkgs 'cfbuild-.*';;
-    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*';;
-    hpux) uninstall_hpux_pkgs 'cfbuild-.*';;
     *)
       echo "Unknown packaging system: $DEP_PACKAGING"
       exit 1;;
@@ -166,24 +135,8 @@ uninstall_cfbuild_devel()
   case "$DEP_PACKAGING" in
     rpm) uninstall_rpms 'cfbuild-.*-devel';;
     deb) uninstall_debs 'cfbuild-.*-devel';;
-    solaris) uninstall_solaris_pkgs 'cfbuild-.*-devel';;
-    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*-devel';;
-    hpux) uninstall_hpux_pkgs 'cfbuild-.*-devel';;
     *)
       echo "Unknown packaging system: $DEP_PACKAGING"
       exit 42;;
   esac
-}
-
-install_freebsd_pkgs()
-{
-	execute-wrapper.sh sudo pkg_add "$@"
-}
-
-uninstall_freebsd_pkgs()
-{
-	PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
-	if [ -n "$PKGS" ]; then
-	  execute-wrapper.sh sudo pkg_delete $PKGS
-	fi
 }

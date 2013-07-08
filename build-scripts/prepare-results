@@ -18,18 +18,6 @@ for dir in cfengine-community; do
       deb)
         cp $BASEDIR/$dir/*.deb "$OUTDIR"
         ;;
-      msi)
-        cp $BASEDIR/$dir/*.msi "$OUTDIR"
-        ;;
-      solaris)
-        cp $BASEDIR/$dir/*.pkg "$OUTDIR"
-        ;;
-	  freebsd)
-		cp build/$dir/pkg/*.tbz "$OUTDIR"
-		;;
-      hpux)
-        cp build/$dir/pkg/*.depot "$OUTDIR"
-        ;;
       *)
         echo "Unknown packaging system: $PACKAGING"
         exit 1;;

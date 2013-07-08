@@ -9,26 +9,6 @@ detect_os()
 	Linux)
           OS_FAMILY=linux
           detect_distribution;;
-	SunOS)
-          OS_FAMILY=solaris
-          OS=solaris
-          OS_VERSION=`uname -r | sed -e 's/^5\.//'`
-          ;;
-	AIX)
-          OS_FAMILY=aix
-          OS=aix;;
-	Darwin)
-          OS_FAMILY=darwin
-          OS=darwin;;
-	FreeBSD)
-          OS_FAMILY=freebsd
-          OS=freebsd;;
-	NetBSD)
-          OS_FAMILY=netbsd
-          OS=netbsd;;
-        HP-UX)
-          OS_FAMILY=hpux
-          OS=hpux;;
 	*)
 	  echo "Unable to detect operating system: $KERNEL_NAME"
 	  exit 42;;
@@ -175,27 +155,12 @@ detect_packaging()
     DEP_PACKAGING=rpm
   elif [ -f /usr/bin/dpkg ]; then
     DEP_PACKAGING=deb
-  elif [ -f /usr/sbin/pkgadd ]; then
-    DEP_PACKAGING=solaris
-  elif [ -f /usr/sbin/pkg_add ]; then
-    SYSTEM=`uname -s`
-	case "$SYSTEM" in
-	  FreeBSD)
-	    DEP_PACKAGING=freebsd;;
-	esac
-  elif [ -f /usr/sbin/swinstall ]; then
-    DEP_PACKAGING=hpux
   else
     echo "Unknown packaging system"
     exit 42
   fi
 
-  case "$OS" in
-    aix)
-      PACKAGING=lpp;;
-    *)
-      PACKAGING=$DEP_PACKAGING;;
-  esac
+  PACKAGING=$DEP_PACKAGING
 
   export DEP_PACKAGING PACKAGING
 }
@@ -207,36 +172,8 @@ detect_arch()
       ARCH=`dpkg --print-architecture`;;
     rpm)
       ARCH=`rpm --eval '%{_arch}'`;;
-    solaris)
-      case `uname -m` in
-        sun*)
-          ARCH=sparc;;
-        i86pc)
-          ARCH=i86pc;;
-        *)
-          echo "Unknown Solaris architecture: `uname -m`";;
-      esac;;
-
-    freebsd)
-      ARCH=`uname -m`
-      OS_VERSION=`uname -r`;;
-    hpux)
-      ARCH=`uname -m`
-      OS_VERSION=`uname -r`;;
     *)
       echo "Unknown packaging system"
-      exit 42;;
-  esac
-
-  case "$CROSS_TARGET" in
-    '')
-      ;;
-    x86-*)
-      ARCH=x86;;
-    x64-*)
-      ARCH=x64;;
-    *)
-      echo "Unknown cross-compilation target: $CROSS_TARGET"
       exit 42;;
   esac
 
@@ -286,5 +223,5 @@ detect_environment
 #  - distribution
 #  - version
 #  - architecture
-#  - packaging tool (dpkg, rpm, solaris pkg, ...)
+#  - packaging tool (dpkg, rpm, ...)
 #

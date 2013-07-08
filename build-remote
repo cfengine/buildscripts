@@ -7,6 +7,7 @@ usage() {
   echo "Usage: build-remote [--branch=<branch>]"
   echo "                    [--source=<url>]"
   echo "                    [--full|--release|--debug|--docs|--release-and-debug]"
+  echo "                    [--build-prefix]"
   echo "                    <user@host>"
   echo
   echo "Branch defaults to 'master'"
@@ -16,8 +17,87 @@ usage() {
   echo
 }
 
+usage_macosx() {
+    echo
+    echo "Usage for Mac OS X users:"
+    echo "build-remote [-b branch/tag] - specify branch or tag"
+    echo "             [-s source] - specify source"
+    echo "             [-p build_prefix] - specify build prefix other than /var/cfengine"
+    echo "             [-f] - full build"
+    echo "             [-r] - release build"
+    echo "             [-d] - debug build"
+    echo "             [-h] - help"
+    echo "             [-a host] - specify buildslave"
+    echo
+    echo "Example:"
+    echo "./build-remote -b 3.5.1 -s /home/user/src -r -a build@buildslave.company.com"
+    echo
+}
+
+opts_macosx() {
+  PROJECT=community
+  BRANCH=master
+  BUILD_TYPE=quick
+  SOURCE=git@github.com:cfengine
+  BUILD_NUMBER=1
+  BUILDPREFIX="/var/cfengine"
+  HOST=
+
+  while getopts "fb:rs:dp:ha:" flag
+  do
+    case "$flag" in
+      b)
+        echo "$OPTARG"
+        echo "$OPTIND"
+        BRANCH=$OPTARG;;
+      s)
+        echo "$OPTARG"
+        echo "$OPTIND"
+        SOURCE=$OPTARG;;
+      p)
+        echo "$OPTARG"
+        echo "$OPTIND"
+        BUILDPREFIX=$OPTARG;;
+      f)
+        echo "$OPTARG"
+        echo "$OPTIND"
+        BUILD_TYPE=full;;
+      d)
+        echo "$OPTARG"
+        echo "$OPTIND"
+        BUILD_TYPE=debug;;
+      r)
+        echo "$OPTARG"
+        echo "$OPTIND"
+        BUILD_TYPE=release;;
+      h)
+        usage_macosx
+        exit 0;;
+      a)
+        echo "$OPTARG"
+        echo "$OPTIND"
+        HOST=$OPTARG;;
+      ?)
+        usage_macosx
+        exit 1;;
+    esac
+  done
+
+  REPOSITORY=$PROJECT-$BRANCH
+  echo $HOST
+  if [ -z $HOST ]; then
+    echo "Missing host, cannot continue"
+    usage_macosx
+    exit 1
+  fi
+
+  export PROJECT BRANCH HOST BUILD_TYPE BUILD_NUMBER BUILDPREFIX
+
+  export SCHEDULER=$PROJECT-$BRANCH-localbuild
+}
+
 opts() {
-  OPTS=`getopt -o p:b:w:c:h --long branch:,source:,full,release,debug,docs,release-and-debug,help -n build-remote -- "$@"`
+  OPTS=`getopt -o p:b:w:c:h --long branch:,source:,full,release,debug,docs,build-prefix,release-and-debug,help -n build-remote -- "$@"`
 
   eval set -- "$OPTS"
 
@@ -31,6 +111,7 @@ opts() {
   BUILD_TYPE=quick
   SOURCE=git@github.com:cfengine
   BUILD_NUMBER=1
+  BUILDPREFIX="/var/cfengine"
 
   while true; do
     case "$1" in
@@ -52,6 +133,9 @@ opts() {
       --source)
         SOURCE="$2"
         shift 2;;
+      --build-prefix)
+        BUILDPREFIX="$2"
+        shift;;
       -h|--help)
         usage
         exit 0;;
@@ -72,7 +156,7 @@ opts() {
   REPOSITORY=$PROJECT-$BRANCH
   HOST=$1
 
-  export PROJECT BRANCH HOST BUILD_TYPE BUILD_NUMBER
+  export PROJECT BRANCH HOST BUILD_TYPE BUILD_NUMBER BUILDPREFIX
 
   export SCHEDULER=$PROJECT-$BRANCH-localbuild
 }
@@ -100,10 +184,24 @@ checkout() {
       git clone $SOURCE/core build/core
       (cd build/core && git checkout -b 3.3.x remotes/origin/3.3.x || git checkout 3.3.x) || false
       ;;
+    community-3.5.x)
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout -b 3.5.x remotes/origin/3.5.x || git checkout 3.3.x) || false
+      ;;
+    community-3.3.*)
+      VERSION=$BRANCH
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout $VERSION) || false
+      ;;
     community-3.4.*)
       VERSION=$BRANCH
       git clone $SOURCE/core build/core
       (cd build/core && git checkout $VERSION) || false
+      ;;
+    community-3.5.*)
+      VERSION=$BRANCH
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout $VERSION) || false  
       ;;
     *)
       echo "WAT?"
@@ -137,7 +235,7 @@ remote_script() {
     ENVVARS="$ENVVARS BUILD_NUMBER=$BUILD_NUMBER"
   fi
 
-  ENVVARS="$ENVVARS BRANCH=$REPOSITORY"
+  ENVVARS="$ENVVARS BRANCH=$REPOSITORY BUILDPREFIX=$BUILDPREFIX"
 
   run "$SCRIPT" ssh -o BatchMode=yes "$HOST" env $ENVVARS build/autobuild/build-scripts/"$SCRIPT"
 }
@@ -169,6 +267,16 @@ common_build() {
   build
 }
 
-opts "$@"
+PLATFORM=`uname -s`
+
+case "$PLATFORM" in
+  "Linux")
+    opts "$@";;
+  "Darwin" )
+    opts_macosx "$@";;
+  *)
+    echo "Running build-remote script on $PLATFORM platform is not supported"
+    exit 42;;
+esac
 prepare_workdir
 common_build

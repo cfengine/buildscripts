@@ -16,15 +16,6 @@ create_empty_test() {
     echo "</testsuite>" >> $NO_TESTS
 }
 
-case "$OS" in
-solaris)
-    TESTS="unit"
-    ;;
-hpux)
-    TESTS="unit"
-    ;;
-esac
-
 if [ "$TESTS" = all ]; then
   #
   # Under Ubuntu 8.04 VM testsuite segfaults. Test it three times.

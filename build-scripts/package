@@ -81,11 +81,12 @@ case "$PACKAGING" in
     rpmbuild -bb --define="_topdir $BASEDIR/$PKG" --define="buildprefix $BUILDPREFIX" --define="_basedir $BASEDIR" ${RPMBUILD_OPTIONS:+"${RPMBUILD_OPTIONS}"} $SPEC
     ;;
   deb)
-    if [ "$BUILDPREFIX" = "/opt/cfengine" ];
+    if ! [ "$BUILDPREFIX" = "/var/cfengine" ];
     then
        #change the base path of cfengine files
+       WORKDIRNAME=`dirname $BUILDPREFIX`
         for i in $P/debian/$PKG*;  do
-          sed -i "s/var/opt/g" $i
+          sed -i "s/var/$WORKDIRNAME/g" $i
         done 
     fi
 
@@ -105,54 +106,6 @@ case "$PACKAGING" in
     (cd $BASEDIR/$PKG/pkg; DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS" dpkg-buildpackage -b -us -uc -rfakeroot) || false
     ;;
 
-  solaris)
-    rm -rf $BASEDIR/$PKG/pkg
-    mkdir -p $BASEDIR/$PKG/pkg
-
-#    cp -pr $P/solaris/etc/ $BASEDIR/$PKG/pkg/
-#    cp -pr $P/solaris/postinstall $BASEDIR/$PKG/pkg/
-#    cp -pr $P/solaris/preremove $BASEDIR/$PKG/pkg/
-    cp -pr $P/solaris/* $BASEDIR/$PKG/pkg/
-    cp -pr $BASEDIR/core/dist/var/cfengine/* $BASEDIR/$PKG/pkg
-    cp -pr /var/cfengine/bin/* $BASEDIR/$PKG/pkg/bin
-    cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg/lib
-    
-    ARCH=`uname -p`
-    sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION/g" $BASEDIR/$PKG/pkg/pkginfo.in > $BASEDIR/$PKG/pkg/pkginfo
-    
-    cd $BASEDIR/$PKG/pkg
-    cat prototype.head > prototype.tmp && find . | egrep -v 'postinstall|pkginfo|prototype|preremove|./etc|prototype.head|pkginfo.in' | pkgproto >> prototype.tmp
-
-    # Old build system
-    sed -e "s/build/root/g;s/sudoers/root/g" prototype.tmp > prototype
-    # New build system
-    sed -e "s/jenkins/root/g;s/sudoers/root/g" prototype.tmp > prototype
-#    pkgmk -o -r `pwd`
-    pkgmk -o -r `pwd` -d $BASEDIR/$PKG/pkg
-#    cd /var/spool/pkg/
-    NAME=CFE$PKG-$VERSION-$ARCH.pkg
-#    echo "$NAME"
-    pkgtrans -o -s $BASEDIR/$PKG/pkg $BASEDIR/$PKG/$NAME CFE$PKG
-    ;;
-  hpux)
-      PREFIX=/var/cfengine
-      ARCH=`uname -m`
-      OS_VER=`uname -r`
-
-      rm -rf $BASEDIR/$PKG/pkg
-      mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
-
-      cp -pr $P/hpux/* $BASEDIR/$PKG/pkg/
-      cp -pr $BASEDIR/core/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
-      cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
-
-      cd $BASEDIR/$PKG/pkg${PREFIX}/
-
-      $BASEDIR/$PKG/pkg/psf.pl . $PKG $VERSION > $PKG-$VERSION.psf
-      /usr/sbin/swpackage -s $PWD/$PKG-$VERSION.psf -x media_type=tape @ $BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot
-      ;;
-  msi)
-    package-msi;;
   *)
     echo "Unknown packaging system: $PACKAGING"
     exit 1;;
