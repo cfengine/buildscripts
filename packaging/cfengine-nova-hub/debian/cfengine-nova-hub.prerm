@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ -x /etc/init.d/cfengine3 ]; then
+   /etc/init.d/cfengine3 stop
+   /var/cfengine/httpd/bin/apachectl stop
+fi
+
+if [ -f /etc/manpath.config ]; then
+ grep -q cfengine /etc/manpath.config
+ if [ $? = "0" ]; then
+sed -i '/cfengine/d' /etc/manpath.config
+ fi
+fi
+
+exit 0
+

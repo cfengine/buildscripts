@@ -1,0 +1,18 @@
+Source: cfbuild-apr-util
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 1.5.2
+
+Package: cfbuild-apr-util
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- apr-util
+ CFEngine Build Automation -- apr-util
+
+Package: cfbuild-apr-util-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- apr -- development files
+ CFEngine Build Automation -- apr -- development files

@@ -1,0 +1,9 @@
+#!/bin/sh -x
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+# We should already be root inside the chroot, so sudo is not necessary,
+# and "GAINROOT=env" might be faster.
+env GAINROOT=env UNSAFE_TESTS=1 $BASEDIR/autobuild/build-scripts/test-on-thismachine

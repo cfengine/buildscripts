@@ -1,0 +1,51 @@
+#!/usr/bin/make -f
+
+PREFIX=/var/cfengine
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) --without-python
+	make
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	make install DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/xmlcatalog.exe
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/xmllint.exe
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libxml2.a
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libxml2.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/xml2Conf.sh
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

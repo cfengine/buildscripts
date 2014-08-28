@@ -1,0 +1,36 @@
+#!/bin/sh -x
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+case "$OS" in
+    rhel|centos)
+        # Fakeroot is here: http://dl.atrpms.net/el5-$1/atrpms/stable/fakeroot-1.6.4-15.1.el5.$1.rpm
+        DEP_LIST="ntp rsync gcc make bison flex fakeroot gcc-c++ ncurses ncurses-devel pkgconfig rpm-build autoconf pam-devel"
+        CHECK_CMD="rpm -q"
+        ;;
+    debian|ubuntu)
+        DEP_LIST="ntp rsync gcc make bison flex fakeroot dpkg-dev debhelper g++ libncurses5 pkg-config build-essential autoconf libpam0g-dev"
+        CHECK_CMD="dpkg -l | grep -q -w"
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+RET=0
+MISSING_DEPS=
+COMMA=
+for dep in $DEP_LIST; do
+    if ! eval $CHECK_CMD $dep; then
+        MISSING_DEPS="$MISSING_DEPS$COMMA$dep"
+        COMMA=", "
+        RET=1
+    fi
+done
+
+if test $RET -gt 0; then
+    echo "Dependencies $MISSING_DEPS not found. Make sure they are installed on the build machine." 1>&2
+fi
+exit $RET

@@ -1,0 +1,37 @@
+#!/usr/xpg4/bin/sh -e
+
+#Options
+
+PREFIX=/var/cfengine
+
+LS=${BUILD_ROOT}/cfbuild-sasl2${PREFIX}
+LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
+export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
+
+#Patch
+gpatch -p1 < solaris-unistd.patch
+#Configure
+
+./configure --prefix=$PREFIX CPPFLAGS=-I/var/cfengine/include
+
+#Build
+
+make -C include
+make -C lib
+
+#Test
+
+#Install
+
+make -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+make -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+
+#Package
+
+rm -rf ${LSD}/etc
+rm -rf ${LSD}/lib/*.a
+rm -rf ${LSD}/lib/*.la
+
+mkdir -p ${LS}/lib
+mv ${LSD}/lib/*.so.* ${LS}/lib
+

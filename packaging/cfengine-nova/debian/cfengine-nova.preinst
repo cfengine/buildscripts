@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ -x /etc/init.d/cfengine3 ]; then
+  /usr/sbin/update-rc.d cfengine3 remove
+fi
+
+exit 0

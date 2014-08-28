@@ -1,0 +1,18 @@
+Source: cfbuild-apr
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 1.4.8
+
+Package: cfbuild-apr
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- apr
+ CFEngine Build Automation -- apr
+
+Package: cfbuild-apr-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- apr -- development files
+ CFEngine Build Automation -- apr -- development files

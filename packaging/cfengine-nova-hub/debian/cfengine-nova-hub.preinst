@@ -1,0 +1,113 @@
+#!/bin/sh
+
+#PREFIX
+PREFIX=/var/cfengine
+
+#
+# Before starting the installation process we need to check that
+# hostname -f returns a valid name. If that is not the case then
+# we just abort the installation.
+#
+NAME=$(hostname -f)
+if [ -z "$NAME" ];
+then
+    echo "hostname -f does not return a valid name, this is a configuration problem on this host."
+	echo "Please make sure that hostname -f returns a valid name (Add an entry to /etc/hosts or "
+	echo "fix the name resolution)."
+	exit 1
+fi
+
+# 
+# We check if there is a server listening on port 80 or port 443.
+# If one is found, then we try to shut it down by calling
+# %{prefix}/httpd/bin/apachectl stop
+# If that does not work, we abort the installation.
+# 
+HTTPD_RUNNING=`netstat -natp | grep -E "(:80\s|:443\s).*LISTEN"`
+if [ ! -z "$HTTPD_RUNNING" ];
+then
+	echo "There seems to be a server listening on either port 80 or 443"
+	echo "Checking if it is part of CFEngine Enterprise"
+	if [ -x $PREFIX/httpd/bin/apachectl ];
+	then
+		echo "Trying to shut down the process using apachectl from CFEngine Enterprise"
+		$PREFIX/httpd/bin/apachectl stop
+		HTTPD_RUNNING=`netstat -natp | grep -E "(:80\s|:443\s).*LISTEN"`
+		if [ ! -z "$HTTPD_RUNNING" ];
+		then
+			echo "Could not shutdown the process, aborting the installation"
+			exit 1
+		fi
+	else
+		echo "No apachectl found, aborting the installation!"
+		echo "Please kill the following processes before attempting a new installation"
+		fuser -n tcp 80
+		fuser -n tcp 443
+		exit 1
+	fi
+fi
+
+#
+# We check if there is a postgres db server running already
+#
+PSQL_RUNNING=`netstat -natp | grep -E "(:5432\s).*LISTEN"`
+if [ ! -z "$PSQL_RUNNING" ];
+then
+	echo "There seems to be a server listening on port 5432"
+	echo "This might mean that there is a PostgreSQL server running on the machine already"
+	echo "Checking if the Postgres installation belongs to a previous CFEngine deployment"
+	PSQL_COMMAND=`ps -p `fuser -n tcp 5432 2>/dev/null` -o args=|cut -d' ' -f1`
+	if [ ! -z "$PSQL_COMMAND" ];
+	then
+		if [ "$PSQL_COMMAND" = "$PREFIX/bin/postgres" ];
+		then
+			echo "The PostgreSQL server belongs to a previous CFEngine deployment, shutting it down."
+			if [ -x "$PREFIX/bin/pg_ctl" ];
+			then
+				(cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart")
+			else
+				echo "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
+				exit 1
+			fi
+		else
+			echo "The PostgreSQL is not from a previous CFEngine deployment"
+			echo "This scenario is not supported, aborting installation"
+			ps -p `fuser -n tcp 5432 2>/dev/null` -o args=
+			exit 1
+		fi
+	else
+		echo "There is a process listening on the PostgreSQL port but it is not PostgreSQL, aborting."
+		echo -n "Command: "
+		ps -p `fuser -n tcp 5432 2>/dev/null` -o args=
+		echo "Please make sure that the process is not running before attempting the installation again."
+		exit 1
+	fi
+	PSQL_FINAL_CHECK=`netstat -natp | grep -E "(:5432\s).*LISTEN"`
+	if [ ! -z "$PSQL_FINAL_CHECK" ];
+    then
+	    echo "There is still a process listening on 5432, please kill it before retrying the installation. Aborting."
+		exit 1
+	fi
+fi
+#
+# We need a cfapache user for our web server
+#
+/usr/bin/getent passwd cfapache >/dev/null || /usr/sbin/useradd -M -r cfapache
+/usr/bin/getent group cfapache >/dev/null || /usr/sbin/groupadd -r cfapache
+
+#
+# We check if there is a postgres user already, otherwise we create one
+#
+/usr/bin/getent passwd cfpostgres >/dev/null || /usr/sbin/useradd -M -r cfpostgres
+
+#
+# Backup htdocs
+#
+if [ -d $PREFIX/httpd/htdocs ]; then
+    echo "A previous version of CFEngine Mission Portal was found,"
+    echo "creating a backup of it at /tmp/cfengine-htdocs.tar.gz"
+    tar zcf /tmp/cfengine-htdocs.tar.gz $PREFIX/httpd/htdocs
+fi
+
+exit 0
+

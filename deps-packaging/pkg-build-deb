@@ -12,7 +12,7 @@ PATH="$PATH:$SCRIPTDIR"
 usage()
 {
   exec >&2
-  echo "$0 <pkgname> <tests> <optimize> <debugsymbols> <version>"
+  echo "$0 <pkgname> <tests> <cross-target/native> <optimize> <debugsymbols> <version>"
   exit 1
 }
 
@@ -22,15 +22,16 @@ fatal()
   exit 42
 }
 
-if [ $# -ne 5 ]; then
+if [ $# -ne 6 ]; then
   usage
 fi
 
 PKGNAME="$1"
 TESTS="$2"
-OPTIMIZE="$3"
-DEBUGSYM="$4"
-VERSION="$5"
+TARGET="$3"
+OPTIMIZE="$4"
+DEBUGSYM="$5"
+VERSION="$6"
 
 P=$BASEDIR/autobuild/deps-packaging/$PKGNAME
 PKGDIR=$BASEDIR/$PKGNAME/pkg
@@ -67,6 +68,38 @@ done
 cp -a $P/* $PKGDIR
 
 # Prepare options
+
+case "$TARGET" in
+  native)
+    ;;
+  *)
+    if [ -d $PKGDIR/mingw ]; then
+      rm -rf $PKGDIR/debian
+      mv $PKGDIR/mingw/debian $PKGDIR
+    fi
+
+    case "$TARGET" in
+      x86)
+        ARCH_OPTIONS="-ti686-w64-mingw32";;
+      x64)
+        ARCH_OPTIONS="-tx86_64-w64-mingw32";;
+      *)
+        fatal "Unknown architecture: $ARCH" 2>&1;;
+    esac
+
+    # Architecture needs to be the build machine architecture, since we will
+    # install the package on that machine afterwards and the package
+    # architecture needs to match.
+    case "$(uname -m)" in
+      i*86)
+        ARCH_OPTIONS="$ARCH_OPTIONS -ai386";;
+      x86_64)
+        ARCH_OPTIONS="$ARCH_OPTIONS -aamd64";;
+      *)
+        fatal "Unknown architecture" 2>&1;;
+    esac
+    ;;
+esac
 
 case "$TESTS" in
   no)
@@ -108,4 +141,5 @@ EOF
 # Build!
 
 cd $PKGDIR
-DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS" dpkg-buildpackage -b -us -uc -rfakeroot
+export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"
+dpkg-buildpackage $ARCH_OPTIONS -b -us -uc -rfakeroot

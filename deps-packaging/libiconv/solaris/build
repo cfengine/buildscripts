@@ -1,0 +1,38 @@
+#!/usr/xpg4/bin/sh -e
+
+#Options
+
+PREFIX=/var/cfengine
+
+LI=${BUILD_ROOT}/cfbuild-libiconv${PREFIX}
+LID=${BUILD_ROOT}/cfbuild-libiconv-devel${PREFIX}
+export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
+
+#Patch
+
+#Configure
+
+./configure --prefix=$PREFIX CFLAGS=-I/var/cfengine/include
+
+#Build
+
+make 
+
+#Test
+
+#Install
+
+sed -e"s/ \/usr\/local\/lib / /" libtool > libtool2
+rm -f libtool
+mv libtool2 libtool
+make install DESTDIR=${BUILD_ROOT}/cfbuild-libiconv-devel
+
+#Package
+
+rm -rf ${LID}/lib/*.a
+rm -rf ${LID}/lib/*.la
+
+mkdir -p ${LI}/lib
+mv ${LID}/lib/libiconv.so* ${LI}/lib
+mv ${LID}/lib/libcharset.so* ${LI}/lib
+

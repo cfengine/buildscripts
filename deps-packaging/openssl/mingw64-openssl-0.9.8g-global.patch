@@ -1,0 +1,16 @@
+Fix global variable macros.
+
+ - RWMJ 2008-09-30
+
+diff -ur openssl-0.9.8g.orig/e_os2.h openssl-0.9.8g.mingw/e_os2.h
+--- openssl-0.9.8g.orig/e_os2.h	2005-12-18 18:57:07.000000000 +0000
++++ openssl-0.9.8g.mingw/e_os2.h	2008-09-30 14:27:53.000000000 +0100
+@@ -264,7 +264,7 @@
+ # define OPENSSL_IMPLEMENT_GLOBAL(type,name)			     \
+ 	extern type _hide_##name;				     \
+ 	type *_shadow_##name(void) { return &_hide_##name; }	     \
+-	static type _hide_##name
++	type _hide_##name
+ # define OPENSSL_DECLARE_GLOBAL(type,name) type *_shadow_##name(void)
+ # define OPENSSL_GLOBAL_REF(name) (*(_shadow_##name()))
+ #else

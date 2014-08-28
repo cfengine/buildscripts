@@ -1,0 +1,13 @@
+Source: cfbuild-rsync
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-rsync
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- rsync
+ CFEngine Build Automation -- rsync
+

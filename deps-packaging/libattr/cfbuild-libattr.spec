@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libattr
 Name: cfbuild-libattr
 Version: %{version}
 Release: 1
-Source: attr-2.4.44.src.tar.gz
+Source: attr-2.4.47.src.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com
@@ -15,7 +15,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n attr-2.4.44
+%setup -q -n attr-2.4.47
 
 zcat ../../SOURCES/attr.destdir.diff.gz | patch -p1 || true
 

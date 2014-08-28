@@ -1,0 +1,12 @@
+*** ssl/s3_pkt.c.orig	2014-06-06 17:18:35.000000000 +0200
+--- ssl/s3_pkt.c	2014-06-06 17:23:38.000000000 +0200
+***************
+*** 110,115 ****
+--- 110,116 ----
+   */
+  
+  #include <stdio.h>
++ #include <limits.h>
+  #include <errno.h>
+  #define USE_SOCKETS
+  #include "ssl_locl.h"

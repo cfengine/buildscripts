@@ -1,0 +1,5 @@
+/var/cfengine/bin/xml2-config
+/var/cfengine/include
+/var/cfengine/lib/*.dll.a
+/var/cfengine/lib/pkgconfig
+

@@ -5,8 +5,9 @@
 parse_version_string()
 {
   VARNAME="$1"
+  VERSION_PATH="$2"
 
-  VERSION=$(awk '/^ ?'$VARNAME'=/ {print}' < $BASEDIR/core/configure)
+  VERSION=$(awk '/^ ?'$VARNAME'=/ {print}' < $BASEDIR/$VERSION_PATH/configure)
 
   VERSION=${VERSION#*=}
 
@@ -21,8 +22,13 @@ parse_version_string()
 ci_version()
 {
   echo "ci_version"
-  VERSION=$(parse_version_string VERSION)
-  echo "Using VERSION: $VERSION"
+  if [ -d $BASEDIR/nova ]; then
+    VERSION=$(parse_version_string NOVA_VERSION "nova")
+    echo "Using NOVA_VERSION: $NOVA_VERSION"
+  else
+    VERSION=$(parse_version_string VERSION "core")
+    echo "Using VERSION: $VERSION"
+  fi
 
   # Insert ~, so pre-releases get sorted before releases
 
@@ -45,8 +51,13 @@ ci_version()
 release_version()
 {
   echo "release_version"
-  VERSION=$(parse_version_string VERSION)
-  echo "Using VERSION: $VERSION"
+  if [ -d $BASEDIR/nova ]; then
+    VERSION=$(parse_version_string NOVA_VERSION "nova")
+    echo "Using NOVA_VERSION: $NOVA_VERSION"
+  else
+    VERSION=$(parse_version_string VERSION "core")
+    echo "Using VERSION: $VERSION"
+  fi
   echo "VERSION: $VERSION"
 }
 
@@ -62,11 +73,14 @@ continuous_version()
 
 if [ -z "$EXPLICIT_VERSION" ]; then 
   case "$BUILD_TYPE" in
-    quick|full|smoke)
+    quick|full)
       ci_version;;
     debug)
       ci_version
       VERSION="$VERSION.debug";;
+    code_coverage)
+      ci_version
+      VERSION="$VERSION.code_coverage";;
     release|debug_and_release)
       release_version;;
     *)

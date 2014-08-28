@@ -12,7 +12,7 @@ PATH="$PATH:$SCRIPTDIR"
 usage()
 {
   exec >&2
-  echo "$0 <pkgname> <tests> <optimize> <debugsymbols> <version>"
+  echo "$0 <pkgname> <tests> <cross-target/native> <optimize> <debugsymbols> <version>"
   exit 1
 }
 
@@ -22,18 +22,44 @@ fatal()
   exit 42
 }
 
-if [ $# -ne 5 ]; then
+if [ $# -ne 6 ]; then
   usage
 fi
 
 PKGNAME="$1"
 TESTS="$2"
-OPTIMIZE="$3"
-DEBUGSYM="$4"
-VERSION="$5"
+TARGET="$3"
+OPTIMIZE="$4"
+DEBUGSYM="$5"
+VERSION="$6"
 
 P=$BASEDIR/autobuild/deps-packaging/$PKGNAME
-SPEC="$P/cfbuild-$PKGNAME.spec"
+SYS=`uname -s`
+if [ $SYS = "AIX" ]; then
+export PATH="/usr/local/bin:$PATH"
+export LDFLAGS="-L/var/cfengine/lib -lpthreads -Wl,-blibpath:/var/cfengine/lib:/usr/lib:/lib -Wl,-brtl"
+export CFLAGS="-I/var/cfengine/include"
+export LD_RUN_PATH=/var/cfengine/lib
+export LD_LIBRARY_PATH="/var/cfengine/lib:$LD_LIBRARY_PATH"
+export LIBPATH="/var/cfengine/lib:/usr/lib:$LIBPATH"
+export YACC=/usr/local/bin/yac
+export MAKE=/usr/bin/gmake
+fi
+
+echo
+echo "$PKGNAME"
+echo
+
+if [ $SYS = "AIX" ]; then
+  case "$PKGNAME" in
+    openldap)
+      SPEC="$P/cfbuild-$PKGNAME-aix.spec";;
+    *)
+      SPEC="$P/cfbuild-$PKGNAME.spec";;
+  esac
+else
+  SPEC="$P/cfbuild-$PKGNAME.spec"
+fi
 
 # Copy source code
 
@@ -50,7 +76,8 @@ echo "$SRCFILES" | while read srcfile opts; do
   ln -sf $srcfile $BASEDIR/$PKGNAME/SOURCES
 done
 
-cp -a $P/* $BASEDIR/$PKGNAME/SOURCES
+# Almost, but not completely, equivalent to -a, compatible with AIX.
+cp -pPR $P/* $BASEDIR/$PKGNAME/SOURCES
 
 # Prepare options
 
@@ -86,9 +113,10 @@ case "$DEBUGSYM" in
     fatal "Unknown debugsym option: $DEBUGSYM";;
 esac
 
-rpmbuild -bb \
+$RPMBUILD_CMD -bb \
   --define="_topdir $BASEDIR/$PKGNAME" \
   --define="version $VERSION" \
   --define="buildprefix $BUILDPREFIX" \
+  --define="make $MAKE" \
   "$RPMBUILD_OPTIONS" \
   $SPEC

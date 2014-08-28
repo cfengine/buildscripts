@@ -1,0 +1,55 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	rm -f *-stamp
+	-make clean
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	#patch -p1 < ../xx
+	#patch -p1 < ../yy
+
+	make -f win32/Makefile.gcc PREFIX=$(DEB_HOST_GNU_TYPE)-
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	$(MAKE) -f win32/Makefile.gcc install \
+		SHARED_MODE=1 \
+		INCLUDE_PATH=$(CURDIR)/debian/tmp$(PREFIX)/include \
+		BINARY_PATH=$(CURDIR)/debian/tmp$(PREFIX)/bin \
+		LIBRARY_PATH=$(CURDIR)/debian/tmp$(PREFIX)/lib
+
+	rm -f $(CURDIR)/debian/tmp${PREFIX}/lib/libz.a
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

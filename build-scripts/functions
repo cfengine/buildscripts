@@ -50,7 +50,7 @@ else
     detect_solaris_sh
     if [ $HAVE_SOLARIS_SH -eq 1 ]; then
         echo "Trying to switch to Solaris POSIX shell"
-        try_exec /usr/xpg4/bin/sh "$0" "$@"
+        try_exec /usr/xpg4/bin/sh -x "$0" "$@"
         echo "Something went wrong when trying to replace the Solaris Shell. Aborting."
         exit 42
     fi
@@ -67,21 +67,20 @@ set -e
 # Figure out where scripts are, and amend PATH to ease our life.
 #
 
-case "$0" in
-  /*) SCRIPTDIR=`dirname "$0"`;;
-  *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
-esac
+if [ -z "$AUTOBUILD_PATH" ]; then
+  case "$0" in
+    /*) SCRIPTDIR=`dirname "$0"`;;
+    *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
+  esac
 
-if [ -n "$TOPDIR" ]; then
-  BASEDIR=`dirname "$SCRIPTDIR"`
-  SCRIPTSDIR="$SCRIPTDIR/build-scripts"
-else
-  BASEDIR=`dirname "$SCRIPTDIR"`
-  BASEDIR=`dirname "$BASEDIR"`
-  SCRIPTSDIR="$SCRIPTDIR"
+  AUTOBUILD_PATH="$(dirname "$SCRIPTDIR")"
 fi
+BASEDIR="$(dirname "$AUTOBUILD_PATH")"
 
-export PATH="$PATH:$SCRIPTSDIR:/usr/local/bin:/usr/sbin:/usr/sfw/bin:/usr/bin:/usr/local/sbin"
+
+# Export to which directory the packages will be installed, using the define buildprefix in environment or /var/cfengine as default. 
+export BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
+export PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/sfw/bin:/usr/bin:/usr/local/sbin"
 export BASEDIR
 
 #
@@ -95,7 +94,7 @@ install_rpms()
 
 uninstall_rpms()
 {
-  PKGS=`rpm -qa --queryformat "%{Name}\n" | grep '^'$1'$' || true`
+  PKGS=`rpm -qa --queryformat "%{Name}-%{Version}\n" | grep '^'$1 || true`
   if [ -n "$PKGS" ]; then
     execute-wrapper.sh sudo rpm -e $PKGS
   fi
@@ -114,6 +113,34 @@ uninstall_debs()
   fi
 }
 
+install_solaris_pkgs()
+{
+  echo "OWHOO!"
+  exit 1
+}
+
+uninstall_solaris_pkgs()
+{
+  PKGS=`pkginfo | awk '{print $2}' | grep '^'$1'$' || true`
+  if [ -n "$PKGS" ]; then
+    execute-wrapper.sh sudo /usr/sbin/pkgrm -n $PKGS
+  fi
+}
+
+install_hpux_pkgs()
+{
+  echo "$@"
+}
+
+uninstall_hpux_pkgs()
+{
+  PKGS=`swlist | awk '{print $1}' | grep '^'$1'$' || true`
+
+  for p in $PKGS
+  do
+    sudo /usr/sbin/swremove $p
+  done
+}
 
 #
 # Dealing with packages
@@ -124,6 +151,9 @@ uninstall_cfbuild()
   case "$DEP_PACKAGING" in
     rpm) uninstall_rpms 'cfbuild-.*';;
     deb) uninstall_debs 'cfbuild-.*';;
+    solaris) uninstall_solaris_pkgs 'cfbuild-.*';;
+    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*';;
+    hpux) uninstall_hpux_pkgs 'cfbuild-.*';;
     *)
       echo "Unknown packaging system: $DEP_PACKAGING"
       exit 1;;
@@ -135,8 +165,163 @@ uninstall_cfbuild_devel()
   case "$DEP_PACKAGING" in
     rpm) uninstall_rpms 'cfbuild-.*-devel';;
     deb) uninstall_debs 'cfbuild-.*-devel';;
+    solaris) uninstall_solaris_pkgs 'cfbuild-.*-devel';;
+    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*-devel';;
+    hpux) uninstall_hpux_pkgs 'cfbuild-.*-devel';;
     *)
       echo "Unknown packaging system: $DEP_PACKAGING"
       exit 42;;
+  esac
+}
+
+install_freebsd_pkgs()
+{
+	execute-wrapper.sh sudo pkg_add "$@"
+}
+
+uninstall_freebsd_pkgs()
+{
+	PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
+	if [ -n "$PKGS" ]; then
+	  execute-wrapper.sh sudo pkg_delete $PKGS
+	fi
+}
+
+run() {
+  NAME="$1"
+  shift
+  echo "---> $NAME"
+  if ! "$@" >> "build-remote.log" 2>&1; then
+    echo "Failed. See the build-remote.log. Last lines are:"
+    tail build-remote.log
+    exit 1
+  fi
+}
+
+local_script_general() {
+  SCRIPT="$1"
+  "$AUTOBUILD_PATH/build-scripts/$SCRIPT" "$HOST"
+}
+
+local_script() {
+  SCRIPT="$1"
+  run "$SCRIPT" "$AUTOBUILD_PATH/build-scripts/$SCRIPT" "$HOST"
+}
+
+remote_script_general() {
+  SCRIPT="$1"
+  LOGIN_COMMAND="$2"
+  SCRIPT_BASEDIR="$3"
+  ENVVARS="PROJECT=$PROJECT"
+  if [ -n "$CROSS_TARGET" ]; then
+    ENVVARS="$ENVVARS CROSS_TARGET=$CROSS_TARGET"
+  fi
+  if [ -n "$WIX_MACHINE" ]; then
+    ENVVARS="$ENVVARS WIX_MACHINE=$WIX_MACHINE"
+  fi
+  if [ -n "$BUILD_TYPE" ]; then
+    ENVVARS="$ENVVARS BUILD_TYPE=$BUILD_TYPE"
+  fi
+  if [ -n "$BUILD_NUMBER" ]; then
+    ENVVARS="$ENVVARS BUILD_NUMBER=$BUILD_NUMBER"
+  fi
+  if [ -n "$PREFIX" ]; then
+    ENVVARS="$ENVVARS BUILDPREFIX=$PREFIX"
+  fi
+
+  ENVVARS="$ENVVARS BRANCH=$REPOSITORY"
+  ENVVARS="$ENVVARS EXPLICIT_ROLE=$EXPLICIT_ROLE"
+  ENVVARS="$ENVVARS EXPLICIT_VERSION=$EXPLICIT_VERSION"
+  ENVVARS="$ENVVARS TEST_MACHINE=$TEST_MACHINE"
+
+  $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/autobuild/build-scripts/"$SCRIPT"
+}
+
+remote_script() {
+  SCRIPT="$1"
+  run "$SCRIPT" remote_script_general "$SCRIPT" "ssh -o BatchMode=yes $HOST" build
+}
+
+projects_to_test() {
+  if test "x$PROJECT" = "xcommunity"; then
+    echo "core masterfiles"
+  else
+    if test "x$ROLE" = "xhub"; then
+      echo "core enterprise nova masterfiles"
+    else
+      echo "core enterprise masterfiles"
+    fi
+  fi
+}
+
+generate_chroot_transfer_script()
+{
+  # These rules are processed in a "first that matches" fashion.
+
+  ############# Cross platform #############
+  cat <<EOF
+- */proc
++ /bin
++ /etc
+- /lib/modules
++ /lib
+- /lib64/modules
++ /lib64
++ /sbin
+- /usr/src
+- /usr/local/src
++ /usr
+- /var/cfengine
+- /var/tmp
++ /var
+EOF
+
+  ########### Platform specific ############
+  case "$OS" in
+    aix)
+      cat <<EOF
++ /dev
++ /TT_DB
++ /audit
++ /lpp
++ /lppdir
++ /opt/freeware
+- /opt/*
++ /opt
+EOF
+      ;;
+    solaris)
+      cat <<EOF
+- /.SUNWnative/usr/jdk
+- /.SUNWnative/usr/openwin
+- /.SUNWnative/usr/lib/AdobeReader
++ /.SUNWnative
++ /opt/csw
+- /opt/*
++ /opt
++ /system/volatile
+- /system/*
++ /system
+EOF
+      ;;
+  esac
+
+  # Exclude everything else.
+  echo "- /*"
+}
+
+# One argument: Where to mount it.
+mount_procfs()
+{
+  case "$OS" in
+    aix)
+      sudo mount -v namefs /proc "$1"
+      ;;
+    solaris)
+      sudo mount -F proc proc "$1"
+      ;;
+    *)
+      sudo mount -t proc proc "$1"
+      ;;
   esac
 }

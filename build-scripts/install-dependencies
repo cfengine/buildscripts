@@ -3,12 +3,12 @@
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
-
 #
 # We use packaging scripts
 PATH=$PATH:$BASEDIR/autobuild/deps-packaging/
 #
 
+set -x
 #export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
 for i in $(ls $BASEDIR/autobuild/deps-packaging);  do
 
@@ -20,15 +20,126 @@ if [ -d "$BASEDIR/autobuild/deps-packaging/$i/debian" ] ; then
    esac
      
 fi
- done
 
-set -x
+if [ -d "$BASEDIR/autobuild/deps-packaging/$i/mingw/debian" ] ; then
+   case "$BUILDPREFIX" in
+  *opt*)
+      sed -i "s/var/opt/" $BASEDIR/autobuild/deps-packaging/$i/mingw/debian/*.install
+   esac
+fi
+
+#change the webdirectory in the apache config file as well
+if [ -d "$BASEDIR/autobuild/deps-packaging/$i" ]
+then
+  if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ] ; then
+   escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
+   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/autobuild/deps-packaging/apache/httpd.conf
+   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/autobuild/deps-packaging/apache/httpd-ssl.conf
+  fi
+fi
+ 
+done
+
 DEPS=""
+case "$OS" in
+  mingw)
+  ;;
+  hpux)
+  ;;
+  solaris)
+  ;;
+  aix)
+  ;;
+  *)
+  DEPS="$DEPS lcov"
+  ;;
+esac
+
+case "$OS-$OS_VERSION" in
+  rhel-4.*)
+    AUTOCONF=$(rpm -qa autoconf)
+    AUTOMAKE=$(rpm -qa automake)
+    LIBTOOL=$(rpm -qa libtool)
+    ACVER=cfbuild-autoconf-2.60-1
+    AMVER=cfbuild-automake-1.10.1-1
+    LTVER=cfbuild-libtool-1.5.24-1
+    if ! [ -z "$AUTOCONF" ]; then
+      if [ "$AUTOCONF" != "$ACVER" ]; then
+        sudo /bin/rpm -ev --nodeps autoconf
+        DEPS="$DEPS autoconf"
+      fi
+    else
+      DEPS="$DEPS autoconf"
+    fi
+
+    if ! [ -z "$AUTOMAKE" ]; then
+      if [ "$AUTOMAKE" != "$AMVER" ]; then
+        sudo /bin/rpm -ev --nodeps automake
+        DEPS="$DEPS automake"
+      fi
+    else
+      DEPS="$DEPS automake"
+    fi
+
+    if ! [ -z "$LIBTOOL" ]; then
+      if [ "$LIBTOOL" != "$LTVER" ]; then
+        sudo /bin/rpm -ev --nodeps libtool
+        DEPS="$DEPS libtool"
+      fi
+    else
+      DEPS="$DEPS libtool"
+    fi
+    ;;
+  debian-4.*)
+    AUTOCONF=$(dpkg -l | grep autoconf | awk '{ print $3 }')
+    AUTOMAKE=$(dpkg -l | grep automake | awk '{ print $3 }')
+    LIBTOOL=$(dpkg -l | grep libtool | awk '{ print $3 }')
+    ACVER=cfbuild-autoconf-2.60-1
+    AMVER=cfbuild-automake-1.10.1-1
+    LTVER=cfbuild-libtool-1.5.24-1
+
+    if ! [ -z "$AUTOCONF" ]; then
+      if [ "$AUTOCONF" != "$ACVER" ]; then
+          sudo /usr/bin/dpkg -r autoconf
+          DEPS="$DEPS autoconf"
+      fi 
+    else
+      DEPS="$DEPS autoconf"
+    fi
+
+    if ! [ -z "$AUTOMAKE" ]; then
+      if [ "$AUTOMAKE" != "$AMVER" ]; then
+          sudo /usr/bin/dpkg -r automake
+          DEPS="$DEPS automake"
+      fi 
+    else
+      DEPS="$DEPS automake"
+    fi
+
+    if ! [ -z "$LIBTOOL" ]; then
+      if [ "$LIBTOOL" != "$LTVER" ]; then
+          sudo /usr/bin/dpkg -r libtool
+          DEPS="$DEPS libtool"
+      fi 
+    else
+      DEPS="$DEPS libtool"
+    fi
+    ;;
+  *)
+    ;;
+esac
 
 case "$LIBGCC" in
   yes)
     DEPS="$DEPS libgcc";;
 esac
+
+case "$PTHREADS_W32" in
+  yes)
+    DEPS="$DEPS pthreads-w32";;
+esac
+
+# FIXME: Why do we need zlib?
 
 DEPS="$DEPS zlib $EMBEDDED_DB openssl pcre"
 
@@ -42,11 +153,34 @@ case "$LIBICONV" in
     DEPS="$DEPS libiconv";;
 esac
 
-case "$SQL" in
+case "$GNURX" in
   yes)
-    # MySQL is disabled until we sort out legal issues
-    #DEPS="$DEPS mysql"
-    DEPS="$DEPS postgresql";;
+    DEPS="$DEPS libgnurx";;
+esac
+
+case "$OPENLDAP" in
+  yes)
+    DEPS="$DEPS openldap";;
+esac
+
+case "$LIBCURL" in
+  yes)
+    DEPS="$DEPS libcurl";;
+esac
+
+case "$GIT" in
+  yes)
+    DEPS="$DEPS git";;
+esac
+
+case "$RSYNC" in
+  yes)
+    DEPS="$DEPS rsync";;
+esac
+
+case "$LIBMCRYPT" in
+  yes)
+    DEPS="$DEPS libmcrypt";;
 esac
 
 case "$LIBXML2" in
@@ -54,9 +188,57 @@ case "$LIBXML2" in
     DEPS="$DEPS libxml2";;
 esac
 
+case "$APR" in
+  yes)
+    DEPS="$DEPS apr";;
+esac
+
+case "$APR_UTIL" in
+  yes)
+    DEPS="$DEPS apr-util";;
+esac
+
+case "$APACHE" in
+  yes)
+    DEPS="$DEPS apache";;
+esac
+
+case "$PGSQL" in
+  yes)
+    DEPS="$DEPS postgresql-hub";;
+  *)
+    case "$SQL" in
+      yes)
+        # MySQL is disabled until we sort out legal issues
+        #DEPS="$DEPS mysql"
+        DEPS="$DEPS postgresql";;
+    esac
+  ;;
+esac
+
+case "$PHP" in
+  yes)
+    DEPS="$DEPS php";;
+esac
+
 case "$LIBVIRT" in
   yes)
     DEPS="$DEPS libvirt";;
+esac
+
+case "$REDIS" in
+  yes)
+    DEPS="$DEPS redis";;
+esac
+
+case "$PHP_APC" in
+  yes)
+    DEPS="$DEPS php-apc";;
+esac
+
+case "$PHP_SVN" in
+  yes)
+    DEPS="$DEPS php-svn";;
 esac
 
 case "$LIBATTR" in
@@ -79,14 +261,14 @@ fi
 for dep in $DEPS; do
 
   case "$BUILD_TYPE" in
-    quick|smoke)
+    quick|code_coverage)
       optimize=yes
       debugsym=no
       versuffix=+untested
       tests=no;;
     debug_and_release)
       optimize=yes
-      debugsym=yes
+      debugsym=no
       versuffix=+dr
       tests=yes;;
     debug)
@@ -104,11 +286,41 @@ for dep in $DEPS; do
       exit 42;;
   esac
 
-     version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
+  case "$ARCH" in
+    x86|x64)
+      crossver=+mingw$ARCH
+      cross=$ARCH;;
+    *)
+      crossver=
+      cross=native;;
+  esac
+
+  case "$OS-$OS_VERSION" in
+    debian-4.*)
+      case "$dep" in
+        autoconf)
+          version=2.60-1
+          ;;
+        automake)
+          version=1.10.1-1
+          ;;
+        libtool)
+          version=1.5.24-1
+          ;;
+        *)
+          version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
+          ;;
+      esac
+      ;;
+    *)
+      version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
+      ;;
+  esac
   if pkg-cache find $dep-$version; then
     case "$BUILD_TYPE" in
-      full|release|debug_and_release) pkg-cache prune $dep-$version;;
-      quick|smoke|debug) echo "Package found in cache, skipping compilation";;
+      # We don't want to prune packages. It takes too long to regenerate.
+      # full|release|debug_and_release) pkg-cache prune $dep-$version;;
+      full|release|debug_and_release|quick|smoke|debug) echo "Package found in cache, skipping compilation";;
       *) echo "WAT?!"; exit 42;;
     esac
   fi
@@ -116,7 +328,7 @@ for dep in $DEPS; do
   if pkg-cache find $dep-$version; then
     :
   else
-    $BASEDIR/autobuild/deps-packaging/pkg-build-${DEP_PACKAGING} $dep $tests $optimize $debugsym $version
+    $BASEDIR/autobuild/deps-packaging/pkg-build-${DEP_PACKAGING} $dep $tests $cross $optimize $debugsym $version
     pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
   fi
 

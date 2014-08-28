@@ -1,0 +1,10 @@
+CFEngine is an automated suite of programs for configuring and
+maintaining Unix-like computers. It has been used on computing arrays
+of between 1 and 30,000 computers since 1993 by a wide range of
+organizations. CFEngine is supported by active research and was the
+first autonomic, hands-free management system for Unix-like operating
+systems. CFEngine is an autonomic maintenance system not merely a
+change management roll-out tool. CFEngine has a history of security
+and adaptability.
+
+WWW: https://cfengine.com/

@@ -1,0 +1,18 @@
+#!/usr/xpg4/bin/sh
+
+# Installs given packages
+
+if [ $# -eq 0 ]; then
+   echo "Usage: $0 <pkg> [<pkg> ...]"
+   exit 1
+fi
+
+for pkg in "$@"; do
+  P_FILENAME=`basename $pkg`
+  P_NAME=${P_FILENAME%.pkg}
+
+  if pkginfo ${P_NAME}; then
+    sudo /usr/sbin/pkgrm -n ${P_NAME}
+  fi
+  sudo /usr/sbin/pkgadd -n -d $pkg ${P_NAME}
+done

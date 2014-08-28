@@ -1,0 +1,19 @@
+*** Makefile.in	Thu Apr 22 22:39:27 2010
+--- Makefile.in	Tue Jun 11 06:45:04 2013
+***************
+*** 685,691 ****
+  	    $(CC) $(CFLAGS) -shared -Wl,-G,-h,libtokyocabinet.so.$(LIBVER) -o $@ \
+  	      $(LIBOBJFILES) $(LDFLAGS) $(LIBS) ; \
+  	  else \
+! 	    $(CC) $(CFLAGS) -shared -Wl,-soname,libtokyocabinet.so.$(LIBVER) -o $@ \
+  	      $(LIBOBJFILES) $(LDFLAGS) $(LIBS) ; \
+  	  fi
+  
+--- 685,691 ----
+  	    $(CC) $(CFLAGS) -shared -Wl,-G,-h,libtokyocabinet.so.$(LIBVER) -o $@ \
+  	      $(LIBOBJFILES) $(LDFLAGS) $(LIBS) ; \
+  	  else \
+! 	    $(CC) $(CFLAGS) -shared -Wl,-G -o $@ \
+  	      $(LIBOBJFILES) $(LDFLAGS) $(LIBS) ; \
+  	  fi
+  

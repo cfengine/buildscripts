@@ -1,0 +1,42 @@
+#!/bin/sh -x
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+case "$TEST_MACHINE" in
+    chroot)
+        SCRIPT=test-chroot
+        CHROOT_ROOT=$HOME/testmachine-chroot/
+        LOGIN_COMMAND="sudo chroot $CHROOT_ROOT /run-in-home-dir.sh"
+
+        sudo umount ${CHROOT_ROOT}proc || true
+        mount_procfs ${CHROOT_ROOT}proc
+        ;;
+    *)
+        # Add VMs, etc here.
+        echo "Only chroot test machines are supported at the moment."
+        exit 1
+        ;;
+esac
+
+SCRIPT_BASEDIR="$(cd "$(dirname "$0")" ; pwd)" # /home/user/whatever/autobuild/build-scripts
+SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever/autobuild
+SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever
+
+# We need to clean up mounts if doing a chroot test run, so wrap this in an if.
+if remote_script_general "$SCRIPT" "$LOGIN_COMMAND" "$SCRIPT_BASEDIR"; then
+    return_code=0
+else
+    return_code=$?
+fi
+
+case "$TEST_MACHINE" in
+    chroot)
+        sudo umount ${CHROOT_ROOT}proc
+        ;;
+esac
+
+if [ $return_code -ne 0 ]; then
+    exit $return_code
+fi

@@ -1,0 +1,51 @@
+#!/bin/sh -x
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+. version
+
+# Windows and possibly other platforms do not produce tests.
+# In order to keep Jenkins happy, we just create an empty
+# test report saying that there were no tests to report.
+create_empty_test() {
+	NO_TESTS=$BASEDIR/core/tests/unit/no_tests.xml
+	touch $NO_TESTS
+    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $NO_TESTS
+    echo "<testsuite name=\"no_tests_to_report\">" >> $NO_TESTS
+    echo "<testcase name=\"no_tests\" />" >> $NO_TESTS
+    echo "</testsuite>" >> $NO_TESTS
+    NO_TESTS=$BASEDIR/nova/tests/unit/no_tests.xml
+    touch $NO_TESTS
+    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $NO_TESTS
+    echo "<testsuite name=\"no_tests_to_report\">" >> $NO_TESTS
+    echo "<testcase name=\"no_tests\" />" >> $NO_TESTS
+    echo "</testsuite>" >> $NO_TESTS
+}
+
+case "$OS" in
+mingw)
+    if [ "xno" != "x$ESCAPETEST" ]
+     then
+     create_empty_test
+     else
+      test-on-windows
+     fi
+    ;;
+esac
+
+if [ "$TESTS" = all ]; then
+  chmod -R g-w $BASEDIR/core/tests/acceptance/*
+  chmod -R g-w $BASEDIR/masterfiles/tests/acceptance/*
+  chmod -R g-w $BASEDIR/masterfiles/lib/*
+  chmod -R g-w $BASEDIR/masterfiles/inventory/*
+  if test "x$PROJECT" != "xcommunity"; then
+    chmod -R g-w $BASEDIR/enterprise/tests/acceptance/*
+  fi
+  for project in `projects_to_test`; do
+    NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project check
+  done
+
+elif [ "$TESTS" = unit ]; then
+  $MAKE -C $BASEDIR/core/tests/unit check
+fi

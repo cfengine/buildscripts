@@ -1,0 +1,69 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	rm -f *-stamp
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	patch -p1 < 0001-Fix-PostgreSQL-compilation-for-MinGW64.patch
+
+	# --enable-largefile is not applied consistently, and on MinGW 2.0.2
+	# --causes confusion between struct stat and struct istat64
+
+	./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) \
+	    --without-zlib \
+	    --disable-largefile \
+	    --without-readline \
+	    --with-system-tzdata=/usr/share/zoneinfo
+
+	make -C src/bin/pg_config
+	make -C src/backend ../../src/include/utils/fmgroids.h
+	make -C src/interfaces/libpq
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	make install -C src/bin/pg_config DESTDIR=$(CURDIR)/debian/tmp
+	make install -C src/include DESTDIR=$(CURDIR)/debian/tmp
+	make install -C src/interfaces/libpq DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/pg_config.exe
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/include/pg_config*.h
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/include/postgresql/server
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/libpq.def
+
+	mv $(CURDIR)/debian/tmp$(PREFIX)/lib/libpq.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	mv $(CURDIR)/debian/tmp$(PREFIX)/lib/libpq.a $(CURDIR)/debian/tmp$(PREFIX)/lib/libpq.dll.a
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

@@ -1,0 +1,60 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	rm -f *-stamp
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	patch -p1 < 0001-Undefine-X509_NAME-from-Windows-headers.patch
+	patch -p1 < 0002-Add-mingw64-target.patch
+	patch -p1 < mingw64-openssl-0.9.8g-global.patch
+	patch -p1 < openssl-0.9.8k-pid-t-mingw.patch
+
+	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
+		mingw64 no-asm shared --prefix=$PREFIX no-zlib
+
+	make build_crypto build_ssl libcrypto.dll.a libssl.dll.a
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
+
+	cp libcrypto-*.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp libcrypto.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib
+	cp libssl-*.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp libssl.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib
+	cp -RL include/openssl $(CURDIR)/debian/tmp$(PREFIX)/include
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
