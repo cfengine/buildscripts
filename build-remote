@@ -2,122 +2,73 @@
 
 set -e
 
+. `dirname "$0"`/build-scripts/functions
+
 usage() {
   echo
-  echo "Usage: build-remote [--branch=<branch>]"
+  echo "Usage: build-remote [--wix-machine=<user@host>]"
+  echo "                    [--cross-target=<target>]"
+  echo "                    [--project=<project>]"
+  echo "                    [--branch=<branch>]"
   echo "                    [--source=<url>]"
+  echo "                    [--role=<hub|agent>]"
+  echo "                    [--version=<version string>]"
+  echo "                    [--test-machine=chroot]"
+  echo "                    [--workdir=/opt/cfengine]"
   echo "                    [--full|--release|--debug|--docs|--release-and-debug]"
-  echo "                    [--build-prefix]"
+  echo "                    [-v|--verbose]"
   echo "                    <user@host>"
   echo
-  echo "Branch defaults to 'master'"
+  echo "Project defaults to 'nova'"
+  echo "Branch defaults to 'master', specify --branch=cp if you just want to do simple rsync from the source directories"
+  echo "workdir defaults to '/var/cfengine'"
   echo "Build type defaults to quick. You may request a full build using --full"
   echo "Source defaults to git@github.com:cfengine/"
   echo
+  echo "WiX machine and cross-compilation are not used by default"
   echo
 }
 
-usage_macosx() {
-    echo
-    echo "Usage for Mac OS X users:"
-    echo "build-remote [-b branch/tag] - specify branch or tag"
-    echo "             [-s source] - specify source"
-    echo "             [-p build_prefix] - specify build prefix other than /var/cfengine"
-    echo "             [-f] - full build"
-    echo "             [-r] - release build"
-    echo "             [-d] - debug build"
-    echo "             [-h] - help"
-    echo "             [-a host] - specify buildslave"
-    echo
-    echo "Example:"
-    echo "./build-remote -b 3.5.1 -s /home/user/src -r -a build@buildslave.company.com"
-    echo
-}
-
-opts_macosx() {
-  PROJECT=community
-  BRANCH=master
-  BUILD_TYPE=quick
-  SOURCE=git@github.com:cfengine
-  BUILD_NUMBER=1
-  BUILDPREFIX="/var/cfengine"
-  HOST=
-
-  while getopts "fb:rs:dp:ha:" flag
-  do
-    case "$flag" in
-      b)
-        echo "$OPTARG"
-        echo "$OPTIND"
-        BRANCH=$OPTARG;;
-      s)
-        echo "$OPTARG"
-        echo "$OPTIND"
-        SOURCE=$OPTARG;;
-      p)
-        echo "$OPTARG"
-        echo "$OPTIND"
-        BUILDPREFIX=$OPTARG;;
-      f)
-        echo "$OPTARG"
-        echo "$OPTIND"
-        BUILD_TYPE=full;;
-      d)
-        echo "$OPTARG"
-        echo "$OPTIND"
-        BUILD_TYPE=debug;;
-      r)
-        echo "$OPTARG"
-        echo "$OPTIND"
-        BUILD_TYPE=release;;
-      h)
-        usage_macosx
-        exit 0;;
-      a)
-        echo "$OPTARG"
-        echo "$OPTIND"
-        HOST=$OPTARG;;
-      ?)
-        usage_macosx
-        exit 1;;
-    esac
-  done
-
-  REPOSITORY=$PROJECT-$BRANCH
-  echo $HOST
-  if [ -z $HOST ]; then
-    echo "Missing host, cannot continue"
-    usage_macosx
-    exit 1
-  fi
-
-  export PROJECT BRANCH HOST BUILD_TYPE BUILD_NUMBER BUILDPREFIX
-
-  export SCHEDULER=$PROJECT-$BRANCH-localbuild
-}
-
 opts() {
-  OPTS=`getopt -o p:b:w:c:h --long branch:,source:,full,release,debug,docs,build-prefix,release-and-debug,help -n build-remote -- "$@"`
+  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,full,release,debug,docs,release-and-debug,help,test-machine: -n build-remote -- "$@"`
 
   eval set -- "$OPTS"
+  echo "$?"
 
   if [ $? != 0 ]; then
     usage
     exit 1
   fi
 
-  PROJECT=community
+  DOCS=no
+  PROJECT=nova
   BRANCH=master
   BUILD_TYPE=quick
   SOURCE=git@github.com:cfengine
-  BUILD_NUMBER=1
-  BUILDPREFIX="/var/cfengine"
+  BUILD_NUMBER=${BUILD_NUMBER:-666}
+  EXPLICIT_ROLE=
+  TEST_MACHINE=${TEST_MACHINE:-}
 
   while true; do
     case "$1" in
+      -p|--project)
+        PROJECT="$2"
+        shift 2;;
       -b|--branch)
         BRANCH="$2"
         shift 2;;
+      -w|--wix-machine)
+        WIX_MACHINE="$2"
+        shift 2;;
+      -c|--cross-target)
+        CROSS_TARGET="$2"
+        shift 2;;
+      -d|--workdir)
+        PREFIX="$2"
+        shift 2;;
+      -v|--verbose)
+        VERBOSE=yes
+        shift;;
       --full)
         BUILD_TYPE=full
         shift;;
@@ -130,15 +81,32 @@ opts() {
 	  --release-and-debug)
 	    BUILD_TYPE=debug_and_release
 		shift;;
+      --docs)
+        DOCS=yes
+        shift;;
       --source)
         SOURCE="$2"
         shift 2;;
-      --build-prefix)
-        BUILDPREFIX="$2"
-        shift;;
+      --role)
+	    EXPLICIT_ROLE="$2"
+		shift 2;;
+	  --version)
+	    EXPLICIT_VERSION="$2"
+		shift 2;;
       -h|--help)
         usage
         exit 0;;
+      -t|--test-machine)
+        TEST_MACHINE="$2"
+        case "$TEST_MACHINE" in
+          chroot)
+            ;;
+          *)
+            echo "Only --test-machine=chroot is supported"
+            exit 1
+            ;;
+        esac
+        shift 2;;
       --)
         shift
         break;;
@@ -147,16 +115,16 @@ opts() {
         exit 1;;
     esac
   done
-
+  echo "$PROJECT $BRANCH $HOST $BUILD_TYPE $SOURCE"
   if [ $# -ne 1 ]; then
     usage
     exit 1
   fi
-  
+
   REPOSITORY=$PROJECT-$BRANCH
   HOST=$1
 
-  export PROJECT BRANCH HOST BUILD_TYPE BUILD_NUMBER BUILDPREFIX
+  export PROJECT BRANCH WIX_MACHINE CROSS_TARGET HOST BUILD_TYPE BUILD_NUMBER DOCS EXPLICIT_ROLE EXPLICIT_VERSION TEST_MACHINE PREFIX
 
   export SCHEDULER=$PROJECT-$BRANCH-localbuild
 }
@@ -164,17 +132,37 @@ opts() {
 prepare_workdir() {
   mkdir -p "workdir-$PROJECT-$BRANCH-$HOST"
   rm -rf "workdir-$PROJECT-$BRANCH-$HOST"/*
+  # In order for tail not to miss any output. If it doesn't exist, there is a small window between
+  # when it is created and when tail discovers it, where output may be missed.
+  touch "workdir-$PROJECT-$BRANCH-$HOST"/build-remote.log
+
+  SCRIPT="$(readlink -f "$0")"
+  AUTOBUILD_PATH="$(pwd)/workdir-$PROJECT-$BRANCH-$HOST/build/autobuild"
+  export AUTOBUILD_PATH
   cd "workdir-$PROJECT-$BRANCH-$HOST"
+
+  checkout
 }
 
 checkout() {
   mkdir -p build
-  rsync -avr --exclude='workdir-*' ../ build/autobuild
-  (cd build/autobuild && git add -A || :; git commit -a -m "Commit for build" || :)
+  rsync -avr --exclude='workdir-*' --exclude=".git" ../ build/autobuild
+  #(cd build/autobuild && git add -A || :; git commit -a -m "Commit for build" || :)
+
+  REPOS="core masterfiles"
+
+  case "$PROJECT" in
+     nova)
+      REPOS="$REPOS nova design-center mission-portal"
+  esac
 
   case "$PROJECT-$BRANCH" in
     community-master)
       git clone $SOURCE/core build/core
+      git clone $SOURCE/masterfiles build/masterfiles
+      (cd build/masterfiles && git checkout $VERSION) || false
+      git clone $SOURCE/design-center build/design-center
+      (cd build/design-center && git checkout $VERSION) || false
       ;;
     community-3.4.x)
       git clone $SOURCE/core build/core
@@ -184,60 +172,87 @@ checkout() {
       git clone $SOURCE/core build/core
       (cd build/core && git checkout -b 3.3.x remotes/origin/3.3.x || git checkout 3.3.x) || false
       ;;
-    community-3.5.x)
-      git clone $SOURCE/core build/core
-      (cd build/core && git checkout -b 3.5.x remotes/origin/3.5.x || git checkout 3.3.x) || false
-      ;;
-    community-3.3.*)
-      VERSION=$BRANCH
-      git clone $SOURCE/core build/core
-      (cd build/core && git checkout $VERSION) || false
-      ;;
     community-3.4.*)
       VERSION=$BRANCH
       git clone $SOURCE/core build/core
       (cd build/core && git checkout $VERSION) || false
       ;;
-    community-3.5.*)
+    nova-2.2.2)
+      VERSION=$BRANCH
+      git clone $SOURCE/nova build/nova
+      (cd build/nova && git checkout $VERSION) || false
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout 3.3.6) || false
+      ;;
+    nova-3.5.x)
+      VERSION=$BRANCH
+      git clone $SOURCE/nova build/nova
+      (cd build/nova && git checkout $VERSION) || false
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout $VERSION) || false
+      git clone $SOURCE/mission-portal build/mission-portal
+      git clone $SOURCE/design-center build/design-center
+      (cd build/design-center && git checkout $VERSION)
+      ;;
+    nova-2.2.*)
+      VERSION=$BRANCH
+      git clone $SOURCE/nova build/nova
+      (cd build/nova && git checkout $VERSION) || false
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout -b 3.3.x remotes/origin/3.3.x || git checkout 3.3.x) || false
+      ;;
+    nova-master)
+      git clone $SOURCE/core build/core
+      git clone $SOURCE/enterprise build/enterprise
+      git clone $SOURCE/nova build/nova
+      git clone $SOURCE/mission-portal build/mission-portal
+      git clone $SOURCE/design-center build/design-center
+      git clone $SOURCE/masterfiles build/masterfiles
+      ;;
+    nova-3.6.x)
       VERSION=$BRANCH
       git clone $SOURCE/core build/core
-      (cd build/core && git checkout $VERSION) || false  
+       (cd build/core && git checkout $VERSION) || false
+      git clone $SOURCE/nova build/nova
+      (cd build/nova && git checkout $VERSION) || false
+      git clone $SOURCE/enterprise build/enterprise
+       (cd build/enterprise && git checkout $VERSION) || false
+      git clone $SOURCE/mission-portal build/mission-portal
+       (cd build/mission-portal && git checkout $VERSION) || false
+      git clone $SOURCE/design-center build/design-center
+       (cd build/design-center && git checkout $VERSION) || false
+      git clone $SOURCE/masterfiles build/masterfiles
+       (cd build/masterfiles && git checkout $VERSION)
+       ;;
+      
+    nova-cp)
+     rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/autobuild
+     for d in core nova enterprise masterfiles design-center mission-portal; do
+       rsync -avr $SOURCE/$d build
+     done
+      ;;
+
+    nova-stable)
+      git clone $SOURCE/core build/core
+      (cd build/core && git checkout -b 3.4.x remotes/origin/3.4.x || git checkout 3.4.1n) || false
+      git clone $SOURCE/nova build/nova
+      (cd build/nova && git checkout -b 3.0.x remotes/origin/3.0.x || git checkout 3.0.0) || false
+      git clone $SOURCE/mission-portal build/mission-portal
+      (cd build/mission-portal && git checkout -b 3.0.x remotes/origin/3.0.x || git checkout 3.0.0) || false
       ;;
     *)
-      echo "WAT?"
-      exit 42;;
+      for i in $REPOS;
+         do
+         git clone $SOURCE/$i build/$i
+         (cd build/$i && git checkout -b $BRANCH remotes/origin/$BRANCH || git checkout $BRANCH) || false
+      done
   esac
 }
 
-run() {
-  NAME="$1"
-  shift
-  echo "---> $NAME"
-  if ! "$@" > "$NAME.log" 2>&1; then
-    echo "Failed. See the $NAME.log. Last lines are:"
-    tail $NAME.log
-    exit 1
-  fi
-}
-
-local_script() {
-  SCRIPT="$1"
-  run "$SCRIPT" "build/autobuild/build-scripts/$SCRIPT" "$HOST"
-}
-
-remote_script() {
-  SCRIPT="$1"
-  ENVVARS="PROJECT=$PROJECT"
-  if [ -n "$BUILD_TYPE" ]; then
-    ENVVARS="$ENVVARS BUILD_TYPE=$BUILD_TYPE"
-  fi
-  if [ -n "$BUILD_NUMBER" ]; then
-    ENVVARS="$ENVVARS BUILD_NUMBER=$BUILD_NUMBER"
-  fi
-
-  ENVVARS="$ENVVARS BRANCH=$REPOSITORY BUILDPREFIX=$BUILDPREFIX"
-
-  run "$SCRIPT" ssh -o BatchMode=yes "$HOST" env $ENVVARS build/autobuild/build-scripts/"$SCRIPT"
+build_docs() {
+  remote_script configure-docs
+  remote_script compile
+  remote_script upload-docs
 }
 
 build() {
@@ -248,6 +263,7 @@ build() {
 	  remote_script produce-debug-symbols
 	  ;;
   esac
+
   remote_script test
   remote_script package
   remote_script prepare-results
@@ -258,25 +274,24 @@ build() {
 }
 
 common_build() {
+  if [ "$VERBOSE" = "yes" ]; then
+    tail -F --pid=$$ build-remote.log &
+  fi
 
-  checkout
   local_script autogen
   local_script transfer-to-buildmachine
+  remote_script build-environment-check
   remote_script clean-buildmachine
   remote_script install-dependencies
-  build
+
+  case "$DOCS" in
+    yes)
+      build_docs;;
+    no)
+      build;;
+  esac
 }
 
-PLATFORM=`uname -s`
-
-case "$PLATFORM" in
-  "Linux")
-    opts "$@";;
-  "Darwin" )
-    opts_macosx "$@";;
-  *)
-    echo "Running build-remote script on $PLATFORM platform is not supported"
-    exit 42;;
-esac
+opts "$@"
 prepare_workdir
 common_build

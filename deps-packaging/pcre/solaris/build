@@ -1,0 +1,42 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+PC=${BUILD_ROOT}/cfbuild-pcre${PREFIX}
+PCD=${BUILD_ROOT}/cfbuild-pcre-devel${PREFIX}
+export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
+
+# Patch
+
+patch -p0 < solaris-8-inttypes.patch
+
+# Configure
+
+./configure --prefix=$PREFIX --enable-unicode-properties --disable-cpp
+
+# Build
+
+make
+
+# Test
+
+if [ "$TESTS" = all ]; then
+  make check
+fi
+
+# Install
+
+make install DESTDIR=${BUILD_ROOT}/cfbuild-pcre-devel
+
+# Package
+
+rm -f ${PCD}/bin/pcregrep
+rm -f ${PCD}/bin/pcretest
+rm -f ${PCD}/lib/*.a
+rm -f ${PCD}/lib/*.la
+rm -rf ${PCD}/share
+
+mkdir -p ${PC}/lib
+mv ${PCD}/lib/*.so.* ${PC}/lib

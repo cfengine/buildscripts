@@ -1,0 +1,18 @@
+Source: cfbuild-openldap
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-openldap
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- openldap
+ CFEngine Build Automation -- openldap
+
+Package: cfbuild-openldap-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- openldap -- development files
+ CFEngine Build Automation -- openldap -- development files

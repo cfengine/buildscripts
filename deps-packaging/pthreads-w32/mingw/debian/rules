@@ -1,0 +1,53 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	rm -f *-stamp
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	#patch -p1 < 0001-Fix-struct-timespec-redifinition-for-MinGW.patch
+	#patch -p1 < cvs-20120509.patch
+	make CROSS=$(DEB_HOST_GNU_TYPE)- clean GC-inlined
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
+
+	cp pthreadGC2.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp libpthreadGC2.a $(CURDIR)/debian/tmp$(PREFIX)/lib
+	cp pthread.h sched.h semaphore.h $(CURDIR)/debian/tmp$(PREFIX)/include
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

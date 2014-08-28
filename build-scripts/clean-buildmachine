@@ -4,4 +4,12 @@
 . detect-environment
 
 uninstall_cfbuild
+
+case $OS in
+aix)
+sudo rm -rf /var/cfengine/*
+;;
+*)
 sudo rm -rf /var/cfengine
+;;
+esac

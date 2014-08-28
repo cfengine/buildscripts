@@ -1,0 +1,3 @@
+/var/cfengine/lib/apr-util-1/*.so
+/var/cfengine/lib/*.so.*
+/var/cfengine/bin/apu*

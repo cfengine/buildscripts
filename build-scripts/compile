@@ -1,8 +1,49 @@
-#!/bin/sh
+#!/bin/sh -x
 
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
 
+case "$PROJECT" in
+  community)
+    NOVA=no
+    ;;
+  nova)
+    NOVA=yes
+    ;;
+  *)
+    echo "Unknown project: $PROJECT"
+    exit 42;;
+esac
+
+if [ $OS = "aix" ]; then
+    export PATH="/usr/local/bin:$PATH"
+    export LDFLAGS="-L/var/cfengine/lib -lpthreads -Wl,-blibpath:/var/cfengine/lib:/usr/lib:/lib -Wl,-brtl"
+    export CFLAGS="-I/var/cfengine/include"
+    export LD_RUN_PATH=/var/cfengine/lib
+    export LD_LIBRARY_PATH="/var/cfengine/lib:$LD_LIBRARY_PATH"
+    export LIBPATH="/var/cfengine/lib:/usr/lib:$LIBPATH"
+    export YACC=/usr/local/bin/yacc
+    export MAKE=/usr/bin/gmake
+fi
+
 $MAKE -C $BASEDIR/core -k
-$MAKE -C $BASEDIR/core install DESTDIR=$BASEDIR/core/dist
+$MAKE -C $BASEDIR/core install DESTDIR=$BASEDIR/cfengine/dist
+
+if test "x$NOVA" = "xyes"; then
+    $MAKE -C $BASEDIR/enterprise -k
+    $MAKE -C $BASEDIR/enterprise install DESTDIR=$BASEDIR/cfengine/dist
+    if test "x$ROLE" = "xhub"; then
+        $MAKE -C $BASEDIR/nova -k
+        $MAKE -C $BASEDIR/nova install DESTDIR=$BASEDIR/cfengine/dist
+        $MAKE -C $BASEDIR/masterfiles install DESTDIR=$BASEDIR/cfengine/dist
+        $MAKE -C $BASEDIR/design-center install-sketches DESTDIR=$BASEDIR/cfengine/dist/sketches
+        $MAKE -C $BASEDIR/design-center install-tools DESTDIR=$BASEDIR/cfengine/dist/tools
+    fi
+else
+    $MAKE -C $BASEDIR/masterfiles install DESTDIR=$BASEDIR/cfengine/dist
+    $MAKE -C $BASEDIR/design-center install-sketches DESTDIR=$BASEDIR/cfengine/dist/sketches
+    $MAKE -C $BASEDIR/design-center install-tools DESTDIR=$BASEDIR/cfengine/dist/tools
+fi
+
+

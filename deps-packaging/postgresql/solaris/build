@@ -1,0 +1,39 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+PG=${BUILD_ROOT}/cfbuild-postgresql${PREFIX}
+PGD=${BUILD_ROOT}/cfbuild-postgresql-devel${PREFIX}
+export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
+
+# Patch
+
+# Configure
+
+./configure --prefix=$PREFIX --without-zlib --without-readline
+
+# Build
+
+make -C src/bin/pg_config
+make -C src/backend ../../src/include/utils/fmgroids.h
+make -C src/interfaces/libpq
+
+# Test
+
+# Install
+
+make install -C src/bin/pg_config DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+make install -C src/include DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+make install -C src/interfaces/libpq DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+
+# Package
+
+rm -f ${PGD}/include/pg_config*.h
+rm -rf ${PGD}/include/postgresql/server
+rm -f ${PGD}/lib/*.a
+rm -rf ${PGD}/share
+
+mkdir -p ${PG}/lib
+mv ${PGD}/lib/libpq.so.* ${PG}/lib

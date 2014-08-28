@@ -1,0 +1,52 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+  PTHREAD=
+else
+  PTHREAD=--with-pthread=/var/cfengine
+endif
+
+clean:
+	dh_testdir
+	dh_testroot
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+	patch -p1 < $(CURDIR)/mdb.patch
+	patch -p1 < $(CURDIR)/mdb-robust.patch
+	patch -p1 < $(CURDIR)/mdb-autoconf.patch
+	patch -p1 < $(CURDIR)/mdb-autoconf-generated.patch
+	cd libraries/liblmdb/ && sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	cd libraries/liblmdb/ && make DESTDIR=$(CURDIR)/debian/tmp install
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip
+endif
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

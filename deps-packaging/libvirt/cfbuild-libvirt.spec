@@ -2,22 +2,12 @@ Summary: CFEngine Build Automation -- libvirt
 Name: cfbuild-libvirt
 Version: %{version}
 Release: 1
-Source0: libvirt-0.8.4.tar.gz
+Source0: libvirt-1.1.3.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
-Patch0: 0001-Disable-GnuTLS-in-remote-driver.patch
-Patch1: 0002-autoreconf-produced-files.patch
-#
-# There is no GET_VLAN_VID_CMD on old Linux kernel (e.g. RHEL4)
-#
-Patch2: 0001-Compile-out-ifaceGetVlanID-if-no-MacVTap-is-requeste.patch
-
-#
-# Do not depend on presence of virtualport headers on system
-#
-Patch3: 0001-Only-test-for-virtualport-if-Macvtap-is-requested.patch
+Patch0: 0001-fix-inet-oldkernel.patch
 
 AutoReqProv: no
 
@@ -25,11 +15,9 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n libvirt-0.8.4
+%setup -q -n libvirt-1.1.3
 %patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
+
 
 # FIXME: is there any other way to have RPATH?
 LDFLAGS=-Wl,--rpath=%{prefix}/lib
@@ -67,7 +55,10 @@ PKG_CONFIG_PATH=%prefix/lib/pkgconfig \
             --without-storage-fs \
             --without-macvtap \
             --without-gnutls \
-            --without-selinux
+            --without-selinux \
+            --with-libxml=%{prefix} \
+            --without-numactl \
+            --without-numad
 %build
 
 make
@@ -85,6 +76,7 @@ rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/libvirt/drivers
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.la
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libvirt-qemu*
+rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libvirt-lxc*
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/libexec
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/sbin
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share/libvirt

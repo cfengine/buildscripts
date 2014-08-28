@@ -1,0 +1,38 @@
+#!/bin/sh
+
+#
+# Register CFEngine initscript, if not yet.
+#
+if [ -x /etc/init.d/cfengine3 ]; then
+  update-rc.d cfengine3 defaults
+fi
+
+#
+# Generate a host key
+#
+if [ ! -f /var/cfengine/ppkeys/localhost.priv ]; then
+    /var/cfengine/bin/cf-key >/dev/null || :
+fi
+
+# start CFE3 processes on only client hosts (not HUB)
+if [ -f /var/cfengine/policy_server.dat -a ! -f /var/cfengine/masterfiles/promises.cf ]; then
+    /etc/init.d/cfengine3 start
+fi
+
+if [ -f /var/cfengine/bin/cf-twin ]; then
+    /bin/rm /var/cfengine/bin/cf-twin
+fi
+
+/bin/cp /var/cfengine/bin/cf-agent /var/cfengine/bin/cf-twin
+for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent;
+do
+	if [ -f /var/cfengine/bin/$i ]; then
+		ln -sf /var/cfengine/bin/$i /usr/local/sbin/$i || true
+	fi
+	if [ -f /usr/share/man/man8/$i.8.gz ]; then
+		rm -f /usr/share/man/man8/$i.8.gz
+	fi
+	/var/cfengine/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
+done
+
+exit 0

@@ -1,0 +1,18 @@
+Source: cfbuild-openssl
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-openssl-mingw64
+Section: libs
+Architecture: all
+Description: CFEngine Build Automation -- openssl -- mingw64
+ CFEngine Build Automation -- openssl -- mingw64
+
+Package: cfbuild-openssl-mingw64-devel
+Section: libdevel
+Architecture: all
+Description: CFEngine Build Automation -- openssl -- mingw64 -- development files
+ CFEngine Build Automation -- openssl -- mingw64 -- development files

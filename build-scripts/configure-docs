@@ -1,0 +1,11 @@
+#!/bin/sh -x
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+P=/var/cfengine
+
+ARGS="--prefix=$P --with-openssl=$P --with-pcre=$P --with-tokyocabinet=$P --enable-docs=all"
+
+cd $BASEDIR/core && env $OPTS ./configure $ARGS

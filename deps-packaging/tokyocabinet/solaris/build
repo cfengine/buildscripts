@@ -1,0 +1,58 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+TT=${BUILD_ROOT}/cfbuild-tokyocabinet${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-tokyocabinet-devel${PREFIX}
+export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
+
+# Patch
+# Solaris 8
+if [ `uname -r` = '5.8' ]; then
+  patch -p0 < solaris-8-inttypes-tcucodec.patch
+  patch -p0 < solaris-8-inttypes-tcutil.patch
+fi
+# Solaris 9
+if [ `uname -r` = '5.9' ]; then
+  patch -p0 < solaris-8-inttypes-tcucodec.patch
+  patch -p0 < solaris-8-inttypes-tcutil.patch
+fi
+
+# Configure
+
+./configure --enable-shared --enable-pthread --prefix=$PREFIX --disable-zlib --disable-bzip
+
+# Build
+
+make
+
+# Test
+
+if [ "$TESTS" = all ]; then
+  make check-util
+  make check-hdb
+  rm -rf casket*
+fi
+
+# Install
+
+make install prefix=${TTD}
+
+# Package
+
+rm -f ${TTD}/bin/tca*
+rm -f ${TTD}/bin/tcb*
+rm -f ${TTD}/bin/tcf*
+rm -f ${TTD}/bin/tchmttest
+rm -f ${TTD}/bin/tchtest
+rm -f ${TTD}/bin/tct*
+rm -f ${TTD}/bin/tcu*
+rm -f ${TTD}/lib/libtokyocabinet.a
+rm -f ${TTD}/libexec/tcawmgr.cgi
+rm -rf ${TTD}/share
+
+mkdir -p ${TT}/bin ${TT}/lib
+mv ${TTD}/bin/tchmgr ${TT}/bin
+mv ${TTD}/lib/libtokyocabinet.so.* ${TT}/lib

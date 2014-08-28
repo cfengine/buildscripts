@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
 Version: %{version}
 Release: 1
-Source0: libxml2-sources-2.7.7.tar.gz
+Source0: libxml2-2.9.1.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,13 +14,22 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n libxml2-2.7.7
+%setup -q -n libxml2-2.9.1
+SYS=`uname -s`
 
-./configure --prefix=%{prefix} --without-python
+if [ $SYS = "AIX" ]; then
+./configure --prefix=%{prefix} --without-python --enable-shared --disable-static
+else
+./configure --prefix=%{prefix} --without-python LDFLAGS="-L%{prefix}/lib -Wl,-R%{prefix}/lib" CPPFLAGS="-I%{prefix}/include" LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
+fi
 
 %build
-
+SYS=`uname -s`
+if [ $SYS = "AIX" ]; then
 make
+else
+make LDFLAGS="-L%{prefix}/lib -Wl,-R%{prefix}/lib" CPPFLAGS="-I%{prefix}/include" LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
+fi
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -53,6 +62,7 @@ CFEngine Build Automation -- libxml2 -- development files
 
 %dir %prefix/lib
 %prefix/lib/*.so.*
+%prefix/lib/*.so
 
 %files devel
 %defattr(-,root,root)

@@ -1,0 +1,36 @@
+Source: cfbuild-postgresql-hub
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-postgresql-hub
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- postgresql hub
+ CFEngine Build Automation -- postgresql hub
+
+Package: cfbuild-postgresql-hub-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- postgresql hub -- development files
+ CFEngine Build Automation -- postgresql hub -- development files
+
+Package: cfbuild-postgresql-hub-server
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- postgresql hub -- server files
+ CFEngine Build Automation -- postgresql hub -- server files
+
+Package: cfbuild-postgresql-hub-libs
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- postgresql hub -- libraries
+ CFEngine Build Automation -- postgresql hub -- libraries
+
+Package: cfbuild-postgresql-hub-contrib
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- postgresql hub -- contrib
+ CFEngine Build Automation -- postgresql hub -- contrib

@@ -1,0 +1,20 @@
+Source: cfengine-nova-hub
+Section: utils
+Priority: extra
+Maintainer: CFEngine AS <contact@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfengine-nova-hub
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Provides: cfengine-nova-hub
+Replaces: cfengine3, cfengine-community, cfengine-nova-hub
+Description: CFEngine Nova : The next generation tool for data centre.
+ CFEngine, or the configuration engine is an agent/software robot and a
+ very high level language for building expert systems to administrate
+ and configure large computer networks. CFEngine uses the idea of
+ classes and a primitive form of intelligence to define and automate
+ the configuration and maintenance of system state, for small to huge
+ configurations. CFEngine is designed to be a part of a computer immune
+ system.

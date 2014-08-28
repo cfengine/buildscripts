@@ -1,0 +1,12 @@
+Source: cfbuild-php-svn
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper, fakeroot, libsvn-dev
+Standards-Version: 3.8.4
+
+Package: cfbuild-php-svn
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- php-svn
+ CFEngine Build Automation -- php-svn

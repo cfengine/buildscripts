@@ -1,0 +1,38 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+TZ=${BUILD_ROOT}/cfbuild-zlib${PREFIX}
+TZD=${BUILD_ROOT}/cfbuild-zlib-devel${PREFIX}
+
+# Configure
+
+LDFLAGS="-Wl,-R${PREFIX}/lib" ./configure --prefix=${PREFIX}
+
+sed -e "s@TEST_LDFLAGS=@TEST_LDFLAGS=-Wl,-R${PREFIX}/lib @" < Makefile > Makefile.new
+mv Makefile.new Makefile
+
+# Build
+
+make
+
+# Test
+
+if [ "$TESTS" = all ]; then
+  make check
+fi
+
+# Install
+
+make install prefix=${TZD}
+
+# Package
+
+rm -f ${TZD}/lib/libz.a
+rm -rf ${TZD}/share
+
+mkdir -p ${TZ}/lib
+mv ${TZD}/lib/libz.so.* ${TZ}/lib
+

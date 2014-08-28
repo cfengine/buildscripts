@@ -22,7 +22,7 @@ usage()
 fatal()
 {
   echo "$@" >&2
-  exit 42
+#  exit 42
 }
 
 opts()

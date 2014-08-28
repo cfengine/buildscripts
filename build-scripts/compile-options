@@ -1,30 +1,103 @@
 # -*- mode:sh -*-
 
-# Export to which directory the packages will be installed, using the define buildprefix in environment or /var/cfengine as default. 
-#export BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
-
 #
 # We need to know what project are we building.
 #
 
+[ "$PROJECT" ] || if [ -d $BASEDIR/nova ]; then
+  PROJECT=nova
+else
+  PROJECT=community
+fi
 
-export PROJECT=community
+export PROJECT
+
+# Should we package libgcc_s.so.1?
+
+case "$OS_FAMILY" in
+  solaris|aix)
+    LIBGCC=yes;;
+  *)
+    LIBGCC=no;;
+esac
+
+# libsasl needed for solaris
+
+case "$OS_FAMILY" in
+  solaris|hpux)
+    LIBSASL=yes;;
+  *)
+    LIBSASL=no;;
+esac
+
+# iconv is needed for libxml2
+case "$OS_FAMILY" in
+  solaris)
+    LIBICONV=yes;;
+  *)
+    LIBICONV=no;;
+esac
+
+# iconv is needed for libxml2 on aix
+case "$OS_FAMILY" in
+   aix)
+     LIBICONV=yes;;
+   solaris)
+     LIBICONV=yes;;
+   *)
+     LIBICONV=no;;
+esac
+
+# Do we need libgnurx-0.dll?
+
+case "$OS_FAMILY" in
+  mingw)
+    GNURX=yes;;
+  *)
+    GNURX=no;;
+esac
+
+# Do we need to build pthreads-w32?
+
+case "$OS_FAMILY" in
+  mingw)
+    PTHREADS_W32=yes;;
+  *)
+    PTHREADS_W32=no;;
+esac
 
 # Embedded DB selection
 
-EMBEDDED_DB=tokyocabinet
+case "$OS_FAMILY" in
+  hpux)
+    EMBEDDED_DB=qdbm;;
+  *)
+    EMBEDDED_DB=lmdb;;
+esac
 
 export EMBEDDED_DB
 
 # libxml2
 
-LIBXML2=yes
+#
+# Temporarily disable edit_xml under Windows: libxml2 mingw build does not work yet
+#
+case "$OS_FAMILY" in
+  mingw)
+    LIBXML2=yes;;
+  hpux)
+    LIBXML2=no;;
+  *)
+    LIBXML2=yes;;
+esac
 
 export LIBXML2
 
 # libvirt
 
 case "$ARCH-${OS_FAMILY}" in
+  s390*-*)
+    LIBVIRT=no;;
   *-linux)
     case "${OS}-${OS_VERSION}" in
       debian-3.1)
@@ -32,6 +105,8 @@ case "$ARCH-${OS_FAMILY}" in
       *-*)
         LIBVIRT=yes;;
     esac;;
+  *-mingw|*-aix|*-*bsd|*-solaris|*-hpux)
+    LIBVIRT=no;;
   *)
     echo "Unknown combination of architecture and OS family: $ARCH-${OS_FAMILY}"
     exit 42;;
@@ -39,29 +114,168 @@ esac
 
 export LIBVIRT
 
+# ROLE
+# We can autodetect if we are building a hub or an agent, but
+# that is suboptimal since the list might change at any time or
+# we might want to build an agent package for a platform that is a hub
+# or viceversa. By default we assume the old behavior but if the 
+# environment variable EXPLICIT_ROLE is defined, then we change our behavior
+# and build according to the role specified by it.
+
+case "$EXPLICIT_ROLE" in
+  agent) ROLE=agent;;
+  hub) ROLE=hub;;
+*)
+  echo "Using auto detection of role."
+  case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
+    community-*) ROLE=agent;;
+# We do not support 32 bits hubs anymore
+	nova-i386-*-*) ROLE=agent;;
+    nova-s390*-*-*) ROLE=agent;;
+    nova-*-centos-[56].*) ROLE=hub;;
+    nova-*-debian-6.*) ROLE=hub;;
+    nova-*-opensuse-11.*) ROLE=hub;;
+    nova-*-rhel-[56].*) ROLE=hub;;
+    nova-*-sles-11.*) ROLE=hub;;
+    nova-*-ubuntu-8.04) ROLE=hub;;
+    nova-*-ubuntu-10.04) ROLE=hub;;
+    nova-*-ubuntu-12.04) ROLE=hub;;
+    nova-*-mingw-*) ROLE=agent;;
+    nova-*) ROLE=agent;;
+    *)
+      echo "Unknown project: $PROJECT"
+      exit 42;;
+  esac;;
+esac 
+export ROLE
+
+# libmcrypt
+
+case "$ROLE" in
+  hub) LIBMCRYPT=yes;;
+  agent) LIBMCRYPT=no;;
+esac
+
+export LIBMCRYPT
+
+# LDAP
+
+case "$PROJECT" in
+  community)
+    OPENLDAP=no;;
+  nova)
+    OPENLDAP=yes;;
+  *)
+    echo "Unknown project: $PROJECT"
+    exit 42;;
+esac
+
+export OPENLDAP
+
 #SQL drivers
 
-SQL=yes
+case "$OS_FAMILY" in
+  aix)
+    SQL=no;;
+  *)
+    SQL=yes;;
+esac
 
 export SQL
 
 # libacl & libattr
-
-LIBACL=yes
-LIBATTR=yes
+case "$OS_FAMILY" in
+  hpux)
+    LIBACL=no
+    LIBATTR=no;;
+  aix)
+    LIBACL=no
+    LIBATTR=no;;
+  solaris)
+    LIBACL=no
+    LIBATTR=no;;
+  freebsd)
+    LIBACL=no
+    LIBATTR=no;;
+  mingw)
+    LIBACL=no
+    LIBATTR=no;;
+  *)
+    LIBACL=yes
+    LIBATTR=yes;;
+esac
 
 export LIBATTR LIBACL
 
-# libSegFault, only on glibc-based systems
+## PHP modules
 
-LIBSEGFAULT=yes
+case "$ROLE" in
+  hub)
+    APR=yes
+    APR_UTIL=yes
+    APACHE=yes
+    PHP=yes
+    PHP_APC=yes
+    LIBCURL=yes
+    GIT=yes
+    RSYNC=yes
+    case "$OS-${OS_VERSION}" in
+      rhel-[5].*) PHP_JSON=yes;;
+      centos-[5].*) PHP_JSON=yes;;
+      *) PHP_JSON=no;;
+    esac
 
-export LIBSEGFAULT
+    case "$OS-${OS_VERSION}" in
+      rhel-[56].*) PHP_MCRYPT=yes;;
+      centos-[6].*) PHP_MCRYPT=yes;;
+      *) PHP_MCRYPT=no;;
+    esac
 
+    case "$OS-${OS_VERSION}" in
+      ubuntu-8.04|sles-*|centos-5.*|rhel-5.*)
+        PHP_CURL_5_2=yes
+        PHP_CURL=no;;
+      *)
+        PHP_CURL_5_2=no
+        PHP_CURL=yes;;
+    esac
+    ;;
+  agent)
+    APACHE=no
+    PHP=no
+    PHP_APC=no
+    LIBCURL=no
+    GIT=no
+    RSYNC=no
+    ;;
+esac
 
-    # Tests
+PHP_SVN=no
+
+export APACHE PHP LIBCURL PHP_APC PHP_SVN GIT
+
+case "$ROLE" in
+  hub)
+    REDIS=yes
+    PGSQL=yes
+    ;;
+  agent)
+    REDIS=no
+    PGSQL=no
+    ;;
+esac
+
+export PGSQL REDIS
+
+# Tests
 
 case "$OS_FAMILY-$BUILD_TYPE" in
+  mingw-*)
+    TESTS=no;;
+  freebsd-*)
+    TESTS=no;;
+  hpux-*)
+    TESTS=no;;
   *-smoke)
     TESTS=unit;;
   *)
@@ -75,7 +289,7 @@ export TESTS
 case "$BUILD_TYPE" in
   debug)
     OPTIMIZE=no;;
-  release|quick|full|smoke|debug_and_release)
+  release|quick|full|debug_and_release|code_coverage)
     OPTIMIZE=yes;;
   *)
     echo "Unknown build type: $BUILD_TYPE"

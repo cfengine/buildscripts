@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Options
+
+PREFIX=/var/cfengine
+
+PG=${BUILD_ROOT}/cfbuild-postgresql${PREFIX}
+PGD=${BUILD_ROOT}/cfbuild-postgresql-devel${PREFIX}
+
+# Patch
+
+# Configure
+
+./configure --prefix=$PREFIX --without-zlib --without-readline
+
+# Build
+
+gmake -C src/bin/pg_config
+gmake -C src/backend ../../src/include/utils/fmgroids.h
+gmake -C src/interfaces/libpq
+
+# Test
+
+# Install
+
+gmake install -C src/bin/pg_config DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+gmake install -C src/include DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+gmake install -C src/interfaces/libpq DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+# Package
+
+rm -f ${PGD}/include/pg_config*.h
+rm -rf ${PGD}/include/postgresql/server
+rm -f ${PGD}/lib/*.a
+rm -rf ${PGD}/share
+
+mkdir -p ${PG}/lib
+mv ${PGD}/lib/libpq.so ${PG}/lib
+mv ${PGD}/lib/libpq.so.* ${PG}/lib
+

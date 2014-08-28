@@ -1,0 +1,8 @@
+/var/cfengine/httpd/bin
+/var/cfengine/httpd/cgi-bin
+/var/cfengine/httpd/conf
+/var/cfengine/httpd/icons
+/var/cfengine/httpd/logs
+/var/cfengine/httpd/modules
+/var/cfengine/httpd/htdocs
+/var/cfengine/httpd/error

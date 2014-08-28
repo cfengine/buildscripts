@@ -1,0 +1,72 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+LDFLAGS=-L$(PREFIX)/lib
+CPPFLAGS=-I$(PREFIX)/include
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	patch -p1 < 0001-Prefix-windres-with-cross-compiler-name.patch
+	patch -p0 < fix-libtool-magic.patch
+
+	# Configure is unable to test memcmp for cross-compilation
+	# getaddrinfo/getnameinfo are broken in MinGW as well as socklen in2.4.36 work around it
+	ac_cv_type_socklen_t=yes \
+	ac_cv_func_memcmp_working=yes  \
+            ac_cv_func_getaddrinfo=no \
+            ac_cv_func_getnameinfo=no \
+	    ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) \
+	    --enable-shared \
+	    --disable-static \
+	    --disable-slapd \
+	    --disable-backends \
+	    --with-tls=openssl \
+	    --without-gssapi \
+	    CC=$(DEB_HOST_GNU_TYPE)-gcc \
+	    AR=$(DEB_HOST_GNU_TYPE)-ar \
+	    LDFLAGS="$(LDFLAGS)" \
+	    CPPFLAGS="$(CPPFLAGS)"
+
+	make -C include
+	make -C libraries
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	make install -C include DESTDIR=$(CURDIR)/debian/tmp
+	make install -C libraries DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/etc
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ "$1" = purge ]; then
+  #
+  # Unregister CFEngine initscript.
+  #
+  /usr/sbin/update-rc.d cfengine3 remove
+fi
+
+exit 0

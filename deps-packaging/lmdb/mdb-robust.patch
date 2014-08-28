@@ -1,0 +1,76 @@
+--- mdb-mdb.old/libraries/liblmdb/mdb.c	2014-07-24 13:34:25.409784457 +0200
++++ mdb-mdb.new/libraries/liblmdb/mdb.c	2014-07-24 14:05:53.704223512 +0200
+@@ -169,6 +169,7 @@
+ #ifdef _WIN32
+ #define MDB_USE_HASH	1
+ #define MDB_PIDLOCK	0
++#define EOWNERDEAD      130
+ #define pthread_t	DWORD
+ #define pthread_mutex_t	HANDLE
+ #define pthread_key_t	DWORD
+@@ -179,7 +180,7 @@
+ #define pthread_getspecific(x)	TlsGetValue(x)
+ #define pthread_setspecific(x,y)	(TlsSetValue(x,y) ? 0 : ErrCode())
+ #define pthread_mutex_unlock(x)	ReleaseMutex(x)
+-#define pthread_mutex_lock(x)	WaitForSingleObject(x, INFINITE)
++#define pthread_mutex_lock(x)	(WaitForSingleObject(x, INFINITE) == WAIT_ABANDONED ? EOWNERDEAD : 0) // masks FAIL and TIMEOUT error, but acceptable
+ #define LOCK_MUTEX_R(env)	pthread_mutex_lock((env)->me_rmutex)
+ #define UNLOCK_MUTEX_R(env)	pthread_mutex_unlock((env)->me_rmutex)
+ #define LOCK_MUTEX_W(env)	pthread_mutex_lock((env)->me_wmutex)
+@@ -2275,7 +2276,20 @@ mdb_txn_renew0(MDB_txn *txn)
+ 					env->me_flags |= MDB_LIVE_READER;
+ 				}
+ 
+-				LOCK_MUTEX_R(env);
++				rc = LOCK_MUTEX_R(env);
++                                switch (rc)
++				{
++				case 0:
++					break;
++#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST
++				case EOWNERDEAD:
++					// we cannot recover the state, so mark mutex as unusable
++					UNLOCK_MUTEX_R(env);
++					// FALLTHROUGH
++#endif
++				default:
++					return MDB_PANIC;
++				}
+ 				nr = ti->mti_numreaders;
+ 				for (i=0; i<nr; i++)
+ 					if (ti->mti_readers[i].mr_pid == 0)
+@@ -2305,7 +2319,20 @@ mdb_txn_renew0(MDB_txn *txn)
+ 		}
+ 	} else {
+ 		if (ti) {
+-			LOCK_MUTEX_W(env);
++			rc = LOCK_MUTEX_W(env);
++                        switch (rc)
++                        {
++                        case 0:
++                                break;
++#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST
++                        case EOWNERDEAD:
++                                // we cannot recover the state, so mark mutex as unusable
++                                UNLOCK_MUTEX_W(env);
++                                // FALLTHROUGH
++#endif
++                        default:
++                                return MDB_PANIC;
++                        }
+ 
+ 			txn->mt_txnid = ti->mti_txnid;
+ 			meta = env->me_metas[txn->mt_txnid & 1];
+@@ -4014,6 +4041,12 @@ mdb_env_setup_locks(MDB_env *env, char *
+ 		pthread_mutexattr_t mattr;
+ 
+ 		if ((rc = pthread_mutexattr_init(&mattr))
++#ifdef HAVE_PTHREAD_MUTEXATTR_SETTYPE
++                        || (rc = pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_ERRORCHECK))
++#endif
++#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST
++                        || (rc = pthread_mutexattr_setrobust(&mattr, PTHREAD_MUTEX_ROBUST))
++#endif
+ 			|| (rc = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))
+ 			|| (rc = pthread_mutex_init(&env->me_txns->mti_mutex, &mattr))
+ 			|| (rc = pthread_mutex_init(&env->me_txns->mti_wmutex, &mattr)))

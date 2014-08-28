@@ -4,7 +4,7 @@
 # 
 #
 # Created by Nakarin Phooripoom on 22/6/2011.
-# Copyright 2010 Cfengine AS. All rights reserved.
+# Copyright 2010 CFEngine AS. All rights reserved.
 #
 ### BEGIN INIT INFO
 # Provides:          cfengine3
@@ -44,7 +44,7 @@ REDHAT=0
 DEBIAN=0
 
 # SuSE
-if [ -f /usr/bin/zypper ]; then
+if [ -d /var/lock/subsys ] && [ -f /usr/bin/zypper ]; then
 	SUSE=1
 else
 	SUSE=0
@@ -52,13 +52,15 @@ fi
 
 # RedHat4/RedHat5/CentOS/Fedora
 if [ -f /usr/bin/yum ] || [ -f /usr/sbin/up2date ]; then
-	REDHAT=1
+	if [ -d /var/lock/subsys ]; then
+		REDHAT=1
+	fi
 else
 	REDHAT=0
 fi
 
 # Debian/Ubuntu
-if [ -f /usr/bin/apt-get ]; then
+if [ ! -d /var/lock/subsys ] && [ -f /usr/bin/apt-get ]; then
 	DEBIAN=1
 else
 	DEBIAN=0

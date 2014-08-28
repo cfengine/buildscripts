@@ -1,16 +1,9 @@
-#!/bin/sh
+#!/bin/sh -x
 
 . `dirname "$0"`/functions
 . version
 
-LNK="$BASEDIR/../../output/$SCHEDULER/current"
-TGT="$BASEDIR/../../output/$SCHEDULER/$BRANCH"
-SRC="$BASEDIR/../../output/.tmp/$SCHEDULER/$BRANCH"
-mkdir -p "$TGT"
-ls -1 "$SRC" | while read name
-do rm -fr "$TGT/$name"
-done # to make way for what we're about to move there:
-mv "$SRC"/* "$TGT"
-rmdir --ignore-fail-on-non-empty "$SRC"
+LNK="$BASEDIR/../../../output/$SCHEDULER/current"
+TGT="$BASEDIR/../../../output/$SCHEDULER/$BUILD_NUMBER"
 rm -f "$LNK"
-ln -fs "$BRANCH" "$LNK"
+ln -fs "$BUILD_NUMBER" "$LNK"

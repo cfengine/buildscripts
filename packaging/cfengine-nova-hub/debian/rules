@@ -1,0 +1,101 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+EXCLUDE=
+BASEDIR=../..
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build:
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs $(EXCLUDE)
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp -a $(PREFIX)/* $(CURDIR)/debian/tmp$(PREFIX)
+	cp -a $(BASEDIR)/cfengine/dist/* $(CURDIR)/debian/tmp
+
+# Remove unnecessary files
+
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.so
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/cfengine-enterprise.la
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/getfacl
+# cf-upgrade is not needed in hub packages
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/cf-upgrade
+
+	-rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/php/cfmod.la
+	-rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/php/cfengine-enterprise-api.la
+
+# Debian is different
+
+	mv $(CURDIR)/debian/tmp/etc/sysconfig $(CURDIR)/debian/tmp/etc/default
+	cp $(BASEDIR)/enterprise/misc/init.d/cfengine3 $(CURDIR)/debian/tmp/etc/init.d/cfengine3
+
+# GUI, REST, KB
+	cp -R $(BASEDIR)/mission-portal $(CURDIR)/debian/tmp$(PREFIX)/share/GUI
+	mkdir $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api
+	cp -R $(BASEDIR)/nova/api/http/* $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api
+	chmod 700 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api/dc-scripts/*.sh
+	cp -R $(BASEDIR)/nova/api/http/.htaccess $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api
+	cp -R $(BASEDIR)/enterprise/misc/solaris_admin_files $(CURDIR)/debian/tmp$(PREFIX)/share/solaris_admin_files
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/tests
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/application/controllers/testing.php
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/unittest_index.php
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/unit_test.php
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/httpd/htdocs/index.html
+
+# Change mode in MP from development to production and change the session key
+
+
+
+	sed "s/define('ENVIRONMENT', 'development')/define('ENVIRONMENT','production')/g" $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php > $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp
+	mv $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp
+
+# NovaBase
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase
+	cp -R $(CURDIR)/debian/tmp$(PREFIX)/masterfiles $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase/masterfiles
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/masterfiles
+
+#Design Center
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/design-center
+	cp -R $(CURDIR)/debian/tmp/sketches/* $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase/sketches
+	cp -R $(CURDIR)/debian/tmp/tools/* $(CURDIR)/debian/tmp$(PREFIX)/design-center
+
+#Postgres
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/share/db
+	cp $(BASEDIR)/nova/db/schema.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
+	cp $(BASEDIR)/nova/db/schema_settings.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
+	cp $(BASEDIR)/nova/db/ootb_settings.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
+
+
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir $(EXCLUDE)
+	dh_testroot $(EXCLUDE)
+	dh_install --sourcedir=debian/tmp $(EXCLUDE)
+	dh_link 
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip
+endif
+	dh_compress $(EXCLUDE)
+	dh_fixperms $(EXCLUDE) -X $(PREFIX)/inputs -X $(PREFIX)/outputs -X $(PREFIX)/ppkeys -X $(PREFIX)/modules
+	dh_installdeb $(EXCLUDE)
+	dh_gencontrol $(EXCLUDE)
+	dh_md5sums $(EXCLUDE)
+	dh_builddeb $(EXCLUDE)
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

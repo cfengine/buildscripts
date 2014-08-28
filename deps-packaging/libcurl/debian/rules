@@ -2,9 +2,6 @@
 
 PREFIX=$(BUILDPREFIX)
 
-LDFLAGS=-L$(BUILDPREFIX)/lib
-CPPFLAGS=-I$(BUILDPREFIX)/include
-
 clean:
 	dh_testdir
 	dh_testroot
@@ -21,8 +18,8 @@ build-stamp:
 				--with-ssl=$(PREFIX) \
 				--with-zlib=$(PREFIX) \
 				--prefix=$(PREFIX) \
-				LDFLAGS="$(LDFLAGS)" \
-				CPPFLAGS="$(CPPFLAGS)"
+				LDFLAGS="-L$(PREFIX)/lib -Wl,-R$(PREFIX)/lib" \
+				CPPFLAGS="-I$(PREFIX)/include" \
 
 	make
 	

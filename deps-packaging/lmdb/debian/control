@@ -1,0 +1,18 @@
+Source: cfbuild-lmdb
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-lmdb
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- lmdb
+ CFEngine Build Automation -- lmdb
+
+Package: cfbuild-lmdb-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- lmdb -- development files
+ CFEngine Build Automation -- lmdb -- development files

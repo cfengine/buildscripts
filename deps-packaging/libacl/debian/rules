@@ -26,8 +26,8 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	make install -C getfacl DESTDIR=$(CURDIR)/debian/tmp
-	make install-dev install-lib DESTDIR=$(CURDIR)/debian/tmp
+	make install -C getfacl DESTDIR=$(CURDIR)/debian/tmp DIST_ROOT=/
+	make install-dev install-lib DESTDIR=$(CURDIR)/debian/tmp DIST_ROOT=/
 
 # configure fails because acl.h doens't exist in include dir
 # it's placed by default in include/sys

@@ -1,0 +1,65 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+ifeq (,$(filter expansion,$(DEB_BUILD_OPTIONS)))
+  EXCLUDE=-Ncfengine-nova-expansion
+else
+  EXCLUDE=
+endif
+
+BASEDIR=../..
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build:
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs $(EXCLUDE)
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp -a $(PREFIX)/* $(CURDIR)/debian/tmp$(PREFIX)
+	cp -a $(BASEDIR)/cfengine/dist/* $(CURDIR)/debian/tmp
+
+# Remove unnecessary files
+
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.so
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/cfengine-enterprise.la
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/getfacl
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl
+
+
+# Debian is different
+
+	mv $(CURDIR)/debian/tmp/etc/sysconfig $(CURDIR)/debian/tmp/etc/default
+	cp $(BASEDIR)/enterprise/misc/init.d/cfengine3 $(CURDIR)/debian/tmp/etc/init.d/cfengine3
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir $(EXCLUDE)
+	dh_testroot $(EXCLUDE)
+	dh_install --sourcedir=debian/tmp $(EXCLUDE)
+	dh_link $(EXCLUDE)
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
+	dh_strip
+endif
+	dh_compress $(EXCLUDE)
+	dh_fixperms $(EXCLUDE) -X $(PREFIX)/inputs -X $(PREFIX)/outputs -X $(PREFIX)/ppkeys -X $(PREFIX)/modules
+	dh_installdeb $(EXCLUDE)
+	dh_gencontrol $(EXCLUDE)
+	dh_md5sums $(EXCLUDE)
+	dh_builddeb $(EXCLUDE)
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
