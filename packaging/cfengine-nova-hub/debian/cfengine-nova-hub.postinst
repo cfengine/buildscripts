@@ -250,7 +250,7 @@ chown cfpostgres /var/log/postgresql.log
            maint="2GB"
            if [ "$total" -ge "$upper" ]; then
                shared="16GB"
-               effect="11.2GB"        #70% of 16G
+               effect="11GB"        #70% of 16G
            else
                shared=$(( $total * 25 / 100 / 1024 ))   #in MB
                shared="$shared""MB"
