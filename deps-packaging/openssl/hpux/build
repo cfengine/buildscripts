@@ -16,13 +16,12 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 export PATH=`pwd`/solaris:$PATH
 
-cd openssl-fips-1.2.4
+cd openssl-fips-1.2.2
 ./Configure hpux-ia64-gcc fipscanisterbuild
 gmake
 cd ..
 
-./Configure hpux-ia64-gcc fips no-ec shared  no-dtls no-psk no-srp \
-    --with-fipslibdir=`pwd`/openssl-fips-1.2.4/fips --prefix=$PREFIX
+./Configure hpux-ia64-gcc fips shared --with-fipslibdir=`pwd`/openssl-fips-1.2.2/fips --prefix=$PREFIX
 
 # Build
 

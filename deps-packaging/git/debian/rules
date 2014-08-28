@@ -12,7 +12,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=$(PREFIX) --with-libpcre=$(PREFIX) --with-openssl=$(PREFIX) --without-iconv --with-gitconfig=$(PREFIX) --with-gitattributes=$(PREFIX) --with-zlib=$(PREFIX) --with-curl=$(PREFIX) --libexecdir=$(PREFIX)/lib
+	./configure --prefix=$(PREFIX) --with-libpcre=$(PREFIX) --with-openssl=$(PREFIX) --without-iconv --with-gitconfig=$(PREFIX) --with-gitattributes=$(PREFIX) --with-zlib=$(PREFIX) --with-curl=$(PREFIX) 
 	make
 
 	touch build-stamp
@@ -25,8 +25,8 @@ install: build
 
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/perl*
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/python*
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/libexec
 
 binary-indep: build install
 

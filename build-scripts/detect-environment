@@ -127,11 +127,8 @@ detect_distribution()
       [0-9].[0-9].[0-9][0-9])
         REL=${REL%.[0-9][0-9]}
         ;;
-      wheezy*)
+      "wheezy/sid")
         REL=7.0
-        ;;
-      jessie*)
-        REL=8.0
         ;;
       *)
         echo "Unable to detect version of Debian: $REL"
@@ -304,6 +301,3 @@ detect_environment
 #  - architecture
 #  - packaging tool (dpkg, rpm, solaris pkg, ...)
 #
-
-OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
-export OUTDIR

@@ -1,0 +1,91 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+echo "Producing a self extracting script with mongo tools"
+
+EXECUTABLES_DIR=$BASEDIR/core/dist/var/cfengine/bin
+EXECUTABLES_LIST="$EXECUTABLES_DIR/mongodump $EXECUTABLES_DIR/mongoexport $EXECUTABLES_DIR/mongoimport $EXECUTABLES_DIR/mongorestore $EXECUTABLES_DIR/mongostat $EXECUTABLES_DIR/mongotop"
+EXECUTABLES_TO_REMOVE="$EXECUTABLES_DIR/mongosniff $EXECUTABLES_DIR/mongos $EXECUTABLES_DIR/mongofiles"
+PAYLOAD_DIR=payload
+
+# Print build information
+echo "EXECUTABLES_DIR  = $EXECUTABLES_DIR"
+echo "EXECUTABLES_LIST = $EXECUTABLES_LIST"
+echo "PAYLOAD_DIR      = $PAYLOAD_DIR"
+
+# Make a temporary folder to store the tools once they are produced
+mkdir $PAYLOAD_DIR
+
+for i in $EXECUTABLES_LIST;
+do
+    echo "Copying $i to: $PAYLOAD_DIR"
+    cp "$i" $PAYLOAD_DIR
+done
+for i in $EXECUTABLES_TO_REMOVE;
+do
+    echo "Removing unused tool: $i"
+    rm -f $EXECUTABLES_TO_REMOVE;
+done
+
+# Write the installation script
+echo "Writing the installation script"
+echo "#!/bin/sh" > $PAYLOAD_DIR/install-ds.sh
+echo "mkdir -p /var/cfengine/utilities"
+echo "mv mongo* /var/cfengine/utilities" >> $PAYLOAD_DIR/install-ds.sh
+echo "exit 0" >> $PAYLOAD_DIR/install-ds.sh
+
+# Write the decompression script
+echo "Writing the decompression script"
+echo "#!/bin/sh" > decompress-ds.sh
+echo "echo \"Installing mongo tools\"" >> decompress-ds.sh
+echo "export TMPDIR=\`mktemp -d /tmp/mt.XXXXXX\`"  >> decompress-ds.sh
+echo "ARCHIVE=\`awk '/^__ARCHIVE_BELOW__/ {print NR + 1; exit 0; }' \$0\`"  >> decompress-ds.sh
+echo "tail -n+\$ARCHIVE \$0 | tar xzv -C \$TMPDIR"  >> decompress-ds.sh
+echo "echo \"Installer ready - starting installation\""
+echo "CDIR=\`pwd\`"  >> decompress-ds.sh
+echo "cd \$TMPDIR/$PAYLOAD_DIR"  >> decompress-ds.sh
+echo "chmod 755 install-ds.sh" >> decompress-ds.sh
+echo "chmod 755 uninstall-ds.sh" >> decompress-ds.sh
+echo "./install-ds.sh"  >> decompress-ds.sh
+echo "cd \$CDIR"  >> decompress-ds.sh
+#echo "rm -rf \$TMPDIR"  >> decompress-ds.sh
+echo "exit 0"  >> decompress-ds.sh
+echo "__ARCHIVE_BELOW__" >> decompress-ds.sh
+
+# Write the uninstall script
+echo "Writing the uninstall script"
+echo "#!/bin/sh" > $PAYLOAD_DIR/uninstall-ds.sh
+echo "echo \"Uninstalling mongo tools\"" >> $PAYLOAD_DIR/uninstall-ds.sh
+echo "rm -rf /var/cfengine/utilities" >> $PAYLOAD_DIR/uninstall-ds.sh
+echo "echo \"Done\"" >> $PAYLOAD_DIR/uninstall-ds.sh
+
+# Now create the self extracting script
+echo "Creating the self extracting script"
+tar cf payload.tar $PAYLOAD_DIR
+if [ -e "payload.tar" ]; then
+    gzip payload.tar
+    if [ -e "payload.tar.gz" ]; then
+        cat decompress-ds.sh payload.tar.gz > cfengine-ds-$OS-$OS_VERSION-$ARCH.bsx
+    else
+        echo "File not found"
+        exit 1
+    fi
+    echo "cfengine-mt-$OS-$OS_VERSION-$ARCH.bsx created"
+fi
+# Put the script in a sensible place
+mkdir -p output/mongo_tools
+mv *.bsx output/mongo_tools
+
+# Clean up after ourserlves
+rm -f decompress-ds.sh
+rm -f install-ds.sh
+rm -f uninstall-ds.sh
+rm -rf $PAYLOAD_DIR
+
+echo "Mongo tools produced."
+
+exit 0
+

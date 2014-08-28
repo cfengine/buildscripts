@@ -1,9 +1,10 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
+DEB_HOST_GNU_TYPE = $(patsubst arch=%,%,$(filter arch=%,$(DEB_BUILD_OPTIONS)))
 
-LDFLAGS=-L$(PREFIX)/lib
-CPPFLAGS=-I$(PREFIX)/include
+LDFLAGS=-L/var/cfengine/lib
+CPPFLAGS=-I/var/cfengine/include
 
 clean:
 	dh_testdir
@@ -19,8 +20,7 @@ build-stamp:
 	patch -p0 < fix-libtool-magic.patch
 
 	# Configure is unable to test memcmp for cross-compilation
-	# getaddrinfo/getnameinfo are broken in MinGW as well as socklen in2.4.36 work around it
-	ac_cv_type_socklen_t=yes \
+	# getaddrinfo/getnameinfo are broken in MinGW, work around it
 	ac_cv_func_memcmp_working=yes  \
             ac_cv_func_getaddrinfo=no \
             ac_cv_func_getnameinfo=no \

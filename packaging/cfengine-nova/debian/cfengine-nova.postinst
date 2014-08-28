@@ -24,7 +24,7 @@ if [ -f /var/cfengine/bin/cf-twin ]; then
 fi
 
 /bin/cp /var/cfengine/bin/cf-agent /var/cfengine/bin/cf-twin
-for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent;
+for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord;
 do
 	if [ -f /var/cfengine/bin/$i ]; then
 		ln -sf /var/cfengine/bin/$i /usr/local/sbin/$i || true

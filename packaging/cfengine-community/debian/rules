@@ -20,13 +20,7 @@ install: build
 
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)
 	cp -a $(PREFIX)/* $(CURDIR)/debian/tmp$(PREFIX)
-	cp -a ${BASEDIR}/cfengine/dist/* $(CURDIR)/debian/tmp
-	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase
-	cp -R $(CURDIR)/debian/tmp$(PREFIX)/masterfiles $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase/masterfiles
-	chmod -R 744 $(CURDIR)/debian/tmp$(PREFIX)/share
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/masterfiles
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl
+	cp -a ${BASEDIR}/core/dist/* $(CURDIR)/debian/tmp
 
 	mkdir -p $(CURDIR)/debian/tmp/etc/init.d
 	cp -a $(CURDIR)/initscript $(CURDIR)/debian/tmp/etc/init.d/cfengine3
@@ -42,10 +36,6 @@ install: build
 
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.so
-
-	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/design-center
-	cp -R $(CURDIR)/debian/tmp/sketches/* $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase/sketches
-	cp -R $(CURDIR)/debian/tmp/tools/* $(CURDIR)/debian/tmp$(PREFIX)/design-center
 
 binary-indep: build install
 

@@ -31,20 +31,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-/etc/lcovrc
-/usr/bin/gendesc
-/usr/bin/genhtml
-/usr/bin/geninfo
-/usr/bin/genpng
-/usr/bin/lcov
-/usr/share/man/man1
-/usr/share/man/man1/gendesc.1.gz
-/usr/share/man/man1/genhtml.1.gz
-/usr/share/man/man1/geninfo.1.gz
-/usr/share/man/man1/genpng.1.gz
-/usr/share/man/man1/lcov.1.gz
-/usr/share/man/man5
-/usr/share/man/man5/lcovrc.5.gz
+/usr/bin
+/usr/share
+/etc
 
 %changelog
 * Mon May 07 2012 Peter Oberparleiter (Peter.Oberparleiter@de.ibm.com)

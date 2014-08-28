@@ -65,7 +65,8 @@ case "\$1" in
 esac
 EOF
 
-chmod 755 $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/etc/rc.d/init.d/cfengine3 
+chmod 755 $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/etc/rc.d/init.d/cfengine3
+
 # Create the info file
 env LD_LIBRARY_PATH=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/bin/cf-agent -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.copyright
 

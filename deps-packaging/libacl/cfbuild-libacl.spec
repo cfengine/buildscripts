@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libacl
 Name: cfbuild-libacl
 Version: %{version}
 Release: 1
-Source: acl-2.2.52.src.tar.gz
+Source: acl-2.2.48.src.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n acl-2.2.52
+%setup -q -n acl-2.2.48
 
 zcat ../../SOURCES/acl.destdir.diff.gz | patch -p1 || true
 
@@ -27,8 +27,8 @@ make
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-make install -C getfacl DESTDIR=${RPM_BUILD_ROOT} DIST_ROOT=/
-make install-dev install-lib DESTDIR=${RPM_BUILD_ROOT} DIST_ROOT=/
+make install -C getfacl DESTDIR=${RPM_BUILD_ROOT}
+make install-dev install-lib DESTDIR=${RPM_BUILD_ROOT}
 
 cp ${RPM_BUILD_ROOT}%{prefix}/include/sys/acl.h ${RPM_BUILD_ROOT}%{prefix}/include/
 

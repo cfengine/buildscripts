@@ -1,0 +1,12 @@
+Source: cfbuild-mongo-c
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packages <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-mongo-c-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- tokyocabinet -- development files
+ CFEngine Build Automation -- tokyocabinet -- development files

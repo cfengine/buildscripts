@@ -6,6 +6,7 @@
 
 set -x
 
+OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
 mkdir -p "$OUTDIR"
 
 for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
@@ -40,10 +41,6 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
   fi
 done
 
-for project in `projects_to_test`; do
-  if [ -f $BASEDIR/$project/tests/acceptance/summary.log ]; then
-    cp $BASEDIR/$project/tests/acceptance/summary.log "$OUTDIR"/$project-summary.log
-    cp $BASEDIR/$project/tests/acceptance/test.log "$OUTDIR"/$project-test.log
-    cp $BASEDIR/$project/tests/acceptance/test.xml "$OUTDIR"/$project-test.xml
-  fi
-done
+if [ -f $BASEDIR/core/tests/acceptance/summary.log ]; then
+  cp $BASEDIR/core/tests/acceptance/*.log "$OUTDIR"
+fi

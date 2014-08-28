@@ -117,6 +117,7 @@ cfmonitord_status=`ps waxu|grep -v grep|grep cf-monitord|awk -F' ' '{print $2}'`
 case "$1" in
 	start)
 		if ! [ -f /var/cfengine/inputs/promises.cf ]; then
+			$ECHO "Policy is not found in /var/cfengine/inputs, not starting CFEngine."
 			exit 0
 		fi
 

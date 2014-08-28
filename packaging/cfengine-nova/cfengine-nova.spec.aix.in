@@ -28,22 +28,18 @@ rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -hR %{prefix}/* $RPM_BUILD_ROOT%{prefix}
-cp -hR %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
+cp -hR %{_basedir}/core/dist/* $RPM_BUILD_ROOT
+
 
 #Copy the modified init.d script according to the working directory
-mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
-cp %{_basedir}/enterprise/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/rc.d/init.d/cfengine3
+cp -hR %{_basedir}/autobuild/packaging/cfengine-nova/aix/etc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
 
 
 # Remove useless stuff
 
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
-#rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
-rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
 rm -rf $RPM_BUILD_ROOT%{prefix}/share/CoreBase
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
-rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
-rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -83,13 +79,12 @@ exit 0
 #
 # Unregister CFEngine initscript.
 #
-ps aux | grep -v grep | grep cf- > /dev/null
-
-if [ $? -eq 0 ]; then
-    /etc/rc.d/init.d/cfengine3 stop
-fi
-
-rm -f /etc/rc.d/init.d/cfengine3
+#ps aux | grep -v grep | grep cf- > /dev/null
+#
+#if [ $? -eq 0 ]; then
+#    service cfengine3 stop
+#fi
+#
 #if [ $1 -eq 0 ]; then
 #    chkconfig --del cfengine3
 #fi
@@ -97,14 +92,15 @@ rm -f /etc/rc.d/init.d/cfengine3
 #
 # Clean lock files created by initscript, if any
 #
-for i in cf-execd cf-serverd cf-monitord cf-hub; do
-    rm -f /var/lock/$i /var/lock/subsys/$i
-done
+#for i in cf-execd cf-serverd cf-monitord cf-hub; do
+#    rm -f /var/lock/$i /var/lock/subsys/$i
+#done
 
-exit 0
+#exit 0
 
 %files
 %defattr(755,root,root)
+
 # Main program
 %dir %prefix
 %dir %prefix/bin
@@ -115,43 +111,35 @@ exit 0
 %prefix/bin/cf-promises
 %prefix/bin/cf-runagent
 %prefix/bin/cf-serverd
-%prefix/bin/cf-upgrade
+%prefix/bin/tchmgr
+%dir %prefix/lib
+%prefix/lib/lib*.so.*
+%prefix/lib/lib*.so
+%prefix/lib/*.a
 
-# LMDB
-%prefix/bin/lmdump
-%prefix/bin/lmmgr
-%prefix/bin/mdb_copy
-%prefix/bin/mdb_stat
 
 # Auxiliary programs
 %if "%{version}" >= "3.0"
 %prefix/bin/rpmvercmp
 %endif
 
-%defattr(644,root,root,755)
-%dir %prefix/lib
-%prefix/lib/lib*.so.*
-%prefix/lib/lib*.so
-%prefix/lib/*.a
-%prefix/lib/cfengine-enterprise.so
-
 # Initscript, other configuration
-%attr(0755,root,system)
-/etc/rc.d/init.d/cfengine3
+/etc/init.d/cfengine3
+/etc/sysconfig/cfengine3
+/etc/profile.d/cfengine.sh
 
 # Documentation
-%defattr(644,root,root,755)
 %dir %prefix/share
 %prefix/share/doc
 
 # Private directories
+
+%dir %prefix/masterfiles
 
 %defattr(700,root,root)
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
 %dir %prefix/modules
-
-
 
 %changelog

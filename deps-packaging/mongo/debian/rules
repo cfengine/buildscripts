@@ -1,0 +1,50 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+DA=$(shell dpkg --print-architecture)
+ifeq ($(DA),i386)
+A=i686
+else
+  ifeq ($(DA),amd64)
+    A=x86_64
+  else
+    $(error Unknown architecture $(DA))
+  endif
+endif
+
+D=mongodb-linux-$(A)-2.2.4
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build:
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp $(D)/bin/* $(CURDIR)/debian/tmp$(PREFIX)/bin
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- openldap
 Name: cfbuild-openldap
 Version: %{version}
 Release: 1
-Source0: openldap-2.4.36.tgz
+Source0: openldap-2.4.23.tgz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n openldap-2.4.36
+%setup -q -n openldap-2.4.23
 
 LDFLAGS="$LDFLAGS -Wl,-R,%{prefix}/lib"
 CPPFLAGS=-I%{buildprefix}/include
@@ -28,6 +28,11 @@ CPPFLAGS=-I%{buildprefix}/include
 CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 
 SYS=`uname -s`
+VER=`uname -v`
+
+if [ $VER = "6" ]; then
+/usr/bin/patch -p1 < ../../SOURCES/configure.aix6.patch
+fi
 
 if [ $SYS = "AIX" ]; then
     cd /var/cfengine/lib

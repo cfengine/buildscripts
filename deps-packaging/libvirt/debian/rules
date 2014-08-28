@@ -25,10 +25,11 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p1 <  0001-fix-inet-oldkernel.patch
+	patch -p1 < 0001-Disable-GnuTLS-in-remote-driver.patch
+	patch -p1 < 0001-Only-test-for-virtualport-if-Macvtap-is-requested.patch
+	patch -p1 < 0002-autoreconf-produced-files.patch
 
 	LDFLAGS="$(LDFLAGS)" \
-	CFLAGS="-DULLONG_MAX=18446744073709551615ULL -fno-stack-protector" \
 	    PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
 	    ./configure \
 	    --prefix=$(PREFIX) \
@@ -54,14 +55,9 @@ build-stamp:
             --without-storage-fs \
 	    --without-macvtap \
 	    --without-gnutls \
-	    --without-selinux \
-	    --without-numactl \
-	    --without-numad \
-	    --without-dbus \
-	    --with-libxml=$(PREFIX)
-	    
+	    --without-selinux
 # gcc in Debian Etch does not provide for ULLONG_MAX.
-	make
+	make CFLAGS=-DULLONG_MAX=18446744073709551615ULL
 
 	touch build-stamp
 
@@ -79,7 +75,6 @@ install: build
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/*.a
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libvirt-qemu*
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libvirt-lxc*
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/libexec
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/sbin
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/libvirt

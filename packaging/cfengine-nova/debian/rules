@@ -26,23 +26,55 @@ install: build
 
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp -a $(PREFIX)/* $(CURDIR)/debian/tmp$(PREFIX)
-	cp -a $(BASEDIR)/cfengine/dist/* $(CURDIR)/debian/tmp
+	cp -a $(BASEDIR)/core/dist/* $(CURDIR)/debian/tmp
 
 # Remove unnecessary files
 
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.so
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/cfengine-enterprise.la
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/getfacl
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl
 
+ifneq (,$(filter expansion,$(DEB_BUILD_OPTIONS)))
+	-rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/php/cfmod.la
+	-rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/php/cfengine-enterprise-api.la
+endif
 
 # Debian is different
 
 	mv $(CURDIR)/debian/tmp/etc/sysconfig $(CURDIR)/debian/tmp/etc/default
-	cp $(BASEDIR)/enterprise/misc/init.d/cfengine3 $(CURDIR)/debian/tmp/etc/init.d/cfengine3
+	cp $(BASEDIR)/nova/misc/init.d/cfengine3 $(CURDIR)/debian/tmp/etc/init.d/cfengine3
+
+ifneq (,$(filter expansion,$(DEB_BUILD_OPTIONS)))
+
+# GUI, REST, KB
+	cp -R $(BASEDIR)/nova/GUI2 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI
+	cp -R $(BASEDIR)/nova/rest $(CURDIR)/debian/tmp$(PREFIX)/share/rest
+	cp -R $(BASEDIR)/nova/knowledge $(CURDIR)/debian/tmp$(PREFIX)/share/KnowledgeBase
+	cp -R $(BASEDIR)/nova/misc/solaris_admin_files $(CURDIR)/debian/tmp$(PREFIX)/share/solaris_admin_files
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/tests
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/application/controllers/testing.php
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/unittest_index.php
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/unit_test.php
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/rest/tests
+
+# Change mode in MP from development to production
+
+	sed "s/define('ENVIRONMENT', 'development')/define('ENVIRONMENT','production')/g" $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php > $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp
+	mv $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp
+
+# NovaBase
+
+	cp -R $(BASEDIR)/nova/masterfiles $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase
+
+	@if [ -f $(BASEDIR)/core/masterfiles/cfengine_stdlib.cf ]; then \
+	cp $(BASEDIR)/core/masterfiles/cfengine_stdlib.cf $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase ;\
+	else \
+	cp -R $(BASEDIR)/core/masterfiles/libraries $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase ;\
+	fi
+
+endif
 
 binary-indep: build install
 
@@ -51,9 +83,6 @@ binary-arch: build install
 	dh_testroot $(EXCLUDE)
 	dh_install --sourcedir=debian/tmp $(EXCLUDE)
 	dh_link $(EXCLUDE)
-ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
-	dh_strip
-endif
 	dh_compress $(EXCLUDE)
 	dh_fixperms $(EXCLUDE) -X $(PREFIX)/inputs -X $(PREFIX)/outputs -X $(PREFIX)/ppkeys -X $(PREFIX)/modules
 	dh_installdeb $(EXCLUDE)

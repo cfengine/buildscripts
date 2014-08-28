@@ -33,12 +33,12 @@ fi
 
 ./configure --enable-off64 --enable-shared --enable-pthread --prefix=%{prefix} --disable-zlib --disable-bzip
 
-$MAKE
+%{make}
 
 if ! [ $SYS = "AIX" ]; then
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
-$MAKE check-util
-$MAKE check-hdb
+%{make} check-util
+%{make} check-hdb
 rm -rf casket*
 %endif
 fi
@@ -46,7 +46,7 @@ fi
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-$MAKE install DESTDIR=${RPM_BUILD_ROOT}
+%{make} install DESTDIR=${RPM_BUILD_ROOT}
 
 rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/tca*
 rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/tcb*

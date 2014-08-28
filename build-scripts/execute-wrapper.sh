@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # execute-wrapper
 # This script tries to execute the given command, and retries in case of
@@ -21,13 +21,7 @@ PAUSE=30
 
 
 # We give it 10 chances to succeed
-#SEQUENCE=`seq $TRIES`
-SEQUENCE=
-seq=0
-while test $seq -lt $TRIES; do
-	seq=$(($seq+1))
-	SEQUENCE="$SEQUENCE $seq"
-done
+SEQUENCE=`seq $TRIES`
 # The final result will be stored here
 RESULT=0
 # The operation and arguments

@@ -33,7 +33,6 @@ SYS=`uname -s`
             LDFLAGS="$LDFLAGS" \
             CPPFLAGS="$CPPFLAGS"
 
-#cp ../../../apr/BUILD/apr-1.4.8/build/apr-rules.mk build/rules.mk
 %build
 
 if [ -z $MAKE ]; then

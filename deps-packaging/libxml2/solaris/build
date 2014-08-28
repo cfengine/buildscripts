@@ -14,7 +14,7 @@ patch -p0 < solaris-8-inttypes.patch
 
 # Configure
 
-./configure --prefix=${PREFIX} --without-python
+./configure --prefix=${PREFIX} --without-python --without-iconv --with-iso8859x
 
 # Build
 

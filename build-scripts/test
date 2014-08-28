@@ -1,14 +1,49 @@
-#!/bin/sh -x
+#!/bin/sh
 
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
 
-if [ -n "$TEST_MACHINE" ]; then
-  local_script_general prepare-testmachine
-  local_script_general transfer-to-testmachine
-  local_script_general test-on-testmachine
-  local_script_general collect-testresults-from-testmachine
-else
-  local_script_general test-on-thismachine
+# Windows and possibly other platforms do not produce tests.
+# In order to keep Jenkins happy, we just create an empty
+# test report saying that there were no tests to report.
+create_empty_test() {
+	NO_TESTS=$BASEDIR/core/tests/unit/no_tests.xml
+	touch $NO_TESTS
+    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $NO_TESTS
+    echo "<testsuite name=\"no_tests_to_report\">" >> $NO_TESTS
+    echo "<testcase name=\"no_tests\" />" >> $NO_TESTS
+    echo "</testsuite>" >> $NO_TESTS
+    NO_TESTS=$BASEDIR/core/nova/tests/unit/no_tests.xml
+    touch $NO_TESTS
+    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $NO_TESTS
+    echo "<testsuite name=\"no_tests_to_report\">" >> $NO_TESTS
+    echo "<testcase name=\"no_tests\" />" >> $NO_TESTS
+    echo "</testsuite>" >> $NO_TESTS
+}
+
+case "$OS" in
+mingw)
+    create_empty_test
+    TESTS="no"
+    ;;
+solaris)
+    TESTS="unit"
+    ;;
+hpux)
+    TESTS="unit"
+    ;;
+esac
+
+if [ "$TESTS" = all ]; then
+  #
+  # Under Ubuntu 8.04 VM testsuite segfaults. Test it three times.
+  # Apparently binary produced is good, but VM (kernel?) is broken.
+  #
+  chmod g-w $BASEDIR/core/tests/acceptance/* -R
+  (cd $BASEDIR/test && NETWORK_TESTS=0 $MAKE -C $BASEDIR/core check \
+    || NETWORK_TESTS=0 $MAKE -C $BASEDIR/core check \
+    || NETWORK_TESTS=0 $MAKE -C $BASEDIR/core check) || false
+elif [ "$TESTS" = unit ]; then
+  $MAKE -C $BASEDIR/core/tests/unit check
 fi

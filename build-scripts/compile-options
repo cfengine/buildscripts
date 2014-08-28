@@ -4,7 +4,7 @@
 # We need to know what project are we building.
 #
 
-[ "$PROJECT" ] || if [ -d $BASEDIR/nova ]; then
+if [ -d $BASEDIR/nova ]; then
   PROJECT=nova
 else
   PROJECT=community
@@ -15,7 +15,9 @@ export PROJECT
 # Should we package libgcc_s.so.1?
 
 case "$OS_FAMILY" in
-  solaris|aix)
+  solaris)
+    LIBGCC=yes;;
+  aix)
     LIBGCC=yes;;
   *)
     LIBGCC=no;;
@@ -42,8 +44,6 @@ esac
 case "$OS_FAMILY" in
    aix)
      LIBICONV=yes;;
-   solaris)
-     LIBICONV=yes;;
    *)
      LIBICONV=no;;
 esac
@@ -69,10 +69,10 @@ esac
 # Embedded DB selection
 
 case "$OS_FAMILY" in
-  hpux)
+  mingw|hpux)
     EMBEDDED_DB=qdbm;;
   *)
-    EMBEDDED_DB=lmdb;;
+    EMBEDDED_DB=tokyocabinet;;
 esac
 
 export EMBEDDED_DB
@@ -207,6 +207,17 @@ esac
 
 export LIBATTR LIBACL
 
+# libSegFault, only on glibc-based systems
+
+case "$OS_FAMILY" in
+  linux)
+    LIBSEGFAULT=yes;;
+  *)
+    LIBSEGFAULT=no;;
+esac
+
+export LIBSEGFAULT
+
 ## PHP modules
 
 case "$ROLE" in
@@ -215,10 +226,11 @@ case "$ROLE" in
     APR_UTIL=yes
     APACHE=yes
     PHP=yes
-    PHP_APC=yes
+    MONGO=yes
+    # No distributions ship php-mongo driver
+    PHP_MONGO=yes
     LIBCURL=yes
     GIT=yes
-    RSYNC=yes
     case "$OS-${OS_VERSION}" in
       rhel-[5].*) PHP_JSON=yes;;
       centos-[5].*) PHP_JSON=yes;;
@@ -243,39 +255,42 @@ case "$ROLE" in
   agent)
     APACHE=no
     PHP=no
-    PHP_APC=no
+    MONGO=no
+    PHP_MONGO=no
     LIBCURL=no
     GIT=no
-    RSYNC=no
     ;;
 esac
 
 PHP_SVN=no
 
-export APACHE PHP LIBCURL PHP_APC PHP_SVN GIT
+export APACHE PHP LIBCURL MONGO PHP_MONGO PHP_SVN GIT
+# mongo-c driver
 
 case "$ROLE" in
   hub)
-    REDIS=yes
-    PGSQL=yes
+    MONGO_C=yes
     ;;
   agent)
-    REDIS=no
-    PGSQL=no
+    MONGO_C=no
     ;;
 esac
 
-export PGSQL REDIS
+export MONGO_C
 
 # Tests
 
 case "$OS_FAMILY-$BUILD_TYPE" in
   mingw-*)
     TESTS=no;;
+  solaris-*)
+    TESTS=no;;
   freebsd-*)
     TESTS=no;;
   hpux-*)
-    TESTS=no;;
+    TEST=no;;
+  aix-*)
+    TEST=no;;
   *-smoke)
     TESTS=unit;;
   *)
@@ -289,7 +304,7 @@ export TESTS
 case "$BUILD_TYPE" in
   debug)
     OPTIMIZE=no;;
-  release|quick|full|debug_and_release|code_coverage)
+  release|quick|full|smoke|debug_and_release)
     OPTIMIZE=yes;;
   *)
     echo "Unknown build type: $BUILD_TYPE"

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+make -C $BASEDIR/core
+make -C $BASEDIR/core install DESTDIR=$BASEDIR/core/dist

@@ -1,0 +1,104 @@
+*** configure	Mon Apr 19 14:22:25 2010
+--- configure	Fri Dec  6 10:26:49 2013
+***************
+*** 6267,6273 ****
+  # whether `pass_all' will *always* work, you probably want this one.
+  
+  case $host_os in
+! aix4* | aix5*)
+    lt_cv_deplibs_check_method=pass_all
+    ;;
+  
+--- 6267,6273 ----
+  # whether `pass_all' will *always* work, you probably want this one.
+  
+  case $host_os in
+! aix4* | aix5* | aix)
+    lt_cv_deplibs_check_method=pass_all
+    ;;
+  
+***************
+*** 9003,9009 ****
+  
+      # See if GNU ld supports shared libraries.
+      case $host_os in
+!     aix3* | aix4* | aix5*)
+        # On AIX/PPC, the GNU linker is very broken
+        if test "$host_cpu" != ia64; then
+  	ld_shlibs=no
+--- 9003,9009 ----
+  
+      # See if GNU ld supports shared libraries.
+      case $host_os in
+!     aix3* | aix4* | aix5* | aix)
+        # On AIX/PPC, the GNU linker is very broken
+        if test "$host_cpu" != ia64; then
+  	ld_shlibs=no
+***************
+*** 9171,9177 ****
+        fi
+        ;;
+  
+!     aix4* | aix5*)
+        if test "$host_cpu" = ia64; then
+  	# On IA64, the linker does run time linking by default, so we don't
+  	# have to do anything special.
+--- 9171,9177 ----
+        fi
+        ;;
+  
+!     aix4* | aix5* | aix)
+        if test "$host_cpu" = ia64; then
+  	# On IA64, the linker does run time linking by default, so we don't
+  	# have to do anything special.
+***************
+*** 9191,9197 ****
+  	# Test if we are trying to use run time linking or normal
+  	# AIX style linking. If -brtl is somewhere in LDFLAGS, we
+  	# need to do runtime linking.
+! 	case $host_os in aix4.[23]|aix4.[23].*|aix5*)
+  	  for ld_flag in $LDFLAGS; do
+    	  if (test $ld_flag = "-brtl" || test $ld_flag = "-Wl,-brtl"); then
+    	    aix_use_runtimelinking=yes
+--- 9191,9197 ----
+  	# Test if we are trying to use run time linking or normal
+  	# AIX style linking. If -brtl is somewhere in LDFLAGS, we
+  	# need to do runtime linking.
+! 	case $host_os in aix4.[23]|aix4.[23].*|aix5*|aix)
+  	  for ld_flag in $LDFLAGS; do
+    	  if (test $ld_flag = "-brtl" || test $ld_flag = "-Wl,-brtl"); then
+    	    aix_use_runtimelinking=yes
+***************
+*** 9920,9926 ****
+    soname_spec='${libname}${release}${shared_ext}$major'
+    ;;
+  
+! aix4* | aix5*)
+    version_type=linux
+    need_lib_prefix=no
+    need_version=no
+--- 9920,9926 ----
+    soname_spec='${libname}${release}${shared_ext}$major'
+    ;;
+  
+! aix4* | aix5* | aix)
+    version_type=linux
+    need_lib_prefix=no
+    need_version=no
+***************
+*** 11293,11299 ****
+    fi
+    ;;
+  
+! aix4* | aix5*)
+    if test "$host_cpu" != ia64 && test "$aix_use_runtimelinking" = no ; then
+      test "$enable_shared" = yes && enable_static=no
+    fi
+--- 11293,11299 ----
+    fi
+    ;;
+  
+! aix4* | aix5* | aix)
+    if test "$host_cpu" != ia64 && test "$aix_use_runtimelinking" = no ; then
+      test "$enable_shared" = yes && enable_static=no
+    fi

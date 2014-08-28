@@ -1,0 +1,14 @@
+--- a/src/mongo.c	2012-06-03 15:45:00.000000000 +0200
++++ b/src/mongo.c	2012-10-17 10:24:43.000000000 +0200
+@@ -413,10 +413,7 @@
+     if( mongo_env_socket_connect( conn, host, port ) != MONGO_OK )
+         return MONGO_ERROR;
+ 
+-    if( mongo_check_is_master( conn ) != MONGO_OK )
+-        return MONGO_ERROR;
+-    else
+-        return MONGO_OK;
++    return MONGO_OK;
+ }
+ 
+ MONGO_EXPORT void mongo_replset_init( mongo *conn, const char *name ) {
