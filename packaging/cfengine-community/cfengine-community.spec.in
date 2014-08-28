@@ -1,4 +1,4 @@
-%define prefix  %{buildprefix}
+%define prefix /var/cfengine
 
 Summary: The CFEngine Configuration System
 Name: cfengine-community
@@ -10,7 +10,6 @@ Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3
-Requires: coreutils gzip
 
 AutoReqProv: no
 
@@ -33,10 +32,12 @@ rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
-cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{prefix}/share/CoreBase
-cp -R $RPM_BUILD_ROOT%{prefix}/masterfiles $RPM_BUILD_ROOT%prefix/share/CoreBase/masterfiles
-rm -rf $RPM_BUILD_ROOT%{prefix}/masterfiles
+cp -a %{_basedir}/core/dist/* $RPM_BUILD_ROOT
+
+#
+# If we are building CFEngine < 3.4, useless cf-know is being installed.
+#
+rm -f $RPM_BUILD_ROOT%{prefix}/bin/cf-know || :
 
 mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
 cp $RPM_SOURCE_DIR/sysconfig $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
@@ -47,35 +48,13 @@ cp $RPM_SOURCE_DIR/initscript $RPM_BUILD_ROOT/etc/init.d/cfengine3
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 cp $RPM_SOURCE_DIR/profile.sh $RPM_BUILD_ROOT/etc/profile.d/cfengine3.sh
 
-#Design center
-mkdir -p ${RPM_BUILD_ROOT}%prefix/design-center
-cp -R $RPM_BUILD_ROOT/sketches/* $RPM_BUILD_ROOT%prefix/share/CoreBase/sketches
-rm -rf $RPM_BUILD_ROOT/sketches
-cp -R $RPM_BUILD_ROOT/tools/* $RPM_BUILD_ROOT%prefix/design-center
-rm -rf $RPM_BUILD_ROOT/tools
-
 # Remove useless stuff
 
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
-rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
-rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
-
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
-%pre
-
-if [ -f /usr/local/sbin/cf-agent ]; then
-	/bin/rm /usr/local/sbin/cf-agent
-	/bin/rm /usr/local/sbin/cf-execd
-	/bin/rm /usr/local/sbin/cf-key
-	/bin/rm /usr/local/sbin/cf-monitord
-	/bin/rm /usr/local/sbin/cf-promises
-	/bin/rm /usr/local/sbin/cf-runagent
-	/bin/rm /usr/local/sbin/cf-serverd
-fi
 
 %post
 
@@ -133,27 +112,9 @@ fi
 #
 # Copy the stock policy for the new installations
 #
-if ! [ -f %prefix/masterfiles/promises.cf ]; then
- /bin/cp -R %prefix/share/CoreBase/masterfiles %prefix
-  #
-  # Create promises_validated
-  #
-  %prefix/bin/cf-promises -T %prefix/masterfiles
+if ! [ -f /var/cfengine/masterfiles/promises.cf ]; then
+ /bin/cp -R %prefix/share/CoreBase/* /var/cfengine/masterfiles
 fi
-
-#
-# Create a plugins directory if it doesnot exist
-#
-if ! [ -d %prefix/plugins ]; then
- mkdir -p %prefix/plugins
- chmod 700 %prefix/plugins
-fi
-
-#
-# Install sketches in CoreBase to design center sketches
-#
-%prefix/design-center/bin/cf-sketch --inputs=%prefix/design-center --installsource=%prefix/share/CoreBase/sketches/cfsketches.json --install-all
-
 
 if [ $1 -eq 2 ]; then
     #
@@ -162,20 +123,8 @@ if [ $1 -eq 2 ]; then
     # To be removed in 3.4.x
     #
     /bin/rm -f %prefix/bin/cf-twin
-    test -d /usr/local/sbin && /bin/rm -f /usr/local/sbin/cf-twin
+    /bin/rm -f /usr/local/sbin/cf-twin
 fi
-
-  # Create a symlink so the binaries are accessible
-  for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent;
-  do
-	if [ -f %prefix/bin/$i -a -d /usr/local/sbin ]; then
-	  ln -sf %prefix/bin/$i /usr/local/sbin/$i || true
-	fi
-	if [ -f /usr/share/man/man8/$i.8.gz ]; then
-		rm -f /usr/share/man/man8/$i.8.gz
-	fi
-	%prefix/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
-  done     
 
 if [ $1 -eq 1 ]; then
     #
@@ -237,18 +186,12 @@ exit 0
 %prefix/bin/cf-key
 %prefix/bin/cf-monitord
 %prefix/bin/cf-promises
+%prefix/bin/cf-report
 %prefix/bin/cf-runagent
 %prefix/bin/cf-serverd
-%prefix/bin/cf-upgrade
-%prefix/bin/getfacl
+%prefix/bin/tchmgr
 %dir %prefix/lib
 %prefix/lib/lib*.so.*
-%prefix/lib/liblmdb.so
-
-# Auxiliary programs
-%if "%{version}" >= "3.4"
-%prefix/bin/rpmvercmp
-%endif
 
 # Initscript, other configuration
 /etc/init.d/cfengine3
@@ -256,8 +199,8 @@ exit 0
 %attr(644,root,root) /etc/profile.d/cfengine3.sh
 
 # Documentation
-%defattr(744,root,root)
 %dir %prefix/share
+%prefix/share/man
 %prefix/share/doc
 
 # CoreBase
@@ -266,22 +209,12 @@ exit 0
 
 # Private directories
 
+%dir %prefix/masterfiles
+
 %defattr(700,root,root)
 %dir %prefix/inputs
 %dir %prefix/modules
 %dir %prefix/outputs
 %dir %prefix/ppkeys
-
-# LMDB
-%prefix/bin/lmdump
-%prefix/bin/lmmgr
-%prefix/bin/mdb_copy
-%prefix/bin/mdb_stat
-
-# Design Center
-%defattr(755,root,root,755)
-%dir %prefix/design-center
-%prefix/design-center/bin
-%prefix/design-center/lib
 
 %changelog

@@ -1,6 +1,9 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
+
+LDFLAGS="-L/var/cfengine/lib"
+CPPFLAGS=-I/var/cfengine/include
 
 clean:
 	dh_testdir
@@ -18,11 +21,13 @@ build-stamp:
 				--with-ssl=$(PREFIX) \
 				--with-zlib=$(PREFIX) \
 				--prefix=$(PREFIX) \
-				LDFLAGS="-L$(PREFIX)/lib -Wl,-R$(PREFIX)/lib" \
-				CPPFLAGS="-I$(PREFIX)/include" \
+				LDFLAGS="$(LDFLAGS)" \
+				CPPFLAGS="$(CPPFLAGS)" \
+				LD_LIBRARY_PATH="$(PREFIX)/lib" \
+				LD_RUN_PATH="$(PREFIX)/lib"
 
 	make
-	
+
 	touch build-stamp
 
 install: build

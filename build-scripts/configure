@@ -4,20 +4,15 @@
 . detect-environment
 . compile-options
 
-P=$BUILDPREFIX
+P=/var/cfengine
 
-ARGS="--prefix=$P --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre=$P"
+ARGS="--prefix=$P --sysconfdir=/etc --with-openssl=$P --with-pcre=$P"
 
 case "$PROJECT" in
   community)
-    NOVA=no
-    ;;
+    ;; # No args need to be added
   nova)
-    NOVA=yes
-    ;;
-  *)
-    echo "Unknown project: $PROJECT"
-    exit 42;;
+    ARGS="$ARGS --with-nova";;
 esac
 
 case "$PTHREADS_W32" in
@@ -41,6 +36,13 @@ case "$LIBACL" in
     ARGS="$ARGS --without-libacl";;
 esac
 
+case "$SQLITE" in
+  yes)
+    ARGS="$ARGS --with-sqlite3=$P";;
+  no)
+    ARGS="$ARGS --without-sqlite3";;
+esac
+
 case "$OPENLDAP" in
   yes)
     ARGS="$ARGS --with-ldap=$P";;
@@ -60,8 +62,6 @@ case "$EMBEDDED_DB" in
     ARGS="$ARGS --with-qdbm=$P";;
   tokyocabinet)
     ARGS="$ARGS --with-tokyocabinet=$P";;
-  lmdb)
-    ARGS="$ARGS --with-lmdb=$P";;
   *)
     echo "Unknown embedded DB: $EMBEDDED_DB"
     exit 42;;
@@ -77,23 +77,13 @@ case "$LIBVIRT" in
     exit 42;;
 esac
 
-case "$LIBXML2" in
+case "$WEB" in
   yes)
-    ARGS="$ARGS --with-libxml2=$P";;
+    ARGS="$ARGS --with-mongo=$P --with-cfmod --with-enterprise-api";;
   no)
-    ARGS="$ARGS --without-libxml2";;
+    ARGS="$ARGS --without-mongo --without-cfmod";;
   *)
-    echo "Unknown libxml2 selection: $LIBXML2"
-    exit 42;;
-esac
-
-case "$ROLE" in
-  hub)
-    ARGS="$ARGS --with-cfmod --with-enterprise-api --with-postgresql-hub=$P --with-redis=$P";;
-  agent)
-    ARGS="$ARGS --without-cfmod --without-postgresql-hub --without-redis";;
-  *)
-    echo "Unknown role selection: $ROLE"
+    echo "Unknown web-interface selection: $WEB"
     exit 42;;
 esac
 
@@ -107,58 +97,4 @@ case "$OPTIMIZE" in
     exit 42;;
 esac
 
-case "$BUILD_TYPE" in
-  debug_and_release)
-      CFLAGS="$CFLAGS -g -O2 -Wall -DNDEBUG";;
-  debug)
-      ;;
-  code_coverage)
-    ARGS="$ARGS --enable-debug"
-# lcov is not found in Windows and other platforms
-      case "${OS}-${OS_VERSION}" in
-        mingw*)
-        ;;
-        hpux*)
-        ;;
-        solaris*)
-        ;;
-        rhel-4.*)
-        ;;
-        aix*)
-	      ;;
-        *)
-        ARGS="$ARGS --enable-coverage"
-        ;;
-      esac
-      ;;
-   full|release|quick)
-      ;;
-  *)
-      echo "Unknown build type: $BUILD_TYPE"
-      exit 42;;
-esac
-case "$OS_FAMILY" in
-  aix)
-	export PATH="/usr/local/bin:$PATH"
-	export LDFLAGS="-L/var/cfengine/lib -lpthreads -Wl,-blibpath:/var/cfengine/lib:/usr/lib:/lib -Wl,-brtl"
-	export CFLAGS="-I/var/cfengine/include"
-	export LD_RUN_PATH=/var/cfengine/lib
-	export LD_LIBRARY_PATH="/var/cfengine/lib:$LD_LIBRARY_PATH"
-	export LIBPATH="/var/cfengine/lib:/usr/lib:$LIBPATH"
-	export YACC=/usr/local/bin/yac
-	export MAKE=/usr/bin/gmake
-  ;;
-  *)
-  ;;
-esac
-
-( cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
-
-if test "x$NOVA" = "xyes"; then
-    ( cd $BASEDIR/enterprise && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
-    if test "x$ROLE" = "xhub"; then
-        ( cd $BASEDIR/nova && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
-    fi
-fi
-
-( cd $BASEDIR/masterfiles && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+cd $BASEDIR/core && env $OPTS ./configure $ARGS

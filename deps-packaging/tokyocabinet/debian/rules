@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
 
 CONFIGURE_OPTS = --host=$(DEB_HOST_GNU_TYPE) --enable-off64 --enable-shared \
                 --enable-pthread --prefix=${PREFIX} --disable-zlib --disable-bzip

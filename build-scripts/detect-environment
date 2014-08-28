@@ -16,7 +16,6 @@ detect_os()
           ;;
 	AIX)
           OS_FAMILY=aix
-          OS_VERSION=`uname -v`.`uname -r`
           OS=aix;;
 	Darwin)
           OS_FAMILY=darwin
@@ -27,9 +26,6 @@ detect_os()
 	NetBSD)
           OS_FAMILY=netbsd
           OS=netbsd;;
-        HP-UX)
-          OS_FAMILY=hpux
-          OS=hpux;;
 	*)
 	  echo "Unable to detect operating system: $KERNEL_NAME"
 	  exit 42;;
@@ -127,12 +123,6 @@ detect_distribution()
       [0-9].[0-9].[0-9][0-9])
         REL=${REL%.[0-9][0-9]}
         ;;
-      wheezy*)
-        REL=7.0
-        ;;
-      jessie*)
-        REL=8.0
-        ;;
       *)
         echo "Unable to detect version of Debian: $REL"
         exit 42;;
@@ -184,14 +174,6 @@ detect_packaging()
     DEP_PACKAGING=deb
   elif [ -f /usr/sbin/pkgadd ]; then
     DEP_PACKAGING=solaris
-  elif [ -f /usr/sbin/pkg_add ]; then
-    SYSTEM=`uname -s`
-	case "$SYSTEM" in
-	  FreeBSD)
-	    DEP_PACKAGING=freebsd;;
-	esac
-  elif [ -f /usr/sbin/swinstall ]; then
-    DEP_PACKAGING=hpux
   else
     echo "Unknown packaging system"
     exit 42
@@ -225,13 +207,6 @@ detect_arch()
         *)
           echo "Unknown Solaris architecture: `uname -m`";;
       esac;;
-
-    freebsd)
-      ARCH=`uname -m`
-      OS_VERSION=`uname -r`;;
-    hpux)
-      ARCH=`uname -m`
-      OS_VERSION=`uname -r`;;
     *)
       echo "Unknown packaging system"
       exit 42;;
@@ -252,47 +227,11 @@ detect_arch()
   export ARCH
 }
 
-detect_tools()
-{
-# This is the idea, we check if we have a 'make' executable.
-# Then we check if 'make -v' returns 'GNU'. If so, that is our
-# make.
-# If it does not, then we check if we have 'gmake' executable. 
-# If so we make it our make.
-    MAKE=""
-    MAKE_VERSION=$(make -v || :)
-    case "$MAKE_VERSION" in
-    GNU*)
-        MAKE="make"
-        ;;
-    *)
-        GMAKE_=`which gmake`
-        case "$GMAKE_" in
-        /*)
-            MAKE="gmake"
-            ;;
-        *)
-            MAKE="Unknown make"
-            ;;
-        esac
-        ;;
-    esac
-    export MAKE
-
-    if [ "x$OS" = "xaix" ]; then
-        RPMBUILD_CMD=rpm
-    else
-        RPMBUILD_CMD=rpmbuild
-    fi
-    export RPMBUILD_CMD
-}
-
 detect_environment()
 {
 detect_os
 detect_packaging
 detect_arch
-detect_tools
 }
 
 detect_environment
@@ -304,6 +243,3 @@ detect_environment
 #  - architecture
 #  - packaging tool (dpkg, rpm, solaris pkg, ...)
 #
-
-OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
-export OUTDIR

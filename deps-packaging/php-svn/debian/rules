@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
 
 EXT_DIR=$(CURDIR)/debian/tmp$(PREFIX)/lib/php
 
@@ -14,8 +14,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	$(PREFIX)/httpd/php/bin/phpize
-	./configure --prefix=$(PREFIX) --with-php-config=$(PREFIX)/httpd/php/bin/php-config LDFLAGS="-L$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include"
+	phpize
+	./configure --prefix=$(PREFIX) CPPFLAGS="-I/var/cfengine/include" LDFLAGS="-L/var/cfengine/lib" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
 	make
 
 	touch build-stamp

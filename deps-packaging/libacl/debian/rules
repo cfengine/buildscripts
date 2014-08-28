@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
-PREFIX= $(BUILDPREFIX)
-LDFLAGS="-L$(BUILDPREFIX)/lib"
+PREFIX=/var/cfengine
+LDFLAGS="-L/var/cfengine/lib -R/var/cfengine/lib"
 clean:
 	dh_testdir
 	dh_testroot
@@ -14,7 +14,10 @@ build-stamp:
 
 	zcat acl.destdir.diff.gz | patch -p1 || true
 
-	./configure --prefix=$(PREFIX) --enable-gettext=no LDFLAGS=$(LDFLAGS)
+	./configure --prefix=$(PREFIX) --enable-gettext=no LDFLAGS=$(LDFLAGS) \
+					CPPFLAGS="-I/var/cfengine/include" \
+					LD_LIBRARY_PATH="/var/cfengine/lib" \
+					LD_RUN_PATH="/var/cfengine/lib"
 
 	make
 
@@ -26,13 +29,12 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	make install -C getfacl DESTDIR=$(CURDIR)/debian/tmp DIST_ROOT=/
-	make install-dev install-lib DESTDIR=$(CURDIR)/debian/tmp DIST_ROOT=/
+	make install-dev install-lib DESTDIR=$(CURDIR)/debian/tmp
 
 # configure fails because acl.h doens't exist in include dir
 # it's placed by default in include/sys
 
-	cp $(CURDIR)/debian/tmp$(PREFIX)/include/sys/acl.h $(CURDIR)/debian/tmp$(PREFIX)/include/
+	cp $(CURDIR)/debian/tmp/var/cfengine/include/sys/acl.h $(CURDIR)/debian/tmp/var/cfengine/include/
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.a
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la

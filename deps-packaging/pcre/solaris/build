@@ -6,7 +6,6 @@ PREFIX=/var/cfengine
 
 PC=${BUILD_ROOT}/cfbuild-pcre${PREFIX}
 PCD=${BUILD_ROOT}/cfbuild-pcre-devel${PREFIX}
-export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # Patch
 
@@ -14,7 +13,7 @@ patch -p0 < solaris-8-inttypes.patch
 
 # Configure
 
-./configure --prefix=$PREFIX --enable-unicode-properties --disable-cpp
+./configure --prefix=$PREFIX --enable-unicode-properties -disable-cpp
 
 # Build
 
@@ -22,7 +21,7 @@ make
 
 # Test
 
-if [ "$TESTS" = all ]; then
+if [ "$TESTS" != no ]; then
   make check
 fi
 

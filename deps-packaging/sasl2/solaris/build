@@ -6,13 +6,12 @@ PREFIX=/var/cfengine
 
 LS=${BUILD_ROOT}/cfbuild-sasl2${PREFIX}
 LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
-export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 #Patch
-gpatch -p1 < solaris-unistd.patch
+
 #Configure
 
-./configure --prefix=$PREFIX CPPFLAGS=-I/var/cfengine/include
+./configure --prefix=$PREFIX LDFLAGS=-L/var/cfengine/lib CPPFLAGS=-I/var/cfengine/include
 
 #Build
 

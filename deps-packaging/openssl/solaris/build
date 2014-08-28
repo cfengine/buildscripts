@@ -6,7 +6,6 @@ PREFIX=/var/cfengine
 
 OS=${BUILD_ROOT}/cfbuild-openssl${PREFIX}
 OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}
-export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # To pick up libgcc_s.so.1, which is apparently not in dyld path.
 export LD_LIBRARY_PATH=$PREFIX/lib
@@ -17,17 +16,12 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 export PATH=`pwd`/solaris:$PATH
 
-# Patch
-
-gpatch -p0 < solaris-int-max.patch
-
-cd openssl-fips-1.2.4
+cd openssl-fips-1.2.2
 ./config fipscanisterbuild
 make
 cd ..
 
-./config fips no-ec shared  no-dtls no-psk no-srp \
-    --with-fipslibdir=`pwd`/openssl-fips-1.2.4/fips --prefix=$PREFIX
+./config fips shared --with-fipslibdir=`pwd`/openssl-fips-1.2.2/fips --prefix=$PREFIX
 
 # Build
 

@@ -1,9 +1,9 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
 
-LDFLAGS=-L$(BUILDPREFIX)/lib
-CPPFLAGS=-I$(BUILDPREFIX)/include
+LDFLAGS=-L/var/cfengine/lib
+CPPFLAGS=-I/var/cfengine/include
 #
 # glibc-2.8 errorneously hides peercred(3) under #ifdef __USE_GNU.
 #

@@ -11,7 +11,7 @@ build-stamp:
 	dh_testdir
 
 	./configure --prefix=/usr
-	
+
 	make
 
 	touch build-stamp

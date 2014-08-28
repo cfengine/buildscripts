@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- zlib
 Name: cfbuild-zlib
 Version: %{version}
 Release: 1
-Source0: zlib-1.2.8.tar.gz
+Source0: zlib-1.2.5.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -10,30 +10,25 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-%define prefix %{buildprefix}
+%define prefix /var/cfengine
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n zlib-1.2.8
+%setup -q -n zlib-1.2.5
 
 %build
 
-if [ -z $MAKE]; then
-  MAKE_PATH=`which make`
-  export MAKE=$MAKE_PATH
-fi
-
 ./configure --prefix=%{prefix}
 
-$MAKE
+make
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
-$MAKE check
+make check
 %endif
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-$MAKE install prefix=${RPM_BUILD_ROOT}%{prefix}
+make install prefix=${RPM_BUILD_ROOT}%{prefix}
 
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libz.a
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share/man
@@ -58,9 +53,8 @@ CFEngine Build Automation -- zlib -- development files
 %defattr(-,root,root)
 
 %dir %{prefix}/lib
-%{prefix}/lib/libz.so
 %{prefix}/lib/libz.so.1
-%{prefix}/lib/libz.so.1.2.8
+%{prefix}/lib/libz.so.1.2.5
 
 %files devel
 %defattr(-,root,root)

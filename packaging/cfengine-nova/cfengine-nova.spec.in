@@ -1,4 +1,4 @@
-%define prefix %{buildprefix}
+%define prefix /var/cfengine
 
 Summary: The CFEngine Configuration System
 Name: cfengine-nova
@@ -9,13 +9,24 @@ License: COSL
 Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
-Obsoletes: cfengine3, cfengine-community, cfengine-nova
-Requires: coreutils gzip
+Obsoletes: cfengine3, cfengine-community
 
 AutoReqProv: no
 
 %if %{?with_debugsym}%{!?with_debugsym:0}
 %define debug_package {nil}
+%endif
+
+%if %{?with_expansion}%{!?with_expansion:0}
+Source0: cfconvert
+%endif
+
+%if %{?with_expansion}%{!?with_expansion:0}
+%package expansion
+Summary: The CFEngine Configuration System -- web-interface
+Group: Applications/System
+Requires: cfengine-nova = %{version}-%{release}
+AutoReqProv: no
 %endif
 
 %description
@@ -24,27 +35,74 @@ leading enterprises since 1993. Customize your IT systems, align to network,
 business and regulatory needs, monitor problems, automatically repair and
 maintain systems.
 
+%if %{?with_expansion}%{!?with_expansion:0}
+%description expansion
+CFEngine is the standalone, open-source datacenter management platform run by
+leading enterprises since 1993. Customize your IT systems, align to network,
+business and regulatory needs, monitor problems, automatically repair and
+maintain systems.
+
+This package contains the web-interface for CFEngine Nova.
+%endif
+
 %install
 rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
-cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
-
-#Copy the modified init.d script according to the working directory
-cp %{_basedir}/enterprise/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
-
+cp -a %{_basedir}/core/dist/* $RPM_BUILD_ROOT
 
 # Remove useless stuff
 
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
-rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
 rm -rf $RPM_BUILD_ROOT%{prefix}/share/CoreBase
-rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
-rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
-rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 
+%if %{?with_expansion}%{!?with_expansion:0}
+
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/php/cfmod.la
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/php/cfengine-enterprise-api.la
+
+# GUI, REST, KB
+
+cp -R %{_basedir}/nova/GUI2 $RPM_BUILD_ROOT%prefix/share/GUI
+cp -R %{_basedir}/nova/rest $RPM_BUILD_ROOT%prefix/share/rest
+cp -R %{_basedir}/nova/knowledge $RPM_BUILD_ROOT%prefix/share/KnowledgeBase
+cp -R %{_basedir}/nova/misc/solaris_admin_files $RPM_BUILD_ROOT%prefix/share
+rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/tests
+rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/application/controllers/testing.php
+rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/unittest_index.php
+rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/unit_test.php
+rm -rf $RPM_BUILD_ROOT%prefix/share/rest/tests
+
+# Change development mode in MP to production mode
+
+sed "s/define('ENVIRONMENT', 'development')/define('ENVIRONMENT','production')/g" $RPM_BUILD_ROOT%prefix/share/GUI/index.php > $RPM_BUILD_ROOT%prefix/share/GUI/index.php.tmp
+mv $RPM_BUILD_ROOT%prefix/share/GUI/index.php.tmp $RPM_BUILD_ROOT%prefix/share/GUI/index.php
+rm -f $RPM_BUILD_ROOT%prefix/share/GUI/index.php.tmp
+
+# NovaBase
+
+cp -R %{_basedir}/nova/masterfiles $RPM_BUILD_ROOT%prefix/share/NovaBase
+if [ -f %{_basedir}/core/masterfiles/cfengine_stdlib.cf ]; then
+	cp %{_basedir}/core/masterfiles/cfengine_stdlib.cf $RPM_BUILD_ROOT%prefix/share/NovaBase
+else
+	cp -R %{_basedir}/core/masterfiles/libraries $RPM_BUILD_ROOT%prefix/share/NovaBase
+fi
+# cfconvert
+
+cp $RPM_SOURCE_DIR/cfconvert $RPM_BUILD_ROOT%prefix/bin
+
+if [ -f /var/cfengine/include/sqlite3.h ]; then
+	sudo rm -rf /var/cfengine/include
+	sudo rm -f /var/cfengine/lib/libsqlite3.so
+fi
+
+# Cleanup
+
+find $RPM_BUILD_ROOT%prefix -name .svn | xargs -r rm -rf
+
+%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -103,9 +161,6 @@ if [ ! -f %prefix/ppkeys/localhost.priv ]; then
     %prefix/bin/cf-key >/dev/null || :
 fi
 
-if [ -f %prefix/bin/cf-twin ]; then
-    /bin/rm %prefix/bin/cf-twin
-fi
 
 /bin/cp %prefix/bin/cf-agent %prefix/bin/cf-twin
 for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent;
@@ -171,6 +226,29 @@ done
 
 exit 0
 
+%if %{?with_expansion}%{!?with_expansion:0}
+%post expansion
+
+#
+# Use default policy in case of fresh installation.
+#
+if ! [ -f %prefix/masterfiles/promises.cf ]; then
+ /bin/cp -R %prefix/share/NovaBase/* %prefix/masterfiles
+fi
+exit 0
+
+%preun expansion
+
+if [ -f /usr/bin/killall ]; then
+ /usr/bin/killall -q -15 mongod
+ /bin/rm -f %prefix/state/mongod.lock
+else
+ /usr/bin/pkill -15 mongod || true
+ /bin/rm -f %prefix/state/mongod.lock
+fi
+exit 0
+%endif
+
 %files
 %defattr(755,root,root)
 
@@ -180,38 +258,29 @@ exit 0
 %prefix/bin/cf-agent
 %prefix/bin/cf-execd
 %prefix/bin/cf-key
+%prefix/bin/cf-know
 %prefix/bin/cf-monitord
 %prefix/bin/cf-promises
+%prefix/bin/cf-report
 %prefix/bin/cf-runagent
 %prefix/bin/cf-serverd
-%prefix/bin/cf-upgrade
-
-# LMDB
-%prefix/bin/lmdump
-%prefix/bin/lmmgr
-%prefix/bin/mdb_copy
-%prefix/bin/mdb_stat
-
-# Auxiliary programs
-%if "%{version}" >= "3.0"
-%prefix/bin/rpmvercmp
-%endif
+%prefix/bin/tchmgr
+%dir %prefix/lib
+%prefix/lib/lib*.so.*
 
 # Initscript, other configuration
 /etc/init.d/cfengine3
 /etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
 
-%defattr(644,root,root,755)
-%dir %prefix/lib
-%prefix/lib/lib*.so*
-%prefix/lib/cfengine-enterprise.so
-
 # Documentation
 %dir %prefix/share
+%prefix/share/man
 %prefix/share/doc
 
 # Private directories
+
+%dir %prefix/masterfiles
 
 %defattr(700,root,root)
 %dir %prefix/ppkeys
@@ -219,5 +288,32 @@ exit 0
 %dir %prefix/inputs
 %dir %prefix/modules
 
+%if %{?with_expansion}%{!?with_expansion:0}
+%files expansion
+%defattr(755,root,root)
+
+# Nova-only binaries
+%prefix/bin/cf-hub
+%prefix/bin/cfconvert
+%prefix/bin/mongo*
+
+# PHP modules
+%prefix/lib/php
+
+# Base policy
+%prefix/share/NovaBase
+
+# Web interface
+%prefix/share/GUI
+%prefix/share/rest
+%prefix/share/KnowledgeBase
+
+#Solaris upgrade files
+%prefix/share/solaris_admin_files
+
+# Software upgrade delivery area
+%prefix/master_software_updates
+
+%endif
 
 %changelog

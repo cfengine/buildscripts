@@ -12,7 +12,7 @@ for pkg in "$@"; do
   P_NAME=${P_FILENAME%.pkg}
 
   if pkginfo ${P_NAME}; then
-    sudo /usr/sbin/pkgrm -n ${P_NAME}
+    sudo pkgrm -n ${P_NAME}
   fi
-  sudo /usr/sbin/pkgadd -n -d $pkg ${P_NAME}
+  sudo pkgadd -n -d $pkg ${P_NAME}
 done

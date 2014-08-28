@@ -1,0 +1,12 @@
+Source: cfbuild-sqlite
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packages <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-sqlite-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- sqlite -- development files
+ CFEngine Build Automation -- sqlite -- development files

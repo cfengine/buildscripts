@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
 INCLUDEPREFIX=/usr/include
 
 clean:

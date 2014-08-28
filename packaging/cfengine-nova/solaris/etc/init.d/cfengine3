@@ -1,6 +1,6 @@
 #!/bin/sh
 
-case $1 in
+case $1 in 
 	'start')
                 ret=0
                 if [ -x /usr/bin/zonename ];then
@@ -32,4 +32,4 @@ case $1 in
 		echo "Usage: $0 { start | stop }"
 		exit 1
 		;;
-esac
+esac    

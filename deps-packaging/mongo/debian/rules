@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
 
 DA=$(shell dpkg --print-architecture)
 ifeq ($(DA),i386)
@@ -30,7 +30,7 @@ install: build
 	dh_installdirs
 
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
-	cp $(D)/bin/* $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp $(D)/bin/mongo* $(CURDIR)/debian/tmp$(PREFIX)/bin
 
 binary-indep: build install
 
@@ -39,6 +39,7 @@ binary-arch: build install
 	dh_testroot
 	dh_install --sourcedir=debian/tmp
 	dh_link
+	dh_strip
 	dh_compress
 	dh_fixperms
 	dh_installdeb

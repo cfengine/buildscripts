@@ -1,0 +1,55 @@
+#!/usr/bin/make -f
+
+PREFIX=/var/cfengine
+
+CFLAGS="-DSQLITE_ENABLE_COLUMN_METADATA"
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure --prefix=$(PREFIX) CFLAGS=$(CFLAGS)
+
+	make
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
+
+	cp .libs/libsqlite3.so $(CURDIR)/debian/tmp$(PREFIX)/lib
+	cp .libs/libsqlite3.so.0 $(CURDIR)/debian/tmp$(PREFIX)/lib
+	cp .libs/libsqlite3.so.0.8.6 $(CURDIR)/debian/tmp$(PREFIX)/lib
+
+	cp sqlite3.h $(CURDIR)/debian/tmp$(PREFIX)/include
+	cp sqlite3ext.h $(CURDIR)/debian/tmp$(PREFIX)/include
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --source=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
+

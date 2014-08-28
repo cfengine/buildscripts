@@ -5,11 +5,13 @@
 
 uninstall_cfbuild
 
-case $OS in
-aix)
-sudo rm -rf /var/cfengine/*
-;;
-*)
-sudo rm -rf /var/cfengine
-;;
+case "$DEP_PACKAGING" in
+  rpm) uninstall_rpms cfengine-community cfengine-nova;;
+  deb) uninstall_debs cfengine-community cfengine-nova;;
+  solaris) uninstall_solaris_pkgs cfengine-community cfengine-nova;;
+  *)
+    echo "Unknown packaging system: $DEP_PACKAGING"
+    exit 42;;
 esac
+
+sudo rm -rf /var/cfengine

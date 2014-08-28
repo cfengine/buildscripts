@@ -3,7 +3,7 @@
 . `dirname "$0"`/functions
 . version
 
-if [ -d $BASEDIR/../../../output/${SCHEDULER}/${BUILD_NUMBER} ]; then
+if [ -d $BASEDIR/../../../output/${SCHEDULER}/${VERSION} ]; then
 	echo "Updating stage"
 	ssh -p222 root@stable.test.cfengine.com '/root/bin/update_stage.pl'
 	ssh -p222 root@stable.test.cfengine.com 'chmod 644 /var/www/html/application/views/policies/*'

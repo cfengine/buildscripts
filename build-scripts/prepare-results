@@ -6,32 +6,23 @@
 
 set -x
 
+OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
 mkdir -p "$OUTDIR"
 
-for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
-  if [ -d $BASEDIR/$dir ]; then
+for dir in cfengine-community cfengine-nova; do
+  if [ -d build/$dir ]; then
     case "$PACKAGING" in
       rpm)
-        cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
+        cp build/$dir/RPMS/*/*.rpm "$OUTDIR"
         ;;
       deb)
-        cp $BASEDIR/$dir/*.deb "$OUTDIR"
+        cp build/$dir/*.deb "$OUTDIR"
         ;;
       msi)
-        cp $BASEDIR/$dir/*.msi "$OUTDIR"
+        cp build/$dir/*.msi "$OUTDIR"
         ;;
       solaris)
-        cp $BASEDIR/$dir/*.pkg "$OUTDIR"
-        ;;
-	  freebsd)
-		cp build/$dir/pkg/*.tbz "$OUTDIR"
-		;;
-      hpux)
-        cp build/$dir/pkg/*.depot "$OUTDIR"
-        ;;
-      lpp)
-        cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
-        cp $BASEDIR/../lppdir/out/*.bff "$OUTDIR"
+        cp build/$dir/*.pkg "$OUTDIR"
         ;;
       *)
         echo "Unknown packaging system: $PACKAGING"
@@ -40,10 +31,6 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
   fi
 done
 
-for project in `projects_to_test`; do
-  if [ -f $BASEDIR/$project/tests/acceptance/summary.log ]; then
-    cp $BASEDIR/$project/tests/acceptance/summary.log "$OUTDIR"/$project-summary.log
-    cp $BASEDIR/$project/tests/acceptance/test.log "$OUTDIR"/$project-test.log
-    cp $BASEDIR/$project/tests/acceptance/test.xml "$OUTDIR"/$project-test.xml
-  fi
-done
+if [ -f build/core/tests/acceptance/summary.log ]; then
+  cp build/core/tests/acceptance/*.log "$OUTDIR"
+fi

@@ -10,13 +10,13 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-%define prefix %{buildprefix}
+%define prefix /var/cfengine
 
 %prep
 mkdir -p %{_builddir}
 %setup -q -n curl-7.27.0
 
-./configure --with-sysroot=%{prefix} --with-ldap-lib=libldap-2.4.so.2 --with-lber-lib=liblber-2.4.so.2 --with-ssl=%{prefix} --with-zlib=%{prefix} --prefix=%{prefix} LDFLAGS="-L/var/cfengine/lib -R/var/cfengine/lib" CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
+LDFLAGS="-L/var/cfengine/lib" CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH=/var/cfengine/lib LD_RUN_PATH=/var/cfengine/lib ./configure --with-sysroot=%{prefix} --with-ldap-lib=libldap-2.4.so.2 --with-lber-lib=liblber-2.4.so.2 --with-ssl=%{prefix} --with-zlib=%{prefix} --prefix=%{prefix}
 
 %build
 
@@ -48,9 +48,6 @@ CFEngine Build Automation -- libcurl
 %files
 %defattr(-,root,root)
 
-%dir %prefix/bin
-%prefix/bin/curl
-
 %dir %prefix/lib
 %prefix/lib/*.so.*
 
@@ -58,6 +55,7 @@ CFEngine Build Automation -- libcurl
 %defattr(-,root,root)
 
 %dir %prefix/bin
+%prefix/bin/curl
 %prefix/bin/curl-config
 
 %prefix/include

@@ -6,16 +6,10 @@ PREFIX=/var/cfengine
 
 TT=${BUILD_ROOT}/cfbuild-tokyocabinet${PREFIX}
 TTD=${BUILD_ROOT}/cfbuild-tokyocabinet-devel${PREFIX}
-export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # Patch
-# Solaris 8
+
 if [ `uname -r` = '5.8' ]; then
-  patch -p0 < solaris-8-inttypes-tcucodec.patch
-  patch -p0 < solaris-8-inttypes-tcutil.patch
-fi
-# Solaris 9
-if [ `uname -r` = '5.9' ]; then
   patch -p0 < solaris-8-inttypes-tcucodec.patch
   patch -p0 < solaris-8-inttypes-tcutil.patch
 fi
@@ -30,7 +24,7 @@ make
 
 # Test
 
-if [ "$TESTS" = all ]; then
+if [ "$TESTS" != no ]; then
   make check-util
   make check-hdb
   rm -rf casket*

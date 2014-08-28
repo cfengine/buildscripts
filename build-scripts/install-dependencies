@@ -3,60 +3,16 @@
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
+
 #
 # We use packaging scripts
 PATH=$PATH:$BASEDIR/autobuild/deps-packaging/
 #
 
 set -x
-#export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
-for i in $(ls $BASEDIR/autobuild/deps-packaging);  do
-
-if [ -d "$BASEDIR/autobuild/deps-packaging/$i/debian" ] ; then
-   echo "$i"
-   case "$BUILDPREFIX" in
-  *opt*)
-      sed -i "s/var/opt/" $BASEDIR/autobuild/deps-packaging/$i/debian/*.install
-   esac
-     
-fi
-
-if [ -d "$BASEDIR/autobuild/deps-packaging/$i/mingw/debian" ] ; then
-   case "$BUILDPREFIX" in
-  *opt*)
-      sed -i "s/var/opt/" $BASEDIR/autobuild/deps-packaging/$i/mingw/debian/*.install
-   esac
-fi
-
-#change the webdirectory in the apache config file as well
-if [ -d "$BASEDIR/autobuild/deps-packaging/$i" ]
-then
-  if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ] ; then
-   escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
-   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/autobuild/deps-packaging/apache/httpd.conf
-   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/autobuild/deps-packaging/apache/httpd-ssl.conf
-  fi
-fi
- 
-done
-
-DEPS=""
-case "$OS" in
-  mingw)
-  ;;
-  hpux)
-  ;;
-  solaris)
-  ;;
-  aix)
-  ;;
-  *)
-  DEPS="$DEPS lcov"
-  ;;
-esac
 
 case "$OS-$OS_VERSION" in
-  rhel-4.*)
+  centos-5.*|rhel-5.*)
     AUTOCONF=$(rpm -qa autoconf)
     AUTOMAKE=$(rpm -qa automake)
     LIBTOOL=$(rpm -qa libtool)
@@ -90,6 +46,7 @@ case "$OS-$OS_VERSION" in
       DEPS="$DEPS libtool"
     fi
     ;;
+
   debian-4.*)
     AUTOCONF=$(dpkg -l | grep autoconf | awk '{ print $3 }')
     AUTOMAKE=$(dpkg -l | grep automake | awk '{ print $3 }')
@@ -131,26 +88,21 @@ esac
 
 case "$LIBGCC" in
   yes)
-    DEPS="$DEPS libgcc";;
-esac
-
-case "$PTHREADS_W32" in
-  yes)
-    DEPS="$DEPS pthreads-w32";;
+    DEPS="libgcc";;
 esac
 
 # FIXME: Why do we need zlib?
 
 DEPS="$DEPS zlib $EMBEDDED_DB openssl pcre"
 
+case "$SQLITE" in
+  yes)
+    DEPS="$DEPS sqlite";;
+esac
+
 case "$LIBSASL" in
   yes)
     DEPS="$DEPS sasl2";;
-esac
-
-case "$LIBICONV" in
-  yes)
-    DEPS="$DEPS libiconv";;
 esac
 
 case "$GNURX" in
@@ -168,14 +120,49 @@ case "$LIBCURL" in
     DEPS="$DEPS libcurl";;
 esac
 
-case "$GIT" in
+case "$PHP_CURL" in
   yes)
-    DEPS="$DEPS git";;
+    SYSTEM=$(cat /etc/issue)
+	case "$SYSTEM" in
+	  "Ubuntu"*)
+	    case "$SYSTEM" in
+		  *"8."*)
+		    DEPS="$DEPS php-curl-old"
+		  ;;
+		  *"10."* | *"12."*)
+		    DEPS="$DEPS php-curl"
+		  ;;
+		esac
+	  ;;
+	  "Debian"*)
+	    DEPS="$DEPS php-curl"
+	  ;;
+	  *"SUSE"*)
+	    DEPS="$DEPS php-curl-old"
+	  ;;
+	  "CentOS"* | "Red"*)
+	    case "$SYSTEM" in
+		  *"5."*)
+		    DEPS="$DEPS php-curl-old"
+		  ;;
+		  *"6."*)
+		    DEPS="$DEPS php-curl"
+		  ;;
+		esac
+	  ;;
+	esac
 esac
 
-case "$RSYNC" in
+case "$SQL" in
   yes)
-    DEPS="$DEPS rsync";;
+    # MySQL is disabled until we sort out legal issues
+    #DEPS="$DEPS mysql"
+    DEPS="$DEPS postgresql";;
+esac
+
+case "$LIBVIRT" in
+  yes)
+    DEPS="$DEPS libxml2 libvirt";;
 esac
 
 case "$LIBMCRYPT" in
@@ -183,62 +170,36 @@ case "$LIBMCRYPT" in
     DEPS="$DEPS libmcrypt";;
 esac
 
-case "$LIBXML2" in
+case "$WEB" in
   yes)
-    DEPS="$DEPS libxml2";;
+	DEPS="$DEPS mongo-c mongo";;
 esac
 
-case "$APR" in
+case "$PTHREADS_W32" in
   yes)
-    DEPS="$DEPS apr";;
+    DEPS="$DEPS pthreads-w32";;
 esac
 
-case "$APR_UTIL" in
+case "$PHP_MONGO" in
   yes)
-    DEPS="$DEPS apr-util";;
-esac
-
-case "$APACHE" in
-  yes)
-    DEPS="$DEPS apache";;
-esac
-
-case "$PGSQL" in
-  yes)
-    DEPS="$DEPS postgresql-hub";;
-  *)
-    case "$SQL" in
-      yes)
-        # MySQL is disabled until we sort out legal issues
-        #DEPS="$DEPS mysql"
-        DEPS="$DEPS postgresql";;
-    esac
-  ;;
-esac
-
-case "$PHP" in
-  yes)
-    DEPS="$DEPS php";;
-esac
-
-case "$LIBVIRT" in
-  yes)
-    DEPS="$DEPS libvirt";;
-esac
-
-case "$REDIS" in
-  yes)
-    DEPS="$DEPS redis";;
-esac
-
-case "$PHP_APC" in
-  yes)
-    DEPS="$DEPS php-apc";;
+    DEPS="$DEPS php-mongo";;
 esac
 
 case "$PHP_SVN" in
   yes)
     DEPS="$DEPS php-svn";;
+esac
+
+case "$PHP_JSON" in
+  yes)
+    DEPS="$DEPS php-json";;
+esac
+
+case "$PHP_MCRYPT" in
+  yes)
+    DEPS="$DEPS php-mcrypt"
+    echo "PHP_MCRYPT"
+    ;;
 esac
 
 case "$LIBATTR" in
@@ -261,16 +222,11 @@ fi
 for dep in $DEPS; do
 
   case "$BUILD_TYPE" in
-    quick|code_coverage)
+    quick)
       optimize=yes
       debugsym=no
       versuffix=+untested
       tests=no;;
-    debug_and_release)
-      optimize=yes
-      debugsym=no
-      versuffix=+dr
-      tests=yes;;
     debug)
       optimize=no
       debugsym=yes
@@ -295,32 +251,12 @@ for dep in $DEPS; do
       cross=native;;
   esac
 
-  case "$OS-$OS_VERSION" in
-    debian-4.*)
-      case "$dep" in
-        autoconf)
-          version=2.60-1
-          ;;
-        automake)
-          version=1.10.1-1
-          ;;
-        libtool)
-          version=1.5.24-1
-          ;;
-        *)
-          version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
-          ;;
-      esac
-      ;;
-    *)
-      version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
-      ;;
-  esac
+  version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
+
   if pkg-cache find $dep-$version; then
     case "$BUILD_TYPE" in
-      # We don't want to prune packages. It takes too long to regenerate.
-      # full|release|debug_and_release) pkg-cache prune $dep-$version;;
-      full|release|debug_and_release|quick|smoke|debug) echo "Package found in cache, skipping compilation";;
+      full|release) pkg-cache prune $dep-$version;;
+      quick|debug) echo "Package found in cache, skipping compilation";;
       *) echo "WAT?!"; exit 42;;
     esac
   fi
@@ -328,7 +264,7 @@ for dep in $DEPS; do
   if pkg-cache find $dep-$version; then
     :
   else
-    $BASEDIR/autobuild/deps-packaging/pkg-build-${DEP_PACKAGING} $dep $tests $cross $optimize $debugsym $version
+    pkg-build-${DEP_PACKAGING} $dep $tests $cross $optimize $debugsym $version
     pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
   fi
 

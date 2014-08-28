@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ -f /usr/bin/killall ]; then
+ /usr/bin/killall -q -15 mongod
+ /bin/rm -f /var/cfengine/state/mongod.lock
+else
+ /usr/bin/pkill -15 mongod || true
+ /bin/rm -f /var/cfengine/state/mongod.lock
+fi
+
+exit 0

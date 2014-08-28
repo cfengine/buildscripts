@@ -1,9 +1,11 @@
-#!/bin/sh -x
+#!/bin/sh
 
 . `dirname "$0"`/functions
 . version
 
-LNK="$BASEDIR/../../../output/$SCHEDULER/current"
-TGT="$BASEDIR/../../../output/$SCHEDULER/$BUILD_NUMBER"
-rm -f "$LNK"
-ln -fs "$BUILD_NUMBER" "$LNK"
+mkdir -p $BASEDIR/../../../output/${SCHEDULER}
+mkdir -p $BASEDIR/../../../output/${SCHEDULER}/${VERSION}
+mv $BASEDIR/../../../output/.tmp/${SCHEDULER}/${VERSION}/* $BASEDIR/../../../output/${SCHEDULER}/${VERSION}
+rmdir --ignore-fail-on-non-empty $BASEDIR/../../../output/.tmp/${SCHEDULER}/${VERSION}
+rm -f $BASEDIR/../../../output/${SCHEDULER}/current
+ln -fs ${VERSION} $BASEDIR/../../../output/${SCHEDULER}/current

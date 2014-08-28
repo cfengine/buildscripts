@@ -1,0 +1,10 @@
+/var/cfengine/bin/cf-hub
+/var/cfengine/bin/cfconvert
+/var/cfengine/bin/mongo*
+/var/cfengine/lib/php
+/var/cfengine/share/NovaBase
+/var/cfengine/share/GUI
+/var/cfengine/share/rest
+/var/cfengine/share/KnowledgeBase
+/var/cfengine/master_software_updates
+/var/cfengine/share/solaris_admin_files

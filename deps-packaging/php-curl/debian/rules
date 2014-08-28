@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
 
 EXT_DIR=$(CURDIR)/debian/tmp$(PREFIX)/lib/php
 
@@ -21,8 +21,12 @@ build-stamp:
 	cp -r ../curl/* .
 	cp -r ../debian/ .
 	cp ../curl.ini .
-	$(PREFIX)/httpd/php/bin/phpize
-	./configure --with-curl=$(PREFIX) --prefix=$(PREFIX)
+	phpize
+	./configure --with-curl=$(PREFIX) --prefix=$(PREFIX) \
+					LDFLAGS="-L/var/cfengine/lib" \
+					CPPFLAGS="-I/var/cfengine/include" \
+					LD_LIBRARY_PATH="/var/cfengine/lib" \
+					LD_RUN_PATH="/var/cfengine/lib"
 	make
 
 	touch build-stamp

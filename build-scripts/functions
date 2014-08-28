@@ -9,29 +9,6 @@
 # Note: Do not use $(), as Solaris /bin/sh will choke on it *before* executing.
 #
 
-# Detect a POSIX compliant shell
-detect_posix_sh() {
-    echo "Trying to detect if we are running on a POSIX shell"
-    HAVE_POSIX_SH=0
-    unset foo
-    (: ${foo%%bar}) 2> /dev/null && echo 0
-    T1=$?
-    if test "$T1" = 0; then
-        echo "POSIX shell detected"
-        HAVE_POSIX_SH=1
-    fi
-}
-# We are getting to the weird ones, Solaris shell supports the things
-# used before so we will use that as a mark of a Solaris shell
-detect_solaris_sh() {
-    echo "Trying to detect Solaris POSIX shell"
-    HAVE_SOLARIS_SH=0
-    if test -x /usr/xpg4/bin/sh; then
-        echo "Solaris POSIX shell detected"
-        HAVE_SOLARIS_SH=1
-    fi
-}
-
 #
 # Detect and replace non-POSIX shell
 #
@@ -39,22 +16,15 @@ try_exec() {
   type "$1" > /dev/null 2>&1 && exec "$@"
 }
 
-echo "POSIX compliant shell test"
-detect_posix_sh
-if [ $HAVE_POSIX_SH -eq 1 ]; then
-    echo "Script will continue"
-else
-    echo "POSIX shell test failed. We will try to detect a POSIX shell in your system."
-    echo "If your system does not have a POSIX shell, then this script will abort."
-    echo "In that case please install a POSIX shell and create a test for it." 
-    detect_solaris_sh
-    if [ $HAVE_SOLARIS_SH -eq 1 ]; then
-        echo "Trying to switch to Solaris POSIX shell"
-        try_exec /usr/xpg4/bin/sh -x "$0" "$@"
-        echo "Something went wrong when trying to replace the Solaris Shell. Aborting."
-        exit 42
-    fi
-    echo "unknown shell"
+unset foo
+(: ${foo%%bar}) 2> /dev/null
+T1="$?"
+
+if test "$T1" != 0; then
+  try_exec /usr/xpg4/bin/sh "$0" "$@"
+  echo "No compatible shell script interpreter found."
+  echo "Please find a POSIX shell for your system."
+  exit 42
 fi
 
 #
@@ -67,20 +37,21 @@ set -e
 # Figure out where scripts are, and amend PATH to ease our life.
 #
 
-if [ -z "$AUTOBUILD_PATH" ]; then
-  case "$0" in
-    /*) SCRIPTDIR=`dirname "$0"`;;
-    *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
-  esac
+case "$0" in
+  /*) SCRIPTDIR=`dirname "$0"`;;
+  *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
+esac
 
-  AUTOBUILD_PATH="$(dirname "$SCRIPTDIR")"
+if [ -n "$TOPDIR" ]; then
+  BASEDIR=`dirname "$SCRIPTDIR"`
+  SCRIPTSDIR="$SCRIPTDIR/build-scripts"
+else
+  BASEDIR=`dirname "$SCRIPTDIR"`
+  BASEDIR=`dirname "$BASEDIR"`
+  SCRIPTSDIR="$SCRIPTDIR"
 fi
-BASEDIR="$(dirname "$AUTOBUILD_PATH")"
 
-
-# Export to which directory the packages will be installed, using the define buildprefix in environment or /var/cfengine as default. 
-export BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
-export PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/sfw/bin:/usr/bin:/usr/local/sbin"
+export PATH="$PATH:$SCRIPTSDIR"
 export BASEDIR
 
 #
@@ -89,27 +60,27 @@ export BASEDIR
 
 install_rpms()
 {
-  execute-wrapper.sh sudo rpm -Uvh "$@"
+  sudo rpm -Uvh "$@"
 }
 
 uninstall_rpms()
 {
-  PKGS=`rpm -qa --queryformat "%{Name}-%{Version}\n" | grep '^'$1 || true`
+  PKGS=`rpm -qa --queryformat "%{Name}\n" | grep '^'$1'$' || true`
   if [ -n "$PKGS" ]; then
-    execute-wrapper.sh sudo rpm -e $PKGS
+    sudo rpm -e $PKGS
   fi
 }
 
 install_debs()
 {
-  execute-wrapper.sh sudo dpkg -i "$@"
+  sudo dpkg -i "$@"
 }
 
 uninstall_debs()
 {
   PKGS=`dpkg -l | tail -n+6 | awk '{print $2}' | grep '^'$1'$' || true`
   if [ -n "$PKGS" ]; then
-    execute-wrapper.sh sudo dpkg --purge $PKGS
+    sudo dpkg --purge $PKGS
   fi
 }
 
@@ -123,23 +94,8 @@ uninstall_solaris_pkgs()
 {
   PKGS=`pkginfo | awk '{print $2}' | grep '^'$1'$' || true`
   if [ -n "$PKGS" ]; then
-    execute-wrapper.sh sudo /usr/sbin/pkgrm -n $PKGS
+    sudo pkgrm -n $PKGS
   fi
-}
-
-install_hpux_pkgs()
-{
-  echo "$@"
-}
-
-uninstall_hpux_pkgs()
-{
-  PKGS=`swlist | awk '{print $1}' | grep '^'$1'$' || true`
-
-  for p in $PKGS
-  do
-    sudo /usr/sbin/swremove $p
-  done
 }
 
 #
@@ -152,8 +108,6 @@ uninstall_cfbuild()
     rpm) uninstall_rpms 'cfbuild-.*';;
     deb) uninstall_debs 'cfbuild-.*';;
     solaris) uninstall_solaris_pkgs 'cfbuild-.*';;
-    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*';;
-    hpux) uninstall_hpux_pkgs 'cfbuild-.*';;
     *)
       echo "Unknown packaging system: $DEP_PACKAGING"
       exit 1;;
@@ -166,162 +120,8 @@ uninstall_cfbuild_devel()
     rpm) uninstall_rpms 'cfbuild-.*-devel';;
     deb) uninstall_debs 'cfbuild-.*-devel';;
     solaris) uninstall_solaris_pkgs 'cfbuild-.*-devel';;
-    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*-devel';;
-    hpux) uninstall_hpux_pkgs 'cfbuild-.*-devel';;
     *)
       echo "Unknown packaging system: $DEP_PACKAGING"
       exit 42;;
-  esac
-}
-
-install_freebsd_pkgs()
-{
-	execute-wrapper.sh sudo pkg_add "$@"
-}
-
-uninstall_freebsd_pkgs()
-{
-	PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
-	if [ -n "$PKGS" ]; then
-	  execute-wrapper.sh sudo pkg_delete $PKGS
-	fi
-}
-
-run() {
-  NAME="$1"
-  shift
-  echo "---> $NAME"
-  if ! "$@" >> "build-remote.log" 2>&1; then
-    echo "Failed. See the build-remote.log. Last lines are:"
-    tail build-remote.log
-    exit 1
-  fi
-}
-
-local_script_general() {
-  SCRIPT="$1"
-  "$AUTOBUILD_PATH/build-scripts/$SCRIPT" "$HOST"
-}
-
-local_script() {
-  SCRIPT="$1"
-  run "$SCRIPT" "$AUTOBUILD_PATH/build-scripts/$SCRIPT" "$HOST"
-}
-
-remote_script_general() {
-  SCRIPT="$1"
-  LOGIN_COMMAND="$2"
-  SCRIPT_BASEDIR="$3"
-  ENVVARS="PROJECT=$PROJECT"
-  if [ -n "$CROSS_TARGET" ]; then
-    ENVVARS="$ENVVARS CROSS_TARGET=$CROSS_TARGET"
-  fi
-  if [ -n "$WIX_MACHINE" ]; then
-    ENVVARS="$ENVVARS WIX_MACHINE=$WIX_MACHINE"
-  fi
-  if [ -n "$BUILD_TYPE" ]; then
-    ENVVARS="$ENVVARS BUILD_TYPE=$BUILD_TYPE"
-  fi
-  if [ -n "$BUILD_NUMBER" ]; then
-    ENVVARS="$ENVVARS BUILD_NUMBER=$BUILD_NUMBER"
-  fi
-  if [ -n "$PREFIX" ]; then
-    ENVVARS="$ENVVARS BUILDPREFIX=$PREFIX"
-  fi
-
-  ENVVARS="$ENVVARS BRANCH=$REPOSITORY"
-  ENVVARS="$ENVVARS EXPLICIT_ROLE=$EXPLICIT_ROLE"
-  ENVVARS="$ENVVARS EXPLICIT_VERSION=$EXPLICIT_VERSION"
-  ENVVARS="$ENVVARS TEST_MACHINE=$TEST_MACHINE"
-
-  $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/autobuild/build-scripts/"$SCRIPT"
-}
-
-remote_script() {
-  SCRIPT="$1"
-  run "$SCRIPT" remote_script_general "$SCRIPT" "ssh -o BatchMode=yes $HOST" build
-}
-
-projects_to_test() {
-  if test "x$PROJECT" = "xcommunity"; then
-    echo "core masterfiles"
-  else
-    if test "x$ROLE" = "xhub"; then
-      echo "core enterprise nova masterfiles"
-    else
-      echo "core enterprise masterfiles"
-    fi
-  fi
-}
-
-generate_chroot_transfer_script()
-{
-  # These rules are processed in a "first that matches" fashion.
-
-  ############# Cross platform #############
-  cat <<EOF
-- */proc
-+ /bin
-+ /etc
-- /lib/modules
-+ /lib
-- /lib64/modules
-+ /lib64
-+ /sbin
-- /usr/src
-- /usr/local/src
-+ /usr
-- /var/cfengine
-- /var/tmp
-+ /var
-EOF
-
-  ########### Platform specific ############
-  case "$OS" in
-    aix)
-      cat <<EOF
-+ /dev
-+ /TT_DB
-+ /audit
-+ /lpp
-+ /lppdir
-+ /opt/freeware
-- /opt/*
-+ /opt
-EOF
-      ;;
-    solaris)
-      cat <<EOF
-- /.SUNWnative/usr/jdk
-- /.SUNWnative/usr/openwin
-- /.SUNWnative/usr/lib/AdobeReader
-+ /.SUNWnative
-+ /opt/csw
-- /opt/*
-+ /opt
-+ /system/volatile
-- /system/*
-+ /system
-EOF
-      ;;
-  esac
-
-  # Exclude everything else.
-  echo "- /*"
-}
-
-# One argument: Where to mount it.
-mount_procfs()
-{
-  case "$OS" in
-    aix)
-      sudo mount -v namefs /proc "$1"
-      ;;
-    solaris)
-      sudo mount -F proc proc "$1"
-      ;;
-    *)
-      sudo mount -t proc proc "$1"
-      ;;
   esac
 }

@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if ! [ -f /var/cfengine/masterfiles/promises.cf ]; then
+ /bin/cp -R /var/cfengine/share/NovaBase/* /var/cfengine/masterfiles
+fi
+
+exit 0

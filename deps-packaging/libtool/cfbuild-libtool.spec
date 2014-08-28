@@ -25,7 +25,8 @@ rm -rf ${RPM_BUILD_ROOT}
 
 make install DESTDIR=${RPM_BUILD_ROOT}
 
-rm -rf ${RPM_BUILD_ROOT}/usr/lib
+rm -rf ${RPM_BUILD_ROOT}/usr/lib/*.a
+rm -rf ${RPM_BUILD_ROOT}/usr/lib/*.la
 rm -rf ${RPM_BUILD_ROOT}/usr/share/info
 rm -rf ${RPM_BUILD_ROOT}/usr/include
 
@@ -41,6 +42,11 @@ CFEngine Build Automation -- libtool
 %dir /usr/bin
 /usr/bin/libtool
 /usr/bin/libtoolize
+
+%dir /usr/lib
+/usr/lib/libltdl.so
+/usr/lib/libltdl.so.3
+/usr/lib/libltdl.so.3.1.5
 
 %dir /usr/share
 /usr/share/aclocal

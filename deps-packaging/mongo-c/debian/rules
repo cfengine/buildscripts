@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
-SOURCE=src/md5.c src/mongo.c src/gridfs.c src/bson.c src/numbers.c src/env_posix.c src/encoding.c
+PREFIX=/var/cfengine
+SOURCE=src/md5.c src/mongo.c src/gridfs.c src/bson.c src/numbers.c
 
 clean:
 	dh_testdir
@@ -12,49 +12,43 @@ clean:
 build: build-stamp
 build-stamp:
 	dh_testdir
-	patch -p1 < allow-secondary-connect.patch
 
-	gcc -c -std=c99 -pedantic -Wall -g -fPIC -O3 -D_POSIX_SOURCE -DR_SAFETY_NET -Isrc ${SOURCE}
-	ar rc libmongoc.a md5.o mongo.o env_posix.o gridfs.o bson.o numbers.o encoding.o
+	gcc -c -std=c99 -pedantic -Wall -g -fPIC -O3 -Isrc ${SOURCE}
+	ar rc libmongoc.a md5.o mongo.o gridfs.o bson.o numbers.o
 	ranlib libmongoc.a
-	ar rc libbson.a md5.o bson.o numbers.o encoding.o
-	ranlib libbson.a
 
 	touch build-stamp
-    
+
 install: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
-    
+
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
-    
+
 	cp libmongoc.a $(CURDIR)/debian/tmp$(PREFIX)/lib
-	cp libbson.a $(CURDIR)/debian/tmp$(PREFIX)/lib
-    
+
 	cp src/bson.h $(CURDIR)/debian/tmp$(PREFIX)/include
+	cp src/mongo_except.h $(CURDIR)/debian/tmp$(PREFIX)/include
 	cp src/mongo.h $(CURDIR)/debian/tmp$(PREFIX)/include
-	cp src/encoding.h $(CURDIR)/debian/tmp$(PREFIX)/include
-	cp src/env.h $(CURDIR)/debian/tmp$(PREFIX)/include
-	cp src/md5.h $(CURDIR)/debian/tmp$(PREFIX)/include
-	cp src/gridfs.h $(CURDIR)/debian/tmp$(PREFIX)/include
-    
+	cp src/platform_hacks.h $(CURDIR)/debian/tmp$(PREFIX)/include
+
 binary-indep: build install
 
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_install --source=debian/tmp
+	dh_install --sourcedir=debian/tmp
 	dh_link
 	dh_strip
 	dh_compress
 	dh_fixperms
+	dh_installdeb
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
-    
+
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install configure
-

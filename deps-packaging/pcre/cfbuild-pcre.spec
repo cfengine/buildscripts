@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- pcre
 Name: cfbuild-pcre
 Version: %{version}
 Release: 1
-Source0: pcre-8.33.tar.gz
+Source0: pcre-8.12.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -10,32 +10,25 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-%define prefix %{buildprefix}
+%define prefix /var/cfengine
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n pcre-8.33
+%setup -q -n pcre-8.12
 
-./configure --prefix=%{prefix} --enable-unicode-properties --disable-cpp --enable-shared
+./configure --prefix=%{prefix} --enable-unicode-properties --disable-cpp
 
 %build
 
-if [ -z $MAKE ]; then
-  MAKE_PATH=`which MAKE`
-  export MAKE=$MAKE_PATH
-fi
-
-$MAKE
-if ! [ $SYS = "AIX" ]; then
+make
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
-$MAKE check
+make check
 %endif
-fi
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-$MAKE install DESTDIR=${RPM_BUILD_ROOT}
+make install DESTDIR=${RPM_BUILD_ROOT}
 
 # Removing unused files
 
@@ -68,12 +61,10 @@ CFEngine Build Automation -- pcre -- development files
 %defattr(-,root,root)
 
 %dir %prefix/lib
-%prefix/lib/libpcre.so
-%prefix/lib/libpcre.so.1
-%prefix/lib/libpcre.so.1.2.1
-%prefix/lib/libpcreposix.so
+%prefix/lib/libpcre.so.0
+%prefix/lib/libpcre.so.0.0.1
 %prefix/lib/libpcreposix.so.0
-%prefix/lib/libpcreposix.so.0.0.2
+%prefix/lib/libpcreposix.so.0.0.0
 
 %files devel
 %defattr(-,root,root)

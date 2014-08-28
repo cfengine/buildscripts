@@ -1,14 +1,16 @@
-#!/bin/sh -x
+#!/bin/sh
 
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
 
-if [ -n "$TEST_MACHINE" ]; then
-  local_script_general prepare-testmachine
-  local_script_general transfer-to-testmachine
-  local_script_general test-on-testmachine
-  local_script_general collect-testresults-from-testmachine
-else
-  local_script_general test-on-thismachine
+if [ "$TESTS" = yes ]; then
+  #
+  # Under Ubuntu 8.04 VM testsuite segfaults. Test it three times.
+  # Apparently binary produced is good, but VM (kernel?) is broken.
+  #
+  chmod g-w $BASEDIR/core/tests/acceptance/* -R
+  (cd $BASEDIR/test && NETWORK_TESTS=0 make -C $BASEDIR/core check \
+    || NETWORK_TESTS=0 make -C $BASEDIR/core check \
+    || NETWORK_TESTS=0 make -C $BASEDIR/core check) || false
 fi

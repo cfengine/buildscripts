@@ -67,7 +67,7 @@ fetch_file()
   mkdir -p "$CACHEDIR"
 
   for URL in $URLS; do
-    if wget -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME"; then
+    if wget --no-check-certificate -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME"; then
       if checksum "$FILENAME" "$CHECKSUM"; then
         return 0
       else

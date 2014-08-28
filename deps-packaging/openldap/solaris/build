@@ -6,17 +6,14 @@ PREFIX=/var/cfengine
 
 OL=${BUILD_ROOT}/cfbuild-openldap${PREFIX}
 OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
-export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # Patch
-
-#patch -p0 -i configure.patch configure
 
 # Configure
 
 ./configure --prefix=$PREFIX --enable-shared --disable-slapd --disable-backends \
             --with-tls=openssl --without-gssapi \
-            CPPFLAGS=-I/var/cfengine/include
+            LDFLAGS=-L/var/cfengine/lib CPPFLAGS=-I/var/cfengine/include
 
 # Build
 

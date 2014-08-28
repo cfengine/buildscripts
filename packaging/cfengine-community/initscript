@@ -4,7 +4,7 @@
 # 
 #
 # Created by Nakarin Phooripoom on 22/6/2011.
-# Copyright 2010 CFEngine AS. All rights reserved.
+# Copyright 2010 Cfengine AS. All rights reserved.
 #
 ### BEGIN INIT INFO
 # Provides:          cfengine3
@@ -44,7 +44,7 @@ REDHAT=0
 DEBIAN=0
 
 # SuSE
-if [ -d /var/lock/subsys ] && [ -f /usr/bin/zypper ]; then
+if [ -f /usr/bin/zypper ]; then
 	SUSE=1
 else
 	SUSE=0
@@ -52,15 +52,13 @@ fi
 
 # RedHat4/RedHat5/CentOS/Fedora
 if [ -f /usr/bin/yum ] || [ -f /usr/sbin/up2date ]; then
-	if [ -d /var/lock/subsys ]; then
-		REDHAT=1
-	fi
+	REDHAT=1
 else
 	REDHAT=0
 fi
 
 # Debian/Ubuntu
-if [ ! -d /var/lock/subsys ] && [ -f /usr/bin/apt-get ]; then
+if [ -f /usr/bin/apt-get ]; then
 	DEBIAN=1
 else
 	DEBIAN=0
@@ -80,15 +78,6 @@ else
 	RUN_CF_MONITORD=1
 fi
 
-# Check /sbin/startproc for SUSE
-if [ -x /sbin/startproc ] && [ -f /etc/rc.status ]; then
-	. /etc/rc.status
-	rc_reset
-	PROC=1
-else
-	PROC=0
-fi
-
 # Source function library. (Redhat/Centos/Fedora)
 if [ -f /usr/bin/yum ] && [ -f /etc/rc.d/init.d/functions ]; then
 	. /etc/rc.d/init.d/functions
@@ -96,6 +85,15 @@ if [ -f /usr/bin/yum ] && [ -f /etc/rc.d/init.d/functions ]; then
 else
 	set -e
 	FUNC=0
+fi
+
+# Check /sbin/startproc for SUSE
+if [ -x /sbin/startproc ] && [ -f /etc/rc.status ]; then
+	. /etc/rc.status
+	rc_reset
+	PROC=1
+else
+	PROC=0
 fi
 
 # Check something for Debian/Ubuntu
@@ -117,6 +115,7 @@ cfmonitord_status=`ps waxu|grep -v grep|grep cf-monitord|awk -F' ' '{print $2}'`
 case "$1" in
 	start)
 		if ! [ -f /var/cfengine/inputs/promises.cf ]; then
+			$ECHO "Policy is not found in /var/cfengine/inputs, not starting CFEngine."
 			exit 0
 		fi
 

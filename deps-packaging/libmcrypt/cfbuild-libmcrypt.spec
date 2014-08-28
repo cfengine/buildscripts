@@ -10,7 +10,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-%define prefix %{buildprefix}
+%define prefix /var/cfengine
 
 %prep
 mkdir -p %{_builddir}

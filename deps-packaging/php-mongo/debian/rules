@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=$(BUILDPREFIX)
+PREFIX=/var/cfengine
 
 EXT_DIR=$(CURDIR)/debian/tmp$(PREFIX)/lib/php
 
@@ -14,8 +14,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	$(PREFIX)/httpd/php/bin/phpize
-	./configure --prefix=$(PREFIX) --with-php-config=$(PREFIX)/httpd/php/bin/php-config LDFLAGS="-L$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include"
+	phpize
+	./configure --prefix=$(PREFIX)
 	make
 
 	touch build-stamp
@@ -28,7 +28,7 @@ install: build
 
 	mkdir -p $(EXT_DIR)
 	make install INSTALL_ROOT=$(CURDIR)/debian/tmp
-	mv $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php/extensions/no-debug-non-zts-20100525/mongo.so $(EXT_DIR)
+	mv $(CURDIR)/debian/tmp/usr/lib/php5/*/mongo.so $(EXT_DIR)
 	cp $(CURDIR)/mongo.ini $(EXT_DIR)
 
 binary-indep: build install

@@ -15,10 +15,5 @@ if [ -f /etc/init.d/cfengine3 ];then
         done
 fi
 
-mkdir -p /usr/local/sbin
-for i in cf-agent cf-execd cf-key cf-monitord cf-promises cf-runagent cf-serverd; do
-        ln -sf /var/cfengine/bin/$i /usr/local/sbin/$i
-done
-
 exit 0
 

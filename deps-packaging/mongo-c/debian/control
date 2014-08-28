@@ -1,7 +1,7 @@
 Source: cfbuild-mongo-c
 Section: libs
 Priority: optional
-Maintainer: CFEngine Packages <packager@cfengine.com>
+Maintainer: CFEngine Packager <packager@cfengine.com>
 Build-Depends: debhelper
 Standards-Version: 3.8.4
 

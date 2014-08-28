@@ -6,8 +6,6 @@
 %define mongoarch x86_64
 %endif
 
-%global __os_install_post %{nil}
-
 Summary: CFEngine Build Automation -- mongo
 Name: cfbuild-mongo
 Version: %{version}
@@ -20,7 +18,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-%define prefix %{buildprefix}
+%define prefix /var/cfengine
 
 %prep
 %setup -q -n mongodb-linux-%{mongoarch}-2.2.4
@@ -31,7 +29,7 @@ AutoReqProv: no
 rm -rf ${RPM_BUILD_ROOT}
 
 mkdir -p ${RPM_BUILD_ROOT}%{prefix}/bin
-cp bin/* ${RPM_BUILD_ROOT}%{prefix}/bin
+cp bin/mongo* ${RPM_BUILD_ROOT}%{prefix}/bin
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -43,6 +41,6 @@ CFEngine Build Automation -- mongo
 %defattr(-,root,root)
 
 %dir %prefix/bin
-%prefix/bin/*
+%prefix/bin/mongo*
 
 %changelog

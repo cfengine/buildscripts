@@ -9,8 +9,8 @@ Package: cfengine-nova
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Provides: cfengine3, cfengine-community
-Conflicts: cfengine3, cfengine-community, cfengine-nova
-Replaces: cfengine3, cfengine-community, cfengine-nova
+Conflicts: cfengine3, cfengine-community
+Replaces: cfengine3, cfengine-community
 Description: CFEngine Nova : The next generation tool for data centre.
  CFEngine, or the configuration engine is an agent/software robot and a
  very high level language for building expert systems to administrate
@@ -19,3 +19,17 @@ Description: CFEngine Nova : The next generation tool for data centre.
  the configuration and maintenance of system state, for small to huge
  configurations. CFEngine is designed to be a part of a computer immune
  system.
+
+Package: cfengine-nova-expansion
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, cfengine-nova (= ${binary:Version})
+Description: CFEngine Nova : The next generation tool for data centre.
+ CFEngine, or the configuration engine is an agent/software robot and a
+ very high level language for building expert systems to administrate
+ and configure large computer networks. CFEngine uses the idea of
+ classes and a primitive form of intelligence to define and automate
+ the configuration and maintenance of system state, for small to huge
+ configurations. CFEngine is designed to be a part of a computer immune
+ system.
+ .
+ This package contains the web-interface part of CFEngine Nova.

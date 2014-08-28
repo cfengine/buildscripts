@@ -11,7 +11,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-%define prefix %{buildprefix}
+%define prefix /var/cfengine
 
 %prep
 mkdir -p %{_builddir}
@@ -19,8 +19,8 @@ mkdir -p %{_builddir}
 
 %build
 
-%{prefix}/httpd/php/bin/phpize
-./configure --prefix=%{prefix} --with-php-config=%{prefix}/httpd/php/bin/php-config LDFLAGS="-L%{prefix}/lib" CPPFLAGS="-I%{prefix}/include"
+phpize
+./configure --prefix=%{prefix}
 
 make
 

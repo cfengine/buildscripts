@@ -10,43 +10,28 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-Patch0: aix-link-fix.patch
-
-%define prefix %{buildprefix}
+%define prefix /var/cfengine
 
 %prep
 mkdir -p %{_builddir}
 %setup -q -n tokyocabinet-1.4.45
-%if "%{_os}" == "aix"
-%patch0 -p1
-%endif
 
 %build
 
-SYS=`uname -s`
-
-if [ -z $MAKE ]; then
-  MAKE_PATH=`which make`
-  export MAKE=$MAKE_PATH
-fi
-
-
 ./configure --enable-off64 --enable-shared --enable-pthread --prefix=%{prefix} --disable-zlib --disable-bzip
 
-$MAKE
+make
 
-if ! [ $SYS = "AIX" ]; then
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
-$MAKE check-util
-$MAKE check-hdb
+make check-util
+make check-hdb
 rm -rf casket*
 %endif
-fi
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-$MAKE install DESTDIR=${RPM_BUILD_ROOT}
+make install DESTDIR=${RPM_BUILD_ROOT}
 
 rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/tca*
 rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/tcb*
@@ -86,7 +71,6 @@ CFEngine Build Automation -- tokyocabinet -- development files
 %{prefix}/bin/tchmgr
 
 %dir %{prefix}/lib
-%{prefix}/lib/libtokyocabinet.so
 %{prefix}/lib/libtokyocabinet.so.9
 %{prefix}/lib/libtokyocabinet.so.9.8.0
 

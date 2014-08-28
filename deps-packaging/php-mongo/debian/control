@@ -2,7 +2,7 @@ Source: cfbuild-php-mongo
 Section: libs
 Priority: optional
 Maintainer: CFEngine Packager <packager@cfengine.com>
-Build-Depends: debhelper, fakeroot
+Build-Depends: debhelper, php5-dev, fakeroot
 Standards-Version: 3.8.4
 
 Package: cfbuild-php-mongo

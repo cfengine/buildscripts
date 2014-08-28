@@ -73,32 +73,17 @@ case "$TARGET" in
   native)
     ;;
   *)
-    if [ -d $PKGDIR/mingw ]; then
-      rm -rf $PKGDIR/debian
-      mv $PKGDIR/mingw/debian $PKGDIR
-    fi
+    rm -rf $PKGDIR/debian
+    mv $PKGDIR/mingw/debian $PKGDIR
 
     case "$TARGET" in
       x86)
-        ARCH_OPTIONS="-ti686-w64-mingw32";;
+        DEB_BUILD_OPTIONS="arch=i686-w64-mingw32";;
       x64)
-        ARCH_OPTIONS="-tx86_64-w64-mingw32";;
+        DEB_BUILD_OPTIONS="arch=x86_64-w64-mingw32";;
       *)
         fatal "Unknown architecture: $ARCH" 2>&1;;
-    esac
-
-    # Architecture needs to be the build machine architecture, since we will
-    # install the package on that machine afterwards and the package
-    # architecture needs to match.
-    case "$(uname -m)" in
-      i*86)
-        ARCH_OPTIONS="$ARCH_OPTIONS -ai386";;
-      x86_64)
-        ARCH_OPTIONS="$ARCH_OPTIONS -aamd64";;
-      *)
-        fatal "Unknown architecture" 2>&1;;
-    esac
-    ;;
+    esac;;
 esac
 
 case "$TESTS" in
@@ -141,5 +126,4 @@ EOF
 # Build!
 
 cd $PKGDIR
-export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"
-dpkg-buildpackage $ARCH_OPTIONS -b -us -uc -rfakeroot
+DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS" dpkg-buildpackage -b -us -uc -rfakeroot

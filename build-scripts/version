@@ -5,9 +5,8 @@
 parse_version_string()
 {
   VARNAME="$1"
-  VERSION_PATH="$2"
 
-  VERSION=$(awk '/^ ?'$VARNAME'=/ {print}' < $BASEDIR/$VERSION_PATH/configure)
+  VERSION=$(awk '/^ ?'$VARNAME'=/ {print}' < $BASEDIR/core/configure)
 
   VERSION=${VERSION#*=}
 
@@ -21,73 +20,44 @@ parse_version_string()
 
 ci_version()
 {
-  echo "ci_version"
   if [ -d $BASEDIR/nova ]; then
-    VERSION=$(parse_version_string NOVA_VERSION "nova")
-    echo "Using NOVA_VERSION: $NOVA_VERSION"
+    VERSION=$(parse_version_string NOVA_VERSION)
   else
-    VERSION=$(parse_version_string VERSION "core")
-    echo "Using VERSION: $VERSION"
+    VERSION=$(parse_version_string VERSION)
   fi
 
   # Insert ~, so pre-releases get sorted before releases
 
-  MAIN_VERSION=$(printf "$VERSION" | perl -ne 'if (/^(\d+\.\d+\.\d+)([a-z][^.]+)?/) { print $1 }')
-  SUPP_VERSION=$(printf "$VERSION" | perl -ne 'if (/^(\d+\.\d+\.\d+)([a-z][^.]+)?/) { print $2 }')
-
-  if [ -z "$MAIN_VERSION" ]; then
-    echo "Unable to parse version $VERSION. Bailing out."
-    exit 42
-  fi
+  MAIN_VERSION=$(echo -n 3.4.0 | perl -ne 'if (/^(\d+\.\d+\.\d+)([^.]+)?(?:\.([0-9a-f]+))?$/) { print $1 }')
+  SUPP_VERSION=$(echo -n 3.4.0 | perl -ne 'if (/^(\d+\.\d+\.\d+)([^.]+)?(?:\.([0-9a-f]+))?$/) { print $2 }')
 
   if [ -z "$SUPP_VERSION" ]; then
     VERSION="$MAIN_VERSION"
   else
     VERSION="$MAIN_VERSION~$SUPP_VERSION"
   fi
-  echo "VERSION: $VERSION"
 }
 
 release_version()
 {
-  echo "release_version"
   if [ -d $BASEDIR/nova ]; then
-    VERSION=$(parse_version_string NOVA_VERSION "nova")
-    echo "Using NOVA_VERSION: $NOVA_VERSION"
+    PROJECT=nova
+    VERSION=$(parse_version_string NOVA_VERSION)
   else
-    VERSION=$(parse_version_string VERSION "core")
-    echo "Using VERSION: $VERSION"
+    PROJECT=community
+    VERSION=$(parse_version_string VERSION)
   fi
-  echo "VERSION: $VERSION"
 }
 
-continuous_version()
-{
-  MONTH=`date +"%m"`
-  YEAR=`date +"%g"`
-  MY_BUILD_NUMBER=$BUILD_NUMBER
-  MY_MAJOR_VERSION=$MAJOR_VERSION
-  echo "version is $MY_MAJOR_VERSION.$YEAR.$MONTH-$MY_BUILD_NUMBER"
-  VERSION=$MY_MAJOR_VERSION.$YEAR.$MONTH-$MY_BUILD_NUMBER
-}
-
-if [ -z "$EXPLICIT_VERSION" ]; then 
-  case "$BUILD_TYPE" in
-    quick|full)
-      ci_version;;
-    debug)
-      ci_version
-      VERSION="$VERSION.debug";;
-    code_coverage)
-      ci_version
-      VERSION="$VERSION.code_coverage";;
-    release|debug_and_release)
-      release_version;;
-    *)
-      echo "Unknown build type: $BUILD_TYPE"
-      exit 1;;
-  esac
-else
-  VERSION=$EXPLICIT_VERSION
-fi
-
+case "$BUILD_TYPE" in
+  quick|full)
+    ci_version;;
+  debug)
+    ci_version
+    VERSION="$VERSION.debug";;
+  release)
+    release_version;;
+  *)
+    echo "Unknown build type: $BUILD_TYPE"
+    exit 1;;
+esac

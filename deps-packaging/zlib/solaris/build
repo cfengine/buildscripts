@@ -20,7 +20,7 @@ make
 
 # Test
 
-if [ "$TESTS" = all ]; then
+if [ "$TESTS" != no ]; then
   make check
 fi
 
