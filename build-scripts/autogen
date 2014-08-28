@@ -2,12 +2,15 @@
 
 . `dirname "$0"`/functions
 
+GITSHAOF="core autobuild autobuild/deps-packaging"
+
 case "$PROJECT" in
   community)
     NOVA=no
     ;;
   nova)
     NOVA=yes
+    GITSHAOF="$GITSHAOF enterprise nova"
     ;;
   *)
     echo "Unknown project: $PROJECT"
@@ -16,8 +19,15 @@ esac
 
 (cd $BASEDIR/core && NO_CONFIGURE=1 ./autogen.sh) || false
 
-for i in autobuild autobuild/deps-packaging core nova; do
-  if [ -d $BASEDIR/$i ]; then
+if test "x$NOVA" = "xyes"; then
+    (cd $BASEDIR/enterprise && NO_CONFIGURE=1 ./autogen.sh) || false
+    (cd $BASEDIR/nova && NO_CONFIGURE=1 ./autogen.sh) || false
+fi
+
+(cd $BASEDIR/masterfiles && NO_CONFIGURE=1 ./autogen.sh) || false
+
+for i in $GITSHAOF; do
+  if [ -d $BASEDIR/$i ] && [ ! -f $BASEDIR/$i/revision ]; then
     R=$(cd $BASEDIR/$i && git log --pretty='format:%h' -1 -- .) || false
     echo $R | tr -d '\n' > $BASEDIR/$i/revision
   fi

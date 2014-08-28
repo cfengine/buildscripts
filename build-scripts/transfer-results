@@ -7,7 +7,7 @@ set -x
 
 BUILDMACHINE="$1"
 
-mkdir -p $BASEDIR/../../../output/.tmp/${SCHEDULER}/${BUILD_NUMBER}
-rsync -ar "$BUILDMACHINE:build/output/*" $BASEDIR/../../../output/.tmp/${SCHEDULER}/${BUILD_NUMBER}
+mkdir -p $BASEDIR/../../../output/${SCHEDULER}/${BUILD_NUMBER}
+rsync -avr --delete "$BUILDMACHINE:build/output/*" $BASEDIR/../../../output/${SCHEDULER}/${BUILD_NUMBER}
 
 ssh "$BUILDMACHINE" "rm -rf build/output"

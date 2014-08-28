@@ -2,9 +2,16 @@
 
 # Installs given packages
 
+case "$0" in
+  /*) SCRIPTDIR=`dirname "$0"`;;
+  *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
+esac
+BASEDIR=`dirname "$SCRIPTDIR"`
+BASEDIR=`dirname "$BASEDIR"`
+
 if [ $# -eq 0 ]; then
    echo "Usage: $0 <pkg> [<pkg> ...]"
    exit 1
 fi
 
-sudo dpkg -i "$@"
+$BASEDIR/autobuild/build-scripts/execute-wrapper.sh sudo dpkg -i "$@"

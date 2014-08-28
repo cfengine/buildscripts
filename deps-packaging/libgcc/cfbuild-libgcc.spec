@@ -23,13 +23,6 @@ rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}/lib
 
-
-LIBGCC=`find /opt/freeware -name libgcc_s.a|head -1`
-LIBSTDC=`find /opt/freeware -name libstdc++.a|head -1`
-
-cp $LIBGCC $RPM_BUILD_ROOT%{prefix}/lib/
-cp $LIBSTDC $RPM_BUILD_ROOT%{prefix}/lib/
-
 cp  /opt/freeware/lib/gcc/powerpc-ibm-aix5.3.0.0/4.2.0/libgcc_s.a $RPM_BUILD_ROOT%{prefix}/lib/
 cp  /opt/freeware/lib/gcc/powerpc-ibm-aix5.3.0.0/4.2.0/libstdc++.a $RPM_BUILD_ROOT%{prefix}/lib/
 cp  /usr/ccs/lib/libpthdebug.a $RPM_BUILD_ROOT%{prefix}/lib/

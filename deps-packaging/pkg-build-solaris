@@ -48,6 +48,7 @@ OPTIMIZE="$4"
 DEBUGSYM="5"
 VERSION="$6"
 
+
 if [ "$TARGET" != "native" ]; then
   echo "Egh? Cross-compiling for Solaris!?"
   exit 42
@@ -71,11 +72,19 @@ pkg-get-autobuild-src "$P" | while read srcfile opts; do
   esac
 
   if [ x$opts = xsubdir ]; then
-    $UNCOMPRESS $srcfile | (cd $PKGDIR; tar xf -) || false
+   if [ "$OS_VERSION" = "8" ]; then
+    $UNCOMPRESS $srcfile | (cd $PKGDIR; LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" gtar xf -) || false
+   else
+    $UNCOMPRESS $srcfile | (cd $PKGDIR; gtar xf -) || false
+   fi
   else
     TD=/tmp/`basename $srcfile`.$$
     mkdir -p "$TD"
-    $UNCOMPRESS $srcfile | (cd "$TD" && tar xf -) || false
+    if [ "$OS_VERSION" = "8" ]; then
+     $UNCOMPRESS $srcfile | (cd "$TD" && gtar xf -) || false
+    else
+     $UNCOMPRESS $srcfile | (cd "$TD" && LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" gtar xf -) || false
+    fi
     mv $TD/*/* $PKGDIR
     rm -r "$TD"
   fi

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -ex
 
 . `dirname "$0"`/functions
 . detect-environment
@@ -30,17 +30,19 @@ case "$BUILD_TYPE" in
     DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS noopt nostrip"
     RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_optimize 0"
     RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_debugsym 1";;
-  quick|smoke|full|release|debug_and_release)
+  quick|full|release|debug_and_release|code_coverage)
+     DEB_BUILD_OPTIONS="nostrip"
     ;;
   *)
     echo "Unknown build type: $BUILD_TYPE"
     exit 42;;
 esac
 
-# Clean -devel packages, so their contents doesn't end up in our packages
-
+# Clean -devel packages, so their contents doesn't end up in our packages, set env variable for dev trouble shooting
+if [ "x$LEAVE_DEVEL_PACKAGES" != "xyes" ]
+then
 uninstall_cfbuild_devel
-
+fi
 # Build it
 
 P="$BASEDIR/autobuild/packaging/$PKG"
@@ -49,12 +51,7 @@ P="$BASEDIR/autobuild/packaging/$PKG"
 escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
 if [ "$PROJECT" = "nova" ];
 then
-if [ "$SYS" = "AIX" ];
-then
-    initdFile=$BASEDIR/core/dist/etc/init.d/cfengine3
-else
-    initdFile=$BASEDIR/nova/misc/init.d/cfengine3
-fi
+initdFile=$BASEDIR/enterprise/misc/init.d/cfengine3
 case "$PACKAGING" in
   solaris)
   sed "s/\/var\/cfengine/$escapedPrefix/g" $initdFile > $initdFile.new && mv $initdFile.new $initdFile
@@ -152,18 +149,15 @@ case "$PACKAGING" in
   
     sed -e "s/@@VERSION@@/$DEB_VERSION/" $BASEDIR/$PKG/pkg/debian/changelog.in > $BASEDIR/$PKG/pkg/debian/changelog
 
-    (cd $BASEDIR/$PKG/pkg; DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS" dpkg-buildpackage -b -us -uc -rfakeroot) || false
+    (cd $BASEDIR/$PKG/pkg; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
     ;;
 
   solaris)
-    rm -rf $BASEDIR/$PKG/pkg
+    sudo rm -rf $BASEDIR/$PKG/pkg
     mkdir -p $BASEDIR/$PKG/pkg
 
-#    cp -pr $P/solaris/etc/ $BASEDIR/$PKG/pkg/
-#    cp -pr $P/solaris/postinstall $BASEDIR/$PKG/pkg/
-#    cp -pr $P/solaris/preremove $BASEDIR/$PKG/pkg/
     cp -pr $P/solaris/* $BASEDIR/$PKG/pkg/
-    cp -pr $BASEDIR/core/dist/var/cfengine/* $BASEDIR/$PKG/pkg
+    cp -pr $BASEDIR/cfengine/dist/var/cfengine/* $BASEDIR/$PKG/pkg
     cp -pr /var/cfengine/bin/* $BASEDIR/$PKG/pkg/bin
     cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg/lib
     
@@ -173,15 +167,11 @@ case "$PACKAGING" in
     cd $BASEDIR/$PKG/pkg
     cat prototype.head > prototype.tmp && find . | egrep -v 'postinstall|pkginfo|prototype|preremove|./etc|prototype.head|pkginfo.in' | pkgproto >> prototype.tmp
 
-    # Old build system
-    sed -e "s/build/root/g;s/sudoers/root/g" prototype.tmp > prototype
-    # New build system
-    sed -e "s/jenkins/root/g;s/sudoers/root/g" prototype.tmp > prototype
-#    pkgmk -o -r `pwd`
+    # Replace last two words with "root root".
+    sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp > prototype
+
     pkgmk -o -r `pwd` -d $BASEDIR/$PKG/pkg
-#    cd /var/spool/pkg/
     NAME=CFE$PKG-$VERSION-$ARCH.pkg
-#    echo "$NAME"
     pkgtrans -o -s $BASEDIR/$PKG/pkg $BASEDIR/$PKG/$NAME CFE$PKG
     ;;
   freebsd)
@@ -190,7 +180,7 @@ case "$PACKAGING" in
 	  mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
 
 	  cp -pr $P/freebsd/* $BASEDIR/$PKG/pkg/
-	  cp -pr $BASEDIR/core/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
+	  cp -pr $BASEDIR/cfengine/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
 	  cp -pr /var/cfengine/bin/* $BASEDIR/$PKG/pkg${PREFIX}/bin
 	  cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
 
@@ -233,7 +223,7 @@ case "$PACKAGING" in
       mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
 
       cp -pr $P/hpux/* $BASEDIR/$PKG/pkg/
-      cp -pr $BASEDIR/core/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
+      cp -pr $BASEDIR/cfengine/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
       cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
 
       cd $BASEDIR/$PKG/pkg${PREFIX}/

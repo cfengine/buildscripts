@@ -12,9 +12,9 @@ else
     echo "Producing debug symbols"
 fi
 
-EXECUTABLES_DIR=$BASEDIR/core/dist/var/cfengine/bin
+EXECUTABLES_DIR=$BASEDIR/cfengine/dist/var/cfengine/bin
 EXECUTABLES_LIST=`ls $EXECUTABLES_DIR/cf-*`
-LIBRARIES_DIR=$BASEDIR/core/dist/var/cfengine/lib
+LIBRARIES_DIR=$BASEDIR/cfengine/dist/var/cfengine/lib
 LIBRARIES_LIST=`ls $LIBRARIES_DIR/*.so*`
 DEBUG_SUFFIX=debug
 PAYLOAD_DIR=payload

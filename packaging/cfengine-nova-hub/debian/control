@@ -9,7 +9,7 @@ Package: cfengine-nova-hub
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Provides: cfengine-nova-hub
-Replaces: cfengine3, cfengine-community, cfengine-nova, cfengine-nova-expansion, cfengine-nova-hub
+Replaces: cfengine3, cfengine-community, cfengine-nova-hub
 Description: CFEngine Nova : The next generation tool for data centre.
  CFEngine, or the configuration engine is an agent/software robot and a
  very high level language for building expert systems to administrate

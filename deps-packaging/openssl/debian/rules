@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 PREFIX=$(BUILDPREFIX)
-DF=openssl-fips-1.2.2
+DF=openssl-fips-1.2.4
 
 clean:
 	dh_testdir
@@ -15,9 +15,30 @@ build-stamp:
 
 	cd $(DF) && ./config fipscanisterbuild no-asm
 	cd $(DF) && make
-	./config fips --with-fipslibdir=$(CURDIR)/$(DF)/fips shared --prefix=$(PREFIX)
+
+	echo BUILD_TYPE is $$BUILD_TYPE
+
+	DEBUG_CONFIG_FLAGS= ;\
+	DEBUG_CFLAGS= ;\
+	if [ $$BUILD_TYPE = "debug" -o $$BUILD_TYPE = "quick" ] ;\
+	then \
+		DEBUG_CONFIG_FLAGS="no-asm -DPURIFY" ;\
+		DEBUG_CFLAGS="-g -O1 -fno-omit-frame-pointer" ;\
+	fi ;\
+	\
+	./config fips no-ec shared  no-dtls no-psk no-srp  $$DEBUG_CONFIG_FLAGS \
+		--with-fipslibdir=$(CURDIR)/$(DF)/fips --prefix=$(PREFIX) \
+		$$DEBUG_CFLAGS
+
+	# Remove -O3 and -fomit-frame-pointer from debug and quick builds
+	if [ $$BUILD_TYPE = "debug" -o $$BUILD_TYPE = "quick" ] ;\
+	then \
+		sed -i -e '/^CFLAG=/{s/ -O3//;s/ -fomit-frame-pointer//}'   Makefile ;\
+	fi
+
 	make SHARED_LDFLAGS="$(SHARED_LDFLAGS)-L$(PREFIX)/lib -Wl,-rpath $(PREFIX)/lib"
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+
 	# ECDSA/ECDH tests are broken, so we explicitly omit them
 	make test TESTS="test_des test_idea test_sha test_md4 test_md5 test_hmac test_md2 test_mdc2 test_rmd test_rc2 test_rc4 test_rc5 test_bf test_cast test_aes test_rand test_bn test_ec test_enc test_x509 test_rsa test_crl test_sid test_gen test_req test_pkcs7 test_verify test_dh test_dsa test_ss test_ca test_engine test_evp test_ssl test_ige test_jpake"
 endif
@@ -33,17 +54,11 @@ install: build
 	$(MAKE) install_sw INSTALL_PREFIX=$(CURDIR)/debian/tmp
 
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/c_rehash
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/libssl.a
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/libcrypto.a
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/engines
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/pkgconfig/openssl.pc
-
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl/certs
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl/private
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl/openssl.cnf
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl/misc
 
 binary-indep: build install
 

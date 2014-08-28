@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
 Version: %{version}
 Release: 1
-Source0: php-5.4.13.tar.gz
+Source0: php-5.4.20.tar.gz
 Source1: php.ini
 License: MIT
 Group: Other
@@ -15,9 +15,9 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n php-5.4.13
+%setup -q -n php-5.4.20
 
-./configure --prefix=%{prefix}/httpd/php --with-apxs2=%{prefix}/httpd/bin/apxs --with-config-file=%{prefix}/httpd/php --with-config-file-scan-dir=%{prefix}/httpd/php/lib --with-libxml-dir=%{prefix} --with-curl=shared,%{prefix} --with-mcrypt=shared,%{prefix} --with-pdo --with-json LDFLAGS="-L/var/cfengine/lib -R/var/cfengine/lib" CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
+./configure --prefix=%{prefix}/httpd/php --with-apxs2=%{prefix}/httpd/bin/apxs --with-config-file=%{prefix}/httpd/php   --with-openssl=shared,%{prefix} --with-config-file-scan-dir=%{prefix}/httpd/php/lib --with-libxml-dir=%{prefix} --with-curl=shared,%{prefix} --with-mcrypt=shared,%{prefix} --with-pdo --with-pdo-pgsql=%{prefix} --with-json LDFLAGS="-L/var/cfengine/lib -R/var/cfengine/lib" CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
 
 %build
 
@@ -30,9 +30,10 @@ cp %{prefix}/httpd/conf/httpd.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
 
 INSTALL_ROOT=${RPM_BUILD_ROOT} make install
 
-cp %{_builddir}/php-5.4.13/php.ini-production ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
+cp %{_builddir}/php-5.4.20/php.ini-production ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
 echo "extension=curl.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/curl.ini
 echo "extension=mcrypt.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/mcrypt.ini
+echo "extension=openssl.so" >>${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/openssl.ini
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php/.channels
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php/.depdb

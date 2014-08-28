@@ -9,7 +9,7 @@ LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
 export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 #Patch
-
+gpatch -p1 < solaris-unistd.patch
 #Configure
 
 ./configure --prefix=$PREFIX CPPFLAGS=-I/var/cfengine/include

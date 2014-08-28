@@ -5,14 +5,6 @@ if [ -x /etc/init.d/cfengine3 ]; then
    /var/cfengine/httpd/bin/apachectl stop
 fi
 
-if [ -f /usr/bin/killall ]; then
-    /usr/bin/killall -q -15 mongod
-    /bin/rm -f /var/cfengine/state/mongod.lock
-else
-    /usr/bin/pkill -15 mongod || true
-    /bin/rm -f /var/cfengine/state/mongod.lock
-fi
-
 if [ -f /etc/manpath.config ]; then
  grep -q cfengine /etc/manpath.config
  if [ $? = "0" ]; then

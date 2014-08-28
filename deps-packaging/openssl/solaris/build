@@ -17,12 +17,17 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 export PATH=`pwd`/solaris:$PATH
 
-cd openssl-fips-1.2.2
+# Patch
+
+gpatch -p0 < solaris-int-max.patch
+
+cd openssl-fips-1.2.4
 ./config fipscanisterbuild
 make
 cd ..
 
-./config fips shared --with-fipslibdir=`pwd`/openssl-fips-1.2.2/fips --prefix=$PREFIX
+./config fips no-ec shared  no-dtls no-psk no-srp \
+    --with-fipslibdir=`pwd`/openssl-fips-1.2.4/fips --prefix=$PREFIX
 
 # Build
 

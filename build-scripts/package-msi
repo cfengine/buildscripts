@@ -34,88 +34,93 @@ LIGHT="\"$WIXPATH/light.exe\""
 
 HOMEPATH="\"c:\\documents and settings\\jenkins\""
 
-DIRNAME=build-$VERSION-$ARCH
+if [ -z $JOB_NAME ]; then
+  DIRNAME=build-$VERSION-$ARCH
+else
+  DIRNAME=$(echo ${JOB_NAME} |sed 's/\(.*\)\/.*/\1/g')
+fi
 
 prepare()
 {
-PKGD=$BASEDIR/packaging/cfengine-nova/pkg
-P=$PKGD/$DIRNAME
-rm -rf $PKGD
-mkdir -p $P/bin
+  PKGD=$BASEDIR/packaging/cfengine-nova/pkg
+  P=$PKGD/$DIRNAME
+  rm -rf $PKGD
+  mkdir -p $P/bin
 
-cp -a /var/cfengine/bin/* $P/bin
-cp -a $BASEDIR/core/dist/var/cfengine/bin/* $P/bin
+  cp -a $BUILDPREFIX/bin/* $P/bin
+  cp -a $BASEDIR/cfengine/dist$BUILDPREFIX/bin/* $P/bin
 
-case "$ARCH" in
-  x86) cp -a $BASEDIR/nova/libcfnova/cf.events.i686.dll $P/bin/cf.events.dll;;
-  x64) cp -a $BASEDIR/nova/libcfnova/cf.events.x86_64.dll $P/bin/cf.events.dll;;
-  *)
-    echo "Unknown architecture: $ARCH"
-    exit 1;;
-esac
+  case "$ARCH" in
+    x86) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll;;
+    x64) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.x86_64.dll $P/bin/cf.events.dll;;
+    *)
+      echo "Unknown architecture: $ARCH"
+      exit 1;;
+  esac
 
-cp $BASEDIR/autobuild/packaging/cfengine-nova/cfengine-nova.wxs $P
+  cp $BASEDIR/autobuild/packaging/cfengine-nova/cfengine-nova.wxs $P
 
-(cd $PKGD; zip -r $DIRNAME.zip $DIRNAME) || false
+  (cd $PKGD; zip -r $DIRNAME.zip $DIRNAME) || false
 }
 
 pre_put()
 {
-$SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME" || :
+  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME" || :
 }
 
 put_zip()
 {
-echo "put $P.zip" | $SFTP "$WIX_MACHINE"
+  echo "put $P.zip" | $SFTP "$WIX_MACHINE"
 }
 
 post_put()
 {
-$SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && $SEVENZIP x -y $DIRNAME.zip"
+  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && $SEVENZIP x -y $DIRNAME.zip"
 }
 
 put()
 {
-try_run pre_put
-try_run put_zip
-try_run post_put
+  try_run pre_put
+  try_run put_zip
+  try_run post_put
 }
 
 candle()
 {
-REVISION="$1"
-$SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH\\$DIRNAME && $CANDLE -dCfSourceDir=$HOMEPATH\\$DIRNAME -dCfVersion=$REVISION -dCfArch=$ARCH cfengine-nova.wxs"
+  REVISION="$1"
+  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH\\$DIRNAME && $CANDLE -dCfSourceDir=$HOMEPATH\\$DIRNAME -dCfVersion=$REVISION -dCfArch=$ARCH cfengine-nova.wxs"
 }
 
 light()
 {
-$SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH\\$DIRNAME && $LIGHT -ext WixUtilExtension cfengine-nova.wixobj"
+  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH\\$DIRNAME && $LIGHT -sice:ICE20 -ext WixUtilExtension cfengine-nova.wixobj"
 }
 
 package()
 {
-if [ -z $EXPLICIT_VERSION ]; then
-  case $BUILD_TYPE in
-    release|debug_and_release)
-      REVISION=$VERSION.65534
-      ;;
-    quick|smoke|full|debug)
-      MAIN_VERSION=${VERSION%\~*}
-      REVISION=$MAIN_VERSION.$BUILD_NUMBER
-      ;;
-  esac
-else
+  if [ -z $EXPLICIT_VERSION ]; then
+    case $BUILD_TYPE in
+      release|debug_and_release)
+        REVISION=$VERSION.0
+        ;;
+      quick|full|debug|code_coverage)
+        MAIN_VERSION=${VERSION%\~*}
+        REVISION=$MAIN_VERSION.$BUILD_NUMBER
+        ;;
+    esac
+  else
     REVISION=$EXPLICIT_VERSION.65534
-fi
+    #fix me, come up with some way of specifying a version number. right now get rid of alphabets.
+    REVISION=$(echo $REVISION | sed 's/[a-z]*//g');
+  fi
 
-# convert any alphabets in revison to int as no alphabets are allowed in windows package version
-alphabet=$(echo $REVISION|sed -e 's/.*\([a-z]\).*/\1/');
-convert=$(printf '%d' "'$alphabet")
-REVISION=$(echo $REVISION|sed -e "s/\(.*\)[a-z]\(.*\)/\1$convert\2/");
-
-# FIXME: due to some reason Windows machine is flaky.
-try_run candle "$REVISION"
-try_run light
+  # convert any alphabets in revison to int as no alphabets are allowed in windows package version
+  alphabet=$(echo $REVISION|sed -e 's/.*\([a-z]\).*/\1/');
+  convert=$(printf '%d' "'$alphabet")
+  REVISION=$(echo $REVISION|sed -e "s/\(.*\)[a-z]\(.*\)/\1$convert\2/");
+  # FIXME: due to some reason Windows machine is flaky.
+  try_run candle "$REVISION"
+  try_run light
 }
 
 get_msi() {
@@ -125,17 +130,27 @@ get cfengine-nova.msi" | $SFTP "$WIX_MACHINE"
 
 get()
 {
-mkdir -p $BASEDIR/cfengine-nova
-cd $BASEDIR/cfengine-nova
-try_run get_msi
-case $ARCH in
-  x86)
-    mv cfengine-nova.msi cfengine-nova-$VERSION-i686.msi
-    ;;
-  x64)
-    mv cfengine-nova.msi cfengine-nova-$VERSION-x86_64.msi
-    ;;
-esac
+  mkdir -p $BASEDIR/cfengine-nova
+  cd $BASEDIR/cfengine-nova
+  try_run get_msi
+
+  case $BUILD_TYPE in
+    release|debug_and_release)
+      PKGNAME="cfengine-nova-$VERSION"
+      ;;
+    quick|full|debug|code_coverage)
+      PKGNAME="cfengine-nova-$VERSION-$BUILD_NUMBER"
+      ;;
+  esac
+
+  case $ARCH in
+    x86)
+      mv cfengine-nova.msi $PKGNAME-i686.msi
+      ;;
+    x64)
+      mv cfengine-nova.msi $PKGNAME-x86_64.msi
+      ;;
+  esac
 }
 
 clean_msi() {

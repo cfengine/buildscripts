@@ -10,7 +10,7 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # Patch
 
-patch -p0 -i configure.patch configure
+#patch -p0 -i configure.patch configure
 
 # Configure
 

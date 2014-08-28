@@ -1,4 +1,5 @@
 /var/cfengine/bin/git*
+/var/cfengine/lib/git-core
 /var/cfengine/share/git*
 /var/cfengine/share/locale
 /var/cfengine/share/man

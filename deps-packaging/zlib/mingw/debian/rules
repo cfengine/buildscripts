@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=/var/cfengine
-DEB_HOST_GNU_TYPE = $(patsubst arch=%,%,$(filter arch=%,$(DEB_BUILD_OPTIONS)))
+PREFIX=$(BUILDPREFIX)
 
 clean:
 	dh_testdir
@@ -36,8 +35,6 @@ install: build
 		LIBRARY_PATH=$(CURDIR)/debian/tmp$(PREFIX)/lib
 
 	rm -f $(CURDIR)/debian/tmp${PREFIX}/lib/libz.a
-	mv $(CURDIR)/debian/tmp${PREFIX}/lib/libzdll.a \
-	   $(CURDIR)/debian/tmp${PREFIX}/lib/libz.dll.a
 
 binary-indep: build install
 

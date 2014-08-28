@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=/var/cfengine
-DEB_HOST_GNU_TYPE = $(patsubst arch=%,%,$(filter arch=%,$(DEB_BUILD_OPTIONS)))
+PREFIX=$(BUILDPREFIX)
 
 clean:
 	dh_testdir
@@ -16,7 +15,7 @@ build-stamp:
 	dh_testdir
 
 	#patch -p1 < 0001-Fix-struct-timespec-redifinition-for-MinGW.patch
-	patch -p1 < cvs-20120509.patch
+	#patch -p1 < cvs-20120509.patch
 	make CROSS=$(DEB_HOST_GNU_TYPE)- clean GC-inlined
 
 	touch build-stamp

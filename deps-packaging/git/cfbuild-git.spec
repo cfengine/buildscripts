@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- git
 Name: cfbuild-git
 Version: %{version}
 Release: 1
-Source0: git-1.8.2.2.tar.gz
+Source0: git-1.8.4.1.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,9 +14,9 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n git-1.8.2.2
+%setup -q -n git-1.8.4.1
 
-./configure --prefix=%{prefix} --with-libpcre=%{prefix} --with-openssl=%{prefix} --without-iconv --with-gitconfig=%{prefix} --with-gitattributes=%{prefix} --with-zlib=%{prefix} --with-curl=%{prefix} 
+./configure --prefix=%{prefix} --with-libpcre=%{prefix} --with-openssl=%{prefix} --without-iconv --with-gitconfig=%{prefix} --with-gitattributes=%{prefix} --with-zlib=%{prefix} --with-curl=%{prefix}  --libexecdir=%{prefix}/lib
 
 %build
 
@@ -29,9 +29,9 @@ make install DESTDIR=${RPM_BUILD_ROOT}
 
 # Removing unused files
 
-rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/perl5
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/python*
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib64
-rm -rf ${RPM_BUILD_ROOT}%{prefix}/libexec
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/perl5
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share/perl5
 
@@ -60,5 +60,8 @@ CFEngine Build Automation -- git
 %{prefix}/share/gitweb
 %{prefix}/share/locale
 %{prefix}/share/man
+
+%dir %{prefix}/lib
+%{prefix}/lib/git-core
 
 %changelog

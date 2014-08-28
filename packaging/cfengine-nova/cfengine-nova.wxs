@@ -36,10 +36,9 @@
 	  <!-- Run cf-key after new installation -->
 	  <Property Id='GenerateKey' Value='empty, for now'  />
 	  <CustomAction Id='GenerateKeyPath' Property='GenerateKey' Value='&quot;[$(var.dirProgFiles)]\Cfengine\bin\cf-key.exe&quot;' Return='check' />
-      <CustomAction Id='GenerateKey' BinaryKey='WixCA' DllEntry='CAQuietExec' Execute='deferred' Return='check' />
+    <CustomAction Id='GenerateKey' BinaryKey='WixCA' DllEntry='CAQuietExec' Execute='deferred' Impersonate='no' Return='check' />
 
-	  <Property Id='ALLUSERS' Value='1' />  <!-- Install for all users -->
-
+	  <Property Id='ALLUSERS' Value='2' />
 	  <!--  Exit with success if installed version is not older -->
 	  <CustomActionRef Id='WixExitEarlyWithSuccess'/>
 
@@ -53,7 +52,7 @@
     	      <Component Id='cf_execd.exe' Guid='563060F2-462E-4A3C-90A1-696D5E0713D2' Win64='$(var.isWin64)'>
                 <File Id='cf_execd.exe' Name='cf-execd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-execd.exe' />
                 <ServiceControl Id='cf_execd.exe' Name='CfengineNovaExec' Stop='uninstall' Remove='uninstall' Wait='yes' />
-                <ServiceInstall Id='cf_execd.exe' Name='CfengineNovaExec' DisplayName='Cfengine Nova Executor' Type='ownProcess' Start='demand' ErrorControl='normal' Vital='yes' Description='The executor daemon is a scheduler and wrapper for execution of cf-agent. It collects the output of the agent and can email it to a specified address.' />
+                <ServiceInstall Id='cf_execd.exe' Name='CfengineNovaExec' DisplayName='Cfengine Nova Executor' Type='ownProcess' Start='auto' ErrorControl='normal' Vital='yes' Description='The executor daemon is a scheduler and wrapper for execution of cf-agent. It collects the output of the agent and can email it to a specified address.' />
               </Component>
               <Component Id='cf_agent.exe' Guid='8CEA06F4-1133-4E98-9EEF-9C1D39DEFAA5' Win64='$(var.isWin64)'>
                 <File Id='cf_agent.exe' Name='cf-agent.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-agent.exe' />
@@ -74,15 +73,21 @@
                 <Environment Id='Path' Name='Path' Value='[dir_bin]' Separator=';' Action='set' Part='last' System='yes' />
                 <File Id='cf_serverd.exe' Name='cf-serverd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-serverd.exe' />
               </Component>
-              <Component Id='dpmgr.exe' Guid='2B0AE460-8158-11E1-84B0-0021869E8B74' Win64='$(var.isWin64)'>
-                <File Id='dpmgr.exe' Name='dpmgr.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\dpmgr.exe' />
+              <Component Id='mdb_copy.exe' Guid='E41C3638-9BBE-497D-A5A8-DB2021030113' Win64='$(var.isWin64)'>
+                <File Id='mdb_copy.exe' Name='mdb_copy.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_copy.exe' />
               </Component>
-              <Component Id='dptsv.exe' Guid='8A160476-8162-11E1-8871-0021869E8B74' Win64='$(var.isWin64)'>
-                <File Id='dptsv.exe' Name='dptsv.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\dptsv.exe' />
+              <Component Id='mdb_stat.exe' Guid='2F61CE79-B0E8-4351-BE3E-7AEE65FE9D8A' Win64='$(var.isWin64)'>
+                <File Id='mdb_stat.exe' Name='mdb_stat.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_stat.exe' />
               </Component>
-
-
-
+              <Component Id='lmmgr.exe' Guid='DBF87C39-43FA-4DFE-A442-D2AB5B8985F0' Win64='$(var.isWin64)'>
+                <File Id='lmmgr.exe' Name='lmmgr.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\lmmgr.exe' />
+              </Component>
+              <Component Id='lmdump.exe' Guid='F21EC031-522B-4E18-9E29-1EEA850903F0' Win64='$(var.isWin64)'>
+                <File Id='lmdump.exe' Name='lmdump.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\lmdump.exe' />
+              </Component>
+	      <Component Id='cf_upgrade.exe' Guid='3BF37FB0-02C2-11E4-B5F8-080027039A4C' Win64='$(var.isWin64)'>
+                <File Id='cf_upgrade.exe' Name='cf-upgrade.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-upgrade.exe' />
+              </Component>
               <Component Id='cf.events.dll' Guid='B3FB046E-59DD-478C-B54C-F7444447B61F' Win64='$(var.isWin64)'>
                 <File Id='cf.events.dll' Name='cf.events.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf.events.dll' />
               </Component>
@@ -92,8 +97,8 @@
               <Component Id='libldap.dll' Guid='A49EA879-3D89-4FB0-9D53-3E35BE266DB1' Win64='$(var.isWin64)'>
                 <File Id='libldap.dll' Name='libldap.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libldap.dll' />
               </Component>
-              <Component Id='libpcre_0.dll' Guid='A32A88D5-6E60-4852-BE95-33FF52CD276D' Win64='$(var.isWin64)'>
-                <File Id='libpcre_0.dll' Name='libpcre-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libpcre-0.dll' />
+              <Component Id='libpcre_1.dll' Guid='A32A88D5-6E60-4852-BE95-33FF52CD276D' Win64='$(var.isWin64)'>
+                <File Id='libpcre_1.dll' Name='libpcre-1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libpcre-1.dll' />
               </Component>
              <Component Id='libpq.dll' Guid='6F4BA3C0-ABAB-45C6-A6A0-9B262058ECA0' Win64='$(var.isWin64)'>
                 <File Id='libpq.dll' Name='libpq.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libpq.dll' />
@@ -110,8 +115,8 @@
               <Component Id='libgnurx_0.dll' Guid='18554ae8-9c92-4cc7-8e5a-7f41ed2080d6' Win64='$(var.isWin64)'>
                 <File Id='libgnurx_0.dll' Name='libgnurx-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libgnurx-0.dll' />
               </Component>
-              <Component Id='qdbm.dll' Guid='fbfa752f-dfa9-440e-ac61-51616dc7da7c' Win64='$(var.isWin64)'>
-                <File Id='qdbm.dll' Name='qdbm.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\qdbm.dll' />
+              <Component Id='liblmdb.dll' Guid='9486AD9B-7189-4D90-8EDA-09E9B522CE89' Win64='$(var.isWin64)'>
+                <File Id='liblmdb.dll' Name='liblmdb.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\liblmdb.dll' />
               </Component>
               <Component Id='zlib1.dll' Guid='ea2e067f-5580-4167-86ba-ec89e560be80' Win64='$(var.isWin64)'>
                 <File Id='zlib1.dll' Name='zlib1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\zlib1.dll' />
@@ -132,26 +137,148 @@
             <ComponentRef Id='cf_promises.exe' />
             <ComponentRef Id='cf_runagent.exe' />
             <ComponentRef Id='cf_serverd.exe' />
-            <ComponentRef Id='dpmgr.exe' />
-            <ComponentRef Id='dptsv.exe' />
+            <ComponentRef Id='cf_upgrade.exe' />
+            <ComponentRef Id='mdb_copy.exe' />
+            <ComponentRef Id='mdb_stat.exe' />
+            <ComponentRef Id='lmmgr.exe' />
+            <ComponentRef Id='lmdump.exe' />
 
             <ComponentRef Id='cf.events.dll' />
             <ComponentRef Id='liblber.dll' />
             <ComponentRef Id='libldap.dll' />
-            <ComponentRef Id='libpcre_0.dll' />
+            <ComponentRef Id='libpcre_1.dll' />
             <ComponentRef Id='libpq.dll' />
             <ComponentRef Id='pthreadGC2.dll' />
             <ComponentRef Id='libcrypto_0.9.8.dll' />
             <ComponentRef Id='libssl_0.9.8.dll' />
             <ComponentRef Id='libgnurx_0.dll' />
-            <ComponentRef Id='qdbm.dll' />
+            <ComponentRef Id='liblmdb.dll' />
             <ComponentRef Id='zlib1.dll' />
 	    <ComponentRef Id='libxml2.dll' />
       </Feature>
 
-	<UI>
-	  <ProgressText Action='GenerateKey'>Generating cryptographic key pair</ProgressText>
-	</UI>
+      <UI>
+          <ProgressText Action='GenerateKey'>Generating cryptographic key pair</ProgressText>
+          <TextStyle Id="DlgFont8" FaceName="Tahoma" Size="8" />
+          <Property Id="DefaultUIFont" Value="DlgFont8" />
+          <Dialog Id="ExitDlg"
+                    Width="300" Height="80"
+                    Title="CFEngine Setup">
+                
+                <Control Id="Description"
+                         Type="Text"
+                         X="15"
+                         Y="10"
+                         Width="270"
+                         Height="30"
+                         Text="{\DlgFont8}[ProductName] setup has completed successfully. Click 'Finish' to exit the Setup Wizard." />
+                
+                <Control Id="Finish"
+                         Type="PushButton"
+                         X="125"
+                         Y="50"
+                         Width="56"
+                         Height="17"
+                         Default="yes"
+                         Cancel="yes"
+                         Text="Finish">
+                    <Publish Event="EndDialog"
+                             Value="Exit" />
+                </Control>
+            </Dialog>
+
+       <Dialog Id="UserExitDlg"
+              Width="300"
+              Height="80"
+              Title="CFEngine Setup">
+                
+          <Control Id="Description"
+                   Type="Text"
+                   X="15"
+                   Y="10"
+                   Width="270"
+                   Height="80"
+                   Text="{\DlgFont8}[ProductName] setup was interrupted. Your system has not been modified. To install this program at a later time, please run the installation again." />
+                
+          <Control Id="Finish"
+                           Type="PushButton"
+                           X="125"
+                           Y="50"
+                           Width="56"
+                           Height="17"
+                           Default="yes"
+                           Cancel="yes"
+                           Text="Finish">
+                      <Publish Event="EndDialog"
+                               Value="Exit" />
+                </Control>
+            </Dialog>
+
+            <Dialog Id="FatalErrorDlg"
+                    Width="300"
+                    Height="80"
+                    Title="CFEngine Setup">
+                <Control Id="Description"
+                         Type="Text"
+                         X="15"
+                         Y="10"
+                         Width="270"
+                         Height="80"
+                         Text="{\DlgFont8}[ProductName] Setup Wizard ended prematurely because of an error. Your system has not been modified. To install this program at a later time, run Setup Wizard again." />
+                <Control Id="Finish"
+                         Type="PushButton"
+                         X="125"
+                         Y="50"
+                         Width="56"
+                         Height="17"
+                         Default="yes"
+                         Cancel="yes"
+                         Text="Finish">
+                    <Publish Event="EndDialog"
+                             Value="Exit" />
+                </Control>
+            </Dialog>
+          <Dialog Id="ProgressDlg"
+                        Width="300"
+                        Height="80"
+                        Title="CFEngine Setup"
+                        Modeless="yes">
+                    <Control Id="CancelButton"
+                             Type="PushButton"
+                             TabSkip="no"
+                             Text="Cancel"
+                             Height="17"
+                             Width="56"
+                             X="125"
+                             Y="60"
+                             Cancel="yes">
+                        <Publish Event="EndDialog"
+                                 Value="Exit" />
+                    </Control>
+                    <Control Id="MyProgressBar"
+                             Type="ProgressBar"
+                             X="70"
+                             Y="30"
+                             Width="200"
+                             Height="15"
+                             ProgressBlocks="yes">
+                        <Subscribe Event="SetProgress"
+                                   Attribute="Progress" />
+                    </Control>
+          </Dialog>
+           <InstallUISequence>
+            <Show Dialog="ExitDlg" OnExit="success" />
+            <Show Dialog="FatalErrorDlg" OnExit="error" />
+            <Show Dialog="UserExitDlg" OnExit="cancel" />
+            <Show Dialog="ProgressDlg" After="CostFinalize" />
+          </InstallUISequence>
+
+           <AdminUISequence>
+            <Show Dialog="ExitDlg" OnExit="success" />
+            <Show Dialog="FatalErrorDlg" OnExit="error" />
+            <Show Dialog="UserExitDlg" OnExit="cancel" />
+           </AdminUISequence>
+    </UI>
 
 
 	<Upgrade Id='B883FBCC-6F05-4AFA-98FA-CAF09BF464EA'>

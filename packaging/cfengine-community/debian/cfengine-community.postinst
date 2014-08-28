@@ -2,6 +2,7 @@
 
 if [ $1 = configure ]; then
 
+PREFIX=/var/cfengine
   #
   # Register CFEngine initscript, if not yet.
   #
@@ -20,7 +21,19 @@ if [ $1 = configure ]; then
   # Copy the stock policy for the new installations
   #
   if ! [ -f /var/cfengine/masterfiles/promises.cf ]; then
-    /bin/cp -R /var/cfengine/share/CoreBase/* /var/cfengine/masterfiles
+    /bin/cp -R /var/cfengine/share/CoreBase/masterfiles /var/cfengine
+  #
+  # Create promises_validated
+  #
+    /var/cfengine/bin/cf-promises -T /var/cfengine/masterfiles
+  fi
+
+  #
+  # Create a plugins directory if it doesnot exist
+  #
+  if ! [ -d /var/cfengine/plugins ]; then
+     mkdir -p /var/cfengine/plugins
+     chmod 700 /var/cfengine/plugins
   fi
 
   #
@@ -31,8 +44,11 @@ if [ $1 = configure ]; then
   /bin/rm -f /var/cfengine/bin/cf-twin
   /bin/rm -f /usr/local/sbin/cf-twin
 
+  #Install sketeches in  the design center directory
+  $PREFIX/design-center/bin/cf-sketch --inputs=$PREFIX/design-center --installsource=$PREFIX/share/CoreBase/sketches/cfsketches.json --install-all
+  
   # Create a symlink so the binaries are accessible
-  for i in cf-agent cf-promises cf-key cf-execd cf-serverd;
+  for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent;
   do
 	if [ -f /var/cfengine/bin/$i ]; then
 	  ln -sf /var/cfengine/bin/$i /usr/local/sbin/$i || true
@@ -50,6 +66,7 @@ if [ $1 = configure ]; then
   if [ -x /etc/init.d/cfengine3 ]; then
     /etc/init.d/cfengine3 start
   fi
+  
 fi
 
 exit 0

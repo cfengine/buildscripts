@@ -9,21 +9,18 @@ fi
 
 if [ -f /etc/php5/conf.d/cfmod.ini ]; then
     rm -f /etc/php5/conf.d/cfmod.ini
-    rm -f /etc/php5/conf.d/mongo.ini
     rm -f /etc/php5/conf.d/curl.ini
     rm -f /etc/php5/conf.d/cfengine-enterprise-api.ini
 fi
 
 if [ -f /usr/lib/php5/20090626/cfmod.so ]; then
     rm -f /usr/lib/php5/20090626/cfmod.so
-    rm -f /usr/lib/php5/20090626/mongo.so
     rm -f /usr/lib/php5/20090626/curl.so
     rm -f /usr/lib/php5/20090626/cfengine-enterprise-api.so
 fi
 
 if [ -f /usr/lib/php5/20060613/cfmod.so ]; then
     rm -f /usr/lib/php5/20060613/cfmod.so
-    rm -f /usr/lib/php5/20060613/mongo.so
     rm -f /usr/lib/php5/20060613/curl.so
     rm -f /usr/lib/php5/20060613/cfengine-enterprise-api.so
 fi
@@ -32,7 +29,7 @@ if [ -f /etc/init.d/apache2 ]; then
     /etc/init.d/apache2 restart
 fi
 
-for i in cf-agent cf-key cf-promises cf-execd cf-serverd cf-monitord mongo;
+for i in cf-agent cf-key cf-promises cf-execd cf-serverd cf-monitord;
 do
     rm -f /usr/local/sbin/$i || true
 done

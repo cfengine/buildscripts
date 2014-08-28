@@ -6,6 +6,7 @@ Version: %{version}
 Release: 1
 Source0: httpd-2.2.24.tar.gz
 Source1: httpd.conf
+Source2: httpd-ssl.conf
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -39,7 +40,9 @@ make install DESTDIR=${RPM_BUILD_ROOT}
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/man
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/manual
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf/httpd.conf
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf/extra/httpd-ssl.conf
 cp ${RPM_BUILD_ROOT}/../../SOURCES/httpd.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
+cp ${RPM_BUILD_ROOT}/../../SOURCES/httpd-ssl.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf/extra
 
 %clean
 rm -rf $RPM_BUILD_ROOT

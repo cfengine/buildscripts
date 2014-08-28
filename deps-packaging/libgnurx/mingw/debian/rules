@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=/var/cfengine
-DEB_HOST_GNU_TYPE = $(patsubst arch=%,%,$(filter arch=%,$(DEB_BUILD_OPTIONS)))
+PREFIX=$(BUILDPREFIX)
 
 clean:
 	dh_testdir

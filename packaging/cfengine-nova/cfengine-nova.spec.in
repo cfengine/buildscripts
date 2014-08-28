@@ -10,6 +10,7 @@ Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3, cfengine-community, cfengine-nova
+Requires: coreutils gzip
 
 AutoReqProv: no
 
@@ -28,18 +29,22 @@ rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
-cp -a %{_basedir}/core/dist/* $RPM_BUILD_ROOT
+cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
 #Copy the modified init.d script according to the working directory
-cp %{_basedir}/nova/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
+cp %{_basedir}/enterprise/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
 
 
 # Remove useless stuff
 
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
 rm -rf $RPM_BUILD_ROOT%{prefix}/share/CoreBase
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
+rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
+rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -47,11 +52,49 @@ rm -rf $RPM_BUILD_ROOT
 %post
 
 #
+# systemd support, if there is systemctl, then prepare unit file.
+#
+if test -x /usr/bin/systemctl; then
+    if [ ! -d /usr/lib/systemd/scripts ]; then
+        mkdir -p /usr/lib/systemd/scripts
+    fi
+    if [ ! -f /usr/lib/systemd/scripts/cfengine3 ]; then
+        cp -f /etc/init.d/cfengine3 /usr/lib/systemd/scripts
+        chmod 0755 /usr/lib/systemd/scripts/cfengine3
+    fi
+    if [ ! -f /usr/lib/systemd/system/cfengine3.service ]; then
+        cat > /usr/lib/systemd/system/cfengine3.service << EOF
+[Unit]
+Description=CFEngine 3 deamons
+ 
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/cfengine3
+ExecStart=/usr/lib/systemd/scripts/cfengine3 start
+ExecStop=/usr/lib/systemd/scripts/cfengine3 stop
+RemainAfterExit=yes
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+    fi
+fi
+
+#
 # Register CFEngine initscript, if not yet.
 #
 if [ $1 -eq 1 ]; then
     chkconfig --add cfengine3
+    if [ -f /usr/lib/systemd/system/cfengine3.service ]; then
+        test -x /usr/bin/systemctl && systemctl enable cfengine3 > /dev/null 2>&1
+    fi
 fi
+if [ $1 -eq 2 ]; then
+    if [ -f /usr/lib/systemd/system/cfengine3.service ]; then
+        test -x /usr/bin/systemctl && systemctl enable cfengine3 > /dev/null 2>&1
+    fi
+fi
+
 
 #
 # Generate a host key
@@ -65,9 +108,9 @@ if [ -f %prefix/bin/cf-twin ]; then
 fi
 
 /bin/cp %prefix/bin/cf-agent %prefix/bin/cf-twin
-for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord;
+for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent;
 do
-	if [ -f %prefix/bin/$i ]; then
+	if [ -f %prefix/bin/$i -a -d /usr/local/sbin ]; then
 		ln -sf %prefix/bin/$i /usr/local/sbin/$i || true
 	fi
 	if [ -f /usr/share/man/man8/$i.8.gz ]; then
@@ -76,21 +119,47 @@ do
 	%prefix/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
 done
 
+if [ $1 -eq 1 ]; then
+    #
+    # Start CFEngine during installation
+    #
+    test -f %prefix/inputs/promises.cf && service cfengine3 start || true
+elif [ $1 -eq 2 ]; then
+    #
+    # And restart during upgrade
+    #
+    service cfengine3 restart
+fi
+
 exit 0
 
 %preun
-
-#
-# Unregister CFEngine initscript.
-#
-ps aux | grep -v grep | grep cf- > /dev/null
-
-if [ $? -eq 0 ]; then
-    service cfengine3 stop
-fi
-
 if [ $1 -eq 0 ]; then
+ 
+    #
+    # Unregister CFEngine initscript.
+    #
+    ps aux | grep -v grep | grep cf- > /dev/null
+
+    if [ $? -eq 0 ]; then
+        service cfengine3 stop
+    fi
+  
+    #
+    # Unregister CFEngine initscript on uninstallation.
+    #
     chkconfig --del cfengine3
+
+    #
+    # systemd support
+    #
+    test -x /usr/bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
+    if [ -f /usr/lib/systemd/scripts/cfengine3 ]; then
+        rm -f /usr/lib/systemd/scripts/cfengine3
+    fi
+    if [ -f /usr/lib/systemd/system/cfengine3.service ]; then
+        rm -f /usr/lib/systemd/system/cfengine3.service
+    fi
 fi
 
 #
@@ -115,10 +184,13 @@ exit 0
 %prefix/bin/cf-promises
 %prefix/bin/cf-runagent
 %prefix/bin/cf-serverd
-%prefix/bin/tchmgr
-%dir %prefix/lib
-%prefix/lib/lib*.so*
+%prefix/bin/cf-upgrade
 
+# LMDB
+%prefix/bin/lmdump
+%prefix/bin/lmmgr
+%prefix/bin/mdb_copy
+%prefix/bin/mdb_stat
 
 # Auxiliary programs
 %if "%{version}" >= "3.0"
@@ -130,18 +202,22 @@ exit 0
 /etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
 
+%defattr(644,root,root,755)
+%dir %prefix/lib
+%prefix/lib/lib*.so*
+%prefix/lib/cfengine-enterprise.so
+
 # Documentation
 %dir %prefix/share
 %prefix/share/doc
 
 # Private directories
 
-%dir %prefix/masterfiles
-
 %defattr(700,root,root)
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
 %dir %prefix/modules
+
 
 %changelog

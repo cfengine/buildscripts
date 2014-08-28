@@ -1,5 +1,11 @@
 #!/bin/sh
 
+#PREFIX
+PREFIX=/var/cfengine
+INSTLOG=/var/log/CFEngineHub-Install.log
+MP_APACHE_USER=cfapache
+exec > $INSTLOG 2>&1
+set -x
 #
 # Register CFEngine initscript, if not yet.
 #
@@ -7,151 +13,358 @@ if [ -x /etc/init.d/cfengine3 ]; then
   update-rc.d cfengine3 defaults
 fi
 
-# Kill apache if running
-APACHE_RUNNING=true
-for i in `seq 100`;
-do
-	HTTPD_RUNNING=`netstat -natp | grep -E "(:80\s|:443\s).*LISTEN"`
-	if [ ! -z "$HTTPD_RUNNING" ];
-	then
-		for i in $HTTPD_RUNNING;
-		do
-			COMPONENTS=`echo $i|grep "/"`
-			if [ ! -z "$COMPONENTS" ];
-			then                        
-				C=`echo $COMPONENTS|cut -d'/' -f2`      
-				if [ ! -z "$C" ];
-				then
-					pkill -15 $C
-				fi
-			fi                      
-		done
-		sleep 1s
-	else                                    
-		APACHE_RUNNING=false
-		break                                                   
-	fi                                                              
-done                                
-
-if [ "$APACHE_RUNNING" = "true" ];
+#
+# Make sure the cfapache user has a home folder and populate it
+#
+MP_APACHE_USER=cfapache
+if [ -d "$PREFIX/$MP_APACHE_USER" ];
 then
-	echo "could not kill httpd, you will need to manually delete this package and install it again."
-	echo "please kill the following processes before attempting a new install"
-	fuser -n tcp 80
-	exit 0
+	echo "cfapache folder already exists, deleting it"
+	rm -rf $PREFIX/$MP_APACHE_USER
 fi
-
-# If the user apache already exists, we delete it.
-/usr/bin/getent passwd apache && /usr/sbin/userdel -f -r apache
-/usr/sbin/useradd -d /home/apache -m apache
-/usr/bin/getent group apache || /usr/sbin/groupadd apache
-
-# Create the apache user
-useradd -d /home/apache -m apache
-mkdir -p /home/apache/.ssh
+/usr/sbin/usermod -d $PREFIX/$MP_APACHE_USER $MP_APACHE_USER
+mkdir -p $PREFIX/$MP_APACHE_USER/.ssh
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/$MP_APACHE_USER
 echo "Host *
-      StrictHostKeyChecking no
-	  UserKnownHostsFile=/dev/null" >> /home/apache/.ssh/config
+StrictHostKeyChecking no
+UserKnownHostsFile=/dev/null" >> $PREFIX/$MP_APACHE_USER/.ssh/config
 
 #
 # Generate a host key
 #
-if [ ! -f /var/cfengine/ppkeys/localhost.priv ]; then
-    /var/cfengine/bin/cf-key >/dev/null || :
+if [ ! -f $PREFIX/ppkeys/localhost.priv ]; then
+    $PREFIX/bin/cf-key >/dev/null || :
 fi
 
-if ! [ -f /var/cfengine/masterfiles/promises.cf ]; then
-    /bin/cp -R /var/cfengine/share/NovaBase/* /var/cfengine/masterfiles
+if [ ! -f $PREFIX/masterfiles/promises.cf ]; then
+    /bin/cp -R $PREFIX/share/NovaBase/masterfiles $PREFIX/
+    touch $PREFIX/masterfiles/cf_promises_validated
+    find $PREFIX/masterfiles -type d -exec chmod 700 {} \;
+    find $PREFIX/masterfiles -type f -exec chmod 600 {} \;
 fi
 
-if [ -f /var/cfengine/lib/php/mcrypt.so ]; then
-  /bin/rm -f /var/cfengine/lib/php/mcrypt.*
+if [ -f $PREFIX/lib/php/mcrypt.so ]; then
+  /bin/rm -f $PREFIX/lib/php/mcrypt.*
 fi
 
-if [ -f /var/cfengine/lib/php/curl.so ]; then
-  /bin/rm -f /var/cfengine/lib/php/curl.*
+if [ -f $PREFIX/lib/php/curl.so ]; then
+  /bin/rm -f $PREFIX/lib/php/curl.*
 fi
 
-cp /var/cfengine/lib/php/*.ini /var/cfengine/httpd/php/lib
-cp /var/cfengine/lib/php/*.so /var/cfengine/httpd/php/lib/php/extensions/no-debug-non-zts-20100525
-cp -r /var/cfengine/share/GUI/* /var/cfengine/httpd/htdocs
-cp -r /var/cfengine/share/rest /var/cfengine/httpd/htdocs
-mkdir -p /var/cfengine/httpd/htdocs/tmp
-mv /var/cfengine/httpd/htdocs/Apache-htaccess /var/cfengine/httpd/htdocs/.htaccess
-chmod 755 /var/cfengine/httpd
-chown -R root:root /var/cfengine/httpd/htdocs
-chmod -R 755 /var/cfengine/httpd/htdocs
+
+
+#
+#Copy necessary Files and permissions
+#
+cp $PREFIX/lib/php/*.ini $PREFIX/httpd/php/lib
+cp $PREFIX/lib/php/*.so $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20100525
+cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
+mkdir -p $PREFIX/httpd/htdocs/tmp
+mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
+chmod 755 $PREFIX/httpd
+chown -R root:root $PREFIX/httpd/htdocs
+chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.sh
+chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.pl
+
+# plugins directory, empty by default
+mkdir -p ${PREFIX}/plugins
+chown -R root:root ${PREFIX}/plugins
+chmod 700 ${PREFIX}/plugins
 
 #these directories should be write able by apache
-chown root:apache /var/cfengine/httpd/logs
-chmod 775 /var/cfengine/httpd/logs
-chown apache:apache /var/cfengine/httpd/htdocs/tmp
-chown apache:apache /var/cfengine/httpd/htdocs/application/logs
+chown root:$MP_APACHE_USER $PREFIX/httpd/logs
+chmod 775 $PREFIX/httpd/logs
+chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/tmp
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
+chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/application/logs
 
 # This folder is required for Design Center and Mission Portal to talk to each other
-mkdir -p /opt/cfengine/userworkdir
-chown -R apache:apache /opt/cfengine/userworkdir
+DCWORKDIR=/opt/cfengine
+$PREFIX/design-center/bin/cf-sketch --inputs=$PREFIX/design-center --installsource=$PREFIX/share/NovaBase/sketches/cfsketches.json --install-all
+mkdir -p $DCWORKDIR/userworkdir/admin/.ssh
+mkdir -p $DCWORKDIR/stage_backup
+mkdir -p $DCWORKDIR/dc-scripts
+mkdir -p $DCWORKDIR/masterfiles_staging
+mkdir -p $DCWORKDIR/masterfiles.git
 
-if ! [ -f /usr/bin/curl ]; then
-        ln -sf /var/cfengine/bin/curl /usr/bin/curl
+touch $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
+chmod 600 $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
+
+cat > $DCWORKDIR/dc-scripts/params.sh <<EOHIPPUS
+#!/bin/bash
+ROOT="$DCWORKDIR/masterfiles_staging"
+GIT_URL="$DCWORKDIR/masterfiles.git"
+GIT_BRANCH="master"
+GIT_WORKING_BRANCH="CF_WORKING_BRANCH"
+GIT_EMAIL="default-committer@your-cfe-site.com"
+GIT_AUTHOR="Default Committer"
+PKEY="$DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt"
+SCRIPT_DIR="$PREFIX/httpd/htdocs/api/dc-scripts"
+VCS_TYPE="GIT"
+export PATH="\${PATH}:/var/cfengine/bin"
+export PKEY="\${PKEY}"
+export GIT_SSH="\${SCRIPT_DIR}/ssh-wrapper.sh"
+EOHIPPUS
+
+# The runfile key in the below JSON is not needed anymore, all the
+# values in it are OK by default, especially the runfile location,
+# which is the first element of repolist plus `/meta/api-runfile.cf`.
+
+cat > $DCWORKDIR/userworkdir/admin/api-config.json <<EOHIPPUS
+{
+  "log":"STDERR",
+  "log_level":"3",
+  "repolist":["sketches"],
+  "recognized_sources":["$PREFIX/design-center/sketches"],
+  "constdata":"$PREFIX/design-center/tools/cf-sketch/constdata.conf",
+  "vardata":"$DCWORKDIR/userworkdir/admin/masterfiles/sketches/meta/vardata.conf",
+  "runfile": {"location":"$DCWORKDIR/userworkdir/admin/masterfiles/sketches/meta/api-runfile.cf"}
+}
+EOHIPPUS
+
+chmod 700 $DCWORKDIR/dc-scripts/params.sh
+
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/userworkdir
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/dc-scripts
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/stage_backup
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/masterfiles.git
+
+chown $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
+cp -R $PREFIX/masterfiles/* $DCWORKDIR/masterfiles_staging
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/masterfiles_staging
+
+chmod 700 $DCWORKDIR/stage_backup
+chmod -R 700 $DCWORKDIR/userworkdir
+
+GIT=$PREFIX/bin/git
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT init")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.email admin@cfengine.com")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.name admin")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "echo -e '/cf_promise_*\n.*.sw[po]\n*~\n\\#*#' >.gitignore")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add .gitignore")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Ignore cf_promise_*'")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add *")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Initial pristine masterfiles'")
+
+(cd $DCWORKDIR/ && su $MP_APACHE_USER -c "$GIT clone --no-hardlinks --bare $DCWORKDIR/masterfiles_staging $DCWORKDIR/masterfiles.git")
+find "$DCWORKDIR/masterfiles.git" -type d -exec chmod 700 {} \;
+find "$DCWORKDIR/masterfiles.git" -type f -exec chmod 600 {} \;
+
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT branch CF_WORKING_BRANCH")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote rm origin")
+(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote add origin $DCWORKDIR/masterfiles.git")
+
+if [ ! -f /usr/bin/curl ]; then
+        ln -sf $PREFIX/bin/curl /usr/bin/curl
 fi
 
-if [ -f /var/cfengine/bin/cf-twin ]; then
-    /bin/rm /var/cfengine/bin/cf-twin
+if [ -f $PREFIX/bin/cf-twin ]; then
+    /bin/rm $PREFIX/bin/cf-twin
 fi
 
+
+#
+#MAN PAGE RELATED
+#
 if [ -f /etc/manpath.config ]; then
  grep -q cfengine /etc/manpath.config
  if [ $? = "1" ]; then
-  echo "MANDATORY_MANPATH   /var/cfengine/share/man" >> /etc/manpath.config
+  echo "MANDATORY_MANPATH   $PREFIX/share/man" >> /etc/manpath.config
  fi
 fi
 
-for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord;
+for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent cf-hub;
 do
-	if [ -f /var/cfengine/bin/$i ]; then
-		ln -sf /var/cfengine/bin/$i /usr/local/sbin/$i || true
+	if [ -f $PREFIX/bin/$i ]; then
+		ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
 	fi
 	if [ -f /usr/share/man/man8/$i.8.gz ]; then
 		rm -f /usr/share/man/man8/$i.8.gz
 	fi
-	/var/cfengine/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
+	$PREFIX/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
 done
 
-/bin/cp /var/cfengine/bin/cf-agent /var/cfengine/bin/cf-twin
+/bin/cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
 
-touch /var/cfengine/state/mongo_stamp
+#
+# Generate a certificate for Mission Portal
+# The certificate will be named $(hostname -f).cert and the corresponding key should be named $(hostname -f).key.
+#
+CFENGINE_MP_DEFAULT_CERT_LOCATION="$PREFIX/httpd/ssl/certs"
+CFENGINE_MP_DEFAULT_KEY_LOCATION="$PREFIX/httpd/ssl/private"
+CFENGINE_OPENSSL="$PREFIX/bin/openssl"
+mkdir -p $CFENGINE_MP_DEFAULT_CERT_LOCATION
+mkdir -p $CFENGINE_MP_DEFAULT_KEY_LOCATION
+CFENGINE_LOCALHOST=$(hostname -f)
+CFENGINE_MP_CERT=$CFENGINE_MP_DEFAULT_CERT_LOCATION/$CFENGINE_LOCALHOST.cert
+CFENGINE_MP_KEY=$CFENGINE_MP_DEFAULT_KEY_LOCATION/$CFENGINE_LOCALHOST.key
+$CFENGINE_OPENSSL req -new -newkey rsa:4096 -days 99999 -nodes -x509 -subj "/C=NA/ST=NA/L=NA/O=SelfSigned/CN=$CFENGINE_LOCALHOST" -keyout $CFENGINE_MP_KEY  -out $CFENGINE_MP_CERT -config $PREFIX/ssl/openssl.cnf
+#
+# Modify the Apache configuration with the corresponding key and certificate
+#
+sed -i $PREFIX/httpd/conf/extra/httpd-ssl.conf -e s:INSERT_CERT_HERE:$CFENGINE_MP_CERT:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
+sed -i $PREFIX/httpd/conf/extra/httpd-ssl.conf -e s:INSERT_CERT_KEY_HERE:$CFENGINE_MP_KEY:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
 
-# Initialize Mongo
-if [ ! -f /var/cfengine/masterfiles/update/mongod.conf ];
-then
-	mkdir -p /var/cfengine/masterfiles/update
-	/bin/cp /var/cfengine/share/NovaBase/update/mongod.conf /var/cfengine/masterfiles/update/
-fi
-/var/cfengine/bin/mongod --dbpath /var/cfengine/state --config /var/cfengine/masterfiles/update/mongod.conf > /dev/null < /dev/null 2>$1
-for i in `seq 100`;
+mkdir -p $PREFIX/config
+$PREFIX/httpd/bin/apachectl start
+
+
+
+
+
+
+  #change keys in file
+NEW_UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+sed -i s/CFE_SESSION_KEY/"$NEW_UUID"/ $PREFIX/httpd/htdocs/application/config/config.php
+sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/httpd/htdocs/application/config/appsettings.php
+sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/share/db/ootb_settings.sql
+
+
+
+
+
+#
+#POSTGRES RELATED
+#
+mkdir -p $PREFIX/state/pg/data
+chown -R cfpostgres $PREFIX/state/pg
+(cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
+touch /var/log/postgresql.log
+chown cfpostgres /var/log/postgresql.log
+
+    # Generating a new postgresql.conf if enough total memory is present
+    #
+    # If total memory is lower than 8G, we use the default pgsql conf file
+    # If total memory is beyond 64G, we use a shared_buffers of 16G
+    # Otherwise, we use a shared_buffers equal to 25% of total memory
+    total=`cat /proc/meminfo |grep "^MemTotal:.*[0-9]\+ kB"|awk '{print $2}'`
+
+    echo "$total" | grep -q '^[0-9]\+$'
+    if [ $? -ne 0 ] ;then
+       echo "Error calculating total memory for setting postgresql shared_buffers";
+    else
+       upper=$(( 64 * 1024 * 1024 ))  #in KB
+       lower=$(( 8 * 1024 * 1024 ))   #in KB
+
+       if [ "$total" -gt "$lower" ]; then
+           maint="2GB"
+           if [ "$total" -ge "$upper" ]; then
+               shared="16GB"
+               effect="11.2GB"        #70% of 16G
+           else
+               shared=$(( $total * 25 / 100 / 1024 ))   #in MB
+               shared="$shared""MB"
+               effect=$(( $total * 70 / 100 / 1024 ))   #in MB
+               effect="$effect""MB"
+           fi
+           sed -i -e "s/^.effective_cache_size.*/effective_cache_size=$effect/" $PREFIX/share/postgresql/postgresql.conf.cfengine
+           sed -i -e "s/^shared_buffers.*/shared_buffers=$shared/" $PREFIX/share/postgresql/postgresql.conf.cfengine
+           sed -i -e "s/^maintenance_work_mem.*/maintenance_work_mem=$maint/" $PREFIX/share/postgresql/postgresql.conf.cfengine
+           cp $PREFIX/share/postgresql/postgresql.conf.cfengine $PREFIX/state/pg/data/postgresql.conf
+           chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
+       else
+          echo "Warning: not enough total memory needed to set shared_buffers=2GB"
+       fi
+    fi
+
+(cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
+
+#make sure that server is up and listening
+TRYNO=1
+LISTENING=no
+echo -n "pinging pgsql server"
+while [ $TRYNO -le 20 ]
 do
-	MONGO_RUNNING=`netstat -nat| grep "127.0.0.1:27017.*LISTEN"`
-	if [ ! -z "$MONGO_RUNNING" ];
-	then
-		break
-	else
-		sleep 1s
-	fi
+      echo -n .
+      ALIVE=$(cd /tmp && su cfpostgres -c "$PREFIX/bin/psql -l 1>/dev/null 2>/dev/null")
+
+      if [ $? -eq 0 ];then
+        LISTENING=yes
+        break
+      fi
+      sleep 1
+      TRYNO=`expr $TRYNO + 1`
 done
+echo done
 
-/var/cfengine/bin/mongo --quiet phpcfengine /var/cfengine/share/GUI/phpcfenginenova/export.js
+if [ "$LISTENING" = "no" ]
+ then
+     echo "Couldnot create necessary database and users, make sure Postgres server is running.."
+ else
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb")
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER")
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root")
 
-/var/cfengine/bin/mongo --quiet cfreport /var/cfengine/share/GUI/api/mongo-initialize.js
+     #create database for MISSION PORTAL
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp")
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql")
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/pgschema.sql")
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql")
 
-/var/cfengine/bin/mongo --quiet phpcfengine /var/cfengine/share/GUI/phpcfenginenova/sql_reports.js
+    #import stored function for MP into cfdb
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/GUI/phpcfenginenova/cfdb_import.sql")
 
-/var/cfengine/httpd/bin/apachectl start
+    #create database for hub internal data
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql")
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql")
 
+    #revoke create permission on public schema for cfdb database
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
+    REVOKE CREATE ON SCHEMA public FROM public;
+EOF
+
+    #grant permission for apache user to use the cfdb database
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
+    GRANT ALL ON DATABASE cfdb TO $MP_APACHE_USER;
+EOF
+
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
+    GRANT SELECT, DELETE ON ALL TABLES IN SCHEMA PUBLIC TO $MP_APACHE_USER;
+EOF
+
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
+    ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
+EOF
+
+    #grant permission for apache user to use the cfsettings database
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
+    GRANT ALL ON DATABASE cfsettings TO $MP_APACHE_USER;
+EOF
+
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
+    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $MP_APACHE_USER;
+EOF
+
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
+    ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
+EOF
+
+fi
+
+
+#
+#REDIS RELATED
+#
+cat > $PREFIX/config/redis.conf << EOF
+daemonize yes
+unixsocket /tmp/redis.sock
+unixsocketperm 755
+EOF
+
+$PREFIX/bin/redis-server $PREFIX/config/redis.conf
+$PREFIX/bin/cf-consumer
+
+#
+#Mission portal
+#
+CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
 
 # start CFE3 processes on only client hosts (not HUB)
-if [ -f /var/cfengine/policy_server.dat -a ! -f /var/cfengine/masterfiles/promises.cf ]; then
+if [ -f $PREFIX/policy_server.dat -a ! -f $PREFIX/masterfiles/promises.cf ]; then
     /etc/init.d/cfengine3 start
-fi 
+fi
 
 exit 0

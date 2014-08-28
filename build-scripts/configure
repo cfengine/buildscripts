@@ -60,6 +60,8 @@ case "$EMBEDDED_DB" in
     ARGS="$ARGS --with-qdbm=$P";;
   tokyocabinet)
     ARGS="$ARGS --with-tokyocabinet=$P";;
+  lmdb)
+    ARGS="$ARGS --with-lmdb=$P";;
   *)
     echo "Unknown embedded DB: $EMBEDDED_DB"
     exit 42;;
@@ -87,9 +89,9 @@ esac
 
 case "$ROLE" in
   hub)
-    ARGS="$ARGS --with-mongo=$P --with-cfmod --with-enterprise-api";;
+    ARGS="$ARGS --with-cfmod --with-enterprise-api --with-postgresql-hub=$P --with-redis=$P";;
   agent)
-    ARGS="$ARGS --without-mongo --without-cfmod";;
+    ARGS="$ARGS --without-cfmod --without-postgresql-hub --without-redis";;
   *)
     echo "Unknown role selection: $ROLE"
     exit 42;;
@@ -110,8 +112,8 @@ case "$BUILD_TYPE" in
       CFLAGS="$CFLAGS -g -O2 -Wall -DNDEBUG";;
   debug)
       ;;
-  quick)
-      ARGS="$ARGS --enable-debug"
+  code_coverage)
+    ARGS="$ARGS --enable-debug"
 # lcov is not found in Windows and other platforms
       case "${OS}-${OS_VERSION}" in
         mingw*)
@@ -123,13 +125,13 @@ case "$BUILD_TYPE" in
         rhel-4.*)
         ;;
         aix*)
-	;;
+	      ;;
         *)
         ARGS="$ARGS --enable-coverage"
         ;;
       esac
       ;;
-  smoke|full|release)
+   full|release|quick)
       ;;
   *)
       echo "Unknown build type: $BUILD_TYPE"
@@ -150,7 +152,13 @@ case "$OS_FAMILY" in
   ;;
 esac
 
- cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS 
+( cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
 
+if test "x$NOVA" = "xyes"; then
+    ( cd $BASEDIR/enterprise && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+    if test "x$ROLE" = "xhub"; then
+        ( cd $BASEDIR/nova && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+    fi
+fi
 
-
+( cd $BASEDIR/masterfiles && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )

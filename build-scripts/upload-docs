@@ -10,5 +10,5 @@ chmod 600 $BASEDIR/autobuild/buildslave/cfedocs.priv
 
 rsync -e "ssh -p 222 -i $BASEDIR/autobuild/buildslave/cfedocs.priv" \
   --progress -ar --delete \
-  $BASEDIR/core/dist/var/cfengine/share/doc/ \
+  $BASEDIR/cfengine/dist/var/cfengine/share/doc/ \
   cfedocs@10.10.160.17:doc

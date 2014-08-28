@@ -6,6 +6,6 @@
 
 P=/var/cfengine
 
-ARGS="--prefix=$P --with-openssl=$P --with-pcre=$P --with-tokyocabinet=$P --without-mongo --enable-docs=all"
+ARGS="--prefix=$P --with-openssl=$P --with-pcre=$P --with-tokyocabinet=$P --enable-docs=all"
 
 cd $BASEDIR/core && env $OPTS ./configure $ARGS
