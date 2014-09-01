@@ -41,7 +41,7 @@ PKGDIR=$BASEDIR/$PKGNAME/pkg
 rm -rf $BASEDIR/$PKGNAME
 mkdir -p $PKGDIR
 
-SRCFILES=$(pkg-get-autobuild-src $P)
+SRCFILES=$(pkg-get-buildscripts-src $P)
 
 echo "$SRCFILES" | while read srcfile opts; do
 
@@ -135,7 +135,7 @@ cfbuild-$PKGNAME ($VERSION) unstable; urgency=low
 
   * New build.
 
- -- CFEngine Autobuild System <autobuild@cfengine.com>  $BUILDDATE
+ -- CFEngine Autobuild System <buildscripts@cfengine.com>  $BUILDDATE
 EOF
 
 # Build!

@@ -6,9 +6,9 @@
 
 # Upload documentation to cf001lin
 
-chmod 600 $BASEDIR/autobuild/buildslave/cfedocs.priv
+chmod 600 $BASEDIR/buildscripts/buildslave/cfedocs.priv
 
-rsync -e "ssh -p 222 -i $BASEDIR/autobuild/buildslave/cfedocs.priv" \
+rsync -e "ssh -p 222 -i $BASEDIR/buildscripts/buildslave/cfedocs.priv" \
   --progress -ar --delete \
   $BASEDIR/cfengine/dist/var/cfengine/share/doc/ \
   cfedocs@10.10.160.17:doc

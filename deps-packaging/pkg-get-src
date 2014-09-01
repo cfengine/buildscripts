@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-CACHEDIR=$HOME/.cache/cfengine-autobuild-distfiles
+CACHEDIR=$HOME/.cache/cfengine-buildscripts-distfiles
 
 usage()
 {

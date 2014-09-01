@@ -6,7 +6,7 @@
 
 case "$TEST_MACHINE" in
     chroot)
-        $BASEDIR/autobuild/build-scripts/prepare-testmachine-chroot
+        $BASEDIR/buildscripts/build-scripts/prepare-testmachine-chroot
         ;;
     *)
         # Add VMs, etc here.
