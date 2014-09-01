@@ -37,6 +37,10 @@ checksum()
   FILENAME="$1"
   CHECKSUM="$2"
 
+  if [ "$CHECKSUM" = "00000000000000000000000000000000" ]; then
+    return 0
+  fi
+
   echo "$CHECKSUM  $CACHEDIR/$FILENAME" | md5sum -c >/dev/null
 }
 
