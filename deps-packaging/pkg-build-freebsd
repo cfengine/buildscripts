@@ -35,7 +35,7 @@ TESTS="$2"
 TARGET="$3"
 VERSION="$4"
 
-P=$BASEDIR/autobuild/deps-packaging/$PKGNAME
+P=$BASEDIR/buildscripts/deps-packaging/$PKGNAME
 PKGDIR=$BASEDIR/$PKGNAME/pkg
 
 rm -rf $PKGDIR

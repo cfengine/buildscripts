@@ -10,31 +10,31 @@ PATH=$PATH:$BASEDIR/autobuild/deps-packaging/
 
 set -x
 #export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
-for i in $(ls $BASEDIR/autobuild/deps-packaging);  do
+for i in $(ls $BASEDIR/buildscripts/deps-packaging);  do
 
-if [ -d "$BASEDIR/autobuild/deps-packaging/$i/debian" ] ; then
+if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/debian" ] ; then
    echo "$i"
    case "$BUILDPREFIX" in
   *opt*)
-      sed -i "s/var/opt/" $BASEDIR/autobuild/deps-packaging/$i/debian/*.install
+      sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/debian/*.install
    esac
      
 fi
 
-if [ -d "$BASEDIR/autobuild/deps-packaging/$i/mingw/debian" ] ; then
+if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/mingw/debian" ] ; then
    case "$BUILDPREFIX" in
   *opt*)
-      sed -i "s/var/opt/" $BASEDIR/autobuild/deps-packaging/$i/mingw/debian/*.install
+      sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/mingw/debian/*.install
    esac
 fi
 
 #change the webdirectory in the apache config file as well
-if [ -d "$BASEDIR/autobuild/deps-packaging/$i" ]
+if [ -d "$BASEDIR/buildscripts/deps-packaging/$i" ]
 then
   if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ] ; then
    escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
-   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/autobuild/deps-packaging/apache/httpd.conf
-   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/autobuild/deps-packaging/apache/httpd-ssl.conf
+   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
+   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
   fi
 fi
  
@@ -308,12 +308,12 @@ for dep in $DEPS; do
           version=1.5.24-1
           ;;
         *)
-          version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
+          version=0+$(cat $BASEDIR/buildscripts/deps-packaging/revision)$versuffix$crossver
           ;;
       esac
       ;;
     *)
-      version=0+$(cat $BASEDIR/autobuild/deps-packaging/revision)$versuffix$crossver
+      version=0+$(cat $BASEDIR/buildscripts/deps-packaging/revision)$versuffix$crossver
       ;;
   esac
   if pkg-cache find $dep-$version; then
@@ -328,7 +328,7 @@ for dep in $DEPS; do
   if pkg-cache find $dep-$version; then
     :
   else
-    $BASEDIR/autobuild/deps-packaging/pkg-build-${DEP_PACKAGING} $dep $tests $cross $optimize $debugsym $version
+    $BASEDIR/buildscripts/deps-packaging/pkg-build-${DEP_PACKAGING} $dep $tests $cross $optimize $debugsym $version
     pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
   fi
 
