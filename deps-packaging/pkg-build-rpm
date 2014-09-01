@@ -33,7 +33,7 @@ OPTIMIZE="$4"
 DEBUGSYM="$5"
 VERSION="$6"
 
-P=$BASEDIR/autobuild/deps-packaging/$PKGNAME
+P=$BASEDIR/buildscripts/deps-packaging/$PKGNAME
 SYS=`uname -s`
 if [ $SYS = "AIX" ]; then
 export PATH="/usr/local/bin:$PATH"

@@ -2,7 +2,7 @@
 
 . `dirname "$0"`/functions
 
-GITSHAOF="core autobuild autobuild/deps-packaging"
+GITSHAOF="core buildscripts buildscripts/deps-packaging"
 
 case "$PROJECT" in
   community)
