@@ -1,11 +1,11 @@
 Summary: CFEngine Build Automation -- lcov
 Name: cfbuild-lcov
-Version: 1.10.1
+Version: 1.10
 Release: 1
 License: GPL
 Group: Development/Tools
 URL: http://ltp.sourceforge.net/coverage/lcov.php
-Source0: lcov-1.10.1.tar.gz
+Source0: lcov-1.10.tar.gz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-root
 BuildArch: noarch
 Requires: perl >= 5.8.8
