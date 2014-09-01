@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-CACHEDIR=$HOME/.cache/cfengine-autobuild-pkgs
+CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs
 
 usage()
 {

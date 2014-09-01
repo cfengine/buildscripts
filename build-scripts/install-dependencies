@@ -5,7 +5,7 @@
 . compile-options
 #
 # We use packaging scripts
-PATH=$PATH:$BASEDIR/autobuild/deps-packaging/
+PATH=$PATH:$BASEDIR/buildscripts/deps-packaging/
 #
 
 set -x

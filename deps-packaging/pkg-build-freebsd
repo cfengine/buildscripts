@@ -41,7 +41,7 @@ PKGDIR=$BASEDIR/$PKGNAME/pkg
 rm -rf $PKGDIR
 mkdir -p $PKGDIR
 
-pkg-get-autobuild-src "$P" | while read srcfile opts; do
+pkg-get-buildscripts-src "$P" | while read srcfile opts; do
   case "$srcfile" in
     *.gz|*.tgz)
       UNCOMPRESS=gzcat;;
@@ -74,7 +74,7 @@ for package in `cat $P/freebsd/packages`; do
 version of $package: $VERSION
 architecture of $package: $ARCH" > $BASEDIR/$PKGNAME/$package-comment
 
-  echo "$package: created by autobuild system" > $BASEDIR/$PKGNAME/$package-descr
+  echo "$package: created by buildscripts system" > $BASEDIR/$PKGNAME/$package-descr
   
   gen_filelist $package > $BASEDIR/$PKGNAME/$package-plist
 

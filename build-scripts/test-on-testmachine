@@ -20,8 +20,8 @@ case "$TEST_MACHINE" in
         ;;
 esac
 
-SCRIPT_BASEDIR="$(cd "$(dirname "$0")" ; pwd)" # /home/user/whatever/autobuild/build-scripts
-SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever/autobuild
+SCRIPT_BASEDIR="$(cd "$(dirname "$0")" ; pwd)" # /home/user/whatever/buildscripts/build-scripts
+SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever/buildscripts
 SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever
 
 # We need to clean up mounts if doing a chroot test run, so wrap this in an if.

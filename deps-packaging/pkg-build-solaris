@@ -60,7 +60,7 @@ PKGDIR=$BASEDIR/$PKGNAME/pkg
 rm -rf $PKGDIR
 mkdir -p $PKGDIR
 
-pkg-get-autobuild-src "$P" | while read srcfile opts; do
+pkg-get-buildscripts-src "$P" | while read srcfile opts; do
   case "$srcfile" in
     *.gz|*.tgz)
       UNCOMPRESS=gzcat;;
