@@ -14,4 +14,4 @@ if [ $# -eq 0 ]; then
    exit 1
 fi
 
-$BASEDIR/autobuild/build-scripts/execute-wrapper.sh sudo dpkg -i "$@"
+$BASEDIR/buildscripts/build-scripts/execute-wrapper.sh sudo dpkg -i "$@"
