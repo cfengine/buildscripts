@@ -215,19 +215,10 @@ sed -i $PREFIX/httpd/conf/extra/httpd-ssl.conf -e s:INSERT_CERT_KEY_HERE:$CFENGI
 mkdir -p $PREFIX/config
 $PREFIX/httpd/bin/apachectl start
 
-
-
-
-
-
-
-
-
-
-
-#
 #POSTGRES RELATED
 #
+if [ ! -d $PREFIX/state/pg/data ]; then
+
 mkdir -p $PREFIX/state/pg/data
 chown -R cfpostgres $PREFIX/state/pg
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
@@ -268,6 +259,7 @@ chown cfpostgres /var/log/postgresql.log
           echo "Warning: not enough total memory needed to set shared_buffers=2GB"
        fi
     fi
+fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
 
