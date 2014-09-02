@@ -58,6 +58,13 @@ fi
 #
 cp $PREFIX/lib/php/*.ini $PREFIX/httpd/php/lib
 cp $PREFIX/lib/php/*.so $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20100525
+
+#Change keys in files
+NEW_UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+sed -i s/CFE_SESSION_KEY/"$NEW_UUID"/ $PREFIX/share/GUI/application/config/config.php
+sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/share/GUI/application/config/appsettings.php
+sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/share/db/ootb_settings.sql
+
 cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
 mkdir -p $PREFIX/httpd/htdocs/tmp
 mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
@@ -213,11 +220,6 @@ $PREFIX/httpd/bin/apachectl start
 
 
 
-  #change keys in file
-NEW_UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-sed -i s/CFE_SESSION_KEY/"$NEW_UUID"/ $PREFIX/httpd/htdocs/application/config/config.php
-sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/httpd/htdocs/application/config/appsettings.php
-sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/share/db/ootb_settings.sql
 
 
 
