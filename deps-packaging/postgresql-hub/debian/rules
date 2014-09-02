@@ -12,7 +12,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=$(PREFIX) --without-zlib --without-readline
+	LD_LIBRARY_PATH=$(PREFIX)/lib LDFLAGS="-L$(PREFIX)/lib" CPPFLAGS=-I$(PREFIX)/include ./configure --prefix=$(PREFIX) --without-zlib --without-readline --with-openssl
 	make 
 	make -C contrib
 	touch build-stamp
