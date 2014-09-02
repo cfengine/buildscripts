@@ -119,6 +119,8 @@ rm -rf $RPM_BUILD_ROOT
 # hostname -f returns a valid name. If that is not the case then
 # we just abort the installation.
 #
+
+ 
 NAME=$(hostname -f)
 if [ -z "$NAME" ];
 then
@@ -201,6 +203,11 @@ then
 	fi
 fi
 
+#stop the remaining services on upgrade
+if [ $1 -eq 2 ]; then
+    /etc/init.d/cfengine3 stop
+fi
+
 #
 # We need a cfapache user for our web server
 #
@@ -236,6 +243,18 @@ if [ $1 -eq 1 ]; then
     chkconfig --add cfengine3
 fi
 
+#
+# if upgrade restart the services
+#
+if [ $1 -eq 2 ]; then
+    /etc/init.d/cfengine3 start
+fi
+
+#
+# Do all the prelimenary setup only on the first install of cfengine package
+#
+
+if [ $1 -eq 1 ]; then
 #
 # Make sure the cfapache user has a home folder and populate it
 #
@@ -281,6 +300,7 @@ NEW_UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' |
 sed -i s/CFE_SESSION_KEY/"$NEW_UUID"/ $PREFIX/share/GUI/application/config/config.php
 sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/share/GUI/application/config/appsettings.php
 sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/share/db/ootb_settings.sql
+
 cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
 mkdir -p $PREFIX/httpd/htdocs/tmp
 mv $PREFIX/httpd/htdocs/htaccess $PREFIX/httpd/htdocs/.htaccess
@@ -502,6 +522,7 @@ fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
 
+
 #make sure that server is up and listening
 TRYNO=1
 LISTENING=no
@@ -596,7 +617,7 @@ $PREFIX/bin/cf-consumer
 #
 CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
-
+fi
 
 exit 0
 
