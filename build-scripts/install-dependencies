@@ -8,6 +8,9 @@
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging/
 #
 
+# Not all dependencies support building in parallel.
+MAKEFLAGS=-j1
+
 set -x
 #export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
 for i in $(ls $BASEDIR/buildscripts/deps-packaging);  do
