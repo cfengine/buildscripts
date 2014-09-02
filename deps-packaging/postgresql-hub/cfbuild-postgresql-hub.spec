@@ -9,14 +9,6 @@ Group: Other
 Url: http://example.com/
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
-#
-
-
-
-
-
-
-
 AutoReqProv: no
 
 %define prefix %{buildprefix}
@@ -29,7 +21,7 @@ mkdir -p %{_builddir}
 
 SYS=`uname -s`
 
-./configure --prefix=%{prefix} --without-zlib --without-readline
+LD_LIBRARY_PATH=%{prefix}/lib LDFLAGS="-L%{prefix}/lib" CPPFLAGS=-I%{prefix}/include ./configure --prefix=%{prefix} --without-zlib --without-readline --with-openssl
 
 if [ -z $MAKE ]; then
   MAKE_PATH=`which make`
@@ -62,18 +54,21 @@ CFEngine Build Automation -- postgresql -- dev files
 %package libs
 Summary: CFEngine Build Automation -- postgresql -- libraries
 Group: Other
+AutoReqProv: no
 %description libs
 CFEngine Build Automation -- postgresql -- libraries
 
 %package server
 Summary: CFEngine Build Automation -- postgresql -- server files
 Group: Other
+AutoReqProv: no
 %description server
 CFEngine Build Automation -- postgresql -- server files
 
 %package contrib
 Summary: CFEngine Build Automation -- postgresql -- contrib
 Group: Other
+AutoReqProv: no
 %description contrib
 CFEngine Build Automation -- postgresql -- contrib
 
@@ -185,6 +180,7 @@ CFEngine Build Automation -- postgresql -- contrib
 %{prefix}/lib/postgresql/utf8_and_sjis.so
 %{prefix}/lib/postgresql/utf8_and_uhc.so
 %{prefix}/lib/postgresql/utf8_and_win.so
+%{prefix}/lib/postgresql/sslinfo.so
 
 %dir %{prefix}/share/postgresql
 %{prefix}/share/postgresql/conversion_create.sql
@@ -213,6 +209,9 @@ CFEngine Build Automation -- postgresql -- contrib
 %{prefix}/share/postgresql/extension/plpgsql.control
 %{prefix}/share/postgresql/extension/plpgsql--unpackaged--1.0.sql
 %{prefix}/share/postgresql/extension/plpgsql--1.0.sql
+%{prefix}/share/postgresql/extension/sslinfo--1.0.sql
+%{prefix}/share/postgresql/extension/sslinfo--unpackaged--1.0.sql
+%{prefix}/share/postgresql/extension/sslinfo.control
 
 %dir %{prefix}/share/postgresql/tsearch_data
 %{prefix}/share/postgresql/tsearch_data/*
