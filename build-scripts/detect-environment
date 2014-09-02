@@ -263,13 +263,13 @@ detect_tools()
     MAKE_VERSION=$(make -v || :)
     case "$MAKE_VERSION" in
     GNU*)
-        MAKE="make"
+        MAKE="$(which make)"
         ;;
     *)
         GMAKE_=`which gmake`
         case "$GMAKE_" in
         /*)
-            MAKE="gmake"
+            MAKE="$GMAKE_"
             ;;
         *)
             MAKE="Unknown make"
