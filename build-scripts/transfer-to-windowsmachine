@@ -44,7 +44,7 @@ case "$ARCH" in
     exit 1;;
 esac
 
-cp $BASEDIR/autobuild/packaging/cfengine-nova/cfengine-nova.wxs $P
+cp $BASEDIR/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs $P
 
 (cd $PKGD; zip -r $DIRNAME.zip $DIRNAME) || false
 }

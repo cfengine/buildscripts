@@ -137,7 +137,7 @@ prepare_workdir() {
   touch "workdir-$PROJECT-$BRANCH-$HOST"/build-remote.log
 
   SCRIPT="$(readlink -f "$0")"
-  AUTOBUILD_PATH="$(pwd)/workdir-$PROJECT-$BRANCH-$HOST/build/autobuild"
+  AUTOBUILD_PATH="$(pwd)/workdir-$PROJECT-$BRANCH-$HOST/build/buildscripts"
   export AUTOBUILD_PATH
   cd "workdir-$PROJECT-$BRANCH-$HOST"
 
@@ -146,8 +146,8 @@ prepare_workdir() {
 
 checkout() {
   mkdir -p build
-  rsync -avr --exclude='workdir-*' --exclude=".git" ../ build/autobuild
-  #(cd build/autobuild && git add -A || :; git commit -a -m "Commit for build" || :)
+  rsync -avr --exclude='workdir-*' --exclude=".git" ../ build/buildscripts
+  #(cd build/buildscripts && git add -A || :; git commit -a -m "Commit for build" || :)
 
   REPOS="core masterfiles"
 
@@ -226,7 +226,7 @@ checkout() {
        ;;
       
     nova-cp)
-     rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/autobuild
+     rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/buildscripts
      for d in core nova enterprise masterfiles design-center mission-portal; do
        rsync -avr $SOURCE/$d build
      done

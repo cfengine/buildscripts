@@ -45,7 +45,7 @@ uninstall_cfbuild_devel
 fi
 # Build it
 
-P="$BASEDIR/autobuild/packaging/$PKG"
+P="$BASEDIR/buildscripts/packaging/$PKG"
 
 #ensure that the initd scripts contaings the right path to executables
 escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
@@ -115,7 +115,7 @@ case "$PACKAGING" in
       -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
       $SPECIN > $SPEC
 
-    for i in `find $BASEDIR/autobuild/packaging/$PKG ! -name "*.spec"`; do
+    for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`; do
       (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
     done
 
@@ -269,7 +269,7 @@ case "$PACKAGING" in
       -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
       $SPECIN > $SPEC
 
-    for i in `find $BASEDIR/autobuild/packaging/$PKG ! -name "*.spec"`; do
+    for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`; do
       (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
     done
 

@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-CACHEDIR=$HOME/.cache/cfengine-autobuild-distfiles
+CACHEDIR=$HOME/.cache/cfengine-buildscripts-distfiles
 
 usage()
 {
@@ -67,7 +67,12 @@ fetch_file()
   mkdir -p "$CACHEDIR"
 
   for URL in $URLS; do
-    if wget -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME"; then
+    # Not all wget versions support --no-check-certificate, so try both forms.
+    # Also, the standard output of this function is parsed, so let's make sure
+    # wget outputs on standard error. That's what it normally does anyway, but
+    # misparsed arguments is an exception.
+    wget --no-check-certificate -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME" 1>&2 || true
+    if [ -f "$CACHEDIR/$FILENAME" ] || wget -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME" 1>&2 ; then
       if checksum "$FILENAME" "$CHECKSUM"; then
         return 0
       else

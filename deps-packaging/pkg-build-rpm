@@ -70,7 +70,7 @@ mkdir -p $BASEDIR/$PKGNAME/RPMS
 mkdir -p $BASEDIR/$PKGNAME/SOURCES
 mkdir -p $BASEDIR/$PKGNAME/SRPMS
 
-SRCFILES=$(pkg-get-autobuild-src $P)
+SRCFILES=$(pkg-get-buildscripts-src $P)
 
 echo "$SRCFILES" | while read srcfile opts; do
   ln -sf $srcfile $BASEDIR/$PKGNAME/SOURCES
