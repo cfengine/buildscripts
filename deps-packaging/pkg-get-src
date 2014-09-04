@@ -37,11 +37,32 @@ checksum()
   FILENAME="$1"
   CHECKSUM="$2"
 
-  if [ "$CHECKSUM" = "00000000000000000000000000000000" ]; then
-    return 0
-  fi
-
-  echo "$CHECKSUM  $CACHEDIR/$FILENAME" | md5sum -c >/dev/null
+  case "$CHECKSUM" in
+    content=*)
+      # Base checksum on content of each contained file, instead of the
+      # downloaded file. Is needed for generated downloads.
+      rm -rf temp
+      mkdir -p temp
+      cd temp
+      case "$CACHEDIR/$FILENAME" in
+        *.gz|*.tgz)
+          UNCOMPRESS=zcat;;
+        *.bz2)
+          UNCOMPRESS=bzcat;;
+        *)
+          echo "Unknown compression: $srcfile"
+          exit 42;;
+      esac
+      $UNCOMPRESS "$CACHEDIR/$FILENAME" | tar x
+      ACTUAL_CHECKSUM="$(find . -type f | env LC_ALL=C sort | xargs cat | md5sum)"
+      cd ..
+      rm -rf temp
+      test "${CHECKSUM#content=}  -" = "$ACTUAL_CHECKSUM"
+      ;;
+    *)
+      echo "$CHECKSUM  $CACHEDIR/$FILENAME" | md5sum -c >/dev/null
+      ;;
+  esac
 }
 
 file_in_cache() 
