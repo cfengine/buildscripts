@@ -32,13 +32,20 @@ sudo touch ${CHROOT_ROOT}inside-chroot.txt
 
 # Trick in order to get a login command that starts out in the home dir instead of the root.
 # See the login command for chroot in test-on-testmachine
-sudo bash -c "cat > ${CHROOT_ROOT}run-in-home-dir.sh" <<'EOF'
+sudo bash -c "cat > ${CHROOT_ROOT}run-in-home-dir.sh" <<EOF
 #!/bin/sh -x
 if [ ! -f /inside-chroot.txt ]; then
     echo Something is wrong. We should be inside the chroot now. Bailing...
     exit 2
 fi
 cd $HOME
+MAKEFLAGS="$MAKEFLAGS"
+export MAKEFLAGS
+LD_ALTEXEC="$LD_ALTEXEC"
+export LD_ALTEXEC
+EOF
+# Note different quote style on Here document.
+sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh" <<'EOF'
 exec "$@"
 EOF
 sudo chmod ugo+x ${CHROOT_ROOT}run-in-home-dir.sh
@@ -47,4 +54,6 @@ sudo mkdir -p ${CHROOT_ROOT}proc
 
 if [ ! -e ${CHROOT_ROOT}dev ]; then
     sudo mkdir -p ${CHROOT_ROOT}dev
+    sudo dd if=/dev/urandom of=${CHROOT_ROOT}dev/urandom bs=1048576 count=10
+    sudo dd if=/dev/urandom of=${CHROOT_ROOT}dev/random bs=1048576 count=10
 fi

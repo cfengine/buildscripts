@@ -277,7 +277,7 @@ generate_chroot_transfer_script()
 EOF
 
   ########### Platform specific ############
-  case "$OS" in
+  case "$OS_FAMILY" in
     aix)
       cat <<EOF
 + /dev
@@ -302,6 +302,11 @@ EOF
 + /system/volatile
 - /system/*
 + /system
+EOF
+      ;;
+    linux)
+      cat <<EOF
++ /dev
 EOF
       ;;
   esac
