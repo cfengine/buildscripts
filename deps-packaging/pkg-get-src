@@ -67,6 +67,8 @@ checksum()
           exit 42;;
       esac
       $UNCOMPRESS "$CACHEDIR/$FILENAME" | $TAR xf - >/dev/null 2>&1
+      # Bogus file created by older versions of tar trying to untar newer archives.
+      rm -f pax_global_header
       ACTUAL_CHECKSUM="$(find . -type f | env LC_ALL=C sort | xargs cat | md5sum)"
       cd ..
       rm -rf temp
