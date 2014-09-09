@@ -1,5 +1,7 @@
 #!/bin/sh -e
 
+. `dirname "$0"`/../build-scripts/functions
+
 CACHEDIR=$HOME/.cache/cfengine-buildscripts-distfiles
 
 usage()
