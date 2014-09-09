@@ -46,7 +46,12 @@ checksum()
       cd temp
       case "$CACHEDIR/$FILENAME" in
         *.gz|*.tgz)
-          UNCOMPRESS=zcat;;
+          if which gzcat >/dev/null 2>&1 ; then
+            UNCOMPRESS=gzcat
+          else
+            UNCOMPRESS=zcat
+          fi
+          ;;
         *.bz2)
           UNCOMPRESS=bzcat;;
         *)
