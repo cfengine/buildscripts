@@ -37,6 +37,12 @@ checksum()
   FILENAME="$1"
   CHECKSUM="$2"
 
+  if which gtar >/dev/null 2>&1; then
+    TAR=gtar
+  else
+    TAR=tar
+  fi
+
   case "$CHECKSUM" in
     content=*)
       # Base checksum on content of each contained file, instead of the
@@ -58,7 +64,7 @@ checksum()
           echo "Unknown compression: $srcfile"
           exit 42;;
       esac
-      $UNCOMPRESS "$CACHEDIR/$FILENAME" | tar x
+      $UNCOMPRESS "$CACHEDIR/$FILENAME" | $TAR xf - >/dev/null 2>&1
       ACTUAL_CHECKSUM="$(find . -type f | env LC_ALL=C sort | xargs cat | md5sum)"
       cd ..
       rm -rf temp
