@@ -11,23 +11,23 @@
 
 # Detect a POSIX compliant shell
 detect_posix_sh() {
-    echo "Trying to detect if we are running on a POSIX shell"
+    # Trying to detect if we are running on a POSIX shell
     HAVE_POSIX_SH=0
     unset foo
-    (: ${foo%%bar}) 2> /dev/null && echo 0
+    (: ${foo%%bar}) 2> /dev/null && true
     T1=$?
     if test "$T1" = 0; then
-        echo "POSIX shell detected"
+        # POSIX shell detected
         HAVE_POSIX_SH=1
     fi
 }
 # We are getting to the weird ones, Solaris shell supports the things
 # used before so we will use that as a mark of a Solaris shell
 detect_solaris_sh() {
-    echo "Trying to detect Solaris POSIX shell"
+    # Trying to detect Solaris POSIX shell
     HAVE_SOLARIS_SH=0
     if test -x /usr/xpg4/bin/sh; then
-        echo "Solaris POSIX shell detected"
+        # Solaris POSIX shell detected
         HAVE_SOLARIS_SH=1
     fi
 }
@@ -39,17 +39,15 @@ try_exec() {
   type "$1" > /dev/null 2>&1 && exec "$@"
 }
 
-echo "POSIX compliant shell test"
+# POSIX compliant shell test
 detect_posix_sh
-if [ $HAVE_POSIX_SH -eq 1 ]; then
-    echo "Script will continue"
-else
-    echo "POSIX shell test failed. We will try to detect a POSIX shell in your system."
-    echo "If your system does not have a POSIX shell, then this script will abort."
-    echo "In that case please install a POSIX shell and create a test for it." 
+if [ $HAVE_POSIX_SH -ne 1 ]; then
+    # POSIX shell test failed. We will try to detect a POSIX shell in your system.
+    # If your system does not have a POSIX shell, then this script will abort.
+    # In that case please install a POSIX shell and create a test for it.
     detect_solaris_sh
     if [ $HAVE_SOLARIS_SH -eq 1 ]; then
-        echo "Trying to switch to Solaris POSIX shell"
+        # "Trying to switch to Solaris POSIX shell"
         try_exec /usr/xpg4/bin/sh -x "$0" "$@"
         echo "Something went wrong when trying to replace the Solaris Shell. Aborting."
         exit 42
