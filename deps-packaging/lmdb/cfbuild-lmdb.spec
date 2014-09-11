@@ -25,15 +25,10 @@ Patch0: mdb.patch
 SYS=`uname -s`
 mkdir -p %{_builddir}
 %setup -q -n %{srcdir}
-if [ $SYS = "AIX" ]; then
-PATCH=/usr/local/bin/patch
-else
-PATCH=patch
-fi
-$PATCH -s -p3 < %{_topdir}/SOURCES/mdb.patch
-$PATCH -s -p3 < %{_topdir}/SOURCES/mdb-robust.patch
-$PATCH -s -p3 < %{_topdir}/SOURCES/mdb-autoconf.patch
-$PATCH -s -p3 < %{_topdir}/SOURCES/mdb-autoconf-generated.patch
+patch -s -p3 < %{_topdir}/SOURCES/mdb.patch
+patch -s -p3 < %{_topdir}/SOURCES/mdb-robust.patch
+patch -s -p3 < %{_topdir}/SOURCES/mdb-autoconf.patch
+patch -s -p3 < %{_topdir}/SOURCES/mdb-autoconf-generated.patch
 # Executable files taken from mdb-autoconf-generated.patch, which is generated
 # from Git, and contains permission info, but patch -p1 cannot apply it.
 # Use the following command to list the files.
