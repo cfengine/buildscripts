@@ -23,8 +23,8 @@ rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}/lib
 
-cp  /opt/freeware/lib/gcc/powerpc-ibm-aix5.3.0.0/4.2.0/libgcc_s.a $RPM_BUILD_ROOT%{prefix}/lib/
-cp  /opt/freeware/lib/gcc/powerpc-ibm-aix5.3.0.0/4.2.0/libstdc++.a $RPM_BUILD_ROOT%{prefix}/lib/
+cp  /opt/freeware/lib/gcc/powerpc-ibm-aix5.3.0.0/4.*/libgcc_s.a $RPM_BUILD_ROOT%{prefix}/lib/
+#cp  /opt/freeware/lib/gcc/powerpc-ibm-aix5.3.0.0/4.*/libstdc++.a $RPM_BUILD_ROOT%{prefix}/lib/
 cp  /usr/ccs/lib/libpthdebug.a $RPM_BUILD_ROOT%{prefix}/lib/
 cp  /usr/ccs/lib/libpthreads.a $RPM_BUILD_ROOT%{prefix}/lib/
 cp  /usr/ccs/lib/libpthreads_compat.a $RPM_BUILD_ROOT%{prefix}/lib/
@@ -47,7 +47,7 @@ rm -rf $RPM_BUILD_ROOT
 %dir %prefix/lib
 
 %prefix/lib/libgcc_s.a
-%prefix/lib/libstdc++.a
+#%prefix/lib/libstdc++.a
 %prefix/lib/libpthdebug.a
 %prefix/lib/libpthreads.a
 %prefix/lib/libpthreads_compat.a
