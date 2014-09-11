@@ -16,17 +16,6 @@ case "$PROJECT" in
     exit 42;;
 esac
 
-if [ $OS = "aix" ]; then
-    export PATH="/usr/local/bin:$PATH"
-    export LDFLAGS="-L/var/cfengine/lib -lpthreads -Wl,-blibpath:/var/cfengine/lib:/usr/lib:/lib -Wl,-brtl"
-    export CFLAGS="-I/var/cfengine/include"
-    export LD_RUN_PATH=/var/cfengine/lib
-    export LD_LIBRARY_PATH="/var/cfengine/lib:$LD_LIBRARY_PATH"
-    export LIBPATH="/var/cfengine/lib:/usr/lib:$LIBPATH"
-    export YACC=/usr/local/bin/yacc
-    export MAKE=/usr/bin/gmake
-fi
-
 $MAKE -C $BASEDIR/core -k
 $MAKE -C $BASEDIR/core install DESTDIR=$BASEDIR/cfengine/dist
 

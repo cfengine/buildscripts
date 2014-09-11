@@ -35,16 +35,6 @@ VERSION="$6"
 
 P=$BASEDIR/buildscripts/deps-packaging/$PKGNAME
 SYS=`uname -s`
-if [ $SYS = "AIX" ]; then
-export PATH="/usr/local/bin:$PATH"
-export LDFLAGS="-L/var/cfengine/lib -lpthreads -Wl,-blibpath:/var/cfengine/lib:/usr/lib:/lib -Wl,-brtl"
-export CFLAGS="-I/var/cfengine/include"
-export LD_RUN_PATH=/var/cfengine/lib
-export LD_LIBRARY_PATH="/var/cfengine/lib:$LD_LIBRARY_PATH"
-export LIBPATH="/var/cfengine/lib:/usr/lib:$LIBPATH"
-export YACC=/usr/local/bin/yac
-export MAKE=/usr/bin/gmake
-fi
 
 echo
 echo "$PKGNAME"
