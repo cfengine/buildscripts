@@ -68,9 +68,6 @@ CFEngine Build Automation -- zlib -- development files
 %dir %{prefix}/include
 %{prefix}/include/*.h
 
-%dir %{prefix}/lib
-%{prefix}/lib/libz.so
-
 %dir %{prefix}/lib/pkgconfig
 %{prefix}/lib/pkgconfig/zlib.pc
 
