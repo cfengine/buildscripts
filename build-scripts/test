@@ -8,7 +8,6 @@ if [ -n "$TEST_MACHINE" ]; then
   local_script_general prepare-testmachine
   local_script_general transfer-to-testmachine
   local_script_general test-on-testmachine
-  local_script_general collect-testresults-from-testmachine
 else
   local_script_general test-on-thismachine
 fi
