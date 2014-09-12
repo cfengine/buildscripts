@@ -287,12 +287,31 @@ detect_tools()
     export RPMBUILD_CMD
 }
 
+detect_cores()
+{
+  case "$OS_FAMILY" in
+    aix)
+      NUM_CORES="$(lscfg | grep proc | wc -l)";;
+    solaris)
+      NUM_CORES="$(psrinfo |wc -l)";;
+    linux)
+      NUM_CORES="$(cat /proc/cpuinfo | grep '^processor' | wc -l)";;
+    *)
+      NUM_CORES=1;;
+  esac
+
+  # Make number of jobs one higher than core count, to account for I/O, network, etc.
+  MAKEFLAGS="${MAKEFLAGS:--j$(($NUM_CORES + 1))}"
+  export MAKEFLAGS
+}
+
 detect_environment()
 {
-detect_os
-detect_packaging
-detect_arch
-detect_tools
+  detect_os
+  detect_packaging
+  detect_arch
+  detect_tools
+  detect_cores
 }
 
 detect_environment
