@@ -12,6 +12,15 @@ fi
 
 export PROJECT
 
+case "$OS_FAMILY" in
+  aix)
+    # This flag is needed because AIX defaults to producing .a shared libraries,
+    # but we need it to make .so libraries. It doesn't work correctly when
+    # specified in the Makefile, so we specify it in the environment instead.
+    LDFLAGS=-Wl,-brtl;;
+esac
+export LDFLAGS
+
 # Should we package libgcc_s.so.1?
 
 case "$OS_FAMILY" in

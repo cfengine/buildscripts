@@ -27,8 +27,8 @@ maintain systems.
 rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}
-cp -hR %{prefix}/* $RPM_BUILD_ROOT%{prefix}
-cp -hR %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
+rsync -rlp %{prefix}/* $RPM_BUILD_ROOT%{prefix}
+rsync -rlp %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
 #Copy the modified init.d script according to the working directory
 mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d

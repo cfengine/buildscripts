@@ -137,20 +137,6 @@ case "$BUILD_TYPE" in
       echo "Unknown build type: $BUILD_TYPE"
       exit 42;;
 esac
-case "$OS_FAMILY" in
-  aix)
-	export PATH="/usr/local/bin:$PATH"
-	export LDFLAGS="-L/var/cfengine/lib -lpthreads -Wl,-blibpath:/var/cfengine/lib:/usr/lib:/lib -Wl,-brtl"
-	export CFLAGS="-I/var/cfengine/include"
-	export LD_RUN_PATH=/var/cfengine/lib
-	export LD_LIBRARY_PATH="/var/cfengine/lib:$LD_LIBRARY_PATH"
-	export LIBPATH="/var/cfengine/lib:/usr/lib:$LIBPATH"
-	export YACC=/usr/local/bin/yac
-	export MAKE=/usr/bin/gmake
-  ;;
-  *)
-  ;;
-esac
 
 ( cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
 
