@@ -130,6 +130,11 @@ then
 	exit 1
 fi
 
+#stop the remaining services on upgrade
+if [ $1 -eq 2 ]; then
+    /etc/init.d/cfengine3 stop
+fi
+
 #
 # We check if there is a server listening on port 80 or port 443.
 # If one is found, then we try to shut it down by calling
@@ -201,11 +206,6 @@ then
 		echo "There is still a process listening on 5432, please kill it before retrying the installation. Aborting."
 		exit 1
 	fi
-fi
-
-#stop the remaining services on upgrade
-if [ $1 -eq 2 ]; then
-    /etc/init.d/cfengine3 stop
 fi
 
 #
