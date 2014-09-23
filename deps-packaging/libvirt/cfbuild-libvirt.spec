@@ -35,6 +35,7 @@ PKG_CONFIG_PATH=%prefix/lib/pkgconfig \
 ./configure --prefix=%{prefix}\
             --localstatedir=/var \
             --with-remote \
+            --without-curl \
             --without-hal \
             --without-udev \
             --without-python \
