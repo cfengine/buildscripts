@@ -650,6 +650,11 @@ exit 0
 
 %preun
 
+# Don't do anything on upgrade.
+if [ $1 -ne 0 ]; then
+  exit 0
+fi
+
 #
 # Unregister CFEngine initscript.
 #
@@ -659,9 +664,7 @@ if [ $? -eq 0 ]; then
     service cfengine3 stop
 fi
 
-if [ $1 -eq 0 ]; then
-    chkconfig --del cfengine3
-fi
+chkconfig --del cfengine3
 
 #
 # Clean lock files created by initscript, if any
@@ -673,6 +676,11 @@ done
 exit 0
 
 %postun
+
+# Don't do anything on upgrade.
+if [ $1 -ne 0 ]; then
+  exit 0
+fi
 
 if [ -f /etc/php.d/cfmod.ini ]; then
     rm -f /etc/php.d/cfmod.ini
