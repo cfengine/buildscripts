@@ -34,6 +34,7 @@ build-stamp:
 	    --prefix=$(PREFIX) \
 	    --localstatedir=/var \
 	    --with-remote \
+            --without-curl \
             --without-hal \
             --without-udev \
             --without-python \
