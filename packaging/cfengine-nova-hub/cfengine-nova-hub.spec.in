@@ -115,13 +115,29 @@ rm -rf $RPM_BUILD_ROOT
 
 %pre
 PREFIX="%{prefix}"
+
+#
+# Work around bug in CFEngine <= 3.6.1: The %preun script stops the services,
+# but it shouldn't when we upgrade. Later versions are fixed, but it's the *old*
+# %preun script that gets called when we upgrade, so we have to work around it
+# by using the %posttrans script, which is the only script from the new package
+# that is called after %preun. Unfortunately it doesn't tell you whether or not
+# you're upgrading, so we need to remember it by using the file below.
+#
+# This section can be removed completely when we no longer support upgrading
+# from the 3.6 series.
+#
+if [ $1 -eq 2 ]; then
+  if %{prefix}/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]|6\.[01])' > /dev/null; then
+    ( echo "Upgraded from:"; %{prefix}/bin/cf-agent -V ) > %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
+  fi
+fi
+
 #
 # Before starting the installation process we need to check that
 # hostname -f returns a valid name. If that is not the case then
 # we just abort the installation.
 #
-
-
 NAME=$(hostname -f)
 if [ -z "$NAME" ];
 then
@@ -708,6 +724,20 @@ if [ -f /usr/lib64/php5/extensions/cfmod.so ]; then
     rm -f /usr/lib64/php5/extensions/cfmod.so
     rm -f /usr/lib64/php5/extensions/curl.so
     rm -f /usr/lib64/php5/extensions/cfengine-enterprise-api.so
+fi
+
+exit 0
+
+%posttrans
+#
+# Work around bug in CFEngine <= 3.6.1. See BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt above.
+#
+# This section can be removed completely when we no longer support upgrading
+# from the 3.6 series.
+#
+if [ -f %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt ]; then
+  service cfengine3 start
+  rm -f %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
 fi
 
 exit 0
