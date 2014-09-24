@@ -60,10 +60,14 @@ cp $PREFIX/lib/php/*.ini $PREFIX/httpd/php/lib
 cp $PREFIX/lib/php/*.so $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20100525
 
 #Change keys in files
-NEW_UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-sed -i s/CFE_SESSION_KEY/"$NEW_UUID"/ $PREFIX/share/GUI/application/config/config.php
-sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/share/GUI/application/config/appsettings.php
-sed -i s/CFE_CLIENT_SECRET_KEY/"$NEW_UUID"/ $PREFIX/share/db/ootb_settings.sql
+if [ -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp ]; then
+  UUID=$(tr -d '\n\r' < $PREFIX/CF_CLIENT_SECRET_KEY.tmp)
+else
+  UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+fi
+sed -i s/CFE_SESSION_KEY/"$UUID"/ $PREFIX/share/GUI/application/config/config.php
+sed -i s/CFE_CLIENT_SECRET_KEY/"$UUID"/ $PREFIX/share/GUI/application/config/appsettings.php
+sed -i s/CFE_CLIENT_SECRET_KEY/"$UUID"/ $PREFIX/share/db/ootb_settings.sql
 
 cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
 mkdir -p $PREFIX/httpd/htdocs/tmp
@@ -85,19 +89,23 @@ chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/tmp
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
 chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/application/logs
 
-# This folder is required for Design Center and Mission Portal to talk to each other
-DCWORKDIR=/opt/cfengine
-$PREFIX/design-center/bin/cf-sketch --inputs=$PREFIX/design-center --installsource=$PREFIX/share/NovaBase/sketches/cfsketches.json --install-all
-mkdir -p $DCWORKDIR/userworkdir/admin/.ssh
-mkdir -p $DCWORKDIR/stage_backup
-mkdir -p $DCWORKDIR/dc-scripts
-mkdir -p $DCWORKDIR/masterfiles_staging
-mkdir -p $DCWORKDIR/masterfiles.git
+#
+# Do all the prelimenary Design Center setup only on the first install of cfengine package
+#
+if [ -z "$2" ]; then
+  # This folder is required for Design Center and Mission Portal to talk to each other
+  DCWORKDIR=/opt/cfengine
+  $PREFIX/design-center/bin/cf-sketch --inputs=$PREFIX/design-center --installsource=$PREFIX/share/NovaBase/sketches/cfsketches.json --install-all
+  mkdir -p $DCWORKDIR/userworkdir/admin/.ssh
+  mkdir -p $DCWORKDIR/stage_backup
+  mkdir -p $DCWORKDIR/dc-scripts
+  mkdir -p $DCWORKDIR/masterfiles_staging
+  mkdir -p $DCWORKDIR/masterfiles.git
 
-touch $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
-chmod 600 $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
+  touch $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
+  chmod 600 $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
 
-cat > $DCWORKDIR/dc-scripts/params.sh <<EOHIPPUS
+  cat > $DCWORKDIR/dc-scripts/params.sh <<EOHIPPUS
 #!/bin/bash
 ROOT="$DCWORKDIR/masterfiles_staging"
 GIT_URL="$DCWORKDIR/masterfiles.git"
@@ -113,11 +121,11 @@ export PKEY="\${PKEY}"
 export GIT_SSH="\${SCRIPT_DIR}/ssh-wrapper.sh"
 EOHIPPUS
 
-# The runfile key in the below JSON is not needed anymore, all the
-# values in it are OK by default, especially the runfile location,
-# which is the first element of repolist plus `/meta/api-runfile.cf`.
+  # The runfile key in the below JSON is not needed anymore, all the
+  # values in it are OK by default, especially the runfile location,
+  # which is the first element of repolist plus `/meta/api-runfile.cf`.
 
-cat > $DCWORKDIR/userworkdir/admin/api-config.json <<EOHIPPUS
+  cat > $DCWORKDIR/userworkdir/admin/api-config.json <<EOHIPPUS
 {
   "log":"STDERR",
   "log_level":"3",
@@ -129,40 +137,41 @@ cat > $DCWORKDIR/userworkdir/admin/api-config.json <<EOHIPPUS
 }
 EOHIPPUS
 
-chmod 700 $DCWORKDIR/dc-scripts/params.sh
+  chmod 700 $DCWORKDIR/dc-scripts/params.sh
 
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/userworkdir
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/dc-scripts
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/stage_backup
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/masterfiles.git
+  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/userworkdir
+  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/dc-scripts
+  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/stage_backup
+  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/masterfiles.git
 
-chown $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
-cp -R $PREFIX/masterfiles/* $DCWORKDIR/masterfiles_staging
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/masterfiles_staging
+  chown $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
+  cp -R $PREFIX/masterfiles/* $DCWORKDIR/masterfiles_staging
+  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/masterfiles_staging
 
-chmod 700 $DCWORKDIR/stage_backup
-chmod -R 700 $DCWORKDIR/userworkdir
+  chmod 700 $DCWORKDIR/stage_backup
+  chmod -R 700 $DCWORKDIR/userworkdir
 
-GIT=$PREFIX/bin/git
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT init")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.email admin@cfengine.com")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.name admin")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "echo -e '/cf_promise_*\n.*.sw[po]\n*~\n\\#*#' >.gitignore")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add .gitignore")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Ignore cf_promise_*'")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add *")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Initial pristine masterfiles'")
+  GIT=$PREFIX/bin/git
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT init")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.email admin@cfengine.com")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.name admin")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "echo -e '/cf_promise_*\n.*.sw[po]\n*~\n\\#*#' >.gitignore")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add .gitignore")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Ignore cf_promise_*'")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add *")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Initial pristine masterfiles'")
 
-(cd $DCWORKDIR/ && su $MP_APACHE_USER -c "$GIT clone --no-hardlinks --bare $DCWORKDIR/masterfiles_staging $DCWORKDIR/masterfiles.git")
-find "$DCWORKDIR/masterfiles.git" -type d -exec chmod 700 {} \;
-find "$DCWORKDIR/masterfiles.git" -type f -exec chmod 600 {} \;
+  (cd $DCWORKDIR/ && su $MP_APACHE_USER -c "$GIT clone --no-hardlinks --bare $DCWORKDIR/masterfiles_staging $DCWORKDIR/masterfiles.git")
+  find "$DCWORKDIR/masterfiles.git" -type d -exec chmod 700 {} \;
+  find "$DCWORKDIR/masterfiles.git" -type f -exec chmod 600 {} \;
 
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT branch CF_WORKING_BRANCH")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote rm origin")
-(cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote add origin $DCWORKDIR/masterfiles.git")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT branch CF_WORKING_BRANCH")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote rm origin")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote add origin $DCWORKDIR/masterfiles.git")
 
-if [ ! -f /usr/bin/curl ]; then
-        ln -sf $PREFIX/bin/curl /usr/bin/curl
+  if [ ! -f /usr/bin/curl ]; then
+    ln -sf $PREFIX/bin/curl /usr/bin/curl
+  fi
 fi
 
 if [ -f $PREFIX/bin/cf-twin ]; then
@@ -205,7 +214,9 @@ mkdir -p $CFENGINE_MP_DEFAULT_KEY_LOCATION
 CFENGINE_LOCALHOST=$(hostname -f)
 CFENGINE_MP_CERT=$CFENGINE_MP_DEFAULT_CERT_LOCATION/$CFENGINE_LOCALHOST.cert
 CFENGINE_MP_KEY=$CFENGINE_MP_DEFAULT_KEY_LOCATION/$CFENGINE_LOCALHOST.key
-$CFENGINE_OPENSSL req -new -newkey rsa:4096 -days 99999 -nodes -x509 -subj "/C=NA/ST=NA/L=NA/O=SelfSigned/CN=$CFENGINE_LOCALHOST" -keyout $CFENGINE_MP_KEY  -out $CFENGINE_MP_CERT -config $PREFIX/ssl/openssl.cnf
+if [ ! -f $CFENGINE_MP_CERT ]; then
+  $CFENGINE_OPENSSL req -new -newkey rsa:4096 -days 99999 -nodes -x509 -subj "/C=NA/ST=NA/L=NA/O=SelfSigned/CN=$CFENGINE_LOCALHOST" -keyout $CFENGINE_MP_KEY  -out $CFENGINE_MP_CERT -config $PREFIX/ssl/openssl.cnf
+fi
 #
 # Modify the Apache configuration with the corresponding key and certificate
 #
@@ -219,46 +230,46 @@ $PREFIX/httpd/bin/apachectl start
 #
 if [ ! -d $PREFIX/state/pg/data ]; then
 
-mkdir -p $PREFIX/state/pg/data
-chown -R cfpostgres $PREFIX/state/pg
-(cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
-touch /var/log/postgresql.log
-chown cfpostgres /var/log/postgresql.log
+  mkdir -p $PREFIX/state/pg/data
+  chown -R cfpostgres $PREFIX/state/pg
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
+  touch /var/log/postgresql.log
+  chown cfpostgres /var/log/postgresql.log
 
-    # Generating a new postgresql.conf if enough total memory is present
-    #
-    # If total memory is lower than 8G, we use the default pgsql conf file
-    # If total memory is beyond 64G, we use a shared_buffers of 16G
-    # Otherwise, we use a shared_buffers equal to 25% of total memory
-    total=`cat /proc/meminfo |grep "^MemTotal:.*[0-9]\+ kB"|awk '{print $2}'`
+  # Generating a new postgresql.conf if enough total memory is present
+  #
+  # If total memory is lower than 8G, we use the default pgsql conf file
+  # If total memory is beyond 64G, we use a shared_buffers of 16G
+  # Otherwise, we use a shared_buffers equal to 25% of total memory
+  total=`cat /proc/meminfo |grep "^MemTotal:.*[0-9]\+ kB"|awk '{print $2}'`
 
-    echo "$total" | grep -q '^[0-9]\+$'
-    if [ $? -ne 0 ] ;then
-       echo "Error calculating total memory for setting postgresql shared_buffers";
+  echo "$total" | grep -q '^[0-9]\+$'
+  if [ $? -ne 0 ] ;then
+    echo "Error calculating total memory for setting postgresql shared_buffers";
+  else
+    upper=$(( 64 * 1024 * 1024 ))  #in KB
+    lower=$(( 8 * 1024 * 1024 ))   #in KB
+
+    if [ "$total" -gt "$lower" ]; then
+      maint="2GB"
+      if [ "$total" -ge "$upper" ]; then
+        shared="16GB"
+        effect="11GB"        #70% of 16G
+      else
+        shared=$(( $total * 25 / 100 / 1024 ))   #in MB
+        shared="$shared""MB"
+        effect=$(( $total * 70 / 100 / 1024 ))   #in MB
+        effect="$effect""MB"
+      fi
+      sed -i -e "s/^.effective_cache_size.*/effective_cache_size=$effect/" $PREFIX/share/postgresql/postgresql.conf.cfengine
+      sed -i -e "s/^shared_buffers.*/shared_buffers=$shared/" $PREFIX/share/postgresql/postgresql.conf.cfengine
+      sed -i -e "s/^maintenance_work_mem.*/maintenance_work_mem=$maint/" $PREFIX/share/postgresql/postgresql.conf.cfengine
+      cp $PREFIX/share/postgresql/postgresql.conf.cfengine $PREFIX/state/pg/data/postgresql.conf
+      chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
     else
-       upper=$(( 64 * 1024 * 1024 ))  #in KB
-       lower=$(( 8 * 1024 * 1024 ))   #in KB
-
-       if [ "$total" -gt "$lower" ]; then
-           maint="2GB"
-           if [ "$total" -ge "$upper" ]; then
-               shared="16GB"
-               effect="11GB"        #70% of 16G
-           else
-               shared=$(( $total * 25 / 100 / 1024 ))   #in MB
-               shared="$shared""MB"
-               effect=$(( $total * 70 / 100 / 1024 ))   #in MB
-               effect="$effect""MB"
-           fi
-           sed -i -e "s/^.effective_cache_size.*/effective_cache_size=$effect/" $PREFIX/share/postgresql/postgresql.conf.cfengine
-           sed -i -e "s/^shared_buffers.*/shared_buffers=$shared/" $PREFIX/share/postgresql/postgresql.conf.cfengine
-           sed -i -e "s/^maintenance_work_mem.*/maintenance_work_mem=$maint/" $PREFIX/share/postgresql/postgresql.conf.cfengine
-           cp $PREFIX/share/postgresql/postgresql.conf.cfengine $PREFIX/state/pg/data/postgresql.conf
-           chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
-       else
-          echo "Warning: not enough total memory needed to set shared_buffers=2GB"
-       fi
+      echo "Warning: not enough total memory needed to set shared_buffers=2GB"
     fi
+  fi
 fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
@@ -269,69 +280,69 @@ LISTENING=no
 echo -n "pinging pgsql server"
 while [ $TRYNO -le 20 ]
 do
-      echo -n .
-      ALIVE=$(cd /tmp && su cfpostgres -c "$PREFIX/bin/psql -l 1>/dev/null 2>/dev/null")
+  echo -n .
+  ALIVE=$(cd /tmp && su cfpostgres -c "$PREFIX/bin/psql -l 1>/dev/null 2>/dev/null")
 
-      if [ $? -eq 0 ];then
-        LISTENING=yes
-        break
-      fi
-      sleep 1
-      TRYNO=`expr $TRYNO + 1`
+  if [ $? -eq 0 ];then
+    LISTENING=yes
+    break
+  fi
+  sleep 1
+  TRYNO=`expr $TRYNO + 1`
 done
 echo done
 
 if [ "$LISTENING" = "no" ]
- then
-     echo "Couldnot create necessary database and users, make sure Postgres server is running.."
- else
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb")
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER")
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root")
+then
+  echo "Couldnot create necessary database and users, make sure Postgres server is running.."
+else
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root")
 
-     #create database for MISSION PORTAL
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp")
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql")
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/pgschema.sql")
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql")
+  #create database for MISSION PORTAL
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/pgschema.sql")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql")
 
-    #import stored function for MP into cfdb
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/GUI/phpcfenginenova/cfdb_import.sql")
+  #import stored function for MP into cfdb
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/GUI/phpcfenginenova/cfdb_import.sql")
 
-    #create database for hub internal data
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql")
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql")
+  #create database for hub internal data
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql")
 
-    #revoke create permission on public schema for cfdb database
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
+  #revoke create permission on public schema for cfdb database
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
     REVOKE CREATE ON SCHEMA public FROM public;
 EOF
 
-    #grant permission for apache user to use the cfdb database
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
+  #grant permission for apache user to use the cfdb database
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
     GRANT ALL ON DATABASE cfdb TO $MP_APACHE_USER;
 EOF
 
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
     GRANT SELECT, DELETE ON ALL TABLES IN SCHEMA PUBLIC TO $MP_APACHE_USER;
 EOF
 
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
     ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
 EOF
 
-    #grant permission for apache user to use the cfsettings database
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
+  #grant permission for apache user to use the cfsettings database
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
     GRANT ALL ON DATABASE cfsettings TO $MP_APACHE_USER;
 EOF
 
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
     GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $MP_APACHE_USER;
 EOF
 
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
     ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
 EOF
 
@@ -355,6 +366,11 @@ $PREFIX/bin/cf-consumer
 #
 CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
+
+#
+# Delete temporarily stored key.
+#
+rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
 
 # start CFE3 processes on only client hosts (not HUB)
 if [ -f $PREFIX/policy_server.dat -a ! -f $PREFIX/masterfiles/promises.cf ]; then
