@@ -16,7 +16,9 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n openldap-2.4.36
 
-LDFLAGS="$LDFLAGS -Wl,-R,%{prefix}/lib"
+# Either "$LDFLAGS -L%{prefix}lib"
+# Or     "-bsvr4 $LDFLAGS -Wl,-R,%{prefix}/lib"
+LDFLAGS="$LDFLAGS -L%{prefix}/lib"
 CPPFLAGS=-I%{buildprefix}/include
 
 #
