@@ -34,5 +34,5 @@ rm -f ${TZD}/lib/libz.a
 rm -rf ${TZD}/share
 
 mkdir -p ${TZ}/lib
-mv ${TZD}/lib/libz.so.* ${TZ}/lib
+mv ${TZD}/lib/libz.so* ${TZ}/lib
 
