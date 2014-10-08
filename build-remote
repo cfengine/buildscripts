@@ -147,7 +147,6 @@ prepare_workdir() {
 checkout() {
   mkdir -p build
   rsync -avr --exclude='workdir-*' ../ build/buildscripts
-  #(cd build/buildscripts && git add -A || :; git commit -a -m "Commit for build" || :)
 
   REPOS="core masterfiles"
 
