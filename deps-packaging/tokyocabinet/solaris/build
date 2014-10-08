@@ -55,4 +55,4 @@ rm -rf ${TTD}/share
 
 mkdir -p ${TT}/bin ${TT}/lib
 mv ${TTD}/bin/tchmgr ${TT}/bin
-mv ${TTD}/lib/libtokyocabinet.so.* ${TT}/lib
+mv ${TTD}/lib/libtokyocabinet.so* ${TT}/lib

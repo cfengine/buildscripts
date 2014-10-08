@@ -36,5 +36,5 @@ rm -f ${LXD}/lib/xml2Conf.sh
 rm -rf ${LXD}/share
 
 mkdir -p ${LX}/lib
-mv ${LXD}/lib/*.so.* ${LX}/lib
+mv ${LXD}/lib/*.so* ${LX}/lib
 

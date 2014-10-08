@@ -49,5 +49,5 @@ rm -rf ${OSD}/lib/*.a
 
 mkdir -p ${OS}/lib
 mv ${OSD}/lib/libcrypto.so* ${OS}/lib
-mv ${OSD}/lib/libssl.so.* ${OS}/lib
+mv ${OSD}/lib/libssl.so* ${OS}/lib
 

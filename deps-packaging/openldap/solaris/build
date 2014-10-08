@@ -37,4 +37,4 @@ rm -f ${OLD}/lib/*.a
 rm -f ${OLD}/lib/*.la
 
 mkdir -p ${OL}/lib
-mv ${OLD}/lib/*.so.* ${OL}/lib
+mv ${OLD}/lib/*.so* ${OL}/lib

@@ -39,4 +39,4 @@ rm -f ${PCD}/lib/*.la
 rm -rf ${PCD}/share
 
 mkdir -p ${PC}/lib
-mv ${PCD}/lib/*.so.* ${PC}/lib
+mv ${PCD}/lib/*.so* ${PC}/lib
