@@ -33,5 +33,5 @@ rm -rf ${LSD}/lib/*.a
 rm -rf ${LSD}/lib/*.la
 
 mkdir -p ${LS}/lib
-mv ${LSD}/lib/*.so.* ${LS}/lib
+mv ${LSD}/lib/*.so* ${LS}/lib
 

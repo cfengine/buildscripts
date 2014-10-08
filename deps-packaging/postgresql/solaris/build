@@ -36,4 +36,4 @@ rm -f ${PGD}/lib/*.a
 rm -rf ${PGD}/share
 
 mkdir -p ${PG}/lib
-mv ${PGD}/lib/libpq.so.* ${PG}/lib
+mv ${PGD}/lib/libpq.so* ${PG}/lib
