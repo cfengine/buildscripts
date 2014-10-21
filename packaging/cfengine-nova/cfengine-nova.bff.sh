@@ -69,11 +69,18 @@ chmod 755 $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/etc/rc.d/init.d/cfengine3
 # Create the info file
 env LD_LIBRARY_PATH=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/bin/cf-agent -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.copyright
 
+# Detect build machine versions of important libraries so we can compare with
+# the install machine.
+PTHREAD_VERSION=`lslpp -l bos.rte.libpthreads | grep bos.rte.libpthreads | head -n1 | sed -e 's/.* \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/'`
+LIBC_VERSION=`lslpp -l bos.rte.libc | grep bos.rte.libc | head -n1 | sed -e 's/.* \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/'`
+
 #Create the lpp_name file
 cat >  $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/lpp_name << EOF; 
 4 R I cfengine.cfengine-nova {
 cfengine.cfengine-nova $VERSION.0 01 N U en_US Cfengine Nova, Data Center Automation
 [
+*prereq bos.rte.libpthreads $PTHREAD_VERSION
+*prereq bos.rte.libc $LIBC_VERSION
 %
 INSTWORK 70 70
 % 
