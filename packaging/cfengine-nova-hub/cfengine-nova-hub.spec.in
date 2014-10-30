@@ -651,6 +651,7 @@ if [ ! -f $PREFIX/config/redis.conf ]; then
 daemonize yes
 unixsocket /tmp/redis.sock
 unixsocketperm 755
+bind 127.0.0.1
 EOF
 fi
 
