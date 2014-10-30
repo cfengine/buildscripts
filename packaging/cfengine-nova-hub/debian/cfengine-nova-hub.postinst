@@ -356,6 +356,7 @@ cat > $PREFIX/config/redis.conf << EOF
 daemonize yes
 unixsocket /tmp/redis.sock
 unixsocketperm 755
+bind 127.0.0.1
 EOF
 
 $PREFIX/bin/redis-server $PREFIX/config/redis.conf
