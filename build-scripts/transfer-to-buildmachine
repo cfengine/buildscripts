@@ -4,4 +4,4 @@
 
 BUILDMACHINE="$1"
 
-rsync -avr --exclude=output --exclude=".git" --delete $BASEDIR/ $BUILDMACHINE:build
+rsync -acvr --exclude=output --exclude=".git" --delete $BASEDIR/ $BUILDMACHINE:build
