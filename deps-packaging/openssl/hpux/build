@@ -12,6 +12,8 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Patch
 
+gpatch -p0 < int-max.patch
+
 # Configure
 
 export PATH=`pwd`/solaris:$PATH
