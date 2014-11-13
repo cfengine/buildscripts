@@ -39,7 +39,7 @@ checksum()
   FILENAME="$1"
   CHECKSUM="$2"
 
-  if which gtar >/dev/null 2>&1; then
+  if which gtar 2>&1 | grep '^/' >/dev/null; then
     TAR=gtar
   else
     TAR=tar
@@ -54,7 +54,7 @@ checksum()
       cd temp
       case "$CACHEDIR/$FILENAME" in
         *.gz|*.tgz)
-          if which gzcat >/dev/null 2>&1 ; then
+          if which gzcat 2>&1 | grep '^/' >/dev/null; then
             UNCOMPRESS=gzcat
           else
             UNCOMPRESS=zcat
