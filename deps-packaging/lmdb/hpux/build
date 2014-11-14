@@ -1,0 +1,49 @@
+#!/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+TT=${BUILD_ROOT}/cfbuild-lmdb${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-lmdb-devel${PREFIX}
+
+cd libraries/liblmdb
+gpatch -p3 < ../../mdb.patch
+gpatch -p3 < ../../mdb-robust.patch
+gpatch -p3 < ../../mdb-autoconf.patch
+gpatch -p3 < ../../mdb-autoconf-generated.patch
+# Executable files taken from mdb-autoconf-generated.patch, which is generated
+# from Git, and contains permission info, but patch -p1 cannot apply it.
+# Use the following command to list the files.
+#   grep -B1 '^new file mode.*755' mdb-autoconf-generated.patch
+chmod 755 config.guess
+chmod 755 config.sub
+chmod 755 configure
+chmod 755 depcomp
+chmod 755 install-sh
+chmod 755 missing
+
+# Configure
+
+# Build
+
+./configure --prefix=$PREFIX
+gmake
+
+# Test
+
+# Install
+
+mkdir -p $TTD/bin
+mkdir -p $TTD/lib
+mkdir -p $TTD/include
+mkdir -p $TTD/man/man1
+gmake install prefix=${TTD}
+
+# Package
+
+rm -rf ${TTD}/man
+
+mkdir -p ${TT}/bin ${TT}/lib
+mv ${TTD}/bin/* ${TT}/bin
+mv ${TTD}/lib/liblmdb.so* ${TT}/lib

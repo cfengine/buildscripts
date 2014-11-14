@@ -78,7 +78,7 @@ BASEDIR="$(dirname "$AUTOBUILD_PATH")"
 
 # Export to which directory the packages will be installed, using the define buildprefix in environment or /var/cfengine as default. 
 export BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
-export PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/sfw/bin:/usr/bin:/usr/local/sbin"
+export PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/sfw/bin:/usr/bin:/usr/local/sbin:/usr/contrib/bin"
 export BASEDIR
 
 #
