@@ -296,6 +296,8 @@ detect_cores()
       NUM_CORES="$(psrinfo |wc -l)";;
     linux)
       NUM_CORES="$(cat /proc/cpuinfo | grep '^processor' | wc -l)";;
+    hpux)
+      NUM_CORES="$(ioscan -k -C processor |grep processor | wc -l)";;
     *)
       NUM_CORES=1;;
   esac
