@@ -7,6 +7,7 @@ VERSION=$1
 
 BASEDIR=$2
 LPPBASE=$2/..
+P="$BASEDIR/buildscripts/packaging/cfengine-nova"
 
 #create necessary directory skeleton
 sudo rm -rf $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION
@@ -65,6 +66,18 @@ case "\$1" in
 esac
 EOF
 
+# Create install/remove scripts.
+PREINSTALL=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.pre_i
+POSTINSTALL=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.post_i
+# Note the reverse pre <-> post relationship on the AIX platform.
+# unpost_i is called before unpre_i.
+PREREMOVE=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.unpost_i
+POSTREMOVE=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.unpre_i
+$P/../common/produce-script cfengine-nova preinstall bff > $PREINSTALL
+$P/../common/produce-script cfengine-nova postinstall bff > $POSTINSTALL
+$P/../common/produce-script cfengine-nova preremove bff > $PREREMOVE
+$P/../common/produce-script cfengine-nova postremove bff > $POSTREMOVE
+
 chmod 755 $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/etc/rc.d/init.d/cfengine3 
 # Create the info file
 env LD_LIBRARY_PATH=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/bin/cf-agent -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.copyright
@@ -90,65 +103,6 @@ INSTWORK 70 70
 ]
 }
 EOF
-
-
-
-
-# Create the post install script
-cat > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.post_i << EOF;
-#!/usr/bin/ksh
- 
-if [ -x /var/cfengine/bin/cf-key ]; then
-        /var/cfengine/bin/cf-key
-fi
- 
-ret=0
- 
-STARTUP=/etc/rc.d/init.d/cfengine3
-if [ -x /etc/rc.d/init.d/cfengine3 ];then
-        for link in /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3; do
-                /usr/bin/ln -fs \$STARTUP \$link
-        done
-fi
-
-/usr/bin/mkdir -p /usr/local/sbin
-for i in cf-agent cf-execd cf-key cf-monitord cf-promises cf-runagent cf-serverd; do
-        /usr/bin/ln -sf /var/cfengine/bin/\$i /usr/local/sbin/\$i
-done
- 
-exit 0
-EOF
-
-
-# Make the pre uninstall script
- 
-cat > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.unpre_i << EOF;
-#!/usr/bin/ksh
-
-PID=\$\$
-	for i in cf-execd cf-serverd cf-monitord cf-hub cf-agent; do
-	    ps -ef | grep \$i | grep -v grep | awk '{print \$2}' >> /tmp/cfengine3.\$PID 
-	done
- 
-while read line; do
-   kill \$line
-done < /tmp/cfengine3.\$PID
- 
-rm /tmp/cfengine3.\$PID
- 
-if [ -d /usr/local/sbin ]; then
-        /usr/bin/rm -f /usr/local/sbin/cf-agent /usr/local/sbin/cf-execd \
-        /usr/local/sbin/cf-key /usr/local/sbin/cf-know /usr/local/sbin/cf-monitord \
-        /usr/local/sbin/cf-promises /usr/local/sbin/cf-report /usr/local/sbin/cf-runagent \
-        /usr/local/sbin/cf-serverd /usr/local/sbin/cf-twin /usr/local/sbin/cf-hub > /dev/null 2>&1
- 
-fi
- 
-/usr/bin/rm -f /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3
- 
-exit 0
-EOF
-
 
 cp /usr/lpp/bos/liblpp.a  $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/usr/lpp/cfengine.cfengine-nova/
 

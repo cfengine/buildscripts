@@ -1,0 +1,61 @@
+#!/bin/sh
+
+# Produces a package script by concatenating snippets according to the following
+# rules:
+#
+# type = <deb|rpm|depot|bff|pkg>
+# action = <install|remove>
+#
+# <type>-script-common.sh
+# <type>-script-common-<action>.sh
+# script-common-<action>.sh
+# script-common-header-last.sh
+# ../cfengine-PROJECT[-hub]/<pre|post><install|remove>.sh
+#
+# Any script that is missing will simply be skipped.
+
+if [ $# -ne 3 ]; then
+  echo "Usage: $0 cfengine-PROJECT[-hub] <pre|post><install|remove> pkg-type"
+  exit 1
+fi
+
+SCRIPTDIR="`dirname $0`"
+BUILD="$1"
+SCRIPT_TYPE="$2"
+PKG_TYPE="$3"
+
+if [ -f "$SCRIPTDIR/$PKG_TYPE-script-common.sh" ]; then
+  cat "$SCRIPTDIR/$PKG_TYPE-script-common.sh"
+fi
+
+echo "PKG_TYPE=$PKG_TYPE"
+echo "SCRIPT_TYPE=$SCRIPT_TYPE"
+
+case "$SCRIPT_TYPE" in
+  *install)
+    if [ -f "$SCRIPTDIR/$PKG_TYPE-script-common-install.sh" ]; then
+      cat "$SCRIPTDIR/$PKG_TYPE-script-common-install.sh"
+    fi
+    if [ -f "$SCRIPTDIR/script-common-install.sh" ]; then
+      cat "$SCRIPTDIR/script-common-install.sh"
+    fi
+    ;;
+  *remove)
+    if [ -f "$SCRIPTDIR/$PKG_TYPE-script-common-remove.sh" ]; then
+      cat "$SCRIPTDIR/$PKG_TYPE-script-common-remove.sh"
+    fi
+    if [ -f "$SCRIPTDIR/script-common-remove.sh" ]; then
+      cat "$SCRIPTDIR/script-common-remove.sh"
+    fi
+    ;;
+esac
+
+if [ -f "$SCRIPTDIR/script-common-header-last.sh" ]; then
+  cat "$SCRIPTDIR/script-common-header-last.sh"
+fi
+
+# Not having a script is not an error. Not all scripts are used,
+# and not all projects are ported over.
+if [ -f "$SCRIPTDIR/../$BUILD/$SCRIPT_TYPE.sh" ]; then
+  cat "$SCRIPTDIR/../$BUILD/$SCRIPT_TYPE.sh"
+fi

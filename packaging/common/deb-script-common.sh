@@ -1,0 +1,48 @@
+#!/bin/sh
+
+PREFIX=/var/cfengine
+
+package_type()
+{
+  echo deb
+}
+
+os_type()
+{
+  echo debian
+}
+
+rc_d_path()
+{
+  echo "/etc"
+}
+
+platform_service()
+{
+  /etc/init.d/"$1" "$2"
+}
+
+IS_UPGRADE=0
+
+case "$1" in
+  upgrade)
+    IS_UPGRADE=1
+    ;;
+  install|remove|purge)
+    IS_UPGRADE=0
+    ;;
+  configure)
+    # Actually not guaranteed to be correct, but will be handled in
+    # script-common-header-last.sh
+    IS_UPGRADE=0
+    ;;
+  *)
+    # Various error handling on debian. We ignore it for now.
+    exit 0
+    ;;
+esac
+
+native_is_upgrade()
+{
+  test $IS_UPGRADE = 1
+}
