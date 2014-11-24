@@ -315,7 +315,7 @@ EOF
 - /var/run/*
 EOF
       ;;
-    linux)
+    linux|hpux)
       cat <<EOF
 + /dev
 EOF

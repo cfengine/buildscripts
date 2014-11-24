@@ -18,7 +18,7 @@ echo "P /var/cfengine" >> $TRANSFER_SCRIPT
 generate_chroot_transfer_script >> $TRANSFER_SCRIPT
 
 RETURN_CODE=0
-sudo rsync --filter=". $TRANSFER_SCRIPT" -av --delete --delete-excluded / $CHROOT_ROOT || RETURN_CODE=$?
+sudo rsync --filter=". $TRANSFER_SCRIPT" -Dav --delete --delete-excluded / $CHROOT_ROOT || RETURN_CODE=$?
 # Return code 24 means "some files vanished before they could be transferred",
 # which we don't care about, since a running system might experience this
 # without it being an error.
