@@ -302,7 +302,7 @@ EOF
 + /system
 EOF
       ;;
-    linux)
+    linux|hpux)
       cat <<EOF
 + /dev
 EOF
