@@ -262,8 +262,6 @@ case "$OS_FAMILY-$BUILD_TYPE" in
     TESTS=no;;
   freebsd-*)
     TESTS=no;;
-  hpux-*)
-    TESTS=no;;
   *-smoke)
     TESTS=unit;;
   *)
