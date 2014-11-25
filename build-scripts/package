@@ -85,6 +85,15 @@ case "$PACKAGING" in
 
     SPEC=$P/$PKG.spec
     SPECIN=$P/$PKG.spec.in
+    PREINSTALL=$P/generated.preinstall
+    POSTINSTALL=$P/generated.postinstall
+    PREREMOVE=$P/generated.preremove
+    POSTREMOVE=$P/generated.postremove
+
+    $P/../common/produce-script $PKG preinstall rpm > $PREINSTALL
+    $P/../common/produce-script $PKG postinstall rpm > $POSTINSTALL
+    $P/../common/produce-script $PKG preremove rpm > $PREREMOVE
+    $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
 
     if [ -z "$SUPP_VERSION" ]; then
       RPM_VERSION=$MAIN_VERSION
@@ -113,6 +122,10 @@ case "$PACKAGING" in
     sed \
       -e "s/@@VERSION@@/$RPM_VERSION/g" \
       -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
+      -e "/^%pre\$/r $PREINSTALL" \
+      -e "/^%post\$/r $POSTINSTALL" \
+      -e "/^%preun\$/r $PREREMOVE" \
+      -e "/^%postun\$/r $POSTREMOVE" \
       $SPECIN > $SPEC
 
     for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`; do
@@ -149,6 +162,11 @@ case "$PACKAGING" in
   
     sed -e "s/@@VERSION@@/$DEB_VERSION/" $BASEDIR/$PKG/pkg/debian/changelog.in > $BASEDIR/$PKG/pkg/debian/changelog
 
+    $P/../common/produce-script $PKG preinstall deb > $BASEDIR/$PKG/pkg/debian/$PKG.preinst
+    $P/../common/produce-script $PKG postinstall deb > $BASEDIR/$PKG/pkg/debian/$PKG.postinst
+    $P/../common/produce-script $PKG preremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.prerm
+    $P/../common/produce-script $PKG postremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.postrm
+
     (cd $BASEDIR/$PKG/pkg; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
     ;;
 
@@ -169,6 +187,11 @@ case "$PACKAGING" in
 
     # Replace last two words with "root root".
     sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp > prototype
+
+    $P/../common/produce-script $PKG preinstall pkg > preinstall
+    $P/../common/produce-script $PKG postinstall pkg > postinstall
+    $P/../common/produce-script $PKG preremove pkg > preremove
+    $P/../common/produce-script $PKG postremove pkg > postremove
 
     pkgmk -o -r `pwd` -d $BASEDIR/$PKG/pkg
     NAME=CFE$PKG-$VERSION-$ARCH.pkg
@@ -222,14 +245,25 @@ case "$PACKAGING" in
       rm -rf $BASEDIR/$PKG/pkg
       mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
 
-      cp -pr $P/hpux/* $BASEDIR/$PKG/pkg/
       cp -pr $BASEDIR/cfengine/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
       cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
+      mkdir -p $BASEDIR/$PKG/pkg/sbin/init.d
+      cp -p $P/hpux/cfengine3 $BASEDIR/$PKG/pkg/sbin/init.d
 
-      cd $BASEDIR/$PKG/pkg${PREFIX}/
+      PREINSTALL=$BASEDIR/$PKG/pkg/generated.preinstall
+      POSTINSTALL=$BASEDIR/$PKG/pkg/generated.postinstall
+      PREREMOVE=$BASEDIR/$PKG/pkg/generated.preremove
+      POSTREMOVE=$BASEDIR/$PKG/pkg/generated.postremove
 
-      $BASEDIR/$PKG/pkg/psf.pl . $PKG $VERSION > $PKG-$VERSION.psf
-      /usr/sbin/swpackage -s $PWD/$PKG-$VERSION.psf -x media_type=tape @ $BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot
+      $P/../common/produce-script $PKG preinstall depot > $PREINSTALL
+      $P/../common/produce-script $PKG postinstall depot > $POSTINSTALL
+      $P/../common/produce-script $PKG preremove depot > $PREREMOVE
+      $P/../common/produce-script $PKG postremove depot > $POSTREMOVE
+
+      cd $BASEDIR/$PKG/pkg/
+
+      $P/hpux/psf.pl . $PKG $VERSION > $BASEDIR/$PKG/$PKG-$VERSION.psf
+      /usr/sbin/swpackage -s $BASEDIR/$PKG/$PKG-$VERSION.psf -x media_type=tape @ $BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot
       ;;
   lpp)
       mkdir -p $BASEDIR/$PKG/BUILD
@@ -239,6 +273,15 @@ case "$PACKAGING" in
 
     SPEC=$P/$PKG.spec
     SPECIN=$P/$PKG.spec.aix.in
+    PREINSTALL=$P/generated.preinstall
+    POSTINSTALL=$P/generated.postinstall
+    PREREMOVE=$P/generated.preremove
+    POSTREMOVE=$P/generated.postremove
+
+    $P/../common/produce-script $PKG preinstall rpm > $PREINSTALL
+    $P/../common/produce-script $PKG postinstall rpm > $POSTINSTALL
+    $P/../common/produce-script $PKG preremove rpm > $PREREMOVE
+    $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
 
     if [ -z "$SUPP_VERSION" ]; then
       RPM_VERSION=$MAIN_VERSION
@@ -267,6 +310,10 @@ case "$PACKAGING" in
     sed \
       -e "s/@@VERSION@@/$RPM_VERSION/g" \
       -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
+      -e "/^%pre\$/r $PREINSTALL" \
+      -e "/^%post\$/r $POSTINSTALL" \
+      -e "/^%preun\$/r $PREREMOVE" \
+      -e "/^%postun\$/r $POSTREMOVE" \
       $SPECIN > $SPEC
 
     for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`; do

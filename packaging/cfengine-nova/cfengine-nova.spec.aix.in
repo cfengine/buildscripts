@@ -48,60 +48,11 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+# Script is inserted here.
 %post
 
-#
-# Register CFEngine initscript, if not yet.
-#
-#if [ $1 -eq 1 ]; then
-#    chkconfig --add cfengine3
-#fi
-
-#
-# Generate a host key
-#
-if [ ! -f %prefix/ppkeys/localhost.priv ]; then
-    %prefix/bin/cf-key >/dev/null || :
-fi
-
-if [ -f /var/cfengine/bin/cf-twin ]; then
-    /bin/rm /var/cfengine/bin/cf-twin
-fi
-
-/bin/cp /var/cfengine/bin/cf-agent /var/cfengine/bin/cf-twin
-for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord;
-do
-	if [ -f /var/cfengine/bin/$i ]; then
-		ln -sf /var/cfengine/bin/$i /usr/local/sbin/$i || true
-	fi
-done
-
-exit 0
-
+# Script is inserted here.
 %preun
-
-#
-# Unregister CFEngine initscript.
-#
-ps aux | grep -v grep | grep cf- > /dev/null
-
-if [ $? -eq 0 ]; then
-    /etc/rc.d/init.d/cfengine3 stop
-fi
-
-rm -f /etc/rc.d/init.d/cfengine3
-#if [ $1 -eq 0 ]; then
-#    chkconfig --del cfengine3
-#fi
-
-#
-# Clean lock files created by initscript, if any
-#
-for i in cf-execd cf-serverd cf-monitord cf-hub; do
-    rm -f /var/lock/$i /var/lock/subsys/$i
-done
-
-exit 0
 
 %files
 %defattr(755,root,root)

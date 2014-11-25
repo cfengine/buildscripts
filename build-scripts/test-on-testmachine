@@ -36,7 +36,7 @@ fi
 # Unmount proc.
 case "$TEST_MACHINE" in
     chroot)
-        sudo umount ${CHROOT_ROOT}proc
+        sudo umount ${CHROOT_ROOT}proc || true
         ;;
 esac
 

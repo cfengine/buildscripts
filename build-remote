@@ -14,6 +14,7 @@ usage() {
   echo "                    [--role=<hub|agent>]"
   echo "                    [--version=<version string>]"
   echo "                    [--test-machine=chroot]"
+  echo "                    [--no-tests]"
   echo "                    [--workdir=/opt/cfengine]"
   echo "                    [--full|--release|--debug|--docs|--release-and-debug]"
   echo "                    [-v|--verbose]"
@@ -30,7 +31,7 @@ usage() {
 }
 
 opts() {
-  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,full,release,debug,docs,release-and-debug,help,test-machine: -n build-remote -- "$@"`
+  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,full,release,debug,docs,release-and-debug,help,test-machine:,no-tests -n build-remote -- "$@"`
 
   eval set -- "$OPTS"
   echo "$?"
@@ -48,6 +49,7 @@ opts() {
   BUILD_NUMBER=${BUILD_NUMBER:-666}
   EXPLICIT_ROLE=
   TEST_MACHINE=${TEST_MACHINE:-}
+  NO_TESTS=${NO_TESTS:-0}
 
   while true; do
     case "$1" in
@@ -107,6 +109,9 @@ opts() {
             ;;
         esac
         shift 2;;
+      --no-tests)
+        NO_TESTS=1
+        shift;;
       --)
         shift
         break;;
@@ -263,7 +268,9 @@ build() {
 	  ;;
   esac
 
-  remote_script test
+  if [ "$NO_TESTS" != 1 ]; then
+    remote_script test
+  fi
   remote_script package
   remote_script prepare-results
 

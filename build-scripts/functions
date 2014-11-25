@@ -302,7 +302,7 @@ EOF
 + /system
 EOF
       ;;
-    linux)
+    linux|hpux)
       cat <<EOF
 + /dev
 EOF
@@ -322,6 +322,10 @@ mount_procfs()
       ;;
     solaris)
       sudo mount -F proc proc "$1"
+      ;;
+    hpux)
+      # No proc on HPUX.
+      true
       ;;
     *)
       sudo mount -t proc proc "$1"
