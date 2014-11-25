@@ -1,0 +1,75 @@
+#!/bin/sh
+
+PREFIX=/var/cfengine
+
+package_type()
+{
+  echo depot
+}
+
+os_type()
+{
+  echo hpux
+}
+
+rc_d_path()
+{
+  echo "/sbin"
+}
+
+rc_start_level()
+{
+  echo S970
+}
+
+rc_kill_level()
+{
+  echo K050
+}
+
+platform_service()
+{
+  /sbin/init.d/"$1" "$2"
+}
+
+native_is_upgrade()
+{
+  test -f "$PREFIX/bin/cf-agent"
+}
+PKG_TYPE=depot
+SCRIPT_TYPE=postremove
+case "$PKG_TYPE" in
+  depot)
+    alias is_upgrade='false'
+    ;;
+  deb)
+    alias is_upgrade='native_is_upgrade'
+    ;;
+esac
+
+if is_upgrade; then
+  # We want to skip removal scripts on upgrade.
+  exit 0
+fi
+if [ -f "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.txt" ]; then
+  # Special mode during testing. Dump some info for verification.
+  (
+    echo "new_script----"
+    echo "script_type=$SCRIPT_TYPE"
+    if is_upgrade; then
+      echo "is_upgrade=1"
+    else
+      echo "is_upgrade=0"
+    fi
+  ) >> "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.log"
+fi
+case `os_type` in
+  debian)
+    #
+    # Unregister CFEngine initscript.
+    #
+    /usr/sbin/update-rc.d cfengine3 remove
+    ;;
+esac
+
+exit 0
