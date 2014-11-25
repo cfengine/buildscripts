@@ -149,12 +149,6 @@ if ! [ -d %prefix/plugins ]; then
  chmod 700 %prefix/plugins
 fi
 
-#
-# Install sketches in CoreBase to design center sketches
-#
-%prefix/design-center/bin/cf-sketch --inputs=%prefix/design-center --installsource=%prefix/share/CoreBase/sketches/cfsketches.json --install-all
-
-
 if [ $1 -eq 2 ]; then
     #
     # Remove the old file (created by CoreBase policy) on upgrades
