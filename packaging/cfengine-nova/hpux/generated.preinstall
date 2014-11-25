@@ -1,0 +1,106 @@
+#!/bin/sh
+
+PREFIX=/var/cfengine
+
+package_type()
+{
+  echo depot
+}
+
+os_type()
+{
+  echo hpux
+}
+
+rc_d_path()
+{
+  echo "/sbin"
+}
+
+rc_start_level()
+{
+  echo S970
+}
+
+rc_kill_level()
+{
+  echo K050
+}
+
+platform_service()
+{
+  /sbin/init.d/"$1" "$2"
+}
+
+native_is_upgrade()
+{
+  test -f "$PREFIX/bin/cf-agent"
+}
+PKG_TYPE=depot
+SCRIPT_TYPE=preinstall
+# Upgrade detection is a mess. It is often difficult to tell, especially from
+# the postinstall script, so we use the package-upgrade.txt file to remember.
+
+case "$PKG_TYPE" in
+  depot|deb|bff)
+    if [ "$SCRIPT_TYPE" = "preinstall" ]; then
+      if native_is_upgrade; then
+        mkdir -p "$PREFIX"
+        echo "File used by CFEngine during package upgrade. Can be safely deleted." > "$PREFIX/package-upgrade.txt"
+      else
+        rm -f "$PREFIX/package-upgrade.txt"
+      fi
+      alias is_upgrade='native_is_upgrade'
+    elif [ "$SCRIPT_TYPE" = "postinstall" ]; then
+      if [ -f "$PREFIX/package-upgrade.txt" ]; then
+        rm -f "$PREFIX/package-upgrade.txt"
+        alias is_upgrade='true'
+      else
+        alias is_upgrade='false'
+      fi
+    fi
+    ;;
+esac
+if [ -f "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.txt" ]; then
+  # Special mode during testing. Dump some info for verification.
+  (
+    echo "new_script----"
+    echo "script_type=$SCRIPT_TYPE"
+    if is_upgrade; then
+      echo "is_upgrade=1"
+    else
+      echo "is_upgrade=0"
+    fi
+  ) >> "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.log"
+fi
+case `os_type` in
+  redhat)
+    #
+    # Work around bug in CFEngine <= 3.6.1: The %preun script stops the
+    # services, but it shouldn't when we upgrade. Later versions are fixed, but
+    # it's the *old* %preun script that gets called when we upgrade, so we have
+    # to work around it by using the %posttrans script, which is the only script
+    # from the new package that is called after %preun. Unfortunately it doesn't
+    # tell you whether or not you're upgrading, so we need to remember it by
+    # using the file below.
+    #
+    # This section can be removed completely when we no longer support upgrading
+    # from the 3.6 series, as well as the posttrans script.
+    #
+    if is_upgrade; then
+      if %{prefix}/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]|6\.[01])' > /dev/null; then
+        ( echo "Upgraded from:"; %{prefix}/bin/cf-agent -V ) > %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
+      fi
+    fi
+    ;;
+esac
+
+case `os_type` in
+  debian)
+    if [ -x /etc/init.d/cfengine3 ]; then
+      /usr/sbin/update-rc.d cfengine3 remove
+    fi
+    ;;
+esac
+
+exit 0

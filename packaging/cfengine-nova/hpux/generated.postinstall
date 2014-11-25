@@ -1,0 +1,185 @@
+#!/bin/sh
+
+PREFIX=/var/cfengine
+
+package_type()
+{
+  echo depot
+}
+
+os_type()
+{
+  echo hpux
+}
+
+rc_d_path()
+{
+  echo "/sbin"
+}
+
+rc_start_level()
+{
+  echo S970
+}
+
+rc_kill_level()
+{
+  echo K050
+}
+
+platform_service()
+{
+  /sbin/init.d/"$1" "$2"
+}
+
+native_is_upgrade()
+{
+  test -f "$PREFIX/bin/cf-agent"
+}
+PKG_TYPE=depot
+SCRIPT_TYPE=postinstall
+# Upgrade detection is a mess. It is often difficult to tell, especially from
+# the postinstall script, so we use the package-upgrade.txt file to remember.
+
+case "$PKG_TYPE" in
+  depot|deb|bff)
+    if [ "$SCRIPT_TYPE" = "preinstall" ]; then
+      if native_is_upgrade; then
+        mkdir -p "$PREFIX"
+        echo "File used by CFEngine during package upgrade. Can be safely deleted." > "$PREFIX/package-upgrade.txt"
+      else
+        rm -f "$PREFIX/package-upgrade.txt"
+      fi
+      alias is_upgrade='native_is_upgrade'
+    elif [ "$SCRIPT_TYPE" = "postinstall" ]; then
+      if [ -f "$PREFIX/package-upgrade.txt" ]; then
+        rm -f "$PREFIX/package-upgrade.txt"
+        alias is_upgrade='true'
+      else
+        alias is_upgrade='false'
+      fi
+    fi
+    ;;
+esac
+if [ -f "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.txt" ]; then
+  # Special mode during testing. Dump some info for verification.
+  (
+    echo "new_script----"
+    echo "script_type=$SCRIPT_TYPE"
+    if is_upgrade; then
+      echo "is_upgrade=1"
+    else
+      echo "is_upgrade=0"
+    fi
+  ) >> "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.log"
+fi
+case `os_type` in
+  redhat)
+    #
+    # systemd support, if there is systemctl, then prepare unit file.
+    #
+    if test -x /usr/bin/systemctl; then
+      if [ ! -d /usr/lib/systemd/scripts ]; then
+        mkdir -p /usr/lib/systemd/scripts
+      fi
+      if [ ! -f /usr/lib/systemd/scripts/cfengine3 ]; then
+        cp -f /etc/init.d/cfengine3 /usr/lib/systemd/scripts
+        chmod 0755 /usr/lib/systemd/scripts/cfengine3
+      fi
+      if [ ! -f /usr/lib/systemd/system/cfengine3.service ]; then
+        cat > /usr/lib/systemd/system/cfengine3.service << EOF
+[Unit]
+Description=CFEngine 3 deamons
+ 
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/sysconfig/cfengine3
+ExecStart=/usr/lib/systemd/scripts/cfengine3 start
+ExecStop=/usr/lib/systemd/scripts/cfengine3 stop
+RemainAfterExit=yes
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+      fi
+    fi
+
+    #
+    # Register CFEngine initscript, if not yet.
+    #
+    if ! is_upgrade; then
+      chkconfig --add cfengine3
+    fi
+    if [ -f /usr/lib/systemd/system/cfengine3.service ]; then
+      test -x /usr/bin/systemctl && systemctl enable cfengine3 > /dev/null 2>&1
+    fi
+    ;;
+
+  debian)
+    #
+    # Register CFEngine initscript, if not yet.
+    #
+    if [ -x /etc/init.d/cfengine3 ]; then
+      update-rc.d cfengine3 defaults
+    fi
+    ;;
+
+  solaris|hpux)
+    if [ -f `rc_d_path`/init.d/cfengine3 ];then
+      for link in `rc_d_path`/rc3.d/`rc_start_level`cfengine3 \
+                  `rc_d_path`/rc0.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rc1.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rc2.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rcS.d/`rc_kill_level`cfengine3; do
+        if [ ! -h $link ]; then
+          /usr/bin/ln -s `rc_d_path`/init.d/cfengine3 $link
+        fi
+      done
+    fi
+    ;;
+
+  aix)
+    if [ -x /etc/rc.d/init.d/cfengine3 ];then
+      for link in /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3; do
+        /usr/bin/ln -fs /etc/rc.d/init.d/cfengine3 $link
+      done
+    fi
+    ;;
+esac
+
+#
+# Generate a host key
+#
+if [ ! -f $PREFIX/ppkeys/localhost.priv ]; then
+    $PREFIX/bin/cf-key >/dev/null || :
+fi
+
+if [ -f $PREFIX/bin/cf-twin ]; then
+    rm -f $PREFIX/bin/cf-twin
+fi
+
+cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
+
+mkdir -p /usr/local/sbin
+for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent;
+do
+  if [ -f $PREFIX/bin/$i ]; then
+    ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
+  fi
+
+  case `os_type` in
+    redhat|debian)
+      if [ -f /usr/share/man/man8/$i.8.gz ]; then
+        rm -f /usr/share/man/man8/$i.8.gz
+      fi
+      $PREFIX/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
+      ;;
+  esac
+done
+
+# start CFE3 processes on only client hosts (not HUB)
+if [ -f /var/cfengine/policy_server.dat -a ! -f /var/cfengine/masterfiles/promises.cf ]; then
+  platform_service cfengine3 start
+fi
+
+exit 0

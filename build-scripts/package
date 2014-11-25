@@ -222,14 +222,18 @@ case "$PACKAGING" in
       rm -rf $BASEDIR/$PKG/pkg
       mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
 
-      cp -pr $P/hpux/* $BASEDIR/$PKG/pkg/
       cp -pr $BASEDIR/cfengine/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
       cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
+      mkdir -p $BASEDIR/$PKG/pkg/sbin/init.d
+      cp -p $P/hpux/cfengine3 $BASEDIR/$PKG/pkg/sbin/init.d
+      for script in preinstall postinstall preremove postremove; do
+        cp $P/hpux/generated.$script $BASEDIR/$PKG/pkg
+      done
 
-      cd $BASEDIR/$PKG/pkg${PREFIX}/
+      cd $BASEDIR/$PKG/pkg/
 
-      $BASEDIR/$PKG/pkg/psf.pl . $PKG $VERSION > $PKG-$VERSION.psf
-      /usr/sbin/swpackage -s $PWD/$PKG-$VERSION.psf -x media_type=tape @ $BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot
+      $P/hpux/psf.pl . $PKG $VERSION > $BASEDIR/$PKG/$PKG-$VERSION.psf
+      /usr/sbin/swpackage -s $BASEDIR/$PKG/$PKG-$VERSION.psf -x media_type=tape @ $BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot
       ;;
   lpp)
       mkdir -p $BASEDIR/$PKG/BUILD

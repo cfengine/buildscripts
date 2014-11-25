@@ -19,35 +19,47 @@
 #
 ################################################################################
 
-use vars qw($length);
 use strict;
 
 die "Usage:  $0: dir ...\n" unless ( @ARGV );
 
-my ($dir, $tag, $revision);
-#while ( $dir = shift ) {
-#    next unless ( -d $dir );
-#    $dir =~ m{.*/(\D+)(.*)$} or $dir =~ m{(\D+)(.*)$};
-#    $length = length( $1 . $2 );
-#    $tag = uc $1;
-#    $revision = $2;
-#    $tag =~ s/\W+/_/g;            # Change non-word characters to '_'
-#    $tag =~ s/_+$//;              # Remove trailing '_'s
-#    $tag = substr( $tag, 0, 16 ); # Truncate to 16 or fewer characters
-#    $revision =~ s/^\W+//;        # Remove leading punctuation
+my ($dir, $tag, $revision, $lctag);
 $dir = $ARGV[0];
 $tag = $ARGV[1];
 $revision = $ARGV[2];
-$length = 20;
-    print "
+$lctag = lc $tag;
+my @scripttypes = ( "preinstall", "postinstall", "preremove", "postremove" );
+
+print <<EOF;
 product
     tag                  $tag
     revision             $revision
+EOF
+
+foreach my $type (@scripttypes)
+{
+    my @files = glob("*.$type");
+    if (scalar(@files) > 1)
+    {
+        print "More than one $type file found\n";
+        exit(1);
+    }
+    foreach my $file (@files)
+    {
+        printf("    %-21s%s\n", $type, $file);
+    }
+}
+
+print <<EOF;
     fileset
-    tag               ", lc $tag, "\n";
-    listdir( $dir ) if ( -d $dir );
-    print "   end\nend\n";
-#}
+    tag               $lctag
+    file_permissions  -o root -g root
+EOF
+listdir( $dir ) if ( -d $dir );
+print <<EOF;
+   end
+end
+EOF
 exit( 0 );
 
 
@@ -57,12 +69,20 @@ sub listdir {
     my @directories;
 
     opendir CWD, "$dir" or die "$0: opendir $dir: $!\n";
-    printf "      directory         %s=/var/cfengine/%s\n",
+    printf "      directory         %s=/%s\n",
         $dir, $dir;
     foreach $entry ( sort readdir CWD ) {
-        next if ( $entry eq "." or $entry eq ".." or
+        my $packagescript = 0;
+        foreach my $type (@scripttypes)
+        {
+            if ($entry =~ /.*\.$type/)
+            {
+                $packagescript = 1;
+            }
+        }
+        next if ($packagescript or $entry eq "." or $entry eq ".." or
             $entry eq "..install_finish" or
-            $entry eq "..install_start" );
+            $entry eq "..install_start");
         lstat "$dir/$entry" or die "$0: stat $dir/$entry: $!\n";
         if ( -d _ ) {
             push @directories, $entry;
