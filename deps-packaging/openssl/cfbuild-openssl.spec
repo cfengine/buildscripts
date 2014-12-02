@@ -1,10 +1,11 @@
+%define openssl_version 0.9.8zc
 %define fips_version 1.2.4
 
 Summary: CFEngine Build Automation -- openssl
 Name: cfbuild-openssl
 Version: %{version}
 Release: 1
-Source0: openssl-0.9.8za.tar.gz
+Source0: openssl-%{openssl_version}.tar.gz
 Source1: openssl-fips-%{fips_version}.tar.gz
 License: MIT
 Group: Other
@@ -19,7 +20,7 @@ Patch0: aix-ar-arguments.patch
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -a1 -n openssl-0.9.8za
+%setup -q -a1 -n openssl-%{openssl_version}
 %if "%{_os}" == "aix"
 %patch0 -p1
 %endif
@@ -51,7 +52,7 @@ then
     LDFLAGS=-L%{buildprefix}/lib
     CPPFLAGS=-I%{buildprefix}/include
 
-    LDFLAGS="$LDFLAGS" CPPFLAGS="$CPPFLAGS" ./Configure aix-gcc no-ec --with-fipslibdir=%{_builddir}/openssl-0.9.8za/openssl-fips-%{fips_version}/fips shared --prefix=%{prefix}
+    LDFLAGS="$LDFLAGS" CPPFLAGS="$CPPFLAGS" ./Configure aix-gcc no-ec --with-fipslibdir=%{_builddir}/openssl-%{openssl_version}/openssl-fips-%{fips_version}/fips shared --prefix=%{prefix}
     /usr/bin/patch -p1 < ../../SOURCES/makefile.openssl.aix.patch
     $MAKE depend
     $MAKE
@@ -65,7 +66,7 @@ else
     fi
 
     ./config fips no-ec shared  no-dtls no-psk no-srp  $DEBUG_CONFIG_FLAGS \
-    --with-fipslibdir=%{_builddir}/openssl-0.9.8za/openssl-fips-%{fips_version}/fips \
+    --with-fipslibdir=%{_builddir}/openssl-%{openssl_version}/openssl-fips-%{fips_version}/fips \
     --prefix=%{prefix}  $DEBUG_CFLAGS
 
     # Remove -O3 and -fomit-frame-pointer from debug and quick builds
