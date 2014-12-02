@@ -17,10 +17,6 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 export PATH=`pwd`/solaris:$PATH
 
-# Patch
-
-gpatch -p0 < int-max.patch
-
 cd openssl-fips-1.2.4
 ./config fipscanisterbuild
 make
