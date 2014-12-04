@@ -46,7 +46,7 @@ case "\$1" in
 	 
 	stop)
 	    PID=\$\$
-	    for i in cf-execd cf-serverd cf-monitord cf-hub; do
+	    for i in cf-execd cf-serverd cf-monitord cf-agent; do
 	    ps -ef | grep \$i | grep -v grep | awk '{print \$2}' >> /tmp/cfengine3.\$PID
 	    done
 	    
