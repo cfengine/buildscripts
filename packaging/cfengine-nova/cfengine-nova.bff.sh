@@ -115,6 +115,11 @@ fi
 for i in cf-agent cf-execd cf-key cf-monitord cf-promises cf-runagent cf-serverd; do
         /usr/bin/ln -sf /var/cfengine/bin/\$i /usr/local/sbin/\$i
 done
+
+# start CFE3 processes on only client hosts (not HUB)
+if [ -f /var/cfengine/policy_server.dat -a ! -f /var/cfengine/masterfiles/promises.cf ]; then
+  /etc/rc.d/init.d/cfengine3 start
+fi
  
 exit 0
 EOF
