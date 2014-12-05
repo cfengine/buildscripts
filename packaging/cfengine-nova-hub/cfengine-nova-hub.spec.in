@@ -515,8 +515,6 @@ fi
 sed -i -e s:INSERT_CERT_HERE:$CFENGINE_MP_CERT:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
 sed -i -e s:INSERT_CERT_KEY_HERE:$CFENGINE_MP_KEY:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
 
-mkdir -p $PREFIX/config
-$PREFIX/httpd/bin/apachectl start
 
 #
 #POSTGRES RELATED
@@ -642,6 +640,11 @@ EOF
 
 fi
 
+#
+# Start Apache server
+#
+mkdir -p $PREFIX/config
+$PREFIX/httpd/bin/apachectl start
 
 #
 #REDIS RELATED
