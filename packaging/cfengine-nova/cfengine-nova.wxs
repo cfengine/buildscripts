@@ -36,7 +36,12 @@
 	  <!-- Run cf-key after new installation -->
 	  <Property Id='GenerateKey' Value='empty, for now'  />
 	  <CustomAction Id='GenerateKeyPath' Property='GenerateKey' Value='&quot;[$(var.dirProgFiles)]\Cfengine\bin\cf-key.exe&quot;' Return='check' />
-    <CustomAction Id='GenerateKey' BinaryKey='WixCA' DllEntry='CAQuietExec' Execute='deferred' Impersonate='no' Return='check' />
+	  <CustomAction Id='GenerateKey' BinaryKey='WixCA' DllEntry='CAQuietExec' Execute='deferred' Impersonate='no' Return='check' />
+
+	  <!-- Start service if the host has already been bootstrapped -->
+	  <Property Id='RestartService' Value='Will be filled in by below tag'  />
+	  <CustomAction Id='RestartServiceCmd' Property='RestartService' Value='&quot;C:\windows\system32\cmd.exe&quot; /c if exist &quot;[$(var.dirProgFiles)]\Cfengine\policy_server.dat&quot; &quot;C:\Windows\System32\net.exe&quot; start CfengineNovaExec &amp; exit 0' Return='check' />
+	  <CustomAction Id='RestartService' BinaryKey='WixCA' DllEntry='CAQuietExec' Execute='deferred' Impersonate='no' Return='check' />
 
 	  <Property Id='ALLUSERS' Value='2' />
 	  <!--  Exit with success if installed version is not older -->
@@ -297,8 +302,12 @@
      <RemoveExistingProducts Sequence='1450' />
      <InstallInitialize Sequence='1500' />
 	 <Custom Action='GenerateKeyPath' After='InstallFiles'>NOT Installed</Custom>
-     <Custom Action='GenerateKey' After='GenerateKeyPath'>NOT Installed</Custom>
+	 <Custom Action='GenerateKey' After='GenerateKeyPath'>NOT Installed</Custom>
+
 	 <InstallFinalize Sequence='6600' />
+
+	 <Custom Action='RestartServiceCmd' Before='InstallFinalize'>NOT Installed</Custom>
+	 <Custom Action='RestartService' After='RestartServiceCmd'>NOT Installed</Custom>
    </InstallExecuteSequence>
 
    </Product>
