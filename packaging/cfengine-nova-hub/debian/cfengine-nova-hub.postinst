@@ -223,9 +223,6 @@ fi
 sed -i $PREFIX/httpd/conf/extra/httpd-ssl.conf -e s:INSERT_CERT_HERE:$CFENGINE_MP_CERT:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
 sed -i $PREFIX/httpd/conf/extra/httpd-ssl.conf -e s:INSERT_CERT_KEY_HERE:$CFENGINE_MP_KEY:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
 
-mkdir -p $PREFIX/config
-$PREFIX/httpd/bin/apachectl start
-
 #POSTGRES RELATED
 #
 if [ ! -d $PREFIX/state/pg/data ]; then
@@ -348,6 +345,11 @@ EOF
 
 fi
 
+#
+# Start Apache server
+#
+mkdir -p $PREFIX/config
+$PREFIX/httpd/bin/apachectl start
 
 #
 #REDIS RELATED
