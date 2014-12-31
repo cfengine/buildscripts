@@ -60,7 +60,7 @@ else
 fi
 
 # Debian/Ubuntu
-if [ ! -d /var/lock/subsys ] && [ -f /usr/bin/apt-get ]; then
+if [ -f /etc/debian_version ] && [ -f /usr/bin/apt-get ]; then
 	DEBIAN=1
 else
 	DEBIAN=0
