@@ -62,6 +62,11 @@ fi
 # Debian/Ubuntu
 if [ -f /etc/debian_version ] && [ -f /usr/bin/apt-get ]; then
 	DEBIAN=1
+	if [ -d /run/lock ]; then
+		LOCKDIR=/run/lock
+	else
+		LOCKDIR=/var/lock
+	fi
 else
 	DEBIAN=0
 fi
@@ -148,11 +153,11 @@ case "$1" in
 		if [ "$RUN_CF_EXECD" = "1" ] && [ "$DEBIAN" = "1" ] && [ "$SSD" = "1" ]; then
 			$ECHO -n "Starting `basename $CFEXECD`: "
 			/sbin/start-stop-daemon --start --verbose --exec $CFEXECD
-			$TOUCH /var/lock/`basename $CFEXECD`
+			$TOUCH $LOCKDIR/`basename $CFEXECD`
 		elif [ "$RUN_CF_EXECD" = "1" ] && [ "$DEBIAN" = "1" ] && [ "$SSD" = "0" ]; then
 			$ECHO -n "Starting `basename $CFEXECD`: "
 			$CFEXECD
-			$TOUCH /var/lock/`basename $CFEXECD`
+			$TOUCH $LOCKDIR/`basename $CFEXECD`
 			$ECHO
 		fi
 		
@@ -184,11 +189,11 @@ case "$1" in
 		if [ "$RUN_CF_SERVERD" = "1" ] && [ "$DEBIAN" = "1" ] && [ "$SSD" = "1" ]; then
 			$ECHO -n "Starting `basename $CFSERVD`: "
 			/sbin/start-stop-daemon --start --verbose --exec $CFSERVD
-			$TOUCH /var/lock/`basename $CFSERVD`
+			$TOUCH $LOCKDIR/`basename $CFSERVD`
 		elif [ "$RUN_CF_SERVERD" = "1" ] && [ "$DEBIAN" = "1" ] && [ "$SSD" = "0" ]; then
 			$ECHO -n "Starting `basename $CFSERVD`: "
 			$CFSERVD
-			$TOUCH /var/lock/`basename $CFSERVD`
+			$TOUCH $LOCKDIR/`basename $CFSERVD`
 			$ECHO
 		fi
 		
@@ -220,11 +225,11 @@ case "$1" in
 		if [ "$RUN_CF_MONITORD" = "1" ] && [ "$DEBIAN" = "1" ] && [ "$SSD" = "1" ]; then
 			$ECHO -n "Starting `basename $CFMOND`: "
 			/sbin/start-stop-daemon --start --verbose --exec $CFMOND
-			$TOUCH /var/lock/`basename $CFMOND`
+			$TOUCH $LOCKDIR/`basename $CFMOND`
 		elif [ "$RUN_CF_MONTIROD" = "1" ] && [ "$DEBIAN" = "1" ] && [ "$SSD" = "0" ]; then
 			$ECHO -n "Starting `basename $CFMOND`: "
 			$CFMOND
-			$TOUCH /var/lock/`basename $CFMOND`
+			$TOUCH $LOCKDIR/`basename $CFMOND`
 			$ECHO
 		fi
 		exit 0
@@ -271,8 +276,8 @@ case "$1" in
 			if [ $cfexecd_status ]; then
 				$ECHO -n "Shutting down `basename $CFEXECD` ... "
 				/sbin/start-stop-daemon -o --stop --retry 5 --name `basename $CFEXECD` || :
-				if [ -f /var/lock/`basename $CFEXECD` ]; then
-					$RM /var/lock/`basename $CFEXECD` || true
+				if [ -f $LOCKDIR/`basename $CFEXECD` ]; then
+					$RM $LOCKDIR/`basename $CFEXECD` || true
 				fi
 				$ECHO
 			fi
@@ -280,8 +285,8 @@ case "$1" in
 			if [ $cfexecd_status ]; then
 				$ECHO -n "Shutting down `basename $CFEXECD` ... "
 				$PKILL `basename $CFEXECD` || :
-				if [ -f /var/lock/`basename $CFEXECD` ]; then
-					$RM /var/lock/`basename $CFEXECD` || true
+				if [ -f $LOCKDIR/`basename $CFEXECD` ]; then
+					$RM $LOCKDIR/`basename $CFEXECD` || true
 				fi
 				$ECHO
 			fi
@@ -328,8 +333,8 @@ case "$1" in
 			if [ $cfserverd_status ]; then
 				$ECHO -n "Shutting down `basename $CFSERVD` ... "
 				/sbin/start-stop-daemon -o --stop --retry 5 --name `basename $CFSERVD` || :
-				if [ -f /var/lock/`basename $CFSERVD` ]; then
-					$RM /var/lock/`basename $CFSERVD` || true
+				if [ -f $LOCKDIR/`basename $CFSERVD` ]; then
+					$RM $LOCKDIR/`basename $CFSERVD` || true
 				fi
 				$ECHO
 			fi
@@ -337,8 +342,8 @@ case "$1" in
 			if [ $cfserverd_status ]; then
 				$ECHO -n "Shutting down `basename $CFSERVD` ... "
 				$PKILL `basename $CFSERVD` || :
-				if [ -f /var/lock/`basename $CFSERVD` ]; then
-					$RM /var/lock/`basename $CFSERVD` || true
+				if [ -f $LOCKDIR/`basename $CFSERVD` ]; then
+					$RM $LOCKDIR/`basename $CFSERVD` || true
 				fi
 				$ECHO
 			fi
@@ -385,8 +390,8 @@ case "$1" in
 			if [ $cfmonitord_status ]; then
 				$ECHO -n "Shutting down `basename $CFMOND` ... "
 				/sbin/start-stop-daemon -o --stop --retry 5 --name `basename $CFMOND` || :
-				if [ -f /var/lock/`basename $CFMOND` ]; then
-					$RM /var/lock/`basename $CFMOND` || true
+				if [ -f $LOCKDIR/`basename $CFMOND` ]; then
+					$RM $LOCKDIR/`basename $CFMOND` || true
 				fi
 				$ECHO
 			fi
@@ -394,8 +399,8 @@ case "$1" in
 			if [ $cfmonitord_status ]; then
 				$ECHO -n "Shutting down `basename $CFMOND` ... "
 				$PKILL `basename $CFMOND` || :
-				if [ -f /var/lock/`basename $CFMOND` ]; then
-					$RM /var/lock/`basename $CFMOND` || true
+				if [ -f $LOCKDIR/`basename $CFMOND` ]; then
+					$RM $LOCKDIR/`basename $CFMOND` || true
 				fi
 				$ECHO
 			fi
