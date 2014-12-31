@@ -38,7 +38,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin:/var/cfengine/bin
 # Has the package been 'removed' but not purged?
 test -f $CFEXECD || exit 0
 
-# defualt is no OS
+# default is no OS
 SUSE=0
 REDHAT=0
 DEBIAN=0
