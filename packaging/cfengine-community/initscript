@@ -46,8 +46,6 @@ DEBIAN=0
 # SuSE
 if [ -d /var/lock/subsys ] && [ -f /usr/bin/zypper ]; then
 	SUSE=1
-else
-	SUSE=0
 fi
 
 # RedHat4/RedHat5/CentOS/Fedora
@@ -55,8 +53,6 @@ if [ -f /usr/bin/yum ] || [ -f /usr/sbin/up2date ]; then
 	if [ -d /var/lock/subsys ]; then
 		REDHAT=1
 	fi
-else
-	REDHAT=0
 fi
 
 # Debian/Ubuntu
@@ -67,8 +63,6 @@ if [ -f /etc/debian_version ] && [ -f /usr/bin/apt-get ]; then
 	else
 		LOCKDIR=/var/lock
 	fi
-else
-	DEBIAN=0
 fi
 
 # default control file
