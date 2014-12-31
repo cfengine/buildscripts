@@ -393,7 +393,7 @@ case "$1" in
 		elif [ "$RUN_CF_MONITORD" = "1" ] && [ "$DEBIAN" = "1" ] && [ "$SSD" = "0" ]; then
 			if [ $cfmonitord_status ]; then
 				$ECHO -n "Shutting down `basename $CFMOND` ... "
-				$PKILL `basename $CFMONITORD` || :
+				$PKILL `basename $CFMOND` || :
 				if [ -f /var/lock/`basename $CFMOND` ]; then
 					$RM /var/lock/`basename $CFMOND` || true
 				fi
