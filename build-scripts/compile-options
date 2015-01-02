@@ -74,14 +74,7 @@ export EMBEDDED_DB
 
 # libxml2
 
-#
-# Temporarily disable edit_xml under Windows: libxml2 mingw build does not work yet
-#
 case "$OS_FAMILY" in
-  mingw)
-    LIBXML2=yes;;
-  hpux)
-    LIBXML2=no;;
   *)
     LIBXML2=yes;;
 esac
