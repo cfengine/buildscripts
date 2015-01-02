@@ -25,6 +25,8 @@ fi
 
 sudo mkdir -p ${CHROOT_ROOT}tmp
 sudo chmod 1777 ${CHROOT_ROOT}tmp
+sudo mkdir -p ${CHROOT_ROOT}var/tmp
+sudo chmod 1777 ${CHROOT_ROOT}var/tmp
 
 sudo mkdir -p ${CHROOT_ROOT}root
 
