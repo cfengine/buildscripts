@@ -39,15 +39,7 @@ case "$OS_FAMILY" in
     LIBSASL=no;;
 esac
 
-# iconv is needed for libxml2
-case "$OS_FAMILY" in
-  solaris)
-    LIBICONV=yes;;
-  *)
-    LIBICONV=no;;
-esac
-
-# iconv is needed for libxml2 on aix
+# iconv is needed for libxml2 on some platforms
 case "$OS_FAMILY" in
    aix)
      LIBICONV=yes;;
