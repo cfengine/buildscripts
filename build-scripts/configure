@@ -56,10 +56,6 @@ case "$ARCH-${OS_FAMILY}" in
 esac
 
 case "$EMBEDDED_DB" in
-  qdbm)
-    ARGS="$ARGS --with-qdbm=$P";;
-  tokyocabinet)
-    ARGS="$ARGS --with-tokyocabinet=$P";;
   lmdb)
     ARGS="$ARGS --with-lmdb=$P";;
   *)
