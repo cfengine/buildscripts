@@ -33,9 +33,19 @@ else
     return_code=$?
 fi
 
-# Unmount proc.
 case "$TEST_MACHINE" in
     chroot)
+        # Fuser has special output. The PIDs arrive on stdout, and all the ornaments
+        # arrive on stderr, so all we have to do is to grep for PID numbers.
+        if sudo fuser $CHROOT_ROOT | grep '[0-9]'; then
+            # Leaving processes behind is an error. It should never happen.
+            return_code=1
+            echo "Error: Found processes left behind in the chroot. I'm killing them, but clean up your mess!"
+            # Nevertheless kill them.
+            sudo fuser -k $CHROOT_ROOT || true
+        fi
+
+        # Unmount proc.
         sudo umount ${CHROOT_ROOT}proc || true
         ;;
 esac
