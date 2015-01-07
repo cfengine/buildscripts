@@ -27,7 +27,7 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
 		cp build/$dir/pkg/*.tbz "$OUTDIR"
 		;;
       hpux)
-        cp build/$dir/pkg/*.depot "$OUTDIR"
+        cp $BASEDIR/$dir/pkg/*.depot "$OUTDIR"
         ;;
       lpp)
         cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
