@@ -17,7 +17,9 @@ detect_os()
 	AIX)
           OS_FAMILY=aix
           OS_VERSION=`uname -v`.`uname -r`
-          OS=aix;;
+          OS=aix
+          unset LIBPATH
+          ;;
 	Darwin)
           OS_FAMILY=darwin
           OS=darwin;;
