@@ -9,7 +9,7 @@ License: COSL
 Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
-Obsoletes: cfengine3, cfengine-community, cfengine-nova
+Obsoletes: cfengine3, cfengine-community
 Requires: coreutils gzip
 
 AutoReqProv: no
