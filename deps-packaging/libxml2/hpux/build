@@ -6,13 +6,14 @@ PREFIX=/var/cfengine
 
 LX=${BUILD_ROOT}/cfbuild-libxml2${PREFIX}
 LXD=${BUILD_ROOT}/cfbuild-libxml2-devel${PREFIX}
+CPPFLAGS="-I${PREFIX}/include"
 LDFLAGS="-L${PREFIX}/lib -R${PREFIX}/lib"
 
 # Patch
 
 # Configure
 
-./configure LDFLAGS="$LDFLAGS" --prefix=${PREFIX} --without-python --without-iconv --with-iso8859x
+./configure CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" --prefix=${PREFIX} --without-python --without-iconv --without-lzma --with-iso8859x
 
 # Build
 
