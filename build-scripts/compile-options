@@ -273,7 +273,7 @@ esac
 export TESTS
 
 # Optimization
-
+# TODO remove OPTIMIZE indirection. We can directly check for BUILD_TYPE.
 case "$BUILD_TYPE" in
   debug)
     OPTIMIZE=no;;
