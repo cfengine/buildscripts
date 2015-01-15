@@ -105,7 +105,7 @@ esac
 
 case "$BUILD_TYPE" in
   debug_and_release)
-      CFLAGS="$CFLAGS -g -O2 -Wall -DNDEBUG";;
+      CFLAGS="-g -O2 -Wall -DNDEBUG  $CFLAGS";;
   debug)
       ;;
   code_coverage)
