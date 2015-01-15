@@ -93,24 +93,16 @@ case "$ROLE" in
     exit 42;;
 esac
 
-case "$OPTIMIZE" in
-  yes)
-    ;;
-  no)
-    ARGS="$ARGS --enable-debug";;
-  *)
-    echo "Unknown optimize selection: $OPTIMIZE"
-    exit 42;;
-esac
-
 case "$BUILD_TYPE" in
   debug_and_release)
-      CFLAGS="-g -O1 -Wall -DNDEBUG  $CFLAGS";;
+    CFLAGS="-g -O1 -Wall -DNDEBUG  $CFLAGS"
+    ;;
   debug)
-      ;;
+    ARGS="$ARGS --enable-debug"
+    ;;
   code_coverage)
     ARGS="$ARGS --enable-debug"
-# lcov is not found in Windows and other platforms
+      # lcov is not found in Windows and other platforms
       case "${OS}-${OS_VERSION}" in
         mingw*)
         ;;
