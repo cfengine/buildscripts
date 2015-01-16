@@ -1,4 +1,4 @@
-%define openssl_version 0.9.8zb
+%define openssl_version 0.9.8ze
 %define fips_version 1.2.4
 
 Summary: CFEngine Build Automation -- openssl
