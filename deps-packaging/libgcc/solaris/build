@@ -11,12 +11,6 @@ PREFIX=/var/cfengine
 #
 # Gross hack, but what we could do?
 #
-LIBGCC_LOC=""
-
-if [ $OS="solaris" ] && [ $OS_VERSION -eq "11" ]; then
 LIBGCC_LOC="/opt/csw/lib/"
-else
-LIBGCC_LOC="/usr/local/lib/"
-fi
 mkdir -p ${BUILD_ROOT}/cfbuild-libgcc/${PREFIX}/lib
 cp "$LIBGCC_LOC"libgcc_s.so.1 ${BUILD_ROOT}/cfbuild-libgcc/${PREFIX}/lib
