@@ -300,6 +300,7 @@ EOF
 + /system/volatile
 - /system/*
 + /system
+- /var/run/*
 EOF
       ;;
     linux|hpux)
