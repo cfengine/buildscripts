@@ -18,13 +18,13 @@ patch -p0 < solaris-8-inttypes.patch
 
 # Build
 
-make
+$MAKE
 
 # Test
 
 # Install
 
-make install DESTDIR=${BUILD_ROOT}/cfbuild-libxml2-devel
+$MAKE install DESTDIR=${BUILD_ROOT}/cfbuild-libxml2-devel
 
 # Package
 

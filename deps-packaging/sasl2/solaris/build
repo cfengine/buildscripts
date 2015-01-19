@@ -16,15 +16,15 @@ gpatch -p1 < solaris-unistd.patch
 
 #Build
 
-make -C include
-make -C lib
+$MAKE -C include
+$MAKE -C lib
 
 #Test
 
 #Install
 
-make -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
-make -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+$MAKE -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+$MAKE -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
 
 #Package
 

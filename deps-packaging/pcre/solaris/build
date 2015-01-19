@@ -18,17 +18,17 @@ patch -p0 < solaris-8-inttypes.patch
 
 # Build
 
-make
+$MAKE
 
 # Test
 
 if [ "$TESTS" = all ]; then
-  make check
+  $MAKE check
 fi
 
 # Install
 
-make install DESTDIR=${BUILD_ROOT}/cfbuild-pcre-devel
+$MAKE install DESTDIR=${BUILD_ROOT}/cfbuild-pcre-devel
 
 # Package
 

@@ -20,15 +20,15 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # Build
 
-make -C include
-make -C libraries
+$MAKE -C include
+$MAKE -C libraries
 
 # Test
 
 # Install
 
-make -C include install DESTDIR=${BUILD_ROOT}/cfbuild-openldap-devel
-make -C libraries install DESTDIR=${BUILD_ROOT}/cfbuild-openldap-devel
+$MAKE -C include install DESTDIR=${BUILD_ROOT}/cfbuild-openldap-devel
+$MAKE -C libraries install DESTDIR=${BUILD_ROOT}/cfbuild-openldap-devel
 
 # Package
 
