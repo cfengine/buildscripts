@@ -19,7 +19,7 @@ cd libraries/liblmdb && gpatch -p3 < ../../mdb.patch.sun && cd -
 
 # Build
 
-cd libraries/liblmdb && make && cd -
+cd libraries/liblmdb && $MAKE && cd -
 
 # Test
 
@@ -29,7 +29,7 @@ mkdir -p $TTD/bin
 mkdir -p $TTD/lib
 mkdir -p $TTD/include
 mkdir -p $TTD/man/man1
-cd libraries/liblmdb && make install prefix=${TTD} && cd -
+cd libraries/liblmdb && $MAKE install prefix=${TTD} && cd -
 
 # Package
 
