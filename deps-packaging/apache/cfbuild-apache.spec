@@ -1,10 +1,11 @@
+%define apache_version 2.2.24
 %global __os_install_post %{nil}
 
 Summary: CFEngine Build Automation -- apache
 Name: cfbuild-apache
 Version: %{version}
 Release: 1
-Source0: httpd-2.2.24.tar.gz
+Source0: httpd-%{apache_version}.tar.gz
 Source1: httpd.conf
 Source2: httpd-ssl.conf
 License: MIT
@@ -18,7 +19,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n httpd-2.2.24
+%setup -q -n httpd-%{apache_version}
 
 LDFLAGS=-L%{buildprefix}/lib
 CPPFLAGS=-I%{buildprefix}/include
