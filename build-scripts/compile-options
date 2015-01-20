@@ -268,19 +268,6 @@ esac
 
 export TESTS
 
-# Optimization
-# TODO remove OPTIMIZE indirection. We can directly check for BUILD_TYPE.
-case "$BUILD_TYPE" in
-  DEBUG)
-    OPTIMIZE=no;;
-  RELEASE|CODE_COVERAGE)
-    OPTIMIZE=yes;;
-  *)
-    echo "Unknown build type: $BUILD_TYPE"
-    exit 42;;
-esac
-
-export OPTIMIZE
 
 # Don't let existing LD_LIBRARY_PATH variables disturb the build.
 # Java sets this when Jenkins launches it.
