@@ -96,7 +96,7 @@ esac
 case "$BUILD_TYPE" in
   ##### this is the RELEASE build #####
   debug_and_release)
-    CFLAGS="-g1 -O2 -DNDEBUG  $CFLAGS"
+    CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
     ;;
   # TODO merge debug_and_release and debug. Today "debug" is not used at all.
   debug)
@@ -125,7 +125,7 @@ case "$BUILD_TYPE" in
    quick)
      ARGS="$ARGS --enable-debug"
      # Override the default "-g3 -O0" that comes with enable-debug
-     CFLAGS="-g1 -O1 $CFLAGS"
+     CFLAGS="-g2 -O1 $CFLAGS"
      ;;
    full|release)
       ;;
