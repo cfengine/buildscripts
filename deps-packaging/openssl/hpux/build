@@ -19,7 +19,7 @@ cd openssl-fips-1.2.4
 gmake
 cd ..
 
-./Configure hpux-ia64-gcc fips no-ec shared  no-dtls no-psk no-srp \
+./Configure hpux-ia64-gcc fips shared  no-ec no-dtls no-psk no-srp \
     --with-fipslibdir=`pwd`/openssl-fips-1.2.4/fips --prefix=$PREFIX
 
 # Build
