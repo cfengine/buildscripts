@@ -94,51 +94,48 @@ case "$ROLE" in
 esac
 
 case "$BUILD_TYPE" in
-  ##### this is the RELEASE build #####
-  debug_and_release)
+
+  RELEASE)
     CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
     ;;
-  # TODO merge debug_and_release and debug. Today "debug" is not used at all.
-  debug)
+  DEBUG)
     ARGS="$ARGS --enable-debug"
+    # Override the default "-g3 -O0" that comes with ./configure --enable-debug
+    # in order to reduce the size of the packages
+    CFLAGS="-g2 -O1 $CFLAGS"
     ;;
-  code_coverage)
+  CODE_COVERAGE)
     ARGS="$ARGS --enable-debug"
-      # lcov is not found in Windows and other platforms
-      case "${OS}-${OS_VERSION}" in
-        mingw*)
-        ;;
-        hpux*)
-        ;;
-        solaris*)
-        ;;
-        rhel-4.*)
-        ;;
-        aix*)
-	      ;;
-        *)
-        ARGS="$ARGS --enable-coverage"
-        ;;
-      esac
+    # lcov is not found in Windows and other platforms
+    case "${OS}-${OS_VERSION}" in
+      mingw*)
       ;;
-   ##### this is the DEBUG build #####
-   quick)
-     ARGS="$ARGS --enable-debug"
-     # Override the default "-g3 -O0" that comes with enable-debug
-     CFLAGS="-g2 -O1 $CFLAGS"
-     ;;
-   full|release)
+      hpux*)
       ;;
+      solaris*)
+      ;;
+      rhel-4.*)
+      ;;
+      aix*)
+      ;;
+      *)
+      ARGS="$ARGS --enable-coverage"
+      ;;
+    esac
+    ;;
   *)
-      echo "Unknown build type: $BUILD_TYPE"
-      exit 42;;
+    echo "Unknown build type: $BUILD_TYPE"
+    exit 42
+    ;;
 esac
 
 ( cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
 
-if test "x$NOVA" = "xyes"; then
+if [ "x$NOVA" = "xyes" ]
+then
     ( cd $BASEDIR/enterprise && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
-    if test "x$ROLE" = "xhub"; then
+    if [ "x$ROLE" = "xhub" ]
+    then
         ( cd $BASEDIR/nova && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
     fi
 fi

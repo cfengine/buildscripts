@@ -71,21 +71,23 @@ continuous_version()
   VERSION=$MY_MAJOR_VERSION.$YEAR.$MONTH-$MY_BUILD_NUMBER
 }
 
-if [ -z "$EXPLICIT_VERSION" ]; then 
+if [ -z "$EXPLICIT_VERSION" ]
+then
   case "$BUILD_TYPE" in
-    quick|full)
-      ci_version;;
-    debug)
+    RELEASE)
+      release_version
+      ;;
+    DEBUG)
       ci_version
-      VERSION="$VERSION.debug";;
-    code_coverage)
+      ;;
+    CODE_COVERAGE)
       ci_version
-      VERSION="$VERSION.code_coverage";;
-    release|debug_and_release)
-      release_version;;
+      VERSION="$VERSION.code_coverage"
+      ;;
     *)
       echo "Unknown build type: $BUILD_TYPE"
-      exit 1;;
+      exit 42
+      ;;
   esac
 else
   VERSION=$EXPLICIT_VERSION
