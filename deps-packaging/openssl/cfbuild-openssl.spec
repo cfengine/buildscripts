@@ -45,7 +45,7 @@ $MAKE
 cd ..
 
 
-echo BUILD_TYPE is $BUILD_TYPE
+echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
 
 if [ $SYS = "AIX" ]
 then
@@ -59,10 +59,10 @@ then
 else
     DEBUG_CONFIG_FLAGS=
     DEBUG_CFLAGS=
-    if [ $BUILD_TYPE = "debug" -o $BUILD_TYPE = "quick" ]
+    if [ $BUILD_TYPE = "DEBUG" ]
     then
         DEBUG_CONFIG_FLAGS="no-asm -DPURIFY"
-        DEBUG_CFLAGS="-g -O1 -fno-omit-frame-pointer"
+        DEBUG_CFLAGS="-g1 -O1 -fno-omit-frame-pointer"
     fi
 
     ./config fips no-ec shared  no-dtls no-psk no-srp  $DEBUG_CONFIG_FLAGS \
@@ -70,7 +70,7 @@ else
     --prefix=%{prefix}  $DEBUG_CFLAGS
 
     # Remove -O3 and -fomit-frame-pointer from debug and quick builds
-    if [ $BUILD_TYPE = "debug" -o $BUILD_TYPE = "quick" ]
+    if [ $BUILD_TYPE = "DEBUG" ]
     then
         sed -i -e '/^CFLAG=/{s/ -O3//;s/ -fomit-frame-pointer//}'   Makefile
     fi

@@ -98,12 +98,13 @@ light()
 
 package()
 {
-  if [ -z $EXPLICIT_VERSION ]; then
+  if [ -z $EXPLICIT_VERSION ]
+  then
     case $BUILD_TYPE in
-      release|debug_and_release)
+      RELEASE)
         REVISION=$VERSION.0
         ;;
-      quick|full|debug|code_coverage)
+      DEBUG|CODE_COVERAGE)
         MAIN_VERSION=${VERSION%\~*}
         REVISION=$MAIN_VERSION.$BUILD_NUMBER
         ;;
@@ -135,10 +136,10 @@ get()
   try_run get_msi
 
   case $BUILD_TYPE in
-    release|debug_and_release)
+    RELEASE)
       PKGNAME="cfengine-nova-$VERSION"
       ;;
-    quick|full|debug|code_coverage)
+    DEBUG|CODE_COVERAGE)
       PKGNAME="cfengine-nova-$VERSION-$BUILD_NUMBER"
       ;;
   esac

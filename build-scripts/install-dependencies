@@ -264,25 +264,15 @@ fi
 for dep in $DEPS; do
 
   case "$BUILD_TYPE" in
-    quick|code_coverage)
+    DEBUG|CODE_COVERAGE)
       optimize=yes
       debugsym=no
       versuffix=+untested
       tests=no;;
-    debug_and_release)
+    RELEASE)
       optimize=yes
       debugsym=no
-      versuffix=+dr
-      tests=yes;;
-    debug)
-      optimize=no
-      debugsym=yes
-      versuffix=+debug
-      tests=no;;
-    full|release)
-      optimize=yes
-      debugsym=no
-      versuffix=
+      versuffix=+release
       tests=yes;;
     *)
       echo "Unknown build type: $BUILD_TYPE"
@@ -321,10 +311,13 @@ for dep in $DEPS; do
   esac
   if pkg-cache find $dep-$version; then
     case "$BUILD_TYPE" in
-      # We don't want to prune packages. It takes too long to regenerate.
-      # full|release|debug_and_release) pkg-cache prune $dep-$version;;
-      full|release|debug_and_release|quick|smoke|debug) echo "Package found in cache, skipping compilation";;
-      *) echo "WAT?!"; exit 42;;
+    # We don't want to prune packages. It takes too long to regenerate.
+    # RELEASE) pkg-cache prune $dep-$version;;
+    RELEASE|DEBUG|CODE_COVERAGE)
+      echo "Package found in cache, skipping compilation";;
+    *)
+      echo "Unknown build type: $BUILD_TYPE"
+      exit 42;;
     esac
   fi
 
