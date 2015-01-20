@@ -20,7 +20,8 @@ build-stamp:
 	patch -p1 < openssl-0.9.8k-pid-t-mingw.patch
 
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
-		mingw64 no-asm shared --prefix=$PREFIX no-zlib
+		mingw64 no-asm no-zlib shared  no-ec no-dtls no-psk no-srp \
+		--prefix=$PREFIX
 
 	make build_crypto build_ssl libcrypto.dll.a libssl.dll.a
 

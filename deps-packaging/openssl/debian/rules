@@ -26,7 +26,7 @@ build-stamp:
 		DEBUG_CFLAGS="-g1 -O1 -fno-omit-frame-pointer" ;\
 	fi ;\
 	\
-	./config fips no-ec shared  no-dtls no-psk no-srp  $$DEBUG_CONFIG_FLAGS \
+	./config fips shared  no-ec no-dtls no-psk no-srp  $$DEBUG_CONFIG_FLAGS \
 		--with-fipslibdir=$(CURDIR)/$(DF)/fips --prefix=$(PREFIX) \
 		$$DEBUG_CFLAGS
 

@@ -52,7 +52,10 @@ then
     LDFLAGS=-L%{buildprefix}/lib
     CPPFLAGS=-I%{buildprefix}/include
 
-    LDFLAGS="$LDFLAGS" CPPFLAGS="$CPPFLAGS" ./Configure aix-gcc no-ec --with-fipslibdir=%{_builddir}/openssl-%{openssl_version}/openssl-fips-%{fips_version}/fips shared --prefix=%{prefix}
+    LDFLAGS="$LDFLAGS" CPPFLAGS="$CPPFLAGS" \
+        ./Configure aix-gcc shared  no-ec no-dtls no-psk no-srp \
+        --with-fipslibdir=%{_builddir}/openssl-%{openssl_version}/openssl-fips-%{fips_version}/fips \
+        --prefix=%{prefix}
     /usr/bin/patch -p1 < ../../SOURCES/makefile.openssl.aix.patch
     $MAKE depend
     $MAKE
@@ -65,7 +68,7 @@ else
         DEBUG_CFLAGS="-g1 -O1 -fno-omit-frame-pointer"
     fi
 
-    ./config fips no-ec shared  no-dtls no-psk no-srp  $DEBUG_CONFIG_FLAGS \
+    ./config fips shared  no-ec no-dtls no-psk no-srp  $DEBUG_CONFIG_FLAGS \
     --with-fipslibdir=%{_builddir}/openssl-%{openssl_version}/openssl-fips-%{fips_version}/fips \
     --prefix=%{prefix}  $DEBUG_CFLAGS
 
