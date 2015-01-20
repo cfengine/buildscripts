@@ -96,7 +96,7 @@ esac
 case "$BUILD_TYPE" in
   debug_and_release)
     ARGS="$ARGS --enable-debug"
-    CFLAGS="-g -O1  $CFLAGS"
+    CFLAGS="-g1 -O1  $CFLAGS"
     ;;
   # TODO merge debug_and_release and debug. Today "debug" is not used at all.
   debug)
