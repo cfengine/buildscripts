@@ -528,8 +528,8 @@ if [ ! -d $PREFIX/state/pg/data ]; then
 
   # Generating a new postgresql.conf if enough total memory is present
   #
-  # If total memory is lower than 8G, we use the default pgsql conf file
-  # If total memory is beyond 64G, we use a shared_buffers of 16G
+  # If total memory is lower than 3GB, we use the default pgsql conf file
+  # If total memory is beyond 64GB, we use a shared_buffers of 16G
   # Otherwise, we use a shared_buffers equal to 25% of total memory
   total=`cat /proc/meminfo |grep "^MemTotal:.*[0-9]\+ kB"|awk '{print $2}'`
 
@@ -538,7 +538,7 @@ if [ ! -d $PREFIX/state/pg/data ]; then
     echo "Error calculating total memory for setting postgresql shared_buffers";
   else
     upper=$(( 64 * 1024 * 1024 ))  #in KB
-    lower=$(( 8 * 1024 * 1024 ))   #in KB
+    lower=$(( 3 * 1024 * 1024 ))   #in KB
 
     if [ "$total" -gt "$lower" ]; then
       maint="2GB"
