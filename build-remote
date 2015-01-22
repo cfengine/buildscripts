@@ -27,6 +27,14 @@ usage() {
   echo "-t chroot, --test-machine=chroot"
   echo "        Which machine to use for unsafe tests. Currently chroot inside the"
   echo "        current machine is the only supported option."
+  echo "--test-shell"
+  echo "        Instead of running the tests, will drop you directly into a shell"
+  echo "        inside the test environment. You can also trigger this specifically"
+  echo "        for the build-scripts/test script by passing TEST_SHELL=1 in the"
+  echo "        environment. The recipe"
+  echo "          TEST_MACHINE=chroot TEST_SHELL=1 build-scripts/test"
+  echo "        is a particularly useful combo on a build host. Note that the build"
+  echo "        will not continue afterwards."
   echo "--no-tests"
   echo "        Do not run tests."
   echo "-d /var/cfengine, --workdir=/var/cfengine"
@@ -48,7 +56,7 @@ usage() {
 }
 
 opts() {
-  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,full,release,debug,docs,release-and-debug,help,test-machine:,no-tests -n build-remote -- "$@"`
+  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,full,release,debug,docs,release-and-debug,help,test-machine:,test-shell,no-tests -n build-remote -- "$@"`
 
   eval set -- "$OPTS"
   echo "$?"
@@ -126,6 +134,9 @@ opts() {
             ;;
         esac
         shift 2;;
+      --test-shell)
+        TEST_SHELL=1
+        shift;;
       --no-tests)
         NO_TESTS=1
         shift;;
@@ -146,7 +157,7 @@ opts() {
   REPOSITORY=$PROJECT-$BRANCH
   HOST=$1
 
-  export PROJECT BRANCH WIX_MACHINE CROSS_TARGET HOST BUILD_TYPE BUILD_NUMBER DOCS EXPLICIT_ROLE EXPLICIT_VERSION TEST_MACHINE PREFIX
+  export PROJECT BRANCH WIX_MACHINE CROSS_TARGET HOST BUILD_TYPE BUILD_NUMBER DOCS EXPLICIT_ROLE EXPLICIT_VERSION TEST_MACHINE TEST_SHELL PREFIX
 
   export SCHEDULER=$PROJECT-$BRANCH-localbuild
 }

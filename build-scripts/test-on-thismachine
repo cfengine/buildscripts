@@ -34,18 +34,29 @@ mingw)
     ;;
 esac
 
-if [ "$TESTS" = all ]; then
-  chmod -R g-w $BASEDIR/core/tests/acceptance/*
-  chmod -R g-w $BASEDIR/masterfiles/tests/acceptance/*
-  chmod -R g-w $BASEDIR/masterfiles/lib/*
-  chmod -R g-w $BASEDIR/masterfiles/inventory/*
-  if test "x$PROJECT" != "xcommunity"; then
-    chmod -R g-w $BASEDIR/enterprise/tests/acceptance/*
+if [ "$TEST_SHELL" = "1" ]; then
+  if [ -n "$SHELL" ]; then
+    "$SHELL" -i
+  elif [ -f /bin/bash ]; then
+    /bin/bash -i
+  else
+    /bin/sh -i
   fi
-  for project in `projects_to_test`; do
-    NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project check
-  done
-
-elif [ "$TESTS" = unit ]; then
-  $MAKE -C $BASEDIR/core/tests/unit check
+  echo "Forcing failure to interrupt build..."
+  exit 1
+else
+  if [ "$TESTS" = all ]; then
+    chmod -R g-w $BASEDIR/core/tests/acceptance/*
+    chmod -R g-w $BASEDIR/masterfiles/tests/acceptance/*
+    chmod -R g-w $BASEDIR/masterfiles/lib/*
+    chmod -R g-w $BASEDIR/masterfiles/inventory/*
+    if test "x$PROJECT" != "xcommunity"; then
+      chmod -R g-w $BASEDIR/enterprise/tests/acceptance/*
+    fi
+    for project in `projects_to_test`; do
+      NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project check
+    done
+  elif [ "$TESTS" = unit ]; then
+    $MAKE -C $BASEDIR/core/tests/unit check
+  fi
 fi
