@@ -60,6 +60,12 @@ PKGDIR=$BASEDIR/$PKGNAME/pkg
 rm -rf $PKGDIR
 mkdir -p $PKGDIR
 
+if which gtar 2>&1 | grep '^/' >/dev/null; then
+  TAR=gtar
+else
+  TAR=tar
+fi
+
 pkg-get-buildscripts-src "$P" | while read srcfile opts; do
   case "$srcfile" in
     *.gz|*.tgz)
@@ -72,19 +78,11 @@ pkg-get-buildscripts-src "$P" | while read srcfile opts; do
   esac
 
   if [ x$opts = xsubdir ]; then
-   if [ "$OS_VERSION" = "8" ]; then
-    $UNCOMPRESS $srcfile | (cd $PKGDIR; LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" gtar xf -) || false
-   else
-    $UNCOMPRESS $srcfile | (cd $PKGDIR; gtar xf -) || false
-   fi
+    $UNCOMPRESS $srcfile | (cd $PKGDIR; $TAR xf -) || false
   else
     TD=/tmp/`basename $srcfile`.$$
     mkdir -p "$TD"
-    if [ "$OS_VERSION" = "8" ]; then
-     $UNCOMPRESS $srcfile | (cd "$TD" && gtar xf -) || false
-    else
-     $UNCOMPRESS $srcfile | (cd "$TD" && LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH" gtar xf -) || false
-    fi
+    $UNCOMPRESS $srcfile | (cd "$TD" && $TAR xf -) || false
     mv $TD/*/* $PKGDIR
     rm -r "$TD"
   fi
