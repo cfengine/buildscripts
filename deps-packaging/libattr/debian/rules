@@ -15,7 +15,7 @@ build-stamp:
 
 # we need to patch attr sources cause by default they don't support DESTDIR
 
-	zcat attr.destdir.diff.gz | patch -p1 --verbose || true
+	zcat attr.destdir.diff.gz | $PATCH -p1 --verbose || true
 
 # installing header files in usr/include is a hack required to compile libacl
 # configure of acl is not able to find headers in any other location than usr/include

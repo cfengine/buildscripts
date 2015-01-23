@@ -8,10 +8,10 @@ TT=${BUILD_ROOT}/cfbuild-lmdb${PREFIX}
 TTD=${BUILD_ROOT}/cfbuild-lmdb-devel${PREFIX}
 
 cd libraries/liblmdb
-gpatch -p3 < ../../mdb.patch
-gpatch -p3 < ../../mdb-robust.patch
-gpatch -p3 < ../../mdb-autoconf.patch
-gpatch -p3 < ../../mdb-autoconf-generated.patch
+$PATCH -p3 < ../../mdb.patch
+$PATCH -p3 < ../../mdb-robust.patch
+$PATCH -p3 < ../../mdb-autoconf.patch
+$PATCH -p3 < ../../mdb-autoconf-generated.patch
 # Executable files taken from mdb-autoconf-generated.patch, which is generated
 # from Git, and contains permission info, but patch -p1 cannot apply it.
 # Use the following command to list the files.

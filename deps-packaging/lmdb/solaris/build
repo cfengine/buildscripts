@@ -11,9 +11,9 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 # Patch
 # Solaris 8
 
-cd libraries/liblmdb && gpatch -p3 < ../../mdb.patch && cd -
-cd libraries/liblmdb && gpatch -p3 < ../../mdb-robust.patch && cd -
-cd libraries/liblmdb && gpatch -p3 < ../../mdb.patch.sun && cd -
+cd libraries/liblmdb && $PATCH -p3 < ../../mdb.patch && cd -
+cd libraries/liblmdb && $PATCH -p3 < ../../mdb-robust.patch && cd -
+cd libraries/liblmdb && $PATCH -p3 < ../../mdb.patch.sun && cd -
 
 # Configure
 
