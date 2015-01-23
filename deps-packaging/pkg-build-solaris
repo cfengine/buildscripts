@@ -78,11 +78,11 @@ pkg-get-buildscripts-src "$P" | while read srcfile opts; do
   esac
 
   if [ x$opts = xsubdir ]; then
-    $UNCOMPRESS $srcfile | (cd $PKGDIR; $TAR xf -) || false
+    $UNCOMPRESS $srcfile | (cd $PKGDIR; $TAR xf -) || true
   else
     TD=/tmp/`basename $srcfile`.$$
     mkdir -p "$TD"
-    $UNCOMPRESS $srcfile | (cd "$TD" && $TAR xf -) || false
+    $UNCOMPRESS $srcfile | (cd "$TD" && $TAR xf -) || true
     mv $TD/*/* $PKGDIR
     rm -r "$TD"
   fi
