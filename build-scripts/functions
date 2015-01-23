@@ -244,7 +244,7 @@ remote_script_general() {
   ENVVARS="$ENVVARS EXPLICIT_VERSION=$EXPLICIT_VERSION"
   ENVVARS="$ENVVARS TEST_MACHINE=$TEST_MACHINE"
 
-  $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT"
+  ( set -x; $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT" )
 }
 
 remote_script() {
