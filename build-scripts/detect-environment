@@ -294,6 +294,13 @@ detect_tools()
         FUSER=/sbin/fuser
     fi
     export FUSER
+
+    if which gpatch 2>&1 | grep '^/' >/dev/null; then
+        PATCH=gpatch
+    else
+        PATCH=patch
+    fi
+    export PATCH
 }
 
 detect_cores()

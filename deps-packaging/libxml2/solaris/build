@@ -10,7 +10,7 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # Patch
 
-patch -p0 < solaris-8-inttypes.patch
+$PATCH -p0 < solaris-8-inttypes.patch
 
 # Configure
 

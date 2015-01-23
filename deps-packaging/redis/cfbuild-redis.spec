@@ -22,7 +22,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 
 %setup -q -n redis-2.8.2
-patch -s -p1 < %{_topdir}/SOURCES/redis.patch
+$PATCH -s -p1 < %{_topdir}/SOURCES/redis.patch
 
 %build
 

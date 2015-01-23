@@ -25,7 +25,7 @@ mkdir -p %{_builddir}
 SYS=`uname -s`
 
 if [ $SYS = "AIX" ]; then
-  patch -p1 < ../../SOURCES/makefile.aix.patch
+  $PATCH -p1 < ../../SOURCES/makefile.aix.patch
 fi
 
 ./configure --prefix=%{prefix} --without-zlib --without-readline --enable-shared

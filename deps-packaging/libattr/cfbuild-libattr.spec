@@ -17,7 +17,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n attr-2.4.47
 
-zcat ../../SOURCES/attr.destdir.diff.gz | patch -p1 || true
+zcat ../../SOURCES/attr.destdir.diff.gz | $PATCH -p1 || true
 
 ./configure --prefix=%{prefix} --includedir=%{incldir} --enable-gettext=no
 
