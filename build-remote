@@ -46,7 +46,7 @@ opts() {
   BRANCH=master
   BUILD_TYPE=quick
   SOURCE=git@github.com:cfengine
-  BUILD_NUMBER=${BUILD_NUMBER:-666}
+  BUILD_NUMBER=${BUILD_NUMBER:-unknown}
   EXPLICIT_ROLE=
   TEST_MACHINE=${TEST_MACHINE:-}
   NO_TESTS=${NO_TESTS:-0}
