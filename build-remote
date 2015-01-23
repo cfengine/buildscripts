@@ -26,6 +26,9 @@ usage() {
   echo "Build type defaults to quick. You may request a full build using --full"
   echo "Source defaults to git@github.com:cfengine/"
   echo
+  echo "NOTE: The following environment variables will be carried to the remote machine:"
+  echo "      CC CPPFLAGS CFLAGS LDFLAGS"
+  echo
   echo "WiX machine and cross-compilation are not used by default"
   echo
 }
