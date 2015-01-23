@@ -287,6 +287,13 @@ detect_tools()
         RPMBUILD_CMD=rpmbuild
     fi
     export RPMBUILD_CMD
+
+    if [ -x /usr/sbin/fuser ]; then
+        FUSER=/usr/sbin/fuser
+    else
+        FUSER=/sbin/fuser
+    fi
+    export FUSER
 }
 
 detect_cores()
