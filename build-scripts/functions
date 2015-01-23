@@ -226,6 +226,18 @@ remote_script_general() {
   if [ -n "$PREFIX" ]; then
     ENVVARS="$ENVVARS BUILDPREFIX=$PREFIX"
   fi
+  if [ -n "$CC" ]; then
+    ENVVARS="$ENVVARS CC=$CC"
+  fi
+  if [ -n "$CPPFLAGS" ]; then
+    ENVVARS="$ENVVARS CPPFLAGS='$CPPFLAGS'"
+  fi
+  if [ -n "$CFLAGS" ]; then
+    ENVVARS="$ENVVARS CFLAGS='$CFLAGS'"
+  fi
+  if [ -n "$LDFLAGS" ]; then
+    ENVVARS="$ENVVARS LDFLAGS=$LDFLAGS"
+  fi
 
   ENVVARS="$ENVVARS BRANCH=$REPOSITORY"
   ENVVARS="$ENVVARS EXPLICIT_ROLE=$EXPLICIT_ROLE"

@@ -36,7 +36,8 @@ opts() {
   eval set -- "$OPTS"
   echo "$?"
 
-  if [ $? != 0 ]; then
+  if [ $? != 0 ]
+  then
     usage
     exit 1
   fi
@@ -46,12 +47,13 @@ opts() {
   BRANCH=master
   BUILD_TYPE=quick
   SOURCE=git@github.com:cfengine
-  BUILD_NUMBER=${BUILD_NUMBER:-666}
+  BUILD_NUMBER=${BUILD_NUMBER:-unknown}
   EXPLICIT_ROLE=
   TEST_MACHINE=${TEST_MACHINE:-}
   NO_TESTS=${NO_TESTS:-0}
 
-  while true; do
+  while true
+  do
     case "$1" in
       -p|--project)
         PROJECT="$2"
@@ -80,9 +82,9 @@ opts() {
       --debug)
         BUILD_TYPE=debug
         shift;;
-	  --release-and-debug)
-	    BUILD_TYPE=debug_and_release
-		shift;;
+      --release-and-debug)
+        BUILD_TYPE=debug_and_release
+        shift;;
       --docs)
         DOCS=yes
         shift;;
@@ -90,11 +92,11 @@ opts() {
         SOURCE="$2"
         shift 2;;
       --role)
-	    EXPLICIT_ROLE="$2"
-		shift 2;;
-	  --version)
-	    EXPLICIT_VERSION="$2"
-		shift 2;;
+        EXPLICIT_ROLE="$2"
+        shift 2;;
+      --version)
+        EXPLICIT_VERSION="$2"
+        shift 2;;
       -h|--help)
         usage
         exit 0;;
@@ -156,7 +158,7 @@ checkout() {
   REPOS="core masterfiles"
 
   case "$PROJECT" in
-     nova)
+    nova)
       REPOS="$REPOS nova design-center mission-portal"
   esac
 
@@ -171,7 +173,7 @@ checkout() {
     community-3.4.x)
       git clone $SOURCE/core build/core
       (cd build/core && git checkout 3.4.x) || false
-     ;;
+      ;;
     community-3.3.x)
       git clone $SOURCE/core build/core
       (cd build/core && git checkout -b 3.3.x remotes/origin/3.3.x || git checkout 3.3.x) || false
@@ -216,24 +218,25 @@ checkout() {
     nova-3.6.x)
       VERSION=$BRANCH
       git clone $SOURCE/core build/core
-       (cd build/core && git checkout $VERSION) || false
+      (cd build/core && git checkout $VERSION) || false
       git clone $SOURCE/nova build/nova
       (cd build/nova && git checkout $VERSION) || false
       git clone $SOURCE/enterprise build/enterprise
-       (cd build/enterprise && git checkout $VERSION) || false
+      (cd build/enterprise && git checkout $VERSION) || false
       git clone $SOURCE/mission-portal build/mission-portal
-       (cd build/mission-portal && git checkout $VERSION) || false
+      (cd build/mission-portal && git checkout $VERSION) || false
       git clone $SOURCE/design-center build/design-center
-       (cd build/design-center && git checkout $VERSION) || false
+      (cd build/design-center && git checkout $VERSION) || false
       git clone $SOURCE/masterfiles build/masterfiles
-       (cd build/masterfiles && git checkout $VERSION)
-       ;;
-      
+      (cd build/masterfiles && git checkout $VERSION)
+      ;;
+
     nova-cp)
-     rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/buildscripts
-     for d in core nova enterprise masterfiles design-center mission-portal; do
-       rsync -avr $SOURCE/$d build
-     done
+      rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/buildscripts
+      for d in core nova enterprise masterfiles design-center mission-portal
+      do
+        rsync -avr $SOURCE/$d build
+      done
       ;;
 
     nova-stable)
@@ -245,10 +248,10 @@ checkout() {
       (cd build/mission-portal && git checkout -b 3.0.x remotes/origin/3.0.x || git checkout 3.0.0) || false
       ;;
     *)
-      for i in $REPOS;
-         do
-         git clone $SOURCE/$i build/$i
-         (cd build/$i && git checkout -b $BRANCH remotes/origin/$BRANCH || git checkout $BRANCH) || false
+      for i in $REPOS
+      do
+        git clone $SOURCE/$i build/$i
+        (cd build/$i && git checkout -b $BRANCH remotes/origin/$BRANCH || git checkout $BRANCH) || false
       done
   esac
 }
@@ -264,11 +267,12 @@ build() {
   remote_script compile
   case "$BUILD_TYPE" in
     debug_and_release)
-	  remote_script produce-debug-symbols
-	  ;;
+      remote_script produce-debug-symbols
+      ;;
   esac
 
-  if [ "$NO_TESTS" != 1 ]; then
+  if [ "$NO_TESTS" != 1 ]
+  then
     remote_script test
   fi
   remote_script package
@@ -280,7 +284,8 @@ build() {
 }
 
 common_build() {
-  if [ "$VERBOSE" = "yes" ]; then
+  if [ "$VERBOSE" = "yes" ]
+  then
     tail -F --pid=$$ build-remote.log &
   fi
 
