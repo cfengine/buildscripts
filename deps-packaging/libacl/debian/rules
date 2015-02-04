@@ -12,7 +12,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	zcat acl.destdir.diff.gz | $PATCH -p1 || true
+	zcat acl.destdir.diff.gz | $(PATCH) -p1 || true
 
 	./configure --prefix=$(PREFIX) --enable-gettext=no LDFLAGS=$(LDFLAGS)
 
