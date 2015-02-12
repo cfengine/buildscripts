@@ -7,6 +7,7 @@ PREFIX=/var/cfengine
 PG=${BUILD_ROOT}/cfbuild-postgresql${PREFIX}
 PGD=${BUILD_ROOT}/cfbuild-postgresql-devel${PREFIX}
 export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
+export LIBS="-lrt"
 
 # Patch
 
@@ -16,17 +17,17 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # Build
 
-make -C src/bin/pg_config
-make -C src/backend ../../src/include/utils/fmgroids.h
-make -C src/interfaces/libpq
+$MAKE -C src/bin/pg_config
+$MAKE -C src/backend ../../src/include/utils/fmgroids.h
+$MAKE -C src/interfaces/libpq
 
 # Test
 
 # Install
 
-make install -C src/bin/pg_config DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
-make install -C src/include DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
-make install -C src/interfaces/libpq DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+$MAKE install -C src/bin/pg_config DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+$MAKE install -C src/include DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
+$MAKE install -C src/interfaces/libpq DESTDIR=${BUILD_ROOT}/cfbuild-postgresql-devel
 
 # Package
 

@@ -9,22 +9,22 @@ LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
 export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 #Patch
-gpatch -p1 < solaris-unistd.patch
+$PATCH -p1 < solaris-unistd.patch
 #Configure
 
 ./configure --prefix=$PREFIX CPPFLAGS=-I/var/cfengine/include
 
 #Build
 
-make -C include
-make -C lib
+$MAKE -C include
+$MAKE -C lib
 
 #Test
 
 #Install
 
-make -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
-make -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+$MAKE -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+$MAKE -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
 
 #Package
 
