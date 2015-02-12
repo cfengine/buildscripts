@@ -16,7 +16,7 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 #Build
 
-make 
+$MAKE 
 
 #Test
 
@@ -25,7 +25,7 @@ make
 sed -e"s/ \/usr\/local\/lib / /" libtool > libtool2
 rm -f libtool
 mv libtool2 libtool
-make install DESTDIR=${BUILD_ROOT}/cfbuild-libiconv-devel
+$MAKE install DESTDIR=${BUILD_ROOT}/cfbuild-libiconv-devel
 
 #Package
 

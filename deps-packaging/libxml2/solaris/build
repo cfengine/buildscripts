@@ -10,21 +10,21 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # Patch
 
-patch -p0 < solaris-8-inttypes.patch
+$PATCH -p0 < solaris-8-inttypes.patch
 
 # Configure
 
-./configure --prefix=${PREFIX} --without-python
+./configure --prefix=${PREFIX} --without-python --without-lzma --without-zlib
 
 # Build
 
-make
+$MAKE
 
 # Test
 
 # Install
 
-make install DESTDIR=${BUILD_ROOT}/cfbuild-libxml2-devel
+$MAKE install DESTDIR=${BUILD_ROOT}/cfbuild-libxml2-devel
 
 # Package
 

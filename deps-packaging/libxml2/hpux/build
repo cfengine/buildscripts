@@ -13,7 +13,7 @@ LDFLAGS="-L${PREFIX}/lib -R${PREFIX}/lib"
 
 # Configure
 
-./configure CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" --prefix=${PREFIX} --without-python --without-iconv --without-lzma --with-iso8859x
+./configure CPPFLAGS="$CPPFLAGS" LDFLAGS="$LDFLAGS" --prefix=${PREFIX} --without-python --without-iconv --without-lzma --without-zlib --with-iso8859x
 
 # Build
 

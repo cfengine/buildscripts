@@ -16,17 +16,17 @@ mv Makefile.new Makefile
 
 # Build
 
-make
+$MAKE
 
 # Test
 
 if [ "$TESTS" = all ]; then
-  make check
+  $MAKE check
 fi
 
 # Install
 
-make install prefix=${TZD}
+$MAKE install prefix=${TZD}
 
 # Package
 

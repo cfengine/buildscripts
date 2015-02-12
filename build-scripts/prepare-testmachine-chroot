@@ -10,7 +10,7 @@ CHROOT_ROOT=$HOME/testmachine-chroot/
 
 sudo mkdir -p $CHROOT_ROOT
 
-sudo fuser -k $CHROOT_ROOT || true
+sudo $FUSER -k $CHROOT_ROOT || true
 sudo umount ${CHROOT_ROOT}proc || true
 
 echo "P $BASEDIR" > $TRANSFER_SCRIPT

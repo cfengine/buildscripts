@@ -16,7 +16,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n acl-2.2.52
 
-zcat ../../SOURCES/acl.destdir.diff.gz | patch -p1 || true
+zcat ../../SOURCES/acl.destdir.diff.gz | $PATCH -p1 || true
 
 ./configure --prefix=%{prefix} --enable-gettext=no LDFLAGS="-L${BUILDPREFIX}/lib"
 
