@@ -57,7 +57,7 @@ checksum()
           if which gzcat 2>&1 | grep '^/' >/dev/null; then
             UNCOMPRESS=gzcat
           else
-            UNCOMPRESS=zcat
+            UNCOMPRESS="gunzip -c"
           fi
           ;;
         *.bz2)
