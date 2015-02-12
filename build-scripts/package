@@ -90,10 +90,12 @@ case "$PACKAGING" in
     PREREMOVE=$P/generated.preremove
     POSTREMOVE=$P/generated.postremove
 
-    $P/../common/produce-script $PKG preinstall rpm > $PREINSTALL
-    $P/../common/produce-script $PKG postinstall rpm > $POSTINSTALL
-    $P/../common/produce-script $PKG preremove rpm > $PREREMOVE
-    $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
+    if [ "$PKG" = cfengine-nova ]; then
+      $P/../common/produce-script $PKG preinstall rpm > $PREINSTALL
+      $P/../common/produce-script $PKG postinstall rpm > $POSTINSTALL
+      $P/../common/produce-script $PKG preremove rpm > $PREREMOVE
+      $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
+    fi
 
     if [ -z "$SUPP_VERSION" ]; then
       RPM_VERSION=$MAIN_VERSION
@@ -119,14 +121,21 @@ case "$PACKAGING" in
       fi
     fi
 
-    sed \
-      -e "s/@@VERSION@@/$RPM_VERSION/g" \
-      -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
-      -e "/^%pre\$/r $PREINSTALL" \
-      -e "/^%post\$/r $POSTINSTALL" \
-      -e "/^%preun\$/r $PREREMOVE" \
-      -e "/^%postun\$/r $POSTREMOVE" \
-      $SPECIN > $SPEC
+    if [ "$PKG" = cfengine-nova ]; then
+      sed \
+        -e "s/@@VERSION@@/$RPM_VERSION/g" \
+        -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
+        -e "/^%pre\$/r $PREINSTALL" \
+        -e "/^%post\$/r $POSTINSTALL" \
+        -e "/^%preun\$/r $PREREMOVE" \
+        -e "/^%postun\$/r $POSTREMOVE" \
+        $SPECIN > $SPEC
+    else
+      sed \
+        -e "s/@@VERSION@@/$RPM_VERSION/g" \
+        -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
+        $SPECIN > $SPEC
+    fi
 
     for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`; do
       (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
@@ -162,10 +171,12 @@ case "$PACKAGING" in
   
     sed -e "s/@@VERSION@@/$DEB_VERSION/" $BASEDIR/$PKG/pkg/debian/changelog.in > $BASEDIR/$PKG/pkg/debian/changelog
 
-    $P/../common/produce-script $PKG preinstall deb > $BASEDIR/$PKG/pkg/debian/$PKG.preinst
-    $P/../common/produce-script $PKG postinstall deb > $BASEDIR/$PKG/pkg/debian/$PKG.postinst
-    $P/../common/produce-script $PKG preremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.prerm
-    $P/../common/produce-script $PKG postremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.postrm
+    if [ "$PKG" = cfengine-nova ]; then
+      $P/../common/produce-script $PKG preinstall deb > $BASEDIR/$PKG/pkg/debian/$PKG.preinst
+      $P/../common/produce-script $PKG postinstall deb > $BASEDIR/$PKG/pkg/debian/$PKG.postinst
+      $P/../common/produce-script $PKG preremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.prerm
+      $P/../common/produce-script $PKG postremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.postrm
+    fi
 
     (cd $BASEDIR/$PKG/pkg; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
     ;;
