@@ -122,6 +122,8 @@ fetch_file()
     else
       # wget(1) tends to create empty files even if download did not finish
       rm -f "$CACHEDIR/$FILENAME"
+      echo 'If you get a message about "Unsupported scheme", simply upload the' 1>&2
+      echo "given file to $CACHEDIR yourself." 1>&2
     fi
   done
 
