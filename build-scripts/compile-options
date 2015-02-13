@@ -283,3 +283,8 @@ case "$BUILD_TYPE" in
 esac
 
 export OPTIMIZE
+
+# Don't let existing LD_LIBRARY_PATH variables disturb the build.
+# Java sets this when Jenkins launches it.
+# PS! Solaris shell returns false if the var is already unset.
+unset LD_LIBRARY_PATH || true
