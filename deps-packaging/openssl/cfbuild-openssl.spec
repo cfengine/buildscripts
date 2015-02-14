@@ -65,7 +65,7 @@ else
     if [ $BUILD_TYPE = "DEBUG" ]
     then
         DEBUG_CONFIG_FLAGS="no-asm -DPURIFY"
-        DEBUG_CFLAGS="-g1 -O1 -fno-omit-frame-pointer"
+        DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer"
     fi
 
     ./config fips shared  no-ec no-dtls no-psk no-srp  $DEBUG_CONFIG_FLAGS \
