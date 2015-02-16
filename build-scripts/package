@@ -26,11 +26,11 @@ case "$PROJECT-$ROLE" in
 esac
 
 case "$BUILD_TYPE" in
-  debug)
+  DEBUG)
     DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS noopt nostrip"
     RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_optimize 0"
     RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_debugsym 1";;
-  quick|full|release|debug_and_release|code_coverage)
+  RELEASE|CODE_COVERAGE)
      DEB_BUILD_OPTIONS="nostrip"
     ;;
   *)
@@ -97,28 +97,33 @@ case "$PACKAGING" in
       $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
     fi
 
-    if [ -z "$SUPP_VERSION" ]; then
-      RPM_VERSION=$MAIN_VERSION
+    RPM_VERSION=$MAIN_VERSION
 
-      if [ $BUILD_TYPE = release -o $BUILD_TYPE = debug_and_release ]; then
-        
-        if [ -z $EXPLICIT_RELEASE ]; then
+    if [ -z "$SUPP_VERSION" ]
+    then
+
+      if [ $BUILD_TYPE = "RELEASE" ]
+      then
+        if [ -z $EXPLICIT_RELEASE ]
+        then
           RPM_RELEASE=1
         else
           RPM_RELEASE=$EXPLICIT_RELEASE
         fi
-     
+
       else
         RPM_RELEASE=0.$BUILD_NUMBER
       fi
-    else
-      RPM_VERSION=$MAIN_VERSION
 
-      if [ $BUILD_TYPE = release -o $BUILD_TYPE = debug_and_release ]; then
+    else
+
+      if [ $BUILD_TYPE = "RELEASE" ]
+      then
         RPM_RELEASE=0.$SUPP_VERSION.1
       else
         RPM_RELEASE=0.$SUPP_VERSION.0.$BUILD_NUMBER
       fi
+
     fi
 
     if [ "$PKG" = cfengine-nova ]; then
@@ -144,7 +149,7 @@ case "$PACKAGING" in
     $RPMBUILD_CMD -bb --define="_topdir $BASEDIR/$PKG" --define="buildprefix $BUILDPREFIX" --define="_basedir $BASEDIR" ${RPMBUILD_OPTIONS:+"${RPMBUILD_OPTIONS}"} $SPEC
     ;;
   deb)
-    if [ "$BUILDPREFIX" = "/opt/cfengine" ];
+    if [ "$BUILDPREFIX" = "/opt/cfengine" ]
     then
        #change the base path of cfengine files
         for i in $P/debian/$PKG*;  do
@@ -154,21 +159,23 @@ case "$PACKAGING" in
 
     rm -rf $BASEDIR/$PKG/pkg
     mkdir -p $BASEDIR/$PKG/pkg
-    cp -a $P/* $BASEDIR/$PKG/pkg    
+    cp -a $P/* $BASEDIR/$PKG/pkg
 
-    if [ $BUILD_TYPE = release -o $BUILD_TYPE = debug_and_release ]; then
-  
-      if [ -z $EXPLICIT_RELEASE ]; then
+    if [ $BUILD_TYPE = "RELEASE" ]
+    then
+
+      if [ -z $EXPLICIT_RELEASE ]
+      then
           DEB_VERSION=$VERSION-1
         else
           DEB_VERSION=$VERSION-$EXPLICIT_RELEASE
         fi
-    
+
    else
       DEB_VERSION=$VERSION~$BUILD_NUMBER
     fi
-     
-  
+
+
     sed -e "s/@@VERSION@@/$DEB_VERSION/" $BASEDIR/$PKG/pkg/debian/changelog.in > $BASEDIR/$PKG/pkg/debian/changelog
 
     if [ "$PKG" = cfengine-nova ]; then
@@ -189,10 +196,10 @@ case "$PACKAGING" in
     cp -pr $BASEDIR/cfengine/dist/var/cfengine/* $BASEDIR/$PKG/pkg
     cp -pr /var/cfengine/bin/* $BASEDIR/$PKG/pkg/bin
     cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg/lib
-    
+
     ARCH=`uname -p`
     sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION/g" $BASEDIR/$PKG/pkg/pkginfo.in > $BASEDIR/$PKG/pkg/pkginfo
-    
+
     cd $BASEDIR/$PKG/pkg
     cat prototype.head > prototype.tmp && find . | egrep -v 'postinstall|pkginfo|prototype|preremove|./etc|prototype.head|pkginfo.in' | pkgproto >> prototype.tmp
 
@@ -294,24 +301,28 @@ case "$PACKAGING" in
     $P/../common/produce-script $PKG preremove rpm > $PREREMOVE
     $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
 
-    if [ -z "$SUPP_VERSION" ]; then
+    if [ -z "$SUPP_VERSION" ]
+    then
       RPM_VERSION=$MAIN_VERSION
 
-      if [ $BUILD_TYPE = release -o $BUILD_TYPE = debug_and_release ]; then
-        
-        if [ -z "$EXPLICIT_RELEASE" ]; then
+      if [ $BUILD_TYPE = "RELEASE" ]
+      then
+
+        if [ -z "$EXPLICIT_RELEASE" ]
+        then
           RPM_RELEASE=1
         else
           RPM_RELEASE=$EXPLICIT_RELEASE
         fi
-     
+
       else
         RPM_RELEASE=0.$BUILD_NUMBER
       fi
     else
       RPM_VERSION=$MAIN_VERSION
 
-      if [ $BUILD_TYPE = release -o $BUILD_TYPE = debug_and_release ]; then
+      if [ $BUILD_TYPE = "RELEASE" ]
+      then
         RPM_RELEASE=0.$SUPP_VERSION.1
       else
         RPM_RELEASE=0.$SUPP_VERSION.0.$BUILD_NUMBER

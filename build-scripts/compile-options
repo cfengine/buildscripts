@@ -257,32 +257,17 @@ export PGSQL REDIS
 
 # Tests
 
-case "$OS_FAMILY-$BUILD_TYPE" in
-  mingw-*)
+case "$OS_FAMILY" in
+  mingw)
     TESTS=no;;
-  freebsd-*)
+  freebsd)
     TESTS=no;;
-  *-smoke)
-    TESTS=unit;;
   *)
     TESTS=all;;
 esac
 
 export TESTS
 
-# Optimization
-# TODO remove OPTIMIZE indirection. We can directly check for BUILD_TYPE.
-case "$BUILD_TYPE" in
-  debug)
-    OPTIMIZE=no;;
-  release|quick|full|debug_and_release|code_coverage)
-    OPTIMIZE=yes;;
-  *)
-    echo "Unknown build type: $BUILD_TYPE"
-    exit 42;;
-esac
-
-export OPTIMIZE
 
 # Don't let existing LD_LIBRARY_PATH variables disturb the build.
 # Java sets this when Jenkins launches it.

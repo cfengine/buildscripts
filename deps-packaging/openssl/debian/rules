@@ -16,22 +16,22 @@ build-stamp:
 	cd $(DF) && ./config fipscanisterbuild no-asm
 	cd $(DF) && make
 
-	echo BUILD_TYPE is $$BUILD_TYPE
+	echo ==================== BUILD_TYPE is $$BUILD_TYPE ====================
 
 	DEBUG_CONFIG_FLAGS= ;\
 	DEBUG_CFLAGS= ;\
-	if [ $$BUILD_TYPE = "debug" -o $$BUILD_TYPE = "quick" ] ;\
+	if [ $$BUILD_TYPE = "DEBUG" ] ;\
 	then \
 		DEBUG_CONFIG_FLAGS="no-asm -DPURIFY" ;\
-		DEBUG_CFLAGS="-g -O1 -fno-omit-frame-pointer" ;\
+		DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer" ;\
 	fi ;\
 	\
-	./config fips no-ec shared  no-dtls no-psk no-srp  $$DEBUG_CONFIG_FLAGS \
+	./config fips shared  no-ec no-dtls no-psk no-srp  $$DEBUG_CONFIG_FLAGS \
 		--with-fipslibdir=$(CURDIR)/$(DF)/fips --prefix=$(PREFIX) \
 		$$DEBUG_CFLAGS
 
 	# Remove -O3 and -fomit-frame-pointer from debug and quick builds
-	if [ $$BUILD_TYPE = "debug" -o $$BUILD_TYPE = "quick" ] ;\
+	if [ $$BUILD_TYPE = "DEBUG" ] ;\
 	then \
 		sed -i -e '/^CFLAG=/{s/ -O3//;s/ -fomit-frame-pointer//}'   Makefile ;\
 	fi

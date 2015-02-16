@@ -45,32 +45,35 @@ $MAKE
 cd ..
 
 
-echo BUILD_TYPE is $BUILD_TYPE
+echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
 
 if [ $SYS = "AIX" ]
 then
     LDFLAGS=-L%{buildprefix}/lib
     CPPFLAGS=-I%{buildprefix}/include
 
-    LDFLAGS="$LDFLAGS" CPPFLAGS="$CPPFLAGS" ./Configure aix-gcc no-ec --with-fipslibdir=%{_builddir}/openssl-%{openssl_version}/openssl-fips-%{fips_version}/fips shared --prefix=%{prefix}
+    LDFLAGS="$LDFLAGS" CPPFLAGS="$CPPFLAGS" \
+        ./Configure aix-gcc shared  no-ec no-dtls no-psk no-srp \
+        --with-fipslibdir=%{_builddir}/openssl-%{openssl_version}/openssl-fips-%{fips_version}/fips \
+        --prefix=%{prefix}
     /usr/bin/patch -p1 < ../../SOURCES/makefile.openssl.aix.patch
     $MAKE depend
     $MAKE
 else
     DEBUG_CONFIG_FLAGS=
     DEBUG_CFLAGS=
-    if [ $BUILD_TYPE = "debug" -o $BUILD_TYPE = "quick" ]
+    if [ $BUILD_TYPE = "DEBUG" ]
     then
         DEBUG_CONFIG_FLAGS="no-asm -DPURIFY"
-        DEBUG_CFLAGS="-g -O1 -fno-omit-frame-pointer"
+        DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer"
     fi
 
-    ./config fips no-ec shared  no-dtls no-psk no-srp  $DEBUG_CONFIG_FLAGS \
+    ./config fips shared  no-ec no-dtls no-psk no-srp  $DEBUG_CONFIG_FLAGS \
     --with-fipslibdir=%{_builddir}/openssl-%{openssl_version}/openssl-fips-%{fips_version}/fips \
     --prefix=%{prefix}  $DEBUG_CFLAGS
 
     # Remove -O3 and -fomit-frame-pointer from debug and quick builds
-    if [ $BUILD_TYPE = "debug" -o $BUILD_TYPE = "quick" ]
+    if [ $BUILD_TYPE = "DEBUG" ]
     then
         sed -i -e '/^CFLAG=/{s/ -O3//;s/ -fomit-frame-pointer//}'   Makefile
     fi

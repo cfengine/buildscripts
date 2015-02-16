@@ -16,14 +16,14 @@ usage() {
   echo "                    [--test-machine=chroot]"
   echo "                    [--no-tests]"
   echo "                    [--workdir=/opt/cfengine]"
-  echo "                    [--full|--release|--debug|--docs|--release-and-debug]"
+  echo "                    [--release|--debug|--docs|--release-and-debug]"
   echo "                    [-v|--verbose]"
   echo "                    <user@host>"
   echo
   echo "Project defaults to 'nova'"
   echo "Branch defaults to 'master', specify --branch=cp if you just want to do simple rsync from the source directories"
   echo "workdir defaults to '/var/cfengine'"
-  echo "Build type defaults to quick. You may request a full build using --full"
+  echo "Build type defaults to DEBUG. You may request a RELEASE build using --release"
   echo "Source defaults to git@github.com:cfengine/"
   echo
   echo "NOTE: The following environment variables will be carried to the remote machine:"
@@ -34,7 +34,7 @@ usage() {
 }
 
 opts() {
-  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,full,release,debug,docs,release-and-debug,help,test-machine:,no-tests -n build-remote -- "$@"`
+  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,release,debug,docs,help,test-machine:,no-tests -n build-remote -- "$@"`
 
   eval set -- "$OPTS"
   echo "$?"
@@ -48,7 +48,7 @@ opts() {
   DOCS=no
   PROJECT=nova
   BRANCH=master
-  BUILD_TYPE=quick
+  BUILD_TYPE=DEBUG
   SOURCE=git@github.com:cfengine
   BUILD_NUMBER=${BUILD_NUMBER:-unknown}
   EXPLICIT_ROLE=
@@ -76,17 +76,11 @@ opts() {
       -v|--verbose)
         VERBOSE=yes
         shift;;
-      --full)
-        BUILD_TYPE=full
-        shift;;
       --release)
-        BUILD_TYPE=release
+        BUILD_TYPE=RELEASE
         shift;;
       --debug)
-        BUILD_TYPE=debug
-        shift;;
-      --release-and-debug)
-        BUILD_TYPE=debug_and_release
+        BUILD_TYPE=DEBUG
         shift;;
       --docs)
         DOCS=yes
@@ -269,7 +263,7 @@ build() {
   remote_script configure
   remote_script compile
   case "$BUILD_TYPE" in
-    debug_and_release)
+    RELEASE)
       remote_script produce-debug-symbols
       ;;
   esac

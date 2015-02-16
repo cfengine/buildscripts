@@ -4,7 +4,7 @@
 . detect-environment
 . compile-options
 
-if [ $BUILD_TYPE != "debug_and_release" ];
+if [ $BUILD_TYPE != "RELEASE" ];
 then
     echo "Debug symbols not requested";
     exit 0;

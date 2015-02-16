@@ -22,7 +22,7 @@ cd openssl-fips-1.2.4
 $MAKE
 cd ..
 
-./config fips no-ec shared  no-dtls no-psk no-srp \
+./config fips shared  no-ec no-dtls no-psk no-srp \
     --with-fipslibdir=`pwd`/openssl-fips-1.2.4/fips --prefix=$PREFIX
 
 # Build
