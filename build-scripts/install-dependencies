@@ -309,16 +309,18 @@ for dep in $DEPS; do
       version=0+$(cat $BASEDIR/buildscripts/deps-packaging/revision)$versuffix$crossver
       ;;
   esac
-  if pkg-cache find $dep-$version; then
-    case "$BUILD_TYPE" in
-    # We don't want to prune packages. It takes too long to regenerate.
-    # RELEASE) pkg-cache prune $dep-$version;;
-    RELEASE|DEBUG|CODE_COVERAGE)
+
+  if pkg-cache find $dep-$version
+  then
+
+    if [ x$PKGCACHE_PRUNE != x ]
+    then
+      echo "Removing package from cache because PKGCACHE_PRUNE is set";;
+      pkg-cache prune $dep-$version
+    else
       echo "Package found in cache, skipping compilation";;
-    *)
-      echo "Unknown build type: $BUILD_TYPE"
-      exit 42;;
-    esac
+    fi
+
   fi
 
   if pkg-cache find $dep-$version; then
