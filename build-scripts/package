@@ -28,8 +28,8 @@ esac
 case "$BUILD_TYPE" in
   DEBUG)
     DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS noopt nostrip"
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_optimize 0"
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_debugsym 1";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define='with_optimize 0'"
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define='with_debugsym 1'";;
   RELEASE|CODE_COVERAGE)
      DEB_BUILD_OPTIONS="nostrip"
     ;;
