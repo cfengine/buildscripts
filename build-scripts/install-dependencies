@@ -315,10 +315,10 @@ for dep in $DEPS; do
 
     if [ x$PKGCACHE_PRUNE != x ]
     then
-      echo "Removing package from cache because PKGCACHE_PRUNE is set";;
+      echo "Removing package from cache because PKGCACHE_PRUNE is set"
       pkg-cache prune $dep-$version
     else
-      echo "Package found in cache, skipping compilation";;
+      echo "Package found in cache, skipping compilation"
     fi
 
   fi
