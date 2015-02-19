@@ -15,7 +15,8 @@ case "$PROJECT-$ROLE" in
   nova-hub)
     PKG=cfengine-nova-hub
     DEB_BUILD_OPTIONS=
-    RPMBUILD_OPTIONS="--define='with_expansion 1'";;
+    RPMBUILD_OPTIONS="--define 'with_expansion 1'"
+    ;;
   nova-agent)
     PKG=cfengine-nova
     DEB_BUILD_OPTIONS=
@@ -28,8 +29,9 @@ esac
 case "$BUILD_TYPE" in
   DEBUG)
     DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS noopt nostrip"
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define='with_optimize 0'"
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define='with_debugsym 1'";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_optimize 0'"
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_debugsym 1'"
+    ;;
   RELEASE|CODE_COVERAGE)
      DEB_BUILD_OPTIONS="nostrip"
     ;;
@@ -125,13 +127,13 @@ case "$PACKAGING" in
     done
 
     # eval and double quoting is needed to separate args,
-    # example cmd --define='a b':
+    # example cmd --define 'a b':
     #     - argv[1] = --define
     #     - argv[2] = a b
     eval $RPMBUILD_CMD -bb \
-      --define="'_topdir $BASEDIR/$PKG'" \
-      --define="'buildprefix $BUILDPREFIX'" \
-      --define="'_basedir $BASEDIR'" \
+      --define "'_topdir $BASEDIR/$PKG'" \
+      --define "'buildprefix $BUILDPREFIX'" \
+      --define "'_basedir $BASEDIR'" \
       $RPMBUILD_OPTIONS $SPEC
     ;;
   deb)
@@ -297,13 +299,13 @@ case "$PACKAGING" in
     done
 
     # eval and double quoting is needed to separate args,
-    # example cmd --define='a b':
+    # example cmd --define 'a b':
     #     - argv[1] = --define
     #     - argv[2] = a b
     eval $RPMBUILD_CMD -bb \
-      --define="'_topdir $BASEDIR/$PKG'" \
-      --define="'buildprefix $BUILDPREFIX'" \
-      --define="'_basedir $BASEDIR'" \
+      --define "'_topdir $BASEDIR/$PKG'" \
+      --define "'buildprefix $BUILDPREFIX'" \
+      --define "'_basedir $BASEDIR'" \
       $RPMBUILD_OPTIONS $SPEC
 
     #create bff packages
