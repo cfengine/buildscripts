@@ -1,16 +1,17 @@
-diff -rupN mdb-mdb.old/libraries/liblmdb/mdb.c mdb-mdb.new/libraries/liblmdb/mdb.c
---- mdb-mdb.old/libraries/liblmdb/mdb.c	2013-12-12 13:46:41.000000000 +0000
-+++ mdb-mdb.new/libraries/liblmdb/mdb.c	2013-12-12 13:48:23.000000000 +0000
-@@ -261,8 +261,12 @@ mdb_sem_wait(sem_t *sem)
-  *	if fdatasync() is not supported.
-  */
- #ifndef MDB_FDATASYNC
-+#if defined(sun)
-+# define MDB_FDATASYNC  fsync
-+#else
- # define MDB_FDATASYNC	fdatasync
- #endif
-+#endif
- 
- #ifndef MDB_MSYNC
- # define MDB_MSYNC(addr,len,flags)	msync(addr,len,flags)
+*** mdb-mdb.old/libraries/liblmdb/mdb.c	2013-12-12 13:46:41.000000000 +0000
+--- mdb-mdb.new/libraries/liblmdb/mdb.c	2013-12-12 13:48:23.000000000 +0000
+***************
+*** 261,268 **** mdb_sem_wait(sem_t *sem)
+--- 261,272 ----
+   *	if fdatasync() is not supported.
+   */
+  #ifndef MDB_FDATASYNC
++ #if defined(sun)
++ # define MDB_FDATASYNC  fsync
++ #else
+  # define MDB_FDATASYNC	fdatasync
+  #endif
++ #endif
+  
+  #ifndef MDB_MSYNC
+  # define MDB_MSYNC(addr,len,flags)	msync(addr,len,flags)

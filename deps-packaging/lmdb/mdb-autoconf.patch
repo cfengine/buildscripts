@@ -1,49 +1,47 @@
-diff --git a/libraries/liblmdb/Makefile.am b/libraries/liblmdb/Makefile.am
-new file mode 100644
-index 0000000..d3a4a4c
---- /dev/null
-+++ b/libraries/liblmdb/Makefile.am
-@@ -0,0 +1,11 @@
-+lib_LTLIBRARIES = liblmdb.la
-+liblmdb_la_SOURCES = mdb.c midl.c
-+liblmdb_la_LDFLAGS=-no-undefined -avoid-version
-+
-+bin_PROGRAMS = mdb_stat mdb_copy lmdump lmmgr
-+mdb_stat_LDADD = liblmdb.la
-+mdb_copy_LDADD = liblmdb.la
-+lmdump_LDADD = liblmdb.la
-+lmmgr_LDADD = liblmdb.la
-+
-+include_HEADERS = lmdb.h
-diff --git a/libraries/liblmdb/configure.ac b/libraries/liblmdb/configure.ac
-new file mode 100644
-index 0000000..d90e002
---- /dev/null
-+++ b/libraries/liblmdb/configure.ac
-@@ -0,0 +1,26 @@
-+AC_INIT([hello], [1.0]) # good
-+AM_INIT_AUTOMAKE([foreign])
-+
-+AC_PROG_CC
-+
-+# Use either new LT_INIT or old AC_DISABLE_STATIC/AC_PROG_LIBTOOL macros
-+m4_ifdef([LT_INIT],
-+  [LT_INIT([disable-static])],
-+  [AC_DISABLE_STATIC
-+   AC_PROG_LIBTOOL])
-+
-+AC_ARG_WITH([pthread], [Path to pthread])
-+AS_IF([test -n "$with_pthread"],
-+    [LDFLAGS+=" -L$with_pthread/lib"]
-+)
-+AC_CHECK_LIB([pthread], [pthread_mutex_lock])
-+AC_CHECK_LIB([pthreadGC2], [pthread_mutex_lock])
-+AS_IF([test "$ac_cv_lib_pthread" = "no" && test "$ac_cv_lib_pthreadGC2" = "no"],
-+[
-+  AC_MSG_ERROR([Could not find pthreads library])
-+])
-+AC_CHECK_FUNCS([pthread_mutexattr_settype pthread_mutexattr_setrobust])
-+
-+AC_CONFIG_SRCDIR([mdb.c])
-+AC_CONFIG_FILES([Makefile])
-+AC_OUTPUT
+*** /dev/null
+--- b/libraries/liblmdb/Makefile.am
+***************
+*** 0 ****
+--- 1,11 ----
++ lib_LTLIBRARIES = liblmdb.la
++ liblmdb_la_SOURCES = mdb.c midl.c
++ liblmdb_la_LDFLAGS=-no-undefined -avoid-version
++ 
++ bin_PROGRAMS = mdb_stat mdb_copy lmdump lmmgr
++ mdb_stat_LDADD = liblmdb.la
++ mdb_copy_LDADD = liblmdb.la
++ lmdump_LDADD = liblmdb.la
++ lmmgr_LDADD = liblmdb.la
++ 
++ include_HEADERS = lmdb.h
+*** /dev/null
+--- b/libraries/liblmdb/configure.ac
+***************
+*** 0 ****
+--- 1,26 ----
++ AC_INIT([hello], [1.0]) # good
++ AM_INIT_AUTOMAKE([foreign])
++ 
++ AC_PROG_CC
++ 
++ # Use either new LT_INIT or old AC_DISABLE_STATIC/AC_PROG_LIBTOOL macros
++ m4_ifdef([LT_INIT],
++   [LT_INIT([disable-static])],
++   [AC_DISABLE_STATIC
++    AC_PROG_LIBTOOL])
++ 
++ AC_ARG_WITH([pthread], [Path to pthread])
++ AS_IF([test -n "$with_pthread"],
++     [LDFLAGS+=" -L$with_pthread/lib"]
++ )
++ AC_CHECK_LIB([pthread], [pthread_mutex_lock])
++ AC_CHECK_LIB([pthreadGC2], [pthread_mutex_lock])
++ AS_IF([test "$ac_cv_lib_pthread" = "no" && test "$ac_cv_lib_pthreadGC2" = "no"],
++ [
++   AC_MSG_ERROR([Could not find pthreads library])
++ ])
++ AC_CHECK_FUNCS([pthread_mutexattr_settype pthread_mutexattr_setrobust])
++ 
++ AC_CONFIG_SRCDIR([mdb.c])
++ AC_CONFIG_FILES([Makefile])
++ AC_OUTPUT
