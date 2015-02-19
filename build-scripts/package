@@ -146,11 +146,7 @@ case "$PACKAGING" in
       (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
     done
 
-    $RPMBUILD_CMD -bb \
-      --define="_topdir $BASEDIR/$PKG" \
-      --define="buildprefix $BUILDPREFIX" \
-      --define="_basedir $BASEDIR" \
-      $RPMBUILD_OPTIONS $SPEC
+    $RPMBUILD_CMD -bb --define="_topdir $BASEDIR/$PKG" --define="buildprefix $BUILDPREFIX" --define="_basedir $BASEDIR" ${RPMBUILD_OPTIONS:+"${RPMBUILD_OPTIONS}"} $SPEC
     ;;
   deb)
     if [ "$BUILDPREFIX" = "/opt/cfengine" ]
@@ -346,12 +342,8 @@ case "$PACKAGING" in
       (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
     done
 
-    $RPMBUILD_CMD -bb \
-      --define="_topdir $BASEDIR/$PKG" \
-      --define="buildprefix $BUILDPREFIX" \
-      --define="_basedir $BASEDIR" \
-      $RPMBUILD_OPTIONS $SPEC
-
+    $RPMBUILD_CMD -bb --define="_topdir $BASEDIR/$PKG" --define="buildprefix $BUILDPREFIX" --define="_basedir $BASEDIR" ${RPMBUILD_OPTIONS:+"${RPMBUILD_OPTIONS}"} $SPEC
+    
     #create bff packages
     chmod +x $P/$PKG.bff.sh
     $P/$PKG.bff.sh $RPM_VERSION $BASEDIR
