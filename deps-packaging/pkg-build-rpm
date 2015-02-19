@@ -78,9 +78,9 @@ fi
 
 case "$TESTS" in
   no)
-    RPMBUILD_OPTIONS=--define="with_testsuite 0";;
+    RPMBUILD_OPTIONS="--define='with_testsuite 0'";;
   yes)
-    RPMBUILD_OPTIONS=--define="with_testsuite 1";;
+    RPMBUILD_OPTIONS="--define='with_testsuite 1'";;
   *)
     fatal "Unknown tests option: $TESTS";;
 esac
@@ -103,10 +103,13 @@ case "$DEBUGSYM" in
     fatal "Unknown debugsym option: $DEBUGSYM";;
 esac
 
-$RPMBUILD_CMD -bb \
-  --define="_topdir $BASEDIR/$PKGNAME" \
-  --define="version $VERSION" \
-  --define="buildprefix $BUILDPREFIX" \
-  --define="make $MAKE" \
-  "$RPMBUILD_OPTIONS" \
-  $SPEC
+# eval and double quoting is needed to separate args,
+# example cmd --define='a b':
+#     - argv[1] = --define
+#     - argv[2] = a b
+eval $RPMBUILD_CMD -bb \
+  --define="'_topdir $BASEDIR/$PKGNAME'" \
+  --define="'version $VERSION'" \
+  --define="'buildprefix $BUILDPREFIX'" \
+  --define="'make $MAKE'" \
+  $RPMBUILD_OPTIONS $SPEC
