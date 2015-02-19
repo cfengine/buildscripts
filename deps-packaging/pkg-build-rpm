@@ -87,18 +87,18 @@ esac
 
 case "$OPTIMIZE" in
   no)
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define='with_optimize 0'";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_optimize 0";;
   yes)
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define='with_optimize 1'";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_optimize 1";;
   *)
     fatal "Unknown optimize option: $OPTIMIZE";;
 esac
 
 case "$DEBUGSYM" in
   yes)
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define='with_debugsym 1'";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_debugsym 1";;
   no)
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define='with_debugsym 0'";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS "--define="with_debugsym 0";;
   *)
     fatal "Unknown debugsym option: $DEBUGSYM";;
 esac
