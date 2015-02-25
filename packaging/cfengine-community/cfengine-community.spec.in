@@ -15,8 +15,7 @@ Requires: coreutils gzip
 AutoReqProv: no
 
 Source0: sysconfig
-Source1: initscript
-Source2: profile.sh
+Source1: profile.sh
 
 %if %{?with_debugsym}%{!?with_debugsym:0}
 %define debug_package {nil}
@@ -42,7 +41,7 @@ mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
 cp $RPM_SOURCE_DIR/sysconfig $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
-cp $RPM_SOURCE_DIR/initscript $RPM_BUILD_ROOT/etc/init.d/cfengine3
+cp $RPM_SOURCE_DIR/../common/cfengine-non-hub/initscript $RPM_BUILD_ROOT/etc/init.d/cfengine3
 
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 cp $RPM_SOURCE_DIR/profile.sh $RPM_BUILD_ROOT/etc/profile.d/cfengine3.sh

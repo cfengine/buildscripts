@@ -26,12 +26,14 @@
 CFEXECD=/var/cfengine/bin/cf-execd
 CFSERVD=/var/cfengine/bin/cf-serverd
 CFMOND=/var/cfengine/bin/cf-monitord
+CFENTERPRISE_INITD=/var/cfengine/bin/cfengine3-nova-hub-init-d.sh
 
 ECHO=/bin/echo
 TOUCH=/bin/touch
 RM=/bin/rm
 KILL=/bin/kill
 PKILL=/usr/bin/pkill
+MV=/bin/mv
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin:/var/cfengine/bin
 
@@ -65,12 +67,17 @@ if [ -f /etc/debian_version ] && [ -f /usr/bin/apt-get ]; then
     fi
 fi
 
+if [ -z "$LOCKDIR" ]; then
+    LOCKDIR=/var/lock
+fi
+
 # default control file
 if [ "$DEBIAN" = "1" ]; then
     DEFAULT=/etc/default/cfengine3
 else
     DEFAULT=/etc/sysconfig/cfengine3
 fi
+
 if [ -f $DEFAULT ]; then
     . $DEFAULT
 else
@@ -111,10 +118,23 @@ cfmonitord_status=`ps waxu|grep -v grep|grep cf-monitord|awk -F' ' '{print $2}'`
 
 ##### end: Defined variables and conditions #####
 
+##### Source enterprise script, if present #####
+
+if [ -f "$CFENTERPRISE_INITD" ]; then
+    CALLED_FROM_INITSCRIPT="1" . "$CFENTERPRISE_INITD"
+else
+    alias enterprise_start=true
+    alias enterprise_stop=true
+    alias enterprise_status=true
+fi
+
 ### start scripting here ###
 
 case "$1" in
     start)
+        # Start Enterprise services.
+        enterprise_start
+
         if ! [ -f /var/cfengine/inputs/promises.cf ]; then
             exit 0
         fi
@@ -399,9 +419,16 @@ case "$1" in
                 $ECHO
             fi
         fi
+
+        # Stop Enterprise services.
+        enterprise_stop
+
         exit 0
         ;;
     status)
+        # Status Enterprise services.
+        enterprise_status
+
         # status cf-execd
         # Redhat/Centos/Fedora
         if [ "$REDHAT" = "1" ] && [ "$FUNC" = "1" ]; then
@@ -492,8 +519,7 @@ case "$1" in
         $0 start
         ;;
     *)
-        N=/etc/init.d/cfengine3
-        echo "Usage: $N {start|stop|status|restart|reload|force-reload}" >&2
+        echo "Usage: $0 {start|stop|status|restart|reload|force-reload}" >&2
         exit 1
         ;;
 esac

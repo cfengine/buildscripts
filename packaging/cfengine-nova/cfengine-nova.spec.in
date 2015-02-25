@@ -32,7 +32,7 @@ cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
 #Copy the modified init.d script according to the working directory
-cp %{_basedir}/enterprise/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
+cp %{_basedir}/buildscripts/packaging/common/cfengine-non-hub/initscript $RPM_BUILD_ROOT/etc/init.d/cfengine3
 
 
 # Remove useless stuff

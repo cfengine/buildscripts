@@ -29,7 +29,7 @@ install: build
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl
 
 	mkdir -p $(CURDIR)/debian/tmp/etc/init.d
-	cp -a $(CURDIR)/initscript $(CURDIR)/debian/tmp/etc/init.d/cfengine3
+	cp -a $(CURDIR)/../common/cfengine-non-hub/initscript $(CURDIR)/debian/tmp/etc/init.d/cfengine3
 	chmod 755 $(CURDIR)/debian/tmp/etc/init.d/cfengine3
 
 	mkdir -p $(CURDIR)/debian/tmp/etc/default

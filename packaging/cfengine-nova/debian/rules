@@ -42,7 +42,7 @@ install: build
 # Debian is different
 
 	mv $(CURDIR)/debian/tmp/etc/sysconfig $(CURDIR)/debian/tmp/etc/default
-	cp $(BASEDIR)/enterprise/misc/init.d/cfengine3 $(CURDIR)/debian/tmp/etc/init.d/cfengine3
+	cp $(BASEDIR)/buildscripts/packaging/common/cfengine-non-hub/initscript $(CURDIR)/debian/tmp/etc/init.d/cfengine3
 
 binary-indep: build install
 
