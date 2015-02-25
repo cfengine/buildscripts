@@ -10,3 +10,13 @@ if [ -f "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.txt" ]; then
     fi
   ) >> "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.log"
 fi
+
+is_community()
+{
+  test "$PROJECT_TYPE" = "cfengine-community"
+}
+
+is_nova()
+{
+  test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
+}

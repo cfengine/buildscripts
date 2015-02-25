@@ -76,11 +76,32 @@ esac
 # Generate a host key
 #
 if [ ! -f $PREFIX/ppkeys/localhost.priv ]; then
-    $PREFIX/bin/cf-key >/dev/null || :
+  $PREFIX/bin/cf-key >/dev/null || :
+fi
+
+if is_community; then
+  #
+  # Copy the stock policy for the new installations
+  #
+  if ! [ -f /var/cfengine/masterfiles/promises.cf ]; then
+    /bin/cp -R /var/cfengine/share/CoreBase/masterfiles /var/cfengine
+    #
+    # Create promises_validated
+    #
+    /var/cfengine/bin/cf-promises -T /var/cfengine/masterfiles
+  fi
+fi
+
+#
+# Create a plugins directory if it doesnot exist
+#
+if ! [ -d $PREFIX/plugins ]; then
+  mkdir -p $PREFIX/plugins
+  chmod 700 $PREFIX/plugins
 fi
 
 if [ -f $PREFIX/bin/cf-twin ]; then
-    rm -f $PREFIX/bin/cf-twin
+  rm -f $PREFIX/bin/cf-twin
 fi
 
 cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
@@ -102,9 +123,6 @@ do
   esac
 done
 
-# start CFE3 processes on only client hosts (not HUB)
-if [ -f /var/cfengine/policy_server.dat -a ! -f /var/cfengine/masterfiles/promises.cf ]; then
-  platform_service cfengine3 start
-fi
+platform_service cfengine3 start
 
 exit 0

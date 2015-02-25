@@ -1,7 +1,21 @@
-#!/bin/sh
-
-#PREFIX
-PREFIX=/var/cfengine
+if [ "`package_type`" = "rpm" ]; then
+  #
+  # Work around bug in CFEngine <= 3.6.1: The %preun script stops the services,
+  # but it shouldn't when we upgrade. Later versions are fixed, but it's the *old*
+  # %preun script that gets called when we upgrade, so we have to work around it
+  # by using the %posttrans script, which is the only script from the new package
+  # that is called after %preun. Unfortunately it doesn't tell you whether or not
+  # you're upgrading, so we need to remember it by using the file below.
+  #
+  # This section can be removed completely when we no longer support upgrading
+  # from the 3.6 series.
+  #
+  if is_upgrade; then
+    if $PREFIX/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]|6\.[01])' > /dev/null; then
+      ( echo "Upgraded from:"; $PREFIX/bin/cf-agent -V ) > $PREFIX/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
+    fi
+  fi
+fi
 
 #
 # Before starting the installation process we need to check that
@@ -17,12 +31,17 @@ then
   exit 1
 fi
 
-# 
+#stop the remaining services on upgrade
+if is_upgrade; then
+  platform_service cfengine3 stop
+fi
+
+#
 # We check if there is a server listening on port 80 or port 443.
 # If one is found, then we try to shut it down by calling
-# %{prefix}/httpd/bin/apachectl stop
+# $PREFIX/httpd/bin/apachectl stop
 # If that does not work, we abort the installation.
-# 
+#
 HTTPD_RUNNING=`netstat -natp | grep -E "(:80\s|:443\s).*LISTEN"`
 if [ ! -z "$HTTPD_RUNNING" ];
 then
@@ -132,4 +151,3 @@ if [ -f $PREFIX/share/GUI/application/config/appsettings.php ]; then
 fi
 
 exit 0
-
