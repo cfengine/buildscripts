@@ -36,13 +36,22 @@ if is_upgrade; then
   platform_service cfengine3 stop
 fi
 
+filter_netstat_listen()
+{
+  if [ -x /usr/sbin/ss ]; then
+    ss -natp | egrep "LISTEN.*($1)"
+  else
+    netstat -natp | egrep "($1).*LISTEN"
+  fi
+}
+
 #
 # We check if there is a server listening on port 80 or port 443.
 # If one is found, then we try to shut it down by calling
 # $PREFIX/httpd/bin/apachectl stop
 # If that does not work, we abort the installation.
 #
-HTTPD_RUNNING=`netstat -natp | grep -E "(:80\s|:443\s).*LISTEN"`
+HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
 if [ ! -z "$HTTPD_RUNNING" ];
 then
   echo "There seems to be a server listening on either port 80 or 443"
@@ -51,7 +60,7 @@ then
   then
     echo "Trying to shut down the process using apachectl from CFEngine Enterprise"
     $PREFIX/httpd/bin/apachectl stop
-    HTTPD_RUNNING=`netstat -natp | grep -E "(:80\s|:443\s).*LISTEN"`
+    HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
     if [ ! -z "$HTTPD_RUNNING" ];
     then
       echo "Could not shutdown the process, aborting the installation"
@@ -69,7 +78,7 @@ fi
 #
 # We check if there is a postgres db server running already
 #
-PSQL_RUNNING=`netstat -natp | grep -E "(:5432\s).*LISTEN"`
+PSQL_RUNNING=`filter_netstat_listen ":5432\s"`
 if [ ! -z "$PSQL_RUNNING" ];
 then
   echo "There seems to be a server listening on port 5432"
@@ -101,7 +110,7 @@ then
     echo "Please make sure that the process is not running before attempting the installation again."
     exit 1
   fi
-  PSQL_FINAL_CHECK=`netstat -natp | grep -E "(:5432\s).*LISTEN"`
+  PSQL_FINAL_CHECK=`filter_netstat_listen ":5432\s"`
   if [ ! -z "$PSQL_FINAL_CHECK" ];
   then
     echo "There is still a process listening on 5432, please kill it before retrying the installation. Aborting."
