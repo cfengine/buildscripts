@@ -1,35 +1,6 @@
 case `os_type` in
   redhat)
     #
-    # systemd support, if there is systemctl, then prepare unit file.
-    #
-    if test -x /usr/bin/systemctl; then
-      if [ ! -d /usr/lib/systemd/scripts ]; then
-        mkdir -p /usr/lib/systemd/scripts
-      fi
-      if [ ! -f /usr/lib/systemd/scripts/cfengine3 ]; then
-        cp -f /etc/init.d/cfengine3 /usr/lib/systemd/scripts
-        chmod 0755 /usr/lib/systemd/scripts/cfengine3
-      fi
-      if [ ! -f /usr/lib/systemd/system/cfengine3.service ]; then
-        cat > /usr/lib/systemd/system/cfengine3.service << EOF
-[Unit]
-Description=CFEngine 3 deamons
- 
-[Service]
-Type=oneshot
-EnvironmentFile=/etc/sysconfig/cfengine3
-ExecStart=/usr/lib/systemd/scripts/cfengine3 start
-ExecStop=/usr/lib/systemd/scripts/cfengine3 stop
-RemainAfterExit=yes
- 
-[Install]
-WantedBy=multi-user.target
-EOF
-      fi
-    fi
-
-    #
     # Register CFEngine initscript, if not yet.
     #
     if ! is_upgrade; then

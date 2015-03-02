@@ -42,6 +42,8 @@ cp $RPM_SOURCE_DIR/sysconfig $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
 
 mkdir -p $RPM_BUILD_ROOT/etc/init.d
 cp $RPM_SOURCE_DIR/../common/cfengine-non-hub/initscript $RPM_BUILD_ROOT/etc/init.d/cfengine3
+mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
+cp %{_basedir}/core/contrib/systemd/cfengine3.service $RPM_BUILD_ROOT/usr/lib/systemd/system
 
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 cp $RPM_SOURCE_DIR/profile.sh $RPM_BUILD_ROOT/etc/profile.d/cfengine3.sh
@@ -98,6 +100,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/init.d/cfengine3
 %attr(644,root,root) /etc/sysconfig/cfengine3
 %attr(644,root,root) /etc/profile.d/cfengine3.sh
+/usr/lib/systemd/system/cfengine3.service
 
 # Documentation
 %defattr(744,root,root)

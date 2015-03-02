@@ -35,8 +35,12 @@ cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
 #Copy the modified init.d script according to the working directory
+mkdir -p $RPM_BUILD_ROOT/etc/init.d
 cp %{_basedir}/buildscripts/packaging/common/cfengine-non-hub/initscript $RPM_BUILD_ROOT/etc/init.d/cfengine3
 cp %{_basedir}/enterprise/misc/cfengine3-nova-hub-init-d.sh $RPM_BUILD_ROOT%{prefix}/bin/cfengine3-nova-hub-init-d.sh
+mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
+cp %{_basedir}/core/contrib/systemd/cfengine3.service $RPM_BUILD_ROOT/usr/lib/systemd/system
+cp %{_basedir}/enterprise/misc/systemd/cfengine3-web.service $RPM_BUILD_ROOT/usr/lib/systemd/system
 
 # Remove useless stuff
 
@@ -250,6 +254,8 @@ exit 0
 /etc/init.d/cfengine3
 /etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
+/usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cfengine3-web.service
 
 # Documentation
 %defattr(644,root,root,755)

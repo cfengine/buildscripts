@@ -8,7 +8,7 @@ case `os_type` in
     chkconfig --del cfengine3
 
     #
-    # systemd support
+    # old systemd support (pre 3.6.5)
     #
     test -x /usr/bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
     if [ -f /usr/lib/systemd/scripts/cfengine3 ]; then

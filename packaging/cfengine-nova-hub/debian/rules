@@ -40,6 +40,9 @@ install: build
 	mv $(CURDIR)/debian/tmp/etc/sysconfig $(CURDIR)/debian/tmp/etc/default
 	cp $(BASEDIR)/buildscripts/packaging/common/cfengine-non-hub/initscript $(CURDIR)/debian/tmp/etc/init.d/cfengine3
 	cp $(BASEDIR)/enterprise/misc/cfengine3-nova-hub-init-d.sh $(CURDIR)/debian/tmp$(PREFIX)/bin/cfengine3-nova-hub-init-d.sh
+	mkdir -p $(CURDIR)/debian/tmp/usr/lib/systemd/system
+	cp $(BASEDIR)/core/contrib/systemd/cfengine3.service $(CURDIR)/debian/tmp/usr/lib/systemd/system
+	cp $(BASEDIR)/enterprise/misc/systemd/cfengine3-web.service $(CURDIR)/debian/tmp/usr/lib/systemd/system
 
 # GUI, REST, KB
 	cp -R $(BASEDIR)/mission-portal $(CURDIR)/debian/tmp$(PREFIX)/share/GUI
