@@ -1,0 +1,22 @@
+#!/bin/sh
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+set -x
+
+
+cd core
+make dist
+cd ..
+
+cd masterfiles
+make dist
+cd ..
+
+
+# Copy to the directory that's being uploaded to buildcache
+
+mkdir -p "$OUTDIR"
+cp core/*.tar.gz masterfiles/*.tar.gz "$OUTDIR"
+rm core/*.tar.gz masterfiles/*.tar.gz
