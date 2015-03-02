@@ -31,12 +31,6 @@ mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
-#Copy the modified init.d script according to the working directory
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
-cp %{_basedir}/buildscripts/packaging/common/cfengine-non-hub/initscript $RPM_BUILD_ROOT/etc/init.d/cfengine3
-mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
-cp %{_basedir}/core/contrib/systemd/cfengine3.service $RPM_BUILD_ROOT/usr/lib/systemd/system
-
 
 # Remove useless stuff
 

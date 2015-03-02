@@ -49,26 +49,6 @@ fi
 
 P="$BASEDIR/buildscripts/packaging/$PKG"
 
-#ensure that the initd scripts contaings the right path to executables
-escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
-if [ "$PROJECT" = "nova" ];
-then
-initdFile=$BASEDIR/enterprise/misc/cfengine3-nova-hub-init-d.sh
-case "$PACKAGING" in
-  solaris)
-  sed "s/\/var\/cfengine/$escapedPrefix/g" $initdFile > $initdFile.new && mv $initdFile.new $initdFile
-  ;;
-  hpux)
-  ;; 
-  lpp)
-  sed  "s/\/var\/cfengine/$escapedPrefix/g"  $initdFile
-  ;;
-  *)
-  sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $initdFile
-   ;;
-esac
-fi
-
 case "$VERSION" in
   *~*)
     MAIN_VERSION=${VERSION%\~*}
