@@ -8,15 +8,9 @@ case `os_type` in
     chkconfig --del cfengine3
 
     #
-    # old systemd support (pre 3.6.5)
+    # systemd support
     #
     test -x /usr/bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
-    if [ -f /usr/lib/systemd/scripts/cfengine3 ]; then
-      rm -f /usr/lib/systemd/scripts/cfengine3
-    fi
-    if [ -f /usr/lib/systemd/system/cfengine3.service ]; then
-      rm -f /usr/lib/systemd/system/cfengine3.service
-    fi
 
     #
     # Clean lock files created by initscript, if any
