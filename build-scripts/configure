@@ -93,6 +93,15 @@ case "$ROLE" in
     exit 42;;
 esac
 
+case "$WITH_SYSTEMD" in
+  yes)
+    ARGS="$ARGS --with-systemd-service";;
+  no)
+    ARGS="$ARGS --without-systemd-service";;
+esac
+
+ARGS="$ARGS --with-init-script"
+
 case "$BUILD_TYPE" in
 
   RELEASE)
