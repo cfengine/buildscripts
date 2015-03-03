@@ -371,13 +371,19 @@ unixsocketperm 755
 bind 127.0.0.1
 EOF
 
+##
+# Start Apache server
 #
+$PREFIX/httpd/bin/apachectl start
+
 #Mission portal
 #
 CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
 
-# Shut down postgres again, because we may need it to start through systemd later.
+# Shut down Apache and Postgres again, because we may need them to start through
+# systemd later.
+$PREFIX/httpd/bin/apachectl stop
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart")
 
 #
