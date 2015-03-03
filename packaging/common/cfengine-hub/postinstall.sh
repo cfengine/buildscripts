@@ -395,14 +395,18 @@ rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
 # Register CFEngine initscript, if not yet.
 #
 if ! is_upgrade; then
-  case "`os_type`" in
-    redhat)
-      chkconfig --add cfengine3
-      ;;
-    debian)
-      update-rc.d cfengine3 defaults
-      ;;
-  esac
+  if [ -x /usr/bin/systemctl ]; then
+    /usr/bin/systemctl enable cfengine3 > /dev/null 2>&1
+  else
+    case "`os_type`" in
+      redhat)
+        chkconfig --add cfengine3
+        ;;
+      debian)
+        update-rc.d cfengine3 defaults
+        ;;
+    esac
+  fi
 fi
 
 platform_service cfengine3 start

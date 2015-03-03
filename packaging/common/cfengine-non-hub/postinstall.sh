@@ -1,48 +1,3 @@
-case `os_type` in
-  redhat)
-    #
-    # Register CFEngine initscript, if not yet.
-    #
-    if ! is_upgrade; then
-      chkconfig --add cfengine3
-    fi
-    if [ -f /usr/lib/systemd/system/cfengine3.service ]; then
-      test -x /usr/bin/systemctl && systemctl enable cfengine3 > /dev/null 2>&1
-    fi
-    ;;
-
-  debian)
-    #
-    # Register CFEngine initscript, if not yet.
-    #
-    if [ -x /etc/init.d/cfengine3 ]; then
-      update-rc.d cfengine3 defaults
-    fi
-    ;;
-
-  solaris|hpux)
-    if [ -f `rc_d_path`/init.d/cfengine3 ];then
-      for link in `rc_d_path`/rc3.d/`rc_start_level`cfengine3 \
-                  `rc_d_path`/rc0.d/`rc_kill_level`cfengine3 \
-                  `rc_d_path`/rc1.d/`rc_kill_level`cfengine3 \
-                  `rc_d_path`/rc2.d/`rc_kill_level`cfengine3 \
-                  `rc_d_path`/rcS.d/`rc_kill_level`cfengine3; do
-        if [ ! -h $link ]; then
-          /usr/bin/ln -s `rc_d_path`/init.d/cfengine3 $link
-        fi
-      done
-    fi
-    ;;
-
-  aix)
-    if [ -x /etc/rc.d/init.d/cfengine3 ];then
-      for link in /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3; do
-        /usr/bin/ln -fs /etc/rc.d/init.d/cfengine3 $link
-      done
-    fi
-    ;;
-esac
-
 #
 # Generate a host key
 #
@@ -93,6 +48,52 @@ do
       ;;
   esac
 done
+
+case `os_type` in
+  redhat|debian)
+    #
+    # Register CFEngine initscript, if not yet.
+    #
+    if [ -x /usr/bin/systemctl ]; then
+      /usr/bin/systemctl enable cfengine3 > /dev/null 2>&1
+    else
+      case `os_type` in
+        redhat)
+          if ! is_upgrade; then
+            chkconfig --add cfengine3
+          fi
+          ;;
+        debian)
+          if [ -x /etc/init.d/cfengine3 ]; then
+            update-rc.d cfengine3 defaults
+          fi
+          ;;
+      esac
+    fi
+    ;;
+
+  solaris|hpux)
+    if [ -f `rc_d_path`/init.d/cfengine3 ];then
+      for link in `rc_d_path`/rc3.d/`rc_start_level`cfengine3 \
+                  `rc_d_path`/rc0.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rc1.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rc2.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rcS.d/`rc_kill_level`cfengine3; do
+        if [ ! -h $link ]; then
+          /usr/bin/ln -s `rc_d_path`/init.d/cfengine3 $link
+        fi
+      done
+    fi
+    ;;
+
+  aix)
+    if [ -x /etc/rc.d/init.d/cfengine3 ];then
+      for link in /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3; do
+        /usr/bin/ln -fs /etc/rc.d/init.d/cfengine3 $link
+      done
+    fi
+    ;;
+esac
 
 platform_service cfengine3 start
 
