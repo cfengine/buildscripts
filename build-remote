@@ -6,19 +6,44 @@ set -e
 
 usage() {
   echo
-  echo "Usage: build-remote [--wix-machine=<user@host>]"
-  echo "                    [--cross-target=<target>]"
-  echo "                    [--project=<project>]"
-  echo "                    [--branch=<branch>]"
-  echo "                    [--source=<url>]"
-  echo "                    [--role=<hub|agent>]"
-  echo "                    [--version=<version string>]"
-  echo "                    [--test-machine=chroot]"
-  echo "                    [--no-tests]"
-  echo "                    [--workdir=/opt/cfengine]"
-  echo "                    [--release|--debug|--docs|--release-and-debug]"
-  echo "                    [-v|--verbose]"
-  echo "                    <user@host>"
+  echo "Usage: build-remote [options] <user@host>"
+  echo
+  echo "Options:"
+  echo "-w <user@host>, --wix-machine=<user@host>"
+  echo "        Windows machine used to build WIX installer."
+  echo "-c <target>, --cross-target=<target>"
+  echo "        Target to compile CFEngine for."
+  echo "-p, <project>, --project=<project>"
+  echo "        Project to compile (community/nova)."
+  echo "-b <branch>, --branch=<branch>"
+  echo "        Which branch to use from each repository."
+  echo "--source=<url>"
+  echo "        Where the git repositories are located. Default is github, but you can"
+  echo "        specify a local path."
+  echo "--role=<hub|agent>"
+  echo "        Either agent or hub."
+  echo "--version=<version string>"
+  echo "        Which version string will appear in the binary and in package names."
+  echo "-t chroot, --test-machine=chroot"
+  echo "        Which machine to use for unsafe tests. Currently chroot inside the"
+  echo "        current machine is the only supported option."
+  echo "--test-shell"
+  echo "        Instead of running the tests, will drop you directly into a shell"
+  echo "        inside the test environment. You can also trigger this specifically"
+  echo "        for the build-scripts/test script by passing TEST_SHELL=1 in the"
+  echo "        environment. The recipe"
+  echo "          TEST_MACHINE=chroot TEST_SHELL=1 build-scripts/test"
+  echo "        is a particularly useful combo on a build host. Note that the build"
+  echo "        will not continue afterwards."
+  echo "--no-tests"
+  echo "        Do not run tests."
+  echo "-d /var/cfengine, --workdir=/var/cfengine"
+  echo "        Specify directory which will be CFEngine's workdir. Does not work for"
+  echo "        Windows binaries."
+  echo "--release|--debug|--docs|--release-and-debug"
+  echo "        With or without debug symbols."
+  echo "-v, --verbose"
+  echo "        Whether or not to echo the log as the build progresses."
   echo
   echo "Project defaults to 'nova'"
   echo "Branch defaults to 'master', specify --branch=cp if you just want to do simple rsync from the source directories"
@@ -34,7 +59,7 @@ usage() {
 }
 
 opts() {
-  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,release,debug,docs,help,test-machine:,no-tests -n build-remote -- "$@"`
+  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,release,debug,docs,help,test-machine:,test-shell,no-tests -n build-remote -- "$@"`
 
   eval set -- "$OPTS"
   echo "$?"
@@ -108,6 +133,9 @@ opts() {
             ;;
         esac
         shift 2;;
+      --test-shell)
+        TEST_SHELL=1
+        shift;;
       --no-tests)
         NO_TESTS=1
         shift;;
@@ -128,7 +156,7 @@ opts() {
   REPOSITORY=$PROJECT-$BRANCH
   HOST=$1
 
-  export PROJECT BRANCH WIX_MACHINE CROSS_TARGET HOST BUILD_TYPE BUILD_NUMBER DOCS EXPLICIT_ROLE EXPLICIT_VERSION TEST_MACHINE PREFIX
+  export PROJECT BRANCH WIX_MACHINE CROSS_TARGET HOST BUILD_TYPE BUILD_NUMBER DOCS EXPLICIT_ROLE EXPLICIT_VERSION TEST_MACHINE TEST_SHELL PREFIX
 
   export SCHEDULER=$PROJECT-$BRANCH-localbuild
 }
