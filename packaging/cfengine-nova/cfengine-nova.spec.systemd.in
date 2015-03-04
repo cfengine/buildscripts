@@ -1,0 +1,666 @@
+%define prefix %{buildprefix}
+
+Summary: The CFEngine Configuration System
+Name: cfengine-nova
+Version: @@VERSION@@
+Release: @@RELEASE@@
+Vendor: CFEngine AS
+License: COSL
+Group: Applications/System
+URL: http://cfengine.com/
+BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
+Obsoletes: cfengine3, cfengine-community
+Requires: coreutils gzip
+
+AutoReqProv: no
+
+%if %{?with_debugsym}%{!?with_debugsym:0}
+%define debug_package {nil}
+%endif
+
+%description
+CFEngine is the standalone, open-source datacenter management platform run by
+leading enterprises since 1993. Customize your IT systems, align to network,
+business and regulatory needs, monitor problems, automatically repair and
+maintain systems.
+
+%install
+rm -rf $RPM_BUILD_ROOT
+
+mkdir -p $RPM_BUILD_ROOT%{prefix}
+cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
+cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
+
+#Copy the modified init.d script according to the working directory
+cp %{_basedir}/core/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
+mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
+cp %{_basedir}/core/misc/systemd/cfengine3.service $RPM_BUILD_ROOT/usr/lib/systemd/system/cfengine3.service
+
+
+# Remove useless stuff
+
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
+rm -rf $RPM_BUILD_ROOT%{prefix}/share/CoreBase
+rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
+rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
+rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
+
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%pre
+#!/bin/sh
+
+PREFIX=%prefix
+
+package_type()
+{
+  echo rpm
+}
+
+os_type()
+{
+  if [ "`uname`" = "AIX" ]; then
+    echo aix
+  else
+    echo redhat
+  fi
+}
+
+rc_d_path()
+{
+  if [ `os_type` = aix ]; then
+    echo "/etc/rc.d"
+  else
+    echo "/etc"
+  fi
+}
+
+platform_service()
+{
+  if [ -x /usr/bin/systemctl ]; then
+    /usr/bin/systemctl "$2" "$1"
+  else
+    /etc/init.d/"$1" "$2"
+  fi
+}
+
+IS_UPGRADE=0
+
+is_upgrade()
+{
+  test $IS_UPGRADE = 1
+}
+PKG_TYPE=rpm
+SCRIPT_TYPE=preinstall
+PROJECT_TYPE=cfengine-nova
+if [ $1 -gt 1 ]; then
+  IS_UPGRADE=1
+fi
+# Upgrade detection is a mess. It is often difficult to tell, especially from
+# the postinstall script, so we use the package-upgrade.txt file to remember.
+
+case "$PKG_TYPE" in
+  depot|deb|bff)
+    if [ "$SCRIPT_TYPE" = "preinstall" ]; then
+      if native_is_upgrade; then
+        mkdir -p "$PREFIX"
+        echo "File used by CFEngine during package upgrade. Can be safely deleted." > "$PREFIX/package-upgrade.txt"
+      else
+        rm -f "$PREFIX/package-upgrade.txt"
+      fi
+      alias is_upgrade='native_is_upgrade'
+    elif [ "$SCRIPT_TYPE" = "postinstall" ]; then
+      if [ -f "$PREFIX/package-upgrade.txt" ]; then
+        rm -f "$PREFIX/package-upgrade.txt"
+        alias is_upgrade='true'
+      else
+        alias is_upgrade='false'
+      fi
+    fi
+    ;;
+esac
+if [ -f "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.txt" ]; then
+  # Special mode during testing. Dump some info for verification.
+  (
+    echo "new_script----"
+    echo "script_type=$SCRIPT_TYPE"
+    if is_upgrade; then
+      echo "is_upgrade=1"
+    else
+      echo "is_upgrade=0"
+    fi
+  ) >> "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.log"
+fi
+
+is_community()
+{
+  test "$PROJECT_TYPE" = "cfengine-community"
+}
+
+is_nova()
+{
+  test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
+}
+case `os_type` in
+  redhat)
+    #
+    # Work around bug in CFEngine <= 3.6.1: The %preun script stops the
+    # services, but it shouldn't when we upgrade. Later versions are fixed, but
+    # it's the *old* %preun script that gets called when we upgrade, so we have
+    # to work around it by using the %posttrans script, which is the only script
+    # from the new package that is called after %preun. Unfortunately it doesn't
+    # tell you whether or not you're upgrading, so we need to remember it by
+    # using the file below.
+    #
+    # This section can be removed completely when we no longer support upgrading
+    # from the 3.6 series, as well as the posttrans script.
+    #
+    if is_upgrade; then
+      if %{prefix}/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]|6\.[01])' > /dev/null; then
+        ( echo "Upgraded from:"; %{prefix}/bin/cf-agent -V ) > %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
+      fi
+    fi
+    ;;
+esac
+
+case `os_type` in
+  debian)
+    if [ -x /etc/init.d/cfengine3 ]; then
+      /usr/sbin/update-rc.d cfengine3 remove
+    fi
+    ;;
+esac
+
+exit 0
+
+
+%post
+#!/bin/sh
+
+PREFIX=%prefix
+
+package_type()
+{
+  echo rpm
+}
+
+os_type()
+{
+  if [ "`uname`" = "AIX" ]; then
+    echo aix
+  else
+    echo redhat
+  fi
+}
+
+rc_d_path()
+{
+  if [ `os_type` = aix ]; then
+    echo "/etc/rc.d"
+  else
+    echo "/etc"
+  fi
+}
+
+platform_service()
+{
+  if [ -x /usr/bin/systemctl ]; then
+    /usr/bin/systemctl "$2" "$1"
+  else
+    /etc/init.d/"$1" "$2"
+  fi
+}
+
+IS_UPGRADE=0
+
+is_upgrade()
+{
+  test $IS_UPGRADE = 1
+}
+PKG_TYPE=rpm
+SCRIPT_TYPE=postinstall
+PROJECT_TYPE=cfengine-nova
+if [ $1 -gt 1 ]; then
+  IS_UPGRADE=1
+fi
+# Upgrade detection is a mess. It is often difficult to tell, especially from
+# the postinstall script, so we use the package-upgrade.txt file to remember.
+
+case "$PKG_TYPE" in
+  depot|deb|bff)
+    if [ "$SCRIPT_TYPE" = "preinstall" ]; then
+      if native_is_upgrade; then
+        mkdir -p "$PREFIX"
+        echo "File used by CFEngine during package upgrade. Can be safely deleted." > "$PREFIX/package-upgrade.txt"
+      else
+        rm -f "$PREFIX/package-upgrade.txt"
+      fi
+      alias is_upgrade='native_is_upgrade'
+    elif [ "$SCRIPT_TYPE" = "postinstall" ]; then
+      if [ -f "$PREFIX/package-upgrade.txt" ]; then
+        rm -f "$PREFIX/package-upgrade.txt"
+        alias is_upgrade='true'
+      else
+        alias is_upgrade='false'
+      fi
+    fi
+    ;;
+esac
+if [ -f "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.txt" ]; then
+  # Special mode during testing. Dump some info for verification.
+  (
+    echo "new_script----"
+    echo "script_type=$SCRIPT_TYPE"
+    if is_upgrade; then
+      echo "is_upgrade=1"
+    else
+      echo "is_upgrade=0"
+    fi
+  ) >> "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.log"
+fi
+
+is_community()
+{
+  test "$PROJECT_TYPE" = "cfengine-community"
+}
+
+is_nova()
+{
+  test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
+}
+#
+# Generate a host key
+#
+if [ ! -f $PREFIX/ppkeys/localhost.priv ]; then
+  $PREFIX/bin/cf-key >/dev/null || :
+fi
+
+if is_community; then
+  #
+  # Copy the stock policy for the new installations
+  #
+  if ! [ -f /var/cfengine/masterfiles/promises.cf ]; then
+    /bin/cp -R /var/cfengine/share/CoreBase/masterfiles /var/cfengine
+    #
+    # Create promises_validated
+    #
+    /var/cfengine/bin/cf-promises -T /var/cfengine/masterfiles
+  fi
+fi
+
+#
+# Create a plugins directory if it doesnot exist
+#
+if ! [ -d $PREFIX/plugins ]; then
+  mkdir -p $PREFIX/plugins
+  chmod 700 $PREFIX/plugins
+fi
+
+if [ -f $PREFIX/bin/cf-twin ]; then
+  rm -f $PREFIX/bin/cf-twin
+fi
+
+cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
+
+mkdir -p /usr/local/sbin
+for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent;
+do
+  if [ -f $PREFIX/bin/$i ]; then
+    ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
+  fi
+
+  case `os_type` in
+    redhat|debian)
+      if [ -f /usr/share/man/man8/$i.8.gz ]; then
+        rm -f /usr/share/man/man8/$i.8.gz
+      fi
+      $PREFIX/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
+      ;;
+  esac
+done
+
+case `os_type` in
+  redhat|debian)
+    #
+    # Register CFEngine initscript, if not yet.
+    #
+    if [ -x /usr/bin/systemctl ]; then
+      /usr/bin/systemctl enable cfengine3 > /dev/null 2>&1
+    else
+      case `os_type` in
+        redhat)
+          if ! is_upgrade; then
+            chkconfig --add cfengine3
+          fi
+          ;;
+        debian)
+          if [ -x /etc/init.d/cfengine3 ]; then
+            update-rc.d cfengine3 defaults
+          fi
+          ;;
+      esac
+    fi
+    ;;
+
+  solaris|hpux)
+    if [ -f `rc_d_path`/init.d/cfengine3 ];then
+      for link in `rc_d_path`/rc3.d/`rc_start_level`cfengine3 \
+                  `rc_d_path`/rc0.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rc1.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rc2.d/`rc_kill_level`cfengine3 \
+                  `rc_d_path`/rcS.d/`rc_kill_level`cfengine3; do
+        if [ ! -h $link ]; then
+          /usr/bin/ln -s `rc_d_path`/init.d/cfengine3 $link
+        fi
+      done
+    fi
+    ;;
+
+  aix)
+    if [ -x /etc/rc.d/init.d/cfengine3 ];then
+      for link in /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3; do
+        /usr/bin/ln -fs /etc/rc.d/init.d/cfengine3 $link
+      done
+    fi
+    ;;
+esac
+
+platform_service cfengine3 start
+
+exit 0
+
+
+%preun
+#!/bin/sh
+
+PREFIX=%prefix
+
+package_type()
+{
+  echo rpm
+}
+
+os_type()
+{
+  if [ "`uname`" = "AIX" ]; then
+    echo aix
+  else
+    echo redhat
+  fi
+}
+
+rc_d_path()
+{
+  if [ `os_type` = aix ]; then
+    echo "/etc/rc.d"
+  else
+    echo "/etc"
+  fi
+}
+
+platform_service()
+{
+  if [ -x /usr/bin/systemctl ]; then
+    /usr/bin/systemctl "$2" "$1"
+  else
+    /etc/init.d/"$1" "$2"
+  fi
+}
+
+IS_UPGRADE=0
+
+is_upgrade()
+{
+  test $IS_UPGRADE = 1
+}
+PKG_TYPE=rpm
+SCRIPT_TYPE=preremove
+PROJECT_TYPE=cfengine-nova
+if [ $1 -gt 0 ]; then
+  IS_UPGRADE=1
+fi
+case "$PKG_TYPE" in
+  depot)
+    alias is_upgrade='false'
+    ;;
+  deb)
+    alias is_upgrade='native_is_upgrade'
+    ;;
+esac
+
+if is_upgrade; then
+  # We want to skip removal scripts on upgrade.
+  exit 0
+fi
+if [ -f "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.txt" ]; then
+  # Special mode during testing. Dump some info for verification.
+  (
+    echo "new_script----"
+    echo "script_type=$SCRIPT_TYPE"
+    if is_upgrade; then
+      echo "is_upgrade=1"
+    else
+      echo "is_upgrade=0"
+    fi
+  ) >> "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.log"
+fi
+
+is_community()
+{
+  test "$PROJECT_TYPE" = "cfengine-community"
+}
+
+is_nova()
+{
+  test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
+}
+platform_service cfengine3 stop
+
+case `os_type` in
+  redhat)
+    #
+    # Unregister CFEngine initscript on uninstallation.
+    #
+    chkconfig --del cfengine3
+
+    #
+    # systemd support
+    #
+    test -x /usr/bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
+
+    #
+    # Clean lock files created by initscript, if any
+    #
+    for i in cf-execd cf-serverd cf-monitord cf-hub; do
+      rm -f /var/lock/$i /var/lock/subsys/$i
+    done
+    ;;
+
+  solaris|hpux)
+    rm -f `rc_d_path`/rc3.d/`rc_start_level`cfengine3 \
+          `rc_d_path`/rc0.d/`rc_kill_level`cfengine3 \
+          `rc_d_path`/rc1.d/`rc_kill_level`cfengine3 \
+          `rc_d_path`/rc2.d/`rc_kill_level`cfengine3 \
+          `rc_d_path`/rcS.d/`rc_kill_level`cfengine3
+    ;;
+
+  aix)
+    /usr/bin/rm -f /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3
+    ;;
+esac
+
+exit 0
+
+
+%postun
+#!/bin/sh
+
+PREFIX=%prefix
+
+package_type()
+{
+  echo rpm
+}
+
+os_type()
+{
+  if [ "`uname`" = "AIX" ]; then
+    echo aix
+  else
+    echo redhat
+  fi
+}
+
+rc_d_path()
+{
+  if [ `os_type` = aix ]; then
+    echo "/etc/rc.d"
+  else
+    echo "/etc"
+  fi
+}
+
+platform_service()
+{
+  if [ -x /usr/bin/systemctl ]; then
+    /usr/bin/systemctl "$2" "$1"
+  else
+    /etc/init.d/"$1" "$2"
+  fi
+}
+
+IS_UPGRADE=0
+
+is_upgrade()
+{
+  test $IS_UPGRADE = 1
+}
+PKG_TYPE=rpm
+SCRIPT_TYPE=postremove
+PROJECT_TYPE=cfengine-nova
+if [ $1 -gt 0 ]; then
+  IS_UPGRADE=1
+fi
+case "$PKG_TYPE" in
+  depot)
+    alias is_upgrade='false'
+    ;;
+  deb)
+    alias is_upgrade='native_is_upgrade'
+    ;;
+esac
+
+if is_upgrade; then
+  # We want to skip removal scripts on upgrade.
+  exit 0
+fi
+if [ -f "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.txt" ]; then
+  # Special mode during testing. Dump some info for verification.
+  (
+    echo "new_script----"
+    echo "script_type=$SCRIPT_TYPE"
+    if is_upgrade; then
+      echo "is_upgrade=1"
+    else
+      echo "is_upgrade=0"
+    fi
+  ) >> "$PREFIX/CFENGINE_TEST_PACKAGE_SCRIPT.log"
+fi
+
+is_community()
+{
+  test "$PROJECT_TYPE" = "cfengine-community"
+}
+
+is_nova()
+{
+  test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
+}
+case `os_type` in
+  debian)
+    #
+    # Unregister CFEngine initscript.
+    #
+    /usr/sbin/update-rc.d cfengine3 remove
+    ;;
+esac
+
+if [ -d /usr/local/sbin ]; then
+  rm -f /usr/local/sbin/cf-agent /usr/local/sbin/cf-execd \
+    /usr/local/sbin/cf-key /usr/local/sbin/cf-know /usr/local/sbin/cf-monitord \
+    /usr/local/sbin/cf-promises /usr/local/sbin/cf-report /usr/local/sbin/cf-runagent \
+    /usr/local/sbin/cf-serverd /usr/local/sbin/cf-twin /usr/local/sbin/cf-hub > /dev/null 2>&1
+fi
+
+exit 0
+
+
+%posttrans
+#
+# Work around bug in CFEngine <= 3.6.1. See BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt above.
+#
+# This section can be removed completely when we no longer support upgrading
+# from the 3.6 series.
+#
+if [ -f %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt ]; then
+  service cfengine3 start
+  rm -f %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
+fi
+
+exit 0
+
+%files
+%defattr(755,root,root)
+
+# Main program
+%dir %prefix
+%dir %prefix/bin
+%prefix/bin/cf-agent
+%prefix/bin/cf-execd
+%prefix/bin/cf-key
+%prefix/bin/cf-monitord
+%prefix/bin/cf-promises
+%prefix/bin/cf-runagent
+%prefix/bin/cf-serverd
+%prefix/bin/cf-upgrade
+
+# LMDB
+%prefix/bin/lmdump
+%prefix/bin/lmmgr
+%prefix/bin/mdb_copy
+%prefix/bin/mdb_stat
+
+# Auxiliary programs
+%if "%{version}" >= "3.0"
+%prefix/bin/rpmvercmp
+%endif
+
+# Initscript, other configuration
+/etc/init.d/cfengine3
+/etc/sysconfig/cfengine3
+/etc/profile.d/cfengine.sh
+/usr/lib/systemd/system/cfengine3.service
+
+%defattr(644,root,root,755)
+%dir %prefix/lib
+%prefix/lib/lib*.so*
+%prefix/lib/cfengine-enterprise.so
+
+# Documentation
+%dir %prefix/share
+%prefix/share/doc
+
+# Private directories
+
+%defattr(700,root,root)
+%dir %prefix/ppkeys
+%dir %prefix/outputs
+%dir %prefix/inputs
+%dir %prefix/modules
+
+
+%changelog
