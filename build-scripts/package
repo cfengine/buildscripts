@@ -86,7 +86,13 @@ case "$PACKAGING" in
     mkdir -p $BASEDIR/$PKG/SRPMS
 
     SPEC=$P/$PKG.spec
-    SPECIN=$P/$PKG.spec.in
+    case "$OS-$OS_VERSION" in
+      rhel-[789].*|centos-[789].*)
+        # Special hack in 3.6 for systemd platforms.
+        SPECIN=$P/$PKG.spec.systemd.in;;
+      *)
+        SPECIN=$P/$PKG.spec.in;;
+    esac
 
     RPM_VERSION=$MAIN_VERSION
 
