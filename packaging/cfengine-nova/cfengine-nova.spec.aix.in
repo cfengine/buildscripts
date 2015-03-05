@@ -30,10 +30,6 @@ mkdir -p $RPM_BUILD_ROOT%{prefix}
 rsync -rlp %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 rsync -rlp %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
-#Copy the modified init.d script according to the working directory
-mkdir -p $RPM_BUILD_ROOT/etc/rc.d/init.d
-cp %{_basedir}/enterprise/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/rc.d/init.d/cfengine3
-
 
 # Remove useless stuff
 
@@ -85,10 +81,6 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/lib/lib*.so
 %prefix/lib/*.a
 %prefix/lib/cfengine-enterprise.so
-
-# Initscript, other configuration
-%attr(0755,root,system)
-/etc/rc.d/init.d/cfengine3
 
 # Documentation
 %defattr(644,root,root,755)

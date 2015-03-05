@@ -255,6 +255,13 @@ esac
 
 export PGSQL REDIS
 
+case "$OS_FAMILY" in
+  linux)
+    WITH_SYSTEMD=yes;;
+  *)
+    WITH_SYSTEMD=no;;
+esac
+
 # Tests
 
 case "$OS_FAMILY" in

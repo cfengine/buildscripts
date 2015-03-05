@@ -1,7 +1,21 @@
-#!/bin/sh
-
-#PREFIX
-PREFIX=/var/cfengine
+if [ "`package_type`" = "rpm" ]; then
+  #
+  # Work around bug in CFEngine <= 3.6.1: The %preun script stops the services,
+  # but it shouldn't when we upgrade. Later versions are fixed, but it's the *old*
+  # %preun script that gets called when we upgrade, so we have to work around it
+  # by using the %posttrans script, which is the only script from the new package
+  # that is called after %preun. Unfortunately it doesn't tell you whether or not
+  # you're upgrading, so we need to remember it by using the file below.
+  #
+  # This section can be removed completely when we no longer support upgrading
+  # from the 3.6 series.
+  #
+  if is_upgrade; then
+    if $PREFIX/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]|6\.[01])' > /dev/null; then
+      ( echo "Upgraded from:"; $PREFIX/bin/cf-agent -V ) > $PREFIX/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
+    fi
+  fi
+fi
 
 #
 # Before starting the installation process we need to check that
@@ -17,13 +31,27 @@ then
   exit 1
 fi
 
-# 
+#stop the remaining services on upgrade
+if is_upgrade; then
+  platform_service cfengine3 stop
+fi
+
+filter_netstat_listen()
+{
+  if [ -x /usr/sbin/ss ]; then
+    ss -natp | egrep "LISTEN.*($1)"
+  else
+    netstat -natp | egrep "($1).*LISTEN"
+  fi
+}
+
+#
 # We check if there is a server listening on port 80 or port 443.
 # If one is found, then we try to shut it down by calling
-# %{prefix}/httpd/bin/apachectl stop
+# $PREFIX/httpd/bin/apachectl stop
 # If that does not work, we abort the installation.
-# 
-HTTPD_RUNNING=`netstat -natp | grep -E "(:80\s|:443\s).*LISTEN"`
+#
+HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
 if [ ! -z "$HTTPD_RUNNING" ];
 then
   echo "There seems to be a server listening on either port 80 or 443"
@@ -32,7 +60,7 @@ then
   then
     echo "Trying to shut down the process using apachectl from CFEngine Enterprise"
     $PREFIX/httpd/bin/apachectl stop
-    HTTPD_RUNNING=`netstat -natp | grep -E "(:80\s|:443\s).*LISTEN"`
+    HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
     if [ ! -z "$HTTPD_RUNNING" ];
     then
       echo "Could not shutdown the process, aborting the installation"
@@ -50,7 +78,7 @@ fi
 #
 # We check if there is a postgres db server running already
 #
-PSQL_RUNNING=`netstat -natp | grep -E "(:5432\s).*LISTEN"`
+PSQL_RUNNING=`filter_netstat_listen ":5432\s"`
 if [ ! -z "$PSQL_RUNNING" ];
 then
   echo "There seems to be a server listening on port 5432"
@@ -82,7 +110,7 @@ then
     echo "Please make sure that the process is not running before attempting the installation again."
     exit 1
   fi
-  PSQL_FINAL_CHECK=`netstat -natp | grep -E "(:5432\s).*LISTEN"`
+  PSQL_FINAL_CHECK=`filter_netstat_listen ":5432\s"`
   if [ ! -z "$PSQL_FINAL_CHECK" ];
   then
     echo "There is still a process listening on 5432, please kill it before retrying the installation. Aborting."
@@ -132,4 +160,3 @@ if [ -f $PREFIX/share/GUI/application/config/appsettings.php ]; then
 fi
 
 exit 0
-

@@ -28,10 +28,6 @@ install: build
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl
 
-	mkdir -p $(CURDIR)/debian/tmp/etc/init.d
-	cp -a $(CURDIR)/initscript $(CURDIR)/debian/tmp/etc/init.d/cfengine3
-	chmod 755 $(CURDIR)/debian/tmp/etc/init.d/cfengine3
-
 	mkdir -p $(CURDIR)/debian/tmp/etc/default
 	cp -a $(CURDIR)/sysconfig $(CURDIR)/debian/tmp/etc/default/cfengine3
 	chmod 644 $(CURDIR)/debian/tmp/etc/default/cfengine3

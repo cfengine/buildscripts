@@ -1,6 +1,41 @@
 An introduction to package install scripts, and how they are used in packaging
 CFEngine.
 
+The scripts are generated from templates inside each package directory, called:
+
+  * preinstall.sh
+  * postinstall.sh
+  * preremove.sh
+  * postremove.sh
+
+They are combined with the platform specific functions in this directory, so
+that you have to worry as little as possible about it inside the package
+scripts themselves.
+
+These are the variables and functions you can use inside the scripts:
+
+  * $PREFIX - The current build prefix, e.g. /var/cfengine.
+
+  * package_type - Returns 'rpm', 'deb', 'pkg', 'depot' or 'bff', depending on
+    platform.
+
+  * os_type - Returns 'redhat', 'debian', 'aix', 'hpux' or 'solaris', depending
+    on platform. Note that this is slightly different from package_type, because
+    AIX can have rpm has well.
+
+  * rc_d_path - Returns the path to the directory containing the init.d and
+    rc[0-6].d directories.
+
+  * platform_service - Use this instead of calling /etc/init.d/<whatever>. Takes
+    two arguments, the service to launch and start/stop.
+
+  * is_upgrade - Returns true/false depending on whether it is an upgrade. Will
+    always return false in removal scripts (they are not called on upgrade).
+
+  * is_community - Returns true if this is a community package.
+
+  * is_nova - Returns true if this is a nova or nova-hub package.
+
 How platforms do it:
 ====================
 
@@ -93,7 +128,8 @@ Removal:
 In other words we choose to omit removal scripts completely in case of upgrade.
 This is primarily motivated by the fact that the calling order varies wildly
 between package managers, and in general you do not need to perform cleanup
-anyway when upgrading.
+anyway when upgrading. It also means that you can be sure inside the removal
+scripts that CFEngine really is being *removed*, not just upgraded.
 
 Use the "is_upgrade" command inside the script to determine what you need to do.
 

@@ -1,6 +1,7 @@
 /etc/init.d
 /etc/default
 /etc/profile.d
+/usr/lib/systemd/system/cfengine3.service
 /var/cfengine/bin/cf-agent
 /var/cfengine/bin/cf-execd
 /var/cfengine/bin/cf-key

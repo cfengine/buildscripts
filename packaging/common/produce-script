@@ -20,42 +20,53 @@ if [ $# -ne 3 ]; then
 fi
 
 SCRIPTDIR="`dirname $0`"
-BUILD="$1"
+TEMPLATEDIR="$SCRIPTDIR/script-templates"
+PROJECT_TYPE="$1"
 SCRIPT_TYPE="$2"
 PKG_TYPE="$3"
 
-if [ -f "$SCRIPTDIR/$PKG_TYPE-script-common.sh" ]; then
-  cat "$SCRIPTDIR/$PKG_TYPE-script-common.sh"
+if [ -f "$TEMPLATEDIR/$PKG_TYPE-script-common.sh" ]; then
+  cat "$TEMPLATEDIR/$PKG_TYPE-script-common.sh"
 fi
 
 echo "PKG_TYPE=$PKG_TYPE"
 echo "SCRIPT_TYPE=$SCRIPT_TYPE"
+echo "PROJECT_TYPE=$PROJECT_TYPE"
 
 case "$SCRIPT_TYPE" in
   *install)
-    if [ -f "$SCRIPTDIR/$PKG_TYPE-script-common-install.sh" ]; then
-      cat "$SCRIPTDIR/$PKG_TYPE-script-common-install.sh"
+    if [ -f "$TEMPLATEDIR/$PKG_TYPE-script-common-install.sh" ]; then
+      cat "$TEMPLATEDIR/$PKG_TYPE-script-common-install.sh"
     fi
-    if [ -f "$SCRIPTDIR/script-common-install.sh" ]; then
-      cat "$SCRIPTDIR/script-common-install.sh"
+    if [ -f "$TEMPLATEDIR/script-common-install.sh" ]; then
+      cat "$TEMPLATEDIR/script-common-install.sh"
     fi
     ;;
   *remove)
-    if [ -f "$SCRIPTDIR/$PKG_TYPE-script-common-remove.sh" ]; then
-      cat "$SCRIPTDIR/$PKG_TYPE-script-common-remove.sh"
+    if [ -f "$TEMPLATEDIR/$PKG_TYPE-script-common-remove.sh" ]; then
+      cat "$TEMPLATEDIR/$PKG_TYPE-script-common-remove.sh"
     fi
-    if [ -f "$SCRIPTDIR/script-common-remove.sh" ]; then
-      cat "$SCRIPTDIR/script-common-remove.sh"
+    if [ -f "$TEMPLATEDIR/script-common-remove.sh" ]; then
+      cat "$TEMPLATEDIR/script-common-remove.sh"
     fi
     ;;
 esac
 
-if [ -f "$SCRIPTDIR/script-common-header-last.sh" ]; then
-  cat "$SCRIPTDIR/script-common-header-last.sh"
+if [ -f "$TEMPLATEDIR/script-common-header-last.sh" ]; then
+  cat "$TEMPLATEDIR/script-common-header-last.sh"
 fi
 
 # Not having a script is not an error. Not all scripts are used,
 # and not all projects are ported over.
-if [ -f "$SCRIPTDIR/../$BUILD/$SCRIPT_TYPE.sh" ]; then
-  cat "$SCRIPTDIR/../$BUILD/$SCRIPT_TYPE.sh"
-fi
+case "$PROJECT_TYPE" in
+  cfengine-nova-hub)
+    if [ -f "$SCRIPTDIR/cfengine-hub/$SCRIPT_TYPE.sh" ]; then
+      cat "$SCRIPTDIR/cfengine-hub/$SCRIPT_TYPE.sh"
+    fi
+    ;;
+  *)
+    if [ -f "$SCRIPTDIR/cfengine-non-hub/$SCRIPT_TYPE.sh" ]; then
+      cat "$SCRIPTDIR/cfengine-non-hub/$SCRIPT_TYPE.sh"
+    fi
+    ;;
+esac

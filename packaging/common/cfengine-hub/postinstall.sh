@@ -1,17 +1,6 @@
-#!/bin/sh
-
-#PREFIX
-PREFIX=/var/cfengine
 INSTLOG=/var/log/CFEngineHub-Install.log
-MP_APACHE_USER=cfapache
 exec > $INSTLOG 2>&1
 set -x
-#
-# Register CFEngine initscript, if not yet.
-#
-if [ -x /etc/init.d/cfengine3 ]; then
-  update-rc.d cfengine3 defaults
-fi
 
 #
 # Make sure the cfapache user has a home folder and populate it
@@ -50,8 +39,6 @@ fi
 if [ -f $PREFIX/lib/php/curl.so ]; then
   /bin/rm -f $PREFIX/lib/php/curl.*
 fi
-
-
 
 #
 #Copy necessary Files and permissions
@@ -92,7 +79,7 @@ chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/application/logs
 #
 # Do all the prelimenary Design Center setup only on the first install of cfengine package
 #
-if [ -z "$2" ]; then
+if ! is_upgrade; then
   # This folder is required for Design Center and Mission Portal to talk to each other
   DCWORKDIR=/opt/cfengine
   $PREFIX/design-center/bin/cf-sketch --inputs=$PREFIX/design-center --installsource=$PREFIX/share/NovaBase/sketches/cfsketches.json --install-all
@@ -116,7 +103,7 @@ GIT_AUTHOR="Default Committer"
 PKEY="$DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt"
 SCRIPT_DIR="$PREFIX/httpd/htdocs/api/dc-scripts"
 VCS_TYPE="GIT"
-export PATH="\${PATH}:/var/cfengine/bin"
+export PATH="\${PATH}:$PREFIX/bin"
 export PKEY="\${PKEY}"
 export GIT_SSH="\${SCRIPT_DIR}/ssh-wrapper.sh"
 EOHIPPUS
@@ -177,30 +164,53 @@ fi
 if [ -f $PREFIX/bin/cf-twin ]; then
     /bin/rm $PREFIX/bin/cf-twin
 fi
-
+/bin/cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
 
 #
 #MAN PAGE RELATED
 #
-if [ -f /etc/manpath.config ]; then
- grep -q cfengine /etc/manpath.config
- if [ $? = "1" ]; then
-  echo "MANDATORY_MANPATH   $PREFIX/share/man" >> /etc/manpath.config
- fi
+MAN_CONFIG=""
+MAN_PATH=""
+case "`package_type`" in
+  rpm)
+    if [ -f /etc/SuSE-release ];
+    then
+      # SuSE
+      MAN_CONFIG="/etc/manpath.config"
+      MAN_PATH="MANDATORY_MANPATH"
+    else
+      # RH/CentOS
+      MAN_CONFIG="/etc/man.config"
+      MAN_PATH="MANPATH"
+    fi
+    ;;
+  deb)
+    MAN_CONFIG="/etc/manpath.config"
+    MAN_PATH="MANDATORY_MANPATH"
+    ;;
+  *)
+    echo "Unknown manpath, should not happen!"
+    ;;
+esac
+
+if [ -f "$MAN_CONFIG" ];
+then
+  MAN=`cat "$MAN_CONFIG"| grep cfengine`
+  if [ -z "$MAN" ]; then
+    echo "$MAN_PATH     $PREFIX/share/man" >> "$MAN_CONFIG"
+  fi
 fi
 
 for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent cf-hub;
 do
-	if [ -f $PREFIX/bin/$i ]; then
-		ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
-	fi
-	if [ -f /usr/share/man/man8/$i.8.gz ]; then
-		rm -f /usr/share/man/man8/$i.8.gz
-	fi
-	$PREFIX/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
+  if [ -f $PREFIX/bin/$i -a -d /usr/local/sbin ]; then
+    ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
+  fi
+  if [ -f /usr/share/man/man8/$i.8.gz ]; then
+    rm -f /usr/share/man/man8/$i.8.gz
+  fi
+  $PREFIX/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
 done
-
-/bin/cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
 
 #
 # Generate a certificate for Mission Portal
@@ -220,8 +230,8 @@ fi
 #
 # Modify the Apache configuration with the corresponding key and certificate
 #
-sed -i $PREFIX/httpd/conf/extra/httpd-ssl.conf -e s:INSERT_CERT_HERE:$CFENGINE_MP_CERT:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
-sed -i $PREFIX/httpd/conf/extra/httpd-ssl.conf -e s:INSERT_CERT_KEY_HERE:$CFENGINE_MP_KEY:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
+sed -i -e s:INSERT_CERT_HERE:$CFENGINE_MP_CERT:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
+sed -i -e s:INSERT_CERT_KEY_HERE:$CFENGINE_MP_KEY:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
 
 #POSTGRES RELATED
 #
@@ -275,7 +285,7 @@ fi
 TRYNO=1
 LISTENING=no
 echo -n "pinging pgsql server"
-while [ $TRYNO -le 20 ]
+while [ $TRYNO -le 10 ]
 do
   echo -n .
   ALIVE=$(cd /tmp && su cfpostgres -c "$PREFIX/bin/psql -l 1>/dev/null 2>/dev/null")
@@ -284,6 +294,7 @@ do
     LISTENING=yes
     break
   fi
+
   sleep 1
   TRYNO=`expr $TRYNO + 1`
 done
@@ -346,10 +357,9 @@ EOF
 fi
 
 #
-# Start Apache server
+# Apache related
 #
 mkdir -p $PREFIX/config
-$PREFIX/httpd/bin/apachectl start
 
 #
 #REDIS RELATED
@@ -361,23 +371,44 @@ unixsocketperm 755
 bind 127.0.0.1
 EOF
 
-$PREFIX/bin/redis-server $PREFIX/config/redis.conf
-$PREFIX/bin/cf-consumer
-
+##
+# Start Apache server
 #
+$PREFIX/httpd/bin/apachectl start
+
 #Mission portal
 #
 CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
+
+# Shut down Apache and Postgres again, because we may need them to start through
+# systemd later.
+$PREFIX/httpd/bin/apachectl stop
+(cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart")
 
 #
 # Delete temporarily stored key.
 #
 rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
 
-# start CFE3 processes on only client hosts (not HUB)
-if [ -f $PREFIX/policy_server.dat -a ! -f $PREFIX/masterfiles/promises.cf ]; then
-    /etc/init.d/cfengine3 start
+#
+# Register CFEngine initscript, if not yet.
+#
+if ! is_upgrade; then
+  if [ -x /usr/bin/systemctl ]; then
+    /usr/bin/systemctl enable cfengine3 > /dev/null 2>&1
+  else
+    case "`os_type`" in
+      redhat)
+        chkconfig --add cfengine3
+        ;;
+      debian)
+        update-rc.d cfengine3 defaults
+        ;;
+    esac
+  fi
 fi
+
+platform_service cfengine3 start
 
 exit 0

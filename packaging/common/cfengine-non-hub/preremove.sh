@@ -11,12 +11,6 @@ case `os_type` in
     # systemd support
     #
     test -x /usr/bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
-    if [ -f /usr/lib/systemd/scripts/cfengine3 ]; then
-      rm -f /usr/lib/systemd/scripts/cfengine3
-    fi
-    if [ -f /usr/lib/systemd/system/cfengine3.service ]; then
-      rm -f /usr/lib/systemd/system/cfengine3.service
-    fi
 
     #
     # Clean lock files created by initscript, if any
@@ -38,12 +32,5 @@ case `os_type` in
     /usr/bin/rm -f /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3
     ;;
 esac
-
-if [ -d /usr/local/sbin ]; then
-  rm -f /usr/local/sbin/cf-agent /usr/local/sbin/cf-execd \
-    /usr/local/sbin/cf-key /usr/local/sbin/cf-know /usr/local/sbin/cf-monitord \
-    /usr/local/sbin/cf-promises /usr/local/sbin/cf-report /usr/local/sbin/cf-runagent \
-    /usr/local/sbin/cf-serverd /usr/local/sbin/cf-twin /usr/local/sbin/cf-hub > /dev/null 2>&1
-fi
 
 exit 0

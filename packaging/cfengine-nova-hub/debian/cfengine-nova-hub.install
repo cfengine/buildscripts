@@ -1,6 +1,8 @@
 /etc/init.d
 /etc/default
 /etc/profile.d
+/usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cfengine3-web.service
 /var/cfengine/bin/cf-agent
 /var/cfengine/bin/cf-execd
 /var/cfengine/bin/cf-key
@@ -10,6 +12,7 @@
 /var/cfengine/bin/cf-serverd
 /var/cfengine/bin/cf-consumer
 /var/cfengine/bin/rsync
+/var/cfengine/bin/cfengine3-nova-hub-init-d.sh
 /var/cfengine/bin/git
 /var/cfengine/bin/git-cvsserver
 /var/cfengine/bin/git-receive-pack
