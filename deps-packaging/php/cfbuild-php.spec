@@ -19,7 +19,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n php-%{php_version}
 
-./configure --prefix=%{prefix}/httpd/php --with-apxs2=%{prefix}/httpd/bin/apxs --with-config-file=%{prefix}/httpd/php   --with-openssl=shared,%{prefix} --with-config-file-scan-dir=%{prefix}/httpd/php/lib --with-libxml-dir=%{prefix} --with-curl=shared,%{prefix} --with-mcrypt=shared,%{prefix} --with-pdo --with-pdo-pgsql=%{prefix} --with-json LDFLAGS="-L/var/cfengine/lib -R/var/cfengine/lib" CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
+./configure --prefix=%{prefix}/httpd/php --with-apxs2=%{prefix}/httpd/bin/apxs --with-config-file=%{prefix}/httpd/php   --with-openssl=shared,%{prefix} --with-config-file-scan-dir=%{prefix}/httpd/php/lib --with-libxml-dir=%{prefix} --with-curl=shared,%{prefix} --with-mcrypt=shared,%{prefix} --with-pdo --with-pdo-pgsql=%{prefix} --with-json LDFLAGS="-L/var/cfengine/lib -Wl,-R/var/cfengine/lib" CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
 
 %build
 
