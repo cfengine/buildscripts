@@ -323,6 +323,10 @@ for dep in $DEPS; do
 
   fi
 
+  # Keep 10 packages around. Should be more than enough for all the main
+  # and private branches.
+  pkg-cache autoprune $dep 10
+
   if pkg-cache find $dep-$version; then
     :
   else
