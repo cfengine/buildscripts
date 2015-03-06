@@ -120,14 +120,15 @@ case "$EXPLICIT_ROLE" in
 # We do not support 32 bits hubs anymore
 	nova-i386-*-*) ROLE=agent;;
     nova-s390*-*-*) ROLE=agent;;
-    nova-*-centos-[56].*) ROLE=hub;;
+    nova-*-centos-[56789].*) ROLE=hub;;
     nova-*-debian-6.*) ROLE=hub;;
     nova-*-opensuse-11.*) ROLE=hub;;
-    nova-*-rhel-[56].*) ROLE=hub;;
+    nova-*-rhel-[56789].*) ROLE=hub;;
     nova-*-sles-11.*) ROLE=hub;;
     nova-*-ubuntu-8.04) ROLE=hub;;
     nova-*-ubuntu-10.04) ROLE=hub;;
     nova-*-ubuntu-12.04) ROLE=hub;;
+    nova-*-ubuntu-14.04) ROLE=hub;;
     nova-*-mingw-*) ROLE=agent;;
     nova-*) ROLE=agent;;
     *)
