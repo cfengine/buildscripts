@@ -39,6 +39,7 @@ build-stamp:
             --without-udev \
             --without-python \
             --without-xen \
+            --without-dtrace \
             --without-qemu \
             --without-openvz \
             --without-lxc \

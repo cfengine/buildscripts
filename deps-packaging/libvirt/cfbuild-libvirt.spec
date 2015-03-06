@@ -40,6 +40,7 @@ PKG_CONFIG_PATH=%prefix/lib/pkgconfig \
             --without-udev \
             --without-python \
             --without-xen \
+            --without-dtrace \
             --without-qemu \
             --without-openvz \
             --without-lxc \
