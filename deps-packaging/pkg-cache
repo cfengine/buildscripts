@@ -1,4 +1,26 @@
-#!/bin/sh -e
+#!/bin/sh
+
+# POSIX shell test.
+try_exec() {
+  type "$1" > /dev/null 2>&1 && exec "$@"
+}
+
+unset foo
+(: ${foo%%bar}) 2> /dev/null
+T1="$?"
+
+if test "$T1" != 0; then
+  try_exec /usr/xpg4/bin/sh "$0" "$@"
+  echo "No compatible shell script interpreter found."
+  echo "Please find a POSIX shell for your system."
+  exit 42
+fi
+
+#
+# Do not set -e before switching to POSIX shell, as it will break the test
+# above.
+#
+set -e
 
 CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs
 
@@ -16,6 +38,9 @@ usage()
   echo
   echo "$0 prune <pkg>-<version>-<release>"
   echo "  removes cached package files"
+  echo
+  echo "$0 autoprune <pkg> <n>"
+  echo "  removes all but the <n> most recently used cached package files"
   exit 1
 }
 
@@ -32,21 +57,37 @@ opts()
   fi
 
   CMD="$1"
-  PKGVR="$2"
-  shift 2
-
-  PKGCACHEDIR="$CACHEDIR/$PKGVR"
+  shift
 
   case "$CMD" in
-    find|list|prune)
-      if [ $# -ne 0 ]; then
-        usage
-      fi;;
-    store)
-      if [ $# -eq 0 ]; then
+    find|list|prune|store)
+      PKGVR="$1"
+      shift
+
+      PKGCACHEDIR="$CACHEDIR/$PKGVR"
+
+      case "$CMD" in
+        store)
+          if [ $# -eq 0 ]; then
+            usage
+          fi
+          PKGFILES="$@"
+          ;;
+        *)
+          if [ $# -ne 0 ]; then
+            usage
+          fi
+          ;;
+      esac
+      ;;
+    autoprune)
+      if [ $# -ne 2 ]; then
         usage
       fi
-      PKGFILES="$@";;
+      PKG="$1"
+      NUM="$2"
+      shift 2
+      ;;
     *)
       fatal "Unknown command: $CMD";;
   esac
@@ -56,7 +97,14 @@ opts "$@"
 
 case "$CMD" in
   find)
-    [ -d "$PKGCACHEDIR" ];;
+    if [ -d "$PKGCACHEDIR" ]; then
+      # Update access time for autoprune.
+      touch "$PKGCACHEDIR"
+      exit 0
+    else
+      exit 1
+    fi
+    ;;
   store)
     if [ -d "$PKGCACHEDIR" ]; then
       fatal "Package $PKGVR is already cached."
@@ -78,4 +126,9 @@ case "$CMD" in
     else
       fatal "Package $PKGVR is not in cache."
     fi;;
+  autoprune)
+    for cache_entry in $(ls -dt $CACHEDIR/$PKG-* | tail +$(($NUM+1))); do
+      rm -rf "$cache_entry"
+    done
+    ;;
 esac
