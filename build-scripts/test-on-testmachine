@@ -59,12 +59,16 @@ INCLUDES='--include=test.* --include=summary.*'
 rsync -rv $INCLUDES --exclude="*" \
     $TESTMACHINE_URI$BASEDIR/core/tests/acceptance/ \
                     $BASEDIR/core/tests/acceptance/
-rsync -rv $INCLUDES --exclude="*" \
-    $TESTMACHINE_URI$BASEDIR/enterprise/tests/acceptance/ \
-                    $BASEDIR/enterprise/tests/acceptance/
-rsync -rv $INCLUDES --exclude="*" \
-    $TESTMACHINE_URI$BASEDIR/masterfiles/tests/acceptance/ \
-                    $BASEDIR/masterfiles/tests/acceptance/
+
+if [ $PROJECT = nova ]
+then
+    rsync -rv $INCLUDES --exclude="*" \
+        $TESTMACHINE_URI$BASEDIR/enterprise/tests/acceptance/ \
+                        $BASEDIR/enterprise/tests/acceptance/
+    rsync -rv $INCLUDES --exclude="*" \
+        $TESTMACHINE_URI$BASEDIR/masterfiles/tests/acceptance/ \
+                        $BASEDIR/masterfiles/tests/acceptance/
+fi
 
 if [ $return_code -ne 0 ]
 then
