@@ -236,8 +236,7 @@ exit 0
 %prefix/bin/cf-upgrade
 %prefix/bin/getfacl
 %dir %prefix/lib
-%prefix/lib/lib*.so.*
-%prefix/lib/liblmdb.so
+%prefix/lib/lib*.so*
 
 # Auxiliary programs
 %if "%{version}" >= "3.4"
