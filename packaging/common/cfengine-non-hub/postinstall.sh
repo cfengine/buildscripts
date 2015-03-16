@@ -54,8 +54,8 @@ case `os_type` in
     #
     # Register CFEngine initscript, if not yet.
     #
-    if [ -x /usr/bin/systemctl ]; then
-      /usr/bin/systemctl enable cfengine3 > /dev/null 2>&1
+    if [ -x /bin/systemctl ]; then
+      /bin/systemctl enable cfengine3 > /dev/null 2>&1
     else
       case `os_type` in
         redhat)

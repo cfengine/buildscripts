@@ -395,8 +395,8 @@ rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
 # Register CFEngine initscript, if not yet.
 #
 if ! is_upgrade; then
-  if [ -x /usr/bin/systemctl ]; then
-    /usr/bin/systemctl enable cfengine3 > /dev/null 2>&1
+  if [ -x /bin/systemctl ]; then
+    /bin/systemctl enable cfengine3 > /dev/null 2>&1
   else
     case "`os_type`" in
       redhat)
