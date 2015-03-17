@@ -95,6 +95,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(644,root,root) /etc/sysconfig/cfengine3
 %attr(644,root,root) /etc/profile.d/cfengine3.sh
 /usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cfengine3-web.service
 
 # Documentation
 %defattr(744,root,root)

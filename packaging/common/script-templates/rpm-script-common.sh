@@ -27,8 +27,8 @@ rc_d_path()
 
 platform_service()
 {
-  if [ -x /usr/bin/systemctl ]; then
-    /usr/bin/systemctl "$2" "$1"
+  if [ -x /bin/systemctl ]; then
+    /bin/systemctl "$2" "$1"
   else
     /etc/init.d/"$1" "$2"
   fi

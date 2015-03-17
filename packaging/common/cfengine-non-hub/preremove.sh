@@ -10,7 +10,7 @@ case `os_type` in
     #
     # systemd support
     #
-    test -x /usr/bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
+    test -x /bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
 
     #
     # Clean lock files created by initscript, if any

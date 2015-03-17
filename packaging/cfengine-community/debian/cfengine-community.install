@@ -1,5 +1,6 @@
 /etc/init.d/cfengine3
 /usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cfengine3-web.service
 /etc/default/cfengine3
 /etc/profile.d/cfengine3.sh
 /var/cfengine/bin/cf-agent
