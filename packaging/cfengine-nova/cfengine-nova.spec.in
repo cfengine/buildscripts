@@ -101,6 +101,7 @@ exit 0
 /etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
 /usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cfengine3-web.service
 
 %defattr(644,root,root,755)
 %dir %prefix/lib
