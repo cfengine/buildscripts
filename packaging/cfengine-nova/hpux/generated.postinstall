@@ -78,7 +78,7 @@ case `os_type` in
     #
     # systemd support, if there is systemctl, then prepare unit file.
     #
-    if test -x /usr/bin/systemctl; then
+    if test -x /bin/systemctl; then
       if [ ! -d /usr/lib/systemd/scripts ]; then
         mkdir -p /usr/lib/systemd/scripts
       fi
@@ -111,7 +111,7 @@ EOF
       chkconfig --add cfengine3
     fi
     if [ -f /usr/lib/systemd/system/cfengine3.service ]; then
-      test -x /usr/bin/systemctl && systemctl enable cfengine3 > /dev/null 2>&1
+      test -x /bin/systemctl && systemctl enable cfengine3 > /dev/null 2>&1
     fi
     ;;
 

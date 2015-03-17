@@ -35,6 +35,7 @@ cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 cp %{_basedir}/core/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
 mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
 cp %{_basedir}/core/misc/systemd/cfengine3.service $RPM_BUILD_ROOT/usr/lib/systemd/system/cfengine3.service
+cp %{_basedir}/core/misc/systemd/cfengine3-web.service $RPM_BUILD_ROOT/usr/lib/systemd/system/cfengine3-web.service
 
 
 # Remove useless stuff
@@ -81,8 +82,8 @@ rc_d_path()
 
 platform_service()
 {
-  if [ -x /usr/bin/systemctl ]; then
-    /usr/bin/systemctl "$2" "$1"
+  if [ -x /bin/systemctl ]; then
+    /bin/systemctl "$2" "$1"
   else
     /etc/init.d/"$1" "$2"
   fi
@@ -208,8 +209,8 @@ rc_d_path()
 
 platform_service()
 {
-  if [ -x /usr/bin/systemctl ]; then
-    /usr/bin/systemctl "$2" "$1"
+  if [ -x /bin/systemctl ]; then
+    /bin/systemctl "$2" "$1"
   else
     /etc/init.d/"$1" "$2"
   fi
@@ -328,8 +329,8 @@ case `os_type` in
     #
     # Register CFEngine initscript, if not yet.
     #
-    if [ -x /usr/bin/systemctl ]; then
-      /usr/bin/systemctl enable cfengine3 > /dev/null 2>&1
+    if [ -x /bin/systemctl ]; then
+      /bin/systemctl enable cfengine3 > /dev/null 2>&1
     else
       case `os_type` in
         redhat)
@@ -404,8 +405,8 @@ rc_d_path()
 
 platform_service()
 {
-  if [ -x /usr/bin/systemctl ]; then
-    /usr/bin/systemctl "$2" "$1"
+  if [ -x /bin/systemctl ]; then
+    /bin/systemctl "$2" "$1"
   else
     /etc/init.d/"$1" "$2"
   fi
@@ -470,7 +471,7 @@ case `os_type` in
     #
     # systemd support
     #
-    test -x /usr/bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
+    test -x /bin/systemctl && systemctl disable cfengine3 > /dev/null 2>&1
 
     #
     # Clean lock files created by initscript, if any
@@ -526,8 +527,8 @@ rc_d_path()
 
 platform_service()
 {
-  if [ -x /usr/bin/systemctl ]; then
-    /usr/bin/systemctl "$2" "$1"
+  if [ -x /bin/systemctl ]; then
+    /bin/systemctl "$2" "$1"
   else
     /etc/init.d/"$1" "$2"
   fi
@@ -644,6 +645,7 @@ exit 0
 /etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
 /usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cfengine3-web.service
 
 %defattr(644,root,root,755)
 %dir %prefix/lib
