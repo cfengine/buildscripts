@@ -35,6 +35,7 @@ cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 cp %{_basedir}/core/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
 mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
 cp %{_basedir}/core/misc/systemd/cfengine3.service $RPM_BUILD_ROOT/usr/lib/systemd/system/cfengine3.service
+cp %{_basedir}/core/misc/systemd/cfengine3-web.service $RPM_BUILD_ROOT/usr/lib/systemd/system/cfengine3-web.service
 
 
 # Remove useless stuff
@@ -644,6 +645,7 @@ exit 0
 /etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
 /usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cfengine3-web.service
 
 %defattr(644,root,root,755)
 %dir %prefix/lib

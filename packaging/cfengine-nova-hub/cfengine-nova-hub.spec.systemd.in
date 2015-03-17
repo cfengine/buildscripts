@@ -39,7 +39,7 @@ cp %{_basedir}/core/misc/init.d/cfengine3 $RPM_BUILD_ROOT/etc/init.d/cfengine3
 cp %{_basedir}/nova/misc/init.d/cfengine3-nova-hub-init-d.sh $RPM_BUILD_ROOT%{prefix}/bin
 mkdir -p $RPM_BUILD_ROOT/usr/lib/systemd/system
 cp %{_basedir}/core/misc/systemd/cfengine3.service $RPM_BUILD_ROOT/usr/lib/systemd/system/cfengine3.service
-cp %{_basedir}/nova/misc/systemd/cfengine3-web.service $RPM_BUILD_ROOT/usr/lib/systemd/system/cfengine3-web.service
+cp %{_basedir}/core/misc/systemd/cfengine3-web.service $RPM_BUILD_ROOT/usr/lib/systemd/system/cfengine3-web.service
 
 # Remove useless stuff
 
