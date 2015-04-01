@@ -40,11 +40,16 @@ case "$TEST_MACHINE" in
         for pid in `sudo $FUSER $CHROOT_ROOT 2>/dev/null`; do
             # Leaving processes behind is an error. It should never happen.
             return_code=1
-            echo "Error: Found processes left behind in the chroot. I'm killing them, but the build will fail, so clean up your mess!"
-            echo "Found PID $pid. Info from 'ps -ef'"
-            echo "--------------"
-            ps -ef | grep $pid
-            echo "--------------"
+            (
+                # This next part is very confusing when mixed with "set -x".
+                # Turn it off inside the subshell while printing this.
+                set +x
+                echo "Error: Found processes left behind in the chroot. I'm killing them, but the build will fail, so clean up your mess!"
+                echo "Found PID $pid. Info from 'ps -ef'"
+                echo "--------------"
+                ps -ef | grep $pid
+                echo "--------------"
+            )
         done
 
         sudo $FUSER -k $CHROOT_ROOT || true
