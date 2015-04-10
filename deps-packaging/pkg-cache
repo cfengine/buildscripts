@@ -95,6 +95,10 @@ opts()
 
 opts "$@"
 
+# Work around the fact that Solaris tail only supports obsolete +n syntax.
+# We need to enable it explicitly for other platforms.
+export _POSIX2_VERSION=1
+
 case "$CMD" in
   find)
     if [ -d "$PKGCACHEDIR" ]; then
