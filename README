@@ -46,7 +46,6 @@ during build.
 Documentation build pre-requisites
 ..................................
 
- * texi2html
  * texinfo
  * texlive
  * cm-super
