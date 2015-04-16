@@ -40,6 +40,9 @@ case "$TEST_MACHINE" in
         if [ $? -eq 0 ]
         then
             echo "ERROR: Found processes left behind in the chroot - I'm killing them, but the build will fail"
+            echo "========== relevant processes in the process table ============"
+            ps auxww | grep [c]f-   || true
+            echo "==============================================================="
             sudo $FUSER -k $CHROOT_ROOT || true
             return_code = 1
         fi
