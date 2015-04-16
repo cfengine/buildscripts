@@ -35,24 +35,15 @@ fi
 
 case "$TEST_MACHINE" in
     chroot)
-        # Fuser has special output. The PIDs arrive on stdout, and all the ornaments
-        # arrive on stderr, so all we have to do is to grep for PID numbers.
-        for pid in `sudo $FUSER $CHROOT_ROOT 2>/dev/null`; do
-            # Leaving processes behind is an error. It should never happen.
-            return_code=1
-            (
-                # This next part is very confusing when mixed with "set -x".
-                # Turn it off inside the subshell while printing this.
-                set +x
-                echo "Error: Found processes left behind in the chroot. I'm killing them, but the build will fail, so clean up your mess!"
-                echo "Found PID $pid. Info from 'ps -ef'"
-                echo "--------------"
-                ps -ef | grep $pid
-                echo "--------------"
-            )
-        done
+        echo "Checking for stale processes in the chroot path: $CHROOT_ROOT"
+        sudo $FUSER -v $CHROOT_ROOT 2>&1
+        if [ $? -eq 0 ]
+        then
+            echo "ERROR: Found processes left behind in the chroot - I'm killing them, but the build will fail"
+            sudo $FUSER -k $CHROOT_ROOT || true
+            return_code = 1
+        fi
 
-        sudo $FUSER -k $CHROOT_ROOT || true
         sudo umount ${CHROOT_ROOT}proc || true
         ;;
 esac
