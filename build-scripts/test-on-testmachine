@@ -37,7 +37,7 @@ case "$TEST_MACHINE" in
     chroot)
         # Fuser has special output. The PIDs arrive on stdout, and all the ornaments
         # arrive on stderr, so all we have to do is to grep for PID numbers.
-        for pid in `sudo $FUSER $CHROOT_ROOT 2>/dev/null`; do
+        for pid in `sudo $FUSER $CHROOT_ROOT 2>/dev/null | sed -e 's/[^ 0-9]//g'`; do
             # Leaving processes behind is an error. It should never happen.
             return_code=1
             (
