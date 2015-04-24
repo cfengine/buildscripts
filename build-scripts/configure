@@ -102,6 +102,13 @@ esac
 
 ARGS="$ARGS --with-init-script"
 
+case "$LIBYAML" in
+  yes)
+    ARGS="$ARGS --with-libyaml=$P";;
+  *)
+    ARGS="$ARGS --without-libyaml";;
+esac
+
 case "$BUILD_TYPE" in
 
   RELEASE)

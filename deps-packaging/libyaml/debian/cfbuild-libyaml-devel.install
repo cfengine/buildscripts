@@ -1,0 +1,4 @@
+/var/cfengine/include/
+/var/cfengine/lib/pkgconfig
+/var/cfengine/lib/*.a
+/var/cfengine/lib/*.la

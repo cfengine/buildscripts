@@ -254,6 +254,11 @@ case "$LIBACL" in
     DEPS="$DEPS libacl";;
 esac
 
+case "$LIBYAML" in
+  yes)
+    DEPS="libyaml $DEPS";;
+esac
+
 #
 # Override for manual testing
 #

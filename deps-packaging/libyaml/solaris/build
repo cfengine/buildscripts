@@ -1,0 +1,34 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+TT=${BUILD_ROOT}/cfbuild-libyaml${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-libyaml-devel${PREFIX}
+export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
+
+# Patch
+# Solaris 8
+
+# Build
+
+./configure --prefix=$PREFIX
+
+$MAKE
+
+# Test
+
+# Install
+
+mkdir -p $TTD/lib
+mkdir -p $TTD/include
+$MAKE install prefix=${TTD}
+
+# Package
+
+rm -rf ${TTD}/man
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/libyaml.so* ${TT}/lib
+mv ${TTD}/lib/libyaml-0.so* ${TT}/lib
