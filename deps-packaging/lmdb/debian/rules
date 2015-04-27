@@ -16,10 +16,7 @@ clean:
 build: build-stamp
 build-stamp:
 	dh_testdir
-	patch -p1 < $(CURDIR)/mdb.patch
-	patch -p1 < $(CURDIR)/mdb-robust.patch
-	patch -p1 < $(CURDIR)/mdb-autoconf.patch
-	patch -p1 < $(CURDIR)/mdb-autoconf-generated.patch
+	for i in 00*.patch; do patch -p1 < $$i; done
 	cd libraries/liblmdb/ && sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
 	touch build-stamp
 

@@ -1,5 +1,5 @@
-*** mdb-mdb/libraries/liblmdb/lmdump.c	1970-01-01 01:00:00.000000000 +0100
---- mdb-mdb.new/libraries/liblmdb/lmdump.c	2014-05-01 14:50:57.676576797 +0200
+*** /dev/null
+--- b/libraries/liblmdb/lmdump.c
 ***************
 *** 0 ****
 --- 1,128 ----
@@ -131,8 +131,8 @@
 + 
 +     return 0;
 + }
-*** mdb-mdb/libraries/liblmdb/lmmgr.c	1970-01-01 01:00:00.000000000 +0100
---- mdb-mdb.new/libraries/liblmdb/lmmgr.c	2014-05-01 14:42:53.396580800 +0200
+*** /dev/null
+--- b/libraries/liblmdb/lmmgr.c
 ***************
 *** 0 ****
 --- 1,201 ----
@@ -337,22 +337,22 @@
 + 
 +     return 1;
 + }
-*** mdb-mdb/libraries/liblmdb/mdb_copy.c	2013-10-25 00:57:17.000000000 +0200
---- mdb-mdb.new/libraries/liblmdb/mdb_copy.c	2014-05-01 14:33:57.896561701 +0200
+*** a/libraries/liblmdb/mdb_copy.c
+--- b/libraries/liblmdb/mdb_copy.c
 ***************
-*** 49,55 **** int main(int argc,char * argv[])
+*** 32,38 **** int main(int argc,char * argv[])
+  	int rc;
+  	MDB_env *env;
+  	const char *progname = argv[0], *act;
+! 	unsigned flags = MDB_RDONLY;
+  	unsigned cpflags = 0;
   
-  	rc = mdb_env_create(&env);
+  	for (; argc > 1 && argv[1][0] == '-'; argc--, argv++) {
+--- 32,38 ----
+  	int rc;
+  	MDB_env *env;
+  	const char *progname = argv[0], *act;
+! 	unsigned flags = MDB_NOSUBDIR|MDB_RDONLY;
+  	unsigned cpflags = 0;
   
-! 	rc = mdb_env_open(env, envname, MDB_RDONLY, 0);
-  	if (rc) {
-  		printf("mdb_env_open failed, error %d %s\n", rc, mdb_strerror(rc));
-  	} else {
---- 49,55 ----
-  
-  	rc = mdb_env_create(&env);
-  
-! 	rc = mdb_env_open(env, envname, MDB_NOSUBDIR|MDB_RDONLY, 0);
-  	if (rc) {
-  		printf("mdb_env_open failed, error %d %s\n", rc, mdb_strerror(rc));
-  	} else {
+  	for (; argc > 1 && argv[1][0] == '-'; argc--, argv++) {

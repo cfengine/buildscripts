@@ -7,11 +7,10 @@ PREFIX=/var/cfengine
 TT=${BUILD_ROOT}/cfbuild-lmdb${PREFIX}
 TTD=${BUILD_ROOT}/cfbuild-lmdb-devel${PREFIX}
 
+for i in 00*.patch; do
+    $PATCH -p1 < $i
+done
 cd libraries/liblmdb
-$PATCH -p3 < ../../mdb.patch
-$PATCH -p3 < ../../mdb-robust.patch
-$PATCH -p3 < ../../mdb-autoconf.patch
-$PATCH -p3 < ../../mdb-autoconf-generated.patch
 # Executable files taken from mdb-autoconf-generated.patch, which is generated
 # from Git, and contains permission info, but patch -p1 cannot apply it.
 # Use the following command to list the files.
