@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- lmdb
 Name: cfbuild-lmdb
 Version: %{version}
 Release: 1
-Source0: 7449ca604ca732ad262cfd77da403968cdb9157f.tar.gz
+Source0: 2f587ae081d076e3707360c5db086520c219d3ea.tar.gz
 License: OpenLDAP
 Group: Other
 Url: http://symas.com/mdb
@@ -13,7 +13,7 @@ AutoReqProv: no
 Patch0: mdb.patch
 
 %define prefix %{buildprefix}
-%define srcdir mdb-mdb/libraries/liblmdb
+%define srcdir lmdb-2f587ae081d076e3707360c5db086520c219d3ea/libraries/liblmdb
 
 %ifarch %ix86
 %define lbits %{nil}
@@ -25,10 +25,9 @@ Patch0: mdb.patch
 SYS=`uname -s`
 mkdir -p %{_builddir}
 %setup -q -n %{srcdir}
-$PATCH -s -p3 < %{_topdir}/SOURCES/mdb.patch
-$PATCH -s -p3 < %{_topdir}/SOURCES/mdb-robust.patch
-$PATCH -s -p3 < %{_topdir}/SOURCES/mdb-autoconf.patch
-$PATCH -s -p3 < %{_topdir}/SOURCES/mdb-autoconf-generated.patch
+for i in %{_topdir}/SOURCES/00*.patch; do
+    $PATCH -p3 < $i
+done
 # Executable files taken from mdb-autoconf-generated.patch, which is generated
 # from Git, and contains permission info, but patch -p1 cannot apply it.
 # Use the following command to list the files.

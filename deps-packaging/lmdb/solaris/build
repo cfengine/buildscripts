@@ -11,15 +11,20 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 # Patch
 # Solaris 8
 
-cd libraries/liblmdb && $PATCH -p3 < ../../mdb.patch && cd -
-cd libraries/liblmdb && $PATCH -p3 < ../../mdb-robust.patch && cd -
-cd libraries/liblmdb && $PATCH -p3 < ../../mdb.patch.sun && cd -
+for i in 00*.patch; do
+    $PATCH -p1 < $i
+done
+
+$PATCH -p1 < mdb.patch.sun
 
 # Configure
 
 # Build
 
-cd libraries/liblmdb && $MAKE && cd -
+cd libraries/liblmdb
+sh ./configure --prefix=$PREFIX
+$MAKE
+cd -
 
 # Test
 
@@ -29,7 +34,9 @@ mkdir -p $TTD/bin
 mkdir -p $TTD/lib
 mkdir -p $TTD/include
 mkdir -p $TTD/man/man1
-cd libraries/liblmdb && $MAKE install prefix=${TTD} && cd -
+cd libraries/liblmdb
+$MAKE install prefix=${TTD}
+cd -
 
 # Package
 
