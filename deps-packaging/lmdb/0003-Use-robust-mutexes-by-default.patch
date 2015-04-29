@@ -1,0 +1,218 @@
+*** a/libraries/liblmdb/lmdb.h
+--- b/libraries/liblmdb/lmdb.h
+***************
+*** 50,61 ****
+   *
+   *	  Fix: Check for stale readers periodically, using the
+   *	  #mdb_reader_check function or the \ref mdb_stat_1 "mdb_stat" tool.
+!  *	  Catch stale
+!  *	  locks with option MDB_ROBUST if supported (non-BSD). Or just
+!  *	  make all programs using the database close it; the lockfile
+!  *	  is always reset on first open of the environment.
+   *
+!  *	- On BSD systems or others configured with MDB_USE_POSIX_SEM,
+   *	  startup can fail due to semaphores owned by another userid.
+   *
+   *	  Fix: Open and close the database as the user which owns the
+--- 50,63 ----
+   *
+   *	  Fix: Check for stale readers periodically, using the
+   *	  #mdb_reader_check function or the \ref mdb_stat_1 "mdb_stat" tool.
+!  *	  Stale writers will be cleared automatically on most systems:
+!  *	  - Windows - automatic
+!  *	  - BSD, systems using SysV semaphores - automatic
+!  *	  - Linux, systems using POSIX mutexes with Robust option - automatic
+!  *	  Otherwise just make all programs using the database close it;
+!  *	  the lockfile is always reset on first open of the environment.
+   *
+!  *	- On BSD systems or others configured with MDB_USE_SYSV_SEM,
+   *	  startup can fail due to semaphores owned by another userid.
+   *
+   *	  Fix: Open and close the database as the user which owns the
+***************
+*** 290,297 **** typedef void (MDB_rel_func)(MDB_val *item, void *oldptr, void *newptr, void *rel
+  #define MDB_NORDAHEAD	0x800000
+  	/** don't initialize malloc'd memory before writing to datafile */
+  #define MDB_NOMEMINIT	0x1000000
+- 	/** catch stale locks if supported (not on BSD, needs robust mutexes) */
+- #define MDB_ROBUST		0x2000000
+  /** @} */
+  
+  /**	@defgroup	mdb_dbi_open	Database Flags
+--- 292,297 ----
+***************
+*** 516,527 **** int  mdb_env_create(MDB_env **env);
+  	 *		Open the environment in read-only mode. No write operations will be
+  	 *		allowed. LMDB will still modify the lock file - except on read-only
+  	 *		filesystems, where LMDB does not use locks.
+- 	 *	<li>#MDB_ROBUST
+- 	 *		Initialize the lockfile to catch stale locks if robust mutexes
+- 	 *		are supported, so aborted processes will not block others.
+- 	 *		Ignored when another process has the environment open. Unsupported
+- 	 *		by liblmdb built with MDB_USE_POSIX_SEM (such as BSD systems).
+- 	 *		Enabled by default on Windows. Some locking slowdown on Unix.
+  	 *	<li>#MDB_WRITEMAP
+  	 *		Use a writeable memory map unless MDB_RDONLY is set. This is faster
+  	 *		and uses fewer mallocs, but loses protection from application bugs
+--- 516,521 ----
+*** a/libraries/liblmdb/mdb.c
+--- b/libraries/liblmdb/mdb.c
+***************
+*** 193,199 **** extern int cacheflush(char *addr, int nbytes, int cache);
+  #define MDB_DEVEL 0
+  #endif
+  
+! #if MDB_DEVEL && (defined(_WIN32) || (defined(EOWNERDEAD) && !defined(MDB_USE_POSIX_SEM)))
+  #define MDB_ROBUST_SUPPORTED	1
+  #endif
+  
+--- 193,199 ----
+  #define MDB_DEVEL 0
+  #endif
+  
+! #if defined(_WIN32) || (defined(EOWNERDEAD) && !defined(MDB_USE_POSIX_SEM))
+  #define MDB_ROBUST_SUPPORTED	1
+  #endif
+  
+***************
+*** 654,661 **** typedef struct MDB_txbody {
+  		 *	when readers release their slots.
+  		 */
+  	unsigned	mtb_numreaders;
+- 		/** Flags which the lock file was initialized with. */
+- 	unsigned	mtb_flags;
+  } MDB_txbody;
+  
+  	/** The actual reader table definition. */
+--- 654,659 ----
+***************
+*** 668,674 **** typedef struct MDB_txninfo {
+  #define mti_rmname	mt1.mtb.mtb_rmname
+  #define mti_txnid	mt1.mtb.mtb_txnid
+  #define mti_numreaders	mt1.mtb.mtb_numreaders
+- #define mti_flags	mt1.mtb.mtb_flags
+  		char pad[(sizeof(MDB_txbody)+CACHELINE-1) & ~(CACHELINE-1)];
+  	} mt1;
+  	union {
+--- 666,671 ----
+***************
+*** 4316,4322 **** mdb_env_setup_locks(MDB_env *env, char *lpath, int mode, int *excl)
+  		if (!env->me_rmutex) goto fail_errno;
+  		env->me_wmutex = CreateMutex(&mdb_all_sa, FALSE, env->me_txns->mti_wmname);
+  		if (!env->me_wmutex) goto fail_errno;
+- 		env->me_flags |= MDB_ROBUST;
+  #elif defined(MDB_USE_POSIX_SEM)
+  		struct stat stbuf;
+  		struct {
+--- 4313,4318 ----
+***************
+*** 4357,4379 **** mdb_env_setup_locks(MDB_env *env, char *lpath, int mode, int *excl)
+  		if ((rc = pthread_mutexattr_init(&mattr))
+  			|| (rc = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))
+  #ifdef MDB_ROBUST_SUPPORTED
+! 			|| ((env->me_flags & MDB_ROBUST) &&
+! 				(rc = pthread_mutexattr_setrobust(&mattr, PTHREAD_MUTEX_ROBUST)))
+  #endif
+  			|| (rc = pthread_mutex_init(&env->me_txns->mti_rmutex, &mattr))
+  			|| (rc = pthread_mutex_init(&env->me_txns->mti_wmutex, &mattr)))
+  			goto fail;
+  		pthread_mutexattr_destroy(&mattr);
+  #endif	/* _WIN32 || MDB_USE_POSIX_SEM */
+- #ifndef MDB_ROBUST_SUPPORTED
+- 		env->me_flags &= ~MDB_ROBUST;
+- #endif
+  
+  		env->me_txns->mti_magic = MDB_MAGIC;
+  		env->me_txns->mti_format = MDB_LOCK_FORMAT;
+  		env->me_txns->mti_txnid = 0;
+  		env->me_txns->mti_numreaders = 0;
+- 		env->me_txns->mti_flags = env->me_flags;
+  
+  	} else {
+  		if (env->me_txns->mti_magic != MDB_MAGIC) {
+--- 4353,4370 ----
+  		if ((rc = pthread_mutexattr_init(&mattr))
+  			|| (rc = pthread_mutexattr_setpshared(&mattr, PTHREAD_PROCESS_SHARED))
+  #ifdef MDB_ROBUST_SUPPORTED
+! 			|| (rc = pthread_mutexattr_setrobust(&mattr, PTHREAD_MUTEX_ROBUST))
+  #endif
+  			|| (rc = pthread_mutex_init(&env->me_txns->mti_rmutex, &mattr))
+  			|| (rc = pthread_mutex_init(&env->me_txns->mti_wmutex, &mattr)))
+  			goto fail;
+  		pthread_mutexattr_destroy(&mattr);
+  #endif	/* _WIN32 || MDB_USE_POSIX_SEM */
+  
+  		env->me_txns->mti_magic = MDB_MAGIC;
+  		env->me_txns->mti_format = MDB_LOCK_FORMAT;
+  		env->me_txns->mti_txnid = 0;
+  		env->me_txns->mti_numreaders = 0;
+  
+  	} else {
+  		if (env->me_txns->mti_magic != MDB_MAGIC) {
+***************
+*** 4391,4398 **** mdb_env_setup_locks(MDB_env *env, char *lpath, int mode, int *excl)
+  		if (rc && rc != EACCES && rc != EAGAIN) {
+  			goto fail;
+  		}
+- 		env->me_flags = (env->me_flags & ~MDB_ROBUST) |
+- 			(env->me_txns->mti_flags & MDB_ROBUST);
+  #ifdef _WIN32
+  		env->me_rmutex = OpenMutex(SYNCHRONIZE, FALSE, env->me_txns->mti_rmname);
+  		if (!env->me_rmutex) goto fail_errno;
+--- 4382,4387 ----
+***************
+*** 4424,4436 **** fail:
+  	 *	environment and re-opening it with the new flags.
+  	 */
+  #define	CHANGEABLE	(MDB_NOSYNC|MDB_NOMETASYNC|MDB_MAPASYNC|MDB_NOMEMINIT)
+! #define	CHANGELESS	(MDB_FIXEDMAP|MDB_NOSUBDIR|MDB_RDONLY|ROBUST_FLAG| \
+  	MDB_WRITEMAP|MDB_NOTLS|MDB_NOLOCK|MDB_NORDAHEAD)
+- #ifdef MDB_ROBUST_SUPPORTED
+- #define ROBUST_FLAG MDB_ROBUST
+- #else
+- #define ROBUST_FLAG 0
+- #endif
+  
+  #if VALID_FLAGS & PERSISTENT_FLAGS & (CHANGEABLE|CHANGELESS)
+  # error "Persistent DB flags & env flags overlap, but both go in mm_flags"
+--- 4413,4420 ----
+  	 *	environment and re-opening it with the new flags.
+  	 */
+  #define	CHANGEABLE	(MDB_NOSYNC|MDB_NOMETASYNC|MDB_MAPASYNC|MDB_NOMEMINIT)
+! #define	CHANGELESS	(MDB_FIXEDMAP|MDB_NOSUBDIR|MDB_RDONLY| \
+  	MDB_WRITEMAP|MDB_NOTLS|MDB_NOLOCK|MDB_NORDAHEAD)
+  
+  #if VALID_FLAGS & PERSISTENT_FLAGS & (CHANGEABLE|CHANGELESS)
+  # error "Persistent DB flags & env flags overlap, but both go in mm_flags"
+***************
+*** 9470,9476 **** static int mdb_reader_check0(MDB_env *env, int rlocked, int *dead)
+   */
+  static int mdb_mutex_failed(MDB_env *env, mdb_mutex_t mutex, int rc)
+  {
+! 	int toggle, rlocked, rc2;
+  #ifndef _WIN32
+  	enum { WAIT_ABANDONED = EOWNERDEAD };
+  #endif
+--- 9454,9460 ----
+   */
+  static int mdb_mutex_failed(MDB_env *env, mdb_mutex_t mutex, int rc)
+  {
+! 	int rlocked, rc2;
+  #ifndef _WIN32
+  	enum { WAIT_ABANDONED = EOWNERDEAD };
+  #endif
+***************
+*** 9480,9491 **** static int mdb_mutex_failed(MDB_env *env, mdb_mutex_t mutex, int rc)
+  		rc = MDB_SUCCESS;
+  		rlocked = (mutex == MDB_MUTEX(env, r));
+  		if (!rlocked) {
+- 			/* Keep mti_txnid updated, otherwise next writer can
+- 			 * overwrite data which latest meta page refers to.
+- 			 * TODO: Instead revert any aborted commit and sync?
+- 			 */
+- 			toggle = mdb_env_pick_meta(env);
+- 			env->me_txns->mti_txnid = env->me_metas[toggle]->mm_txnid;
+  			/* env is hosed if the dead thread was ours */
+  			if (env->me_txn) {
+  				env->me_flags |= MDB_FATAL_ERROR;
+--- 9464,9469 ----
