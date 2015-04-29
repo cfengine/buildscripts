@@ -1,0 +1,31 @@
+#!/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+TT=${BUILD_ROOT}/cfbuild-libyaml${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-libyaml-devel${PREFIX}
+
+patch -p1 < hpux-header-fix.patch
+
+# Build
+
+./configure --prefix=$PREFIX
+gmake
+
+# Test
+
+# Install
+
+mkdir -p $TTD/lib
+mkdir -p $TTD/include
+gmake install prefix=${TTD}
+
+# Package
+
+rm -rf ${TTD}/man
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/libyaml.so* ${TT}/lib
+mv ${TTD}/lib/libyaml-0.so* ${TT}/lib

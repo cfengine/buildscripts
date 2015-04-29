@@ -263,6 +263,8 @@ case "$OS_FAMILY" in
     WITH_SYSTEMD=no;;
 esac
 
+LIBYAML=yes
+
 # Tests
 
 case "$OS_FAMILY" in
