@@ -135,6 +135,9 @@ detect_distribution()
       jessie*)
         REL=8.0
         ;;
+      stretch*)
+        REL=9.0
+        ;;
       *)
         echo "Unable to detect version of Debian: $REL"
         exit 42;;
