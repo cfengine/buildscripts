@@ -282,7 +282,7 @@ checkpoint_timeout = 15min		# range 30s-1h
 # - Other Planner Options -
 
 #default_statistics_target = 100	# range 1-10000
-#constraint_exclusion = partition	# on, off, or partition
+constraint_exclusion = partition	# on, off, or partition
 #cursor_tuple_fraction = 0.1		# range 0.0-1.0
 #from_collapse_limit = 8
 #join_collapse_limit = 8		# 1 disables collapsing of explicit
@@ -393,7 +393,7 @@ checkpoint_timeout = 15min		# range 30s-1h
 #log_duration = off
 #log_error_verbosity = default		# terse, default, or verbose messages
 #log_hostname = off
-#log_line_prefix = ''			# special values:
+log_line_prefix = '%t '			# special values:
 					#   %a = application name
 					#   %u = user name
 					#   %d = database name
