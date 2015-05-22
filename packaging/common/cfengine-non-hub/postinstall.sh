@@ -9,12 +9,12 @@ if is_community; then
   #
   # Copy the stock policy for the new installations
   #
-  if ! [ -f /var/cfengine/masterfiles/promises.cf ]; then
-    /bin/cp -R /var/cfengine/share/CoreBase/masterfiles /var/cfengine
+  if ! [ -f $PREFIX/masterfiles/promises.cf ]; then
+    /bin/cp -R $PREFIX/share/CoreBase/masterfiles $PREFIX
     #
     # Create promises_validated
     #
-    /var/cfengine/bin/cf-promises -T /var/cfengine/masterfiles
+    $PREFIX/bin/cf-promises -T $PREFIX/masterfiles
   fi
 
   #
