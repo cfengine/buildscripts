@@ -36,6 +36,8 @@ cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{prefix}/share/CoreBase
 cp -R $RPM_BUILD_ROOT%{prefix}/masterfiles $RPM_BUILD_ROOT%prefix/share/CoreBase/masterfiles
 rm -rf $RPM_BUILD_ROOT%{prefix}/masterfiles
+cp -R $RPM_BUILD_ROOT%{prefix}/modules $RPM_BUILD_ROOT%prefix/share/CoreBase/modules
+rm -rf $RPM_BUILD_ROOT%{prefix}/modules/*
 
 mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
 cp $RPM_SOURCE_DIR/sysconfig $RPM_BUILD_ROOT/etc/sysconfig/cfengine3

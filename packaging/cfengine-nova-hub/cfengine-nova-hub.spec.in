@@ -84,6 +84,8 @@ find $RPM_BUILD_ROOT%prefix/share/GUI -type f -exec sed -i 's/cfapi_log/syslog/'
 mkdir -p $RPM_BUILD_ROOT%prefix/share/NovaBase
 cp -R $RPM_BUILD_ROOT%prefix/masterfiles $RPM_BUILD_ROOT%prefix/share/NovaBase/masterfiles
 rm -rf $RPM_BUILD_ROOT%prefix/masterfiles
+cp -R $RPM_BUILD_ROOT%prefix/modules $RPM_BUILD_ROOT%prefix/share/NovaBase/modules
+rm -rf $RPM_BUILD_ROOT%prefix/modules/*
 
 #Design center
 mkdir -p ${RPM_BUILD_ROOT}%prefix/design-center
