@@ -15,13 +15,14 @@ Agent dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.8
 * [OpenSSL](http://openssl.org/) 0.9.8ze **OUTDATED** end-of-2015 will be **DEPRECATED**
-* [PCRE](ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.33 **OUTDATED**
+* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.33 **OUTDATED**
 * LMDB
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.5
 * [libxml2](ftp://xmlsoft.org/libxml2/) 2.9.1 **OUTDATED**
 * libgcc
   * Currently only in use on AIX, Solaris
   * "Package" only copies the (outdated) system library to `/var/cfengine`
+  * **TODO** why do we need to ship libgcc
 
 Enterprise agent specific dependencies:
 
@@ -33,16 +34,21 @@ Enterprise agent specific dependencies:
 
 Hub specific dependencies:
 
-* APR
-* apr-util
-* Apache
-* PostgreSQL
-* Redis
-* PHP
-* php-apc
-* php-svn
+* [APR](https://apr.apache.org/) 1.4.8 **OUTDATED**
+* [apr-util](https://apr.apache.org/) 1.5.2 **OUTDATED**
+* [Apache](http://httpd.apache.org/) 2.2.29
+* [PostgreSQL](http://www.postgresql.org/) 9.0.4 **OUTDATED** 9/2015 to be **DEPRECATED**
+* PostgreSQL for the hub 9.3.2  **OUTDATED**
+  * **TODO** Why two different postgresql?
+* [Redis](http://redis.io/) 2.8.2 **WAY OUTDATED**
+* [PHP](http://php.net/) 5.4.38 **OUTDATED**
+* [php-apc](https://pecl.php.net/package/APC) 3.1.13
+  * We're using the latest version, which was released in 2012!
+    This project seems stale, do we really need it in our code?
+    **TODO remove**
+* [php-svn](https://pecl.php.net/package/svn) 1.0.1 **OUTDATED**
 
-Other dependencies (*find out why they are needed!*)
+Other dependencies (**find out why they are needed!**)
 
 * libmcrypt (??)
 * libiconv  (??)
