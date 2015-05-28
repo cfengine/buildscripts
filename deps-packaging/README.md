@@ -42,7 +42,7 @@ Hub specific dependencies:
 * [APR](https://apr.apache.org/) 1.5.2
 * [apr-util](https://apr.apache.org/) 1.5.4
 * [Apache](http://httpd.apache.org/) 2.2.29
-* PostgreSQL for the hub 9.3.2  **OUTDATED**
+* PostgreSQL for the hub 9.3.7
 * [Redis](http://redis.io/) 2.8.2 **WAY OUTDATED**
 * [PHP](http://php.net/) 5.4.38 **OUTDATED**
 * [php-apc](https://pecl.php.net/package/APC) 3.1.13
