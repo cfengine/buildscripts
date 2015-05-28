@@ -16,21 +16,24 @@ Agent dependencies:
 * [zlib](http://www.zlib.net/) 1.2.8
 * [OpenSSL](http://openssl.org/) 0.9.8ze **OUTDATED** end-of-2015 will be **DEPRECATED**
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.33 **OUTDATED**
-* LMDB
+* [LMDB](https://github.com/LMDB/lmdb/) 0.9.14
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.5
 * [libxml2](ftp://xmlsoft.org/libxml2/) 2.9.1 **OUTDATED**
+* [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
+* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
 * libgcc
-  * Currently only in use on AIX, Solaris
+  * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
+    to substitute missing system functions
   * "Package" only copies the (outdated) system library to `/var/cfengine`
-  * **TODO** why do we need to ship libgcc
 
 Enterprise agent specific dependencies:
 
 * [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
+  * Requires change of buildslaves (autobuild)
 * pthreads-w32
-* OpenLDAP
-* libvirt
+* [OpenLDAP](http://www.openldap.org/software/download/) 2.4.36 **OUTDATED**
+* [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3 **OUTDATED**
 
 Hub specific dependencies:
 
@@ -47,15 +50,13 @@ Hub specific dependencies:
     This project seems stale, do we really need it in our code?
     **TODO remove**
 * [php-svn](https://pecl.php.net/package/svn) 1.0.1 **OUTDATED**
+* [libcurl](http://curl.haxx.se/download.html) 7.27.0 **OUTDATED**
 
 Other dependencies (**find out why they are needed!**)
 
 * libmcrypt (??)
 * libiconv  (??)
 * [gnu rx](http://www.gnu.org/software/rx/rx.html) **DEPRECATED**
-* libcurl (is it community or enterprise or hub dependency?)
-* libacl  (same question)
-* libattr (same question)
 * [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads) 2.1.26
   * Not built on RHEL, why?
 
