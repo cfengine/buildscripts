@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- redis
 Name: cfbuild-redis
 Version: %{version}
 Release: 1
-Source0: redis-2.8.2.tar.gz
+Source0: redis-2.8.20.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -21,7 +21,7 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 
-%setup -q -n redis-2.8.2
+%setup -q -n redis-2.8.20
 $PATCH -s -p1 < %{_topdir}/SOURCES/redis.patch
 
 %build
@@ -41,17 +41,17 @@ mkdir -p $RPM_BUILD_ROOT/$PREFIX/bin
 mkdir -p $RPM_BUILD_ROOT/$PREFIX/lib%{lbits}
 mkdir -p $RPM_BUILD_ROOT/$PREFIX/include/hiredis
 
-cp -pf %{_builddir}/redis-2.8.2/src/redis-server $RPM_BUILD_ROOT/$PREFIX/bin
-cp -pf %{_builddir}/redis-2.8.2/src/redis-benchmark $RPM_BUILD_ROOT/$PREFIX/bin
-cp -pf %{_builddir}/redis-2.8.2/src/redis-cli $RPM_BUILD_ROOT/$PREFIX/bin
-cp -pf %{_builddir}/redis-2.8.2/src/redis-check-dump $RPM_BUILD_ROOT/$PREFIX/bin
-cp -pf %{_builddir}/redis-2.8.2/src/redis-check-aof $RPM_BUILD_ROOT/$PREFIX/bin
+cp -pf %{_builddir}/redis-*/src/redis-server     $RPM_BUILD_ROOT/$PREFIX/bin
+cp -pf %{_builddir}/redis-*/src/redis-benchmark  $RPM_BUILD_ROOT/$PREFIX/bin
+cp -pf %{_builddir}/redis-*/src/redis-cli        $RPM_BUILD_ROOT/$PREFIX/bin
+cp -pf %{_builddir}/redis-*/src/redis-check-dump $RPM_BUILD_ROOT/$PREFIX/bin
+cp -pf %{_builddir}/redis-*/src/redis-check-aof  $RPM_BUILD_ROOT/$PREFIX/bin
 
-cp -a %{_builddir}/redis-2.8.2/deps/hiredis/hiredis.h %{_builddir}/redis-2.8.2/deps/hiredis/async.h %{_builddir}/redis-2.8.2/deps/hiredis/adapters $RPM_BUILD_ROOT/$PREFIX/include/hiredis
-cp -a %{_builddir}/redis-2.8.2/deps/hiredis/libhiredis.so $RPM_BUILD_ROOT/$PREFIX/lib%{lbits}/libhiredis.so.0.10
-cd $RPM_BUILD_ROOT/$PREFIX/lib%{lbits} && ln -sf libhiredis.so.0.10 libhiredis.so.0
+cp -a %{_builddir}/redis-*/deps/hiredis/hiredis.h %{_builddir}/redis-*/deps/hiredis/async.h %{_builddir}/redis-*/deps/hiredis/adapters $RPM_BUILD_ROOT/$PREFIX/include/hiredis
+cp -a %{_builddir}/redis-*/deps/hiredis/libhiredis.so $RPM_BUILD_ROOT/$PREFIX/lib%{lbits}/libhiredis.so.0.11
+cd $RPM_BUILD_ROOT/$PREFIX/lib%{lbits} && ln -sf libhiredis.so.0.11 libhiredis.so.0
 cd $RPM_BUILD_ROOT/$PREFIX/lib%{lbits} && ln -sf libhiredis.so.0 libhiredis.so
-cp -a %{_builddir}/redis-2.8.2/deps/hiredis/libhiredis.a $RPM_BUILD_ROOT/$PREFIX/lib%{lbits}
+cp -a %{_builddir}/redis-*/deps/hiredis/libhiredis.a $RPM_BUILD_ROOT/$PREFIX/lib%{lbits}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -78,9 +78,7 @@ CFEngine Build Automation -- redis -- development files
 %{prefix}/bin/redis-check-dump
 
 %dir %{prefix}/lib%{lbits}
-%{prefix}/lib%{lbits}/libhiredis.so
-%{prefix}/lib%{lbits}/libhiredis.so.0
-%{prefix}/lib%{lbits}/libhiredis.so.0.10
+%{prefix}/lib%{lbits}/libhiredis.so*
 
 %files devel
 %defattr(-,root,root)
@@ -95,6 +93,7 @@ CFEngine Build Automation -- redis -- development files
 %dir %{prefix}/include/hiredis/adapters
 %{prefix}/include/hiredis/adapters/ae.h
 %{prefix}/include/hiredis/adapters/libev.h
+%{prefix}/include/hiredis/adapters/libuv.h
 %{prefix}/include/hiredis/adapters/libevent.h
 
 %changelog
