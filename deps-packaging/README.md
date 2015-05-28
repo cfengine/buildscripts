@@ -15,7 +15,7 @@ Agent dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.8
 * [OpenSSL](http://openssl.org/) 0.9.8ze **OUTDATED** end-of-2015 will be **DEPRECATED**
-* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.33 **OUTDATED**
+* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.37
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.14
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.5
 * [libxml2](ftp://xmlsoft.org/libxml2/) 2.9.1 **OUTDATED**
