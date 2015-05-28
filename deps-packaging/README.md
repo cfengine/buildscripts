@@ -34,15 +34,15 @@ Enterprise agent specific dependencies:
 * [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
 * [OpenLDAP](http://www.openldap.org/software/download/) 2.4.40
 * [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3.9
+* [PostgreSQL](http://www.postgresql.org/) 9.0.20 9/2015 to be **DEPRECATED**
+  * From this one we selectively build only `libpq`
 
 Hub specific dependencies:
 
 * [APR](https://apr.apache.org/) 1.5.2
 * [apr-util](https://apr.apache.org/) 1.5.4
 * [Apache](http://httpd.apache.org/) 2.2.29
-* [PostgreSQL](http://www.postgresql.org/) 9.0.4 **OUTDATED** 9/2015 to be **DEPRECATED**
 * PostgreSQL for the hub 9.3.2  **OUTDATED**
-  * **TODO** Why two different postgresql?
 * [Redis](http://redis.io/) 2.8.2 **WAY OUTDATED**
 * [PHP](http://php.net/) 5.4.38 **OUTDATED**
 * [php-apc](https://pecl.php.net/package/APC) 3.1.13
