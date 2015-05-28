@@ -19,6 +19,8 @@ Agent dependencies:
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.14
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.5
 * [libxml2](http://xmlsoft.org/libxml2/) 2.9.2
+* [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.14
+  * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
 * libgcc
@@ -36,6 +38,8 @@ Enterprise agent specific dependencies:
 * [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3.9
 * [PostgreSQL](http://www.postgresql.org/) 9.0.20 9/2015 to be **DEPRECATED**
   * From this one we selectively build only `libpq`
+* [gnu rx](http://www.gnu.org/software/rx/rx.html) 2.5.1 **DEPRECATED**
+  * Needed by MinGW
 
 Hub specific dependencies:
 
@@ -51,12 +55,12 @@ Hub specific dependencies:
     **TODO remove**
 * [php-svn](https://pecl.php.net/package/svn) 1.0.1 **OUTDATED**
 * [libcurl](http://curl.haxx.se/download.html) 7.27.0 **OUTDATED**
+  * Needed for php module
+* libmcrypt 2.5.8
+  * Needed for php module
 
 Other dependencies (**find out why they are needed!**)
 
-* libmcrypt (??)
-* libiconv  (??)
-* [gnu rx](http://www.gnu.org/software/rx/rx.html) **DEPRECATED**
 * [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads) 2.1.26
-  * Not built on RHEL, why?
+  * Only build on Solaris and HP-UX, why? What makes it necessary?
 
