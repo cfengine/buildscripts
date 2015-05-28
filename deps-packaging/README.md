@@ -31,9 +31,9 @@ Enterprise agent specific dependencies:
 * [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
-* pthreads-w32
-* [OpenLDAP](http://www.openldap.org/software/download/) 2.4.36 **OUTDATED**
-* [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3 **OUTDATED**
+* [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
+* [OpenLDAP](http://www.openldap.org/software/download/) 2.4.40
+* [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3.9
 
 Hub specific dependencies:
 

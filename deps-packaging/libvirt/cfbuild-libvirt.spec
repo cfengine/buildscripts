@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libvirt
 Name: cfbuild-libvirt
 Version: %{version}
 Release: 1
-Source0: libvirt-1.1.3.tar.gz
+Source0: libvirt-1.1.3.9.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -15,7 +15,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n libvirt-1.1.3
+%setup -q -n libvirt-1.1.3.9
 %patch0 -p1
 
 
