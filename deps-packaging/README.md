@@ -37,8 +37,8 @@ Enterprise agent specific dependencies:
 
 Hub specific dependencies:
 
-* [APR](https://apr.apache.org/) 1.4.8 **OUTDATED**
-* [apr-util](https://apr.apache.org/) 1.5.2 **OUTDATED**
+* [APR](https://apr.apache.org/) 1.5.2
+* [apr-util](https://apr.apache.org/) 1.5.4
 * [Apache](http://httpd.apache.org/) 2.2.29
 * [PostgreSQL](http://www.postgresql.org/) 9.0.4 **OUTDATED** 9/2015 to be **DEPRECATED**
 * PostgreSQL for the hub 9.3.2  **OUTDATED**

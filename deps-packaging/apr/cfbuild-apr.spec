@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- apr
 Name: cfbuild-apr
 Version: %{version}
 Release: 1
-Source0: apr-1.4.8.tar.gz
+Source0: apr-1.5.2.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n apr-1.4.8
+%setup -q -n apr-1.5.2
 
 LDFLAGS=-L%{buildprefix}/lib
 CPPFLAGS=-I%{buildprefix}/include
@@ -38,7 +38,7 @@ SYS=`uname -s`
 if [ -z $MAKE ]; then
     MAKE_PATH=`which MAKE`
     export MAKE=$MAKE_PATH
-fi    
+fi
 
 $MAKE
 
