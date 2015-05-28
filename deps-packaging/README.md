@@ -44,7 +44,7 @@ Hub specific dependencies:
 * [Apache](http://httpd.apache.org/) 2.2.29
 * PostgreSQL for the hub 9.3.7
 * [Redis](http://redis.io/) 2.8.20
-* [PHP](http://php.net/) 5.4.38 **OUTDATED**
+* [PHP](http://php.net/) 5.4.41 9/2015 to be **DEPRECATED**
 * [php-apc](https://pecl.php.net/package/APC) 3.1.13
   * We're using the latest version, which was released in 2012!
     This project seems stale, do we really need it in our code?
