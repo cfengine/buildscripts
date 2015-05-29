@@ -84,6 +84,8 @@ find $RPM_BUILD_ROOT%prefix/share/GUI -type f -exec sed -i 's/cfapi_log/syslog/'
 mkdir -p $RPM_BUILD_ROOT%prefix/share/NovaBase
 cp -R $RPM_BUILD_ROOT%prefix/masterfiles $RPM_BUILD_ROOT%prefix/share/NovaBase/masterfiles
 rm -rf $RPM_BUILD_ROOT%prefix/masterfiles
+cp -R $RPM_BUILD_ROOT%prefix/modules $RPM_BUILD_ROOT%prefix/share/NovaBase/modules
+rm -rf $RPM_BUILD_ROOT%prefix/modules/*
 
 #Design center
 mkdir -p ${RPM_BUILD_ROOT}%prefix/design-center
@@ -118,7 +120,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %posttrans
 #
-# Work around bug in CFEngine <= 3.6.1. See BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt above.
+# Work around bug in CFEngine <= 3.6.1. Search for
+# BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt in the buildscripts repository.
 #
 # This section can be removed completely when we no longer support upgrading
 # from the 3.6 series.

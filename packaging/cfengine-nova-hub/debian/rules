@@ -64,6 +64,8 @@ install: build
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase
 	cp -R $(CURDIR)/debian/tmp$(PREFIX)/masterfiles $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase/masterfiles
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/masterfiles
+	cp -R $(CURDIR)/debian/tmp$(PREFIX)/modules $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase/modules
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/modules/*
 
 #Design Center
 

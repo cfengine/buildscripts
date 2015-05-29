@@ -25,6 +25,8 @@ install: build
 	cp -R $(CURDIR)/debian/tmp$(PREFIX)/masterfiles $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase/masterfiles
 	chmod -R 744 $(CURDIR)/debian/tmp$(PREFIX)/share
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/masterfiles
+	cp -R $(CURDIR)/debian/tmp$(PREFIX)/modules $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase/modules
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/modules/*
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl
 

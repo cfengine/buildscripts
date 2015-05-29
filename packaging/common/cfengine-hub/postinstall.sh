@@ -32,6 +32,22 @@ if [ ! -f $PREFIX/masterfiles/promises.cf ]; then
     find $PREFIX/masterfiles -type f -exec chmod 600 {} \;
 fi
 
+#
+# Copy the stock package modules for the new installations
+#
+(
+  if ! [ -d $PREFIX/modules/packages ]; then
+    mkdir -p $PREFIX/modules/packages
+  fi
+  if cd $PREFIX/share/NovaBase/modules/packages; then
+    for module in *; do
+      if ! [ -f $PREFIX/modules/packages/$module ]; then
+        cp $module $PREFIX/modules/packages
+      fi
+    done
+  fi
+)
+
 if [ -f $PREFIX/lib/php/mcrypt.so ]; then
   /bin/rm -f $PREFIX/lib/php/mcrypt.*
 fi
