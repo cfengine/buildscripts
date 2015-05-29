@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
 Version: %{version}
 Release: 1
-Source0: libxml2-2.9.1.tar.gz
+Source0: libxml2-2.9.2.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,13 +14,17 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n libxml2-2.9.1
+%setup -q -n libxml2-2.9.2
 SYS=`uname -s`
 
-if [ $SYS = "AIX" ]; then
-./configure --prefix=%{prefix} --without-python --enable-shared --disable-static
+if [ $SYS = "AIX" ]
+then
+    ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix}
 else
-./configure --prefix=%{prefix} --without-python LDFLAGS="-L%{prefix}/lib -Wl,-R%{prefix}/lib" CPPFLAGS="-I%{prefix}/include" LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
+    ./configure --prefix=%{prefix} --without-python --with-zlib=%{prefix} \
+        LDFLAGS="-L%{prefix}/lib -Wl,-R%{prefix}/lib" \
+        CPPFLAGS="-I%{prefix}/include" \
+        LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
 fi
 
 %build
@@ -41,6 +45,7 @@ rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/xmllint
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libxml2.a
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libxml2.la
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/xml2Conf.sh
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/cmake
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share
 
 %clean
