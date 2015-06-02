@@ -158,7 +158,7 @@ EOHIPPUS
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT init")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.email admin@cfengine.com")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.name admin")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "echo -e '/cf_promises_*\n.*.sw[po]\n*~\n\\#*#' >.gitignore")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "(echo '/cf_promises_*'; echo '.*.sw[po]'; echo '*~'; echo '\\#*#') >.gitignore")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add .gitignore")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Ignore cf_promise_*'")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add *")
