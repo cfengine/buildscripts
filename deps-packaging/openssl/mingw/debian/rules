@@ -14,16 +14,12 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p1 < 0001-Undefine-X509_NAME-from-Windows-headers.patch
-	patch -p1 < 0002-Add-mingw64-target.patch
-	patch -p1 < mingw64-openssl-0.9.8g-global.patch
-	patch -p1 < openssl-0.9.8k-pid-t-mingw.patch
-
+	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
-		mingw64 no-asm no-zlib shared  no-ec no-dtls no-psk no-srp \
-		--prefix=$PREFIX
-
-	make build_crypto build_ssl libcrypto.dll.a libssl.dll.a
+		mingw64 no-asm shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-srp \
+		--prefix=$(PREFIX)
+	make depend
+	make ### build_crypto build_ssl libcrypto.dll.a libssl.dll.a
 
 	touch build-stamp
 
@@ -37,9 +33,9 @@ install: build
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
 
-	cp libcrypto-*.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp libeay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp libcrypto.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib
-	cp libssl-*.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp ssleay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp libssl.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib
 	cp -RL include/openssl $(CURDIR)/debian/tmp$(PREFIX)/include
 
