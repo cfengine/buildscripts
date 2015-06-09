@@ -16,16 +16,12 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 export PATH=`pwd`/solaris:$PATH
 
-cd openssl-fips-1.2.4
-./config fipscanisterbuild
-make
-cd ..
-
-./config fips shared  no-ec no-dtls no-psk no-srp \
-    --with-fipslibdir=`pwd`/openssl-fips-1.2.4/fips --prefix=$PREFIX
+./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
+    --prefix=$PREFIX
 
 # Build
 
+make depend
 make
 
 # Test
