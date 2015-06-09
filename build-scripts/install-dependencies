@@ -239,11 +239,6 @@ case "$PHP_APC" in
     DEPS="$DEPS php-apc";;
 esac
 
-case "$PHP_SVN" in
-  yes)
-    DEPS="$DEPS php-svn";;
-esac
-
 case "$LIBATTR" in
   yes)
     DEPS="$DEPS libattr";;
