@@ -239,9 +239,7 @@ case "$ROLE" in
     ;;
 esac
 
-PHP_SVN=no
-
-export APACHE PHP LIBCURL PHP_APC PHP_SVN GIT
+export APACHE PHP LIBCURL PHP_APC GIT
 
 case "$ROLE" in
   hub)

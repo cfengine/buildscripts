@@ -53,7 +53,6 @@ Hub specific dependencies:
   * We're using the latest version, which was released in 2012!
     This project seems stale, do we really need it in our code?
     **TODO remove**
-* [php-svn](https://pecl.php.net/package/svn) 1.0.1 **OUTDATED**
 * [libcurl](http://curl.haxx.se/download.html) 7.27.0 **OUTDATED**
   * Needed for php module
 * libmcrypt 2.5.8
