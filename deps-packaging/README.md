@@ -49,10 +49,6 @@ Hub specific dependencies:
 * PostgreSQL for the hub 9.3.7
 * [Redis](http://redis.io/) 2.8.20
 * [PHP](http://php.net/) 5.6.9
-* [php-apc](https://pecl.php.net/package/APC) 3.1.13
-  * We're using the latest version, which was released in 2012!
-    This project seems stale, do we really need it in our code?
-    **TODO remove**
 * [libcurl](http://curl.haxx.se/download.html) 7.27.0 **OUTDATED**
   * Needed for php module
 * libmcrypt 2.5.8
