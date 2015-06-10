@@ -204,7 +204,6 @@ case "$ROLE" in
     APR_UTIL=yes
     APACHE=yes
     PHP=yes
-    PHP_APC=yes
     LIBCURL=yes
     GIT=yes
     RSYNC=yes
@@ -232,16 +231,13 @@ case "$ROLE" in
   agent)
     APACHE=no
     PHP=no
-    PHP_APC=no
     LIBCURL=no
     GIT=no
     RSYNC=no
     ;;
 esac
 
-PHP_SVN=no
-
-export APACHE PHP LIBCURL PHP_APC PHP_SVN GIT
+export APACHE PHP LIBCURL GIT
 
 case "$ROLE" in
   hub)

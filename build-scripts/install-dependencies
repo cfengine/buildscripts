@@ -234,16 +234,6 @@ case "$REDIS" in
     DEPS="$DEPS redis";;
 esac
 
-case "$PHP_APC" in
-  yes)
-    DEPS="$DEPS php-apc";;
-esac
-
-case "$PHP_SVN" in
-  yes)
-    DEPS="$DEPS php-svn";;
-esac
-
 case "$LIBATTR" in
   yes)
     DEPS="$DEPS libattr";;

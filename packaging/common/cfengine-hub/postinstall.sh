@@ -60,7 +60,7 @@ fi
 #Copy necessary Files and permissions
 #
 cp $PREFIX/lib/php/*.ini $PREFIX/httpd/php/lib
-cp $PREFIX/lib/php/*.so $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20100525
+cp $PREFIX/lib/php/*.so $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20131226
 
 #Change keys in files
 if [ -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp ]; then
