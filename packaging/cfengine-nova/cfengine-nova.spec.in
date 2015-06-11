@@ -247,7 +247,7 @@ exit 0
 
 # Private directories
 
-%defattr(700,root,root)
+%defattr(700,root,root,700)
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
