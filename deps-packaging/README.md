@@ -1,5 +1,6 @@
-See file `install-dependencies` for more details, as well as the
-relevant subdirectories.
+All versions listed apply to 3.7.x branch unless mentioned
+otherwise. File `install-dependencies` and the relevant subdirectories
+in `deps-packaging` are the source of this information.
 
 
 Build dependencies:
@@ -14,7 +15,7 @@ Build dependencies:
 Agent dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.8
-* [OpenSSL](http://openssl.org/) 0.9.8ze **OUTDATED** end-of-2015 will be **DEPRECATED**
+* [OpenSSL](http://openssl.org/) 1.0.2a
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.37
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.14
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.5
