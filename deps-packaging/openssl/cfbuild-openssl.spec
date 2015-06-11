@@ -36,6 +36,11 @@ echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
     then
         DEBUG_CONFIG_FLAGS="no-asm -DPURIFY"
         DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer"
+    # Workaround for OpenSSL build issue on our old SuSE buildslave, see:
+    # http://www.mail-archive.com/openssl-dev@openssl.org/msg39231.html
+    elif [ "$OS" = sles ]
+    then
+        DEBUG_CONFIG_FLAGS=no-asm
     fi
 
     ./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
