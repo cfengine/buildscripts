@@ -168,6 +168,7 @@ exit 0
 %{prefix}/ssl/misc/c_info
 %{prefix}/ssl/misc/c_issuer
 %{prefix}/ssl/misc/c_name
+%{prefix}/ssl/misc/tsget
 
 %prefix/bin/git
 %prefix/bin/gitk
