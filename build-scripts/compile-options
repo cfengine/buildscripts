@@ -207,6 +207,9 @@ case "$ROLE" in
     LIBCURL=yes
     GIT=yes
     RSYNC=yes
+    # Needed by PHP, see redmine#7270
+    LIBICONV=yes
+
     case "$OS-${OS_VERSION}" in
       rhel-[5].*) PHP_JSON=yes;;
       centos-[5].*) PHP_JSON=yes;;

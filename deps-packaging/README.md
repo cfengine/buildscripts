@@ -54,6 +54,8 @@ Hub specific dependencies:
   * Needed for php module
 * libmcrypt 2.5.8
   * Needed for php module
+* [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.14
+  * Needed to be built into PHP, it's used by `cf_util_helper.php`
 
 Other dependencies (**find out why they are needed!**)
 

@@ -70,7 +70,7 @@ mkdir -p %{_builddir}
 --without-gettext \
 --without-gmp \
 --without-mhash \
---without-iconv \
+--with-iconv-dir=%{prefix} \
 --without-imap \
 --without-imap-ssl \
 --without-interbase \
