@@ -34,6 +34,7 @@ mkdir -p %{_builddir}
 --with-pdo \
 --with-pdo-pgsql=%{prefix} \
 --with-json \
+--with-iconv \
 --without-aolserver \
 --without-caudium \
 --without-continuity \
@@ -70,7 +71,6 @@ mkdir -p %{_builddir}
 --without-gettext \
 --without-gmp \
 --without-mhash \
---without-iconv \
 --without-imap \
 --without-imap-ssl \
 --without-interbase \

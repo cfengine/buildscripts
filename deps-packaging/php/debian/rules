@@ -24,6 +24,7 @@ build-stamp:
 --with-mcrypt=shared,$(PREFIX) \
 --with-pdo \
 --with-json \
+--with-iconv \
 --with-pdo-pgsql=$(PREFIX) \
 --without-aolserver \
 --without-caudium \
@@ -61,7 +62,6 @@ build-stamp:
 --without-gettext \
 --without-gmp \
 --without-mhash \
---without-iconv \
 --without-imap \
 --without-imap-ssl \
 --without-interbase \
