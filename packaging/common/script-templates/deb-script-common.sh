@@ -32,8 +32,7 @@ case "$1" in
     IS_UPGRADE=0
     ;;
   configure)
-    # Actually not guaranteed to be correct, but will be handled in
-    # script-common-header-last.sh
+    # Actually not guaranteed to be correct.
     IS_UPGRADE=0
     ;;
   *)
