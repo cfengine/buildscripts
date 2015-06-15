@@ -425,6 +425,9 @@ if ! is_upgrade; then
   fi
 fi
 
+# Do not test for existence of $PREFIX/policy_server.dat, since we want the
+# web service to start. The script should take care of detecting that we are
+# not bootstrapped.
 platform_service cfengine3 start
 
 exit 0

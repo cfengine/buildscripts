@@ -111,6 +111,8 @@ case `os_type` in
     ;;
 esac
 
-platform_service cfengine3 start
+if [ -f $PREFIX/policy_server.dat ]; then
+  platform_service cfengine3 start
+fi
 
 exit 0
