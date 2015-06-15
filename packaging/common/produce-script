@@ -8,6 +8,7 @@
 #
 # <type>-script-common.sh
 # <type>-script-common-<action>.sh
+# script-common.sh
 # script-common-<action>.sh
 # script-common-header-last.sh
 # ../cfengine-PROJECT[-hub]/<pre|post><install|remove>.sh
@@ -25,9 +26,14 @@ PROJECT_TYPE="$1"
 SCRIPT_TYPE="$2"
 PKG_TYPE="$3"
 
-if [ -f "$TEMPLATEDIR/$PKG_TYPE-script-common.sh" ]; then
-  cat "$TEMPLATEDIR/$PKG_TYPE-script-common.sh"
-fi
+include_script()
+{
+  if [ -f "$1" ]; then
+    cat "$1"
+  fi
+}
+
+include_script "$TEMPLATEDIR/$PKG_TYPE-script-common.sh"
 
 echo "PKG_TYPE=$PKG_TYPE"
 echo "SCRIPT_TYPE=$SCRIPT_TYPE"
@@ -35,38 +41,26 @@ echo "PROJECT_TYPE=$PROJECT_TYPE"
 
 case "$SCRIPT_TYPE" in
   *install)
-    if [ -f "$TEMPLATEDIR/$PKG_TYPE-script-common-install.sh" ]; then
-      cat "$TEMPLATEDIR/$PKG_TYPE-script-common-install.sh"
-    fi
-    if [ -f "$TEMPLATEDIR/script-common-install.sh" ]; then
-      cat "$TEMPLATEDIR/script-common-install.sh"
-    fi
+    include_script "$TEMPLATEDIR/$PKG_TYPE-script-common-install.sh"
+    include_script "$TEMPLATEDIR/script-common.sh"
+    include_script "$TEMPLATEDIR/script-common-install.sh"
     ;;
   *remove)
-    if [ -f "$TEMPLATEDIR/$PKG_TYPE-script-common-remove.sh" ]; then
-      cat "$TEMPLATEDIR/$PKG_TYPE-script-common-remove.sh"
-    fi
-    if [ -f "$TEMPLATEDIR/script-common-remove.sh" ]; then
-      cat "$TEMPLATEDIR/script-common-remove.sh"
-    fi
+    include_script "$TEMPLATEDIR/$PKG_TYPE-script-common-remove.sh"
+    include_script "$TEMPLATEDIR/script-common.sh"
+    include_script "$TEMPLATEDIR/script-common-remove.sh"
     ;;
 esac
 
-if [ -f "$TEMPLATEDIR/script-common-header-last.sh" ]; then
-  cat "$TEMPLATEDIR/script-common-header-last.sh"
-fi
+include_script "$TEMPLATEDIR/script-common-header-last.sh"
 
 # Not having a script is not an error. Not all scripts are used,
 # and not all projects are ported over.
 case "$PROJECT_TYPE" in
   cfengine-nova-hub)
-    if [ -f "$SCRIPTDIR/cfengine-hub/$SCRIPT_TYPE.sh" ]; then
-      cat "$SCRIPTDIR/cfengine-hub/$SCRIPT_TYPE.sh"
-    fi
+    include_script "$SCRIPTDIR/cfengine-hub/$SCRIPT_TYPE.sh"
     ;;
   *)
-    if [ -f "$SCRIPTDIR/cfengine-non-hub/$SCRIPT_TYPE.sh" ]; then
-      cat "$SCRIPTDIR/cfengine-non-hub/$SCRIPT_TYPE.sh"
-    fi
+    include_script "$SCRIPTDIR/cfengine-non-hub/$SCRIPT_TYPE.sh"
     ;;
 esac
