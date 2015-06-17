@@ -15,7 +15,7 @@ case "$PKG_TYPE" in
         ;;
       postremove|postinstall)
         if [ -f "$PREFIX/package-upgrade.txt" ]; then
-          if "$SCRIPT_TYPE" = "postinstall"; then
+          if [ "$SCRIPT_TYPE" = "postinstall" ]; then
             rm -f "$PREFIX/package-upgrade.txt"
           fi
           alias is_upgrade='true'
