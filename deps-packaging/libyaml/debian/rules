@@ -28,6 +28,7 @@ install: build
 	dh_installdirs
 
 	make DESTDIR=$(CURDIR)/debian/tmp install
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
 
 binary-indep: build install
 
