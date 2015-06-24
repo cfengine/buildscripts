@@ -5,7 +5,7 @@ PREFIX=$(BUILDPREFIX)
 ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
   PTHREAD=
 else
-  PTHREAD=--with-pthread=/var/cfengine
+  PTHREAD=--with-pthread=$(PREFIX)
 endif
 
 clean:
@@ -28,6 +28,7 @@ install: build
 	dh_installdirs
 
 	make DESTDIR=$(CURDIR)/debian/tmp install
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
 
 binary-indep: build install
 
