@@ -19,7 +19,11 @@ rc_d_path()
 
 platform_service()
 {
-  /etc/init.d/"$1" "$2"
+  if [ -x /bin/systemctl ]; then
+    /bin/systemctl "$2" "$1"
+  else
+    /etc/init.d/"$1" "$2"
+  fi
 }
 
 IS_UPGRADE=0
