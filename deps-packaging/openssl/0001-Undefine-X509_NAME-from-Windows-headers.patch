@@ -15,15 +15,15 @@ index ea89153..64d370d 100644
 +++ b/crypto/rand/rand.h
 @@ -65,6 +65,12 @@
  
- #if defined(OPENSSL_SYS_WINDOWS)
- #include <windows.h>
-+#undef X509_NAME
-+#undef X509_EXTENSIONS
-+#undef X509_CERT_PAIR
-+#undef PKCS7_ISSUER_AND_SERIAL
-+#undef OCSP_REQUEST
-+#undef OCSP_RESPONSE
- #endif
+ # if defined(OPENSSL_SYS_WINDOWS)
+ #  include <windows.h>
++#  undef X509_NAME
++#  undef X509_EXTENSIONS
++#  undef X509_CERT_PAIR
++#  undef PKCS7_ISSUER_AND_SERIAL
++#  undef OCSP_REQUEST
++#  undef OCSP_RESPONSE
+ # endif
  
  #ifdef  __cplusplus
 diff --git a/e_os.h b/e_os.h
@@ -31,18 +31,18 @@ index cc90f5e..4d64cbd 100644
 --- a/e_os.h
 +++ b/e_os.h
 @@ -268,6 +268,12 @@ extern "C" {
- #      define _WIN32_WINNT 0x0400
- #    endif
- #    include <windows.h>
-+#    undef X509_NAME
-+#    undef X509_EXTENSIONS
-+#    undef X509_CERT_PAIR
-+#    undef PKCS7_ISSUER_AND_SERIAL
-+#    undef OCSP_REQUEST
-+#    undef OCSP_RESPONSE
- #    include <stdio.h>
- #    include <stddef.h>
- #    include <errno.h>
+ #    define _WIN32_WINNT 0x0400
+ #   endif
+ #   include <windows.h>
++#   undef X509_NAME
++#   undef X509_EXTENSIONS
++#   undef X509_CERT_PAIR
++#   undef PKCS7_ISSUER_AND_SERIAL
++#   undef OCSP_REQUEST
++#   undef OCSP_RESPONSE
+ #   include <stdio.h>
+ #   include <stddef.h>
+ #   include <errno.h>
 -- 
 1.7.4.1
 

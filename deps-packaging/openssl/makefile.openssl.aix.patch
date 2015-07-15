@@ -5,10 +5,10 @@
   PEX_LIBS= 
   EX_LIBS= 
   EXE_EXT= 
-! ARFLAGS= -X32
+! ARFLAGS= 
   AR= ar $(ARFLAGS) r
   ARD=ar $(ARFLAGS) d
-  RANLIB= /usr/local/bin/ranlib
+  RANLIB= /usr/bin/ranlib
 --- 65,71 ----
   PEX_LIBS= 
   EX_LIBS= 
@@ -16,4 +16,4 @@
 ! ARFLAGS= -X32
   AR= ar $(ARFLAGS) r
   ARD=ar $(ARFLAGS) d
-  RANLIB= /usr/local/bin/ranlib
+  RANLIB= /usr/bin/ranlib
