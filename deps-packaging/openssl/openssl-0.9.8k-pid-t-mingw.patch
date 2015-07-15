@@ -1,13 +1,13 @@
 --- a/engines/e_aep.c.orig	2008-12-30 14:30:57.000000000 +0100
 +++ a/engines/e_aep.c	2009-09-06 12:51:40.000000000 +0200
 @@ -62,8 +62,10 @@
- #include <unistd.h>
+ # include <unistd.h>
  #else
- #include <process.h>
+ # include <process.h>
 +#ifndef _PID_T_
  typedef int pid_t;
  #endif
 +#endif
  
  #if defined(OPENSSL_SYS_NETWARE) && defined(NETWARE_CLIB)
- #define getpid GetThreadID
+ # define getpid GetThreadID
