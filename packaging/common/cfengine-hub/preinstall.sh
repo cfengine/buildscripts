@@ -25,7 +25,8 @@ fi
 NAME=$(hostname -f)
 if [ -z "$NAME" ];
 then
-  echo "hostname -f does not return a valid name, this is a configuration problem on this host."
+  echo "hostname -f does not return a valid name, but this is a requirement for generating a"
+  echo "SSL certificate for the Mission Portal and API."
   echo "Please make sure that hostname -f returns a valid name (Add an entry to /etc/hosts or "
   echo "fix the name resolution)."
   exit 1
