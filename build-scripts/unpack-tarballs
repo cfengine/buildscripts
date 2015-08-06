@@ -1,0 +1,23 @@
+#!/bin/sh -x
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+
+SOURCE_TARBALL="$BASEDIR/output/tarballs/cfengine-3.*.tar.gz"
+MASTERFILES_TARBALL="$BASEDIR/output/tarballs/cfengine-masterfiles*.tar.gz"
+cd $BASEDIR
+
+echo "Ensuring that the git-checked-out directories core/ and masterfiles/ are not here"
+[ -e core -o -e masterfiles ] && exit 1 || true
+
+# NATIVE TAR is being used on purpose, and *not* GNU TAR.
+
+echo "UNPACKING SOURCE TARBALL AND SYMLINKING core/"
+gzip -dc "$SOURCE_TARBALL"  | tar -xf -
+ln -s cfengine-3* core
+
+echo "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
+gzip -dc "$MASTERFILES_TARBALL" | tar -xf -
+ln -s cfengine-masterfiles-* masterfiles
