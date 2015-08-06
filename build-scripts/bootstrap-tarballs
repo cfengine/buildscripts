@@ -1,0 +1,30 @@
+#!/bin/sh -x
+
+. `dirname "$0"`/functions
+. detect-environment
+. compile-options
+
+
+mkdir -p $BASEDIR/output/tarballs
+
+cd $BASEDIR/core
+rm cfengine-3.*.tar.gz || true
+git rev-parse HEAD > $BASEDIR/output/core-commitID
+
+make dist
+mv cfengine-3.*.tar.gz $BASEDIR/output/tarballs/
+
+cd $BASEDIR/masterfiles
+rm cfengine-masterfiles*.tar.gz || true
+git rev-parse HEAD > $BASEDIR/output/masterfiles-commitID
+
+make dist
+mv cfengine-masterfiles*.tar.gz $BASEDIR/output/tarballs/
+
+# We remove the git-checked-out directories so that we use the tarballs,
+# in order to ensure they are good. The tarballs are unpacked and
+# symlinked into place, during the next building stage in each of the
+# various buildslaves.
+
+cd "$BASEDIR"
+rm -rf "$BASEDIR/core/" "$BASEDIR/masterfiles/"
