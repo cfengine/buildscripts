@@ -28,7 +28,7 @@ build-stamp:
 	    --disable-backends \
 	    --with-tls=openssl \
 	    --without-gssapi \
-	    CC=$(DEB_HOST_GNU_TYPE)-gcc \
+	    CC="$(DEB_HOST_GNU_TYPE)-gcc -static-libgcc" \
 	    AR=$(DEB_HOST_GNU_TYPE)-ar \
 	    LDFLAGS="$(LDFLAGS) -L$(PREFIX)/lib" \
 	    CPPFLAGS="$(CPPFLAGS) -I$(PREFIX)/include"
