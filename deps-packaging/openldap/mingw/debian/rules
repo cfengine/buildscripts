@@ -2,9 +2,6 @@
 
 PREFIX=$(BUILDPREFIX)
 
-LDFLAGS=-L$(PREFIX)/lib
-CPPFLAGS=-I$(PREFIX)/include
-
 clean:
 	dh_testdir
 	dh_testroot
@@ -33,8 +30,8 @@ build-stamp:
 	    --without-gssapi \
 	    CC=$(DEB_HOST_GNU_TYPE)-gcc \
 	    AR=$(DEB_HOST_GNU_TYPE)-ar \
-	    LDFLAGS="$(LDFLAGS)" \
-	    CPPFLAGS="$(CPPFLAGS)"
+	    LDFLAGS="$(LDFLAGS) -L$(PREFIX)/lib" \
+	    CPPFLAGS="$(CPPFLAGS) -I$(PREFIX)/include"
 
 	make -C include
 	make -C libraries
