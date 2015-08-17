@@ -18,6 +18,7 @@ build-stamp:
 	patch -p1 < 0002-Add-mingw64-target.patch
 	patch -p1 < mingw64-openssl-0.9.8g-global.patch
 	patch -p1 < openssl-0.9.8k-pid-t-mingw.patch
+	patch -p1 < mingw-honor-LDFLAGS.patch
 
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
 		mingw64 no-asm no-zlib shared  no-ec no-dtls no-psk no-srp \
