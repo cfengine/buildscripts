@@ -18,6 +18,8 @@ case "$OS_FAMILY" in
     # but we need it to make .so libraries. It doesn't work correctly when
     # specified in the Makefile, so we specify it in the environment instead.
     LDFLAGS=-Wl,-brtl;;
+  mingw)
+    LDFLAGS=-static-libgcc;;
 esac
 export LDFLAGS
 

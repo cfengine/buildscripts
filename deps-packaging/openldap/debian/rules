@@ -2,8 +2,6 @@
 
 PREFIX=$(BUILDPREFIX)
 
-LDFLAGS=-L$(BUILDPREFIX)/lib
-CPPFLAGS=-I$(BUILDPREFIX)/include
 #
 # glibc-2.8 errorneously hides peercred(3) under #ifdef __USE_GNU.
 #
@@ -28,8 +26,8 @@ build-stamp:
 	    --disable-backends \
 	    --with-tls=openssl \
 	    --without-gssapi \
-	    LDFLAGS="$(LDFLAGS)" \
-	    CPPFLAGS="$(CPPFLAGS)"
+	    LDFLAGS="$(LDFLAGS) -L$(PREFIX)/lib" \
+	    CPPFLAGS="$(CPPFLAGS) -I$(PREFIX)/include"
 
 	make -C include
 	make -C libraries
