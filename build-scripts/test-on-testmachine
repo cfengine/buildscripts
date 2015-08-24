@@ -38,6 +38,12 @@ case "$TEST_MACHINE" in
         # Fuser has special output. The PIDs arrive on stdout, and all the ornaments
         # arrive on stderr, so all we have to do is to grep for PID numbers.
         for pid in `sudo $FUSER $CHROOT_ROOT 2>/dev/null | sed -e 's/[^ 0-9]//g'`; do
+            # Minilogd may sometimes launch on RedHat without any user
+            # intervention. Ignore that.
+            if ps -ef | egrep "^ *[^ ]+ +$pid" | grep minilogd; then
+                continue
+            fi
+
             # Leaving processes behind is an error. It should never happen.
             return_code=1
             (
