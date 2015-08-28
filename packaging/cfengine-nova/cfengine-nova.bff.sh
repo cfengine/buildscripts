@@ -8,8 +8,14 @@ VERSION=$1
 BASEDIR=$2
 LPPBASE=$2/..
 
-#create necessary directory skeleton
-sudo rm -rf $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION
+# Clean up old build artifacts.
+for i in bff lpp out
+do
+    sudo rm -rf $LPPBASE/lppdir/$i/*
+    sudo rm -rf $HOME/lppdir/$i/*
+done
+
+# Create necessary directory skeleton.
 mkdir -p $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION
 cd $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION
 
