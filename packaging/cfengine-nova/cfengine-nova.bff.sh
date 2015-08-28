@@ -36,42 +36,6 @@ sudo rm -rf $LPPBASE/lppdir/out
 mkdir -p $LPPBASE/lppdir/out
 
 
-cat > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/etc/rc.d/init.d/cfengine3 << EOF;
-#!/usr/bin/ksh
- 
-ulimit -c 0
-
-case "\$1" in
- 
-	start)
-	   ps -ef | grep -v grep | grep cf-execd > /dev/null
-	   ret=\$?
-	   if [ \$ret -gt 0 ]; then
-	   /var/cfengine/bin/cf-execd
-	   fi
-	   ;;
-	 
-	stop)
-	    PID=\$\$
-	    for i in cf-execd cf-serverd cf-monitord cf-agent; do
-	    ps -ef | grep \$i | grep -v grep | awk '{print \$2}' >> /tmp/cfengine3.\$PID
-	    done
-	    
-	    while read line; do
-	        kill \$line
-	    done < /tmp/cfengine3.\$PID
-	 
-	    rm /tmp/cfengine3.\$PID
-	 
-	     ;;
-	 
-	* )
-	     echo "Usage: \$0 (start | stop)"
-	    exit 1
-	 
-esac
-EOF
-
 # Create install/remove scripts.
 PREINSTALL=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.pre_i
 POSTINSTALL=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.post_i
@@ -84,7 +48,6 @@ $P/../common/produce-script cfengine-nova postinstall bff > $POSTINSTALL
 $P/../common/produce-script cfengine-nova preremove bff > $PREREMOVE
 $P/../common/produce-script cfengine-nova postremove bff > $POSTREMOVE
 
-chmod 755 $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/etc/rc.d/init.d/cfengine3 
 # Create the info file
 env LD_LIBRARY_PATH=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/bin/cf-agent -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.copyright
 
