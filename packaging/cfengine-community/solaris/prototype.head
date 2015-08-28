@@ -1,3 +1,5 @@
 i pkginfo=./pkginfo
 i postinstall=./postinstall
 i preremove=./preremove
+i preinstall=./preinstall
+i postremove=./postremove
