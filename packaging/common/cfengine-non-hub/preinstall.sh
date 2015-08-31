@@ -1,3 +1,8 @@
+# Stop the services on upgrade.
+if is_upgrade; then
+  platform_service cfengine3 stop
+fi
+
 case `os_type` in
   redhat)
     #
