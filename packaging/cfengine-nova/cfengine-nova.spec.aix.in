@@ -87,6 +87,11 @@ rm -rf $RPM_BUILD_ROOT
 %dir %prefix/share
 %prefix/share/doc
 
+# System files
+%defattr(755,root,root)
+%dir /etc/rc.d/init.d
+/etc/rc.d/init.d/*
+
 # Private directories
 
 %defattr(700,root,root)

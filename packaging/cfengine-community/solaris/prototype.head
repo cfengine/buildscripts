@@ -1,4 +1,5 @@
 i pkginfo=./pkginfo
 i postinstall=./postinstall
 i preremove=./preremove
-f none /etc/init.d/cfengine3 0755 root root
+i preinstall=./preinstall
+i postremove=./postremove
