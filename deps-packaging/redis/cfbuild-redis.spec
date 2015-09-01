@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- redis
 Name: cfbuild-redis
 Version: %{version}
 Release: 1
-Source0: redis-2.8.20.tar.gz
+Source0: redis-2.8.21.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -21,7 +21,7 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 
-%setup -q -n redis-2.8.20
+%setup -q -n redis-2.8.21
 $PATCH -s -p1 < %{_topdir}/SOURCES/redis.patch
 
 %build
