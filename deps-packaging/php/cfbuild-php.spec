@@ -1,4 +1,4 @@
-%define php_version 5.6.9
+%define php_version 5.6.12
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -11,8 +11,6 @@ Group: Other
 Url: http://example.com/
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
-Patch0: phar-link-fix.patch
-
 AutoReqProv: no
 
 %define prefix %{buildprefix}
@@ -20,8 +18,6 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n php-%{php_version}
-
-%patch0 -p1
 
 ./configure --prefix=%{prefix}/httpd/php \
 --with-apxs2=%{prefix}/httpd/bin/apxs \
