@@ -1,4 +1,11 @@
 platform_service cfengine3 stop
+if [ -x /bin/systemctl ]; then
+  # When using systemd, the services are split in two, and although both will
+  # stop due to the command above, the web part may only do so after some
+  # delay, which may cause problems later if the binaries are gone by the time
+  # it tries to stop them.
+  /bin/systemctl stop cfengine3-web
+fi
 
 case "`os_type`" in
   redhat)
