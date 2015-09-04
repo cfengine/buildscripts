@@ -1,5 +1,9 @@
-# Stop the services on upgrade.
 if is_upgrade; then
+  # This is nice to know to provide fixes for bugs in already released
+  # package scripts.
+  "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
+
+  # Stop the services on upgrade.
   platform_service cfengine3 stop
 fi
 

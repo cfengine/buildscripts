@@ -1,3 +1,9 @@
+if is_upgrade; then
+  # This is nice to know to provide fixes for bugs in already released
+  # package scripts.
+  "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
+fi
+
 if [ "`package_type`" = "rpm" ]; then
   #
   # Work around bug in CFEngine <= 3.6.1: The %preun script stops the services,
