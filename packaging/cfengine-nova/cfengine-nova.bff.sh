@@ -48,6 +48,11 @@ $P/../common/produce-script cfengine-nova postinstall bff > $POSTINSTALL
 $P/../common/produce-script cfengine-nova preremove bff > $PREREMOVE
 $P/../common/produce-script cfengine-nova postremove bff > $POSTREMOVE
 
+# In addition AIX has pre_rm, which we will treat the same as preinstall.
+# See the actual scripts for more details on this
+PRE_RM=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.pre_rm
+$P/../common/produce-script cfengine-nova preinstall bff > $PRE_RM
+
 # Create the info file
 env LD_LIBRARY_PATH=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/bin/cf-agent -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.copyright
 

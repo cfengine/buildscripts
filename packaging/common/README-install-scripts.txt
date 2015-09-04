@@ -39,47 +39,54 @@ These are the variables and functions you can use inside the scripts:
 How platforms do it:
 ====================
 
-N = Script from new package
-O = Script from old package
+N         = Script from new package
+O         = Script from old package
+<Install> = Install of package files
+<Replace> = Replacement of old package files with new ones
+<Remove>  = Removal of package files
 
 Install:
 --------
 
-+--------------+-------------+----------------+-------------+----------------+
-|    rpm       |     deb     | depot (HPUX)   | bff (AIX)   | pkg (Solaris)  |
-+--------------+-------------+----------------+-------------+----------------+
-| N: pretrans  |     N/A     |      N/A       |     N/A     |      N/A       |
-| N: pre       | N: preinst  | N: preinstall  | N: pre_i    | N: preinstall  |
-| N: post      | N: postinst | N: postinstall | N: post_i   | N: postinstall |
-| N: posttrans |     N/A     |      N/A       |     N/A     |      N/A       |
-+--------------+-------------+----------------+-------------+----------------+
+|--------------+-------------+----------------+-----------+----------------|
+| rpm          | deb         | depot (HPUX)   | bff (AIX) | pkg (Solaris)  |
+|--------------+-------------+----------------+-----------+----------------|
+| N: pretrans  |             |                |           |                |
+| N: pre       | N: preinst  | N: preinstall  | N: pre_i  | N: preinstall  |
+| <Install>    | <Install>   | <Install>      | <Install> | <Install>      |
+| N: post      | N: postinst | N: postinstall | N: post_i | N: postinstall |
+| N: posttrans |             |                |           |                |
+|--------------+-------------+----------------+-----------+----------------|
 
 Upgrade:
 --------
 
-+--------------+-------------+----------------+-------------+----------------+
-|    rpm       |     deb     | depot (HPUX)   | bff (AIX)   | pkg (Solaris)  |
-+--------------+-------------+----------------+-------------+----------------+
-| N: pretrans  |     N/A     |      N/A       |     N/A     |      N/A       |
-| N: pre       | O: prerm    | N: preinstall  | N: pre_rm   |      N/A (*)   |
-| N: post      | N: preinst  | N: postinstall | N: pre_i    |      N/A       |
-| O: preun     | O: postrm   |      N/A       | N: post_i   |      N/A       |
-| O: postun    | N: postinst |      N/A       |     N/A     |      N/A       |
-| N: posttrans |     N/A     |      N/A       |     N/A     |      N/A       |
-+--------------+-------------+----------------+-------------+----------------+
+|--------------+-------------+----------------+-----------+---------------|
+| rpm          | deb         | depot (HPUX)   | bff (AIX) | pkg (Solaris) |
+|--------------+-------------+----------------+-----------+---------------|
+|              |             |                | N: pre_rm |               |
+| N: pretrans  | O: prerm    |                | <Remove>  |               |
+| N: pre       | N: preinst  | N: preinstall  | N: pre_i  |               |
+| <Replace>    | <Replace>   | <Replace>      | <Install> | (*)           |
+| N: post      | O: postrm   | N: postinstall | N: post_i |               |
+| O: preun     | N: postinst |                |           |               |
+| O: postun    |             |                |           |               |
+| N: posttrans |             |                |           |               |
+|--------------+-------------+----------------+-----------+---------------|
 
 (*) Upgrade doesn't exist on Solaris. You have to remove and then add.
 
 Removal:
 --------
 
-+--------------+-------------+----------------+-------------+----------------+
-|    rpm       |     deb     | depot (HPUX)   | bff (AIX)   | pkg (Solaris)  |
-+--------------+-------------+----------------+-------------+----------------+
-| O: pretrans  |     N/A     |      N/A       |     N/A     |      N/A       |
-| O: preun     | O: prerm    | O: preremove   | O: unpost_i | O: preremove   |
-| O: postun    | O: postrm   | O: postremove  | O: unpre_i  | O: postremove  |
-+--------------+-------------+----------------+-------------+----------------+
+|-------------+-----------+---------------+-------------+---------------|
+| rpm         | deb       | depot (HPUX)  | bff (AIX)   | pkg (Solaris) |
+|-------------+-----------+---------------+-------------+---------------|
+| O: pretrans |           |               |             |               |
+| O: preun    | O: prerm  | O: preremove  | O: unpost_i | O: preremove  |
+| <Remove>    | <Remove>  | <Remove>      | <Remove>    | <Remove>      |
+| O: postun   | O: postrm | O: postremove | O: unpre_i  | O: postremove |
+|-------------+-----------+---------------+-------------+---------------|
 
 As can be seen, every single platform have their own way to do things, and no
 two platforms use the same approach. We try to do our best to keep things as
@@ -96,34 +103,39 @@ This is the mapping we use:
 Install:
 --------
 
-+-------------+----------+----------+--------------+-----------+--------------+
-| Packaging   |   rpm    |   deb    | depot (HPUX) | bff (AIX) | pkg (Solaris)|
-+-------------+----------+----------+--------------+-----------+--------------+
-| preinstall  |   pre    | preinst  |  preinstall  |  pre_i    |  preinstall  |
-| postinstall |   post   | postinst |  postinstall |  post_i   |  postinstall |
-+-------------+----------+----------+--------------+-----------+--------------+
+|-------------+-----------+-----------+--------------+-----------+---------------|
+| Packaging   | rpm       | deb       | depot (HPUX) | bff (AIX) | pkg (Solaris) |
+|-------------+-----------+-----------+--------------+-----------+---------------|
+| preinstall  | pre       | preinst   | preinstall   | pre_i     | preinstall    |
+| <Install>   | <Install> | <Install> | <Install>    | <Install> | <Install>     |
+| postinstall | post      | postinst  | postinstall  | post_i    | postinstall   |
+|-------------+-----------+-----------+--------------+-----------+---------------|
 
 Upgrade:
 --------
 
-+-------------+----------+----------+--------------+-----------+--------------+
-| Packaging   |   rpm    |   deb    | depot (HPUX) | bff (AIX) | pkg (Solaris)|
-+-------------+----------+----------+--------------+-----------+--------------+
-| preinstall  |   pre    | preinst  |  preinstall  |  pre_i    |     N/A      |
-| postinstall |   post   | postinst |  postinstall |  post_i   |     N/A      |
-| preremove   |   N/A    |   N/A    |     N/A      |    N/A    |     N/A      |
-| postremove  |   N/A    |   N/A    |     N/A      |    N/A    |     N/A      |
-+-------------+----------+----------+--------------+-----------+--------------+
+|----------------+-----------+-----------+--------------+-----------+---------------|
+| Packaging      | rpm       | deb       | depot (HPUX) | bff (AIX) | pkg (Solaris) |
+|----------------+-----------+-----------+--------------+-----------+---------------|
+| preinstall     | pre       | preinst   | preinstall   | pre_rm    |               |
+| <Replace>      | <Replace> | <Replace> | <Replace>    | <Replace> |               |
+| postinstall    | post      | postinst  | postinstall  | post_i    |               |
+| preremove (*)  |           |           |              |           |               |
+| postremove (*) |           |           |              |           |               |
+|----------------+-----------+-----------+--------------+-----------+---------------|
+
+(*) Not run
 
 Removal:
 --------
 
-+-------------+----------+----------+--------------+-----------+--------------+
-| Packaging   |   rpm    |   deb    | depot (HPUX) | bff (AIX) | pkg (Solaris)|
-+-------------+----------+----------+--------------+-----------+--------------+
-| preremove   |  preun   | prerm    |  preremove   | unpost_i  |  preremove   |
-| postremove  |  postun  | postrm   |  postremove  | unpre_i   |  postremove  |
-+-------------+----------+----------+--------------+-----------+--------------+
+|------------+----------+----------+--------------+-----------+---------------|
+| Packaging  | rpm      | deb      | depot (HPUX) | bff (AIX) | pkg (Solaris) |
+|------------+----------+----------+--------------+-----------+---------------|
+| preremove  | preun    | prerm    | preremove    | unpost_i  | preremove     |
+| <Remove>   | <Remove> | <Remove> | <Remove>     | <Remove>  | <Remove>      |
+| postremove | postun   | postrm   | postremove   | unpre_i   | postremove    |
+|------------+----------+----------+--------------+-----------+---------------|
 
 In other words we choose to omit removal scripts completely in case of upgrade.
 This is primarily motivated by the fact that the calling order varies wildly
