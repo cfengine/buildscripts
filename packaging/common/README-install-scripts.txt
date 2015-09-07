@@ -64,7 +64,7 @@ Upgrade:
 |--------------+-------------+----------------+-----------+---------------|
 | rpm          | deb         | depot (HPUX)   | bff (AIX) | pkg (Solaris) |
 |--------------+-------------+----------------+-----------+---------------|
-|              |             |                | N: pre_rm |               |
+|              |             |                | O: pre_rm |               |
 | N: pretrans  | O: prerm    |                | <Remove>  |               |
 | N: pre       | N: preinst  | N: preinstall  | N: pre_i  |               |
 | <Replace>    | <Replace>   | <Replace>      | <Install> | (*)           |
