@@ -10,21 +10,24 @@ mkdir -p $BASEDIR/output/tarballs
 cd $BASEDIR/core
 rm cfengine-3.*.tar.gz || true
 git rev-parse HEAD > $BASEDIR/output/core-commitID
-
+# Configure in order to run "make dist", deleted later.
+./configure --with-tokyocabinet=/usr
 make dist
 mv cfengine-3.*.tar.gz $BASEDIR/output/tarballs/
 
 cd $BASEDIR/masterfiles
 rm cfengine-masterfiles*.tar.gz || true
 git rev-parse HEAD > $BASEDIR/output/masterfiles-commitID
-
+# Configure in order to run "make dist", deleted later.
+./configure
 make dist
 mv cfengine-masterfiles*.tar.gz $BASEDIR/output/tarballs/
 
-# We remove the git-checked-out directories so that we use the tarballs,
-# in order to ensure they are good. The tarballs are unpacked and
-# symlinked into place, during the next building stage in each of the
-# various buildslaves.
+# DELETE the git-checked-out directories, they are tainted with
+# ./configure artifacts anyway.  The tarballs are unpacked and symlinked
+# into place, during the next building stage in each of the various
+# buildslaves. That way unpacking of tarballs on all platforms is
+# verified.
 
 cd "$BASEDIR"
 rm -rf "$BASEDIR/core/" "$BASEDIR/masterfiles/"
