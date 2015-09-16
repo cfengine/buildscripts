@@ -23,6 +23,11 @@ git rev-parse HEAD > $BASEDIR/output/masterfiles-commitID
 make dist
 mv cfengine-masterfiles*.tar.gz $BASEDIR/output/tarballs/
 
+cd $BASEDIR/output/tarballs
+sha256sum *.tar.gz > sha256sums.txt
+CKSUM=`sum sha256sums.txt | cut -d ' ' -f 1`
+mv sha256sums.txt sha256sums.$CKSUM.txt
+
 # DELETE the git-checked-out directories, they are tainted with
 # ./configure artifacts anyway.  The tarballs are unpacked and symlinked
 # into place, during the next building stage in each of the various
