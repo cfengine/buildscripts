@@ -15,9 +15,9 @@ echo "Ensuring that the git-checked-out directories core/ and masterfiles/ are n
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
 echo "UNPACKING SOURCE TARBALL AND SYMLINKING core/"
-gzip -dc "$SOURCE_TARBALL"  | tar -xf -
+gzip -dc $SOURCE_TARBALL  | tar -xf -
 ln -s cfengine-3* core
 
 echo "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
-gzip -dc "$MASTERFILES_TARBALL" | tar -xf -
+gzip -dc $MASTERFILES_TARBALL  | tar -xf -
 ln -s cfengine-masterfiles-* masterfiles
