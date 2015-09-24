@@ -9,6 +9,7 @@ if [ "$SCRIPT_TYPE" = preinstall ]; then
     # install. This mean we must create the helper file, since it is only way to
     # tell later that pre_rm has already been run. It will be cleaned up in
     # postinstall.
+    mkdir -p "$PREFIX"
     echo "Helper file used by CFEngine package installation. Can be safely deleted." > "$PREFIX/AIX_PREINSTALL_ALREADY_DONE.txt"
   fi
 elif [ "$SCRIPT_TYPE" = postinstall ]; then
