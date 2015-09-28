@@ -10,15 +10,15 @@ gen_prototype() {
       continue
     elif [ "$destf" = "/var" ]; then
       continue
+    elif [ -h $f ]; then
+      dest=`LANG= file -h $f | sed -e 's/.*symbolic link to //'`
+      echo "s none /$destf=$dest root root"
     elif [ -f $f ] && [ -x $f ]; then
       echo "f none /$destf=$f 0755 root root"
     elif [ -f $f ]; then
       echo "f none /$destf=$f 0644 root root"
     elif [ -d $f ]; then
       echo "d none /$destf=$f 0755 root root"
-    elif [ -h $f ]; then
-      dest=`LANG= file -h $f | sed -e 's/.*symbolic link to //'`
-      echo "s none /$destf=$dest root root"
     else
       echo "Unknown file type: $f" >&2
       exit 42

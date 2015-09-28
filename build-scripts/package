@@ -172,21 +172,27 @@ case "$PACKAGING" in
     sudo rm -rf $BASEDIR/$PKG/pkg
     mkdir -p $BASEDIR/$PKG/pkg
 
-    cp -pr $BASEDIR/cfengine/dist/* $BASEDIR/$PKG/pkg
-    cp -pr $P/solaris/* $BASEDIR/$PKG/pkg
-    cp -pr /var/cfengine/bin/* $BASEDIR/$PKG/pkg/var/cfengine/bin
-    cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg/var/cfengine/lib
-
-    ARCH=`uname -p`
-    sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION/g" $BASEDIR/$PKG/pkg/pkginfo.in > $BASEDIR/$PKG/pkg/pkginfo
+    rsync -lpr $BASEDIR/cfengine/dist/* $BASEDIR/$PKG/pkg/
+    rsync -lpr /var/cfengine/bin/* $BASEDIR/$PKG/pkg/var/cfengine/bin/
+    rsync -lpr /var/cfengine/lib/* $BASEDIR/$PKG/pkg/var/cfengine/lib/
 
     cd $BASEDIR/$PKG/pkg
-    cat prototype.head > prototype.tmp
-    find . -type f | egrep -v "$PREFIX|(pre|post)(install|remove)|pkginfo|prototype|prototype.head|pkginfo.in" | pkgproto >> prototype.tmp
-    find var/cfengine | pkgproto >> prototype.tmp
+    # IMPORTANT: Before this step, do not copy any files into the current
+    # directory that shouldn't be in the package, otherwise they will be
+    # included as package files.
+    pkgproto .=/ > ../prototype.tmp
+    mv ../prototype.tmp .
 
-    # Replace last two words with "root root".
-    sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp > prototype
+    # Paste several things together in the prototype.
+    (
+      cat $P/solaris/prototype.head
+      # Replace last two words with "root root" and filter out directories that
+      # aren't ours.
+      sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp | egrep '^([^d]|d none /var/cfengine)'
+    ) > prototype
+
+    ARCH=`uname -p`
+    sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION/g" $P/solaris/pkginfo.in > $BASEDIR/$PKG/pkg/pkginfo
 
     $P/../common/produce-script $PKG preinstall pkg > preinstall
     $P/../common/produce-script $PKG postinstall pkg > postinstall
