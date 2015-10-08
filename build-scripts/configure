@@ -109,6 +109,13 @@ case "$LIBYAML" in
     ARGS="$ARGS --without-libyaml";;
 esac
 
+if [ "$LIBCURL" = "yes" ] || [ "$LIBCURL_HUB" = "yes" ]
+then
+  ARGS="$ARGS --with-libcurl=$P"
+else
+  ARGS="$ARGS --without-libcurl"
+fi
+
 case "$BUILD_TYPE" in
 
   RELEASE)

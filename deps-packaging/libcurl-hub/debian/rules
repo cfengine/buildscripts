@@ -55,6 +55,9 @@ install: build
 
 	make install DESTDIR=$(CURDIR)/debian/tmp
 
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.a
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la
+
 binary-indep: build install
 
 binary-arch: build install

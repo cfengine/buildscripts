@@ -1,0 +1,18 @@
+Source: cfbuild-libcurl-hub
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-libcurl-hub
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- libcurl
+ CFEngine Build Automation -- libcurl
+
+Package: cfbuild-libcurl-hub-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- libcurl -- development files
+  CFEngine Build Automation -- libcurl -- development files

@@ -40,6 +40,7 @@ rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
 rm -rf $RPM_BUILD_ROOT%{prefix}/share/CoreBase
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
+rm -f $RPM_BUILD_ROOT%{prefix}/bin/curl
 rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 
 

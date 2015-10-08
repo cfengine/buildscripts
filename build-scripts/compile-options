@@ -220,8 +220,8 @@ case "$ROLE" in
     APR=yes
     APR_UTIL=yes
     APACHE=yes
+    LIBCURL_HUB=yes
     PHP=yes
-    LIBCURL=yes
     GIT=yes
     RSYNC=yes
     case "$OS-${OS_VERSION}" in
@@ -247,14 +247,14 @@ case "$ROLE" in
     ;;
   agent)
     APACHE=no
+    LIBCURL=yes
     PHP=no
-    LIBCURL=no
     GIT=no
     RSYNC=no
     ;;
 esac
 
-export APACHE PHP LIBCURL GIT
+export APACHE PHP GIT
 
 case "$ROLE" in
   hub)
@@ -277,6 +277,8 @@ case "$OS_FAMILY" in
 esac
 
 LIBYAML=yes
+
+export LIBYAML LIBCURL
 
 # Tests
 
