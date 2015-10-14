@@ -12,6 +12,13 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 $PATCH -p1 < solaris-unistd.patch
 #Configure
 
+# Work around bug in ancient libtool: -R is not passed to the linker.
+if [ -x /usr/ccs/bin/ld ]
+then
+    LD="/usr/ccs/bin/ld $LDFLAGS"
+    export LD
+fi
+
 ./configure --prefix=$PREFIX CPPFLAGS=-I/var/cfengine/include
 
 #Build
