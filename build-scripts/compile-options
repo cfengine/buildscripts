@@ -23,6 +23,10 @@ case "$OS_FAMILY" in
 esac
 export LDFLAGS
 
+# For Debian builds, which do not automatically inherit build flags
+DEB_LDFLAGS_APPEND="$LDFLAGS"
+export DEB_LDFLAGS_APPEND
+
 # Should we package libgcc_s.so.1?
 
 case "$OS_FAMILY" in
