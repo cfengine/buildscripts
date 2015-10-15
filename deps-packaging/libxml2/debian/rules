@@ -13,7 +13,7 @@ build-stamp:
 	dh_testdir
 
 	./configure --prefix=$(PREFIX) --without-python 
-	LDFLAGS="-L$(PREFIX)/lib -R$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" make
+	CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" make
 
 	touch build-stamp
 
@@ -23,7 +23,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	LDFLAGS="-L$(PREFIX)/lib -R$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" make install DESTDIR=$(CURDIR)/debian/tmp 
+	CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" make install DESTDIR=$(CURDIR)/debian/tmp 
 
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/xmlcatalog
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/xmllint

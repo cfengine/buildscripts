@@ -113,7 +113,7 @@ build-stamp:
 --without-tsrm-pth \
 --without-tsrm-st \
 --without-tsrm-pthreads
-	LDFLAGS="-L$(PREFIX)/lib -R$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" make
+	CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" make
 
 	touch build-stamp
 
@@ -126,7 +126,7 @@ install: build
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf
 	cp $(PREFIX)/httpd/conf/httpd.conf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/httpd.conf
 
-	INSTALL_ROOT=$(CURDIR)/debian/tmp LDFLAGS="-L$(PREFIX)/lib -R$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" $(MAKE) install
+	INSTALL_ROOT=$(CURDIR)/debian/tmp CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" $(MAKE) install
 	cp $(CURDIR)/php.ini-production $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
 	echo "extension=curl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/curl.ini
 	echo "extension=mcrypt.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/mcrypt.ini

@@ -15,25 +15,13 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n libxml2-2.9.2
-SYS=`uname -s`
 
-if [ $SYS = "AIX" ]
-then
-    ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix}
-else
-    ./configure --prefix=%{prefix} --without-python --with-zlib=%{prefix} \
-        LDFLAGS="-L%{prefix}/lib -Wl,-R%{prefix}/lib" \
-        CPPFLAGS="-I%{prefix}/include" \
-        LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
-fi
+./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
+    CPPFLAGS="-I%{prefix}/include" \
+    LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
 
 %build
-SYS=`uname -s`
-if [ $SYS = "AIX" ]; then
 make
-else
-make LDFLAGS="-L%{prefix}/lib -Wl,-R%{prefix}/lib" CPPFLAGS="-I%{prefix}/include" LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
-fi
 
 %install
 rm -rf ${RPM_BUILD_ROOT}

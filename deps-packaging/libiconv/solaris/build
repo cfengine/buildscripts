@@ -6,7 +6,6 @@ PREFIX=/var/cfengine
 
 LI=${BUILD_ROOT}/cfbuild-libiconv${PREFIX}
 LID=${BUILD_ROOT}/cfbuild-libiconv-devel${PREFIX}
-export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 #Patch
 

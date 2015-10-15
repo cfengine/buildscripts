@@ -17,9 +17,20 @@ case "$OS_FAMILY" in
     # This flag is needed because AIX defaults to producing .a shared libraries,
     # but we need it to make .so libraries. It doesn't work correctly when
     # specified in the Makefile, so we specify it in the environment instead.
-    LDFLAGS=-Wl,-brtl;;
+    LDFLAGS="-Wl,-brtl"
+    # AIX needs default RPATH (libpath on AIX) specified as well, otherwise it
+    # won't find libc.
+    LDFLAGS="$LDFLAGS -L$BUILDPREFIX/lib -Wl,-blibpath:$BUILDPREFIX/lib:/usr/lib:/lib"
+    ;;
+  hpux)
+    LDFLAGS="-L$BUILDPREFIX/lib -Wl,+b$BUILDPREFIX/lib"
+    ;;
   mingw)
-    LDFLAGS=-static-libgcc;;
+    LDFLAGS="-static-libgcc -L$BUILDPREFIX/lib"
+    ;;
+  *)
+    LDFLAGS="-L$BUILDPREFIX/lib -Wl,-R$BUILDPREFIX/lib"
+    ;;
 esac
 export LDFLAGS
 

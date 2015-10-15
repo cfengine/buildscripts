@@ -6,7 +6,6 @@ PREFIX=/var/cfengine
 
 PG=${BUILD_ROOT}/cfbuild-postgresql${PREFIX}
 PGD=${BUILD_ROOT}/cfbuild-postgresql-devel${PREFIX}
-export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 export LIBS="-lrt"
 
 # Patch

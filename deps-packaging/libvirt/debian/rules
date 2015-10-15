@@ -9,11 +9,6 @@ clean:
 	dh_clean
 
 #
-# FIXME: is there any other way to have RPATH?
-#
-LDFLAGS=-Wl,--rpath=$(PREFIX)/lib
-
-#
 # Newer ld(1) does not allow implicit linking through intermediate
 # libraries. Add -lxml2 explicitly.
 #
@@ -27,7 +22,6 @@ build-stamp:
 
 	patch -p1 <  0001-fix-inet-oldkernel.patch
 
-	LDFLAGS="$(LDFLAGS)" \
 	CFLAGS="-DULLONG_MAX=18446744073709551615ULL -fno-stack-protector" \
 	    PKG_CONFIG_PATH=$(PREFIX)/lib/pkgconfig \
 	    ./configure \

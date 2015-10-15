@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 
 PREFIX= $(BUILDPREFIX)
-LDFLAGS="-L$(BUILDPREFIX)/lib"
 clean:
 	dh_testdir
 	dh_testroot
@@ -14,7 +13,7 @@ build-stamp:
 
 	zcat acl.destdir.diff.gz | $(PATCH) -p1 || true
 
-	./configure --prefix=$(PREFIX) --enable-gettext=no LDFLAGS=$(LDFLAGS)
+	./configure --prefix=$(PREFIX) --enable-gettext=no
 
 	make
 

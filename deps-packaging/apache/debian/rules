@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 PREFIX=$(BUILDPREFIX)
 
-LDFLAGS="-L$(BUILDPREFIX)/lib -Wl,-R$(BUILDPREFIX)/lib"
 CPPFLAGS=-I$(BUILDPREFIX)/include
 
 clean:
@@ -14,7 +13,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=$(PREFIX)/httpd --enable-so --enable-mods-shared="all ssl ldap authnz_ldap" --with-z=$(PREFIX) --with-ssl=$(PREFIX) --with-ldap=$(PREFIX)  --with-apr=$(PREFIX) --with-apr-util=$(PREFIX) LDFLAGS=$(LDFLAGS) CPPFLAGS="$(CPPFLAGS)" 
+	./configure --prefix=$(PREFIX)/httpd --enable-so --enable-mods-shared="all ssl ldap authnz_ldap" --with-z=$(PREFIX) --with-ssl=$(PREFIX) --with-ldap=$(PREFIX)  --with-apr=$(PREFIX) --with-apr-util=$(PREFIX) CPPFLAGS="$(CPPFLAGS)" 
 	make
 
 	touch build-stamp
