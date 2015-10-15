@@ -14,7 +14,10 @@ PGD=${BUILD_ROOT}/cfbuild-postgresql-devel${PREFIX}
 # For HP-UX we need to use HP C Compiler to avoid errors related to <net/if.h>
 # We need to disable thread safety in order to be able to compile libpq using
 # HP C Compiler. Otherwise it'll hang during configure.
-
+# Because of this we also need to modify the link flags to not use the GNU
+# specific '-Wl,' indirect flag. It should be passed directly instead.
+LDFLAGS="`echo $LDFLAGS | sed -e 's/-Wl,//g'`"
+export LDFLAGS
 CC=cc ./configure --prefix=$PREFIX --without-zlib --without-readline --disable-thread-safety
 
 # Build
