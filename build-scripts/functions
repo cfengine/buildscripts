@@ -236,7 +236,7 @@ remote_script_general() {
     ENVVARS="$ENVVARS CFLAGS='$CFLAGS'"
   fi
   if [ -n "$LDFLAGS" ]; then
-    ENVVARS="$ENVVARS LDFLAGS=$LDFLAGS"
+    ENVVARS="$ENVVARS LDFLAGS='$LDFLAGS'"
   fi
 
   ENVVARS="$ENVVARS BRANCH=$REPOSITORY"
@@ -244,7 +244,7 @@ remote_script_general() {
   ENVVARS="$ENVVARS EXPLICIT_VERSION=$EXPLICIT_VERSION"
   ENVVARS="$ENVVARS TEST_MACHINE=$TEST_MACHINE"
 
-  ( set -x; $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT" )
+  ( set -x; eval $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT" )
 }
 
 remote_script() {
