@@ -16,7 +16,6 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n apr-1.4.8
 
-LDFLAGS=-L%{buildprefix}/lib
 CPPFLAGS=-I%{buildprefix}/include
 
 #
@@ -30,7 +29,6 @@ CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 SYS=`uname -s`
 
 ./configure --prefix=%{prefix} \
-            LDFLAGS="$LDFLAGS" \
             CPPFLAGS="$CPPFLAGS"
 
 %build

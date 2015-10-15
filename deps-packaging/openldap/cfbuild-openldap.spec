@@ -16,7 +16,6 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n openldap-2.4.44
 
-LDFLAGS=-L%{buildprefix}/lib
 CPPFLAGS=-I%{buildprefix}/include
 
 #
@@ -41,7 +40,6 @@ fi
             --disable-backends \
             --with-tls=openssl \
             --without-gssapi \
-            LDFLAGS="$LDFLAGS" \
             CPPFLAGS="$CPPFLAGS"
 
 %build
