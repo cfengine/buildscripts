@@ -19,18 +19,14 @@ mkdir -p %{_builddir}
 %patch0 -p1
 
 
-# FIXME: is there any other way to have RPATH?
-LDFLAGS=-Wl,--rpath=%{prefix}/lib
-
 #
 # Newer ld(1) does not allow implicit linking through intermediate
 # libraries. Add -lxml2 explicitly.
 #
 # https://fedoraproject.org/wiki/UnderstandingDSOLinkChange
 #
-LDFLAGS="$LDFLAGS -L%prefix/lib -lxml2"
+LDFLAGS="$LDFLAGS -lxml2"
 
-LDFLAGS="$LDFLAGS" \
 PKG_CONFIG_PATH=%prefix/lib/pkgconfig \
 ./configure --prefix=%{prefix}\
             --localstatedir=/var \

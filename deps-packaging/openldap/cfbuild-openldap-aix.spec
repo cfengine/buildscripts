@@ -18,7 +18,6 @@ mkdir -p %{_builddir}
 
 # Either "$LDFLAGS -L%{prefix}lib"
 # Or     "-bsvr4 $LDFLAGS -Wl,-R,%{prefix}/lib"
-LDFLAGS="$LDFLAGS -L%{prefix}/lib"
 CPPFLAGS=-I%{buildprefix}/include
 
 #
@@ -38,7 +37,6 @@ SYS=`uname -s`
             --disable-backends \
             --with-tls=openssl \
             --without-gssapi \
-            LDFLAGS="$LDFLAGS" \
             CPPFLAGS="$CPPFLAGS"
 
 %build

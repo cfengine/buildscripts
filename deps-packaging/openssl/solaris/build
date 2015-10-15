@@ -6,7 +6,6 @@ PREFIX=/var/cfengine
 
 OS=${BUILD_ROOT}/cfbuild-openssl${PREFIX}
 OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}
-export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 # To pick up libgcc_s.so.1, which is apparently not in dyld path.
 export LD_LIBRARY_PATH=$PREFIX/lib

@@ -18,7 +18,7 @@ mkdir -p %{_builddir}
 
 zcat ../../SOURCES/acl.destdir.diff.gz | $PATCH -p1 || true
 
-./configure --prefix=%{prefix} --enable-gettext=no LDFLAGS="-L${BUILDPREFIX}/lib"
+./configure --prefix=%{prefix} --enable-gettext=no
 
 %build
 

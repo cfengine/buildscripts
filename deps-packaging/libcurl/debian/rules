@@ -18,7 +18,6 @@ build-stamp:
 				--with-ssl=$(PREFIX) \
 				--with-zlib=$(PREFIX) \
 				--prefix=$(PREFIX) \
-				LDFLAGS="-L$(PREFIX)/lib -Wl,-R$(PREFIX)/lib" \
 				CPPFLAGS="-I$(PREFIX)/include" \
 
 	make
