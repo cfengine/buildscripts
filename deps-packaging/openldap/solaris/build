@@ -16,7 +16,8 @@ export LDFLAGS="-Wl,-R/var/cfengine/lib -L/var/cfengine/lib"
 
 ./configure --prefix=$PREFIX --enable-shared --disable-slapd --disable-backends \
             --with-tls=openssl --without-gssapi \
-            CPPFLAGS=-I$PREFIX/include
+            CPPFLAGS=-I$PREFIX/include \
+            CC=gcc
 
 # Build
 
