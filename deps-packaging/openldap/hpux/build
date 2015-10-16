@@ -7,13 +7,19 @@ PREFIX=/var/cfengine
 OL=${BUILD_ROOT}/cfbuild-openldap${PREFIX}
 OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
 
+# Work around bug in libtool: On HP-UX it doesn't understand that there is an
+# interdependency from libldap to liblber when installing. Force this knowledge
+# on it (for the "make install" below, but must be passed in configure).
+LDFLAGS="$LDFLAGS -L${BUILD_ROOT}/cfbuild-openldap-devel$PREFIX/lib"
+export LDFLAGS
+
 # Patch
 
 # Configure
 
 ./configure --prefix=$PREFIX --enable-shared --disable-slapd --disable-backends \
             --with-tls=openssl --without-gssapi --without-threads \
-            LDFLAGS="-L/var/cfengine/lib -L${OLD}/lib" CPPFLAGS=-I/var/cfengine/include
+            CPPFLAGS=-I$PREFIX/include
 
 # Build
 

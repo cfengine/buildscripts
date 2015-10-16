@@ -120,7 +120,7 @@ mkdir -p %{_builddir}
 --without-tsrm-pth \
 --without-tsrm-st \
 --without-tsrm-pthreads \
-LDFLAGS="-L/var/cfengine/lib -Wl,-R/var/cfengine/lib" CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
+CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
 
 %build
 

@@ -21,11 +21,10 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n httpd-%{apache_version}
 
-LDFLAGS=-L%{buildprefix}/lib
 CPPFLAGS=-I%{buildprefix}/include
 
 
-./configure --prefix=%{prefix}/httpd --enable-so --enable-mods-shared="all ssl ldap authnz_ldap" --with-z=%{prefix} --with-ssl=%{prefix}  --with-ldap=%{prefix}  --with-apr=%{prefix} --with-apr-util=%{prefix}  LDFLAGS="$LDFLAGS" CPPFLAGS="$CPPFLAGS"
+./configure --prefix=%{prefix}/httpd --enable-so --enable-mods-shared="all ssl ldap authnz_ldap" --with-z=%{prefix} --with-ssl=%{prefix}  --with-ldap=%{prefix}  --with-apr=%{prefix} --with-apr-util=%{prefix}  CPPFLAGS="$CPPFLAGS"
 
 %build
 

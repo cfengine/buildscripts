@@ -26,7 +26,6 @@ build-stamp:
 	    --disable-backends \
 	    --with-tls=openssl \
 	    --without-gssapi \
-	    LDFLAGS="$(LDFLAGS) -L$(PREFIX)/lib" \
 	    CPPFLAGS="$(CPPFLAGS) -I$(PREFIX)/include"
 
 	make -C include

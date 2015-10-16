@@ -7,6 +7,15 @@ PREFIX=/var/cfengine
 PC=${BUILD_ROOT}/cfbuild-pcre${PREFIX}
 PCD=${BUILD_ROOT}/cfbuild-pcre-devel${PREFIX}
 
+# HP-UX needs the .libs directory in the library search path because of a
+# bug in libtool: it will specify libpcre.so.3 as the dependency of
+# libpcreposix.so.3, however when it links it tries to link to libpcre.so.
+# Although they are the same library, the native ld is not happy with this,
+# and starts looking for the libpcre.so.3 library on its own, which it won't
+# find, because it wasn't listed on the command line. Hence we need to
+# specify libtool's secret library stash: ".libs".
+LDFLAGS="$LDFLAGS -L.libs"
+
 # Patch
 
 # Configure

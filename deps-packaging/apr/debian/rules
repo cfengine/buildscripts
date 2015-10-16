@@ -2,7 +2,6 @@
 
 PREFIX=$(BUILDPREFIX)
 
-LDFLAGS=-L$(BUILDPREFIX)/lib
 CPPFLAGS=-I$(BUILDPREFIX)/include
 #
 # glibc-2.8 errorneously hides peercred(3) under #ifdef __USE_GNU.
@@ -23,7 +22,6 @@ build-stamp:
 	dh_testdir
 
 	./configure --prefix=$(PREFIX) \
-	    LDFLAGS="$(LDFLAGS)" \
 	    CPPFLAGS="$(CPPFLAGS)"
 
 	make 

@@ -9,7 +9,7 @@ TZD=${BUILD_ROOT}/cfbuild-zlib-devel${PREFIX}
 
 # Configure
 
-LDFLAGS="-Wl,-R${PREFIX}/lib" ./configure --prefix=${PREFIX}
+./configure --prefix=${PREFIX}
 
 sed -e "s@TEST_LDFLAGS=@TEST_LDFLAGS=-Wl,-R${PREFIX}/lib @" < Makefile > Makefile.new
 mv Makefile.new Makefile
