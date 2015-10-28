@@ -9,8 +9,13 @@ SOURCE_TARBALL="$BASEDIR/output/tarballs/cfengine-3.*.tar.gz"
 MASTERFILES_TARBALL="$BASEDIR/output/tarballs/cfengine-masterfiles*.tar.gz"
 cd $BASEDIR
 
+# DELETE the git-checked-out directories, they are tainted with
+# ./configure artifacts anyway.  The tarballs are unpacked and symlinked
+# into place. That way unpacking of tarballs on all platforms is
+# verified.
+
 echo "Ensuring that the git-checked-out directories core/ and masterfiles/ are not here"
-[ -e core -o -e masterfiles ] && exit 1 || true
+rm -rf "$BASEDIR/core/" "$BASEDIR/masterfiles/"
 
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
