@@ -78,6 +78,7 @@
 /var/cfengine/bin/pg_test_timing
 /var/cfengine/bin/pg_standby
 /var/cfengine/bin/pg_archivecleanup
+/var/cfengine/bin/pg_recvlogical
 /var/cfengine/bin/oid2name
 /var/cfengine/bin/pg_upgrade
 /var/cfengine/bin/pg_xlogdump
