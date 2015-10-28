@@ -21,10 +21,10 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=$(PREFIX)  --with-apr=$(PREFIX) --with-ldap-lib=$(PREFIX)/lib --with-ldap\
+	./configure --prefix=$(PREFIX)  --with-apr=$(PREFIX) --with-ldap-lib=$(PREFIX)/lib --with-ldap \
 	    CPPFLAGS="$(CPPFLAGS)"
-	cp ../../apr/pkg/build/apr_rules.mk build/rules.mk
-	make 
+
+	make
 
 	touch build-stamp
 
