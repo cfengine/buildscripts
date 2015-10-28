@@ -1,0 +1,48 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=/var/cfengine
+
+TT=${BUILD_ROOT}/cfbuild-libcurl${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
+
+# Build
+
+./configure --prefix=$PREFIX \
+    --with-sysroot=$PREFIX \
+    --with-ssl=$PREFIX \
+    --with-zlib=$PREFIX \
+    --disable-ldap \
+    --disable-ldaps \
+    --without-axtls \
+    --without-cyassl \
+    --without-darwinssl \
+    --without-egd-socket \
+    --without-gnutls \
+    --without-gssapi \
+    --without-libidn \
+    --without-libmetalink \
+    --without-librtmp \
+    --without-libssh2 \
+    --without-nghttp2 \
+    --without-nss \
+    --without-polarssl \
+    --without-winidn \
+    --without-winssl
+$MAKE
+
+# Test
+
+# Install
+
+mkdir -p $TTD/lib
+mkdir -p $TTD/include
+$MAKE install prefix=${TTD}
+
+# Package
+
+rm -rf ${TTD}/man
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/libcurl.so* ${TT}/lib

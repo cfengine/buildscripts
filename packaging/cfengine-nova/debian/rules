@@ -36,6 +36,7 @@ install: build
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/getfacl
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/curl
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl
 
 

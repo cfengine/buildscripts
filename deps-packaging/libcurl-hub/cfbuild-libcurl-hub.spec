@@ -1,5 +1,5 @@
 Summary: CFEngine Build Automation -- libcurl
-Name: cfbuild-libcurl
+Name: cfbuild-libcurl-hub
 Version: %{version}
 Release: 1
 Source: curl-7.45.0.tar.gz

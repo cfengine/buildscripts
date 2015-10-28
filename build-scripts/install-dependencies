@@ -171,6 +171,11 @@ case "$LIBCURL" in
     DEPS="$DEPS libcurl";;
 esac
 
+case "$LIBCURL_HUB" in
+  yes)
+    DEPS="$DEPS libcurl-hub";;
+esac
+
 case "$GIT" in
   yes)
     DEPS="$DEPS git";;
