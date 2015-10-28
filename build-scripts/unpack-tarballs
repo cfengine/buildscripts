@@ -15,7 +15,7 @@ cd $BASEDIR
 # verified.
 
 echo "Ensuring that the git-checked-out directories core/ and masterfiles/ are not here"
-rm -rf "$BASEDIR/core/" "$BASEDIR/masterfiles/" "$BASEDIR/enterprise/" "$BASEDIR/nova/" "$BASEDIR/mission-portal/" "$BASEDIR/design-center/"
+rm -rf "$BASEDIR/core/" "$BASEDIR/masterfiles/" "$BASEDIR/enterprise/" "$BASEDIR/nova/" "$BASEDIR/mission-portal/"
 
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
