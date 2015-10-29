@@ -14,6 +14,7 @@ git rev-parse HEAD > $BASEDIR/output/core-commitID
 ./configure --with-tokyocabinet=/usr
 make dist
 mv cfengine-3.*.tar.gz $BASEDIR/output/tarballs/
+make distclean
 
 cd $BASEDIR/masterfiles
 rm cfengine-masterfiles*.tar.gz || true
@@ -22,6 +23,7 @@ git rev-parse HEAD > $BASEDIR/output/masterfiles-commitID
 ./configure
 make dist
 mv cfengine-masterfiles*.tar.gz $BASEDIR/output/tarballs/
+make distclean
 
 cd $BASEDIR/output/tarballs
 sha256sum *.tar.gz > sha256sums.txt
