@@ -212,7 +212,6 @@ exit 0
 %{prefix}/bin/pgbench
 %{prefix}/bin/vacuumlo
 %{prefix}/bin/pg_test_fsync
-%{prefix}/bin/pg_recvlogical
 #redis server
 %{prefix}/bin/redis-cli
 %{prefix}/bin/redis-server
