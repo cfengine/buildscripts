@@ -47,13 +47,14 @@ Hub specific dependencies:
 * [APR](https://apr.apache.org/) 1.5.2
 * [apr-util](https://apr.apache.org/) 1.5.4
 * [Apache](http://httpd.apache.org/) 2.2.29
-* PostgreSQL for the hub 9.3.7
-* [Redis](http://redis.io/) 2.8.20
-* [PHP](http://php.net/) 5.6.9
+* PostgreSQL for the hub 9.3.9
+* [Redis](http://redis.io/) 2.8.23
+* [PHP](http://php.net/) 5.6.14
 * [libcurl](http://curl.haxx.se/download.html) 7.27.0 **OUTDATED**
   * Needed for php module
 * libmcrypt 2.5.8
   * Needed for php module
+* Git 1.8.5.6
 
 Other dependencies (**find out why they are needed!**)
 
