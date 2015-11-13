@@ -83,5 +83,6 @@ fi
 
 if [ $return_code -ne 0 ]
 then
+    echo "ERROR: we just finished cleaning up, but earlier command had returned: $return_code"
     exit $return_code
 fi
