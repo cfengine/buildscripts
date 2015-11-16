@@ -233,15 +233,25 @@ done
 # The certificate will be named $(hostname -f).cert and the corresponding key should be named $(hostname -f).key.
 #
 CFENGINE_MP_DEFAULT_CERT_LOCATION="$PREFIX/httpd/ssl/certs"
+CFENGINE_MP_DEFAULT_CERT_LINK_LOCATION="$PREFIX/httpd/ssl"
 CFENGINE_MP_DEFAULT_KEY_LOCATION="$PREFIX/httpd/ssl/private"
 CFENGINE_OPENSSL="$PREFIX/bin/openssl"
 mkdir -p $CFENGINE_MP_DEFAULT_CERT_LOCATION
 mkdir -p $CFENGINE_MP_DEFAULT_KEY_LOCATION
 CFENGINE_LOCALHOST=$(hostname -f)
 CFENGINE_MP_CERT=$CFENGINE_MP_DEFAULT_CERT_LOCATION/$CFENGINE_LOCALHOST.cert
+CFENGINE_MP_CERT_LINK=$CFENGINE_MP_DEFAULT_CERT_LINK_LOCATION/cert.pem
 CFENGINE_MP_KEY=$CFENGINE_MP_DEFAULT_KEY_LOCATION/$CFENGINE_LOCALHOST.key
 if [ ! -f $CFENGINE_MP_CERT ]; then
   $CFENGINE_OPENSSL req -new -newkey rsa:2048 -days 3650 -nodes -x509 -utf8 -sha256 -subj "/CN=$CFENGINE_LOCALHOST" -keyout $CFENGINE_MP_KEY  -out $CFENGINE_MP_CERT -config $PREFIX/ssl/openssl.cnf
+  ln -sf $CFENGINE_MP_CERT $CFENGINE_MP_CERT_LINK
+fi
+
+#
+# If we are upgrading and the link is not there make sure to create it
+#
+if [ ! -h $CFENGINE_MP_CERT_LINK ]; then
+  ln -sf $CFENGINE_MP_CERT $CFENGINE_MP_CERT_LINK
 fi
 #
 # Modify the Apache configuration with the corresponding key and certificate
