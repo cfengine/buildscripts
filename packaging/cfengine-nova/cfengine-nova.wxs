@@ -132,6 +132,9 @@
 	      <Component Id='libxml2.dll' Guid='7ae36f48-d2ad-417c-a01f-809b7613eccc' Win64='$(var.isWin64)'>
                 <File Id='libxml2.dll' Name='libxml2-2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libxml2-2.dll' />
               </Component>
+	      <Component Id='libcurl_4.dll' Guid='de435dd1-1fce-424a-b6a0-dc63192e2060' Win64='$(var.isWin64)'>
+                <File Id='libcurl_4.dll' Name='libcurl-4.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcurl-4.dll' />
+              </Component>
             </Directory>
           </Directory>
         </Directory>
@@ -164,6 +167,7 @@
             <ComponentRef Id='libyaml_0_2.dll' />
             <ComponentRef Id='zlib1.dll' />
 	    <ComponentRef Id='libxml2.dll' />
+	    <ComponentRef Id='libcurl_4.dll' />
       </Feature>
 
       <UI>
