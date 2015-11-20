@@ -258,14 +258,17 @@ exit 0
 %dir %prefix/share
 %prefix/share/man
 %prefix/share/doc
-# Base policy
-%prefix/share/NovaBase
 # Web interface
 %prefix/share/GUI
 #postgresql share
 %prefix/share/postgresql/*
 %prefix/share/db
 %{prefix}/share/doc/postgresql/extension/*
+# Base policy
+%prefix/share/NovaBase
+
+%defattr(755,root,root,755)
+%prefix/share/NovaBase/modules
 
 #DC deps
 %defattr(755,root,root,755)
@@ -304,11 +307,12 @@ exit 0
 %prefix/design-center/bin
 %prefix/design-center/lib
 
+%defattr(755,root,root,755)
+%dir %prefix/modules
 
 %defattr(700,root,root,700)
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
-%dir %prefix/modules
 
 %changelog
