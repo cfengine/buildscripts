@@ -233,7 +233,7 @@ done
 # The certificate will be named $(hostname -f).cert and the corresponding key should be named $(hostname -f).key.
 #
 CFENGINE_MP_DEFAULT_CERT_LOCATION="$PREFIX/httpd/ssl/certs"
-CFENGINE_MP_DEFAULT_CERT_LINK_LOCATION="$PREFIX/httpd/ssl"
+CFENGINE_MP_DEFAULT_CERT_LINK_LOCATION="$PREFIX/ssl"
 CFENGINE_MP_DEFAULT_KEY_LOCATION="$PREFIX/httpd/ssl/private"
 CFENGINE_OPENSSL="$PREFIX/bin/openssl"
 mkdir -p $CFENGINE_MP_DEFAULT_CERT_LOCATION
