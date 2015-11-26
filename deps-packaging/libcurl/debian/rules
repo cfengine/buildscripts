@@ -4,8 +4,10 @@ PREFIX=$(BUILDPREFIX)
 
 ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
   PTHREAD=
+  CC_OVERRIDE=
 else
   PTHREAD=--with-pthread=$(PREFIX)
+  CC_OVERRIDE="CC=$(DEB_HOST_GNU_TYPE)-gcc -static-libgcc"
 endif
 
 clean:
@@ -41,6 +43,8 @@ build-stamp:
 				--without-polarssl \
 				--without-winidn \
 				--without-winssl \
+				LDFLAGS="$(LDFLAGS)" \
+				$(CC_OVERRIDE) \
 				CPPFLAGS="-I$(PREFIX)/include" \
 
 	make
