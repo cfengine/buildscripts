@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- openldap
 Name: cfbuild-openldap
 Version: %{version}
 Release: 1
-Source0: openldap-2.4.42.tgz
+Source0: openldap-2.4.43.tgz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n openldap-2.4.42
+%setup -q -n openldap-2.4.43
 
 # Either "$LDFLAGS -L%{prefix}lib"
 # Or     "-bsvr4 $LDFLAGS -Wl,-R,%{prefix}/lib"
