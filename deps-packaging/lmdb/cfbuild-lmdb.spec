@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- lmdb
 Name: cfbuild-lmdb
 Version: %{version}
 Release: 1
-Source0: 2f587ae081d076e3707360c5db086520c219d3ea.tar.gz
+Source0: 2011eb37c1a3d390df2336cb2c55843771723a0c.tar.gz
 License: OpenLDAP
 Group: Other
 Url: http://symas.com/mdb
@@ -13,7 +13,7 @@ AutoReqProv: no
 Patch0: mdb.patch
 
 %define prefix %{buildprefix}
-%define srcdir lmdb-2f587ae081d076e3707360c5db086520c219d3ea/libraries/liblmdb
+%define srcdir lmdb-2011eb37c1a3d390df2336cb2c55843771723a0c/libraries/liblmdb
 
 %ifarch %ix86
 %define lbits %{nil}
