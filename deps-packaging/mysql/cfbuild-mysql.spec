@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- mysql
 Name: cfbuild-mysql
 Version: %{version}
 Release: 1
-Source0: mysql-5.1.53.tar.gz
+Source0: mysql-5.1.72.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n mysql-5.1.53
+%setup -q -n mysql-5.1.72
 
 %build
 

@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl-hub
 Version: %{version}
 Release: 1
-Source: curl-7.46.0.tar.gz
+Source: curl-7.47.0.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n curl-7.46.0
+%setup -q -n curl-7.47.0
 
 ./configure \
     --with-sysroot=%{prefix} \
