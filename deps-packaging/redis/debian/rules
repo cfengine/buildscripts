@@ -29,10 +29,10 @@ install: build
 	cp -pf $(CURDIR)/src/redis-cli $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp -pf $(CURDIR)/src/redis-check-dump $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp -pf $(CURDIR)/src/redis-check-aof $(CURDIR)/debian/tmp$(PREFIX)/bin
-	
+
 	cp -a $(CURDIR)/deps/hiredis/hiredis.h $(CURDIR)/deps/hiredis/async.h $(CURDIR)/deps/hiredis/adapters $(CURDIR)/debian/tmp$(PREFIX)/include/hiredis
-	cp -a $(CURDIR)/deps/hiredis/libhiredis.so $(CURDIR)/debian/tmp$(PREFIX)/lib/libhiredis.so.0.10
-	cd $(CURDIR)/debian/tmp$(PREFIX)/lib && ln -sf libhiredis.so.0.10 libhiredis.so.0
+	cp -a $(CURDIR)/deps/hiredis/libhiredis.so $(CURDIR)/debian/tmp$(PREFIX)/lib/libhiredis.so.0.11
+	cd $(CURDIR)/debian/tmp$(PREFIX)/lib && ln -sf libhiredis.so.0.11 libhiredis.so.0
 	cd $(CURDIR)/debian/tmp$(PREFIX)/lib && ln -sf libhiredis.so.0 libhiredis.so
 	cp -a $(CURDIR)/deps/hiredis/libhiredis.a $(CURDIR)/debian/tmp$(PREFIX)/lib
 

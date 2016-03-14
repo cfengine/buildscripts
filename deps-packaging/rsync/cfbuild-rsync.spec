@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- rsync
 Name: cfbuild-rsync
 Version: %{version}
 Release: 1
-Source0: rsync-3.1.0.tar.gz
+Source0: rsync-3.1.2.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n rsync-3.1.0
+%setup -q -n rsync-3.1.2
 
 ./configure --prefix=%{prefix} --with-included-zlib=%{prefix}
 

@@ -5,4 +5,4 @@
 /var/cfengine/bin/redis-check-dump
 /var/cfengine/lib/libhiredis.so
 /var/cfengine/lib/libhiredis.so.0
-/var/cfengine/lib/libhiredis.so.0.10
+/var/cfengine/lib/libhiredis.so.0.*

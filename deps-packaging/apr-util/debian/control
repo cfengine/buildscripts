@@ -3,7 +3,7 @@ Section: libs
 Priority: optional
 Maintainer: CFEngine Packager <packager@cfengine.com>
 Build-Depends: debhelper
-Standards-Version: 1.5.2
+Standards-Version: 1.5.4
 
 Package: cfbuild-apr-util
 Section: libs
