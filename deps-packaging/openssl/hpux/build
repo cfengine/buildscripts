@@ -14,6 +14,8 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 export PATH=`pwd`/solaris:$PATH
 
+patch -p1 < openssl-fips-0.9.8e-cve-2016-0797.patch
+
 cd openssl-fips-1.2.4
 ./Configure hpux-ia64-gcc fipscanisterbuild
 gmake

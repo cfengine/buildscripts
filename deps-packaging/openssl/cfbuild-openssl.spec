@@ -15,6 +15,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 AutoReqProv: no
 
 Patch0: aix-ar-arguments.patch
+Patch1: openssl-fips-0.9.8e-cve-2016-0797.patch
 
 %define prefix %{buildprefix}
 
@@ -24,6 +25,7 @@ mkdir -p %{_builddir}
 %if "%{_os}" == "aix"
 %patch0 -p1
 %endif
+%patch1 -p1
 
 %build
 
