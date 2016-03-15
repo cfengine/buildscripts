@@ -25,6 +25,7 @@ build-stamp:
 		mingw64 no-asm no-zlib shared  no-ec no-dtls no-psk no-srp \
 		--prefix=$PREFIX
 
+	make depend
 	make build_crypto build_ssl libcrypto.dll.a libssl.dll.a
 
 	touch build-stamp

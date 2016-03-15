@@ -29,6 +29,7 @@ cd ..
 
 # Build
 
+$MAKE depend
 $MAKE
 
 # Test

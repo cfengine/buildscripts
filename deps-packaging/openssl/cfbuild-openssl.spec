@@ -80,6 +80,7 @@ else
         sed -i -e '/^CFLAG=/{s/ -O3//;s/ -fomit-frame-pointer//}'   Makefile
     fi
 
+    $MAKE SHARED_LDFLAGS="${SHARED_LDFLAGS} -L%{prefix}/lib -Wl,-rpath %{prefix}/lib" depend
     $MAKE SHARED_LDFLAGS="${SHARED_LDFLAGS} -L%{prefix}/lib -Wl,-rpath %{prefix}/lib"
 fi
 

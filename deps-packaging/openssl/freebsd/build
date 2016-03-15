@@ -28,6 +28,7 @@ cd ..
 
 # Build
 
+make depend
 make
 
 # Test

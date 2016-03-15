@@ -26,6 +26,7 @@ cd ..
 
 # Build
 
+gmake depend
 gmake
 
 # Test

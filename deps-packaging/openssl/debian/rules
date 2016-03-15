@@ -38,6 +38,7 @@ build-stamp:
 		sed -i -e '/^CFLAG=/{s/ -O3//;s/ -fomit-frame-pointer//}'   Makefile ;\
 	fi
 
+	make SHARED_LDFLAGS="$(SHARED_LDFLAGS)-L$(PREFIX)/lib -Wl,-rpath $(PREFIX)/lib" depend
 	make SHARED_LDFLAGS="$(SHARED_LDFLAGS)-L$(PREFIX)/lib -Wl,-rpath $(PREFIX)/lib"
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 
