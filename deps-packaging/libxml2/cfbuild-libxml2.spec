@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
 Version: %{version}
 Release: 1
-Source0: libxml2-2.9.1.tar.gz
+Source0: libxml2-2.9.3.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n libxml2-2.9.1
+%setup -q -n libxml2-2.9.3
 SYS=`uname -s`
 
 if [ $SYS = "AIX" ]; then
