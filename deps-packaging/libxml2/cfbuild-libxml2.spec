@@ -17,6 +17,7 @@ mkdir -p %{_builddir}
 %setup -q -n libxml2-2.9.3
 
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
+    LDFLAGS="-L%{prefix}/lib -Wl,-R%{prefix}/lib" \
     CPPFLAGS="-I%{prefix}/include" \
     LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
 
@@ -33,6 +34,7 @@ rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/xmllint
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libxml2.a
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libxml2.la
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/xml2Conf.sh
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/cmake
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share
 
 %clean
