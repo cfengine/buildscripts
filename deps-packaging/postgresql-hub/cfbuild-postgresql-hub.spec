@@ -212,6 +212,9 @@ CFEngine Build Automation -- postgresql -- contrib
 %{prefix}/share/postgresql/extension/sslinfo--1.0.sql
 %{prefix}/share/postgresql/extension/sslinfo--unpackaged--1.0.sql
 %{prefix}/share/postgresql/extension/sslinfo.control
+%{prefix}/share/postgresql/extension/citext--1.0--1.1.sql
+%{prefix}/share/postgresql/extension/citext--1.1--1.0.sql
+%{prefix}/share/postgresql/extension/citext--1.1.sql
 
 %dir %{prefix}/share/postgresql/tsearch_data
 %{prefix}/share/postgresql/tsearch_data/*
