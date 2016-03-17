@@ -1310,7 +1310,6 @@ exit 0
 %prefix/httpd/icons
 %prefix/httpd/logs
 %prefix/httpd/modules
-%prefix/httpd/php/etc
 %prefix/httpd/php/lib
 %prefix/httpd/php/php
 %defattr(755,root,root,755)
