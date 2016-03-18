@@ -17,7 +17,6 @@ mkdir -p %{_builddir}
 %setup -q -n libxml2-2.9.3
 
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
-    LDFLAGS="-L%{prefix}/lib -Wl,-R%{prefix}/lib" \
     CPPFLAGS="-I%{prefix}/include" \
     LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
 
