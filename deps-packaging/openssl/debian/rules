@@ -13,7 +13,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p1 < openssl-fips-0.9.8e-cve-2016-0797.patch
+	$(PATCH) -p1 < openssl-fips-0.9.8e-cve-2016-0797.patch
 
 	cd $(DF) && ./config fipscanisterbuild no-asm
 	cd $(DF) && make
