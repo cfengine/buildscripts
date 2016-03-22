@@ -1,4 +1,5 @@
 var/cfengine/httpd/php/bin
+var/cfengine/httpd/php/etc
 var/cfengine/httpd/php/lib
 var/cfengine/httpd/php/php
 var/cfengine/httpd/modules/libphp5.so

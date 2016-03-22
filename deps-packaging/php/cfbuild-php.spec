@@ -1,4 +1,4 @@
-%define php_version 5.6.19
+%define php_version 5.4.43
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -19,108 +19,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n php-%{php_version}
 
-./configure --prefix=%{prefix}/httpd/php \
---with-apxs2=%{prefix}/httpd/bin/apxs \
---with-config-file=%{prefix}/httpd/php \
---with-openssl=shared,%{prefix} \
---with-config-file-scan-dir=%{prefix}/httpd/php/lib \
---with-libxml-dir=%{prefix} \
---with-curl=shared,%{prefix} \
---with-mcrypt=shared,%{prefix} \
---with-pdo \
---with-pdo-pgsql=%{prefix} \
---with-json \
---with-iconv \
---without-aolserver \
---without-caudium \
---without-continuity \
---without-fpm-user \
---without-fpm-group \
---without-fpm-systemd \
---without-fpm-acl \
---without-isapi \
---without-litespeed \
---without-milter \
---without-nsapi \
---without-phttpd \
---without-pi3web \
---without-roxen \
---without-thttpd \
---without-tux \
---without-webjames \
---without-layout \
---without-sqlite3 \
---without-bz2 \
---without-qdbm \
---without-gdbm \
---without-ndbm \
---without-db4 \
---without-db3 \
---without-db2 \
---without-db1 \
---without-dbm \
---without-tcadb \
---without-cdb \
---without-enchant \
---without-gd \
---without-t1lib \
---without-gettext \
---without-gmp \
---without-mhash \
---without-imap \
---without-imap-ssl \
---without-interbase \
---without-icu-dir \
---without-libmbfl \
---without-onig \
---without-mssql \
---without-mysql \
---without-mysql-sock \
---without-mysqli \
---without-oci8 \
---without-odbcver \
---without-adabas \
---without-sapdb \
---without-solid \
---without-ibm-db2 \
---without-ODBCRouter \
---without-empress \
---without-empress-bcs \
---without-birdstep \
---without-custom-odbc \
---without-iodbc \
---without-esoob \
---without-unixODBC \
---without-dbmaker \
---without-pdo-dblib \
---without-pdo-firebird \
---without-pdo-mysql \
---without-pdo-oci \
---without-pdo-oci \
---without-pdo-oci \
---without-pdo-odbc \
---without-pdo-odbc \
---without-pdo-odbc \
---without-pdo-sqlite \
---without-pgsql \
---without-pspell \
---without-libedit \
---without-readline \
---without-recode \
---without-mm \
---without-snmp \
---without-sybase-ct \
---without-tidy \
---without-xmlrpc \
---without-xsl \
---without-libzip \
---without-pear \
---without-pear \
---without-zend-vm \
---without-tsrm-pth \
---without-tsrm-st \
---without-tsrm-pthreads \
-CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
+./configure --prefix=%{prefix}/httpd/php --with-apxs2=%{prefix}/httpd/bin/apxs --with-config-file=%{prefix}/httpd/php   --with-openssl=shared,%{prefix} --with-config-file-scan-dir=%{prefix}/httpd/php/lib --with-libxml-dir=%{prefix} --with-curl=shared,%{prefix} --with-mcrypt=shared,%{prefix} --with-pdo --with-pdo-pgsql=%{prefix} --with-json LDFLAGS="-L/var/cfengine/lib -Wl,-R/var/cfengine/lib" CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
 
 %build
 
@@ -169,6 +68,7 @@ CFEngine Build Automation -- php -- development files
 %defattr(-,root,root)
 
 %dir %prefix/httpd/php
+%prefix/httpd/php/etc
 %prefix/httpd/php/lib
 %prefix/httpd/php/bin
 %prefix/httpd/php/php

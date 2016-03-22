@@ -1,0 +1,52 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+EXT_DIR=$(CURDIR)/debian/tmp$(PREFIX)/lib/php
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	$(PREFIX)/httpd/php/bin/phpize
+	./configure --prefix=$(PREFIX) --with-php-config=$(PREFIX)/httpd/php/bin/php-config LDFLAGS="-L$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include"
+	make
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(EXT_DIR)
+	make install INSTALL_ROOT=$(CURDIR)/debian/tmp
+	mv $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php/extensions/no-debug-non-zts-20100525/mongo.so $(EXT_DIR)
+	cp $(CURDIR)/mongo.ini $(EXT_DIR)
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+
+	dh_install --sourcedir=$(CURDIR)/debian/tmp
+
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

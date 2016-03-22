@@ -12,108 +12,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=$(PREFIX)/httpd/php \
---with-apxs2=$(PREFIX)/httpd/bin/apxs \
---with-config-file=$(PREFIX)/httpd/php \
---with-openssl=shared,$(PREFIX) \
---with-config-file-scan-dir=$(PREFIX)/httpd/php/lib \
---with-libxml-dir=$(PREFIX) \
---with-curl=shared,$(PREFIX) \
---with-mcrypt=shared,$(PREFIX) \
---with-pdo \
---with-json \
---with-iconv \
---with-pdo-pgsql=$(PREFIX) \
---without-aolserver \
---without-caudium \
---without-continuity \
---without-fpm-user \
---without-fpm-group \
---without-fpm-systemd \
---without-fpm-acl \
---without-isapi \
---without-litespeed \
---without-milter \
---without-nsapi \
---without-phttpd \
---without-pi3web \
---without-roxen \
---without-thttpd \
---without-tux \
---without-webjames \
---without-layout \
---without-sqlite3 \
---without-bz2 \
---without-qdbm \
---without-gdbm \
---without-ndbm \
---without-db4 \
---without-db3 \
---without-db2 \
---without-db1 \
---without-dbm \
---without-tcadb \
---without-cdb \
---without-enchant \
---without-gd \
---without-t1lib \
---without-gettext \
---without-gmp \
---without-mhash \
---without-imap \
---without-imap-ssl \
---without-interbase \
---without-icu-dir \
---without-libmbfl \
---without-onig \
---without-mssql \
---without-mysql \
---without-mysql-sock \
---without-mysqli \
---without-oci8 \
---without-odbcver \
---without-adabas \
---without-sapdb \
---without-solid \
---without-ibm-db2 \
---without-ODBCRouter \
---without-empress \
---without-empress-bcs \
---without-birdstep \
---without-custom-odbc \
---without-iodbc \
---without-esoob \
---without-unixODBC \
---without-dbmaker \
---without-pdo-dblib \
---without-pdo-firebird \
---without-pdo-mysql \
---without-pdo-oci \
---without-pdo-oci \
---without-pdo-oci \
---without-pdo-odbc \
---without-pdo-odbc \
---without-pdo-odbc \
---without-pdo-sqlite \
---without-pgsql \
---without-pspell \
---without-libedit \
---without-readline \
---without-recode \
---without-mm \
---without-snmp \
---without-sybase-ct \
---without-tidy \
---without-xmlrpc \
---without-xsl \
---without-libzip \
---without-pear \
---without-pear \
---without-zend-vm \
---without-tsrm-pth \
---without-tsrm-st \
---without-tsrm-pthreads
-	CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" make
+	./configure --prefix=$(PREFIX)/httpd/php --with-apxs2=$(PREFIX)/httpd/bin/apxs --with-config-file=$(PREFIX)/httpd/php  --with-openssl=shared,$(PREFIX) --with-config-file-scan-dir=$(PREFIX)/httpd/php/lib --with-libxml-dir=$(PREFIX) --with-curl=shared,$(PREFIX) --with-mcrypt=shared,$(PREFIX) --with-pdo --with-json --with-pdo-pgsql=$(PREFIX)
+	LDFLAGS="-L$(PREFIX)/lib -R$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" make
 
 	touch build-stamp
 
@@ -126,7 +26,7 @@ install: build
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf
 	cp $(PREFIX)/httpd/conf/httpd.conf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/httpd.conf
 
-	INSTALL_ROOT=$(CURDIR)/debian/tmp CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" $(MAKE) install
+	INSTALL_ROOT=$(CURDIR)/debian/tmp LDFLAGS="-L$(PREFIX)/lib -R$(PREFIX)/lib" CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" $(MAKE) install
 	cp $(CURDIR)/php.ini-production $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
 	echo "extension=curl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/curl.ini
 	echo "extension=mcrypt.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/mcrypt.ini
