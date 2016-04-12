@@ -22,13 +22,8 @@ parse_version_string()
 ci_version()
 {
   echo "ci_version"
-  if [ -d $BASEDIR/nova ]; then
-    VERSION=$(parse_version_string NOVA_VERSION "nova")
-    echo "Using NOVA_VERSION: $NOVA_VERSION"
-  else
-    VERSION=$(parse_version_string VERSION "core")
-    echo "Using VERSION: $VERSION"
-  fi
+  VERSION=$(parse_version_string VERSION "core")
+  echo "Using VERSION: $VERSION"
 
   # Insert ~, so pre-releases get sorted before releases
 
@@ -51,13 +46,8 @@ ci_version()
 release_version()
 {
   echo "release_version"
-  if [ -d $BASEDIR/nova ]; then
-    VERSION=$(parse_version_string NOVA_VERSION "nova")
-    echo "Using NOVA_VERSION: $NOVA_VERSION"
-  else
-    VERSION=$(parse_version_string VERSION "core")
-    echo "Using VERSION: $VERSION"
-  fi
+  VERSION=$(parse_version_string VERSION "core")
+  echo "Using VERSION: $VERSION"
   echo "VERSION: $VERSION"
 }
 
