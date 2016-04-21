@@ -217,8 +217,6 @@ case "$PGSQL" in
   *)
     case "$SQL" in
       yes)
-        # MySQL is disabled until we sort out legal issues
-        #DEPS="$DEPS mysql"
         DEPS="$DEPS postgresql";;
     esac
   ;;

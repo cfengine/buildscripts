@@ -1,4 +1,0 @@
-/var/cfengine/bin/mysql_config
-/var/cfengine/include
-/var/cfengine/lib/*.so
-
