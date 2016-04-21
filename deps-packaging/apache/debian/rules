@@ -13,7 +13,18 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=$(PREFIX)/httpd --enable-so --enable-mods-shared="all ssl ldap authnz_ldap" --with-z=$(PREFIX) --with-ssl=$(PREFIX) --with-ldap=$(PREFIX)  --with-apr=$(PREFIX) --with-apr-util=$(PREFIX) CPPFLAGS="$(CPPFLAGS)" 
+	./configure \
+--prefix=$(PREFIX)/httpd \
+--enable-so \
+--enable-mods-shared="all ssl ldap authnz_ldap" \
+--with-z=$(PREFIX) \
+--with-ssl=$(PREFIX) \
+--with-ldap=$(PREFIX) \
+--with-apr=$(PREFIX) \
+--with-apr-util=$(PREFIX) \
+--with-pcre=$(PREFIX) \
+--with-mpm=prefork \
+CPPFLAGS="$(CPPFLAGS)"
 	make
 
 	touch build-stamp
