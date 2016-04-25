@@ -31,15 +31,16 @@ fi
 NAME=$(hostname -f)
 if [ -z "$NAME" ];
 then
-  echo "hostname -f does not return a valid name, but this is a requirement for generating a"
-  echo "SSL certificate for the Mission Portal and API."
-  echo "Please make sure that hostname -f returns a valid name (Add an entry to /etc/hosts or "
-  echo "fix the name resolution)."
+  cf_console "hostname -f does not return a valid name, but this is a requirement for generating a"
+  cf_console "SSL certificate for the Mission Portal and API."
+  cf_console "Please make sure that hostname -f returns a valid name (Add an entry to /etc/hosts or "
+  cf_console "fix the name resolution)."
   exit 1
 fi
 
 #stop the remaining services on upgrade
 if is_upgrade; then
+  cf_console "Stopping CFEngine..."
   platform_service cfengine3 stop
   if [ -x /bin/systemctl ]; then
     # When using systemd, the services are split in two, and although both will
@@ -68,21 +69,21 @@ filter_netstat_listen()
 HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
 if [ ! -z "$HTTPD_RUNNING" ];
 then
-  echo "There seems to be a server listening on either port 80 or 443"
-  echo "Checking if it is part of CFEngine Enterprise"
+  cf_console "There seems to be a server listening on either port 80 or 443"
+  cf_console "Checking if it is part of CFEngine Enterprise"
   if [ -x $PREFIX/httpd/bin/apachectl ];
   then
-    echo "Trying to shut down the process using apachectl from CFEngine Enterprise"
+    cf_console "Trying to shut down the process using apachectl from CFEngine Enterprise"
     $PREFIX/httpd/bin/apachectl stop
     HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
     if [ ! -z "$HTTPD_RUNNING" ];
     then
-      echo "Could not shutdown the process, aborting the installation"
+      cf_console "Could not shutdown the process, aborting the installation"
       exit 1
     fi
   else
-    echo "No apachectl found, aborting the installation!"
-    echo "Please kill the following processes before attempting a new installation"
+    cf_console "No apachectl found, aborting the installation!"
+    cf_console "Please kill the following processes before attempting a new installation"
     fuser -n tcp 80
     fuser -n tcp 443
     exit 1
@@ -95,39 +96,39 @@ fi
 PSQL_RUNNING=`filter_netstat_listen ":5432\s"`
 if [ ! -z "$PSQL_RUNNING" ];
 then
-  echo "There seems to be a server listening on port 5432"
-  echo "This might mean that there is a PostgreSQL server running on the machine already"
-  echo "Checking if the Postgres installation belongs to a previous CFEngine deployment"
+  cf_console "There seems to be a server listening on port 5432"
+  cf_console "This might mean that there is a PostgreSQL server running on the machine already"
+  cf_console "Checking if the Postgres installation belongs to a previous CFEngine deployment"
   PSQL_COMMAND=$(ps -p $(fuser -n tcp 5432 2>/dev/null) -o args=|cut -d' ' -f1)
   if [ ! -z "$PSQL_COMMAND" ];
   then
     if [ "$PSQL_COMMAND" = "$PREFIX/bin/postgres" ];
     then
-      echo "The PostgreSQL server belongs to a previous CFEngine deployment, shutting it down."
+      cf_console "The PostgreSQL server belongs to a previous CFEngine deployment, shutting it down."
       if [ -x "$PREFIX/bin/pg_ctl" ];
       then
 	(cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart")
       else
-	echo "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
+	cf_console "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
 	exit 1
       fi
     else
-      echo "The PostgreSQL is not from a previous CFEngine deployment"
-      echo "This scenario is not supported, aborting installation"
+      cf_console "The PostgreSQL is not from a previous CFEngine deployment"
+      cf_console "This scenario is not supported, aborting installation"
       ps -p `fuser -n tcp 5432 2>/dev/null` -o args=
       exit 1
     fi
   else
-    echo "There is a process listening on the PostgreSQL port but it is not PostgreSQL, aborting."
-    echo -n "Command: "
+    cf_console "There is a process listening on the PostgreSQL port but it is not PostgreSQL, aborting."
+    cf_console -n "Command: "
     ps -p `fuser -n tcp 5432 2>/dev/null` -o args=
-    echo "Please make sure that the process is not running before attempting the installation again."
+    cf_console "Please make sure that the process is not running before attempting the installation again."
     exit 1
   fi
   PSQL_FINAL_CHECK=`filter_netstat_listen ":5432\s"`
   if [ ! -z "$PSQL_FINAL_CHECK" ];
   then
-    echo "There is still a process listening on 5432, please kill it before retrying the installation. Aborting."
+    cf_console "There is still a process listening on 5432, please kill it before retrying the installation. Aborting."
     exit 1
   fi
 fi
@@ -146,8 +147,8 @@ fi
 # Backup htdocs
 #
 if [ -d $PREFIX/httpd/htdocs ]; then
-  echo "A previous version of CFEngine Mission Portal was found,"
-  echo "creating a backup of it at /tmp/cfengine-htdocs.tar.gz"
+  cf_console "A previous version of CFEngine Mission Portal was found,"
+  cf_console "creating a backup of it at /tmp/cfengine-htdocs.tar.gz"
   tar zcf /tmp/cfengine-htdocs.tar.gz $PREFIX/httpd/htdocs
 fi
 

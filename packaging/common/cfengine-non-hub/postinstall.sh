@@ -118,6 +118,7 @@ if [ -f $PREFIX/policy_server.dat ]; then
     platform_service cfengine3 stop
   fi
 
+  cf_console "Starting CFEngine..."
   platform_service cfengine3 start
 fi
 

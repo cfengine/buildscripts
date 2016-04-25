@@ -20,3 +20,24 @@ is_nova()
 {
   test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
 }
+
+INSTLOG=/var/log/CFEngineHub-Install.log
+CONSOLE=7
+# Redirect most output to log file, but keep console around for custom output.
+case "$SCRIPT_TYPE" in
+  pre*)
+    eval "exec $CONSOLE>&1 > $INSTLOG 2>&1"
+    ;;
+  *)
+    eval "exec $CONSOLE>&1 >> $INSTLOG 2>&1"
+    ;;
+esac
+echo "$SCRIPT_TYPE:"
+
+# Output directly to console, bypassing log.
+cf_console()
+{
+  echo "$@" 1>&$CONSOLE
+}
+
+set -x
