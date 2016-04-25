@@ -397,6 +397,21 @@ EOF
 
 fi
 
+# If upgrading from a version below 3.9 that has PostgreSQL.
+if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
+  CF_DBS="cfdb cfsettings cfmp"
+  for db in $CF_DBS; do
+    if ! [ -f "$PREFIX/state/pg/db_dump-$db.sql.gz" ]; then
+      continue
+    fi
+    cf_console "Restoring database $db..."
+    (cd /tmp && su cfpostgres -c "gunzip -c $PREFIX/state/pg/db_dump-$db.sql.gz | $PREFIX/bin/psql $db")
+    if [ $? != 0 ]; then
+      cf_console "Not able to migrate database $db."
+    fi
+  done
+fi
+
 #
 # Apache related
 #

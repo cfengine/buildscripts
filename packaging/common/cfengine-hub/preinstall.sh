@@ -4,6 +4,39 @@ if is_upgrade; then
   "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
 fi
 
+# If upgrading from a version below 3.9 that has PostgreSQL, and the data dir exists.
+if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+  cf_console "Attempting to migrate Mission Portal database."
+  cf_console "This can be very space consuming if the database is big."
+  cf_console "It can be disabled by shutting down CFEngine and removing/renaming $PREFIX/state/pg/data prior to upgrade."
+  cf_console "Press Ctrl-C in the next 15 seconds if you want to cancel..."
+  sleep 15
+
+  if [ -d "$PREFIX/state/pg/data.bak" ]; then
+    cf_console "Old backup in $PREFIX/state/pg/data.bak already exists. Please remove before attempting upgrade."
+    exit 1
+  fi
+
+  CF_DBS="cfdb cfsettings cfmp"
+  FAILED=0
+  for db in $CF_DBS; do
+    cf_console "Backing up database $db..."
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_dump $db | gzip -c > $PREFIX/state/pg/db_dump-$db.sql.gz")
+    if [ $? != 0 ]; then
+      FAILED=1
+      cf_console "Not able to migrate database. Aborting."
+      break
+    fi
+  done
+
+  if [ "$FAILED" != 0 ]; then
+    for db in $CF_DBS; do
+      rm -f "$PREFIX/state/pg/db_dump-$db.sql.gz"
+    done
+    exit 1
+  fi
+fi
+
 if [ "`package_type`" = "rpm" ]; then
   #
   # Work around bug in CFEngine <= 3.6.1: The %preun script stops the services,
@@ -49,6 +82,11 @@ if is_upgrade; then
     # will immediately check whether the ports are in use.
     /bin/systemctl stop cfengine3-web
   fi
+fi
+
+if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+  # Now that PostgreSQL is shut down, move the old data out of the way.
+  mv "$PREFIX/state/pg/data" "$PREFIX/state/pg/data.bak"
 fi
 
 filter_netstat_listen()
