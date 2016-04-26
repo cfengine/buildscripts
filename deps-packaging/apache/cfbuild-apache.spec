@@ -1,4 +1,4 @@
-%define apache_version 2.2.31
+%define apache_version 2.4.20
 %global __os_install_post %{nil}
 
 Summary: CFEngine Build Automation -- apache
@@ -24,7 +24,18 @@ mkdir -p %{_builddir}
 CPPFLAGS=-I%{buildprefix}/include
 
 
-./configure --prefix=%{prefix}/httpd --enable-so --enable-mods-shared="all ssl ldap authnz_ldap" --with-z=%{prefix} --with-ssl=%{prefix}  --with-ldap=%{prefix}  --with-apr=%{prefix} --with-apr-util=%{prefix}  CPPFLAGS="$CPPFLAGS"
+./configure \
+    --prefix=%{prefix}/httpd \
+    --enable-so \
+    --enable-mods-shared="all ssl ldap authnz_ldap" \
+    --with-z=%{prefix} \
+    --with-ssl=%{prefix} \
+    --with-ldap=%{prefix} \
+    --with-apr=%{prefix} \
+    --with-apr-util=%{prefix} \
+    --with-pcre=%{prefix} \
+    --with-mpm=prefork \
+    CPPFLAGS="$CPPFLAGS"
 
 %build
 

@@ -192,7 +192,9 @@ exit 0
 %{prefix}/bin/pg_dumpall
 %{prefix}/bin/pg_isready
 %{prefix}/bin/pg_receivexlog
+%{prefix}/bin/pg_recvlogical
 %{prefix}/bin/pg_restore
+%{prefix}/bin/pg_rewind
 %{prefix}/bin/psql
 %{prefix}/bin/reindexdb
 %{prefix}/bin/vacuumdb

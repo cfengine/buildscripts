@@ -23,8 +23,7 @@ Agent dependencies:
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
-* [libcurl](http://curl.haxx.se/download.html) 7.47.0
-* [MySQL] 5.1.72
+* [libcurl](http://curl.haxx.se/download.html) 7.48.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -47,13 +46,13 @@ Hub specific dependencies:
 
 * [APR](https://apr.apache.org/) 1.5.2
 * [apr-util](https://apr.apache.org/) 1.5.4
-* [Apache](http://httpd.apache.org/) 2.2.31
-* PostgreSQL for the hub 9.3.11
+* [Apache](http://httpd.apache.org/) 2.4.20
+* PostgreSQL for the hub 9.5.2
 * [Redis](http://redis.io/) 3.0.7
-* [PHP](http://php.net/) 5.6.19
+* [PHP](http://php.net/) 5.6.20
 * libmcrypt 2.5.8
   * Needed for php module
-* Git 2.6.5
+* Git 2.8.1
 * rsync 3.1.2
 
 Other dependencies (**find out why they are needed!**)

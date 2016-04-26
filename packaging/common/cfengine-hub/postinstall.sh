@@ -1,7 +1,3 @@
-INSTLOG=/var/log/CFEngineHub-Install.log
-exec > $INSTLOG 2>&1
-set -x
-
 #
 # Make sure the cfapache user has a home folder and populate it
 #
@@ -347,7 +343,7 @@ echo done
 
 if [ "$LISTENING" = "no" ]
 then
-  echo "Couldnot create necessary database and users, make sure Postgres server is running.."
+  cf_console "Couldnot create necessary database and users, make sure Postgres server is running.."
 else
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
@@ -399,6 +395,21 @@ EOF
     ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
 EOF
 
+fi
+
+# If upgrading from a version below 3.9 that has PostgreSQL.
+if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
+  CF_DBS="cfdb cfsettings cfmp"
+  for db in $CF_DBS; do
+    if ! [ -f "$PREFIX/state/pg/db_dump-$db.sql.gz" ]; then
+      continue
+    fi
+    cf_console "Restoring database $db..."
+    (cd /tmp && su cfpostgres -c "gunzip -c $PREFIX/state/pg/db_dump-$db.sql.gz | $PREFIX/bin/psql $db")
+    if [ $? != 0 ]; then
+      cf_console "Not able to migrate database $db."
+    fi
+  done
 fi
 
 #
@@ -463,6 +474,7 @@ if ! [ -f "$PREFIX/UPGRADED_FROM.txt" ] || egrep '3\.([0-6]|7\.0)' "$PREFIX/UPGR
   # more time now that we have upgraded.
   platform_service cfengine3 stop
 fi
+cf_console "Starting CFEngine..."
 platform_service cfengine3 start
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"

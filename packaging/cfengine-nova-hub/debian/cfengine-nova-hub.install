@@ -72,7 +72,9 @@
 /var/cfengine/bin/initdb
 /var/cfengine/bin/pg_controldata
 /var/cfengine/bin/pg_ctl
+/var/cfengine/bin/pg_recvlogical
 /var/cfengine/bin/pg_resetxlog
+/var/cfengine/bin/pg_rewind
 /var/cfengine/bin/postgres
 /var/cfengine/bin/postmaster
 /var/cfengine/bin/pg_test_timing
