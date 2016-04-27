@@ -7,11 +7,11 @@ set -x
 
 
 cd core
-$MAKE dist
+$MAKE V=1 dist
 cd ..
 
 cd masterfiles
-$MAKE dist
+$MAKE V=1 dist
 cd ..
 
 
