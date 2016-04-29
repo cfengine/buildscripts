@@ -37,7 +37,8 @@ echo "$SCRIPT_TYPE:"
 # Output directly to console, bypassing log.
 cf_console()
 {
-  echo "$@" 1>&$CONSOLE
+  set +x
+  "$@" 1>&$CONSOLE 2>&$CONSOLE
 }
 
 set -x
