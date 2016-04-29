@@ -1,5 +1,4 @@
-cf_console "Stopping CFEngine..."
-platform_service cfengine3 stop
+cf_console platform_service cfengine3 stop
 
 case `os_type` in
   redhat)

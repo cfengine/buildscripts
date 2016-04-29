@@ -4,7 +4,7 @@
 MP_APACHE_USER=cfapache
 if [ -d "$PREFIX/$MP_APACHE_USER" ];
 then
-	echo "cfapache folder already exists, deleting it"
+	cf_console echo "cfapache folder already exists, deleting it"
 	rm -rf $PREFIX/$MP_APACHE_USER
 fi
 /usr/sbin/usermod -d $PREFIX/$MP_APACHE_USER $MP_APACHE_USER
@@ -293,7 +293,7 @@ if [ ! -d $PREFIX/state/pg/data ]; then
 
   echo "$total" | grep -q '^[0-9]\+$'
   if [ $? -ne 0 ] ;then
-    echo "Error calculating total memory for setting postgresql shared_buffers";
+    cf_console echo "Error calculating total memory for setting postgresql shared_buffers";
   else
     upper=$(( 64 * 1024 * 1024 ))  #in KB
     lower=$(( 3 * 1024 * 1024 ))   #in KB
@@ -315,7 +315,7 @@ if [ ! -d $PREFIX/state/pg/data ]; then
       cp $PREFIX/share/postgresql/postgresql.conf.cfengine $PREFIX/state/pg/data/postgresql.conf
       chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
     else
-      echo "Warning: not enough total memory needed to set shared_buffers=2GB"
+      cf_console echo "Warning: not enough total memory needed to set shared_buffers=2GB"
     fi
   fi
 fi
@@ -343,7 +343,7 @@ echo done
 
 if [ "$LISTENING" = "no" ]
 then
-  cf_console "Couldnot create necessary database and users, make sure Postgres server is running.."
+  cf_console echo "Couldnot create necessary database and users, make sure Postgres server is running.."
 else
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
@@ -404,10 +404,10 @@ if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; the
     if ! [ -f "$PREFIX/state/pg/db_dump-$db.sql.gz" ]; then
       continue
     fi
-    cf_console "Restoring database $db..."
+    cf_console echo "Restoring database $db..."
     (cd /tmp && su cfpostgres -c "gunzip -c $PREFIX/state/pg/db_dump-$db.sql.gz | $PREFIX/bin/psql $db")
     if [ $? != 0 ]; then
-      cf_console "Not able to migrate database $db."
+      cf_console echo "Not able to migrate database $db."
     fi
   done
 fi
@@ -472,10 +472,9 @@ fi
 if ! [ -f "$PREFIX/UPGRADED_FROM.txt" ] || egrep '3\.([0-6]|7\.0)' "$PREFIX/UPGRADED_FROM.txt" > /dev/null; then
   # Versions <= 3.7.0 are unreliable in their daemon killing. Kill them one
   # more time now that we have upgraded.
-  platform_service cfengine3 stop
+  cf_console platform_service cfengine3 stop
 fi
-cf_console "Starting CFEngine..."
-platform_service cfengine3 start
+cf_console platform_service cfengine3 start
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"
 

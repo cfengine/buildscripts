@@ -115,11 +115,10 @@ if [ -f $PREFIX/policy_server.dat ]; then
   if ! [ -f "$PREFIX/UPGRADED_FROM.txt" ] || egrep '3\.([0-6]|7\.0)' "$PREFIX/UPGRADED_FROM.txt" > /dev/null; then
     # Versions <= 3.7.0 are unreliable in their daemon killing. Kill them one
     # more time now that we have upgraded.
-    platform_service cfengine3 stop
+    cf_console platform_service cfengine3 stop
   fi
 
-  cf_console "Starting CFEngine..."
-  platform_service cfengine3 start
+  cf_console platform_service cfengine3 start
 fi
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"
