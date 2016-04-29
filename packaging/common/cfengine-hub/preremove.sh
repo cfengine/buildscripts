@@ -1,5 +1,4 @@
-cf_console "Stopping CFEngine..."
-platform_service cfengine3 stop
+cf_console platform_service cfengine3 stop
 if [ -x /bin/systemctl ]; then
   # When using systemd, the services are split in two, and although both will
   # stop due to the command above, the web part may only do so after some

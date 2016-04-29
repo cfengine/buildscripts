@@ -4,8 +4,7 @@ if is_upgrade; then
   "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
 
   # Stop the services on upgrade.
-  cf_console "Stopping CFEngine..."
-  platform_service cfengine3 stop
+  cf_console platform_service cfengine3 stop
 fi
 
 case `os_type` in
