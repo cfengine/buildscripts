@@ -4,7 +4,7 @@
 MP_APACHE_USER=cfapache
 if [ -d "$PREFIX/$MP_APACHE_USER" ];
 then
-	echo "cfapache folder already exists, deleting it"
+	cf_console "cfapache folder already exists, deleting it"
 	rm -rf $PREFIX/$MP_APACHE_USER
 fi
 /usr/sbin/usermod -d $PREFIX/$MP_APACHE_USER $MP_APACHE_USER
@@ -293,7 +293,7 @@ if [ ! -d $PREFIX/state/pg/data ]; then
 
   echo "$total" | grep -q '^[0-9]\+$'
   if [ $? -ne 0 ] ;then
-    echo "Error calculating total memory for setting postgresql shared_buffers";
+    cf_console "Error calculating total memory for setting postgresql shared_buffers";
   else
     upper=$(( 64 * 1024 * 1024 ))  #in KB
     lower=$(( 3 * 1024 * 1024 ))   #in KB
@@ -315,7 +315,7 @@ if [ ! -d $PREFIX/state/pg/data ]; then
       cp $PREFIX/share/postgresql/postgresql.conf.cfengine $PREFIX/state/pg/data/postgresql.conf
       chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
     else
-      echo "Warning: not enough total memory needed to set shared_buffers=2GB"
+      cf_console "Warning: not enough total memory needed to set shared_buffers=2GB"
     fi
   fi
 fi
