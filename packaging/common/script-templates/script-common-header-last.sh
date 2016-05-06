@@ -38,8 +38,12 @@ echo "$SCRIPT_TYPE:"
 # Output directly to console, bypassing log.
 cf_console()
 {
-  set +x
-  "$@" 1>&$CONSOLE 2>&$CONSOLE
+  # Use subshell to prevent "set +x" from leaking out into the rest of the
+  # execution.
+  (
+    set +x
+    "$@" 1>&$CONSOLE 2>&$CONSOLE
+  )
 }
 
 set -x
