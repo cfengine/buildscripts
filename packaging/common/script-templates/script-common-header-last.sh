@@ -22,6 +22,7 @@ is_nova()
 }
 
 INSTLOG=/var/log/CFEngineHub-Install.log
+mkdir -p "$(dirname "$INSTLOG")"
 CONSOLE=7
 # Redirect most output to log file, but keep console around for custom output.
 case "$SCRIPT_TYPE" in
