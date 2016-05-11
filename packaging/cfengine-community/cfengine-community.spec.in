@@ -88,9 +88,7 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/lib/lib*.so*
 
 # Auxiliary programs
-%if "%{version}" >= "3.4"
 %prefix/bin/rpmvercmp
-%endif
 
 # Initscript, other configuration
 /etc/init.d/cfengine3
