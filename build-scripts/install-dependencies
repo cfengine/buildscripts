@@ -60,9 +60,9 @@ esac
 
 case "$OS-$OS_VERSION" in
   rhel-4.*)
-    AUTOCONF=$(rpm -qa autoconf)
-    AUTOMAKE=$(rpm -qa automake)
-    LIBTOOL=$(rpm -qa libtool)
+    AUTOCONF=$(rpm -q autoconf)
+    AUTOMAKE=$(rpm -q automake)
+    LIBTOOL=$(rpm -q libtool)
     ACVER=cfbuild-autoconf-2.60-1
     AMVER=cfbuild-automake-1.10.1-1
     LTVER=cfbuild-libtool-1.5.24-1
