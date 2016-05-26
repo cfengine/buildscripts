@@ -12,7 +12,7 @@ Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3, cfengine-community
-Requires: coreutils gzip libtool-ltdl
+Requires: coreutils gzip
 Requires(pre): /usr/sbin/useradd, /usr/sbin/userdel, /usr/bin/getent
 Requires(post): /usr/sbin/usermod, /bin/sed
 AutoReqProv: no

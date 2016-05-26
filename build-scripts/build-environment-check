@@ -1,36 +1,71 @@
-#!/bin/sh -x
+#!/bin/sh
 
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
 
+
+# WARNING we alter the buildslave: we remove UNWANTED_DEPS
+
+
 case "$OS" in
     rhel|centos)
         # Fakeroot is here: http://dl.atrpms.net/el5-$1/atrpms/stable/fakeroot-1.6.4-15.1.el5.$1.rpm
-        DEP_LIST="ntp rsync gcc make bison flex fakeroot gcc-c++ ncurses ncurses-devel pkgconfig rpm-build autoconf pam-devel"
-        CHECK_CMD="rpm -q"
+        DEP_LIST="ntp rsync gcc make fakeroot gcc-c++ ncurses ncurses-devel pkgconfig rpm-build pam-devel"
+        # Libtool is unwanted because "libltdl" polutes our package dependencies.
+        # The rest are wanted only on the machine doing "autogen.sh", which is *different* from the buildslaves
+        ### TODO add to the unwanted list:    bison byacc flex autoconf automake
+        ###      unfortunately they are automatically installed at some later stage...
+        UNWANTED_DEPS="libtool libtool-ltdl libtool-ltdl-devel"
+        CHECK_CMD="rpm -q --quiet"
+        REMOVE_CMD="rpm -e"
         ;;
     debian|ubuntu)
-        DEP_LIST="ntp rsync gcc make bison flex fakeroot dpkg-dev debhelper g++ libncurses5 pkg-config build-essential autoconf libpam0g-dev"
+        DEP_LIST="ntp rsync gcc make fakeroot dpkg-dev debhelper g++ libncurses5 pkg-config build-essential autoconf libpam0g-dev"
+        UNWANTED_DEPS="libtool libltdl7 libltdl-dev"
         CHECK_CMD="dpkg -l | grep -q -w"
+        REMOVE_CMD="dpkg --purge"
         ;;
+
+    # QUIT IN UNKNOWN OS
     *)
         exit 0
         ;;
 esac
 
 RET=0
-MISSING_DEPS=
-COMMA=
-for dep in $DEP_LIST; do
-    if ! eval $CHECK_CMD $dep; then
-        MISSING_DEPS="$MISSING_DEPS$COMMA$dep"
-        COMMA=", "
-        RET=1
+for unwanted in $UNWANTED_DEPS
+do
+    if $CHECK_CMD $unwanted
+    then
+        echo "Removing unwanted package:" $unwanted
+        $REMOVE_CMD $unwanted    ||     echo FAILURE && RET=1
     fi
 done
 
-if test $RET -gt 0; then
-    echo "Dependencies $MISSING_DEPS not found. Make sure they are installed on the build machine." 1>&2
+MISSING_DEPS=
+COMMA=
+for dep in $DEP_LIST
+do
+    if ! $CHECK_CMD $dep
+    then
+        MISSING_DEPS="$MISSING_DEPS$COMMA$dep"
+        COMMA=","
+        RET=1
+    fi
+done
+if [ $RET != 0 ]
+then
+    echo "Need packages INSTALLED to proceed:" $MISSING_DEPS    1>&2
 fi
-exit $RET
+
+
+# Exit with the right exit code
+if [  $RET = 0  ]
+then
+    echo "$0: SUCCESS buildslave is correctly setup"
+    exit 0
+else
+    echo "$0: FAILURE buildslave is NOT correctly setup"
+    exit 1
+fi
