@@ -1,36 +1,74 @@
-#!/bin/sh -x
+#!/bin/sh
 
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
 
+
 case "$OS" in
     rhel|centos)
         # Fakeroot is here: http://dl.atrpms.net/el5-$1/atrpms/stable/fakeroot-1.6.4-15.1.el5.$1.rpm
-        DEP_LIST="ntp rsync gcc make bison flex fakeroot gcc-c++ ncurses ncurses-devel pkgconfig rpm-build autoconf pam-devel"
-        CHECK_CMD="rpm -q"
+        DEP_LIST="ntp rsync gcc make fakeroot gcc-c++ ncurses ncurses-devel pkgconfig rpm-build pam-devel"
+        # Libtool is unwanted because "libltdl" polutes our package dependencies.
+        # The rest are wanted only on the machine doing "autogen.sh", which is *different* from the buildslaves
+        ### TODO add to the unwanted list:    bison byacc flex autoconf automake
+        UNWANTED_DEPS="libtool libtool-ltdl libtool-ltdl-devel"
+        CHECK_CMD="rpm -q --quiet"
+        REMOVE_CMD="rpm -e"
         ;;
     debian|ubuntu)
-        DEP_LIST="ntp rsync gcc make bison flex fakeroot dpkg-dev debhelper g++ libncurses5 pkg-config build-essential autoconf libpam0g-dev"
+        DEP_LIST="ntp rsync gcc make fakeroot dpkg-dev debhelper g++ libncurses5 pkg-config build-essential autoconf libpam0g-dev"
+        UNWANTED_DEPS="libtool libltdl7 libltdl-dev"
         CHECK_CMD="dpkg -l | grep -q -w"
+        REMOVE_CMD="dpkg --purge"
         ;;
     *)
         exit 0
         ;;
 esac
 
-RET=0
+RET1=0
 MISSING_DEPS=
 COMMA=
-for dep in $DEP_LIST; do
-    if ! eval $CHECK_CMD $dep; then
+for dep in $DEP_LIST
+do
+    if ! $CHECK_CMD $dep
+    then
         MISSING_DEPS="$MISSING_DEPS$COMMA$dep"
-        COMMA=", "
-        RET=1
+        COMMA=","
+        RET1=1
     fi
 done
-
-if test $RET -gt 0; then
-    echo "Dependencies $MISSING_DEPS not found. Make sure they are installed on the build machine." 1>&2
+if [ $RET1 -gt 0 ]
+then
+    echo "Need packages INSTALLED to proceed:" $MISSING_DEPS    1>&2
 fi
-exit $RET
+
+RET2=0
+COMMA=
+TOREMOVE_DEPS=
+for unwanted in $UNWANTED_DEPS
+do
+    if $CHECK_CMD $unwanted
+    then
+        TOREMOVE_DEPS="$TOREMOVE_DEPS$COMMA$unwanted"
+        COMMA=","
+        RET2=1
+    fi
+done
+if [ $RET2 -gt 0 ]
+then
+    echo "Need packages REMOVED to proceed:" $TOREMOVE_DEPS    1>&2
+fi
+
+
+
+# Exit with the right exit code
+if [  $RET1 = 0  -a  $RET2 = 0  ]
+then
+    echo "$0: SUCCESS buildslave is correctly setup"
+    exit 0
+else
+    echo "$0: FAILURE buildslave is NOT correctly setup"
+    exit 1
+fi
