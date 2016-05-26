@@ -60,73 +60,33 @@ esac
 
 case "$OS-$OS_VERSION" in
   rhel-4.*)
-    AUTOCONF=$(rpm -q autoconf)
-    AUTOMAKE=$(rpm -q automake)
-    LIBTOOL=$(rpm -q libtool)
     ACVER=cfbuild-autoconf-2.60-1
     AMVER=cfbuild-automake-1.10.1-1
     LTVER=cfbuild-libtool-1.5.24-1
-    if ! [ -z "$AUTOCONF" ]; then
-      if [ "$AUTOCONF" != "$ACVER" ]; then
-        sudo /bin/rpm -ev --nodeps autoconf
-        DEPS="$DEPS autoconf"
-      fi
-    else
-      DEPS="$DEPS autoconf"
-    fi
 
-    if ! [ -z "$AUTOMAKE" ]; then
-      if [ "$AUTOMAKE" != "$AMVER" ]; then
-        sudo /bin/rpm -ev --nodeps automake
-        DEPS="$DEPS automake"
-      fi
-    else
-      DEPS="$DEPS automake"
-    fi
+    sudo rpm -e autoconf || true
+    DEPS="$DEPS autoconf"
 
-    if ! [ -z "$LIBTOOL" ]; then
-      if [ "$LIBTOOL" != "$LTVER" ]; then
-        sudo /bin/rpm -ev --nodeps libtool
-        DEPS="$DEPS libtool"
-      fi
-    else
-      DEPS="$DEPS libtool"
-    fi
+    sudo rpm -e automake || true
+    DEPS="$DEPS automake"
+
+    sudo rpm -e libtool || true
+    DEPS="$DEPS libtool"
     ;;
+
   debian-4.*)
-    AUTOCONF=$(dpkg -l | grep autoconf | awk '{ print $3 }')
-    AUTOMAKE=$(dpkg -l | grep automake | awk '{ print $3 }')
-    LIBTOOL=$(dpkg -l | grep libtool | awk '{ print $3 }')
     ACVER=cfbuild-autoconf-2.60-1
     AMVER=cfbuild-automake-1.10.1-1
     LTVER=cfbuild-libtool-1.5.24-1
 
-    if ! [ -z "$AUTOCONF" ]; then
-      if [ "$AUTOCONF" != "$ACVER" ]; then
-          sudo /usr/bin/dpkg -r autoconf
-          DEPS="$DEPS autoconf"
-      fi 
-    else
-      DEPS="$DEPS autoconf"
-    fi
+    sudo dpkg -r autoconf || true
+    DEPS="$DEPS autoconf"
 
-    if ! [ -z "$AUTOMAKE" ]; then
-      if [ "$AUTOMAKE" != "$AMVER" ]; then
-          sudo /usr/bin/dpkg -r automake
-          DEPS="$DEPS automake"
-      fi 
-    else
-      DEPS="$DEPS automake"
-    fi
+    sudo dpkg -r automake || true
+    DEPS="$DEPS automake"
 
-    if ! [ -z "$LIBTOOL" ]; then
-      if [ "$LIBTOOL" != "$LTVER" ]; then
-          sudo /usr/bin/dpkg -r libtool
-          DEPS="$DEPS libtool"
-      fi 
-    else
-      DEPS="$DEPS libtool"
-    fi
+    sudo dpkg -r libtool || true
+    DEPS="$DEPS libtool"
     ;;
   *)
     ;;
