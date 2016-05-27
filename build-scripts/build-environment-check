@@ -43,21 +43,15 @@ do
     fi
 done
 
-MISSING_DEPS=
-COMMA=
 for dep in $DEP_LIST
 do
-    if ! $CHECK_CMD $dep
-    then
-        MISSING_DEPS="$MISSING_DEPS$COMMA$dep"
-        COMMA=","
+    if $CHECK_CMD $dep
+    then true
+    else
+        echo "ERROR Missing system package:" $dep
         RET=1
     fi
 done
-if [ $RET != 0 ]
-then
-    echo "Need packages INSTALLED to proceed:" $MISSING_DEPS    1>&2
-fi
 
 
 # Exit with the right exit code
