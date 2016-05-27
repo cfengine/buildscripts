@@ -58,17 +58,6 @@ case "$OS" in
   ;;
 esac
 
-case "$OS-$OS_VERSION" in
-    rhel-4.* | debian-4.* )
-
-        uninstall_pkg autoconf  || true
-        uninstall_pkg automake  || true
-        uninstall_pkg libtool   || true
-
-        DEPS="$DEPS autoconf automake libtool"
-        ;;
-esac
-
 case "$LIBGCC" in
   yes)
     DEPS="$DEPS libgcc";;
@@ -229,17 +218,7 @@ do
 
     revision=$(cat $BASEDIR/buildscripts/deps-packaging/revision)
 
-    case "$OS-$OS_VERSION" in
-        debian-4.*)
-            case "$dep" in
-                autoconf) version=2.60-1   ;;
-                automake) version=1.10.1-1 ;;
-                libtool)  version=1.5.24-1 ;;
-                *)        version=0+$revision$versuffix$crossver
-            esac ;;
-        *)
-            version=0+$revision$versuffix$crossver
-    esac
+    version=0+$revision$versuffix$crossver
 
   if pkg-cache find $dep-$version
   then
