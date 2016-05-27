@@ -44,7 +44,7 @@ do
     if query_pkg $unwanted
     then
         echo "Removing unwanted package:" $unwanted
-        uninstall_pkg $unwanted    ||     echo FAILURE && RET=1
+        uninstall_pkg $unwanted    ||    { echo FAILURE ; RET=1 ; }
     fi
 done
 
