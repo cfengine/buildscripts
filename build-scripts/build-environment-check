@@ -8,44 +8,49 @@
 # WARNING we alter the buildslave: we remove UNWANTED_DEPS
 
 
+### SYSTEM PACKAGE DEPENDENCIES ###
+# Fakeroot is here: http://dl.atrpms.net/el5-$1/atrpms/stable/fakeroot-1.6.4-15.1.el5.$1.rpm
+# Libtool is unwanted because "libltdl" polutes our package dependencies.
+# The rest are wanted only on the machine doing "autogen.sh",
+#which is *different* from the buildslaves
+### TODO add to the unwanted list:    bison byacc flex autoconf automake
+###      unfortunately they are automatically installed at some later stage...
+
+
 case "$OS" in
     rhel|centos)
-        # Fakeroot is here: http://dl.atrpms.net/el5-$1/atrpms/stable/fakeroot-1.6.4-15.1.el5.$1.rpm
-        DEP_LIST="ntp rsync gcc make fakeroot gcc-c++ ncurses ncurses-devel pkgconfig rpm-build pam-devel"
-        # Libtool is unwanted because "libltdl" polutes our package dependencies.
-        # The rest are wanted only on the machine doing "autogen.sh", which is *different* from the buildslaves
-        ### TODO add to the unwanted list:    bison byacc flex autoconf automake
-        ###      unfortunately they are automatically installed at some later stage...
-        UNWANTED_DEPS="libtool libtool-ltdl libtool-ltdl-devel"
-        CHECK_CMD="rpm -q --quiet"
-        REMOVE_CMD="rpm -e"
+        DEP_LIST="gcc-c++ ncurses ncurses-devel pkgconfig rpm-build pam-devel"
+        UNWANTED_DEPS="libtool-ltdl libtool-ltdl-devel"
         ;;
     debian|ubuntu)
-        DEP_LIST="ntp rsync gcc make fakeroot dpkg-dev debhelper g++ libncurses5 pkg-config build-essential autoconf libpam0g-dev"
-        UNWANTED_DEPS="libtool libltdl7 libltdl-dev"
-        CHECK_CMD="dpkg -l | grep -q -w"
-        REMOVE_CMD="dpkg --purge"
+        DEP_LIST="dpkg-dev debhelper g++ libncurses5 pkg-config build-essential libpam0g-dev"
+        UNWANTED_DEPS="libltdl7 libltdl-dev"
         ;;
 
-    # QUIT IN UNKNOWN OS
+    # SKIP IN UNKNOWN OS
     *)
+        echo "$0: not implemented for OS $OS, skipping"
         exit 0
         ;;
 esac
 
+DEP_LIST="$DEP_LIST ntp rsync gcc make fakeroot "
+UNWANTED_DEPS="$UNWANTED_DEPS libtool autoconf automake"
+
+
 RET=0
 for unwanted in $UNWANTED_DEPS
 do
-    if $CHECK_CMD $unwanted
+    if query_pkg $unwanted
     then
         echo "Removing unwanted package:" $unwanted
-        $REMOVE_CMD $unwanted    ||     echo FAILURE && RET=1
+        uninstall_pkg $unwanted    ||     echo FAILURE && RET=1
     fi
 done
 
 for dep in $DEP_LIST
 do
-    if $CHECK_CMD $dep
+    if query_pkg $dep
     then true
     else
         echo "ERROR Missing system package:" $dep

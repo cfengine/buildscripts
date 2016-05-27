@@ -59,37 +59,14 @@ case "$OS" in
 esac
 
 case "$OS-$OS_VERSION" in
-  rhel-4.*)
-    ACVER=cfbuild-autoconf-2.60-1
-    AMVER=cfbuild-automake-1.10.1-1
-    LTVER=cfbuild-libtool-1.5.24-1
+    rhel-4.* | debian-4.* )
 
-    sudo rpm -e autoconf || true
-    DEPS="$DEPS autoconf"
+        uninstall_pkg autoconf  || true
+        uninstall_pkg automake  || true
+        uninstall_pkg libtool   || true
 
-    sudo rpm -e automake || true
-    DEPS="$DEPS automake"
-
-    sudo rpm -e libtool || true
-    DEPS="$DEPS libtool"
-    ;;
-
-  debian-4.*)
-    ACVER=cfbuild-autoconf-2.60-1
-    AMVER=cfbuild-automake-1.10.1-1
-    LTVER=cfbuild-libtool-1.5.24-1
-
-    sudo dpkg -r autoconf || true
-    DEPS="$DEPS autoconf"
-
-    sudo dpkg -r automake || true
-    DEPS="$DEPS automake"
-
-    sudo dpkg -r libtool || true
-    DEPS="$DEPS libtool"
-    ;;
-  *)
-    ;;
+        DEPS="$DEPS autoconf automake libtool"
+        ;;
 esac
 
 case "$LIBGCC" in
@@ -217,11 +194,13 @@ esac
 #
 # Override for manual testing
 #
-if [ "x$1" != x ]; then
+if [ "x$1" != x ]
+then
   DEPS="$@"
 fi
 
-for dep in $DEPS; do
+for dep in $DEPS
+do
 
   case "$BUILD_TYPE" in
     DEBUG|CODE_COVERAGE)
@@ -248,27 +227,19 @@ for dep in $DEPS; do
       cross=native;;
   esac
 
-  case "$OS-$OS_VERSION" in
-    debian-4.*)
-      case "$dep" in
-        autoconf)
-          version=2.60-1
-          ;;
-        automake)
-          version=1.10.1-1
-          ;;
-        libtool)
-          version=1.5.24-1
-          ;;
+    revision=$(cat $BASEDIR/buildscripts/deps-packaging/revision)
+
+    case "$OS-$OS_VERSION" in
+        debian-4.*)
+            case "$dep" in
+                autoconf) version=2.60-1   ;;
+                automake) version=1.10.1-1 ;;
+                libtool)  version=1.5.24-1 ;;
+                *)        version=0+$revision$versuffix$crossver
+            esac ;;
         *)
-          version=0+$(cat $BASEDIR/buildscripts/deps-packaging/revision)$versuffix$crossver
-          ;;
-      esac
-      ;;
-    *)
-      version=0+$(cat $BASEDIR/buildscripts/deps-packaging/revision)$versuffix$crossver
-      ;;
-  esac
+            version=0+$revision$versuffix$crossver
+    esac
 
   if pkg-cache find $dep-$version
   then

@@ -115,6 +115,19 @@ uninstall_hpux_pkgs()
   done
 }
 
+install_freebsd_pkgs()
+{
+	execute-wrapper.sh sudo pkg_add "$@"
+}
+
+uninstall_freebsd_pkgs()
+{
+	PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
+	if [ -n "$PKGS" ]; then
+	  execute-wrapper.sh sudo pkg_delete $PKGS
+	fi
+}
+
 #
 # Dealing with packages
 #
@@ -132,7 +145,6 @@ uninstall_cfbuild()
       exit 1;;
   esac
 }
-
 uninstall_cfbuild_devel()
 {
   case "$DEP_PACKAGING" in
@@ -147,18 +159,38 @@ uninstall_cfbuild_devel()
   esac
 }
 
-install_freebsd_pkgs()
+install_pkg_file()
 {
-	execute-wrapper.sh sudo pkg_add "$@"
+    case "$DEP_PACKAGING" in
+        rpm)     sudo rpm  -i -v $1 ;;
+        deb)     sudo dpkg -i    $1 ;;
+        *)
+            echo "ERROR install_pkg_file not implemented on $DEP_PACKAGING"
+            exit 1
+    esac
+}
+uninstall_pkg()
+{
+    case "$DEP_PACKAGING" in
+        rpm) sudo rpm  -e -v $1 ;;
+        deb) sudo dpkg -P    $1 ;;
+        *)
+            echo "ERROR uninstall_pkg not implemented for $DEP_PACKAGING"
+            exit 1
+    esac
+}
+query_pkg()
+{
+    case "$DEP_PACKAGING" in
+        rpm) rpm  -q --quiet         $1 ;;
+        deb) dpkg -l  |  grep -q -w  $1 ;;
+        *)
+            echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
+            exit 1
+    esac
 }
 
-uninstall_freebsd_pkgs()
-{
-	PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
-	if [ -n "$PKGS" ]; then
-	  execute-wrapper.sh sudo pkg_delete $PKGS
-	fi
-}
+
 
 run() {
   NAME="$1"
