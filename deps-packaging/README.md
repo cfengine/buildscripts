@@ -6,9 +6,6 @@ in `deps-packaging` are the source of this information.
 Build dependencies:
 
 * lcov
-* autoconf
-* automake
-* libtool
 * git
 * rsync
 
