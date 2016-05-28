@@ -23,7 +23,7 @@ case "$OS" in
         ;;
     debian|ubuntu)
         DEP_LIST="dpkg-dev debhelper g++ libncurses5 pkg-config build-essential libpam0g-dev"
-        UNWANTED_DEPS="libltdl7 libltdl-dev"
+        UNWANTED_DEPS="libltdl-dev libltdl7"
         ;;
 
     # SKIP IN UNKNOWN OS
@@ -42,7 +42,7 @@ esac
 
 
 DEP_LIST="$DEP_LIST ntp rsync gcc make"
-UNWANTED_DEPS="$UNWANTED_DEPS libtool autoconf automake"
+UNWANTED_DEPS="$UNWANTED_DEPS libtool automake autoconf"
 
 
 RET=0
