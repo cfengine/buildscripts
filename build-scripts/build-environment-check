@@ -42,7 +42,7 @@ esac
 
 
 DEP_LIST="$DEP_LIST ntp rsync gcc make"
-UNWANTED_DEPS="$UNWANTED_DEPS libtool automake autoconf"
+UNWANTED_DEPS="$UNWANTED_DEPS libtool"    # TODO automake autoconf bison byacc flex
 
 
 RET=0
@@ -50,8 +50,8 @@ for unwanted in $UNWANTED_DEPS
 do
     if query_pkg $unwanted
     then
-        echo "Removing unwanted package:" $unwanted
-        uninstall_pkg $unwanted    ||    { echo FAILURE ; RET=1 ; }
+        echo "ERROR Found unwanted package:" $unwanted
+        RET=1
     fi
 done
 
@@ -73,5 +73,6 @@ then
     exit 0
 else
     echo "$0: FAILURE buildslave is NOT correctly setup"
+    echo "You should edit the policy in autobuild to fix the issues"
     exit 1
 fi
