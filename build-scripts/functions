@@ -183,7 +183,7 @@ query_pkg()
 {
     case "$DEP_PACKAGING" in
         rpm) rpm  -q --quiet $1 ;;
-        deb) dpkg -l         $1 >/dev/null 2>&1 ;;
+        deb) dpkg -s         $1 2>&1    |    grep '^Status: .*installed' >/dev/null 2>&1 ;;
         *)
             echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
             exit 1
