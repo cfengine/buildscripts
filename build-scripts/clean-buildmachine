@@ -13,5 +13,3 @@ sudo rm -rf /var/cfengine/*
 sudo rm -rf /var/cfengine
 ;;
 esac
-
-$BASEDIR/buildscripts/build-scripts/build-environment-check
