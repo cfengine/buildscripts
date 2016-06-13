@@ -138,6 +138,10 @@ cp %{prefix}/httpd/conf/httpd.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
 INSTALL_ROOT=${RPM_BUILD_ROOT} make install
 
 cp %{_builddir}/php-%{php_version}/php.ini-production ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
+
+# Reduce information leakage by default
+sed -ri 's/^\s*expose_php\s*=.*/expose_php = Off/g' ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
+
 echo "extension=curl.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/curl.ini
 echo "extension=mcrypt.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/mcrypt.ini
 echo "extension=openssl.so" >>${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/openssl.ini
