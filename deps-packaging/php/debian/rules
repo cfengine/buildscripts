@@ -127,7 +127,12 @@ install: build
 	cp $(PREFIX)/httpd/conf/httpd.conf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/httpd.conf
 
 	INSTALL_ROOT=$(CURDIR)/debian/tmp CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" $(MAKE) install
+
 	cp $(CURDIR)/php.ini-production $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
+
+	# Reduce information leakage by default
+	sed -ri 's/^\s*expose_php\s*=.*/expose_php = Off/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
+
 	echo "extension=curl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/curl.ini
 	echo "extension=mcrypt.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/mcrypt.ini
 	echo "extension=openssl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/openssl.ini
