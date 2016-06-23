@@ -7,7 +7,7 @@ Standards-Version: 3.8.4
 
 Package: cfengine-nova-hub
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libltdl7
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Provides: cfengine-nova-hub
 Replaces: cfengine3, cfengine-community, cfengine-nova-hub
 Description: CFEngine Nova : The next generation tool for data centre.
