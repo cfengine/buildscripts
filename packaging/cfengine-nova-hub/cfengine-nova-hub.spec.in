@@ -252,6 +252,9 @@ exit 0
 /etc/init.d/cfengine3
 /etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
+
+# Systemd units
+%defattr(664,root,root,755)
 /usr/lib/systemd/system/cfengine3.service
 /usr/lib/systemd/system/cfengine3-web.service
 
