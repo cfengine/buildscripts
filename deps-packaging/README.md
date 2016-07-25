@@ -11,16 +11,16 @@ Build dependencies:
 Agent dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.8
-* [OpenSSL](http://openssl.org/) 1.0.2g
-* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.38
+* [OpenSSL](http://openssl.org/) 1.0.2h
+* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.39
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.18
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.6
-* [libxml2](http://xmlsoft.org/sources/) 2.9.3
+* [libxml2](http://xmlsoft.org/sources/) 2.9.4
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.14
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
-* [libcurl](http://curl.haxx.se/download.html) 7.48.0
+* [libcurl](http://curl.haxx.se/download.html) 7.50.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -43,10 +43,10 @@ Hub specific dependencies:
 
 * [APR](https://apr.apache.org/) 1.5.2
 * [apr-util](https://apr.apache.org/) 1.5.4
-* [Apache](http://httpd.apache.org/) 2.4.20
-* PostgreSQL for the hub 9.5.2
+* [Apache](http://httpd.apache.org/) 2.4.23
+* PostgreSQL for the hub 9.5.3
 * [Redis](http://redis.io/) 3.0.7
-* [PHP](http://php.net/) 5.6.20
+* [PHP](http://php.net/) 5.6.24
 * libmcrypt 2.5.8
   * Needed for php module
 * Git 2.8.1
