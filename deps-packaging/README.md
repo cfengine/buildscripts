@@ -12,11 +12,11 @@ Build dependencies:
 Agent dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.8
-* [OpenSSL](http://openssl.org/) 1.0.2g
-* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.38
+* [OpenSSL](http://openssl.org/) 1.0.2h
+* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.39
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.18
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.6
-* [libxml2](http://xmlsoft.org/libxml2/) 2.9.3
+* [libxml2](http://xmlsoft.org/libxml2/) 2.9.4
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.14
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
@@ -45,10 +45,10 @@ Hub specific dependencies:
 * [APR](https://apr.apache.org/) 1.5.2
 * [apr-util](https://apr.apache.org/) 1.5.4
 * [Apache](http://httpd.apache.org/) 2.2.31
-* PostgreSQL for the hub 9.3.11
+* PostgreSQL for the hub 9.3.13
 * [Redis](http://redis.io/) 2.8.24
-* [PHP](http://php.net/) 5.6.19
-* [libcurl](http://curl.haxx.se/download.html) 7.47.0
+* [PHP](http://php.net/) 5.6.24
+* [libcurl](http://curl.haxx.se/download.html) 7.50.0
   * Needed for php module
 * libmcrypt 2.5.8
   * Needed for php module
