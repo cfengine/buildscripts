@@ -15,7 +15,7 @@ Agent dependencies:
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.39
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.18
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.6
-* [libxml2](http://xmlsoft.org/sources/) 2.9.3
+* [libxml2](http://xmlsoft.org/sources/) 2.9.4
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.14
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
