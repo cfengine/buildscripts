@@ -71,8 +71,9 @@ rm -rf $RPM_BUILD_ROOT
 %postun
 
 %files
-%defattr(755,root,root)
 
+# Executables
+%defattr(755,root,root,755)
 # Main program
 %dir %prefix
 %dir %prefix/bin
@@ -87,11 +88,14 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/getfacl
 %dir %prefix/lib
 %prefix/lib/lib*.so*
-
 # Auxiliary programs
-%if "%{version}" >= "3.4"
 %prefix/bin/rpmvercmp
-%endif
+# LMDB utilities
+%prefix/bin/lmdump
+%prefix/bin/lmmgr
+%prefix/bin/mdb_copy
+%prefix/bin/mdb_stat
+
 
 # Initscript, other configuration
 /etc/init.d/cfengine3
@@ -114,17 +118,11 @@ rm -rf $RPM_BUILD_ROOT
 
 # Private directories
 
-%defattr(700,root,root)
+%defattr(600,root,root,700)
 %dir %prefix/inputs
 %dir %prefix/modules
 %dir %prefix/outputs
 %dir %prefix/ppkeys
-
-# LMDB
-%prefix/bin/lmdump
-%prefix/bin/lmmgr
-%prefix/bin/mdb_copy
-%prefix/bin/mdb_stat
 
 # Design Center
 %defattr(755,root,root,755)
