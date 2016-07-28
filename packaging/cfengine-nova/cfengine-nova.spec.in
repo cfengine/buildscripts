@@ -72,8 +72,9 @@ fi
 exit 0
 
 %files
-%defattr(755,root,root)
 
+# Executables
+%defattr(755,root,root,755)
 # Main program
 %dir %prefix
 %dir %prefix/bin
@@ -85,17 +86,13 @@ exit 0
 %prefix/bin/cf-runagent
 %prefix/bin/cf-serverd
 %prefix/bin/cf-upgrade
-
-# LMDB
+# Auxiliary programs
+%prefix/bin/rpmvercmp
+# LMDB utilities
 %prefix/bin/lmdump
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
-
-# Auxiliary programs
-%if "%{version}" >= "3.0"
-%prefix/bin/rpmvercmp
-%endif
 
 # Initscript, other configuration
 /etc/init.d/cfengine3
@@ -115,7 +112,7 @@ exit 0
 
 # Private directories
 
-%defattr(700,root,root,700)
+%defattr(600,root,root,700)
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs

@@ -52,7 +52,9 @@ rm -rf $RPM_BUILD_ROOT
 %preun
 
 %files
-%defattr(755,root,root)
+
+# Executables
+%defattr(755,root,root,755)
 # Main program
 %dir %prefix
 %dir %prefix/bin
@@ -64,17 +66,13 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/cf-runagent
 %prefix/bin/cf-serverd
 %prefix/bin/cf-upgrade
-
-# LMDB
+# Auxiliary programs
+%prefix/bin/rpmvercmp
+# LMDB utilities
 %prefix/bin/lmdump
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
-
-# Auxiliary programs
-%if "%{version}" >= "3.0"
-%prefix/bin/rpmvercmp
-%endif
 
 %defattr(644,root,root,755)
 %dir %prefix/lib
@@ -89,13 +87,13 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/share/doc
 
 # System files
-%defattr(755,root,root)
+%defattr(755,root,root,755)
 %dir /etc/rc.d/init.d
 /etc/rc.d/init.d/*
 
 # Private directories
 
-%defattr(700,root,root)
+%defattr(600,root,root,700)
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
