@@ -66,6 +66,10 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/cf-runagent
 %prefix/bin/cf-serverd
 %prefix/bin/cf-upgrade
+# Libraries
+%dir %prefix/lib
+%prefix/lib/lib*.so*
+%prefix/lib/cfengine-enterprise.so
 # Auxiliary programs
 %prefix/bin/rpmvercmp
 # LMDB utilities
@@ -74,31 +78,26 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
 
+# Static libraries
 %defattr(644,root,root,755)
-%dir %prefix/lib
-%prefix/lib/lib*.so.*
-%prefix/lib/lib*.so
 %prefix/lib/*.a
-%prefix/lib/cfengine-enterprise.so
-
-# Documentation
-%defattr(644,root,root,755)
-%dir %prefix/share
-%prefix/share/doc
 
 # System files
 %defattr(755,root,root,755)
 %dir /etc/rc.d/init.d
 /etc/rc.d/init.d/*
 
-# Private directories
+# Documentation
+%defattr(644,root,root,755)
+%dir %prefix/share
+%prefix/share/doc
 
+# Private directories
 %defattr(600,root,root,700)
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
 %dir %prefix/modules
-
 
 
 %changelog
