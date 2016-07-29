@@ -134,8 +134,9 @@ fi
 exit 0
 
 %files
-%defattr(755,root,root)
 
+# Executables
+%defattr(755,root,root,755)
 # Main program
 %dir %prefix
 %dir %prefix/bin
@@ -157,8 +158,6 @@ exit 0
 %{prefix}/bin/openssl
 %dir %{prefix}/ssl
 %{prefix}/ssl/openssl.cnf
-
-
 %dir %{prefix}/ssl/certs
 %dir %{prefix}/ssl/private
 %dir %{prefix}/ssl/misc
@@ -225,12 +224,12 @@ exit 0
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
-
 # Auxiliary programs
-%if "%{version}" >= "3.0"
 %prefix/bin/rpmvercmp
-%endif
+#libexec of git
+%prefix/lib/git-core/*
 
+# Libraries
 %defattr(644,root,root,755)
 %dir %prefix/lib
 %prefix/lib/lib*.so*
@@ -242,19 +241,15 @@ exit 0
 %prefix/lib/apr-util-1
 #libs of postgres
 %{prefix}/lib/postgresql/*
-#libexec of git
-%defattr(755,root,root,755)
-%{prefix}/lib/git-core/*
-
 
 # Initscript, other configuration
 %defattr(755,root,root,755)
 /etc/init.d/cfengine3
-/etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
+%attr(644,root,root) /etc/sysconfig/cfengine3
 
 # Systemd units
-%defattr(664,root,root,755)
+%defattr(644,root,root,755)
 /usr/lib/systemd/system/cfengine3.service
 /usr/lib/systemd/system/cfengine3-web.service
 
@@ -269,9 +264,12 @@ exit 0
 %prefix/share/postgresql/*
 %prefix/share/db
 %{prefix}/share/doc/postgresql/extension/*
+
 # Base policy
+%defattr(644,root,root,755)
 %prefix/share/NovaBase
 
+# Package modules
 %defattr(755,root,root,755)
 %prefix/share/NovaBase/modules
 
@@ -286,11 +284,11 @@ exit 0
 #Solaris upgrade files
 %prefix/share/solaris_admin_files
 
-# Private directories
 %defattr(755,root,root,755)
 %dir %prefix/httpd
 %prefix/httpd/bin
 %prefix/httpd/cgi-bin
+
 %defattr(644,root,root,755)
 %prefix/httpd/conf
 %prefix/httpd/error
@@ -300,6 +298,7 @@ exit 0
 %prefix/httpd/modules
 %prefix/httpd/php/lib
 %prefix/httpd/php/php
+
 %defattr(755,root,root,755)
 %prefix/httpd/php/bin
 
@@ -312,12 +311,11 @@ exit 0
 %prefix/design-center/bin
 %prefix/design-center/lib
 
-%defattr(755,root,root,755)
-%dir %prefix/modules
-
+# Private directories
 %defattr(700,root,root,700)
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
+%dir %prefix/modules
 
 %changelog
