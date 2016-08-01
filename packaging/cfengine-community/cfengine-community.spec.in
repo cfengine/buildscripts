@@ -70,6 +70,7 @@ rm -rf $RPM_BUILD_ROOT
 %preun
 %postun
 
+
 %files
 
 # Executables
@@ -85,39 +86,41 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/cf-runagent
 %prefix/bin/cf-serverd
 %prefix/bin/cf-upgrade
-%prefix/bin/getfacl
+# Libraries
 %dir %prefix/lib
 %prefix/lib/lib*.so*
 # Auxiliary programs
 %prefix/bin/rpmvercmp
+%prefix/bin/getfacl
 # LMDB utilities
 %prefix/bin/lmdump
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
 
-
-# Initscript, other configuration
-/etc/init.d/cfengine3
+# Globally installed configs, scripts
 %attr(644,root,root) /etc/sysconfig/cfengine3
-%attr(644,root,root) /etc/profile.d/cfengine3.sh
+%attr(755,root,root) /etc/profile.d/cfengine3.sh
+%attr(755,root,root) /etc/init.d/cfengine3
 
 # Systemd units
-%defattr(664,root,root,755)
+%defattr(644,root,root,755)
 /usr/lib/systemd/system/cfengine3.service
 /usr/lib/systemd/system/cfengine3-web.service
 
 # Documentation
-%defattr(744,root,root)
+%defattr(644,root,root,755)
 %dir %prefix/share
 %prefix/share/doc
 
 # CoreBase
-
+%defattr(644,root,root,755)
 %prefix/share/CoreBase
+# Executables in CoreBase
+%defattr(755,root,root,755)
+%prefix/share/CoreBase/modules
 
 # Private directories
-
 %defattr(600,root,root,700)
 %dir %prefix/inputs
 %dir %prefix/modules
@@ -129,5 +132,6 @@ rm -rf $RPM_BUILD_ROOT
 %dir %prefix/design-center
 %prefix/design-center/bin
 %prefix/design-center/lib
+
 
 %changelog
