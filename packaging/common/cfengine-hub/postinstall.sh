@@ -289,7 +289,7 @@ if [ ! -d $PREFIX/state/pg/data ]; then
   # If total memory is lower than 3GB, we use the default pgsql conf file
   # If total memory is beyond 64GB, we use a shared_buffers of 16G
   # Otherwise, we use a shared_buffers equal to 25% of total memory
-  total=`cat /proc/meminfo |grep "^MemTotal:.*[0-9]\+ kB"|awk '{print $2}'`
+  total=$(awk '/^MemTotal:.*[0-9]+\skB/ {print $2}' /proc/meminfo)
 
   echo "$total" | grep -q '^[0-9]\+$'
   if [ $? -ne 0 ] ;then
