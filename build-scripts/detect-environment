@@ -54,8 +54,7 @@ detect_distribution()
     REL=$(cat /etc/redhat-release)
     case "$REL" in
       "CentOS "*)
-        VER=${REL#CentOS release }
-        VER=${VER% \(Final\)}
+        VER="$(echo "$REL" | sed -e 's/^CentOS \([^ ]* \)release \([0-9][0-9]*\.[0-9][0-9]*\).*$/\2/')"
         case "$VER" in
           [0-9].[0-9]);;
           *)
