@@ -326,6 +326,7 @@ EOF
     linux|hpux)
       cat <<EOF
 + /dev
+- /var/lib/lxcfs
 EOF
       ;;
   esac
