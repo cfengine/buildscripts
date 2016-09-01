@@ -426,7 +426,7 @@ mkdir -p $PREFIX/config
 #REDIS RELATED
 #
 cat > $PREFIX/config/redis.conf << EOF
-daemonize yes
+daemonize no
 pidfile $PREFIX/redis-server.pid
 unixsocket /tmp/redis.sock
 unixsocketperm 600
@@ -459,6 +459,17 @@ rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
 #
 if ! is_upgrade; then
   if [ -x /bin/systemctl ]; then
+    # Reload systemd config to pick up newly installed units
+    /bin/systemctl daemon-reload > /dev/null 2>&1
+    # Enable service units
+    /bin/systemctl enable cf-apache > /dev/null 2>&1
+    /bin/systemctl enable cf-execd > /dev/null 2>&1
+    /bin/systemctl enable cf-runalerts > /dev/null 2>&1
+    /bin/systemctl enable cf-consumer > /dev/null 2>&1
+    /bin/systemctl enable cf-monitord > /dev/null 2>&1
+    /bin/systemctl enable cf-postgres > /dev/null 2>&1
+    /bin/systemctl enable cf-redis-server > /dev/null 2>&1
+    /bin/systemctl enable cf-hub > /dev/null 2>&1
     /bin/systemctl enable cfengine3 > /dev/null 2>&1
   else
     case "`os_type`" in

@@ -2,7 +2,15 @@
 /etc/default
 /etc/profile.d
 /usr/lib/systemd/system/cfengine3.service
-/usr/lib/systemd/system/cfengine3-web.service
+/usr/lib/systemd/system/cf-apache.service
+/usr/lib/systemd/system/cf-consumer.service
+/usr/lib/systemd/system/cf-execd.service
+/usr/lib/systemd/system/cf-hub.service
+/usr/lib/systemd/system/cf-monitord.service
+/usr/lib/systemd/system/cf-postgres.service
+/usr/lib/systemd/system/cf-redis-server.service
+/usr/lib/systemd/system/cf-runalerts.service
+/usr/lib/systemd/system/cf-serverd.service
 /var/cfengine/bin/cf-agent
 /var/cfengine/bin/cf-execd
 /var/cfengine/bin/cf-key
@@ -11,6 +19,7 @@
 /var/cfengine/bin/cf-runagent
 /var/cfengine/bin/cf-serverd
 /var/cfengine/bin/cf-consumer
+/var/cfengine/bin/runalerts.php
 /var/cfengine/bin/rsync
 /var/cfengine/bin/cfengine3-nova-hub-init-d.sh
 /var/cfengine/bin/git
@@ -68,7 +77,7 @@
 /var/cfengine/bin/pg_restore
 /var/cfengine/bin/psql
 /var/cfengine/bin/reindexdb
-/var/cfengine/bin/vacuumdb 
+/var/cfengine/bin/vacuumdb
 /var/cfengine/bin/initdb
 /var/cfengine/bin/pg_controldata
 /var/cfengine/bin/pg_ctl
