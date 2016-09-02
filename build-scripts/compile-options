@@ -130,28 +130,41 @@ export LIBVIRT
 case "$EXPLICIT_ROLE" in
   agent) ROLE=agent;;
   hub) ROLE=hub;;
-*)
-  echo "Using auto detection of role."
-  case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
-    community-*) ROLE=agent;;
-# We do not support 32 bits hubs anymore
-    nova-i386-*-*) ROLE=agent;;
-    nova-s390*-*-*) ROLE=agent;;
-    nova-*-centos-[56789].*) ROLE=hub;;
-    nova-*-debian-6.*) ROLE=hub;;
-    nova-*-opensuse-11.*) ROLE=hub;;
-    nova-*-rhel-[56789].*) ROLE=hub;;
-    nova-*-sles-11.*) ROLE=hub;;
-    nova-*-ubuntu-8.04) ROLE=agent;;
-    nova-*-ubuntu-10.04) ROLE=agent;;
-    nova-*-ubuntu-12.04) ROLE=hub;;
-    nova-*-ubuntu-14.04) ROLE=hub;;
-    nova-*-mingw-*) ROLE=agent;;
-    nova-*) ROLE=agent;;
-    *)
-      echo "Unknown project: $PROJECT"
-      exit 42;;
-  esac;;
+  *)
+    if [ -z "$NODE_LABELS" ]
+    then
+      case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
+        community-*) ROLE=agent;;
+        # We do not support 32 bits hubs anymore
+        nova-i386-*-*) ROLE=agent;;
+        nova-s390*-*-*) ROLE=agent;;
+        nova-*-centos-*) ROLE=hub;;
+        nova-*-debian-*) ROLE=hub;;
+        nova-*-opensuse-*) ROLE=hub;;
+        nova-*-rhel-*) ROLE=hub;;
+        nova-*-sles-*) ROLE=hub;;
+        nova-*-ubuntu-*) ROLE=hub;;
+        nova-*-mingw-*) ROLE=agent;;
+        nova-*) ROLE=agent;;
+        *)
+          echo "Unknown project: $PROJECT"
+          exit 42
+          ;;
+      esac
+      echo "Autodetected $ROLE role based on missing Jenkins label and OS."
+    else
+      case "$NODE_LABELS" in
+        *_HUB_*)
+          echo "Autodetected hub role based on '_HUB_' in Jenkins label."
+          ROLE=hub
+          ;;
+        *)
+          echo "Autodetected agent role based on missing '_HUB_' in Jenkins label."
+          ROLE=agent
+          ;;
+      esac
+    fi
+    ;;
 esac
 export ROLE
 
