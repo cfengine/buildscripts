@@ -119,28 +119,23 @@ detect_distribution()
     OS_VERSION="$REL"
   elif [ -f /etc/debian_version ]; then
     REL=$(cat /etc/debian_version)
-    case "$REL" in
-      [0-9].[0-9])
-        ;;
-      [0-9].[0-9].[0-9])
-        REL=${REL%.[0-9]}
-        ;;
-      [0-9].[0-9].[0-9][0-9])
-        REL=${REL%.[0-9][0-9]}
-        ;;
-      wheezy*)
-        REL=7.0
-        ;;
-      jessie*)
-        REL=8.0
-        ;;
-      stretch*)
-        REL=9.0
-        ;;
-      *)
-        echo "Unable to detect version of Debian: $REL"
-        exit 42;;
-    esac
+    if ! echo "$REL" | egrep '^[0-9]+\.[0-9]+(\.[0-9]+)?$' > /dev/null
+    then
+      case "$REL" in
+        wheezy*)
+          REL=7.0
+          ;;
+        jessie*)
+          REL=8.0
+          ;;
+        stretch*)
+          REL=9.0
+          ;;
+        *)
+          echo "Unable to detect version of Debian: $REL"
+          exit 42;;
+      esac
+    fi
 
     OS=debian
     OS_VERSION="$REL"
