@@ -48,15 +48,16 @@ if [ ! -f /inside-chroot.txt ]; then
     exit 2
 fi
 cd $HOME
-MAKEFLAGS="$MAKEFLAGS"
-export MAKEFLAGS
-LD_ALTEXEC="$LD_ALTEXEC"
-export LD_ALTEXEC
 EOF
+
+# Include entire environment in chroot, and make sure everything is exported.
+export | sed -e 's/^\([^ ]*\)=/export \1=/' | sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
+
 # Note different quote style on Here document.
 sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh" <<'EOF'
 exec "$@"
 EOF
+
 sudo chmod ugo+x ${CHROOT_ROOT}run-in-home-dir.sh
 
 sudo mkdir -p ${CHROOT_ROOT}proc
