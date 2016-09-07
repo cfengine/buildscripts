@@ -50,8 +50,11 @@ fi
 cd $HOME
 EOF
 
-# Include entire environment in chroot, and make sure everything is exported.
-export | sed -e 's/^\([^ ]*\)=/export \1=/' | sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
+# Include entire environment in chroot, and make sure everything is exported,
+# and added to the existing environment.
+export | sed -e 's/^\([^ ]*\)=/export \1=/' | grep -v '^[^=]* PATH=' | sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
+# Treat PATH specifically, and add to existing path.
+printf 'export PATH="%s:$PATH"\n' "$PATH" | sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
 
 # Note different quote style on Here document.
 sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh" <<'EOF'
