@@ -55,12 +55,11 @@ detect_distribution()
     case "$REL" in
       "CentOS "*)
         VER="$(echo "$REL" | sed -e 's/^CentOS.* release \([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')"
-        case "$VER" in
-          [0-9].[0-9]);;
-          *)
-            echo "Unknown CentOS version: $VER"
-            exit 42;;
-        esac
+        if ! echo "$VER" | egrep '^[0-9]+\.[0-9]+$' > /dev/null
+        then
+          echo "Unknown CentOS version: $VER"
+          exit 42
+        fi
 
         OS=centos
         OS_VERSION="$VER"
