@@ -22,7 +22,16 @@ fi
 #
 set -e
 
-CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs
+# Check for Jenkins node label and use that as index.
+if [ -n "$NODE_LABELS" ]
+then
+  # There can be multiple labels, pick the first one.
+  # The last one is usually the node name.
+  label=${NODE_LABELS%% *}
+else
+  label=NO_LABEL
+fi
+CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs/$label
 
 usage()
 {
