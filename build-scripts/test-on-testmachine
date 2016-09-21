@@ -27,7 +27,8 @@ SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever/buildscripts
 SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever
 
 # We need to perform several cleanup tasks if doing a chroot test run, so wrap this in an if.
-if remote_script_general "$SCRIPT" "$LOGIN_COMMAND" "$SCRIPT_BASEDIR"; then
+if remote_script_general "$SCRIPT" "$LOGIN_COMMAND" "$SCRIPT_BASEDIR"
+then
     return_code=0
 else
     return_code=$?
@@ -37,10 +38,12 @@ case "$TEST_MACHINE" in
     chroot)
         # Fuser has special output. The PIDs arrive on stdout, and all the ornaments
         # arrive on stderr, so all we have to do is to grep for PID numbers.
-        for pid in `sudo $FUSER $CHROOT_ROOT 2>/dev/null | sed -e 's/[^ 0-9]//g'`; do
+        for pid in `sudo $FUSER $CHROOT_ROOT 2>/dev/null | sed -e 's/[^ 0-9]//g'`
+        do
             # Minilogd may sometimes launch on RedHat without any user
             # intervention. Ignore that.
-            if ps -ef | egrep "^ *[^ ]+ +$pid" | grep minilogd; then
+            if ps -ef | egrep "^ *[^ ]+ +$pid" | grep minilogd
+            then
                 continue
             fi
 
