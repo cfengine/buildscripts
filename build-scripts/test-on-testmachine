@@ -56,7 +56,7 @@ case "$TEST_MACHINE" in
                 echo "Error: Found processes left behind in the chroot. I'm killing them, but the build will fail, so clean up your mess!"
                 echo "Found PID $pid. Info from 'ps -ef'"
                 echo "--------------"
-                ps -ef | grep $pid
+                ps -ef | grep $pid | grep -v grep
                 echo "--------------"
             )
         done
