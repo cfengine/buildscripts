@@ -1,5 +1,18 @@
 # -*- mode:sh -*-
 
+detect_labels()
+{
+  case "$NODE_LABELS" in
+    *_x86_64_mingw*)
+      CROSS_TARGET=${CROSS_TARGET:-x64-mingw}
+      ;;
+    *_i386_mingw*)
+      CROSS_TARGET=${CROSS_TARGET:-x86-mingw}
+      ;;
+  esac
+  export CROSS_TARGET
+}
+
 detect_os()
 {
   case "$CROSS_TARGET" in
@@ -321,6 +334,7 @@ detect_cores()
 
 detect_environment()
 {
+  detect_labels
   detect_os
   detect_packaging
   detect_arch
