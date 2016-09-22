@@ -5,34 +5,16 @@
 . compile-options
 . version
 
-MAX_TRY=50
+WIXPATH="$HOME/wix"
 
-try_run() {
-  for i in $(seq $MAX_TRY); do
-    if "$@"; then
-      return
-    fi
-  done
-  return 1
-}
-
-SSH="ssh -o BatchMode=yes -o StrictHostKeyChecking=no"
-SFTP="sftp -o BatchMode=yes -o StrictHostKeyChecking=no"
-
-SEVENZIP="\"c:/program files/7-zip/7z\""
-
-case "$ARCH" in
-  x86) WIXPATH="c:/program files/wix toolset v3.8/bin";;
-  x64) WIXPATH="c:/program files (x86)/wix toolset v3.8/bin";;
-  *)
-    echo "Unknown architecture: $ARCH"
-    exit 1;;
-esac
-
-CANDLE="\"$WIXPATH/candle.exe\""
-LIGHT="\"$WIXPATH/light.exe\""
-
-HOMEPATH="\"c:\\documents and settings\\jenkins\""
+# Wine can handle these tools under the following conditions:
+# * You must use Wine 32-bit (wine:i386)
+# * The host must have run "winetricks dotnet45" and clicked through all the
+#   installations.
+#
+# This was tested with Wix tools 3.10.
+CANDLE="wine $WIXPATH/candle.exe"
+LIGHT="wine $WIXPATH/light.exe"
 
 if [ -z $JOB_NAME ]; then
   DIRNAME=build-$VERSION-$ARCH
@@ -40,10 +22,11 @@ else
   DIRNAME=$(echo ${JOB_NAME} |sed 's/\(.*\)\/.*/\1/g')
 fi
 
-prepare()
+PKGD=$BASEDIR/packaging/cfengine-nova/pkg
+P=$PKGD/$DIRNAME
+
+pre()
 {
-  PKGD=$BASEDIR/packaging/cfengine-nova/pkg
-  P=$PKGD/$DIRNAME
   rm -rf $PKGD
   mkdir -p $P/bin
 
@@ -59,45 +42,23 @@ prepare()
   esac
 
   cp $BASEDIR/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs $P
-
-  (cd $PKGD; zip -r $DIRNAME.zip $DIRNAME) || false
-}
-
-pre_put()
-{
-  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME" || :
-}
-
-put_zip()
-{
-  echo "put $P.zip" | $SFTP "$WIX_MACHINE"
-}
-
-post_put()
-{
-  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && $SEVENZIP x -y $DIRNAME.zip"
-}
-
-put()
-{
-  try_run pre_put
-  try_run put_zip
-  try_run post_put
 }
 
 candle()
 {
   REVISION="$1"
-  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH\\$DIRNAME && $CANDLE -dCfSourceDir=$HOMEPATH\\$DIRNAME -dCfVersion=$REVISION -dCfArch=$ARCH cfengine-nova.wxs"
+  $CANDLE -dCfSourceDir=. -dCfVersion=$REVISION -dCfArch=$ARCH cfengine-nova.wxs
 }
 
 light()
 {
-  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH\\$DIRNAME && $LIGHT -sice:ICE20 -ext WixUtilExtension cfengine-nova.wixobj"
+  $LIGHT -sval -sice:ICE20 -ext WixUtilExtension cfengine-nova.wixobj
 }
 
 package()
 {
+  cd $P
+
   if [ -z $EXPLICIT_VERSION ]
   then
     case $BUILD_TYPE in
@@ -116,24 +77,22 @@ package()
   fi
 
   # convert any alphabets in revison to int as no alphabets are allowed in windows package version
-  alphabet=$(echo $REVISION|sed -e 's/.*\([a-z]\).*/\1/');
+  alphabet=$(echo $REVISION|sed -e 's/[^a-zA-Z]*\([a-zA-Z]*\).*/\1/');
   convert=$(printf '%d' "'$alphabet")
-  REVISION=$(echo $REVISION|sed -e "s/\(.*\)[a-z]\(.*\)/\1$convert\2/");
-  # FIXME: due to some reason Windows machine is flaky.
-  try_run candle "$REVISION"
-  try_run light
+  REVISION=$(echo $REVISION|sed -e "s/$alphabet/$convert/");
+
+  candle "$REVISION"
+  light
 }
 
-get_msi() {
-  echo "cd $DIRNAME
-get cfengine-nova.msi" | $SFTP "$WIX_MACHINE"
-}
-
-get()
+post()
 {
   mkdir -p $BASEDIR/cfengine-nova
+  mv $P/cfengine-nova.msi $BASEDIR/cfengine-nova
   cd $BASEDIR/cfengine-nova
-  try_run get_msi
+
+  # For some reason candle is giving file no permissions at all.
+  chmod 644 cfengine-nova.msi
 
   case $BUILD_TYPE in
     RELEASE)
@@ -154,27 +113,6 @@ get()
   esac
 }
 
-clean_msi() {
-  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && del /Q cfengine-nova.msi"
-}
-
-clean_build() {
-  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && rd /Q /S $DIRNAME"
-}
-
-clean_zip() {
-  $SSH "$WIX_MACHINE" cmd /c "cd $HOMEPATH && del /Q $DIRNAME.zip"
-}
-
-clean()
-{
-  try_run clean_msi
-  try_run clean_build
-  try_run clean_zip
-}
-
-prepare
-put
+pre
 package
-get
-clean
+post
