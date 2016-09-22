@@ -78,8 +78,11 @@ package()
 
   # convert any alphabets in revison to int as no alphabets are allowed in windows package version
   alphabet=$(echo $REVISION|sed -e 's/[^a-zA-Z]*\([a-zA-Z]*\).*/\1/');
-  convert=$(printf '%d' "'$alphabet")
-  REVISION=$(echo $REVISION|sed -e "s/$alphabet/$convert/");
+  if [ -n "$alphabet" ]
+  then
+    convert=$(printf '%d' "'$alphabet")
+    REVISION=$(echo $REVISION|sed -e "s/$alphabet/$convert/");
+  fi
 
   candle "$REVISION"
   light
