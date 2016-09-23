@@ -84,8 +84,39 @@ package()
     REVISION=$(echo $REVISION|sed -e "s/$alphabet/$convert/");
   fi
 
-  candle "$REVISION"
-  light
+  # Wix tools have a ridiculously short maximum file length of 128 characters.
+  # This is easily exceeded when Jenkins workspace paths are involved. Luckily
+  # we can shortcut the paths by using Windows drive letters to point to a
+  # directory closer to the source files. Wine will automatically use the
+  # shortest one.
+
+  # Find a free drive letter. Z: is usually / in Wine, but apart from that it's
+  # more likely to find free letters at the bottom end, so count backwards.
+  WORKSPACE_DRIVE=
+  for letter in y x w v u t s r q p o n m l k j i h g f e d
+  do
+    if [ ! -e $HOME/.wine/dosdevices/$letter: ]
+    then
+      WORKSPACE_DRIVE=$letter:
+      ln -s $PWD $HOME/.wine/dosdevices/$WORKSPACE_DRIVE
+      break
+    fi
+  done
+
+  if [ -z "$WORKSPACE_DRIVE" ]
+  then
+    echo "Unable to find a free drive letter for Wine path."
+    exit 2
+  fi
+
+  ret=0
+  candle "$REVISION" && light || ret=$?
+
+  # Make sure the drive letter from above is cleaned up in case this build slave
+  # is reused.
+  rm -f $HOME/.wine/dosdevices/$WORKSPACE_DRIVE
+
+  return $ret
 }
 
 post()
