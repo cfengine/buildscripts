@@ -350,12 +350,29 @@ then
   fi
 else
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb")
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
+
+  # If upgrading from a version below 3.9 that has PostgreSQL.
+  if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
+    CF_DBS="cfdb cfsettings cfmp"
+    for db in $CF_DBS; do
+      if ! [ -f "$PREFIX/state/pg/db_dump-$db.sql.gz" ]; then
+        continue
+      fi
+      cf_console echo "Restoring database $db..."
+      (cd /tmp && su cfpostgres -c "gunzip -c $PREFIX/state/pg/db_dump-$db.sql.gz | $PREFIX/bin/psql $db")
+      if [ $? != 0 ]; then
+        cf_console echo "Not able to migrate database $db. Backup is in $PREFIX/state/pg/db_dump-$db.sql.gz"
+      fi
+    done
+  fi
+
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
 
   #create database for MISSION PORTAL
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/pgschema.sql")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql")
@@ -364,7 +381,6 @@ else
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/GUI/phpcfenginenova/cfdb_import.sql")
 
   #create database for hub internal data
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql")
 
@@ -399,21 +415,6 @@ EOF
     ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
 EOF
 
-fi
-
-# If upgrading from a version below 3.9 that has PostgreSQL.
-if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
-  CF_DBS="cfdb cfsettings cfmp"
-  for db in $CF_DBS; do
-    if ! [ -f "$PREFIX/state/pg/db_dump-$db.sql.gz" ]; then
-      continue
-    fi
-    cf_console echo "Restoring database $db..."
-    (cd /tmp && su cfpostgres -c "gunzip -c $PREFIX/state/pg/db_dump-$db.sql.gz | $PREFIX/bin/psql $db")
-    if [ $? != 0 ]; then
-      cf_console echo "Not able to migrate database $db. Backup is in $PREFIX/state/pg/db_dump-$db.sql.gz"
-    fi
-  done
 fi
 
 #
