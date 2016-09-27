@@ -343,7 +343,11 @@ echo done
 
 if [ "$LISTENING" = "no" ]
 then
-  cf_console echo "Couldnot create necessary database and users, make sure Postgres server is running.."
+  cf_console echo "Could not create necessary database and users, make sure Postgres server is running.."
+  # If upgrading from a version below 3.9 that has PostgreSQL.
+  if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
+    cf_console echo "Database migration also failed for the above reason. Backups are in $PREFIX/state/pg/*.sql.gz"
+  fi
 else
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
@@ -407,7 +411,7 @@ if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; the
     cf_console echo "Restoring database $db..."
     (cd /tmp && su cfpostgres -c "gunzip -c $PREFIX/state/pg/db_dump-$db.sql.gz | $PREFIX/bin/psql $db")
     if [ $? != 0 ]; then
-      cf_console echo "Not able to migrate database $db."
+      cf_console echo "Not able to migrate database $db. Backup is in $PREFIX/state/pg/db_dump-$db.sql.gz"
     fi
   done
 fi
