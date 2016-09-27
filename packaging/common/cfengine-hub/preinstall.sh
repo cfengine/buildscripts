@@ -35,6 +35,8 @@ if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [
     done
     exit 1
   fi
+
+  cf_console echo "Done making backup. They will be in $PREFIX/state/pg/db_dump-*.sql.gz."
 fi
 
 if [ "`package_type`" = "rpm" ]; then
