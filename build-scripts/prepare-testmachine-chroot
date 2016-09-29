@@ -52,7 +52,22 @@ EOF
 
 # Include entire environment in chroot, and make sure everything is exported,
 # and added to the existing environment.
-export | grep -v '^[^=]*\bPATH=' | sed -e 's/^[^=]* //; s/^\([^=]*\)=\(.*\)/\1=\2\nexport \1/' | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
+# Split on newlines, not on spaces.
+IFS='
+'
+for entry in $(export)
+do
+    name=$(echo "$entry" | sed -e 's/^[^=]* //; s/^\([^=]*\)=.*/\1/')
+    if [ "$name" = "PATH" ]
+    then
+        continue
+    fi
+    value="$(echo "$entry" | sed -e 's/^[^=]*=//')"
+    printf "%s=%s\nexport %s\n" "$name" "$value" "$name"
+done | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
+# Restore normal splitting semantics.
+unset IFS
+
 # Treat PATH specifically, and add to existing path.
 printf 'export PATH="%s:$PATH"\n' "$PATH" | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
 
