@@ -52,9 +52,9 @@ EOF
 
 # Include entire environment in chroot, and make sure everything is exported,
 # and added to the existing environment.
-export | sed -e 's/^\([^ ]*\)=/export \1=/' | grep -v '^[^=]* PATH=' | sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
+export | grep -v '^[^=]*\bPATH=' | sed -e 's/^[^=]* //; s/^\([^=]*\)=\(.*\)/\1=\2\nexport \1/' | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
 # Treat PATH specifically, and add to existing path.
-printf 'export PATH="%s:$PATH"\n' "$PATH" | sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
+printf 'export PATH="%s:$PATH"\n' "$PATH" | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
 
 # Note different quote style on Here document.
 sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh" <<'EOF'
