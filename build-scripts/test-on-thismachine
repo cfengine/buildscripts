@@ -54,9 +54,9 @@ else
       chmod -R g-w $BASEDIR/enterprise/tests/acceptance/*
     fi
     for project in `projects_to_test`; do
-      NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project check
+      NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project V=1 check
     done
   elif [ "$TESTS" = unit ]; then
-    $MAKE -C $BASEDIR/core/tests/unit check
+    $MAKE -C $BASEDIR/core/tests/unit V=1 check
   fi
 fi
