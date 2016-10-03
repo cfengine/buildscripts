@@ -5,12 +5,13 @@ detect_labels()
   case "$NODE_LABELS" in
     *_x86_64_mingw*)
       CROSS_TARGET=${CROSS_TARGET:-x64-mingw}
+      export CROSS_TARGET
       ;;
     *_i386_mingw*)
       CROSS_TARGET=${CROSS_TARGET:-x86-mingw}
+      export CROSS_TARGET
       ;;
   esac
-  export CROSS_TARGET
 }
 
 detect_os()
