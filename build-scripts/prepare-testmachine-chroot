@@ -69,7 +69,7 @@ done | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
 unset IFS
 
 # Treat PATH specifically, and add to existing path.
-printf 'export PATH="%s:$PATH"\n' "$PATH" | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
+printf 'PATH="%s:$PATH"\nexport PATH\n' "$PATH" | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
 
 # Note different quote style on Here document.
 sudo bash -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh" <<'EOF'
