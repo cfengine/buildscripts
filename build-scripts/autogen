@@ -17,18 +17,23 @@ case "$PROJECT" in
     exit 42;;
 esac
 
-(cd $BASEDIR/core && NO_CONFIGURE=1 ./autogen.sh) || false
-
-if test "x$NOVA" = "xyes"; then
-    (cd $BASEDIR/enterprise && NO_CONFIGURE=1 ./autogen.sh) || false
-    (cd $BASEDIR/nova && NO_CONFIGURE=1 ./autogen.sh) || false
+if test "x$NOVA" = "xyes"
+then
+    projects="core enterprise nova masterfiles"
+else
+    projects="core masterfiles"
 fi
 
-(cd $BASEDIR/masterfiles && NO_CONFIGURE=1 ./autogen.sh) || false
+for p in $projects
+do
+    (cd $BASEDIR/$p && NO_CONFIGURE=1 ./autogen.sh) || false
+done
 
-for i in $GITSHAOF; do
-  if [ -d $BASEDIR/$i ] && [ ! -f $BASEDIR/$i/revision ]; then
-    R=$(cd $BASEDIR/$i && git log --pretty='format:%h' -1 -- .) || false
-    echo $R | tr -d '\n' > $BASEDIR/$i/revision
-  fi
+for i in $GITSHAOF
+do
+    if [ -d $BASEDIR/$i ] && [ ! -f $BASEDIR/$i/revision ]
+    then
+        R=$(cd $BASEDIR/$i && git log --pretty='format:%h' -1 -- .) || false
+        echo $R | tr -d '\n' > $BASEDIR/$i/revision
+    fi
 done
