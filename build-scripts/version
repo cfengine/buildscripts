@@ -9,7 +9,11 @@ parse_version_string()
 
   VERSION=$(awk '/^ ?'$VARNAME'=/ {print}' < $BASEDIR/$VERSION_PATH/configure)
 
+  # Remove "VERSION="
   VERSION=${VERSION#*=}
+  # Remove quotes, if any.
+  VERSION=${VERSION%\'}
+  VERSION=${VERSION#\'}
 
   if [ -z "$VERSION" ]; then
     echo "Unable to detect version (variable $VARNAME). Bailing out" >&2
