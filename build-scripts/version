@@ -2,31 +2,18 @@
 
 # Detect version of the software
 
-parse_version_string()
+get_version_string()
 {
-  VARNAME="$1"
-  VERSION_PATH="$2"
+  DIR=$1
 
-  VERSION=$(awk '/^ ?'$VARNAME'=/ {print}' < $BASEDIR/$VERSION_PATH/configure)
-
-  # Remove "VERSION="
-  VERSION=${VERSION#*=}
-  # Remove quotes, if any.
-  VERSION=${VERSION%\'}
-  VERSION=${VERSION#\'}
-
-  if [ -z "$VERSION" ]; then
-    echo "Unable to detect version (variable $VARNAME). Bailing out" >&2
-    exit 42
-  fi
-
-  echo $VERSION
+  grep '^[^a-zA-Z0-9_]VERSION=[^$]*$' $BASEDIR/$DIR/configure \
+      | cut -d= -f2  \
+      | tr -d \'
 }
 
 ci_version()
 {
-  echo "ci_version"
-  VERSION=$(parse_version_string VERSION "core")
+  VERSION=`get_version_string core`
   echo "Using VERSION: $VERSION"
 
   # Insert ~, so pre-releases get sorted before releases
@@ -44,15 +31,14 @@ ci_version()
   else
     VERSION="$MAIN_VERSION~$SUPP_VERSION"
   fi
+
   echo "VERSION: $VERSION"
 }
 
 release_version()
 {
-  echo "release_version"
-  VERSION=$(parse_version_string VERSION "core")
+  VERSION=`get_version_string core`
   echo "Using VERSION: $VERSION"
-  echo "VERSION: $VERSION"
 }
 
 continuous_version()
