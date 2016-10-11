@@ -85,6 +85,14 @@ if is_upgrade; then
   fi
 fi
 
+# CFE-2278: Migrate to split units
+if is_upgrade; then
+  if [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
+    # It's functionality is replaced with multiple units.
+    /bin/systemctl disable cfengine3-web
+  fi
+fi
+
 if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
   # Now that PostgreSQL is shut down, move the old data out of the way.
   mv "$PREFIX/state/pg/data" "$PREFIX/state/pg/data.bak"

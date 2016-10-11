@@ -71,6 +71,11 @@ case `os_type` in
     # Register CFEngine initscript, if not yet.
     #
     if [ -x /bin/systemctl ]; then
+      # Reload systemd config to pick up newly installed units
+      /bin/systemctl daemon-reload > /dev/null 2>&1
+      # Enable service units
+      /bin/systemctl enable cf-execd > /dev/null 2>&1
+      /bin/systemctl enable cf-monitord > /dev/null 2>&1
       /bin/systemctl enable cfengine3 > /dev/null 2>&1
     else
       case `os_type` in
