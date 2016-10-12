@@ -41,7 +41,7 @@ case "$OS-$OS_VERSION" in
 esac
 
 
-DEP_LIST="$DEP_LIST ntp rsync gcc make"
+DEP_LIST="$DEP_LIST ntp rsync gcc make sudo wget"
 UNWANTED_DEPS="$UNWANTED_DEPS libtool"    # TODO automake autoconf bison byacc flex
 
 
