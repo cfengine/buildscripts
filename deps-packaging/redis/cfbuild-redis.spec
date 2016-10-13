@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- redis
 Name: cfbuild-redis
 Version: %{version}
 Release: 1
-Source0: redis-3.0.7.tar.gz
+Source0: redis-3.2.4.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -21,7 +21,7 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 
-%setup -q -n redis-3.0.7
+%setup -q -n redis-3.2.4
 $PATCH -s -p1 < %{_topdir}/SOURCES/redis.patch
 
 %build
@@ -44,7 +44,6 @@ mkdir -p $RPM_BUILD_ROOT/$PREFIX/include/hiredis
 cp -pf %{_builddir}/redis-*/src/redis-server     $RPM_BUILD_ROOT/$PREFIX/bin
 cp -pf %{_builddir}/redis-*/src/redis-benchmark  $RPM_BUILD_ROOT/$PREFIX/bin
 cp -pf %{_builddir}/redis-*/src/redis-cli        $RPM_BUILD_ROOT/$PREFIX/bin
-cp -pf %{_builddir}/redis-*/src/redis-check-dump $RPM_BUILD_ROOT/$PREFIX/bin
 cp -pf %{_builddir}/redis-*/src/redis-check-aof  $RPM_BUILD_ROOT/$PREFIX/bin
 
 cp -a %{_builddir}/redis-*/deps/hiredis/hiredis.h %{_builddir}/redis-*/deps/hiredis/async.h %{_builddir}/redis-*/deps/hiredis/adapters $RPM_BUILD_ROOT/$PREFIX/include/hiredis
@@ -75,7 +74,6 @@ CFEngine Build Automation -- redis -- development files
 %{prefix}/bin/redis-server
 %{prefix}/bin/redis-check-aof
 %{prefix}/bin/redis-benchmark
-%{prefix}/bin/redis-check-dump
 
 %dir %{prefix}/lib%{lbits}
 %{prefix}/lib%{lbits}/libhiredis.so*

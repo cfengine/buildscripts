@@ -223,7 +223,6 @@ exit 0
 %{prefix}/bin/redis-server
 %{prefix}/bin/redis-check-aof
 %{prefix}/bin/redis-benchmark
-%{prefix}/bin/redis-check-dump
 # LMDB
 %prefix/bin/lmdump
 %prefix/bin/lmmgr
