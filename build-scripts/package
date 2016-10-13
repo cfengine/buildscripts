@@ -51,7 +51,9 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
 
 case "$VERSION" in
   *~*)
+    # everything before the tilde
     MAIN_VERSION=${VERSION%\~*}
+    # everything after the tilde
     SUPP_VERSION=${VERSION#*~};;
   *)
     MAIN_VERSION=${VERSION}
@@ -59,64 +61,69 @@ case "$VERSION" in
 esac
 
 case "$PACKAGING" in
-  rpm)
+  rpm|lpp)
     mkdir -p $BASEDIR/$PKG/BUILD
     mkdir -p $BASEDIR/$PKG/RPMS
     mkdir -p $BASEDIR/$PKG/SOURCES
     mkdir -p $BASEDIR/$PKG/SRPMS
 
     SPEC=$P/$PKG.spec
-    SPECIN=$P/$PKG.spec.in
     PREINSTALL=$P/generated.preinstall
     POSTINSTALL=$P/generated.postinstall
     PREREMOVE=$P/generated.preremove
     POSTREMOVE=$P/generated.postremove
+
+    if [ "$PACKAGING" = lpp ]
+    then
+        SPECIN=$P/$PKG.spec.aix.in
+    else
+        SPECIN=$P/$PKG.spec.in
+    fi
 
     $P/../common/produce-script $PKG preinstall rpm > $PREINSTALL
     $P/../common/produce-script $PKG postinstall rpm > $POSTINSTALL
     $P/../common/produce-script $PKG preremove rpm > $PREREMOVE
     $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
 
+
     RPM_VERSION=$MAIN_VERSION
 
     if [ -z "$SUPP_VERSION" ]
     then
 
-      if [ $BUILD_TYPE = "RELEASE" ]
-      then
-        if [ -z $EXPLICIT_RELEASE ]
+        # The "release" tag in the RPM spec file is the incremental
+        # version of the specific package. Usually just an increasing
+        # number.
+        if [ $BUILD_TYPE = "RELEASE" ]
         then
-          RPM_RELEASE=1
+            RPM_RELEASE=${EXPLICIT_RELEASE:-1}
         else
-          RPM_RELEASE=$EXPLICIT_RELEASE
+            RPM_RELEASE=$BUILD_NUMBER
         fi
 
-      else
-        RPM_RELEASE=0.$BUILD_NUMBER
-      fi
-
+    # SUPP_VERSION is the part of the git tag after the dash, e.g. build1
     else
 
-      if [ $BUILD_TYPE = "RELEASE" ]
-      then
-        RPM_RELEASE=0.$SUPP_VERSION.1
-      else
-        RPM_RELEASE=0.$SUPP_VERSION.0.$BUILD_NUMBER
-      fi
-
+        if [ $BUILD_TYPE = "RELEASE" ]
+        then
+            RPM_RELEASE=$SUPP_VERSION
+        else
+            RPM_RELEASE=$SUPP_VERSION.$BUILD_NUMBER
+        fi
     fi
 
     sed \
-      -e "s/@@VERSION@@/$RPM_VERSION/g" \
-      -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
-      -e "/^%pre\$/r $PREINSTALL" \
-      -e "/^%post\$/r $POSTINSTALL" \
-      -e "/^%preun\$/r $PREREMOVE" \
-      -e "/^%postun\$/r $POSTREMOVE" \
-      $SPECIN > $SPEC
+        -e "s/@@VERSION@@/$RPM_VERSION/g" \
+        -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
+        -e "/^%pre\$/r $PREINSTALL" \
+        -e "/^%post\$/r $POSTINSTALL" \
+        -e "/^%preun\$/r $PREREMOVE" \
+        -e "/^%postun\$/r $POSTREMOVE" \
+        $SPECIN > $SPEC
 
-    for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`; do
-      (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
+    for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`
+    do
+        (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
     done
 
     # eval and double quoting is needed to separate args,
@@ -128,7 +135,16 @@ case "$PACKAGING" in
       --define "'buildprefix $BUILDPREFIX'" \
       --define "'_basedir $BASEDIR'" \
       $RPMBUILD_OPTIONS $SPEC
+
+
+    if [ "$PACKAGING" = lpp ]
+    then
+        # Create AIX bff packages
+        chmod +x $P/$PKG.bff.sh
+        $P/$PKG.bff.sh $RPM_VERSION $BASEDIR
+    fi
     ;;
+
   deb)
     if [ "$BUILDPREFIX" = "/opt/cfengine" ]
     then
@@ -269,79 +285,6 @@ case "$PACKAGING" in
       $P/hpux/psf.pl . $PKG $VERSION > $BASEDIR/$PKG/$PKG-$VERSION.psf
       /usr/sbin/swpackage -s $BASEDIR/$PKG/$PKG-$VERSION.psf -x media_type=tape @ $BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot
       ;;
-  lpp)
-      mkdir -p $BASEDIR/$PKG/BUILD
-    mkdir -p $BASEDIR/$PKG/RPMS
-    mkdir -p $BASEDIR/$PKG/SOURCES
-    mkdir -p $BASEDIR/$PKG/SRPMS
-
-    SPEC=$P/$PKG.spec
-    SPECIN=$P/$PKG.spec.aix.in
-    PREINSTALL=$P/generated.preinstall
-    POSTINSTALL=$P/generated.postinstall
-    PREREMOVE=$P/generated.preremove
-    POSTREMOVE=$P/generated.postremove
-
-    $P/../common/produce-script $PKG preinstall rpm > $PREINSTALL
-    $P/../common/produce-script $PKG postinstall rpm > $POSTINSTALL
-    $P/../common/produce-script $PKG preremove rpm > $PREREMOVE
-    $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
-
-    if [ -z "$SUPP_VERSION" ]
-    then
-      RPM_VERSION=$MAIN_VERSION
-
-      if [ $BUILD_TYPE = "RELEASE" ]
-      then
-
-        if [ -z "$EXPLICIT_RELEASE" ]
-        then
-          RPM_RELEASE=1
-        else
-          RPM_RELEASE=$EXPLICIT_RELEASE
-        fi
-
-      else
-        RPM_RELEASE=0.$BUILD_NUMBER
-      fi
-    else
-      RPM_VERSION=$MAIN_VERSION
-
-      if [ $BUILD_TYPE = "RELEASE" ]
-      then
-        RPM_RELEASE=0.$SUPP_VERSION.1
-      else
-        RPM_RELEASE=0.$SUPP_VERSION.0.$BUILD_NUMBER
-      fi
-    fi
-
-    sed \
-      -e "s/@@VERSION@@/$RPM_VERSION/g" \
-      -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
-      -e "/^%pre\$/r $PREINSTALL" \
-      -e "/^%post\$/r $POSTINSTALL" \
-      -e "/^%preun\$/r $PREREMOVE" \
-      -e "/^%postun\$/r $POSTREMOVE" \
-      $SPECIN > $SPEC
-
-    for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`; do
-      (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
-    done
-
-    # eval and double quoting is needed to separate args,
-    # example cmd --define 'a b':
-    #     - argv[1] = --define
-    #     - argv[2] = a b
-    eval $RPMBUILD_CMD -bb \
-      --define "'_topdir $BASEDIR/$PKG'" \
-      --define "'buildprefix $BUILDPREFIX'" \
-      --define "'_basedir $BASEDIR'" \
-      $RPMBUILD_OPTIONS $SPEC
-
-    #create bff packages
-    chmod +x $P/$PKG.bff.sh
-    $P/$PKG.bff.sh $RPM_VERSION $BASEDIR
-    ;;
   msi)
     package-msi;;
   *)
