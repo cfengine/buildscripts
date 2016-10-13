@@ -4,8 +4,8 @@ if is_upgrade; then
   "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
 fi
 
-# If upgrading from a version below 3.9 that has PostgreSQL, and the data dir exists.
-if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+# If upgrading from a version below 3.10 that has PostgreSQL, and the data dir exists.
+if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
   cf_console echo "Attempting to migrate Mission Portal database."
   cf_console echo "This can be very space consuming if the database is big."
   cf_console echo "It can be disabled by shutting down CFEngine and removing/renaming $PREFIX/state/pg/data prior to upgrade."
@@ -93,7 +93,7 @@ if is_upgrade; then
   fi
 fi
 
-if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
   # Now that PostgreSQL is shut down, move the old data out of the way.
   mv "$PREFIX/state/pg/data" "$PREFIX/state/pg/data.bak"
 fi

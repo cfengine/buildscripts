@@ -344,8 +344,8 @@ echo done
 if [ "$LISTENING" = "no" ]
 then
   cf_console echo "Could not create necessary database and users, make sure Postgres server is running.."
-  # If upgrading from a version below 3.9 that has PostgreSQL.
-  if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
+  # If upgrading from a version below 3.10 that has PostgreSQL.
+  if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
     cf_console echo "Database migration also failed for the above reason. Backups are in $PREFIX/state/pg/*.sql.gz"
   fi
 else
@@ -355,8 +355,8 @@ else
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
 
-  # If upgrading from a version below 3.9 that has PostgreSQL.
-  if is_upgrade && egrep '^3\.[6-8]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
+  # If upgrading from a version below 3.10 that has PostgreSQL.
+  if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
     CF_DBS="cfdb cfsettings cfmp"
     for db in $CF_DBS; do
       if ! [ -f "$PREFIX/state/pg/db_dump-$db.sql.gz" ]; then
