@@ -13,26 +13,28 @@ get_version_string()
 
 ci_version()
 {
-  VERSION=`get_version_string core`
-  echo "Using VERSION: $VERSION"
+    VERSION_IN=`get_version_string core`
+    echo "Got VERSION: $VERSION_IN"
 
-  # Insert ~, so pre-releases get sorted before releases
+    # The version string is usually taken from git tags, thus it can be
+    # 3.10.0b1-build1.
 
-  MAIN_VERSION=$(printf "$VERSION" | perl -ne 'if (/^(\d+\.\d+\.\d+)([a-z][^.]+)?/) { print $1 }')
-  SUPP_VERSION=$(printf "$VERSION" | perl -ne 'if (/^(\d+\.\d+\.\d+)([a-z][^.]+)?/) { print $2 }')
+    # 3.10.0b1-build1: Replace dash with tilde and separate
+    # MAIN from SUPPlementary version. Dashes confuse deb/rpm
+    # packagers, and we use the tilde later to split it again.
 
-  if [ -z "$MAIN_VERSION" ]; then
-    echo "Unable to parse version $VERSION. Bailing out."
-    exit 42
-  fi
+    VERSION=$(echo "$VERSION_IN"  |  tr '-' '~')
 
-  if [ -z "$SUPP_VERSION" ]; then
-    VERSION="$MAIN_VERSION"
-  else
-    VERSION="$MAIN_VERSION~$SUPP_VERSION"
-  fi
+    # Is it in correct form until the tilde?
+    if echo "$VERSION" | egrep '^[0-9]+\.[0-9]+\.[0-9]+[ab][0-9]+(~.*|$)'
+    then
+        :    # correct
+    else
+        echo "Unable to parse version $VERSION_IN. Bailing out."
+        exit 42
+    fi
 
-  echo "VERSION: $VERSION"
+    echo "Setting VERSION: $VERSION"
 }
 
 release_version()
@@ -72,4 +74,3 @@ then
 else
   VERSION=$EXPLICIT_VERSION
 fi
-
