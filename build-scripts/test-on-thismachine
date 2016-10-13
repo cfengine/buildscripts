@@ -63,6 +63,6 @@ else
     done
   elif [ "$TESTS" = unit ]
   then
-      $MAKE -C $BASEDIR/core/tests/unit VERBOSE=1 check
+      $MAKE -C $BASEDIR/core/tests/unit VERBOSE=-I check
   fi
 fi
