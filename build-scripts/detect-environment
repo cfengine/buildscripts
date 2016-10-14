@@ -2,7 +2,7 @@
 
 detect_labels()
 {
-  case "$NODE_LABELS" in
+  case "$label" in
     *_x86_64_mingw*)
       CROSS_TARGET=${CROSS_TARGET:-x64-mingw}
       export CROSS_TARGET
