@@ -4,10 +4,29 @@
 # We need to know what project are we building.
 #
 
-[ "$PROJECT" ] || if [ -d $BASEDIR/nova ]; then
-  PROJECT=nova
-else
-  PROJECT=community
+
+# Autodect PROJECT if not set
+
+if [ x"$PROJECT" = x ]
+then
+    if [ x"$JOB_NAME" != x ]
+    then
+        case "$JOB_NAME" in
+            *-community-*)   PROJECT=community;;
+            *-enterprise-*)  PROJECT=nova;;
+            *-hub-*)         PROJECT=nova;;
+            *-agent-*)       PROJECT=nova;;
+        esac
+
+    # JOB_NAME not set, possibly we are running outside Jenkins
+    else
+        if [ -d $BASEDIR/nova ]
+        then
+            PROJECT=nova
+        else
+            PROJECT=community
+        fi
+    fi
 fi
 
 export PROJECT
