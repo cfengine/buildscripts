@@ -21,6 +21,7 @@ fi
 # is not a main "build" type job (it could be the bootstrap job).
 # Do directory-based auto-detection.
 if [ x"$PROJECT" = x ]
+then
    if [ -d $BASEDIR/nova ]
    then
        PROJECT=nova
