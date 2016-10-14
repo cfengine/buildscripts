@@ -9,24 +9,24 @@
 
 if [ x"$PROJECT" = x ]
 then
-    if [ x"$JOB_NAME" != x ]
-    then
-        case "$JOB_NAME" in
-            *-community-*)   PROJECT=community;;
-            *-enterprise-*)  PROJECT=nova;;
-            *-hub-*)         PROJECT=nova;;
-            *-agent-*)       PROJECT=nova;;
-        esac
+    case x"$JOB_NAME" in
+        *-community-*)   PROJECT=community;;
+        *-enterprise-*)  PROJECT=nova;;
+        *-hub-*)         PROJECT=nova;;
+        *-agent-*)       PROJECT=nova;;
+    esac
+fi
 
-    # JOB_NAME not set, possibly we are running outside Jenkins
-    else
-        if [ -d $BASEDIR/nova ]
-        then
-            PROJECT=nova
-        else
-            PROJECT=community
-        fi
-    fi
+# If still not set, then either we are running outside Jenkins, or this
+# is not a main "build" type job (it could be the bootstrap job).
+# Do directory-based auto-detection.
+if [ x"$PROJECT" = x ]
+   if [ -d $BASEDIR/nova ]
+   then
+       PROJECT=nova
+   else
+       PROJECT=community
+   fi
 fi
 
 export PROJECT
