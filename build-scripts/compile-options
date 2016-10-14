@@ -147,47 +147,56 @@ export LIBVIRT
 # and build according to the role specified by it.
 
 case "$EXPLICIT_ROLE" in
-  agent) ROLE=agent;;
-  hub) ROLE=hub;;
-  *)
-    if [ -z "$label" ]
-    then
-      case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
-        community-*) ROLE=agent;;
-        # We do not support 32 bits hubs anymore
-        nova-i386-*-*) ROLE=agent;;
-        nova-s390*-*-*) ROLE=agent;;
-        nova-*-centos-*) ROLE=hub;;
-        nova-*-debian-*) ROLE=hub;;
-        nova-*-opensuse-*) ROLE=hub;;
-        nova-*-rhel-*) ROLE=hub;;
-        nova-*-sles-*) ROLE=hub;;
-        nova-*-ubuntu-*) ROLE=hub;;
-        nova-*-mingw-*) ROLE=agent;;
-        nova-*) ROLE=agent;;
-        *)
-          echo "Unknown project: $PROJECT"
-          exit 42
-          ;;
-      esac
-      echo "Autodetected $ROLE role based on missing Jenkins label and OS."
+    agent) ROLE=agent;;
+    hub)   ROLE=hub;;
+    *)
+        # Not running under Jenkins?
+        if [ x"$JENKINS_SERVER_COOKIE" = x ]
+        then
+            case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
+                community-*) ROLE=agent;;
+                # We do not support 32 bits hubs anymore
+                nova-i386-*-*) ROLE=agent;;
+                nova-s390*-*-*) ROLE=agent;;
+                nova-*-centos-*) ROLE=hub;;
+                nova-*-debian-*) ROLE=hub;;
+                nova-*-opensuse-*) ROLE=hub;;
+                nova-*-rhel-*) ROLE=hub;;
+                nova-*-sles-*) ROLE=hub;;
+                nova-*-ubuntu-*) ROLE=hub;;
+                nova-*-mingw-*) ROLE=agent;;
+                nova-*) ROLE=agent;;
+                *)
+                    echo "Unknown project: $PROJECT"
+                    exit 42
+                    ;;
+            esac
+            echo "Autodetected $ROLE role based on missing Jenkins label and OS."
 
-    else    # $label is set
+        else    # we are running under Jenkins
 
-      case "$label" in
-        *_HUB_*)
-          echo "Autodetected hub role based on '_HUB_' in Jenkins label."
-          ROLE=hub
-          ;;
-        *)
-          echo "Autodetected agent role based on missing '_HUB_' in Jenkins label."
-          ROLE=agent
-          ;;
-      esac
-    fi
-    ;;
+            # The "label" variable is set in multi-matrix jobs;
+            # thus it is *not set* in the bootstrap job.
+            case x"$label" in
+                x)
+                    echo "label is not set, assuming that this is not the main build job; Setting ROLE=agent."
+                    ROLE=agent
+                    ;;
+                *_HUB_*)
+                    echo "Autodetected hub role based on '_HUB_' in Jenkins label."
+                    ROLE=hub
+                    ;;
+                *)
+                    echo "Autodetected agent role based on missing '_HUB_' in Jenkins label."
+                    ROLE=agent
+                    ;;
+            esac
+        fi
+        ;;
 esac
+
 export ROLE
+
 
 # libmcrypt
 
