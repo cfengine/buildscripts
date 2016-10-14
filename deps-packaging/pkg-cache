@@ -27,16 +27,18 @@ fi
 #
 set -e
 
+
 # Check for Jenkins node label and use that as index.
-if [ -n "$NODE_LABELS" ]
+# There can be multiple labels, pick the first one.
+firstlabel=${NODE_LABELS%% *}
+
+if [ x"$firstlabel" = x ]
 then
-  # There can be multiple labels, pick the first one.
-  # The last one is usually the node name.
-  label=${NODE_LABELS%% *}
-else
-  label=NO_LABEL
+    echo "Jenkins has not assigned a LABEL to this node, you are probably building manually"
+    firstlabel=NO_LABEL
 fi
-CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs/$label
+
+CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs/$firstlabel
 
 usage()
 {
