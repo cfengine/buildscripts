@@ -131,7 +131,7 @@ case "$EXPLICIT_ROLE" in
   agent) ROLE=agent;;
   hub) ROLE=hub;;
   *)
-    if [ -z "$NODE_LABELS" ]
+    if [ -z "$label" ]
     then
       case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
         community-*) ROLE=agent;;
@@ -152,8 +152,10 @@ case "$EXPLICIT_ROLE" in
           ;;
       esac
       echo "Autodetected $ROLE role based on missing Jenkins label and OS."
-    else
-      case "$NODE_LABELS" in
+
+    else    # $label is set
+
+      case "$label" in
         *_HUB_*)
           echo "Autodetected hub role based on '_HUB_' in Jenkins label."
           ROLE=hub
