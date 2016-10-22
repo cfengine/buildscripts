@@ -88,12 +88,13 @@ case "$PACKAGING" in
 
     RPM_VERSION=$MAIN_VERSION
 
+    # Set RPM_RELEASE, which sets the "release" tag in the RPM spec
+    # file, which is an incremental version of the specific package in
+    # case it is rebuilt and re-released for any reason.
+
     if [ -z "$SUPP_VERSION" ]
     then
 
-        # The "release" tag in the RPM spec file is the incremental
-        # version of the specific package. Usually just an increasing
-        # number.
         if [ $BUILD_TYPE = "RELEASE" ]
         then
             RPM_RELEASE=${EXPLICIT_RELEASE:-1}
@@ -101,8 +102,8 @@ case "$PACKAGING" in
             RPM_RELEASE=$BUILD_NUMBER
         fi
 
-    # SUPP_VERSION is the part of the git tag after the dash, e.g. build1
     else
+        # SUPP_VERSION is the part of the git tag after the dash, e.g. build1
 
         if [ $BUILD_TYPE = "RELEASE" ]
         then

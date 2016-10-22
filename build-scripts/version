@@ -11,22 +11,28 @@ get_version_string()
       | tr -d \'
 }
 
+# Generate VERSION in the form of MAIN~SUPP, where SUPP is going in the
+# "release" tag of RPMs (see "package" script).
 ci_version()
 {
     VERSION_IN=`get_version_string core`
     echo "Got VERSION: $VERSION_IN"
 
     # The version string is usually taken from git tags, thus it can be
-    # 3.10.0b1-build1.
+    # 3.10.0b1-build1. Or from determine-version.py and then it can be
+    # 3.10.0a.abcdef.
 
     # 3.10.0b1-build1: Replace dash with tilde and separate
     # MAIN from SUPPlementary version. Dashes confuse deb/rpm
     # packagers, and we use the tilde later to split it again.
 
+    # 3.10.0a.abcdef: Here the MAIN version is all of the string, and
+    # there is no SUPPlementary version.
+
     VERSION=$(echo "$VERSION_IN"  |  tr '-' '~')
 
     # Is it in correct form until the tilde?
-    if echo "$VERSION" | egrep '^[0-9]+\.[0-9]+\.[0-9]+[ab][0-9]+(~.*|$)'
+    if echo "$VERSION" | egrep '^[0-9]+\.[0-9]+\.[0-9]+([ab][0-9]*)?(\.[0-9a-f]+)(~.*)?$'
     then
         :    # correct
     else
