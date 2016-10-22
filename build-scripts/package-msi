@@ -61,6 +61,11 @@ package()
 
   if [ -z $EXPLICIT_VERSION ]
   then
+    # First make sure VERSION does not contain a 4th dot, since on windows we'll
+    # add one later (plus they can only be numeric); so convert
+    # 3.10.0a.abcdef to 3.10.0a.
+    VERSION=$(echo $VERSION | sed -e 's/\([^.]*\.[^.]*\.[^.]*\).*/\1/')
+
     case $BUILD_TYPE in
       RELEASE)
         REVISION=$VERSION.0
