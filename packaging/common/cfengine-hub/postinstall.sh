@@ -426,7 +426,7 @@ mkdir -p $PREFIX/config
 #REDIS RELATED
 #
 cat > $PREFIX/config/redis.conf << EOF
-daemonize no
+daemonize yes
 pidfile $PREFIX/redis-server.pid
 unixsocket /tmp/redis.sock
 unixsocketperm 600
