@@ -464,6 +464,7 @@ if ! is_upgrade; then
     # Enable service units
     /bin/systemctl enable cf-apache > /dev/null 2>&1
     /bin/systemctl enable cf-execd > /dev/null 2>&1
+    /bin/systemctl enable cf-serverd > /dev/null 2>&1
     /bin/systemctl enable cf-runalerts > /dev/null 2>&1
     /bin/systemctl enable cf-consumer > /dev/null 2>&1
     /bin/systemctl enable cf-monitord > /dev/null 2>&1
