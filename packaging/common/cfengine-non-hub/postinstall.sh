@@ -75,6 +75,7 @@ case `os_type` in
       /bin/systemctl daemon-reload > /dev/null 2>&1
       # Enable service units
       /bin/systemctl enable cf-execd > /dev/null 2>&1
+      /bin/systemctl enable cf-serverd > /dev/null 2>&1
       /bin/systemctl enable cf-monitord > /dev/null 2>&1
       /bin/systemctl enable cfengine3 > /dev/null 2>&1
     else
