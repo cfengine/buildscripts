@@ -374,7 +374,12 @@ else
     done
   fi
 
+  # Ensure cfpostgres can read the sql files it will import. ENT-2684
+  (chown cfpostgres "$PREFIX/share/db/*.sql")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql")
+
+  # Ensure cfpostgres can read the sql files it will import. ENT-2684
+  (chown cfpostgres "$PREFIX/share/GUI/phpcfenginenova/*.sql")
 
   #create database for MISSION PORTAL
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql")
@@ -384,9 +389,16 @@ else
   #import stored function for MP into cfdb
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/GUI/phpcfenginenova/cfdb_import.sql")
 
+
+  # Return restrictive permissions to sql files ENT-2684
+  (chown root:root "$PREFIX/share/GUI/phpcfenginenova/*.sql")
+
   #create database for hub internal data
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql")
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql")
+
+  # Return restrictive permissions to sql files ENT-2684
+  (chown root:root "$PREFIX/share/db/*.sql")
 
   #revoke create permission on public schema for cfdb database
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
