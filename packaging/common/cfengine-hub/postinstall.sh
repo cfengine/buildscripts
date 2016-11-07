@@ -301,14 +301,18 @@ if [ ! -d $PREFIX/state/pg/data ]; then
     if [ "$total" -gt "$lower" ]; then
       maint="2GB"
       if [ "$total" -ge "$upper" ]; then
+        # larger shared buffers provide minor performance improvement
         shared="16GB"
-        effect="11GB"        #70% of 16G
       else
         shared=$(( $total * 25 / 100 / 1024 ))   #in MB
         shared="$shared""MB"
-        effect=$(( $total * 70 / 100 / 1024 ))   #in MB
-        effect="$effect""MB"
       fi
+
+      # effective_cache_size: 50% of total memory is conservative value
+      # 75% is more aggressive, keeping 70% of total memory
+      effect=$(( $total * 70 / 100 / 1024 ))   #in MB
+      effect="$effect""MB"
+
       sed -i -e "s/^.effective_cache_size.*/effective_cache_size=$effect/" $PREFIX/share/postgresql/postgresql.conf.cfengine
       sed -i -e "s/^shared_buffers.*/shared_buffers=$shared/" $PREFIX/share/postgresql/postgresql.conf.cfengine
       sed -i -e "s/^maintenance_work_mem.*/maintenance_work_mem=$maint/" $PREFIX/share/postgresql/postgresql.conf.cfengine
