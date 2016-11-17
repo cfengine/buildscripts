@@ -83,6 +83,13 @@ install: build
 	cp $(BASEDIR)/nova/db/schema_settings.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
 	cp $(BASEDIR)/nova/db/ootb_settings.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
 
+# ENT-2708, ENT-2846
+	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/application/config/*.php
+	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/phpcfenginenova/*.sql
+	chmod 700 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/phpcfenginenova/migrations
+	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/phpcfenginenova/migrations/*.sql
+	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/db/*.sql
+
 
 
 binary-indep: build install
@@ -91,7 +98,7 @@ binary-arch: build install
 	dh_testdir $(EXCLUDE)
 	dh_testroot $(EXCLUDE)
 	dh_install --sourcedir=debian/tmp $(EXCLUDE)
-	dh_link 
+	dh_link
 ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
 	dh_strip
 endif
