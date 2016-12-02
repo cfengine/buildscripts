@@ -277,6 +277,14 @@ exit 0
 %prefix/share/db
 %{prefix}/share/doc/postgresql/extension/*
 
+# ENT-2708, ENT-2846
+%defattr(600,root,root,700)
+%prefix/share/GUI/application/config/*.php
+%prefix/share/GUI/phpcfenginenova/*.sql
+%prefix/share/GUI/phpcfenginenova/migrations
+%prefix/share/GUI/phpcfenginenova/migrations/*.sql
+%prefix/share/db/*.sql
+
 # Base policy
 %defattr(644,root,root,755)
 %prefix/share/NovaBase
