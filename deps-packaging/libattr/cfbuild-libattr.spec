@@ -11,7 +11,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 AutoReqProv: no
 
 %define prefix %{buildprefix}
-%define incldir /usr/include
+%define incldir /var/cfengine/include
 
 %prep
 mkdir -p %{_builddir}

@@ -1,7 +1,7 @@
 #!/usr/bin/make -f
 
 PREFIX=$(BUILDPREFIX)
-INCLUDEPREFIX=/usr/include
+INCLUDEPREFIX=$(BUILDPREFIX)/include
 
 clean:
 	dh_testdir
