@@ -34,7 +34,7 @@ firstlabel=${NODE_LABELS%% *}
 
 if [ x"$firstlabel" = x ]
 then
-    echo "Jenkins has not assigned a LABEL to this node, you are probably building manually"
+    echo "Jenkins has not assigned a LABEL to this node, you are probably building manually" 1>&2
     firstlabel=NO_LABEL
 fi
 
