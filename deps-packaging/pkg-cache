@@ -63,7 +63,7 @@ usage()
 fatal()
 {
   echo "$@" >&2
-#  exit 42
+  exit 42
 }
 
 opts()
@@ -126,14 +126,21 @@ case "$CMD" in
     fi
     ;;
   store)
-    if [ -d "$PKGCACHEDIR" ]; then
-      fatal "Package $PKGVR is already cached."
-    fi
-    mkdir -p "$PKGCACHEDIR"
+      mkdir -p "$PKGCACHEDIR"
+      for sourcefile in $PKGFILES
+      do
+          destfile="$PKGCACHEDIR/`basename $sourcefile`"
 
-    # Force-remove cache directory if cp(1) fails, otherwise cache might become
-    # inconsistent
-    cp $PKGFILES "$PKGCACHEDIR" || (rm -rf "$PKGCACHEDIR"; false);;
+          # Do not write file if it already exists.
+          if [ ! -f "$destfile" ]
+          then
+              # Force-remove cache directory if cp fails, otherwise
+              # cache might become inconsistent
+              cp "$sourcefile" "$destfile" || \
+                  (rm -rf "$PKGCACHEDIR"; fatal 'Failed to copy!')
+          fi
+      done
+      ;;
   list)
     if [ -d "$PKGCACHEDIR" ]; then
       echo "$PKGCACHEDIR"/*
