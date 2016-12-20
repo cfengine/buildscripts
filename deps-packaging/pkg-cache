@@ -136,17 +136,15 @@ case "$CMD" in
           then
               # Force-remove cache directory if cp fails, otherwise
               # cache might become inconsistent
-              cp "$sourcefile" "$destfile" || \
-                  (rm -rf "$PKGCACHEDIR"; fatal 'Failed to copy!')
+              cp "$sourcefile" "$destfile"  \
+                  ||  (rm -rf "$PKGCACHEDIR"; fatal "Failed to copy $PKGVR")
           fi
       done
       ;;
   list)
-    if [ -d "$PKGCACHEDIR" ]; then
-      echo "$PKGCACHEDIR"/*
-    else
-      fatal "Package $PKGVR is not in cache."
-    fi;;
+      find "$PKGCACHEDIR" -type f  \
+          ||  fatal "Failed searching $PKGVR in cache"
+      ;;
   prune)
     if [ -d "$PKGCACHEDIR" ]; then
       rm -rf "$PKGCACHEDIR"
