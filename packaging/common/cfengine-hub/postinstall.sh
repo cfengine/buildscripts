@@ -1,3 +1,9 @@
+if [ -x /bin/systemctl ]; then
+  # This is important in case any of the units have been replaced by the package
+  # and we call them in the postinstall script.
+  /bin/systemctl daemon-reload
+fi
+
 #
 # Make sure the cfapache user has a home folder and populate it
 #
