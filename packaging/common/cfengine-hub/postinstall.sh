@@ -451,6 +451,59 @@ bind 127.0.0.1
 port 0
 EOF
 
+# Fix Mission Portal application permissions ENT-3035
+# Replication of https://github.com/cfengine/masterfiles/blob/8e8c648713d947ad9c2412584b238b8c8743130e/cfe_internal/enterprise/CFE_knowledge.cf
+find $PREFIX/httpd/htdocs/ -type f ! -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/ -type f ! -name '.htaccess' -exec chmod 0440 {} +
+
+# Scripts
+find $PREFIX/httpd/htdocs/scripts/ -type f -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/scripts/ -type f -exec chmod 0440 {} +
+
+# Tmp
+find $PREFIX/httpd/htdocs/tmp/ -type f -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/tmp/ -type f -exec chmod 0660 {} +
+
+# logs
+find $PREFIX/httpd/htdocs/logs/ -type f -exec chown -R $MP_APACHE_USER:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/logs/ -type f -exec chmod 0640 {} +
+
+# application
+find $PREFIX/httpd/htdocs/application/ -type f -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/application/ -type f -exec chmod 0440 {} +
+
+# API non-executable
+find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -o ! -name '*.pl' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -o ! -name '*.pl' -exec chmod 0440 {} +
+
+# API executable
+find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -o -name '*.pl' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -o -name '*.pl' -exec chmod 0550 {} +
+
+# API static non htaccess
+find $PREFIX/httpd/htdocs/api/static -type f ! -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/api/static -type f ! -name '.htaccess' -exec chmod 0440 {} +
+chown root:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
+chmod 0660 $PREFIX/httpd/htdocs/api/static
+
+# HTTPD logs
+find $PREFIX/httpd/logs/ -type f -exec chown -R $MP_APACHE_USER:$MP_APACHE_USER {} +
+find $PREFIX/httpd/logs/ -type f -exec chmod 0640 {} +
+
+# SSL
+find $PREFIX/httpd/ssl/ -type f -exec chown -R root:root {} +
+find $PREFIX/httpd/ssl/ -type f -exec chmod 0440 {} +
+
+# htaccess TODO Remove this, htaccess unusued since 3.10+
+find $PREFIX/httpd/htdocs -type f -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs -type f -name '.htaccess' -exec chmod 0440 {} +
+
+# All dirs need to be group executable
+find $PREFIX/httpd/htdocs -type d -exec chmod g+x {} +
+
+# Restrict access to application source
+find $PREFIX/share/GUI -type f -exec chmod 0400 {} +
+
 ##
 # Start Apache server
 #
