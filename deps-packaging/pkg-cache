@@ -135,11 +135,7 @@ case "$CMD" in
           if [ ! -f "$destfile" ]
           then
               mkdir -p "$PKGCACHEDIR"
-
-              # Force-remove cache directory if cp fails, otherwise
-              # cache might become inconsistent
-              rsync -v "$sourcefile" "$destfile"  \
-                  ||  ( fatal "Failed to copy $PKGVR" )
+              rsync -v "$sourcefile" "$destfile"
           fi
       done
       ;;
