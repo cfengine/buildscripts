@@ -138,8 +138,8 @@ case "$CMD" in
 
               # Force-remove cache directory if cp fails, otherwise
               # cache might become inconsistent
-              cp "$sourcefile" "$destfile"  \
-                  ||  (rm -rf "$PKGCACHEDIR"; fatal "Failed to copy $PKGVR")
+              rsync -v "$sourcefile" "$destfile"  \
+                  ||  ( fatal "Failed to copy $PKGVR" )
           fi
       done
       ;;
