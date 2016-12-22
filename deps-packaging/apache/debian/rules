@@ -42,7 +42,6 @@ install: build
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/httpd.conf
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/extra/httpd-ssl.conf
 	cp $(CURDIR)/httpd.conf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/httpd.conf
-	cp $(CURDIR)/httpd-ssl.conf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/extra/httpd-ssl.conf
 
 binary-indep: build install
 

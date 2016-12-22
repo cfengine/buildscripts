@@ -277,8 +277,9 @@ fi
 #
 # Modify the Apache configuration with the corresponding key and certificate
 #
-sed -i -e s:INSERT_CERT_HERE:$CFENGINE_MP_CERT:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
-sed -i -e s:INSERT_CERT_KEY_HERE:$CFENGINE_MP_KEY:g $PREFIX/httpd/conf/extra/httpd-ssl.conf
+sed -i -e s:INSERT_CERT_HERE:$CFENGINE_MP_CERT:g $PREFIX/httpd/conf/httpd.conf
+sed -i -e s:INSERT_CERT_KEY_HERE:$CFENGINE_MP_KEY:g $PREFIX/httpd/conf/httpd.conf
+sed -i -e s:INSERT_FQDN_HERE:$CFENGINE_LOCALHOST:g $PREFIX/httpd/conf/httpd.conf
 
 #POSTGRES RELATED
 #
