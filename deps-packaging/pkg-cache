@@ -117,14 +117,15 @@ export _POSIX2_VERSION=1
 
 case "$CMD" in
   find)
-    if [ -d "$PKGCACHEDIR" ]; then
-      # Update access time for autoprune.
-      touch "$PKGCACHEDIR"
-      exit 0
-    else
-      exit 1
-    fi
-    ;;
+      if [ `find "$PKGCACHEDIR" -type f  |  wc -l`  !=  0 ]
+      then
+          # Update access time for autoprune.
+          touch "$PKGCACHEDIR"
+          exit 0
+      else
+          exit 1
+      fi
+      ;;
   store)
       mkdir -p "$PKGCACHEDIR"
       for sourcefile in $PKGFILES
