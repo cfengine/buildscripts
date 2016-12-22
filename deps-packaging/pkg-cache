@@ -127,7 +127,6 @@ case "$CMD" in
       fi
       ;;
   store)
-      mkdir -p "$PKGCACHEDIR"
       for sourcefile in $PKGFILES
       do
           destfile="$PKGCACHEDIR/`basename $sourcefile`"
@@ -135,6 +134,8 @@ case "$CMD" in
           # Do not write file if it already exists.
           if [ ! -f "$destfile" ]
           then
+              mkdir -p "$PKGCACHEDIR"
+
               # Force-remove cache directory if cp fails, otherwise
               # cache might become inconsistent
               cp "$sourcefile" "$destfile"  \
