@@ -35,7 +35,6 @@ then
         $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
 fi
 
-
 #
 # Override for manual testing
 #
