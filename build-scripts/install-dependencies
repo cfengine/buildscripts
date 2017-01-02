@@ -12,35 +12,37 @@ PATH=$PATH:$BASEDIR/buildscripts/deps-packaging/
 MAKEFLAGS=-j1
 
 set -x
+
 #export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
-for i in $(ls $BASEDIR/buildscripts/deps-packaging);  do
+for i in $(ls $BASEDIR/buildscripts/deps-packaging)
+do
+    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/debian" ]
+    then
+        echo "$i"
+        case "$BUILDPREFIX" in
+        *opt*)
+            sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/debian/*.install
+        esac
+    fi
 
-if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/debian" ] ; then
-   echo "$i"
-   case "$BUILDPREFIX" in
-  *opt*)
-      sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/debian/*.install
-   esac
-     
-fi
+    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/mingw/debian" ]
+    then
+        case "$BUILDPREFIX" in
+        *opt*)
+            sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/mingw/debian/*.install
+        esac
+    fi
 
-if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/mingw/debian" ] ; then
-   case "$BUILDPREFIX" in
-  *opt*)
-      sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/mingw/debian/*.install
-   esac
-fi
-
-#change the webdirectory in the apache config file as well
-if [ -d "$BASEDIR/buildscripts/deps-packaging/$i" ]
-then
-  if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ] ; then
-   escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
-   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
-   sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
-  fi
-fi
- 
+    #change the webdirectory in the apache config file as well
+    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i" ]
+    then
+        if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ]
+        then
+            escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
+            sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
+            sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
+        fi
+    fi
 done
 
 DEPS=""
@@ -180,64 +182,65 @@ esac
 #
 if [ "x$1" != x ]
 then
-  DEPS="$@"
+    DEPS="$@"
 fi
 
 for dep in $DEPS
 do
 
-  case "$BUILD_TYPE" in
+    case "$BUILD_TYPE" in
     DEBUG|CODE_COVERAGE)
-      optimize=yes
-      debugsym=no
-      versuffix=+untested
-      tests=no;;
+        optimize=yes
+        debugsym=no
+        versuffix=+untested
+        tests=no;;
     RELEASE)
-      optimize=yes
-      debugsym=no
-      versuffix=+release
-      tests=yes;;
+        optimize=yes
+        debugsym=no
+        versuffix=+release
+        tests=yes;;
     *)
-      echo "Unknown build type: $BUILD_TYPE"
-      exit 42;;
-  esac
+        echo "Unknown build type: $BUILD_TYPE"
+        exit 42;;
+    esac
 
-  case "$ARCH" in
+    case "$ARCH" in
     x86|x64)
-      crossver=+mingw$ARCH
-      cross=$ARCH;;
+        crossver=+mingw$ARCH
+        cross=$ARCH;;
     *)
-      crossver=
-      cross=native;;
-  esac
+        crossver=
+        cross=native;;
+    esac
 
     revision=$(cat $BASEDIR/buildscripts/deps-packaging/revision)
-
     version=0+$revision$versuffix$crossver
 
-  if pkg-cache find $dep-$version
-  then
-
-    if [ x$PKGCACHE_PRUNE != x ]
+    if pkg-cache find $dep-$version
     then
-      echo "Removing package from cache because PKGCACHE_PRUNE is set"
-      pkg-cache prune $dep-$version
-    else
-      echo "Package found in cache, skipping compilation"
+        if [ x$PKGCACHE_PRUNE != x ]
+        then
+            echo "Removing package from cache because PKGCACHE_PRUNE is set"
+            pkg-cache prune $dep-$version
+        else
+            echo "Package found in cache, skipping compilation"
+        fi
+
     fi
 
-  fi
+    # Keep 10 packages around. Should be more than enough for all the main
+    # and private branches.
+    pkg-cache autoprune $dep 10
 
-  # Keep 10 packages around. Should be more than enough for all the main
-  # and private branches.
-  pkg-cache autoprune $dep 10
+    if pkg-cache find $dep-$version
+    then
+        :
+    else
+        $BASEDIR/buildscripts/deps-packaging/pkg-build-${DEP_PACKAGING}  \
+            $dep $tests $cross $optimize $debugsym $version
+        pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
+    fi
 
-  if pkg-cache find $dep-$version; then
-    :
-  else
-    $BASEDIR/buildscripts/deps-packaging/pkg-build-${DEP_PACKAGING} $dep $tests $cross $optimize $debugsym $version
-    pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
-  fi
+    pkg-install-${DEP_PACKAGING} $(pkg-cache list $dep-$version)
 
-  pkg-install-${DEP_PACKAGING} $(pkg-cache list $dep-$version)
 done
