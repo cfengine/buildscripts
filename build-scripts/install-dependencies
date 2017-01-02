@@ -13,6 +13,12 @@ MAKEFLAGS=-j1
 
 set -x
 
+# This should be already set from sourcing "function" at the top, but
+# make sure, because we don't want build-artifacts-cache to have bogus
+# packages.
+set -e
+
+
 #export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
 for i in $(ls $BASEDIR/buildscripts/deps-packaging)
 do
