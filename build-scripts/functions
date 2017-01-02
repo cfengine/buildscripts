@@ -402,7 +402,12 @@ mktempdir ()
 {
     [ x$1 = x ] && fatal "mktempdir: TEMPLATE directory argument missing"
 
-    my_mktemp=`func_which mktemp`         \
+    # HP-UX has its own non-POSIX mktemp, so override it.
+    # If not on HP-UX, search PATH for the 'mktemp' command.
+
+    [ x`uname -s` = xHP-UX ]              \
+        && my_mktemp=func_mktemp          \
+        || my_mktemp=`func_which mktemp`  \
         || my_mktemp=`func_which gmktemp` \
         || my_mktemp=func_mktemp
 
