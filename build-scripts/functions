@@ -357,3 +357,59 @@ mount_procfs()
       ;;
   esac
 }
+
+# Exit with an error. If error code is not specified, just "exit 1".
+# Examples:
+#     fatal "install failed" 42
+#     fatal "exiting with default error code"
+fatal()
+{
+  echo "$1" >&2
+  exit ${2-1}
+}
+
+# Check that command exists, and print its full path,
+# else return error but print nothing
+func_which ()
+{
+    command -v $1  2>/dev/null
+}
+
+# Only works as mktemp -d /path/to/tmpdir.XXXX
+func_mktemp ()
+{
+    # Only works as mktemp -d
+    [ x$1 != x-d ] && fatal "func_mktemp: error, first argument must be -d"
+    [ x$2  = x ]   && fatal "func_mktemp: requires two arguments"
+
+    # $RANDOM does not exist on Solaris 9 /bin/sh, use $$ as fallback
+    my_tmpdir=`echo $2 | sed 's/XX*/'${RANDOM-$$}/`
+
+    save_mktemp_umask=`umask`
+    umask 0077
+    # Set -e will cause this to fail if it already exists
+    mkdir "$my_tmpdir"
+    umask $save_mktemp_umask
+
+    [ -d "$my_tmpdir" ]      \
+        && echo "$my_tmpdir" \
+        || fatal "func_mktemp: failed creating temporary directory $my_tmpdir"
+}
+
+# mktempdir TEMPLATE
+# Example: mktempdir /tmp/dir.XXXXXX
+mktempdir ()
+{
+    [ x$1 = x ] && fatal "mktempdir: TEMPLATE directory argument missing"
+
+    # HP-UX has its own non-POSIX mktemp, so override it.
+    # If not on HP-UX, search PATH for the 'mktemp' command.
+
+    [ x`uname -s` = xHP-UX ]              \
+        && my_mktemp=func_mktemp          \
+        || my_mktemp=`func_which mktemp`  \
+        || my_mktemp=`func_which gmktemp` \
+        || my_mktemp=func_mktemp
+
+    $my_mktemp -d $1
+}

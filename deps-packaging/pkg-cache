@@ -1,31 +1,6 @@
 #!/bin/sh
 
-#
-# Detect and replace non-POSIX shell
-#
-try_exec() {
-    type "$1" > /dev/null 2>&1 && exec "$@"
-}
-
-broken_posix_shell()
-{
-    unset foo
-    local foo=1
-    test "$foo" != "1"
-}
-
-if broken_posix_shell >/dev/null 2>&1; then
-    try_exec /usr/xpg4/bin/sh "$0" "$@"
-    echo "No compatible shell script interpreter found."
-    echo "Please find a POSIX shell for your system."
-    exit 42
-fi
-
-#
-# Do not set -e before switching to POSIX shell, as it will break the test
-# above.
-#
-set -e
+. `dirname "$0"`/../build-scripts/functions
 
 
 # Check for Jenkins node label and use that as index.
@@ -58,12 +33,6 @@ usage()
   echo "$0 autoprune <pkg> <n>"
   echo "  removes all but the <n> most recently used cached package files"
   exit 1
-}
-
-fatal()
-{
-  echo "$@" >&2
-  exit 42
 }
 
 opts()
@@ -127,17 +96,20 @@ case "$CMD" in
       fi
       ;;
   store)
-      for sourcefile in $PKGFILES
-      do
-          destfile="$PKGCACHEDIR/`basename $sourcefile`"
+      if [ -d "$PKGCACHEDIR" ]
+      then
+          echo "pkg-cache store: Skipping storing package because directory already exists:    $PKGCACHEDIR"  1>&2
+          exit
+      fi
 
-          # Do not write file if it already exists.
-          if [ ! -f "$destfile" ]
-          then
-              mkdir -p "$PKGCACHEDIR"
-              rsync -v "$sourcefile" "$destfile"
-          fi
-      done
+      tempdir=`mktempdir "$PKGCACHEDIR.XXXXXX"`
+
+      cp $PKGFILES "$tempdir"
+
+      # Atomically rename directory, to avoid a very common issue:
+      # package directory only containing the "devel" package but not
+      # the main one, or vice-versa.
+      mv "$tempdir" "$PKGCACHEDIR"
       ;;
   list)
       find "$PKGCACHEDIR" -type f  \
