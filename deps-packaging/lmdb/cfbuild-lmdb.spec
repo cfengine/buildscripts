@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- lmdb
 Name: cfbuild-lmdb
 Version: %{version}
 Release: 1
-Source0: ad8488cfac644d7a289e428ab3c403c859d844cb.tar.gz
+Source0: 14cff072ec29f48093a9d40cc79934cf5376af4a.tar.gz
 License: OpenLDAP
 Group: Other
 Url: http://symas.com/mdb
@@ -13,7 +13,7 @@ AutoReqProv: no
 Patch0: mdb.patch
 
 %define prefix %{buildprefix}
-%define srcdir lmdb-ad8488cfac644d7a289e428ab3c403c859d844cb/libraries/liblmdb
+%define srcdir lmdb-14cff072ec29f48093a9d40cc79934cf5376af4a/libraries/liblmdb
 
 %ifarch %ix86
 %define lbits %{nil}
@@ -38,6 +38,12 @@ chmod 755 configure
 chmod 755 depcomp
 chmod 755 install-sh
 chmod 755 missing
+
+# Workaround for automake being sensitive to the order in which the generated
+# files are applied. If Makefile.in is patched before aclocal.m4 (which it is,
+# following natural file order), then it will try to rebuild Makefile.in, which
+# it can't without automake. Work around it by touching that file.
+touch Makefile.in
 
 %build
 

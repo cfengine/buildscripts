@@ -21,6 +21,11 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 	for i in 00*.patch; do patch -p1 < $$i; done
+	# Workaround for automake being sensitive to the order in which the generated
+	# files are applied. If Makefile.in is patched before aclocal.m4 (which it is,
+	# following natural file order), then it will try to rebuild Makefile.in, which
+	# it can't without automake. Work around it by touching that file.
+	touch libraries/liblmdb/Makefile.in
 	cd libraries/liblmdb/ && sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
 	touch build-stamp
 
