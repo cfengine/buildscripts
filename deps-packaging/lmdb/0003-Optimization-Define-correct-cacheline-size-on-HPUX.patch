@@ -1,23 +1,36 @@
-*** a/libraries/liblmdb/configure.ac
---- b/libraries/liblmdb/configure.ac
-***************
-*** 37,42 **** AC_CHECK_FUNC([pthread_mutexattr_setrobust],
---- 37,54 ----
-      ])
-  ])
-  
-+ AC_MSG_CHECKING([cache line size])
-+ AS_CASE([$target_os],
-+ [*hpux*],
-+ [
-+     AC_MSG_RESULT([128])
-+     AC_DEFINE([CACHELINE], [128])
-+ ],
-+ [
-+     AC_MSG_RESULT([64])
-+     AC_DEFINE([CACHELINE], [64])
-+ ])
-+ 
-  AC_CONFIG_SRCDIR([mdb.c])
-  AC_CONFIG_FILES([Makefile])
-  AC_OUTPUT
+From 53556430561ac2ecb4bd715563bc19ab12c71a07 Mon Sep 17 00:00:00 2001
+From: Kristian Amlie <kristian.amlie@cfengine.com>
+Date: Thu, 23 Apr 2015 11:28:56 +0200
+Subject: [PATCH 3/4] Optimization: Define correct cacheline size on HPUX.
+
+This only affects performance.
+---
+ libraries/liblmdb/configure.ac | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/libraries/liblmdb/configure.ac b/libraries/liblmdb/configure.ac
+index 3db2251..2a5834b 100644
+--- a/libraries/liblmdb/configure.ac
++++ b/libraries/liblmdb/configure.ac
+@@ -37,6 +37,18 @@ AC_CHECK_FUNC([pthread_mutexattr_setrobust],
+     ])
+ ])
+ 
++AC_MSG_CHECKING([cache line size])
++AS_CASE([$target_os],
++[*hpux*],
++[
++    AC_MSG_RESULT([128])
++    AC_DEFINE([CACHELINE], [128])
++],
++[
++    AC_MSG_RESULT([64])
++    AC_DEFINE([CACHELINE], [64])
++])
++
+ AC_CONFIG_SRCDIR([mdb.c])
+ AC_CONFIG_FILES([Makefile])
+ AC_OUTPUT
+-- 
+2.7.4
+
