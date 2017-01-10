@@ -102,6 +102,7 @@ case "$CMD" in
           exit
       fi
 
+      mkdir -p "$(dirname $PKGCACHEDIR)"
       tempdir=`mktempdir "$PKGCACHEDIR.XXXXXX"`
 
       cp $PKGFILES "$tempdir"
