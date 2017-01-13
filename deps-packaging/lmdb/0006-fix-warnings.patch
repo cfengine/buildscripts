@@ -1,0 +1,48 @@
+From ad1e4b9910895cb94d120f8f0d43264c4c58e7da Mon Sep 17 00:00:00 2001
+From: Dimitrios Apostolou <dimitrios.apostolou@cfengine.com>
+Date: Fri, 13 Jan 2017 19:09:23 +0100
+Subject: [PATCH 6/6] fix warnings
+
+---
+ libraries/liblmdb/lmmgr.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libraries/liblmdb/lmmgr.c b/libraries/liblmdb/lmmgr.c
+index 1137d8d..ca80bc7 100644
+--- a/libraries/liblmdb/lmmgr.c
++++ b/libraries/liblmdb/lmmgr.c
+@@ -1,11 +1,12 @@
+ /*
+ lmmgr.c : Add, remove or manage the maxreaders value of a given database file
+ */
++#include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+ #include "lmdb.h"
+ 
+ static int report_error(int rc) 
+ {
+     printf("err(%d): %s\n", rc, mdb_strerror(rc));   
+     return rc;
+@@ -130,17 +131,17 @@ int do_stat(char *dbfile)
+     MDB_env *env;
+     openconn(dbfile, &env, 0);
+ 
+     MDB_stat stat;
+     MDB_envinfo info;
+ 
+     rc = mdb_env_stat(env, &stat);
+     rc = mdb_env_info(env, &info);
+-    printf("me_maxreaders=%ld\n", info.me_maxreaders);
++    printf("me_maxreaders=%u\n", info.me_maxreaders);
+     mdb_env_close(env);
+     return 0;
+ }
+ 
+ int main(int argc, char *argv[])
+ {
+     if (argc < 3)
+     {
+-- 
+2.7.4
+
