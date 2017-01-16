@@ -10,7 +10,7 @@ Build dependencies:
 
 Agent dependencies:
 
-* [zlib](http://www.zlib.net/) 1.2.8
+* [zlib](http://www.zlib.net/) 1.2.11
 * [OpenSSL](http://openssl.org/) 1.0.2j
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.39
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.18
