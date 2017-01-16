@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- zlib
 Name: cfbuild-zlib
 Version: %{version}
 Release: 1
-Source0: zlib-1.2.8.tar.gz
+Source0: zlib-1.2.11.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n zlib-1.2.8
+%setup -q -n zlib-1.2.11
 
 %build
 
@@ -60,7 +60,7 @@ CFEngine Build Automation -- zlib -- development files
 %dir %{prefix}/lib
 %{prefix}/lib/libz.so
 %{prefix}/lib/libz.so.1
-%{prefix}/lib/libz.so.1.2.8
+%{prefix}/lib/libz.so.1.2.11
 
 %files devel
 %defattr(-,root,root)
