@@ -42,12 +42,11 @@ do
     #change the webdirectory in the apache config file as well
     if [ -d "$BASEDIR/buildscripts/deps-packaging/$i" ]
     then
-        if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ]
-        then
-            escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
-            sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
-            sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
-        fi
+      if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ] ; then
+       escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
+       # This is ugly. Can't we do something better than hard-coding a path in the original config?
+       sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
+      fi
     fi
 done
 
