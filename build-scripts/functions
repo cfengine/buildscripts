@@ -65,7 +65,8 @@ export BUILDPREFIX
 case x`uname -s` in
     xSunOS)
         # Currently we rely strongly on OpenCSW packages.
-        PATH="/opt/csw/bin:$PATH"  ;;
+        PATH="/opt/csw/bin:/usr/xpg4/bin:$PATH"  ;;
+
     xHP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
     *) ;;
 esac
@@ -76,7 +77,7 @@ export PATH
 # For utilities in paths that we don't want in PATH.
 # Used only by func_whereis()
 # TODO make it platform-dependent, add other platforms besides Solaris.
-SECONDARY_PATHS="/usr/sfw/bin /usr/sbin /sbin"  #"/opt/csw/gnu /usr/ccs/bin"
+SECONDARY_PATHS="/sbin /usr/sbin  /usr/sfw/bin"  #"/opt/csw/gnu /usr/ccs/bin"
 
 
 #
