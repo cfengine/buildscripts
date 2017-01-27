@@ -338,6 +338,10 @@ detect_environment
 
 # Print the environment variables so that the log can be used to debug problems
 # stemming from wrong environment.
-echo -e "\n\n==================== Current environment ========================"
+echo
+echo
+echo "==================== Current environment ========================"
 env
-echo -e "=================================================================\n\n"
+echo "================================================================="
+echo
+echo
