@@ -1,8 +1,6 @@
 #!/usr/xpg4/bin/sh -e
 
 
-. `dirname "$0"`/../../../build-scripts/functions
-. detect-environment
 # Options
 
 PREFIX=/var/cfengine
