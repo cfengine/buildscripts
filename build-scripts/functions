@@ -69,13 +69,14 @@ case x`uname -s` in
     xHP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
     *) ;;
 esac
+# TODO remove */sbin from generic PATH
 PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/local/sbin:"
 export PATH
 
-# For extra utilities in paths we don't want in PATH.
+# For utilities in paths that we don't want in PATH.
 # Used only by func_whereis()
-# TODO other platforms besides Solaris.
-SECONDARY_PATHS="/usr/sfw/bin"  #"/opt/csw/gnu /usr/ccs/bin"
+# TODO make it platform-dependent, add other platforms besides Solaris.
+SECONDARY_PATHS="/usr/sfw/bin /usr/sbin /sbin"  #"/opt/csw/gnu /usr/ccs/bin"
 
 
 #
