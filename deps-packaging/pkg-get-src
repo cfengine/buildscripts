@@ -17,12 +17,6 @@ info()
   echo "I: $@" >&2
 }
 
-fatal()
-{
-  echo "$@" >&2
-  exit 42
-}
-
 opts()
 {
   if [ $# -lt 2 ]; then

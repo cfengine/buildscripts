@@ -364,7 +364,7 @@ mount_procfs()
 #     fatal "exiting with default error code"
 fatal()
 {
-  echo "$1" >&2
+  echo "FATAL ERROR: $1" >&2
   exit ${2-1}
 }
 
