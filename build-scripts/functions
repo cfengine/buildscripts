@@ -72,6 +72,11 @@ esac
 PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/local/sbin:"
 export PATH
 
+# For extra utilities in paths we don't want in PATH.
+# Used only by func_whereis()
+# TODO other platforms besides Solaris.
+SECONDARY_PATHS="/usr/sfw/bin"  #"/opt/csw/gnu /usr/ccs/bin"
+
 
 #
 # Packages handling
@@ -391,11 +396,47 @@ fatal()
     exit ${2-1}
 }
 
-# Check that command exists, and print its full path,
-# else return error but print nothing
+# Check that $1 command exists in PATH, and print its full path, else
+# return error.  If it has many arguments, continue to
+# check for $2 command, etc, before giving up.
 func_which ()
 {
-    command -v $1  2>/dev/null
+    while [ x"$1" != x ]
+    do
+        if command -v "$1"  2>/dev/null
+        then
+            return 0
+        fi
+        shift
+    done
+    return 1
+}
+
+# Same as func_which, but search for $1 command in all possible paths,
+# not only PATH. If not found, search for $2, etc.
+func_whereis ()
+{
+    while [ x"$1" != x ]
+    do
+        # First, search in PATH
+        if command -v "$1"  2>/dev/null
+        then
+            return 0
+        # Second, search in SECONDARY_PATHS
+        else
+            for p in $SECONDARY_PATHS
+            do
+                if command -v "$p/$1"  2>/dev/null
+                then
+                    return 0
+                fi
+            done
+        fi
+
+        # Command $1 not found, search for next argument
+        shift
+    done
+    return 1
 }
 
 # Only works as mktemp -d /path/to/tmpdir.XXXX
