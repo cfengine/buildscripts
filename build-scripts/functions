@@ -385,8 +385,8 @@ mount_procfs()
 #     fatal "exiting with default error code"
 fatal()
 {
-  echo "FATAL ERROR: $1" >&2
-  exit ${2-1}
+    echo "FATAL ERROR: $1" >&2
+    exit ${2-1}
 }
 
 # Check that command exists, and print its full path,
