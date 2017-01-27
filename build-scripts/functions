@@ -6,7 +6,7 @@
 #
 
 #
-# Note: Do not use $(), as Solaris /bin/sh will choke on it *before* executing.
+# NOTE: Do not use $(), as Solaris /bin/sh will choke on it *before* executing.
 #
 
 #
@@ -50,9 +50,9 @@ export_variables ()
             *)  SCRIPTDIR=`pwd`/`dirname "$0"`;;
         esac
 
-        AUTOBUILD_PATH="$(dirname "$SCRIPTDIR")"
+        AUTOBUILD_PATH=`dirname "$SCRIPTDIR"`
     fi
-    BASEDIR="$(dirname "$AUTOBUILD_PATH")"
+    BASEDIR=`dirname "$AUTOBUILD_PATH"`
     export BASEDIR
 
 
