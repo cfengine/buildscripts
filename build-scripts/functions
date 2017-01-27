@@ -36,48 +36,72 @@ fi
 #
 set -e
 
-#
-# Figure out where scripts are, and amend PATH to ease our life.
-#
 
-if [ -z "$AUTOBUILD_PATH" ]
-then
-    case "$0" in
-        /*) SCRIPTDIR=`dirname "$0"`;;
-        *)  SCRIPTDIR=`pwd`/`dirname "$0"`;;
+# Preparatory step: export all variables needed
+export_variables ()
+{
+    #
+    # BASEDIR: where all our repos have been checked out
+    #
+    if [ -z "$AUTOBUILD_PATH" ]
+    then
+        case "$0" in
+            /*) SCRIPTDIR=`dirname "$0"`;;
+            *)  SCRIPTDIR=`pwd`/`dirname "$0"`;;
+        esac
+
+        AUTOBUILD_PATH="$(dirname "$SCRIPTDIR")"
+    fi
+    BASEDIR="$(dirname "$AUTOBUILD_PATH")"
+    export BASEDIR
+
+
+    # BUILDPREFIX: which directory the packages will be installed to.
+    BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
+    export BUILDPREFIX
+
+
+    # Set PATH according to the needs of each platform and build-type
+    # TODO: remove the generic PATH setting completely,
+    #       all should be under conditionals
+    case x`uname -s` in
+        xSunOS)
+            # Currently we rely strongly on OpenCSW packages.
+            PATH="/opt/csw/bin:/usr/xpg4/bin:$PATH"  ;;
+
+        xHP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
+        *) ;;
     esac
+    # TODO remove */sbin from generic PATH
+    PATH="$PATH:/usr/local/bin:/usr/sbin:/usr/local/sbin"
+    PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin"
+    export PATH
 
-  AUTOBUILD_PATH="$(dirname "$SCRIPTDIR")"
-fi
-BASEDIR="$(dirname "$AUTOBUILD_PATH")"
-export BASEDIR
+
+    # Autotools config.status (as invoked by ./configure) needs CONFIG_SHELL
+    # to point to a proper bourne shell in some platforms.
+    # https://www.gnu.org/software/libtool/manual/html_node/Configure-notes.html
+    # https://www.gnu.org/savannah-checkouts/gnu/autoconf/manual/autoconf-2.69/html_node/config_002estatus-Invocation.html
+    case x`uname -s` in
+        xSunOS)  CONFIG_SHELL=/usr/xpg4/bin/sh  ;;
+        xAIX)    CONFIG_SHELL=/usr/bin/bash     ;;
+    esac
+    export CONFIG_SHELL
 
 
-# Export to which directory the packages will be installed, using the
-# define buildprefix in environment or /var/cfengine as default.
-BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
-export BUILDPREFIX
+    # Final destination of generated buildscripts output
+    OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
+    export OUTDIR
+}
 
-# Set PATH according to the needs of each platform and build-type
-# TODO: remove the generic PATH setting completely,
-#       all should be under conditionals
+export_variables
 
-case x`uname -s` in
-    xSunOS)
-        # Currently we rely strongly on OpenCSW packages.
-        PATH="/opt/csw/bin:/usr/xpg4/bin:$PATH"  ;;
-
-    xHP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
-    *) ;;
-esac
-# TODO remove */sbin from generic PATH
-PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/local/sbin:"
-export PATH
 
 # For utilities in paths that we don't want in PATH.
-# Used only by func_whereis()
+# Not exported, used exclusively by func_whereis()
 # TODO make it platform-dependent, add other platforms besides Solaris.
 SECONDARY_PATHS="/sbin /usr/sbin  /usr/sfw/bin"  #"/opt/csw/gnu /usr/ccs/bin"
+
 
 
 #
@@ -229,12 +253,12 @@ run() {
 
 local_script_general() {
   SCRIPT="$1"
-  "$AUTOBUILD_PATH/build-scripts/$SCRIPT" "$HOST"
+  "$BASEDIR/buildscripts/build-scripts/$SCRIPT" "$HOST"
 }
 
 local_script() {
   SCRIPT="$1"
-  run "$SCRIPT" "$AUTOBUILD_PATH/build-scripts/$SCRIPT" "$HOST"
+  run "$SCRIPT" "$BASEDIR/buildscripts/build-scripts/$SCRIPT" "$HOST"
 }
 
 remote_script_general() {
