@@ -63,7 +63,9 @@ export BUILDPREFIX
 #       all should be under conditionals
 
 case x`uname -s` in
-    xSunOS)  PATH="/opt/csw/bin:$PATH"  ;;
+    xSunOS)
+        # Currently we rely strongly on OpenCSW packages.
+        PATH="/opt/csw/bin:$PATH"  ;;
     xHP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
     *) ;;
 esac
