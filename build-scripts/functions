@@ -50,12 +50,25 @@ then
   AUTOBUILD_PATH="$(dirname "$SCRIPTDIR")"
 fi
 BASEDIR="$(dirname "$AUTOBUILD_PATH")"
-
-
-# Export to which directory the packages will be installed, using the define buildprefix in environment or /var/cfengine as default.
-export BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
-export PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/local/sbin:/usr/contrib/bin"
 export BASEDIR
+
+
+# Export to which directory the packages will be installed, using the
+# define buildprefix in environment or /var/cfengine as default.
+BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
+export BUILDPREFIX
+
+# Set PATH according to the needs of each platform and build-type
+# TODO: remove the generic PATH setting completely,
+#       all should be under conditionals
+
+case x`uname -s` in
+    xSunOS)  PATH="/opt/csw/bin:$PATH"  ;;
+    xHP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
+    *) ;;
+esac
+PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/local/sbin:"
+export PATH
 
 
 #
