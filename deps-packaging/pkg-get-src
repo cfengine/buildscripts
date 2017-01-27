@@ -38,7 +38,7 @@ checksum()
     FILENAME="$1"
     CHECKSUM="$2"
 
-    TAR=`func_which gtar`  ||  TAR=tar
+    TAR=`func_which tar gtar`
 
     case "$CHECKSUM" in
         content=*)
