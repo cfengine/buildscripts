@@ -321,14 +321,6 @@ detect_environment()
   detect_cores
 }
 
-detect_environment
-
-# Print the environment variables so that the log can be used to debug problems
-# stemming from wrong environment.
-echo -e "\n\n==================== Current environment ========================"
-env
-echo -e "=================================================================\n\n"
-
 #
 # We need to detect the following pieces of data:
 #  - distribution
@@ -336,6 +328,10 @@ echo -e "=================================================================\n\n"
 #  - architecture
 #  - packaging tool (dpkg, rpm, solaris pkg, ...)
 #
+detect_environment
 
-OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
-export OUTDIR
+# Print the environment variables so that the log can be used to debug problems
+# stemming from wrong environment.
+echo -e "\n\n==================== Current environment ========================"
+env
+echo -e "=================================================================\n\n"
