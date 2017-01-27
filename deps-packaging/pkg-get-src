@@ -6,135 +6,130 @@ CACHEDIR=$HOME/.cache/cfengine-buildscripts-distfiles
 
 usage()
 {
-  exec >&2
-  echo "Usage: $0 <distfile> <URL> [<URL> ...]"
-  echo "  downloads all files specified in distfile using URLs"
-  exit 1
+    exec >&2
+    echo "Usage: $0 <distfile> <URL> [<URL> ...]"
+    echo "  downloads all files specified in distfile using URLs"
+    exit 1
 }
 
 info()
 {
-  echo "I: $@" >&2
+    echo "I: $@" >&2
 }
 
 opts()
 {
-  if [ $# -lt 2 ]; then
-    usage
-  fi
+    if [ $# -lt 2 ]
+    then
+        usage
+    fi
 
-  DISTFILE="$1"
-  shift
-  URLS="$@"
+    DISTFILE="$1"
+    shift
+    URLS="$@"
 }
 
+# Compare filename $1 to checksum $2. If $2 starts with "content=" then
+# checksum is computed based on *content* of each contained file,
+# instead of the downloaded file itself. Is needed for generated
+# downloads.
 checksum()
 {
-  FILENAME="$1"
-  CHECKSUM="$2"
+    FILENAME="$1"
+    CHECKSUM="$2"
 
-  if which gtar 2>&1 | grep '^/' >/dev/null; then
-    TAR=gtar
-  else
-    TAR=tar
-  fi
+    TAR=`func_which gtar`  ||  TAR=tar
 
-  case "$CHECKSUM" in
-    content=*)
-      # Base checksum on content of each contained file, instead of the
-      # downloaded file. Is needed for generated downloads.
-      rm -rf temp
-      mkdir -p temp
-      cd temp
-      case "$CACHEDIR/$FILENAME" in
-        *.gz|*.tgz)
-          if which gzcat 2>&1 | grep '^/' >/dev/null; then
-            UNCOMPRESS=gzcat
-          else
-            UNCOMPRESS="gunzip -c"
-          fi
-          ;;
-        *.bz2)
-          UNCOMPRESS=bzcat;;
+    case "$CHECKSUM" in
+        content=*)
+            CHECKSUM="${CHECKSUM#content=}"              # remove prefix
+
+            rm -rf temp  &&  mkdir -p temp  &&  cd temp
+
+            func_decompress "$FILENAME" | $TAR xf - >/dev/null 2>&1
+            # Bogus file created by older versions of tar trying to untar newer archives.
+            rm -f pax_global_header
+
+            ACTUAL_CHECKSUM=`find . -type f | env LC_ALL=C sort | xargs cat | func_md5`
+
+            cd ..  &&  rm -rf temp
+            ;;
         *)
-          echo "Unknown compression: $srcfile"
-          exit 42;;
-      esac
-      $UNCOMPRESS "$CACHEDIR/$FILENAME" | $TAR xf - >/dev/null 2>&1
-      # Bogus file created by older versions of tar trying to untar newer archives.
-      rm -f pax_global_header
-      ACTUAL_CHECKSUM="$(find . -type f | env LC_ALL=C sort | xargs cat | md5sum)"
-      cd ..
-      rm -rf temp
-      test "${CHECKSUM#content=}  -" = "$ACTUAL_CHECKSUM"
-      ;;
-    *)
-      echo "$CHECKSUM  $CACHEDIR/$FILENAME" | md5sum -c >/dev/null
-      ;;
-  esac
+            ACTUAL_CHECKSUM=`func_md5 $FILENAME` ;;
+    esac
+
+    test "$CHECKSUM" = "$ACTUAL_CHECKSUM"
 }
 
-file_in_cache() 
+file_in_cache()
 {
-  FILENAME="$1"
-  CHECKSUM="$2"
+    FILENAME="$1"
+    CHECKSUM="$2"
 
-  if [ -f "$CACHEDIR/$FILENAME" ]; then
-    if checksum "$FILENAME" "$CHECKSUM"; then
-      return 0
+    if [ -f "$CACHEDIR/$FILENAME" ]
+    then
+        if checksum "$CACHEDIR/$FILENAME" "$CHECKSUM"
+        then
+            return 0
+        else
+            info "WARNING: Cached file $FILENAME has wrong checksum."
+            rm -f "$CACHEDIR/$FILENAME"
+            return 1
+        fi
     else
-      info "Cached file $FILENAME has wrong checksum."
-      rm -f "$CACHEDIR/$FILENAME"
-      return 1
+        info "File $FILENAME is not in cache"
+        return 1
     fi
-  else
-    info "File $FILENAME is not in cache"
-    return 1
-  fi
 }
 
 fetch_file()
 {
-  FILENAME="$1"
-  CHECKSUM="$2"
+    FILENAME="$1"
+    CHECKSUM="$2"
 
-  mkdir -p "$CACHEDIR"
+    mkdir -p "$CACHEDIR"
 
-  for URL in $URLS; do
-    # Not all wget versions support --no-check-certificate, so try both forms.
-    # Also, the standard output of this function is parsed, so let's make sure
-    # wget outputs on standard error. That's what it normally does anyway, but
-    # misparsed arguments is an exception.
-    wget --no-check-certificate -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME" 1>&2 || true
-    if [ -f "$CACHEDIR/$FILENAME" ] || wget -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME" 1>&2 ; then
-      if checksum "$FILENAME" "$CHECKSUM"; then
-        return 0
-      else
-        info "Downloaded $URL$FILENAME has wrong checksum. Continuing"
-        rm -f "$CACHEDIR/$FILENAME"
-      fi
-    else
-      # wget(1) tends to create empty files even if download did not finish
-      rm -f "$CACHEDIR/$FILENAME"
-      echo 'If you get a message about "Unsupported scheme", simply upload the' 1>&2
-      echo "given file to $CACHEDIR yourself." 1>&2
-    fi
-  done
+    for URL in $URLS
+    do
+        # Not all wget versions support --no-check-certificate, so try both forms.
+        # Also, the standard output of this function is parsed, so let's make sure
+        # wget outputs on standard error. That's what it normally does anyway, but
+        # misparsed arguments is an exception.
+        wget --no-check-certificate -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME" 1>&2 \
+            || wget -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME" 1>&2  \
+            || true
 
-  return 1
+        if [ -f "$CACHEDIR/$FILENAME" ]
+        then
+            if checksum "$CACHEDIR/$FILENAME" "$CHECKSUM"
+            then
+                return 0                           # SUCCESSFUL DOWNLOAD
+            else
+                info "WARNING: Downloaded $URL$FILENAME has wrong checksum. Continuing"
+                # wget(1) tends to create empty files even if download did not finish
+                rm -f "$CACHEDIR/$FILENAME"
+            fi
+        fi
+    done
+
+    echo 'If you get a message about "Unsupported scheme", simply upload the' 1>&2
+    echo "given file to $CACHEDIR yourself." 1>&2
+    return 1
 }
 
 get_src()
 {
-  cat "$DISTFILE" | while read CHECKSUM FILENAME OPTS; do
-    file_in_cache "$FILENAME" "$CHECKSUM" || \
-      fetch_file "$FILENAME" "$CHECKSUM" || \
-      fatal "Unable to fetch $FILENAME"
-  done
+    cat "$DISTFILE"  |  while read CHECKSUM FILENAME OPTS
+    do
+        file_in_cache "$FILENAME" "$CHECKSUM" \
+            || fetch_file "$FILENAME" "$CHECKSUM" \
+            || fatal "Unable to fetch $FILENAME"
+    done
 
-  cat "$DISTFILE" | while read CHECKSUM FILENAME OPTS; do
-    echo "$CACHEDIR/$FILENAME" $OPTS
-  done
+    cat "$DISTFILE"  |  while read CHECKSUM FILENAME OPTS
+    do
+        echo "$CACHEDIR/$FILENAME" $OPTS
+    done
 }
 
 opts "$@"

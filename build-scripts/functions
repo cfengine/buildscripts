@@ -54,7 +54,7 @@ BASEDIR="$(dirname "$AUTOBUILD_PATH")"
 
 # Export to which directory the packages will be installed, using the define buildprefix in environment or /var/cfengine as default.
 export BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
-export PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/sfw/bin:/usr/bin:/usr/local/sbin:/usr/contrib/bin"
+export PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin:/usr/local/bin:/usr/sbin:/usr/local/sbin:/usr/contrib/bin"
 export BASEDIR
 
 
@@ -420,4 +420,30 @@ mktempdir ()
         || my_mktemp=func_mktemp
 
     $my_mktemp -d $1
+}
+
+# Print the md5sum of $1 or stdin. See:
+# http://www-01.ibm.com/support/docview.wss?uid=swg21496703
+func_md5 ()
+{
+    if func_which md5sum >/dev/null
+    then
+        md5sum "$@" | cut -d ' ' -f 1
+    else
+        case x`uname -s` in
+            xSunOS)  digest -a md5 "$@"  ;;
+            *)      fatal "Can't find command for computing MD5"  ;;
+        esac
+    fi
+}
+
+# Decompresses $1 or stdin to stdout
+func_decompress ()
+{
+    case "$1" in
+        *.gz|*.tgz)  gzip  -dc "$@" ;;
+        *.bz2)       bzip2 -dc "$@" ;;
+
+        *) fatal "Unknown compression for file: $@" ;;
+    esac
 }
