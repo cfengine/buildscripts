@@ -78,15 +78,6 @@ export_variables ()
     export PATH
 
 
-    # Autotools config.status (as invoked by ./configure) needs CONFIG_SHELL
-    # to point to a proper bourne shell in some platforms.
-    # https://www.gnu.org/savannah-checkouts/gnu/autoconf/manual/autoconf-2.69/html_node/config_002estatus-Invocation.html
-    case x`uname -s` in
-        xSunOS)  CONFIG_SHELL=/usr/xpg4/bin/sh  ;;
-    esac
-    export CONFIG_SHELL
-
-
     # Final destination of generated buildscripts output
     OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
     export OUTDIR

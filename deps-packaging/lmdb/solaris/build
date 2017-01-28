@@ -28,7 +28,7 @@ touch Makefile.in
 
 # Build
 
-sh ./configure --prefix=$PREFIX
+CONFIG_SHELL=/usr/xpg4/bin/sh sh ./configure --prefix=$PREFIX
 $MAKE
 cd -
 
