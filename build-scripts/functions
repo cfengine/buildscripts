@@ -37,9 +37,24 @@ fi
 set -e
 
 
+if [ "$_IS_FUNCTIONS_SOURCED" = yes ]
+then
+    echo 'FATAL: Why are you sourcing "functions" script twice?!?'
+    exit 101
+fi
+
 # Preparatory step: export all variables needed
 export_variables ()
 {
+    #
+    # See more examples at https://en.wikipedia.org/wiki/Uname
+    #
+    UNAME_S=`uname -s`  # Linux             SunOS        AIX           HP-UX    FreeBSD
+    UNAME_R=`uname -r`  # 4.4.0-59-generic  5.10         3             B.11.23  6.1-RELEASE-p15
+    UNAME_M=`uname -m`  # x86_64,i686       i86pc,sun4v  0001013AD400  ia64     i386,amd64
+    #        uname -p   # x86_64            i386,sparc   powerpc       ERROR
+    export UNAME_S UNAME_R UNAME_M
+
     #
     # BASEDIR: where all our repos have been checked out
     #
@@ -64,26 +79,27 @@ export_variables ()
     # Set PATH according to the needs of each platform and build-type
     # TODO: remove the generic PATH setting completely,
     #       all should be under conditionals
-    case x`uname -s` in
-        xSunOS)
+    case $UNAME_S in
+        SunOS)
             # Currently we rely strongly on OpenCSW packages.
             PATH="/opt/csw/bin:/usr/xpg4/bin:$PATH"  ;;
 
-        xHP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
+        HP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
         *) ;;
     esac
-    # TODO remove */sbin from generic PATH
+
     PATH="$PATH:/usr/local/bin:/usr/sbin:/usr/local/sbin"
-    PATH="$PATH:$AUTOBUILD_PATH/build-scripts:$BUILDPREFIX/httpd/php/bin"
+    PATH="$PATH:$BASEDIR/buildscripts/build-scripts"
+    PATH="$PATH:$BUILDPREFIX/httpd/php/bin"                # TODO REMOVE
     export PATH
 
     # /bin/sh in Solaris 11 behaves badly only when /usr/xpg4/bin is
     # first in path! In particular it uses a bad built-in "rm" instead
     # of /usr/bin/rm.
-    if [ `uname -s` = "SunOS" ] && [ `uname -r` = "5.11" ]
+    if [ "$UNAME_S" = "SunOS" ] && [ "$UNAME_R" = "5.11" ]
     then
         ACCEPT_INFERIOR_RM_PROGRAM=yes
-        export ACCEPT_INFERIOR_RM_PROGRAM;
+        export ACCEPT_INFERIOR_RM_PROGRAM
     fi
 
 
@@ -493,7 +509,7 @@ mktempdir ()
     # HP-UX has its own non-POSIX mktemp, so override it.
     # If not on HP-UX, search PATH for the 'mktemp' or 'gmktemp' command.
 
-    [ x`uname -s` = xHP-UX ]              \
+    [ "$UNAME_S" = HP-UX ]              \
         && my_mktemp=func_mktemp          \
         || my_mktemp=`func_which mktemp gmktemp`  \
         || my_mktemp=func_mktemp
@@ -509,8 +525,8 @@ func_md5 ()
     then
         md5sum "$@" | cut -d ' ' -f 1
     else
-        case x`uname -s` in
-            xSunOS)  digest -a md5 "$@"  ;;
+        case "$UNAME_S" in
+            SunOS)  digest -a md5 "$@"  ;;
             *)      fatal "Can't find command for computing MD5"  ;;
         esac
     fi
@@ -526,3 +542,6 @@ func_decompress ()
         *) fatal "Unknown compression for file: $@" ;;
     esac
 }
+
+
+_IS_FUNCTIONS_SOURCED=yes
