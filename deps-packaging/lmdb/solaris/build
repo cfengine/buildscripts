@@ -10,7 +10,8 @@ TTD=${BUILD_ROOT}/cfbuild-lmdb-devel${PREFIX}
 # Patch
 # Solaris 8
 
-for i in 00*.patch; do
+for i in 00*.patch
+do
     $PATCH -p1 < $i
 done
 
@@ -23,10 +24,6 @@ cd libraries/liblmdb
 # following natural file order), then it will try to rebuild Makefile.in, which
 # it can't without automake. Work around it by touching that file.
 touch Makefile.in
-
-# Configure
-
-# Build
 
 CONFIG_SHELL=/usr/xpg4/bin/sh sh ./configure --prefix=$PREFIX
 $MAKE
