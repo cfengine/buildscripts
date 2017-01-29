@@ -1,5 +1,19 @@
 # -*- mode:sh -*-
 
+#
+# Always *source* this file, not execute! Always after you first
+# sourced "functions". Like that:
+#   . `dirname "$0"`/functions
+#   . detect-environment
+#
+
+if [ "$_IS_FUNCTIONS_SOURCED" != yes ]
+then
+    echo 'FATAL: You must source "functions" script before "detect-environment"!'
+    exit 100
+fi
+
+
 detect_labels()
 {
   case "$label" in
@@ -18,19 +32,18 @@ detect_os()
 {
   case "$CROSS_TARGET" in
     '')
-      KERNEL_NAME=`uname -s`
-      case "$KERNEL_NAME" in
+      case "$UNAME_S" in
 	Linux)
           OS_FAMILY=linux
           detect_distribution;;
 	SunOS)
           OS_FAMILY=solaris
           OS=solaris
-          OS_VERSION=`uname -r | sed -e 's/^5\.//'`
+          OS_VERSION=`echo $UNAME_R | sed -e 's/^5\.//'`
           ;;
 	AIX)
           OS_FAMILY=aix
-          OS_VERSION=`uname -v`.`uname -r`
+          OS_VERSION=`uname -v`.$UNAME_R
           OS=aix
           unset LIBPATH
           ;;
@@ -47,7 +60,7 @@ detect_os()
           OS_FAMILY=hpux
           OS=hpux;;
 	*)
-	  echo "Unable to detect operating system: $KERNEL_NAME"
+	  echo "Unable to detect operating system: $UNAME_S"
 	  exit 42;;
       esac
       ;;
@@ -197,8 +210,7 @@ detect_packaging()
   elif [ -f /usr/sbin/pkgadd ]; then
     DEP_PACKAGING=solaris
   elif [ -f /usr/sbin/pkg_add ]; then
-    SYSTEM=`uname -s`
-	case "$SYSTEM" in
+    case "$UNAME_S" in
 	  FreeBSD)
 	    DEP_PACKAGING=freebsd;;
 	esac
@@ -229,21 +241,21 @@ detect_arch()
     rpm)
       ARCH=`rpm --eval '%{_arch}'`;;
     solaris)
-      case `uname -m` in
+      case $UNAME_M in
         sun*)
           ARCH=sparc;;
         i86pc)
           ARCH=i86pc;;
         *)
-          echo "Unknown Solaris architecture: `uname -m`";;
+          echo "Unknown Solaris architecture: $UNAME_M";;
       esac;;
 
     freebsd)
-      ARCH=`uname -m`
-      OS_VERSION=`uname -r`;;
+      ARCH=$UNAME_M
+      OS_VERSION=$UNAME_R ;;
     hpux)
-      ARCH=`uname -m`
-      OS_VERSION=`uname -r`;;
+      ARCH=$UNAME_M
+      OS_VERSION=$UNAME_R ;;
     *)
       echo "Unknown packaging system"
       exit 42;;
