@@ -37,7 +37,7 @@ P=$BASEDIR/buildscripts/deps-packaging/$PKGNAME
 SYS=`uname -s`
 
 echo
-echo "$PKGNAME"
+echo "========================= Building RPM for: $PKGNAME =========================="
 echo
 
 if [ $SYS = "AIX" ]; then
