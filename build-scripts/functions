@@ -393,6 +393,23 @@ fatal()
     exit ${2-1}
 }
 
+# Append a space and string $2 to variable $1, for example:
+# func_append V "blah" is equivalent to  V="$V blah".
+var_append()
+{
+    eval $1=\$$1\\ \$2
+}
+
+# Return True if string $2 exists in variable $1.
+# WARNING: $2 may not contain special characters like spaces etc.
+var_contains()
+{
+    eval "case \$$1 in
+        *\"$2\"*)  true  ;;
+        *)         false ;;
+    esac"
+}
+
 # Check that $1 command exists in PATH, and print its full path, else
 # return error.  If it has many arguments, continue to
 # check for $2 command, etc, before giving up.
