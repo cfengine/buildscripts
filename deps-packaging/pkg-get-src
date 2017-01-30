@@ -104,6 +104,13 @@ fetch_file()
         # must test for file existence for retrying.
         [ -f "$OUTFILE" ]  ||  $WGET -t5 "$URL$FILENAME" -O "$OUTFILE" 1>&2  ||  true
 
+        # Try one last time after converting https to http.
+        if [ ! -f "$OUTFILE" ]  &&  var_contains URL "https"
+        then
+            newurl=`echo $URL | sed s/https/http/`
+            $WGET -t5 "$newurl$FILENAME" -O "$OUTFILE" 1>&2  ||  true
+        fi
+
         if [ -f "$OUTFILE" ]
         then
             if checksum "$OUTFILE" "$CHECKSUM"
