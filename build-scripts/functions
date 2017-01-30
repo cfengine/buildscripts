@@ -212,7 +212,10 @@ run() {
   NAME="$1"
   shift
   echo "---> $NAME"
-  if ! "$@" >> "build-remote.log" 2>&1; then
+  if "$@" >> "build-remote.log" 2>&1
+  then
+      :
+  else
     echo "Failed. See the build-remote.log. Last lines are:"
     tail build-remote.log
     exit 1
