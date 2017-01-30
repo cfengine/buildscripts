@@ -26,14 +26,6 @@ CPPFLAGS=-I%{buildprefix}/include
 #
 CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 
-SYS=`uname -s`
-
-if [ $SYS = "AIX" ]; then
-    cd /var/cfengine/lib
-    sudo ar qv libssl.a libssl.so
-    sudo ar qv libcrypto.a libcrypto.so
-    cd -
-fi
 ./configure --prefix=%{prefix} \
             --enable-shared \
             --disable-slapd \
@@ -47,7 +39,7 @@ fi
 if [ -z $MAKE ]; then
     MAKE_PATH=`which MAKE`
     export MAKE=$MAKE_PATH
-fi    
+fi
 
 $MAKE -C include
 $MAKE -C libraries
@@ -56,14 +48,7 @@ $MAKE -C libraries
 rm -rf ${RPM_BUILD_ROOT}
 
 $MAKE -C include install DESTDIR=${RPM_BUILD_ROOT}
-
-if [ $SYS = "AIX" ]; then
-sudo cp ./libraries/liblber/.libs/liblber.a /var/cfengine/lib
 $MAKE -C libraries install DESTDIR=${RPM_BUILD_ROOT}
-sudo rm -f /var/cfengine/lib/liblber.a
-else
-$MAKE -C libraries install DESTDIR=${RPM_BUILD_ROOT}
-fi
 
 # Removing unused files
 
@@ -71,10 +56,6 @@ rm -rf ${RPM_BUILD_ROOT}%{prefix}/etc
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.la
 
-if [ $SYS = "AIX" ]; then
-    sudo rm /var/cfengine/lib/libssl.a
-    sudo rm /var/cfengine/lib/libcrypto.a
-fi
 %clean
 rm -rf $RPM_BUILD_ROOT
 
