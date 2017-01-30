@@ -1,12 +1,16 @@
 # -*- mode: sh -*-
 
 #
-# Use this script in the following way:
+# Always *source* (not execute) this script at the *top* of your
+# script. It will *ensure* your script is executing under POSIX shell,
+# and provide some portability and utility functions. Use like this:
+#
 # . `dirname "$0"`/functions
 #
 
 #
-# NOTE: Do not use $(), as Solaris /bin/sh will choke on it *before* executing.
+# NOTE: In this file, do not use $(), as Solaris /bin/sh will choke on
+#       it *before* executing.
 #
 
 #
