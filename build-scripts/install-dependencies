@@ -3,10 +3,10 @@
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
-#
+
+
 # We use packaging scripts
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
-#
 
 # Not all dependencies support building in parallel.
 MAKEFLAGS=-j1
@@ -19,7 +19,14 @@ set -x
 set -e
 
 
-#export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
+install_pkg_files()
+{
+    retry_wrapper  pkg-install-$DEP_PACKAGING  "$@"
+}
+
+
+#export the prefer path to all the packaging scripts so that the library
+#will gets generated in desired path.
 for i in $(ls $BASEDIR/buildscripts/deps-packaging)
 do
     if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/debian" ]
@@ -247,6 +254,6 @@ do
         pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
     fi
 
-    pkg-install-${DEP_PACKAGING} $(pkg-cache list $dep-$version)
+    install_pkg_files  $(pkg-cache list $dep-$version)
 
 done
