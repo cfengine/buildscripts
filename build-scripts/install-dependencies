@@ -3,10 +3,10 @@
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
-#
+
+
 # We use packaging scripts
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
-#
 
 # Not all dependencies support building in parallel.
 MAKEFLAGS=-j1
@@ -19,37 +19,21 @@ set -x
 set -e
 
 
-#export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
-for i in $(ls $BASEDIR/buildscripts/deps-packaging)
-do
-    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/debian" ]
-    then
-        echo "$i"
-        case "$BUILDPREFIX" in
-        *opt*)
-            sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/debian/*.install
-        esac
-    fi
+install_pkg_files()
+{
+    retry_wrapper  pkg-install-$DEP_PACKAGING  "$@"
+}
 
-    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/mingw/debian" ]
-    then
-        case "$BUILDPREFIX" in
-        *opt*)
-            sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/mingw/debian/*.install
-        esac
-    fi
 
-    #change the webdirectory in the apache config file as well
-    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i" ]
-    then
-        if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ]
-        then
-            escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
-            sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
-            sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
-        fi
-    fi
-done
+# Apply necessary changes for alternate /opt/cfengine prefix
+if [ "$BUILDPREFIX" = "/opt/cfengine" ]
+then
+    sed -i "s:var/cfengine:opt/cfengine:"  \
+        $BASEDIR/buildscripts/deps-packaging/*/debian/*.install  \
+        $BASEDIR/buildscripts/deps-packaging/*/mingw/debian/*.install \
+        $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf \
+        $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
+fi
 
 DEPS=""
 case "$OS" in
@@ -250,6 +234,6 @@ do
         pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
     fi
 
-    pkg-install-${DEP_PACKAGING} $(pkg-cache list $dep-$version)
+    install_pkg_files  $(pkg-cache list $dep-$version)
 
 done
