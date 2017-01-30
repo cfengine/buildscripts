@@ -123,80 +123,51 @@ SECONDARY_PATHS="/sbin /usr/sbin  /usr/sfw/bin"  #"/opt/csw/gnu /usr/ccs/bin"
 
 
 #
-# Packages handling
+# Dealing with packages. For platform-specific functions it's preferred
+# to have them as a separate script under deps-packaging directory.
 #
-
-install_rpms()
-{
-  execute-wrapper.sh sudo rpm -Uvh "$@"
-}
 
 uninstall_rpms()
 {
-  PKGS=`rpm -qa --queryformat "%{Name}-%{Version}\n" | grep '^'$1 || true`
-  if [ -n "$PKGS" ]; then
-    execute-wrapper.sh sudo rpm -e $PKGS
-  fi
+    PKGS=`rpm -qa --queryformat "%{Name}-%{Version}\n" | grep '^'$1 || true`
+    if [ -n "$PKGS" ]
+    then
+        retry_wrapper  sudo rpm -e $PKGS
+    fi
 }
-
-install_debs()
-{
-  execute-wrapper.sh sudo dpkg -i "$@"
-}
-
 uninstall_debs()
 {
-  PKGS=`dpkg -l | tail -n+6 | awk '{print $2}' | grep '^'$1'$' || true`
-  if [ -n "$PKGS" ]; then
-    execute-wrapper.sh sudo dpkg --purge $PKGS
-  fi
+    PKGS=`dpkg -l | tail -n+6 | awk '{print $2}' | grep '^'$1'$' || true`
+    if [ -n "$PKGS" ]
+    then
+        retry_wrapper  sudo dpkg --purge $PKGS
+    fi
 }
-
-install_solaris_pkgs()
-{
-  echo "OWHOO!"
-  exit 1
-}
-
 uninstall_solaris_pkgs()
 {
-  PKGS=`pkginfo | awk '{print $2}' | grep '^'$1'$' || true`
-  if [ -n "$PKGS" ]; then
-    execute-wrapper.sh sudo /usr/sbin/pkgrm -n $PKGS
-  fi
+    PKGS=`pkginfo | awk '{print $2}' | grep '^'$1'$' || true`
+    if [ -n "$PKGS" ]
+    then
+        retry_wrapper  sudo /usr/sbin/pkgrm -n $PKGS
+    fi
 }
-
-install_hpux_pkgs()
-{
-  echo "$@"
-}
-
 uninstall_hpux_pkgs()
 {
-  PKGS=`swlist | awk '{print $1}' | grep '^'$1'$' || true`
+    PKGS=`swlist | awk '{print $1}' | grep '^'$1'$' || true`
 
-  for p in $PKGS
-  do
-    sudo /usr/sbin/swremove $p
-  done
+    for p in $PKGS
+    do
+        sudo /usr/sbin/swremove $p
+    done
 }
-
-install_freebsd_pkgs()
-{
-	execute-wrapper.sh sudo pkg_add "$@"
-}
-
 uninstall_freebsd_pkgs()
 {
-	PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
-	if [ -n "$PKGS" ]; then
-	  execute-wrapper.sh sudo pkg_delete $PKGS
-	fi
+    PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
+    if [ -n "$PKGS" ]
+    then
+	retry_wrapper  sudo pkg_delete $PKGS
+    fi
 }
-
-#
-# Dealing with packages
-#
 
 uninstall_cfbuild()
 {
@@ -223,27 +194,6 @@ uninstall_cfbuild_devel()
       echo "Unknown packaging system: $DEP_PACKAGING"
       exit 42;;
   esac
-}
-
-install_pkg_file()
-{
-    case "$DEP_PACKAGING" in
-        rpm)     sudo rpm  -i -v $1 ;;
-        deb)     sudo dpkg -i    $1 ;;
-        *)
-            echo "ERROR install_pkg_file not implemented on $DEP_PACKAGING"
-            exit 1
-    esac
-}
-uninstall_pkg()
-{
-    case "$DEP_PACKAGING" in
-        rpm) sudo rpm  -e -v $1 ;;
-        deb) sudo dpkg -P    $1 ;;
-        *)
-            echo "ERROR uninstall_pkg not implemented for $DEP_PACKAGING"
-            exit 1
-    esac
 }
 query_pkg()
 {
@@ -545,6 +495,42 @@ func_decompress ()
 
         *) fatal "Unknown compression for file: $@" ;;
     esac
+}
+
+# retry_wrapper: This function tries to execute the given command,
+#                retrying in case of failure.
+# WARNING: do not pipe the output as stdout is altered!
+retry_wrapper()
+{
+    operation="$@"
+    [ "$operation" = "" ]  &&  fatal "retry_wrapper: no arguments"
+
+    # SLEEP: which sleep program to use
+    # maxtries: how many times to re try the execution
+    # pause: number of seconds to pause after each try
+    SLEEP=`func_which sleep`
+    maxtries=5
+    pause=30
+
+    while [ $maxtries != 0 ]
+    do
+        echo "* retry_wrapper:  $operation"
+
+	if $operation
+        then
+	    echo "* SUCCESS"
+            return 0
+        else
+            err_ret=$?
+            maxtries=`expr $maxtries - 1`
+	    echo "* FAILURE $err_ret"
+            echo "* Sleeping for:  $pause seconds"
+            echo "* Retries left:  $maxtries"
+	    $SLEEP $pause
+        fi
+    done
+
+    return $err_ret
 }
 
 
