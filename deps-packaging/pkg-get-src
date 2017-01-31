@@ -87,6 +87,7 @@ fetch_file()
     FILENAME="$1"
     CHECKSUM="$2"
 
+    OUTFILE="$CACHEDIR/$FILENAME"
     WGET=`func_whereis wget`
 
     mkdir -p "$CACHEDIR"
@@ -97,19 +98,33 @@ fetch_file()
         # Also, the standard output of this function is parsed, so let's make sure
         # wget outputs on standard error. That's what it normally does anyway, but
         # misparsed arguments is an exception.
-        $WGET --no-check-certificate -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME" 1>&2 \
-            || $WGET -t5 "$URL$FILENAME" -O "$CACHEDIR/$FILENAME" 1>&2  \
-            || true
+        $WGET --no-check-certificate -t5 "$URL$FILENAME" -O "$OUTFILE" 1>&2  ||  true
 
-        if [ -f "$CACHEDIR/$FILENAME" ]
+        # Sometimes wget returns error, but leaves an empty file
+        rm_if_empty "$OUTFILE"
+
+        # Some wget (1.9.1 on AIX) return 0 even when they failed! So we
+        # must test for file existence for retrying.
+        [ -f "$OUTFILE" ]  ||  $WGET -t5 "$URL$FILENAME" -O "$OUTFILE" 1>&2  ||  true
+        rm_if_empty "$OUTFILE"
+
+        # Try one last time after converting https to http.
+        if [ ! -f "$OUTFILE" ]  &&  var_contains URL "https"
         then
-            if checksum "$CACHEDIR/$FILENAME" "$CHECKSUM"
+            newurl=`echo $URL | sed s/https/http/`
+            $WGET -t5 "$newurl$FILENAME" -O "$OUTFILE" 1>&2  ||  true
+            rm_if_empty "$OUTFILE"
+        fi
+
+        if [ -f "$OUTFILE" ]
+        then
+            if checksum "$OUTFILE" "$CHECKSUM"
             then
                 return 0                           # SUCCESSFUL DOWNLOAD
             else
                 info "WARNING: Downloaded $URL$FILENAME has wrong checksum. Continuing"
                 # wget(1) tends to create empty files even if download did not finish
-                rm -f "$CACHEDIR/$FILENAME"
+                rm -f "$OUTFILE"
             fi
         fi
     done
