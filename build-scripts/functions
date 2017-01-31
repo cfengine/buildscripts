@@ -536,5 +536,14 @@ retry_wrapper()
     return $err_ret
 }
 
+rm_if_empty()
+{
+    if [ -f "$1" ]  &&  [ ! -s "$1" ]
+    then
+        echo "Removing empty file: $1"  1>&2
+        rm -f "$1"
+    fi
+}
+
 
 _IS_FUNCTIONS_SOURCED=yes
