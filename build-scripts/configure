@@ -1,120 +1,74 @@
 #!/bin/sh -x
 
+
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
 
+case "$PROJECT" in
+    community)  NOVA=no   ;;
+    nova)       NOVA=yes  ;;
+    *) fatal "Unknown project: $PROJECT"  ;;
+esac
+
+
 P=$BUILDPREFIX
 
-ARGS="--prefix=$P --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre=$P"
+ARGS="--prefix=$P --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre=$P --with-init-script"
 
-case "$PROJECT" in
-  community)
-    NOVA=no
-    ;;
-  nova)
-    NOVA=yes
-    ;;
-  *)
-    echo "Unknown project: $PROJECT"
-    exit 42;;
-esac
-
-case "$PTHREADS_W32" in
-  yes)
-    ARGS="$ARGS --with-pthreads=$P";;
-  no)
-    ;;
-esac
-
-case "$SQL" in
-  yes)
-    ARGS="$ARGS --with-postgresql=$P --without-mysql";;
-  no)
-    ARGS="$ARGS --without-sql";;
-esac
-
-case "$LIBACL" in
-  yes)
-    ARGS="$ARGS --with-libacl=$P";;
-  no)
-    ARGS="$ARGS --without-libacl";;
-esac
-
-case "$OPENLDAP" in
-  yes)
-    ARGS="$ARGS --with-ldap=$P";;
-  no)
-    ARGS="$ARGS --without-ldap";;
-esac
-
-case "$ARCH-${OS_FAMILY}" in
-  x86-mingw)
-    ARGS="$ARGS --host=i686-w64-mingw32";;
-  x64-mingw)
-    ARGS="$ARGS --host=x86_64-w64-mingw32";;
-esac
-
-case "$EMBEDDED_DB" in
-  lmdb)
-    ARGS="$ARGS --with-lmdb=$P";;
-  *)
-    echo "Unknown embedded DB: $EMBEDDED_DB"
-    exit 42;;
-esac
-
-case "$LIBVIRT" in
-  yes)
-    ARGS="$ARGS --with-libvirt=$P";;
-  no)
-    ARGS="$ARGS --without-libvirt";;
-  *)
-    echo "Unknown libvirt selection: $LIBVIRT"
-    exit 42;;
-esac
-
-case "$LIBXML2" in
-  yes)
-    ARGS="$ARGS --with-libxml2=$P";;
-  no)
-    ARGS="$ARGS --without-libxml2";;
-  *)
-    echo "Unknown libxml2 selection: $LIBXML2"
-    exit 42;;
-esac
-
-case "$ROLE" in
-  hub)
-    ARGS="$ARGS --with-cfmod --with-enterprise-api --with-postgresql-hub=$P --with-redis=$P";;
-  agent)
-    ARGS="$ARGS --without-cfmod --without-postgresql-hub --without-redis";;
-  *)
-    echo "Unknown role selection: $ROLE"
-    exit 42;;
-esac
-
-case "$WITH_SYSTEMD" in
-  yes)
-    ARGS="$ARGS --with-systemd-service";;
-  no)
-    ARGS="$ARGS --without-systemd-service";;
-esac
-
-ARGS="$ARGS --with-init-script"
-
-case "$LIBYAML" in
-  yes)
-    ARGS="$ARGS --with-libyaml=$P";;
-  *)
-    ARGS="$ARGS --without-libyaml";;
-esac
-
-if [ "$LIBCURL" = "yes" ] || [ "$LIBCURL_HUB" = "yes" ]
+if [ $EMBEDDED_DB = lmdb ]
 then
-  ARGS="$ARGS --with-libcurl=$P"
-else
-  ARGS="$ARGS --without-libcurl"
+    var_append ARGS "--with-lmdb=$P"
 fi
+case "$DEPS" in
+    *pthreads-w32*)  var_append ARGS "--with-pthreads=$P" ;;
+esac
+case "$DEPS" in
+    *openldap*)  var_append ARGS "--with-ldap=$P" ;;
+    *)           var_append ARGS "--without-ldap" ;;
+esac
+case "$DEPS" in
+    *libxml2*)  var_append ARGS "--with-libxml2=$P" ;;
+    *)          var_append ARGS "--without-libxml2" ;;
+esac
+case "$DEPS" in
+    *libyaml*)  var_append ARGS "--with-libyaml=$P" ;;
+    *)          var_append ARGS "--without-libyaml" ;;
+esac
+case "$DEPS" in
+    *postgresql*) var_append ARGS "--with-postgresql=$P --without-mysql" ;;
+    *)            var_append ARGS "--without-sql" ;;
+esac
+case "$DEPS" in
+    *libacl*)  var_append ARGS "--with-libacl=$P" ;;
+    *)         var_append ARGS "--without-libacl" ;;
+esac
+case "$DEPS" in
+    *libvirt*)  var_append ARGS "--with-libvirt=$P" ;;
+    *)          var_append ARGS "--without-libvirt" ;;
+esac
+# both libcurl or libcurl-hub are valid
+case "$DEPS" in
+    *libcurl*)  var_append ARGS "--with-libcurl=$P" ;;
+    *)          var_append ARGS "--without-libcurl" ;;
+esac
+case "$ROLE" in
+    hub)   var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql-hub=$P --with-redis=$P" ;;
+    agent) var_append ARGS "--without-cfmod --without-postgresql-hub --without-redis" ;;
+    *)     fatal "Unknown ROLE: $ROLE" ;;
+esac
+case "$WITH_SYSTEMD" in
+  yes)  var_append ARGS "--with-systemd-service" ;;
+  *)    var_append ARGS "--without-systemd-service" ;;
+esac
+
+
+# Cross-compiling Windows?
+case "$ARCH-${OS_FAMILY}" in
+  x86-mingw)  var_append ARGS "--host=i686-w64-mingw32"   ;;
+  x64-mingw)  var_append ARGS "--host=x86_64-w64-mingw32" ;;
+esac
+
 
 case "$BUILD_TYPE" in
 

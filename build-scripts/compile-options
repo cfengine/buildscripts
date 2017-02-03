@@ -1,8 +1,7 @@
 # -*- mode:sh -*-
 
-#
-# We need to know what project are we building.
-#
+# Calculate dependencies and build parameters according to the environment.
+# SOURCE this file, don't execute.
 
 
 # Autodect PROJECT if not set
@@ -58,86 +57,60 @@ export LDFLAGS
 DEB_LDFLAGS_APPEND="$LDFLAGS"
 export DEB_LDFLAGS_APPEND
 
-# Should we package libgcc_s.so.1?
+# Embedded DB selection
+EMBEDDED_DB="lmdb"
 
+
+
+############### Fill in build dependencies in DEPS variable ################
+
+DEPS=
+[ $OS_FAMILY = linux ]  &&  var_append DEPS "lcov"
+[ $OS_FAMILY = mingw ]  &&  var_append DEPS "pthreads-w32 libgnurx"
+
+# libgcc_s.so is needed before we compile any other dependency
+#             on some platforms!
 case "$OS_FAMILY" in
-  solaris|aix)
-    LIBGCC=yes;;
-  *)
-    LIBGCC=no;;
+    solaris|aix)  var_append DEPS "libgcc" ;;
 esac
 
-# libsasl needed for solaris
+# FIXME: Why do we need zlib?
+# ANSWER: Openssl uses it optionally, TODO DISABLE
+var_append DEPS "zlib $EMBEDDED_DB openssl pcre"
 
+# libsasl needed for solaris
 case "$OS_FAMILY" in
-  solaris|hpux)
-    LIBSASL=yes;;
-  *)
-    LIBSASL=no;;
+    solaris|hpux)  var_append DEPS "sasl2" ;;
 esac
 
 # iconv is needed for libxml2 on some platforms
 case "$OS_FAMILY" in
-   aix)
-     LIBICONV=yes;;
-   solaris)
-     LIBICONV=yes;;
-   *)
-     LIBICONV=no;;
+   aix|solaris)  var_append DEPS "libiconv" ;;
 esac
 
-# Do we need libgnurx-0.dll?
-
-case "$OS_FAMILY" in
-  mingw)
-    GNURX=yes;;
-  *)
-    GNURX=no;;
-esac
-
-# Do we need to build pthreads-w32?
-
-case "$OS_FAMILY" in
-  mingw)
-    PTHREADS_W32=yes;;
-  *)
-    PTHREADS_W32=no;;
-esac
-
-# Embedded DB selection
-
-EMBEDDED_DB=lmdb
-export EMBEDDED_DB
-
-# libxml2
-
-case "$OS_FAMILY" in
-  *)
-    LIBXML2=yes;;
-esac
-
-export LIBXML2
+var_append DEPS "libxml2 libyaml"
 
 # libvirt
-
 case "$ARCH-${OS_FAMILY}" in
-  s390*-*)
-    LIBVIRT=no;;
-  *-linux)
-    case "${OS}-${OS_VERSION}" in
-      debian-3.1)
-        LIBVIRT=no;;
-      *-*)
-        LIBVIRT=yes;;
-    esac;;
-  *-mingw|*-aix|*-*bsd|*-solaris|*-hpux)
-    LIBVIRT=no;;
-  *)
-    echo "Unknown combination of architecture and OS family: $ARCH-${OS_FAMILY}"
-    exit 42;;
+    s390*-*)  ;;                             # no libvirt for this linux
+    *-linux)
+        case "${OS}-${OS_VERSION}" in
+            debian-3.1)  ;;           # no libvirt for this linux either
+            *-*)  var_append DEPS "libvirt" ;;          # YES to libvirt
+        esac
+        ;;
 esac
 
-export LIBVIRT
+# LDAP functions in the agent
+case "$PROJECT" in
+    nova)  var_append DEPS "openldap"
+esac
+
+# libacl & libattr - not for the exotics (linux only?)
+case "$OS_FAMILY" in
+  hpux|aix|solaris|freebsd|mingw)       ;;
+  *)  var_append DEPS "libattr libacl"  ;;
+esac
 
 # ROLE
 # We can autodetect if we are building a hub or an agent, but
@@ -199,146 +172,38 @@ esac
 export ROLE
 
 
-# libmcrypt
-
-case "$ROLE" in
-  hub) LIBMCRYPT=yes;;
-  agent) LIBMCRYPT=no;;
-esac
-
-export LIBMCRYPT
-
-# LDAP
-
-case "$PROJECT" in
-  community)
-    OPENLDAP=no;;
-  nova)
-    OPENLDAP=yes;;
-  *)
-    echo "Unknown project: $PROJECT"
-    exit 42;;
-esac
-
-export OPENLDAP
-
-#SQL drivers
-
-case "$OS_FAMILY" in
-  aix)
-    SQL=no;;
-  *)
-    SQL=yes;;
-esac
-
-export SQL
-
-# libacl & libattr
-case "$OS_FAMILY" in
-  hpux)
-    LIBACL=no
-    LIBATTR=no;;
-  aix)
-    LIBACL=no
-    LIBATTR=no;;
-  solaris)
-    LIBACL=no
-    LIBATTR=no;;
-  freebsd)
-    LIBACL=no
-    LIBATTR=no;;
-  mingw)
-    LIBACL=no
-    LIBATTR=no;;
-  *)
-    LIBACL=yes
-    LIBATTR=yes;;
-esac
-
-export LIBATTR LIBACL
-
 ## PHP modules
 
 case "$ROLE" in
-  hub)
-    APR=yes
-    APR_UTIL=yes
-    APACHE=yes
-    LIBCURL_HUB=yes
-    PHP=yes
-    GIT=yes
-    RSYNC=yes
-    case "$OS-${OS_VERSION}" in
-      rhel-[5].*) PHP_JSON=yes;;
-      centos-[5].*) PHP_JSON=yes;;
-      *) PHP_JSON=no;;
-    esac
-
-    case "$OS-${OS_VERSION}" in
-      rhel-[56].*) PHP_MCRYPT=yes;;
-      centos-[6].*) PHP_MCRYPT=yes;;
-      *) PHP_MCRYPT=no;;
-    esac
-
-    case "$OS-${OS_VERSION}" in
-      ubuntu-8.04|sles-*|centos-5.*|rhel-5.*)
-        PHP_CURL_5_2=yes
-        PHP_CURL=no;;
-      *)
-        PHP_CURL_5_2=no
-        PHP_CURL=yes;;
-    esac
-    ;;
-  agent)
-    APACHE=no
-    LIBCURL=yes
-    PHP=no
-    GIT=no
-    RSYNC=no
-    ;;
+    # HUB-ONLY dependencies
+    hub)
+        var_append DEPS "libmcrypt libcurl-hub"
+        var_append DEPS "apr apr-util apache git rsync"
+        var_append DEPS "postgresql-hub php redis"
+        ;;
+    # AGENT-ONLY dependencies
+    agent)
+        var_append DEPS "libcurl postgresql"
+        ;;
 esac
 
-export APACHE PHP GIT
 
-case "$ROLE" in
-  hub)
-    REDIS=yes
-    PGSQL=yes
-    ;;
-  agent)
-    REDIS=no
-    PGSQL=no
-    ;;
+# systemd is not a build dependency, but should we generate
+# unit files for it?
+case "$OS_FAMILY" in
+  linux)  WITH_SYSTEMD=yes;;
+  *)      WITH_SYSTEMD=no;;
 esac
 
-export PGSQL REDIS
 
 case "$OS_FAMILY" in
-  linux)
-    WITH_SYSTEMD=yes;;
-  *)
-    WITH_SYSTEMD=no;;
+    mingw|freebsd)  TESTS=no  ;;
+    *)              TESTS=all ;;
 esac
-
-LIBYAML=yes
-
-export LIBYAML LIBCURL
-
-# Tests
-
-case "$OS_FAMILY" in
-  mingw)
-    TESTS=no;;
-  freebsd)
-    TESTS=no;;
-  *)
-    TESTS=all;;
-esac
-
 export TESTS
 
 
 # Don't let existing LD_LIBRARY_PATH variables disturb the build.
 # Java sets this when Jenkins launches it.
 # PS! Solaris shell returns false if the var is already unset.
-unset LD_LIBRARY_PATH || true
+unset LD_LIBRARY_PATH  ||  true

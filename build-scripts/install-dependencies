@@ -3,188 +3,38 @@
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
-#
+
+
 # We use packaging scripts
-PATH=$PATH:$BASEDIR/buildscripts/deps-packaging/
-#
+PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
 
 # Not all dependencies support building in parallel.
 MAKEFLAGS=-j1
 
 set -x
 
-# This should be already set from sourcing "function" at the top, but
+# This should be already set from sourcing "functions" at the top, but
 # make sure, because we don't want build-artifacts-cache to have bogus
 # packages.
 set -e
 
 
-#export the prefer path to all the packaging scripts so that the library will gets generated in desired path.
-for i in $(ls $BASEDIR/buildscripts/deps-packaging)
-do
-    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/debian" ]
-    then
-        echo "$i"
-        case "$BUILDPREFIX" in
-        *opt*)
-            sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/debian/*.install
-        esac
-    fi
+install_pkg_files()
+{
+    retry_wrapper  pkg-install-$DEP_PACKAGING  "$@"
+}
 
-    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i/mingw/debian" ]
-    then
-        case "$BUILDPREFIX" in
-        *opt*)
-            sed -i "s/var/opt/" $BASEDIR/buildscripts/deps-packaging/$i/mingw/debian/*.install
-        esac
-    fi
 
-    #change the webdirectory in the apache config file as well
-    if [ -d "$BASEDIR/buildscripts/deps-packaging/$i" ]
-    then
-        if [ "$i" = "apache" ] && [ "$ROLE" = "hub" ]
-        then
-            escapedPrefix=$(echo $BUILDPREFIX | sed 's/\//\\\//g')
-            sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
-            sed -i "s/\/var\/cfengine/$escapedPrefix/g"  $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
-        fi
-    fi
-done
+# Apply necessary changes for alternate /opt/cfengine prefix
+if [ "$BUILDPREFIX" = "/opt/cfengine" ]
+then
+    sed -i "s:var/cfengine:opt/cfengine:"  \
+        $BASEDIR/buildscripts/deps-packaging/*/debian/*.install  \
+        $BASEDIR/buildscripts/deps-packaging/*/mingw/debian/*.install \
+        $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf \
+        $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
+fi
 
-DEPS=""
-case "$OS" in
-  mingw)
-  ;;
-  hpux)
-  ;;
-  solaris)
-  ;;
-  aix)
-  ;;
-  *)
-  DEPS="$DEPS lcov"
-  ;;
-esac
-
-case "$LIBGCC" in
-  yes)
-    DEPS="$DEPS libgcc";;
-esac
-
-case "$PTHREADS_W32" in
-  yes)
-    DEPS="$DEPS pthreads-w32";;
-esac
-
-# FIXME: Why do we need zlib?
-
-DEPS="$DEPS zlib $EMBEDDED_DB openssl pcre"
-
-case "$LIBSASL" in
-  yes)
-    DEPS="$DEPS sasl2";;
-esac
-
-case "$LIBICONV" in
-  yes)
-    DEPS="$DEPS libiconv";;
-esac
-
-case "$GNURX" in
-  yes)
-    DEPS="$DEPS libgnurx";;
-esac
-
-case "$OPENLDAP" in
-  yes)
-    DEPS="$DEPS openldap";;
-esac
-
-case "$LIBCURL" in
-  yes)
-    DEPS="$DEPS libcurl";;
-esac
-
-case "$LIBCURL_HUB" in
-  yes)
-    DEPS="$DEPS libcurl-hub";;
-esac
-
-case "$GIT" in
-  yes)
-    DEPS="$DEPS git";;
-esac
-
-case "$RSYNC" in
-  yes)
-    DEPS="$DEPS rsync";;
-esac
-
-case "$LIBMCRYPT" in
-  yes)
-    DEPS="$DEPS libmcrypt";;
-esac
-
-case "$LIBXML2" in
-  yes)
-    DEPS="$DEPS libxml2";;
-esac
-
-case "$APR" in
-  yes)
-    DEPS="$DEPS apr";;
-esac
-
-case "$APR_UTIL" in
-  yes)
-    DEPS="$DEPS apr-util";;
-esac
-
-case "$APACHE" in
-  yes)
-    DEPS="$DEPS apache";;
-esac
-
-case "$PGSQL" in
-  yes)
-    DEPS="$DEPS postgresql-hub";;
-  *)
-    case "$SQL" in
-      yes)
-        DEPS="$DEPS postgresql";;
-    esac
-  ;;
-esac
-
-case "$PHP" in
-  yes)
-    DEPS="$DEPS php";;
-esac
-
-case "$LIBVIRT" in
-  yes)
-    DEPS="$DEPS libvirt";;
-esac
-
-case "$REDIS" in
-  yes)
-    DEPS="$DEPS redis";;
-esac
-
-case "$LIBATTR" in
-  yes)
-    DEPS="$DEPS libattr";;
-esac
-
-case "$LIBACL" in
-  yes)
-    DEPS="$DEPS libacl";;
-esac
-
-case "$LIBYAML" in
-  yes)
-    DEPS="libyaml $DEPS";;
-esac
 
 #
 # Override for manual testing
@@ -250,6 +100,6 @@ do
         pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
     fi
 
-    pkg-install-${DEP_PACKAGING} $(pkg-cache list $dep-$version)
+    install_pkg_files  $(pkg-cache list $dep-$version)
 
 done
