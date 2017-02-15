@@ -28,7 +28,7 @@ business and regulatory needs, monitor problems, automatically repair and
 maintain systems.
 
 %install
-rm -rf $RPM_BUILD_ROOT
+#rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
@@ -114,7 +114,7 @@ cp %{_basedir}/nova/db/ootb_settings.sql $RPM_BUILD_ROOT%prefix/share/db/
 
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+#rm -rf $RPM_BUILD_ROOT
 
 # These four will be filled in by the package script.
 %pre
