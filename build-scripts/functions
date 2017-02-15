@@ -65,11 +65,13 @@ export_variables ()
     if [ -z "$AUTOBUILD_PATH" ]
     then
         case "$0" in
+            *buildscripts/build-remote) SCRIPTDIR="$0";;
             /*) SCRIPTDIR=`dirname "$0"`;;
             *)  SCRIPTDIR=`pwd`/`dirname "$0"`;;
         esac
 
         AUTOBUILD_PATH=`dirname "$SCRIPTDIR"`
+
     fi
     BASEDIR=`dirname "$AUTOBUILD_PATH"`
     export BASEDIR

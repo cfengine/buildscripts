@@ -14,9 +14,11 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
     case "$PACKAGING" in
       rpm)
         cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
+        cp $BASEDIR/$dir/RPMS/*.pkg.tar.gz "$OUTDIR"
         ;;
       deb)
         cp $BASEDIR/$dir/*.deb "$OUTDIR"
+        cp $BASEDIR/$dir/pkg/*.pkg.tar.gz "$OUTDIR"
         ;;
       msi)
         cp $BASEDIR/$dir/*.msi "$OUTDIR"
@@ -24,9 +26,9 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
       solaris)
         cp $BASEDIR/$dir/*.pkg "$OUTDIR"
         ;;
-	  freebsd)
-		cp build/$dir/pkg/*.tbz "$OUTDIR"
-		;;
+      freebsd)
+        cp build/$dir/pkg/*.tbz "$OUTDIR"
+        ;;
       hpux)
         cp $BASEDIR/$dir/pkg/*.depot "$OUTDIR"
         ;;
@@ -38,6 +40,7 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
         echo "Unknown packaging system: $PACKAGING"
         exit 1;;
     esac
+    #cp $BASEDIR/$dir/*.generic-pkg.tar.gz "$OUTDIR"
   fi
 done
 
