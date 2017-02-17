@@ -7,7 +7,6 @@ Version: %{version}
 Release: 1
 Source0: httpd-%{apache_version}.tar.gz
 Source1: httpd.conf
-Source2: httpd-ssl.conf
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -53,7 +52,6 @@ rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/manual
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf/httpd.conf
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf/extra/httpd-ssl.conf
 cp ${RPM_BUILD_ROOT}/../../SOURCES/httpd.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
-cp ${RPM_BUILD_ROOT}/../../SOURCES/httpd-ssl.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf/extra
 
 %clean
 rm -rf $RPM_BUILD_ROOT
