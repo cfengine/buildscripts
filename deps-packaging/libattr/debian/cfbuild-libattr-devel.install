@@ -1,2 +1,2 @@
-/usr/include/attr
+/var/cfengine/include/attr
 /var/cfengine/lib/*.so
