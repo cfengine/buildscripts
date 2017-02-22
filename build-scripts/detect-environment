@@ -1,8 +1,22 @@
 # -*- mode:sh -*-
 
+#
+# Always *source* this file, not execute! Always after you first
+# sourced "functions". Like that:
+#   . `dirname "$0"`/functions
+#   . detect-environment
+#
+
+if [ "$_IS_FUNCTIONS_SOURCED" != yes ]
+then
+    echo 'FATAL: You must source "functions" script before "detect-environment"!'
+    exit 100
+fi
+
+
 detect_labels()
 {
-  case "$NODE_LABELS" in
+  case "$label" in
     *_x86_64_mingw*)
       CROSS_TARGET=${CROSS_TARGET:-x64-mingw}
       export CROSS_TARGET
@@ -18,19 +32,18 @@ detect_os()
 {
   case "$CROSS_TARGET" in
     '')
-      KERNEL_NAME=`uname -s`
-      case "$KERNEL_NAME" in
+      case "$UNAME_S" in
 	Linux)
           OS_FAMILY=linux
           detect_distribution;;
 	SunOS)
           OS_FAMILY=solaris
           OS=solaris
-          OS_VERSION=`uname -r | sed -e 's/^5\.//'`
+          OS_VERSION=`echo $UNAME_R | sed -e 's/^5\.//'`
           ;;
 	AIX)
           OS_FAMILY=aix
-          OS_VERSION=`uname -v`.`uname -r`
+          OS_VERSION=`uname -v`.$UNAME_R
           OS=aix
           unset LIBPATH
           ;;
@@ -47,7 +60,7 @@ detect_os()
           OS_FAMILY=hpux
           OS=hpux;;
 	*)
-	  echo "Unable to detect operating system: $KERNEL_NAME"
+	  echo "Unable to detect operating system: $UNAME_S"
 	  exit 42;;
       esac
       ;;
@@ -197,8 +210,7 @@ detect_packaging()
   elif [ -f /usr/sbin/pkgadd ]; then
     DEP_PACKAGING=solaris
   elif [ -f /usr/sbin/pkg_add ]; then
-    SYSTEM=`uname -s`
-	case "$SYSTEM" in
+    case "$UNAME_S" in
 	  FreeBSD)
 	    DEP_PACKAGING=freebsd;;
 	esac
@@ -229,21 +241,21 @@ detect_arch()
     rpm)
       ARCH=`rpm --eval '%{_arch}'`;;
     solaris)
-      case `uname -m` in
+      case $UNAME_M in
         sun*)
           ARCH=sparc;;
         i86pc)
           ARCH=i86pc;;
         *)
-          echo "Unknown Solaris architecture: `uname -m`";;
+          echo "Unknown Solaris architecture: $UNAME_M";;
       esac;;
 
     freebsd)
-      ARCH=`uname -m`
-      OS_VERSION=`uname -r`;;
+      ARCH=$UNAME_M
+      OS_VERSION=$UNAME_R ;;
     hpux)
-      ARCH=`uname -m`
-      OS_VERSION=`uname -r`;;
+      ARCH=$UNAME_M
+      OS_VERSION=$UNAME_R ;;
     *)
       echo "Unknown packaging system"
       exit 42;;
@@ -266,30 +278,16 @@ detect_arch()
 
 detect_tools()
 {
-# This is the idea, we check if we have a 'make' executable.
-# Then we check if 'make -v' returns 'GNU'. If so, that is our
-# make.
-# If it does not, then we check if we have 'gmake' executable. 
-# If so we make it our make.
-    MAKE=""
-    MAKE_VERSION=$(make -v || :)
-    case "$MAKE_VERSION" in
-    GNU*)
-        MAKE="$(which make)"
-        ;;
-    *)
-        GMAKE_=`which gmake`
-        case "$GMAKE_" in
-        /*)
-            MAKE="$GMAKE_"
-            ;;
-        *)
-            MAKE="Unknown make"
-            ;;
-        esac
-        ;;
-    esac
-    export MAKE
+    # We look for GNU Make because
+    # various dependencies have various requirements
+    MAKE=`func_whereis gmake make`
+
+    if $MAKE -v | grep GNU
+    then
+        export MAKE
+    else
+        fatal "GNU Make not found"
+    fi
 
     if [ "x$OS" = "xaix" ]; then
         RPMBUILD_CMD=rpm
@@ -298,18 +296,10 @@ detect_tools()
     fi
     export RPMBUILD_CMD
 
-    if [ -x /usr/sbin/fuser ]; then
-        FUSER=/usr/sbin/fuser
-    else
-        FUSER=/sbin/fuser
-    fi
+    FUSER=`func_whereis fuser`
     export FUSER
 
-    if which gpatch 2>&1 | grep '^/' >/dev/null; then
-        PATCH=gpatch
-    else
-        PATCH=patch
-    fi
+    PATCH=`func_whereis gpatch patch`
     export PATCH
 }
 
@@ -343,14 +333,6 @@ detect_environment()
   detect_cores
 }
 
-detect_environment
-
-# Print the environment variables so that the log can be used to debug problems
-# stemming from wrong environment.
-echo -e "\n\n==================== Current environment ========================"
-env
-echo -e "=================================================================\n\n"
-
 #
 # We need to detect the following pieces of data:
 #  - distribution
@@ -358,6 +340,14 @@ echo -e "=================================================================\n\n"
 #  - architecture
 #  - packaging tool (dpkg, rpm, solaris pkg, ...)
 #
+detect_environment
 
-OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
-export OUTDIR
+# Print the environment variables so that the log can be used to debug problems
+# stemming from wrong environment.
+echo
+echo
+echo "==================== Current environment ========================"
+env
+echo "================================================================="
+echo
+echo

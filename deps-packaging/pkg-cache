@@ -1,37 +1,19 @@
 #!/bin/sh
 
-# POSIX shell test.
-try_exec() {
-  type "$1" > /dev/null 2>&1 && exec "$@"
-}
+. `dirname "$0"`/../build-scripts/functions
 
-unset foo
-(: ${foo%%bar}) 2> /dev/null
-T1="$?"
-
-if test "$T1" != 0; then
-  try_exec /usr/xpg4/bin/sh "$0" "$@"
-  echo "No compatible shell script interpreter found."
-  echo "Please find a POSIX shell for your system."
-  exit 42
-fi
-
-#
-# Do not set -e before switching to POSIX shell, as it will break the test
-# above.
-#
-set -e
 
 # Check for Jenkins node label and use that as index.
-if [ -n "$NODE_LABELS" ]
+# There can be multiple labels, pick the first one.
+firstlabel=${NODE_LABELS%% *}
+
+if [ x"$firstlabel" = x ]
 then
-  # There can be multiple labels, pick the first one.
-  # The last one is usually the node name.
-  label=${NODE_LABELS%% *}
-else
-  label=NO_LABEL
+    echo "Jenkins has not assigned a LABEL to this node, you are probably building manually" 1>&2
+    firstlabel=NO_LABEL
 fi
-CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs/$label
+
+CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs/$firstlabel
 
 usage()
 {
@@ -51,12 +33,6 @@ usage()
   echo "$0 autoprune <pkg> <n>"
   echo "  removes all but the <n> most recently used cached package files"
   exit 1
-}
-
-fatal()
-{
-  echo "$@" >&2
-#  exit 42
 }
 
 opts()
@@ -110,29 +86,36 @@ export _POSIX2_VERSION=1
 
 case "$CMD" in
   find)
-    if [ -d "$PKGCACHEDIR" ]; then
-      # Update access time for autoprune.
-      touch "$PKGCACHEDIR"
-      exit 0
-    else
-      exit 1
-    fi
-    ;;
+      if [ `find "$PKGCACHEDIR" -type f  |  wc -l`  !=  0 ]
+      then
+          # Update access time for autoprune.
+          touch "$PKGCACHEDIR"
+          exit 0
+      else
+          exit 1
+      fi
+      ;;
   store)
-    if [ -d "$PKGCACHEDIR" ]; then
-      fatal "Package $PKGVR is already cached."
-    fi
-    mkdir -p "$PKGCACHEDIR"
+      if [ -d "$PKGCACHEDIR" ]
+      then
+          echo "pkg-cache store: Skipping storing package because directory already exists:    $PKGCACHEDIR"  1>&2
+          exit
+      fi
 
-    # Force-remove cache directory if cp(1) fails, otherwise cache might become
-    # inconsistent
-    cp $PKGFILES "$PKGCACHEDIR" || (rm -rf "$PKGCACHEDIR"; false);;
+      mkdir -p "$(dirname $PKGCACHEDIR)"
+      tempdir=`mktempdir "$PKGCACHEDIR.XXXXXX"`
+
+      cp $PKGFILES "$tempdir"
+
+      # Atomically rename directory, to avoid a very common issue:
+      # package directory only containing the "devel" package but not
+      # the main one, or vice-versa.
+      mv "$tempdir" "$PKGCACHEDIR"
+      ;;
   list)
-    if [ -d "$PKGCACHEDIR" ]; then
-      echo "$PKGCACHEDIR"/*
-    else
-      fatal "Package $PKGVR is not in cache."
-    fi;;
+      find "$PKGCACHEDIR" -type f  \
+          ||  fatal "Failed searching $PKGVR in cache"
+      ;;
   prune)
     if [ -d "$PKGCACHEDIR" ]; then
       rm -rf "$PKGCACHEDIR"

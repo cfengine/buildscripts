@@ -245,8 +245,8 @@ case "$PACKAGING" in
 	  ;;
   hpux)
       PREFIX=/var/cfengine
-      ARCH=`uname -m`
-      OS_VER=`uname -r`
+      ARCH=$UNAME_M
+      OS_VER=$UNAME_R
 
       rm -rf $BASEDIR/$PKG/pkg
       mkdir -p $BASEDIR/$PKG/pkg${PREFIX}

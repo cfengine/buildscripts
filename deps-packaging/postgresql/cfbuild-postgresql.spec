@@ -69,6 +69,7 @@ CFEngine Build Automation -- postgresql -- development files
 %defattr(-,root,root)
 
 %dir %{prefix}/lib
+%{prefix}/lib/libpq.so
 %{prefix}/lib/libpq.so.5
 %{prefix}/lib/libpq.so.5.3
 
@@ -79,8 +80,5 @@ CFEngine Build Automation -- postgresql -- development files
 %{prefix}/bin/pg_config
 
 %{prefix}/include
-
-%dir %{prefix}/lib
-%{prefix}/lib/libpq.so
 
 %changelog
