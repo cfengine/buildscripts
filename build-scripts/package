@@ -143,6 +143,18 @@ case "$PACKAGING" in
         # Create AIX bff packages
         chmod +x $P/$PKG.bff.sh
         $P/$PKG.bff.sh $RPM_VERSION $BASEDIR
+    else
+        # Create TAR package
+        TARBALL=$BASEDIR/$PKG/RPMS/cfengine-$VERSION.pkg.tar.gz
+	# RHEL4 and RHEL6 have buildroot in different folders.
+	# Below lines try to be careful about finding it.
+	# Note that `mv` command will fail and abort the build
+	# if it was found incorrectly (doesn't have expected subdirs)
+        cd $BASEDIR/$PKG/
+        [ -d BUILDROOT ] && cd BUILDROOT
+        [ -d $PKG-* ] && cd $PKG-*
+        mv usr etc var/cfengine/share/
+        tar czvf $TARBALL .
     fi
     ;;
 
@@ -182,6 +194,12 @@ case "$PACKAGING" in
     $P/../common/produce-script $PKG postremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.postrm
 
     (cd $BASEDIR/$PKG/pkg; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
+
+    # Create TAR package
+    TARBALL=$BASEDIR/$PKG/pkg/cfengine-$VERSION.pkg.tar.gz
+    cd $BASEDIR/$PKG/pkg/debian/tmp/
+    mv usr etc var/cfengine/share/
+    tar czvf $TARBALL .
     ;;
 
   solaris)
@@ -292,3 +310,6 @@ case "$PACKAGING" in
     echo "Unknown packaging system: $PACKAGING"
     exit 1;;
 esac
+
+#TARBALL=$BASEDIR/$PKG/cfengine-$VERSION.generic-pkg.tar.gz
+#tar czf $TARBALL /var/cfengine
