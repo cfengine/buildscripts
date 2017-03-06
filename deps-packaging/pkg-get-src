@@ -105,7 +105,8 @@ fetch_file()
 
         # Some wget (1.9.1 on AIX) return 0 even when they failed! So we
         # must test for file existence for retrying.
-        [ -f "$OUTFILE" ]  ||  $WGET -t5 "$URL$FILENAME" -O "$OUTFILE" 1>&2  ||  true
+        # Also, they need an estra parameter to switch to passive mode FTP.
+        [ -f "$OUTFILE" ]  ||  $WGET -t5 --passive-ftp "$URL$FILENAME" -O "$OUTFILE" 1>&2  ||  true
         rm_if_empty "$OUTFILE"
 
         # Try one last time after converting https to http.
