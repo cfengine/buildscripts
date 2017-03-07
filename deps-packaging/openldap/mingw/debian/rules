@@ -14,11 +14,12 @@ build-stamp:
 
 	patch -p1 < 0001-Prefix-windres-with-cross-compiler-name.patch
 	patch -p0 < fix-libtool-magic.patch
+	ln -s /var/cfengine/bin/libgnurx-0.dll .
 
 	# Configure is unable to test memcmp for cross-compilation
 	# getaddrinfo/getnameinfo are broken in MinGW as well as socklen in2.4.36 work around it
 	ac_cv_type_socklen_t=yes \
-	ac_cv_func_memcmp_working=yes  \
+	ac_cv_func_memcmp_working=yes \
             ac_cv_func_getaddrinfo=no \
             ac_cv_func_getnameinfo=no \
 	    ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) \
