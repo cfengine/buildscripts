@@ -20,8 +20,7 @@ Agent dependencies:
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
-* [libcurl](http://curl.haxx.se/download.html) 7.50.3
-  **TODO**: Update to 7.53 (or later) branch in next release (CFEngine 3.11)
+* [libcurl](http://curl.haxx.se/download.html) 7.53.1
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
