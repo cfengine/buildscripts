@@ -52,6 +52,7 @@ Hub specific dependencies:
 * [libmcrypt](https://sourceforge.net/projects/mcrypt/files/Libmcrypt/) 2.5.8
   * Needed for php module
 * [Git](https://www.kernel.org/pub/software/scm/git/) 2.10.2
+  **TODO**: Update to 2.12 (or later) branch in next release (CFEngine 3.11)
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.2
 
 Other dependencies (**find out why they are needed!**)
