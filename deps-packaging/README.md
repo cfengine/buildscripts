@@ -35,7 +35,7 @@ Enterprise agent specific dependencies:
 * [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
 * [OpenLDAP](http://www.openldap.org/software/download/) 2.4.44
 * [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3.9
-* [PostgreSQL](http://www.postgresql.org/) 9.0.20 9/2015 to be **DEPRECATED**
+* [PostgreSQL](http://www.postgresql.org/) 9.0.23 **EOL**
   * From this one we selectively build only `libpq`
 * [gnu rx](http://www.gnu.org/software/rx/rx.html) 2.5.1 **DEPRECATED**
   * Needed by MinGW
