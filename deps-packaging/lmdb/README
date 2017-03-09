@@ -1,0 +1,9 @@
+Take the official tree and do:
+
+cd lmdb
+git am ../buildscripts/dep-packaging/lmdb/00*
+
+If you've made changes to lmdb, you can regenerate the patches with:
+
+git format-patch HEAD~4..HEAD
+mv 00* ../buildscripts/deps-packaging/lmdb
