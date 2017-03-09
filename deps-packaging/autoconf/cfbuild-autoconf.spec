@@ -1,8 +1,8 @@
 Summary: CFEngine Build Automation -- autoconf
 Name: cfbuild-autoconf
-Version: 2.60
+Version: 2.69
 Release: 1
-Source0: autoconf-2.60.tar.gz
+Source0: autoconf-2.69.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
