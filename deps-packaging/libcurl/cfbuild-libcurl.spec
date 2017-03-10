@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
 Version: %{version}
 Release: 1
-Source: curl-7.50.0.tar.gz
+Source: curl-7.53.1.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n curl-7.50.0
+%setup -q -n curl-7.53.1
 
 ./configure --with-sysroot=%{prefix} --with-ldap-lib=libldap-2.4.so.2 --with-lber-lib=liblber-2.4.so.2 --with-ssl=%{prefix} --with-zlib=%{prefix} --prefix=%{prefix} CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
 
