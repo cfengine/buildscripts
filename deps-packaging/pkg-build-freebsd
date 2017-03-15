@@ -41,7 +41,7 @@ PKGDIR=$BASEDIR/$PKGNAME/pkg
 rm -rf $PKGDIR
 mkdir -p $PKGDIR
 
-pkg-get-buildscripts-src "$P" | while read srcfile opts; do
+pkg-get-src "$P" | while read srcfile opts; do
   case "$srcfile" in
     *.gz|*.tgz)
       UNCOMPRESS="gzip -dc";;
@@ -51,7 +51,7 @@ pkg-get-buildscripts-src "$P" | while read srcfile opts; do
       echo "Unknown compression: $srcfile"
       exit 42;;
   esac
-  
+
   if [ x$opts = xsubdir ]; then
     $UNCOMPRESS $srcfile | (cd $PKGDIR; tar xf -) || false
   else
@@ -75,7 +75,7 @@ version of $package: $VERSION
 architecture of $package: $ARCH" > $BASEDIR/$PKGNAME/$package-comment
 
   echo "$package: created by buildscripts system" > $BASEDIR/$PKGNAME/$package-descr
-  
+
   gen_filelist $package > $BASEDIR/$PKGNAME/$package-plist
 
   /usr/sbin/pkg_create -j -f $BASEDIR/$PKGNAME/$package-plist -c $BASEDIR/$PKGNAME/$package-comment -d $BASEDIR/$PKGNAME/$package-descr -p $BASEDIR/$PKGNAME/pkg/out/$package/ $BASEDIR/$PKGNAME/$package-$VERSION-$ARCH.tbz

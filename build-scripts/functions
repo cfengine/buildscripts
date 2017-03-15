@@ -125,6 +125,11 @@ SECONDARY_PATHS="/sbin /usr/sbin  /usr/sfw/bin"  #"/opt/csw/gnu /usr/ccs/bin"
 
 
 
+grep_q()
+{
+    grep "$@"  >/dev/null
+}
+
 #
 # Dealing with packages. For platform-specific functions it's preferred
 # to have them as a separate script under deps-packaging directory.
@@ -202,7 +207,7 @@ query_pkg()
 {
     case "$DEP_PACKAGING" in
         rpm) rpm  -q --quiet $1 ;;
-        deb) dpkg -s         $1 2>&1    |    grep '^Status: .*ok installed' >/dev/null 2>&1 ;;
+        deb) dpkg -s         $1 2>&1    |    grep_q '^Status: .*ok installed' ;;
         *)
             echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
             exit 1
@@ -394,6 +399,11 @@ fatal()
 {
     echo "FATAL ERROR: $1" >&2
     exit ${2-1}
+}
+
+log_info()
+{
+    echo "INFO: $@"  1>&2
 }
 
 # Append a space and string $2 to variable $1, for example:
