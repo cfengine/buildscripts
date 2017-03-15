@@ -41,7 +41,7 @@ PKGDIR=$BASEDIR/$PKGNAME/pkg
 rm -rf $BASEDIR/$PKGNAME
 mkdir -p $PKGDIR
 
-SRCFILES=$(pkg-get-buildscripts-src $P)
+SRCFILES=$(pkg-get-src $P)
 
 echo "$SRCFILES" | while read srcfile opts; do
 
