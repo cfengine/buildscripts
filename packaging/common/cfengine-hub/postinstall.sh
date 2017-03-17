@@ -92,7 +92,14 @@ chown root:$MP_APACHE_USER $PREFIX/httpd/logs
 chmod 775 $PREFIX/httpd/logs
 chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/tmp
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
-chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/application/logs
+
+if [ -d "$PREFIX/httpd/htdocs/application/logs" ]; then
+    mv "$PREFIX/httpd/htdocs/application/logs" "$PREFIX/httpd/logs/application"
+fi
+if [ ! -d "$PREFIX/httpd/logs/application" ]; then
+    mkdir -p "$PREFIX/httpd/logs/application"
+fi
+chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/logs/application
 
 #
 # Do all the prelimenary Design Center setup only on the first install of cfengine package
