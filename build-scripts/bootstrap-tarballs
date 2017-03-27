@@ -21,7 +21,8 @@ rm cfengine-masterfiles*.tar.gz || true
 git rev-parse HEAD > $BASEDIR/output/masterfiles-commitID
 # Configure in order to run "make dist", deleted later.
 ./configure
-make dist
+make dist                                               # source tarball
+make tar-package                                       # package tarball
 mv cfengine-masterfiles*.tar.gz $BASEDIR/output/tarballs/
 make distclean
 
