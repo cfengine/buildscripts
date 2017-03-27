@@ -6,7 +6,7 @@
 
 
 SOURCE_TARBALL="$BASEDIR/output/tarballs/cfengine-3.*.tar.gz"
-MASTERFILES_TARBALL="$BASEDIR/output/tarballs/cfengine-masterfiles*.tar.gz"
+MASTERFILES_TARBALL=`ls $BASEDIR/output/tarballs/cfengine-masterfiles*.tar.gz | grep -v 'pkg.tar.gz$'`
 cd $BASEDIR
 
 # DELETE the git-checked-out directories, they are tainted with
