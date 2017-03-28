@@ -15,68 +15,76 @@ fi
 
 CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs/$firstlabel
 
+
 usage()
 {
-  exec >&2
-  echo "$0 find <pkg>-<version>-<release>"
-  echo "  looks up package in cache"
-  echo
-  echo "$0 store <pkg>-<version>-<release> <pkgfile> [<pkgfile> ...]"
-  echo "  stores new package in cache. refuses to do that if package already exists"
-  echo
-  echo "$0 list <pkg>-<version>-<release>"
-  echo "  lists cached package files"
-  echo
-  echo "$0 prune <pkg>-<version>-<release>"
-  echo "  removes cached package files"
-  echo
-  echo "$0 autoprune <pkg> <n>"
-  echo "  removes all but the <n> most recently used cached package files"
-  exit 1
+    exec >&2
+    echo "$0 find <pkg>-<version>-<release>"
+    echo "  looks up package in cache"
+    echo
+    echo "$0 store <pkg>-<version>-<release> <pkgfile> [<pkgfile> ...]"
+    echo "  stores new package in cache. refuses to do that if package already exists"
+    echo
+    echo "$0 list <pkg>-<version>-<release>"
+    echo "  lists cached package files"
+    echo
+    echo "$0 prune <pkg>-<version>-<release>"
+    echo "  removes cached package files"
+    echo
+    echo "$0 autoprune <pkg> <n>"
+    echo "  removes all but the <n> most recently used cached package files"
+    exit 1
 }
 
 opts()
 {
-  if [ $# -lt 2 ]; then
-    usage
-  fi
-
-  CMD="$1"
-  shift
-
-  case "$CMD" in
-    find|list|prune|store)
-      PKGVR="$1"
-      shift
-
-      PKGCACHEDIR="$CACHEDIR/$PKGVR"
-
-      case "$CMD" in
-        store)
-          if [ $# -eq 0 ]; then
-            usage
-          fi
-          PKGFILES="$@"
-          ;;
-        *)
-          if [ $# -ne 0 ]; then
-            usage
-          fi
-          ;;
-      esac
-      ;;
-    autoprune)
-      if [ $# -ne 2 ]; then
+    if [ $# -lt 2 ]
+    then
         usage
-      fi
-      PKG="$1"
-      NUM="$2"
-      shift 2
-      ;;
+    fi
+
+    CMD="$1"
+    shift
+
+    case "$CMD" in
+
+    find|list|prune|store)
+        PKGVR="$1"
+        shift
+
+        PKGCACHEDIR="$CACHEDIR/$PKGVR"
+
+        case "$CMD" in
+            store)
+                if [ $# -eq 0 ]
+                then
+                    usage
+                fi
+                PKGFILES="$@"
+                ;;
+            *)
+                if [ $# -ne 0 ]
+                then
+                    usage
+                fi
+                ;;
+        esac
+        ;;
+    autoprune)
+        if [ $# -ne 2 ]
+        then
+            usage
+        fi
+        PKG="$1"
+        NUM="$2"
+        shift 2
+        ;;
     *)
-      fatal "Unknown command: $CMD";;
-  esac
+        fatal "Unknown command: $CMD"
+        ;;
+    esac
 }
+
 
 opts "$@"
 
@@ -85,46 +93,49 @@ opts "$@"
 export _POSIX2_VERSION=1
 
 case "$CMD" in
-  find)
-      if [ `find "$PKGCACHEDIR" -type f  |  wc -l`  !=  0 ]
-      then
-          # Update access time for autoprune.
-          touch "$PKGCACHEDIR"
-          exit 0
-      else
-          exit 1
-      fi
-      ;;
-  store)
-      if [ -d "$PKGCACHEDIR" ]
-      then
-          echo "pkg-cache store: Skipping storing package because directory already exists:    $PKGCACHEDIR"  1>&2
-          exit
-      fi
+    find)
+        if [ `find "$PKGCACHEDIR" -type f  |  wc -l`  !=  0 ]
+        then
+            # Update access time for autoprune.
+            touch "$PKGCACHEDIR"
+            exit 0
+        else
+            exit 1
+        fi
+        ;;
+    store)
+        if [ -d "$PKGCACHEDIR" ]
+        then
+            echo "pkg-cache store: Skipping storing package because directory already exists:    $PKGCACHEDIR"  1>&2
+            exit
+        fi
 
-      mkdir -p "$(dirname $PKGCACHEDIR)"
-      tempdir=`mktempdir "$PKGCACHEDIR.XXXXXX"`
+        mkdir -p "$(dirname $PKGCACHEDIR)"
+        tempdir=`mktempdir "$PKGCACHEDIR.XXXXXX"`
 
-      cp $PKGFILES "$tempdir"
+        cp $PKGFILES "$tempdir"
 
-      # Atomically rename directory, to avoid a very common issue:
-      # package directory only containing the "devel" package but not
-      # the main one, or vice-versa.
-      mv "$tempdir" "$PKGCACHEDIR"
-      ;;
-  list)
-      find "$PKGCACHEDIR" -type f  \
-          ||  fatal "Failed searching $PKGVR in cache"
-      ;;
-  prune)
-    if [ -d "$PKGCACHEDIR" ]; then
-      rm -rf "$PKGCACHEDIR"
-    else
-      fatal "Package $PKGVR is not in cache."
-    fi;;
-  autoprune)
-    for cache_entry in $(ls -dt $CACHEDIR/$PKG-* | tail +$(($NUM+1))); do
-      rm -rf "$cache_entry"
-    done
-    ;;
+        # Atomically rename directory, to avoid a very common issue:
+        # package directory only containing the "devel" package but not
+        # the main one, or vice-versa.
+        mv "$tempdir" "$PKGCACHEDIR"
+        ;;
+    list)
+        find "$PKGCACHEDIR" -type f  \
+            ||  fatal "Failed searching $PKGVR in cache"
+        ;;
+    prune)
+        if [ -d "$PKGCACHEDIR" ]
+        then
+            rm -rf "$PKGCACHEDIR"
+        else
+            fatal "Package $PKGVR is not in cache."
+        fi
+        ;;
+    autoprune)
+        for cache_entry in $(ls -dt $CACHEDIR/$PKG-* | tail +$(($NUM+1)))
+        do
+            rm -rf "$cache_entry"
+        done
+        ;;
 esac
