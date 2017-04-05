@@ -20,5 +20,5 @@ esac
 # Filter out "./" parts in the BASEDIR name.
 # It confuses the rsync -R mechanism.
 BASEDIR_NO_DOT="$(echo $BASEDIR | sed -e 's,/\.,,g')"
-sudo rsync -avR $EXCLUDES --delete --delete-excluded $BASEDIR_NO_DOT/ $TESTMACHINE_URI
-sudo rsync -avR $EXCLUDES --delete --delete-excluded /var/cfengine/ $TESTMACHINE_URI
+sudo rsync -avR $EXCLUDES --delete --delete-excluded $BASEDIR_NO_DOT/ $TESTMACHINE_URI  >rsync.log
+sudo rsync -avR $EXCLUDES --delete --delete-excluded /var/cfengine/ $TESTMACHINE_URI    >>rsync.log
