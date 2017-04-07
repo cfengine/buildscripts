@@ -183,7 +183,7 @@ prepare_workdir() {
 
 checkout() {
   mkdir -p build
-  rsync -avr --exclude='workdir-*' ../ build/buildscripts
+  rsync -avr --exclude='workdir-*' ../ build/buildscripts  >>rsync.log
 
   REPOS="core masterfiles"
 
@@ -262,10 +262,10 @@ checkout() {
       ;;
 
     nova-cp)
-      rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/buildscripts
+      rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/buildscripts  >>rsync.log
       for d in core nova enterprise masterfiles design-center mission-portal
       do
-        rsync -avr $SOURCE/$d build
+        rsync -avr $SOURCE/$d build  >>rsync.log
       done
       ;;
 
