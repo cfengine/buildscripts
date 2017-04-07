@@ -154,7 +154,7 @@ case "$PACKAGING" in
         [ -d BUILDROOT ] && cd BUILDROOT
         [ -d $PKG-* ] && cd $PKG-*
         mv usr etc var/cfengine/share/
-        tar czvf $TARBALL .
+        tar czvf $TARBALL .  > $TARBALL.filelist
     fi
     ;;
 
@@ -199,7 +199,7 @@ case "$PACKAGING" in
     TARBALL=$BASEDIR/$PKG/pkg/$PKG-$VERSION.$ARCH.pkg.tar.gz
     cd $BASEDIR/$PKG/pkg/debian/tmp/
     mv usr etc var/cfengine/share/
-    tar czvf $TARBALL .
+    tar czvf $TARBALL .  > $TARBALL.filelist
     ;;
 
   solaris)
