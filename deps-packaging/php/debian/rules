@@ -133,6 +133,9 @@ install: build
 	# Reduce information leakage by default
 	sed -ri 's/^\s*expose_php\s*=.*/expose_php = Off/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
 
+        # Set the default timezone for php to UTC
+	sed -ri 's/^(\s|;)*date.timezone\s*=.*/date.timezone = "UTC"/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
+
 	echo "extension=curl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/curl.ini
 	echo "extension=mcrypt.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/mcrypt.ini
 	echo "extension=openssl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/openssl.ini
