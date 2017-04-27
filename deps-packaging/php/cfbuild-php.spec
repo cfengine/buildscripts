@@ -138,6 +138,9 @@ cp %{_builddir}/php-%{php_version}/php.ini-production ${RPM_BUILD_ROOT}%{prefix}
 # Reduce information leakage by default
 sed -ri 's/^\s*expose_php\s*=.*/expose_php = Off/g' ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
 
+# Set the default timezone for php
+sed -ri 's/^(\s|;)*date.timezone\s*=.*/date.timezone = "UTC"/g' ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
+
 echo "extension=curl.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/curl.ini
 echo "extension=mcrypt.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/mcrypt.ini
 echo "extension=openssl.so" >>${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/openssl.ini
