@@ -12,7 +12,7 @@ install:
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) install PREFIX=$(CURDIR)/debian/tmp
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp PREFIX=/usr CFG_DIR=/etc
 
 	rm -rf $(CURDIR)/debian/tmp/usr/share/info
 	rm -rf $(CURDIR)/debian/tmp/usr/share/emacs
