@@ -12,15 +12,11 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-Patch0: honor-LDFLAGS.patch
-
 %define prefix %{buildprefix}
 
 %prep
 mkdir -p %{_builddir}
 %setup -q -n openssl-%{openssl_version}
-
-%patch0 -p1
 
 %build
 

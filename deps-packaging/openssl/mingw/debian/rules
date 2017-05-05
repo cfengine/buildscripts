@@ -14,8 +14,6 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p1 < honor-LDFLAGS.patch
-
 	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
 		mingw64 no-asm shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-srp \
