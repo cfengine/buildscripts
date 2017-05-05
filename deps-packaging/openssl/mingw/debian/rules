@@ -10,13 +10,20 @@ clean:
 
 	dh_clean
 
+# AFAIK it is either i686-w64-mingw32 or x86_64-w64-mingw32
+ifeq ($(DEB_HOST_GNU_TYPE),i686-w64-mingw32)
+    TARGET=mingw
+else
+    TARGET=mingw64
+endif
+
 build: build-stamp
 build-stamp:
 	dh_testdir
 
 	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
-		mingw64 no-asm shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-srp \
+		$(TARGET)  no-asm shared  no-idea no-rc5 no-ssl3 no-dtls no-srp no-engine \
 		--prefix=$(PREFIX)
 	make depend
 	make ### build_crypto build_ssl libcrypto.dll.a libssl.dll.a
@@ -29,13 +36,16 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
+	$(MAKE) install_sw DESTDIR=$(CURDIR)/debian/tmp
+	$(MAKE) install_ssldirs DESTDIR=$(CURDIR)/debian/tmp
+
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
 
-	cp libeay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp libcrypto*.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp libcrypto.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib
-	cp ssleay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp libssl*.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp libssl.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib
 	cp -RL include/openssl $(CURDIR)/debian/tmp$(PREFIX)/include
 

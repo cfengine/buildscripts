@@ -11,7 +11,7 @@ Build dependencies:
 Agent dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.0.2n
+* [OpenSSL](http://openssl.org/) 1.1.0g
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.41
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.21
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.7

@@ -12,8 +12,8 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Configure
 
-./Configure hpux-ia64-gcc shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
-    --prefix=$PREFIX
+$PERL ./Configure hpux-ia64-gcc shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
+    $LDFLAGS --prefix=$PREFIX
 
 # Build
 
@@ -29,7 +29,8 @@ fi
 
 # Install
 
-gmake INSTALL_PREFIX=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+gmake DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+gmake DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_ssldirs
 
 # Package
 
