@@ -14,8 +14,6 @@ build-stamp:
 
 	echo ==================== BUILD_TYPE is $$BUILD_TYPE ====================
 
-	patch -p1 < honor-LDFLAGS.patch
-
 	DEBUG_CONFIG_FLAGS= ;\
 	DEBUG_CFLAGS= ;\
 	if [ $$BUILD_TYPE = "DEBUG" ] ;\

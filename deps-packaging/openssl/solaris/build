@@ -12,8 +12,6 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Patch
 
-$PATCH -p1 < honor-LDFLAGS.patch
-
 # Add dummy header files for features which are not compiled, but required
 mkdir -p ${BUILD_ROOT}/../include/openssl
 for f in idea srp; do
