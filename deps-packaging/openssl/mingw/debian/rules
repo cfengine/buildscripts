@@ -33,9 +33,13 @@ install: build
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
 
-	cp libeay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	ls -lahp
+
+	# cp libeay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp libcrypto.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp libcrypto.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib
-	cp ssleay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	# cp ssleay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
+	cp libssl.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp libssl.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib
 	cp -RL include/openssl $(CURDIR)/debian/tmp$(PREFIX)/include
 
