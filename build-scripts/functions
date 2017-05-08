@@ -67,6 +67,7 @@ export_variables ()
         case "$0" in
             *buildscripts/build-remote) SCRIPTDIR="$0";;
             /*) SCRIPTDIR=`dirname "$0"`;;
+            -*) SCRIPTDIR=`pwd`;; # if this script is sourced from a login shell, $0 is '-bash' or similar
             *)  SCRIPTDIR=`pwd`/`dirname "$0"`;;
         esac
 
