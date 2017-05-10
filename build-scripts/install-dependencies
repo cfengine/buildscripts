@@ -4,6 +4,19 @@
 . detect-environment
 . compile-options
 
+test -d /var/cfengine || sudo mkdir /var/cfengine
+sudo chmod 777 /var/cfengine
+mkdir -p /var/cfengine/include
+
+# TODO: find a better place for this
+wget http://www.cpan.org/src/5.0/perl-5.24.1.tar.gz
+gunzip perl-5.24.1.tar.gz
+tar -xf perl-5.24.1.tar
+cd perl-5.24.1
+./Configure -des -Dprefix=/var/cfengine -Dcc=gcc -Dmake=$MAKE
+$MAKE
+$MAKE install
+
 
 # We use packaging scripts
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
