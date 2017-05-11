@@ -22,7 +22,8 @@ build-stamp:
 		DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer" ;\
 	fi ;\
 	\
-	./config shared  no-idea no-rc5 no-ssl2 no-ssl3  no-dtls no-psk no-srp \
+	PERL=/var/cfengine/bin/perl \
+	./config shared  no-idea no-rc5 no-ssl3  no-dtls no-psk no-srp \
 		$$DEBUG_CONFIG_FLAGS \
                 --prefix=$(PREFIX) \
 		$$DEBUG_CFLAGS

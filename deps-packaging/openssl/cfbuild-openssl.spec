@@ -46,6 +46,7 @@ echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
         DEBUG_CONFIG_FLAGS=no-asm
     fi
 
+    export PERL=$HOME/perl-my/bin/perl
     ./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
         $DEBUG_CONFIG_FLAGS \
         --prefix=%{prefix} \
