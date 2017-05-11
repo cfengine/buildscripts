@@ -48,7 +48,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) install_sw INSTALL_PREFIX=$(CURDIR)/debian/tmp
+	$(MAKE) install_sw DESTDIR=$(CURDIR)/debian/tmp
 
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/c_rehash
 
