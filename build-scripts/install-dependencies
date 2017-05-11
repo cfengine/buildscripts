@@ -4,8 +4,7 @@
 . detect-environment
 . compile-options
 
-test -d /var/cfengine || sudo mkdir /var/cfengine
-sudo chmod 777 /var/cfengine
+test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
 mkdir -p /var/cfengine/include
 
 # TODO: find a better place for this
