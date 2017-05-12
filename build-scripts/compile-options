@@ -3,7 +3,6 @@
 # Calculate dependencies and build parameters according to the environment.
 # SOURCE this file, don't execute.
 
-
 # Autodect PROJECT if not set
 
 if [ x"$PROJECT" = x ]
@@ -89,17 +88,6 @@ case "$OS_FAMILY" in
 esac
 
 var_append DEPS "libxml2 libyaml"
-
-# libvirt
-case "$ARCH-${OS_FAMILY}" in
-    s390*-*)  ;;                             # no libvirt for this linux
-    *-linux)
-        case "${OS}-${OS_VERSION}" in
-            debian-3.1)  ;;           # no libvirt for this linux either
-            *-*)  var_append DEPS "libvirt" ;;          # YES to libvirt
-        esac
-        ;;
-esac
 
 # LDAP functions in the agent
 case "$PROJECT" in
