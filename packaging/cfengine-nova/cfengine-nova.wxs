@@ -105,9 +105,6 @@
               <Component Id='libpcre_1.dll' Guid='A32A88D5-6E60-4852-BE95-33FF52CD276D' Win64='$(var.isWin64)'>
                 <File Id='libpcre_1.dll' Name='libpcre-1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libpcre-1.dll' />
               </Component>
-             <Component Id='libpq.dll' Guid='6F4BA3C0-ABAB-45C6-A6A0-9B262058ECA0' Win64='$(var.isWin64)'>
-                <File Id='libpq.dll' Name='libpq.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libpq.dll' />
-              </Component>
               <Component Id='pthreadGC2.dll' Guid='C9A99E1A-8ECE-4EAF-96DA-12B6BC298BFD' Win64='$(var.isWin64)'>
                 <File Id='pthreadGC2.dll' Name='pthreadGC2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\pthreadGC2.dll' />
               </Component>
@@ -158,7 +155,6 @@
             <ComponentRef Id='liblber.dll' />
             <ComponentRef Id='libldap.dll' />
             <ComponentRef Id='libpcre_1.dll' />
-            <ComponentRef Id='libpq.dll' />
             <ComponentRef Id='pthreadGC2.dll' />
             <ComponentRef Id='libeay32.dll' />
             <ComponentRef Id='ssleay32.dll' />
