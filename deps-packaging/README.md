@@ -20,7 +20,7 @@ Agent dependencies:
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
-* [libcurl](http://curl.haxx.se/download.html) 7.53.1
+* [libcurl](http://curl.haxx.se/download.html) 7.54.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -33,10 +33,6 @@ Enterprise agent specific dependencies:
   * Requires change of buildslaves (autobuild)
 * [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
 * [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.44
-* [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3.9
-  **TODO**: Update to 1.3 branch in next release (CFEngine 3.11)
-* [PostgreSQL](http://www.postgresql.org/) 9.0.23 **EOL**
-  * From this one we selectively build only `libpq`
 * [gnu rx](http://www.gnu.org/software/rx/rx.html) 2.5.1 **DEPRECATED**
   * Needed by MinGW
 
@@ -50,8 +46,7 @@ Hub specific dependencies:
 * [PHP](http://php.net/) 5.6.30
 * [libmcrypt](https://sourceforge.net/projects/mcrypt/files/Libmcrypt/) 2.5.8
   * Needed for php module
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.10.2
-  **TODO**: Update to 2.12 (or later) branch in next release (CFEngine 3.11)
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.13.0
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.2
 
 Other dependencies (**find out why they are needed!**)

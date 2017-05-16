@@ -69,7 +69,7 @@ fi
 pkg-get-buildscripts-src "$P" | while read srcfile opts; do
   case "$srcfile" in
     *.gz|*.tgz)
-      UNCOMPRESS=gzcat;;
+      UNCOMPRESS="gzip -dc";;
     *.bz2)
       UNCOMPRESS=bzcat;;
     *)
