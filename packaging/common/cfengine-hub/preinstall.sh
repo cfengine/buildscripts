@@ -197,6 +197,12 @@ if [ -d $PREFIX/httpd/htdocs ]; then
   cf_console echo "A previous version of CFEngine Mission Portal was found,"
   cf_console echo "creating a backup of it at /tmp/cfengine-htdocs.tar.gz"
   tar zcf /tmp/cfengine-htdocs.tar.gz $PREFIX/httpd/htdocs
+
+  cf_console echo "Purging old version from $PREFIX/httpd/htdocs"
+  # We preserve the tmp directory as it may contain scheduled or exported
+  # reports. We preserve cf_robot.php because it is generated
+  find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/tmp" -prune \) -not \( -name "cf_robot.php" \) -type f -print | xargs rm
+
 fi
 
 #
