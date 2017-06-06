@@ -177,7 +177,7 @@
           <Dialog Id="ExitDlg"
                     Width="300" Height="80"
                     Title="CFEngine Setup">
-                
+
                 <Control Id="Description"
                          Type="Text"
                          X="15"
@@ -185,7 +185,7 @@
                          Width="270"
                          Height="30"
                          Text="{\DlgFont8}[ProductName] setup has completed successfully. Click 'Finish' to exit the Setup Wizard." />
-                
+
                 <Control Id="Finish"
                          Type="PushButton"
                          X="125"
@@ -204,7 +204,7 @@
               Width="300"
               Height="80"
               Title="CFEngine Setup">
-                
+
           <Control Id="Description"
                    Type="Text"
                    X="15"
@@ -212,7 +212,7 @@
                    Width="270"
                    Height="80"
                    Text="{\DlgFont8}[ProductName] setup was interrupted. Your system has not been modified. To install this program at a later time, please run the installation again." />
-                
+
           <Control Id="Finish"
                            Type="PushButton"
                            X="125"
