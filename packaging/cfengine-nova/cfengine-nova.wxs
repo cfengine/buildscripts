@@ -68,6 +68,9 @@
               <Component Id='cf_monitord.exe' Guid='F9E42EF0-960C-4DEC-87BB-FB0C53F18E7F' Win64='$(var.isWin64)'>
                 <File Id='cf_monitord.exe' Name='cf-monitord.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-monitord.exe' />
               </Component>
+              <Component Id='cf_net.exe' Guid='E247749E-7C73-4E13-BF3F-315A19774635' Win64='$(var.isWin64)'>
+                <File Id='cf_net.exe' Name='cf-net.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-net.exe' />
+              </Component>
               <Component Id='cf_promises.exe' Guid='D3875D39-C53D-47DF-98CC-C393353ACCCD' Win64='$(var.isWin64)'>
                 <File Id='cf_promises.exe' Name='cf-promises.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-promises.exe' />
               </Component>
@@ -142,6 +145,7 @@
             <ComponentRef Id='cf_agent.exe' />
             <ComponentRef Id='cf_key.exe' />
             <ComponentRef Id='cf_monitord.exe' />
+            <ComponentRef Id='cf_net.exe' />
             <ComponentRef Id='cf_promises.exe' />
             <ComponentRef Id='cf_runagent.exe' />
             <ComponentRef Id='cf_serverd.exe' />
@@ -173,7 +177,7 @@
           <Dialog Id="ExitDlg"
                     Width="300" Height="80"
                     Title="CFEngine Setup">
-                
+
                 <Control Id="Description"
                          Type="Text"
                          X="15"
@@ -181,7 +185,7 @@
                          Width="270"
                          Height="30"
                          Text="{\DlgFont8}[ProductName] setup has completed successfully. Click 'Finish' to exit the Setup Wizard." />
-                
+
                 <Control Id="Finish"
                          Type="PushButton"
                          X="125"
@@ -200,7 +204,7 @@
               Width="300"
               Height="80"
               Title="CFEngine Setup">
-                
+
           <Control Id="Description"
                    Type="Text"
                    X="15"
@@ -208,7 +212,7 @@
                    Width="270"
                    Height="80"
                    Text="{\DlgFont8}[ProductName] setup was interrupted. Your system has not been modified. To install this program at a later time, please run the installation again." />
-                
+
           <Control Id="Finish"
                            Type="PushButton"
                            X="125"
