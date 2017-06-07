@@ -199,7 +199,15 @@ if [ -d $PREFIX/httpd/htdocs ]; then
   tar zcf /tmp/cfengine-htdocs.tar.gz $PREFIX/httpd/htdocs
 fi
 
-#
+  cf_console echo "Purging old version from $PREFIX/httpd/htdocs"
+  # We preserve the tmp directory as it may contain scheduled or exported
+  # reports. We preserve cf_robot.php because it is generated
+  find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/tmp" -prune \) -not \( -name "cf_robot.php" \) -type f -print0 | xargs -0 rm
+  # Hack around ENT-3205
+  if [ -e "$PREFIX/share/GUI/system/libraries/Session.php" ]; then
+    rm "$PREFIX/share/GUI/system/libraries/Session.php"
+  fi
+
 # Make a backup of the key CFE_CLIENT_SECRET_KEY, if any, and restore the
 # original file content.
 #
