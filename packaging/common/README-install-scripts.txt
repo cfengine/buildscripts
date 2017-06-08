@@ -67,9 +67,10 @@ Upgrade:
 |              |             |                | O: pre_rm |               |
 | N: pretrans  | O: prerm    |                | <Remove>  |               |
 | N: pre       | N: preinst  | N: preinstall  | N: pre_i  |               |
-| <Replace>    | <Replace>   | <Replace>      | <Install> | (*)           |
+| <Install>    | <Replace>   | <Replace>      | <Install> | (*)           |
 | N: post      | O: postrm   | N: postinstall | N: post_i |               |
 | O: preun     | N: postinst |                |           |               |
+| <Remove>     |             |                |           |               |
 | O: postun    |             |                |           |               |
 | N: posttrans |             |                |           |               |
 |--------------+-------------+----------------+-----------+---------------|
