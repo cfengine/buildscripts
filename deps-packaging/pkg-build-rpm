@@ -62,12 +62,17 @@ mkdir -p $BASEDIR/$PKGNAME/SRPMS
 
 SRCFILES=$(pkg-get-buildscripts-src $P)
 
-echo "$SRCFILES" | while read srcfile opts; do
-  ln -sf $srcfile $BASEDIR/$PKGNAME/SOURCES
-done
+if [ x"$SRCFILES" != x ]
+then
+    echo "$SRCFILES" | while read srcfile opts
+    do
+        ln -sf $srcfile $BASEDIR/$PKGNAME/SOURCES
+    done
 
-# Almost, but not completely, equivalent to -a, compatible with AIX.
-cp -pPR $P/* $BASEDIR/$PKGNAME/SOURCES
+    # Almost, but not completely, equivalent to -a, compatible with AIX.
+    cp -pPR $P/* $BASEDIR/$PKGNAME/SOURCES
+fi
+
 
 # Prepare options
 
