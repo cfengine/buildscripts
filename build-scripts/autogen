@@ -37,3 +37,19 @@ do
         echo $R | tr -d '\n' > $BASEDIR/$i/revision
     fi
 done
+
+
+detected_versions=`echo $projects  \
+    | xargs -n1  \
+    | sed "s/.*/$BASEDIR\/&\/CFVERSION/"  \
+    | xargs cat`
+number_of_different_versions=`echo $detected_versions  \
+    | tr ' ' '\n'  \
+    | sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/'  \
+    | uniq  |  wc -l`
+
+if [ x"$number_of_different_versions" != x1 ]
+then
+    echo "Detected versions mismatch:" "$detected_versions"  1>&2
+    exit 33
+fi
