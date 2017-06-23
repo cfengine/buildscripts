@@ -41,7 +41,7 @@ done
 
 detected_versions=`echo $projects  \
     | xargs -n1  \
-    | sed "s/.*/$BASEDIR\/&\/CFVERSION/"  \
+    | sed "s|.*|$BASEDIR/&/CFVERSION|"  \
     | xargs cat`
 number_of_different_versions=`echo $detected_versions  \
     | tr ' ' '\n'  \
