@@ -1,0 +1,46 @@
+#!/bin/bash
+
+set -ex
+for i in core nova enterprise mission-portal masterfiles design-center; do
+	test -d $i || git clone git@github.com:cfengine/$i.git
+done
+
+# packages needed for autogen
+sudo apt-get install git autoconf automake m4 make bison flex binutils libtool gcc g++ libc-dev libpam0g-dev python libtokyocabinet-dev libssl-dev libpcre3-dev default-jre-headless psmisc
+
+NO_CONFIGURE=1 PROJECT=nova ./buildscripts/build-scripts/autogen
+
+# packages needed for building
+sudo apt-get install bison flex binutils build-essential fakeroot ntp dpkg-dev libpam0g-dev python debhelper pkg-config psmisc nfs-common
+# remove unwanted dependencies
+sudo apt-get purge libltdl-dev libltdl7 libtool
+
+BUILD_TYPE=DEBUG; ESCAPETEST=yes;
+export BUILD_TYPE ESCAPETEST
+TEST_MACHINE=chroot; export TEST_MACHINE
+
+# cleaning not needed, since Travis always gives us a clean VM
+# ./buildscripts/build-scripts/clean-buildmachine
+./buildscripts/build-scripts/build-environment-check
+./buildscripts/build-scripts/install-dependencies
+./buildscripts/build-scripts/configure
+./buildscripts/build-scripts/generate-source-tarballs
+./buildscripts/build-scripts/compile
+# skip running tests on 'fast' and 'fast-php' jobs
+expr "$job" : "fast" || ./buildscripts/build-scripts/test
+./buildscripts/build-scripts/package
+./buildscripts/build-scripts/prepare-results
+
+ls output
+ls output/*
+
+if [ "$job" = "fast-php" ]; then
+	# clean build leftovers before going to php tests
+	./buildscripts/build-scripts/clean-buildmachine
+	# bring back PHP stuff which was hidden from build process
+	[ -d ~/.phpenv.del ] && mv ~/.phpenv.del ~/.phpenv
+	cd mission-portal
+	job=php ./travis.sh ../output/*/*.deb
+	exit $?
+fi
+
