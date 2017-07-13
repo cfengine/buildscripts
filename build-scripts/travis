@@ -23,6 +23,8 @@ do
             git fetch origin 'refs/heads/*:refs/remotes/origin/*'
             # Get last remaining tags, if any.
             git fetch --tags origin
+	    # This was partially taken from Mender repo:
+	    # https://github.com/mendersoftware/mender/blob/fc27422420bd3859d917579484856debdfa50e5f/.travis.yml#L61-L69
             )
         fi
     else
