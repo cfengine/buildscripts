@@ -15,7 +15,14 @@ do
         then
             (
             cd $i
-            git fetch origin refs/heads/*:refs/remotes/origin/*
+            # Rename the branch we're on, so that it's not in the way for the
+            # subsequent fetch. It's ok if this fails, it just means we're not on any
+            # branch.
+            git branch -m temp-branch || true
+            # Fetch rest of branches
+            git fetch origin 'refs/heads/*:refs/remotes/origin/*'
+            # Get last remaining tags, if any.
+            git fetch --tags origin
             )
         fi
     else
