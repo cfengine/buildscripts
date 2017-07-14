@@ -4,14 +4,6 @@ if [ -x /bin/systemctl ]; then
   /bin/systemctl daemon-reload
 fi
 
-if is_upgrade
-then
-    cf_console echo  \
-        'WARNING: attempted hub upgrade detected;'                      \
-        'this is UNSUPPORTED and might not work, you are on your own!'  \
-        '(relevant tickets: ENT-3205, ENT-3218)'
-fi
-
 #
 # Make sure the cfapache user has a home folder and populate it
 #

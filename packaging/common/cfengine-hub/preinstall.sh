@@ -1,3 +1,14 @@
+
+if is_upgrade
+then
+    cf_console echo  \
+        'WARNING: attempted hub upgrade detected;'  \
+        'this is UNSUPPORTED, aborting!'            \
+        '(relevant tickets: ENT-3205, ENT-3218)'
+    exit 1
+fi
+
+
 if is_upgrade; then
   # This is nice to know to provide fixes for bugs in already released
   # package scripts.
