@@ -1,18 +1,35 @@
 #!/bin/bash
 
 set -ex
-for i in core nova enterprise mission-portal masterfiles design-center; do
-	if [ -d $i ]; then
-		# Repo already checked out. Probably by Travis.
-		# Travis checks out only one branch, what confuses `determine-version.py`.
-		# To fix it, we need to perform "unshallow" operation.
-		# But we do it only for "core" and those repos where
-		# ./3rdparty/core/determine-version.py file exists.
-		# (Other repos are not checked for versions, we assume).
-		[ "$i" = "core" -o -f $i/3rdparty/core/determine-version.py ] && (cd $i && git fetch --unshallow)
-	else
-		git clone git@github.com:cfengine/$i.git
-	fi
+for i in core nova enterprise mission-portal masterfiles design-center
+do
+    if [ -d $i ]
+    then
+        # Repo already checked out. Probably by Travis.
+        # Travis checks out only one branch, what confuses `determine-version.py`.
+        # To fix it, we need to ask git to checkout other branches, too.
+        # But we do it only for "core" and those repos where
+        # ./3rdparty/core/determine-version.py file exists.
+        # (Other repos are not checked for versions, we assume).
+        if [ "$i" = "core" -o -f $i/3rdparty/core/determine-version.py ]
+        then
+            (
+            cd $i
+            # Rename the branch we're on, so that it's not in the way for the
+            # subsequent fetch. It's ok if this fails, it just means we're not on any
+            # branch.
+            git branch -m temp-branch || true
+            # Fetch rest of branches
+            git fetch origin 'refs/heads/*:refs/remotes/origin/*'
+            # Get last remaining tags, if any.
+            git fetch --tags origin
+	    # This was partially taken from Mender repo:
+	    # https://github.com/mendersoftware/mender/blob/fc27422420bd3859d917579484856debdfa50e5f/.travis.yml#L61-L69
+            )
+        fi
+    else
+        git clone git@github.com:cfengine/$i.git
+    fi
 done
 
 # packages needed for autogen
@@ -45,12 +62,12 @@ ls output
 ls output/*
 
 if [ "$job" = "fast-php" ]; then
-	# clean build leftovers before going to php tests
-	./buildscripts/build-scripts/clean-buildmachine
-	# bring back PHP stuff which was hidden from build process
-	[ -d ~/.phpenv.del ] && mv ~/.phpenv.del ~/.phpenv
-	cd mission-portal
-	job=php ./travis.sh ../output/*/*.deb
-	exit $?
+    # clean build leftovers before going to php tests
+    ./buildscripts/build-scripts/clean-buildmachine
+    # bring back PHP stuff which was hidden from build process
+    [ -d ~/.phpenv.del ] && mv ~/.phpenv.del ~/.phpenv
+    cd mission-portal
+    job=php ./travis.sh ../output/*/*.deb
+    exit $?
 fi
 
