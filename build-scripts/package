@@ -145,7 +145,7 @@ case "$PACKAGING" in
         $P/$PKG.bff.sh $RPM_VERSION $BASEDIR
     else
         # Create TAR package
-        TARBALL=$BASEDIR/$PKG/RPMS/cfengine-$VERSION.pkg.tar.gz
+        TARBALL=$BASEDIR/$PKG/RPMS/$PKG-$VERSION.$ARCH.pkg.tar.gz
 	# RHEL4 and RHEL6 have buildroot in different folders.
 	# Below lines try to be careful about finding it.
 	# Note that `mv` command will fail and abort the build
@@ -196,7 +196,7 @@ case "$PACKAGING" in
     (cd $BASEDIR/$PKG/pkg; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
 
     # Create TAR package
-    TARBALL=$BASEDIR/$PKG/pkg/cfengine-$VERSION.pkg.tar.gz
+    TARBALL=$BASEDIR/$PKG/pkg/$PKG-$VERSION.$ARCH.pkg.tar.gz
     cd $BASEDIR/$PKG/pkg/debian/tmp/
     mv usr etc var/cfengine/share/
     tar czvf $TARBALL .
