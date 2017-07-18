@@ -1,33 +1,14 @@
 #!/bin/sh
 
+
 . `dirname "$0"`/../build-scripts/functions
 
-CACHEDIR=$HOME/.cache/cfengine-buildscripts-distfiles
+set -e        # errors are fatal
+#set -x       # for debugging
 
-usage()
-{
-    exec >&2
-    echo "Usage: $0 <distfile> <URL> [<URL> ...]"
-    echo "  downloads all files specified in distfile using URLs"
-    exit 1
-}
+MYNAME=`basename $0`
+TMPDIR=/tmp
 
-info()
-{
-    echo "I: $@" >&2
-}
-
-opts()
-{
-    if [ $# -lt 2 ]
-    then
-        usage
-    fi
-
-    DISTFILE="$1"
-    shift
-    URLS="$@"
-}
 
 # Compare filename $1 to checksum $2. If $2 starts with "content=" then
 # checksum is computed based on *content* of each contained file,
@@ -35,6 +16,8 @@ opts()
 # downloads.
 checksum()
 {
+    [ $# -lt 2 ]  &&  fatal "$MYNAME: at least 2 args required but got: $*"  2
+
     FILENAME="$1"
     CHECKSUM="$2"
 
@@ -61,36 +44,18 @@ checksum()
     test "$CHECKSUM" = "$ACTUAL_CHECKSUM"
 }
 
-file_in_cache()
-{
-    FILENAME="$1"
-    CHECKSUM="$2"
 
-    if [ -f "$CACHEDIR/$FILENAME" ]
-    then
-        if checksum "$CACHEDIR/$FILENAME" "$CHECKSUM"
-        then
-            return 0
-        else
-            info "WARNING: Cached file $FILENAME has wrong checksum."
-            rm -f "$CACHEDIR/$FILENAME"
-            return 1
-        fi
-    else
-        info "File $FILENAME is not in cache"
-        return 1
-    fi
-}
-
+# Fetches it from upstream, stores it in $TMPDIR, prints the path.
 fetch_file()
 {
+    [ $# -lt 2 ]  &&  fatal "$MYNAME: at least 2 args required but got: $*"  2
+
     FILENAME="$1"
     CHECKSUM="$2"
 
-    OUTFILE="$CACHEDIR/$FILENAME"
+    OUTFILE="$TMPDIR/$FILENAME"
+    rm_if_empty "$OUTFILE"
     WGET=`func_whereis wget`
-
-    mkdir -p "$CACHEDIR"
 
     for URL in $URLS
     do
@@ -121,34 +86,88 @@ fetch_file()
         then
             if checksum "$OUTFILE" "$CHECKSUM"
             then
+                log_info "Successfully downloaded:" "$OUTFILE"
+                echo "$OUTFILE"
                 return 0                           # SUCCESSFUL DOWNLOAD
             else
-                info "WARNING: Downloaded $URL$FILENAME has wrong checksum. Continuing"
-                # wget(1) tends to create empty files even if download did not finish
+                log_info "WARNING: Downloaded $URL$FILENAME has wrong checksum, deleting"
                 rm -f "$OUTFILE"
             fi
         fi
     done
 
-    echo 'If you get a message about "Unsupported scheme", simply upload the' 1>&2
-    echo "given file to $CACHEDIR yourself." 1>&2
+    log_info 'If you get a message about "Unsupported scheme", upload the file manually'
     return 1
 }
 
 get_src()
 {
-    cat "$DISTFILE"  |  while read CHECKSUM FILENAME OPTS
-    do
-        file_in_cache "$FILENAME" "$CHECKSUM" \
-            || fetch_file "$FILENAME" "$CHECKSUM" \
-            || fatal "Unable to fetch $FILENAME"
-    done
+    [ $# -lt 2 ]  &&  fatal "$MYNAME: at least 2 args required but got: $*"  2
 
-    cat "$DISTFILE"  |  while read CHECKSUM FILENAME OPTS
-    do
-        echo "$CACHEDIR/$FILENAME" $OPTS
-    done
+    DISTFILE="$1"
+    shift
+    URLS="$@"
+
+    exec <"$DISTFILE"
+    read CHECKSUM FILENAME OPTS
+
+    local_filename=`pkg-cache listfile $FILENAME`  ||  true
+
+    if [ -f "$local_filename" ]  &&  checksum "$local_filename" "$CHECKSUM"
+    then
+        :                        # SUCCESS, do nothing
+    else
+        [ -f "$local_filename" ]  &&  rm -f "$local_filename"
+
+        tmp_filename=`fetch_file $FILENAME $CHECKSUM`
+
+        # Cache it, both locally and remotely, to avoid hitting upstream every time.
+        # pkg-cache will also print the locally stored file, which we want.
+        pkg-cache putfile $tmp_filename
+        rm -f $tmp_filename
+
+        local_filename=`pkg-cache listfile $FILENAME`  \
+            ||  fatal "We just stored the file but cache can't find it"
+        if [ ! -f "$local_filename" ]  ||  ! checksum "$local_filename" "$CHECKSUM"
+        then
+            fatal "We just stored the file and the checksum differs"
+        fi
+    fi
+
+    # Output of this script is the path and an optional field:
+    if [ -f "$local_filename" ]
+    then
+        echo "$local_filename" $OPTS
+    else
+        echo "ERROR: $MYNAME failed to download and cache $FILENAME from $URLS"  1>&2
+        return 1
+    fi
 }
 
-opts "$@"
-get_src
+
+
+
+
+if [ $# -ne 1 ]
+then
+    exec >&2
+    echo "Download source tarball of a package, as descibed in basedir/distfiles and basedir/source"
+    echo "Usage: $MYNAME <basedir>"
+    fatal "ERROR, got arguments: $*"  2
+fi
+
+PKGDIR=$1
+
+# Exit gracefully if nothing to downbloat.
+[ ! -f "$PKGDIR/distfiles" ]  &&  exit 0
+
+
+# Local mirrors can be added here
+DIST_SERVER=
+ALT_DIST_SERVER=`cat $PKGDIR/source`
+
+get_src "$PKGDIR/distfiles" $DIST_SERVER $ALT_DIST_SERVER
+
+# The previous get_src line does all the work, and outputs:
+# 1. the path to the file locally
+# 2. an optional "option" field that may be "subdir"

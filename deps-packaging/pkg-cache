@@ -2,140 +2,158 @@
 
 . `dirname "$0"`/../build-scripts/functions
 
+set -e
+#set -x                                                  # for debugging
+
+MYNAME=`basename $0`
+
+# Set to anything except "no" if you want to skip remote cache
+CACHE_IS_ONLY_LOCAL=${CACHE_IS_ONLY_LOCAL:-no}
 
 # Check for Jenkins node label and use that as index.
 # There can be multiple labels, pick the first one.
 firstlabel=${NODE_LABELS%% *}
-
 if [ x"$firstlabel" = x ]
 then
-    echo "Jenkins has not assigned a LABEL to this node, you are probably building manually" 1>&2
+    echo "Jenkins has not assigned a LABEL to this node," \
+         "you are probably building manually;" \
+         "disabling remote sftp cache"  1>&2
     firstlabel=NO_LABEL
+    CACHE_IS_ONLY_LOCAL=yes
 fi
 
-CACHEDIR=$HOME/.cache/cfengine-buildscripts-pkgs/$firstlabel
+CACHEDIR=$HOME/.cache/buildscripts_cache
+# Binary packages are architecture (label) specific so they need a label subdir
+PKGS_CACHEDIR=$CACHEDIR/pkgs
+# Source tarballs etc are not
+FILES_CACHEDIR=$CACHEDIR/files
+# Make sure that we don't write directly to CACHEDIR but to the subdirs mentioned above
+unset CACHEDIR
 
+mkdir -p $PKGS_CACHEDIR
+mkdir -p $FILES_CACHEDIR
 
-usage()
+exit_usage()
 {
     exec >&2
-    echo "$0 find <pkg>-<version>-<release>"
-    echo "  looks up package in cache"
-    echo
-    echo "$0 store <pkg>-<version>-<release> <pkgfile> [<pkgfile> ...]"
-    echo "  stores new package in cache. refuses to do that if package already exists"
-    echo
-    echo "$0 list <pkg>-<version>-<release>"
-    echo "  lists cached package files"
-    echo
-    echo "$0 prune <pkg>-<version>-<release>"
-    echo "  removes cached package files"
-    echo
-    echo "$0 autoprune <pkg> <n>"
-    echo "  removes all but the <n> most recently used cached package files"
-    exit 1
+    echo "$MYNAME listpkgfiles  <pkg>-<version>"
+    echo "    lists the full local paths to all files of that package found in cache"
+    echo "    if necessary it fetches them from the sftp cache first"
+    echo "$MYNAME putpkg  <pkg>-<version> <pkgfiles>..."
+    # TODO decide to overwrite or not? probably yes...
+    echo "    writes all pkgfiles to the local and remote cache; TODO OVERWRITE OR NOT?"
+    echo "$MYNAME listfile  <filename>"
+    echo "    given a filename without slashes, the output is the local full"
+    echo "    pathname after it's fetched from remote, if needed"
+    echo "$MYNAME putfile  <filename>"
+    echo "    Stores a file locally and remotely"
+
+    exit 2
 }
 
-opts()
+# Remove directory silently, if empty or with bogus, unimportant
+# contents (having no files but only subdirs is also considered bogus,
+# the subdir could be just the temporary transfer dir from a previous
+# transfer).
+rmdir_if_bogus()
 {
-    if [ $# -lt 2 ]
-    then
-        usage
-    fi
+(                                     # subshell to undo sh -x verbosity
+    bogus=yes
+    for f in "$1"/*
+    do
+        # if we find a non-empty file, then we are good
+        if [ -f "$f" ]  &&  [ ! -s "$f" ]
+        then
+            bogus=no
+            break
+        fi
+    done
 
-    CMD="$1"
+    [ $bogus = yes ]  &&  [ -d "$1" ]  &&  rm -rf "$1"  ||  true
+)
+}
+
+
+retval=73                                       # failure by default
+
+cmd=$1
+shift
+
+case "$cmd" in
+putpkg)
+    if [ x"$1" = x ]  ||  [ x"$2" = x ]  ||  echo "$1" | grep_q '[/ ]'
+    then
+        fatal  "$MYNAME $cmd:  requires one package name as argument with no slashes or spaces, and many file path arguments"
+    fi
+    pkgname=$1
     shift
 
-    case "$CMD" in
+    pkg_cache_dir="$PKGS_CACHEDIR/$firstlabel/$pkgname"
 
-    find|list|prune|store)
-        PKGVR="$1"
-        shift
+    # Remove bogus or empty dirs
+    rmdir_if_bogus $pkg_cache_dir
 
-        PKGCACHEDIR="$CACHEDIR/$PKGVR"
+    if [ -d "$pkg_cache_dir" ]
+    then
+        # TODO DECIDE if it's better to force copying always
+        echo "$MYNAME $cmd: Skipping because package already exists in local cache:  $pkg_cache_dir"  1>&2
+    else
+        mkdir -p $pkg_cache_dir
+        cp "$@" $pkg_cache_dir/
 
-        case "$CMD" in
-            store)
-                if [ $# -eq 0 ]
-                then
-                    usage
-                fi
-                PKGFILES="$@"
-                ;;
-            *)
-                if [ $# -ne 0 ]
-                then
-                    usage
-                fi
-                ;;
-        esac
-        ;;
-    autoprune)
-        if [ $# -ne 2 ]
+        if [ $CACHE_IS_ONLY_LOCAL = no ]
         then
-            usage
+            cache-sftp putdir  $firstlabel/$pkgname  "$@"
         fi
-        PKG="$1"
-        NUM="$2"
-        shift 2
-        ;;
-    *)
-        fatal "Unknown command: $CMD"
-        ;;
-    esac
-}
+    fi
+    ;;
+listpkgfiles)
+    if [ x"$1" = x ]  ||  [ x"$2" != x ]  ||  echo "$1" | grep_q '[/ ]'
+    then
+        fatal  "$MYNAME $cmd:  requires exactly one package name as argument with no slashes or spaces"
+    fi
+    pkgname="$1"
+    pkg_cache_dir="$PKGS_CACHEDIR/$firstlabel/$pkgname"
 
+    # Remove bogus or empty dirs
+    rmdir_if_bogus $pkg_cache_dir
 
-opts "$@"
+    if [ ! -d $pkg_cache_dir ] && [ $CACHE_IS_ONLY_LOCAL = no ]
+    then
+        mkdir -p $pkg_cache_dir
+        cd $pkg_cache_dir
+        cache-sftp getdir  $firstlabel/$pkgname
+        cd -  >/dev/null
+    fi
 
-# Work around the fact that Solaris tail only supports obsolete +n syntax.
-# We need to enable it explicitly for other platforms.
-export _POSIX2_VERSION=1
+    rmdir_if_bogus $pkg_cache_dir
 
-case "$CMD" in
-    find)
-        if [ `find "$PKGCACHEDIR" -type f  |  wc -l`  !=  0 ]
-        then
-            # Update access time for autoprune.
-            touch "$PKGCACHEDIR"
-            exit 0
-        else
-            exit 1
-        fi
-        ;;
-    store)
-        if [ -d "$PKGCACHEDIR" ]
-        then
-            echo "pkg-cache store: Skipping storing package because directory already exists:    $PKGCACHEDIR"  1>&2
-            exit
-        fi
+    [ -d $pkg_cache_dir ]  &&  echo  $pkg_cache_dir/*  ||  true
+    ;;
+putfile)
+    cp  $1  $FILES_CACHEDIR
 
-        mkdir -p "$(dirname $PKGCACHEDIR)"
-        tempdir=`mktempdir "$PKGCACHEDIR.XXXXXX"`
+    if [ $CACHE_IS_ONLY_LOCAL = no ]
+    then
+        cache-sftp putfile $1
+    fi
+    ;;
+listfile)
+    if [ x"$1" = x ]  ||  [ x"$2" != x ]  ||  echo "$1" | grep_q /
+    then
+        fatal  "$MYNAME $cmd:  requires exactly one file name as argument with no slashes"
+    fi
+    filename="$1"
 
-        cp $PKGFILES "$tempdir"
+    rm_if_empty $FILES_CACHEDIR/$filename
 
-        # Atomically rename directory, to avoid a very common issue:
-        # package directory only containing the "devel" package but not
-        # the main one, or vice-versa.
-        mv "$tempdir" "$PKGCACHEDIR"
-        ;;
-    list)
-        find "$PKGCACHEDIR" -type f  \
-            ||  fatal "Failed searching $PKGVR in cache"
-        ;;
-    prune)
-        if [ -d "$PKGCACHEDIR" ]
-        then
-            rm -rf "$PKGCACHEDIR"
-        else
-            fatal "Package $PKGVR is not in cache."
-        fi
-        ;;
-    autoprune)
-        for cache_entry in $(ls -dt $CACHEDIR/$PKG-* | tail +$(($NUM+1)))
-        do
-            rm -rf "$cache_entry"
-        done
-        ;;
+    if [ ! -f $FILES_CACHEDIR/$filename ] && [ $CACHE_IS_ONLY_LOCAL = no ]
+    then
+        cd $FILES_CACHEDIR/
+        cache-sftp getfile "$filename"
+        cd -  >/dev/null
+    fi
+
+    [ -f $FILES_CACHEDIR/$filename ]  &&  echo $FILES_CACHEDIR/$filename  ||  true
+    ;;
 esac

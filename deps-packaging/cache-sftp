@@ -1,0 +1,234 @@
+#!/bin/sh
+
+. `dirname "$0"`/../build-scripts/functions
+set +e                                                   # errors are OK
+#set -x                                                  # for debugging
+
+
+MYNAME=`basename $0`
+CACHE_HOST=jenkins_sftp_cache@build-artifacts-cache.cloud.cfengine.com
+REMOTE_CACHEDIR="buildscripts_cache"
+SSH_ARGS="-o GSSAPIAuthentication=no -o PreferredAuthentications=publickey"
+
+
+sftp -b -  </dev/null  2>&1  \
+    |  fgrep 'No such file or directory (-)'  >/dev/null
+
+if [ $? = 0 ]                                     # old version detected
+then
+    log_info "This host has a very old SFTP client, taking countermeasures ..."
+    SFTP_IS_OLD=1
+else
+    SFTP_IS_OLD=0
+fi
+
+
+# Feed the SFTP command with a commands script in standard
+# input. Any command that fails will cause sftp to return error, unless
+# that command is prefixed with '-'.
+#
+# However old SFTP versions are very restrictive: "-b" switch does not
+# accept '-' to indicate stdin, script commands can't be prefixed with
+# '-' and the return code of sftp is always zero even if some of the
+# script commands failed.
+sftp_stdin()
+{
+    if [ $SFTP_IS_OLD = 1 ]
+    then
+        # Remove leading dash from input script lines
+        sed 's/^ *-//'  \
+            | sftp $SSH_ARGS  $CACHE_HOST  1>&2
+        # return most likely zero since it can't detect failed script
+        # commands anyway
+        return
+    else
+        sftp $SSH_ARGS -b -  $CACHE_HOST  1>&2
+        return
+    fi
+}
+
+
+print_usage()
+{
+    (
+    exec >&2
+    echo "$MYNAME getdir   <dirname>"
+    echo "    Fetches all packages related to the version requested, writes them to CWD"
+    echo
+    echo "$MYNAME putdir   <dirname> <filenames>..."
+    echo "    Stores new package in cache. refuses to do that if package already exists"
+    echo
+    echo "$MYNAME getfile  <filename>"
+    echo "    Get filename from remote cache to CWD"
+    echo
+    echo "$MYNAME putfile  <filename>"
+    echo
+    )
+}
+
+
+main()
+{
+    retval=73                                       # failure by default
+
+    cmd=$1
+    shift
+
+    case "$cmd" in
+    getdir)
+        dirname=$1
+        if [ x$dirname = x ]  ||  [ x"$2" != x ]
+        then
+            fatal  "$MYNAME $cmd:  requires exactly one word as argument: dirname"  2
+        fi
+
+        # case "$dirname" in
+        #     *)   basedirname=.                ;  leafdirname="$dirname"       ;;
+        #     */*) basedirname="${filename%/*}" ;  leafdirname="${dirname##*/}" ;;
+        # esac
+
+        # Canonicalised dirname
+        canondirname=`echo $dirname | sed 's|/|_|g'`
+
+        tmpdir=`mktempdir $MYNAME.$cmd.$canondirname.tmp-XXXX`  ||  fatal "mktempdir failure"
+
+        if cd $tmpdir
+        then
+
+            echo "
+                cd $REMOTE_CACHEDIR/dirs/$dirname
+                get *
+                get .DONE
+                "  |  sftp_stdin
+            retval=$?
+
+            # Is the download complete and are the files stored properly on the server?
+            if [ $retval = 0 ]  &&  [ -f .DONE ]  &&  [ `ls | wc -l` -gt 0 ]
+            then                                                        # success
+                mv * .DONE  ../
+                retval=$?              # most likely 0
+            else
+                rm -f * .DONE
+                # Any failure is considered "successful lookup but failed to
+                # find package in cache". It's hard to do otherwise.
+                retval=0
+            fi
+
+            cd ..
+        fi
+        ;;
+    putdir)
+        echo "$1" | grep_q ' '  &&  fatal "$MYNAME $cmd:  no spaces allowed for dirname"  2
+
+        dirname=$1
+        shift
+        dirfiles="$@"
+        [ x"$dirfiles" = x ]    &&  fatal "$MYNAME $cmd:  requires at least 2 args: dirname dirfiles..."  2
+
+        # Canonicalised dirname
+        canondirname=`echo $dirname | sed 's|/|_|g'`
+
+        tmpdir=`mktempdir $MYNAME.$cmd.$canondirname.tmp-XXXXXXXX`  ||  fatal "mktempdir failure"
+        touch $tmpdir/.DONE                                         ||  fatal "touch failure"
+
+        # Prefixing an sftp line with '-' causes the sftp script to
+        # not abort on error.
+        # + mkdir will usually fail unless it's a brand new jenkins label.
+        # + rename will fail if another buildslave
+        #   managed to upload the package first.
+
+        {
+        echo "
+            cd $REMOTE_CACHEDIR/dirs
+            -mkdir tmp
+            mkdir tmp/$tmpdir
+            cd    tmp/$tmpdir
+            `echo $dirfiles | xargs -n1 echo put`
+            put $tmpdir/.DONE
+            cd ../..
+            "
+
+        # Trim the leaf dir and leaf slash from dirname
+        dirname_parent=`echo $dirname | sed -e 's|/$||' -e 's|[^/]*$||' -e 's|/$||'`
+        if [ x"$dirname_parent" != x ]
+        then
+            # Compose the `mkdir -p` for old sftp versions!
+            d2=""
+            for d in `echo $dirname_parent | tr / ' '`
+            do
+                d2=$d2$d
+                echo "
+                -mkdir $d2
+                    "
+                d2=$d2/
+            done
+        fi
+
+        # ATOMICALLY RENAME AS THE DESTINATION DIRNAME
+        echo "
+            -rename tmp/$tmpdir $dirname
+            "
+        } |  sftp_stdin
+
+        retval=$?
+        rm $tmpdir/.DONE
+        ;;
+    getfile)
+        filename=$1
+        if [ x$filename = x ]  ||  [ x"$2" != x ]  ||  echo $filename | grep_q /
+        then
+            fatal  "$MYNAME $cmd:  requires exactly one file name as argument with no slashes"  2
+        fi
+
+        tmpfile="$filename.tmp-$$"
+
+        echo "
+            get $REMOTE_CACHEDIR/files/$filename $tmpfile
+            "  |  sftp_stdin
+        retval=$?
+        rm_if_empty "$tmpfile"
+
+        # Is the download complete?
+        if [ $retval = 0 ]  &&  [ -f "$tmpfile" ]
+        then                                                        # success
+            mv "$tmpfile" "$filename"
+            retval=$?              # most likely 0
+        fi
+        ;;
+    putfile)
+        [ $# != 1 ]    &&  fatal  "$MYNAME $cmd: needs 1 filename argument, got $#"  2
+        [ ! -f "$1" ]  &&  fatal  "$MYNAME $cmd $1:  file does not exist"  2
+        srcfile=$1
+        dstfile=`basename $srcfile`
+        tmpfile=$dstfile.tmp-`hostname`-$$
+        echo "
+            -mkdir $REMOTE_CACHEDIR
+            cd $REMOTE_CACHEDIR
+            -mkdir files
+            cd files
+            put $srcfile $tmpfile
+            -rename $tmpfile $dstfile
+            "  |  sftp_stdin
+
+        retval=$?
+        ;;
+    *)
+        print_usage
+        retval=2
+        ;;
+    esac
+
+
+    # CLEAN-UP and EXIT
+
+    if [ x"$tmpdir" != x ]  &&  [ -d "$tmpdir" ]
+    then
+        # No need for 'rm -rf', tmpdir should already be empty
+        rmdir "$tmpdir"
+    fi
+
+    return $retval
+}
+
+
+main "$@"
