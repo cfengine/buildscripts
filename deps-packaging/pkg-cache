@@ -1,8 +1,9 @@
 #!/bin/sh
 
 . `dirname "$0"`/../build-scripts/functions
-set -x
+
 set -e
+#set -x                                                  # for debugging
 
 MYNAME=`basename $0`
 

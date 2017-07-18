@@ -2,9 +2,9 @@
 
 
 . `dirname "$0"`/../build-scripts/functions
-set -x
-set -e        # errors are fatal
 
+set -e        # errors are fatal
+#set -x       # for debugging
 
 MYNAME=`basename $0`
 TMPDIR=/tmp
