@@ -65,11 +65,14 @@ export_variables ()
     if [ -z "$AUTOBUILD_PATH" ]
     then
         case "$0" in
+            *buildscripts/build-remote) SCRIPTDIR="$0";;
             /*) SCRIPTDIR=`dirname "$0"`;;
+            -*) SCRIPTDIR=`pwd`;; # if this script is sourced from a login shell, $0 is '-bash' or similar
             *)  SCRIPTDIR=`pwd`/`dirname "$0"`;;
         esac
 
         AUTOBUILD_PATH=`dirname "$SCRIPTDIR"`
+
     fi
     BASEDIR=`dirname "$AUTOBUILD_PATH"`
     export BASEDIR
@@ -121,6 +124,11 @@ export_variables
 SECONDARY_PATHS="/sbin /usr/sbin  /usr/sfw/bin"  #"/opt/csw/gnu /usr/ccs/bin"
 
 
+
+grep_q()
+{
+    grep "$@"  >/dev/null
+}
 
 #
 # Dealing with packages. For platform-specific functions it's preferred
@@ -199,7 +207,7 @@ query_pkg()
 {
     case "$DEP_PACKAGING" in
         rpm) rpm  -q --quiet $1 ;;
-        deb) dpkg -s         $1 2>&1    |    grep '^Status: .*ok installed' >/dev/null 2>&1 ;;
+        deb) dpkg -s         $1 2>&1    |    grep_q '^Status: .*ok installed' ;;
         *)
             echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
             exit 1
@@ -391,6 +399,28 @@ fatal()
 {
     echo "FATAL ERROR: $1" >&2
     exit ${2-1}
+}
+
+log_info()
+{
+    echo "INFO: $@"  1>&2
+}
+
+# Append a space and string $2 to variable $1, for example:
+# func_append V "blah" is equivalent to  V="$V blah".
+var_append()
+{
+    eval $1=\$$1\\ \$2
+}
+
+# Return True if string $2 exists in variable $1.
+# WARNING: $2 may not contain special characters like spaces etc.
+var_contains()
+{
+    eval "case \$$1 in
+        *\"$2\"*)  true  ;;
+        *)         false ;;
+    esac"
 }
 
 # Check that $1 command exists in PATH, and print its full path, else
