@@ -20,6 +20,7 @@
 set -e
 #set -x                                                  # for debugging
 
+PATH=$PATH:$BASEDIR/buildscripts/deps-packaging         # for cache-sftp
 MYNAME=`basename $0`
 
 # Set to anything except "no" if you want to skip remote cache
