@@ -6,6 +6,7 @@
 set -e        # errors are fatal
 #set -x       # for debugging
 
+PATH=$PATH:$BASEDIR/buildscripts/deps-packaging          # for pkg-cache
 MYNAME=`basename $0`
 TMPDIR=/tmp
 
