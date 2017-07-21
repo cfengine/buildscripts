@@ -96,4 +96,6 @@ do
 
     # CLEAN UP
     rm -f $package_files
+    # keep 50 most recent packages to preserve disk space
+    pkg-cache keep_newest 50
 done
