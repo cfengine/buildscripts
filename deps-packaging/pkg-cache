@@ -81,7 +81,7 @@ rmdir_if_bogus()
     for f in "$1"/*
     do
         # if we find a non-empty file, then we are good
-        if [ -f "$f" ]  &&  [ ! -s "$f" ]
+        if [ -f "$f" ]  &&  [ -s "$f" ]
         then
             bogus=no
             break
