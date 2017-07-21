@@ -1,5 +1,24 @@
 #!/bin/sh
 
+# This script implements the SFTP cache bakend for pkg-cache script. Its
+# job is to put and get directories from a remote SFTP server
+# *atomically*, without leaving packages half-bake like our previous
+# solution did (NFSv4-over-ssh in combination with rsync), while being
+# supported on all kinds of crazy platforms.
+#
+# *So this is written with portability in mind.* It offers limited
+# *functionality, but works on all kinds of platforms and sftp versions.
+#
+# Basically it executes a batch of sftp commands. These commands might
+# fail in the middle without giving us a chance to know where exactly,
+# and sftp might return an irrelevant exit code. Thus we send a very
+# conservative batch of sftp commands, making sure that all precautions
+# have been taken, and then check whether various effects of the script
+# are standing.
+#
+# Good luck.
+
+
 . `dirname "$0"`/../build-scripts/functions
 set +e                                                   # errors are OK
 #set -x                                                  # for debugging

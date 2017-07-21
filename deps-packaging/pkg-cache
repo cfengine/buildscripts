@@ -1,5 +1,20 @@
 #!/bin/sh
 
+# This is a utility that caches things, both locally and in our own SFTP
+# server (using the cache-sftp command). It can cache two kinds of
+# things:
+#
+# - files: any single file can be cached with the commands "putfile" and
+#       "listfile", and it's mostly used for source tarballs, to avoid
+#       hitting upstream all the time.
+#
+# - packages: any directory can be cached using the commands "putpkg"
+#       and "listpkgfiles", and it's mostly used for built
+#       dependencies. Therefore the cached packages are stored into a
+#       jenkins-label (i.e. architecture specific) named directory, to
+#       avoid conflicts with same packages built on other systems.
+
+
 . `dirname "$0"`/../build-scripts/functions
 
 set -e
@@ -32,6 +47,8 @@ unset CACHEDIR
 
 mkdir -p $PKGS_CACHEDIR
 mkdir -p $FILES_CACHEDIR
+[ -d $PKGS_CACHEDIR ]  ||  fatal "$MYNAME: cache directory does not exist: $PKGS_CACHEDIR"
+[ -d $FILES_CACHEDIR ] ||  fatal "$MYNAME: cache directory does not exist: $FILES_CACHEDIR"
 
 exit_usage()
 {
@@ -47,6 +64,8 @@ exit_usage()
     echo "    pathname after it's fetched from remote, if needed"
     echo "$MYNAME putfile  <filename>"
     echo "    Stores a file locally and remotely"
+    echo "$MYNAME keep_newest <number>"
+    echo "    Keeps only <number> of packages in the local cache"
 
     exit 2
 }
@@ -155,5 +174,52 @@ listfile)
     fi
 
     [ -f $FILES_CACHEDIR/$filename ]  &&  echo $FILES_CACHEDIR/$filename  ||  true
+    ;;
+keep_newest)
+    case "$1" in
+        ''|*[!0-9]*)  fatal \
+            "$MYNAME $cmd requires only one argument, must be a number, but got:  $1" ;;
+    esac
+
+    number=`expr $1 + 1`
+
+    cd $FILES_CACHEDIR/
+    for f in `ls -t  |  sed -n $number,\$p`
+    do
+        if [ ! -f "$f" ]
+        then
+            log_info "$MYNAME $cmd: skipping invalid file:  $f"
+        else
+            if `ls -tu  |  head -$number  |  grep_q "$f"`
+            then
+                log_info "$MYNAME $cmd: skipping file because it has been recently accessed:  $f"
+            else
+                log_info "$MYNAME $cmd: deleting file:  $f"
+                rm -f "$f"
+            fi
+        fi
+    done
+    cd -  >/dev/null
+
+    cd $PKGS_CACHEDIR/$firstlabel/
+    for f in `ls -t  |  sed -n $number,\$p`
+    do
+        if [ ! -d "$f" ]  ||  [ "$f" == "." ]  ||  [ "$f" == ".." ]  ||  var_contains f /
+        then
+            log_info "$MYNAME $cmd: skipping invalid directory:  $f"
+        else
+            if `ls -tu  |  head -$number  |  grep_q "$f"`
+            then
+                log_info "$MYNAME $cmd: skipping directory because it has been recently accessed:  $f"
+            else
+                log_info "$MYNAME $cmd: deleting directory:  $f"
+                rm -rf "$f"
+            fi
+        fi
+    done
+    cd -  >/dev/null
+    ;;
+*)
+    exit_usage
     ;;
 esac
