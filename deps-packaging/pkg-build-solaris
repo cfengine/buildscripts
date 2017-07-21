@@ -66,7 +66,7 @@ else
   TAR=tar
 fi
 
-pkg-get-buildscripts-src "$P" | while read srcfile opts; do
+pkg-get-src "$P" | while read srcfile opts; do
   case "$srcfile" in
     *.gz|*.tgz)
       UNCOMPRESS="gzip -dc";;

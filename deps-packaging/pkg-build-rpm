@@ -60,7 +60,7 @@ mkdir -p $BASEDIR/$PKGNAME/RPMS
 mkdir -p $BASEDIR/$PKGNAME/SOURCES
 mkdir -p $BASEDIR/$PKGNAME/SRPMS
 
-SRCFILES=$(pkg-get-buildscripts-src $P)
+SRCFILES=$(pkg-get-src $P)
 
 if [ x"$SRCFILES" != x ]
 then
