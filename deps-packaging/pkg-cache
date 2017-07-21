@@ -1,5 +1,20 @@
 #!/bin/sh
 
+# This is a utility that caches things, both locally and in our own SFTP
+# server (using the cache-sftp command). It can cache two kinds of
+# things:
+#
+# - files: any single file can be cached with the commands "putfile" and
+#       "listfile", and it's mostly used for source tarballs, to avoid
+#       hitting upstream all the time.
+#
+# - packages: any directory can be cached using the commands "putpkg"
+#       and "listpkgfiles", and it's mostly used for built
+#       dependencies. Therefore the cached packages are stored into a
+#       jenkins-label (i.e. architecture specific) named directory, to
+#       avoid conflicts with same packages built on other systems.
+
+
 . `dirname "$0"`/../build-scripts/functions
 
 set -e
