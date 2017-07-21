@@ -184,7 +184,7 @@ keep_newest)
     number=`expr $1 + 1`
 
     cd $FILES_CACHEDIR/
-    for f in `ls -t  |  sed -n $number,\$p`
+    for f in `ls -t  |  sed -n $number,'$'p`
     do
         if [ ! -f "$f" ]
         then
@@ -202,7 +202,7 @@ keep_newest)
     cd -  >/dev/null
 
     cd $PKGS_CACHEDIR/$firstlabel/
-    for f in `ls -t  |  sed -n $number,\$p`
+    for f in `ls -t  |  sed -n $number,'$'p`
     do
         if [ ! -d "$f" ]  ||  [ "$f" == "." ]  ||  [ "$f" == ".." ]  ||  var_contains f /
         then
