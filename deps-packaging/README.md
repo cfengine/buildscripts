@@ -46,7 +46,7 @@ Hub specific dependencies:
 * [PHP](http://php.net/) 5.6.30
 * [libmcrypt](https://sourceforge.net/projects/mcrypt/files/Libmcrypt/) 2.5.8
   * Needed for php module
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.13.0
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.13.3
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.2
 
 Other dependencies (**find out why they are needed!**)
