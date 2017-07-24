@@ -47,7 +47,7 @@ Hub specific dependencies:
 * [Apache](http://httpd.apache.org/) 2.2.32
 * PostgreSQL for the hub 9.3.16
 * [Redis](http://redis.io/) 2.8.24
-* [PHP](http://php.net/) 5.6.30
+* [PHP](http://php.net/) 5.6.31
 * [libcurl](http://curl.haxx.se/download.html) 7.53.1
   * Needed for php module
 * libmcrypt 2.5.8
