@@ -206,31 +206,30 @@ do
     revision=$(cat $BASEDIR/buildscripts/deps-packaging/revision)
     version=0+$revision$versuffix$crossver
 
-    if pkg-cache find $dep-$version
+    # FETCH dependency packages if needed
+    package_files=`pkg-cache listpkgfiles $dep-$version`
+
+    # If package cache did not have the packages
+    if [ x"$package_files" = x ]
     then
-        if [ x$PKGCACHE_PRUNE != x ]
-        then
-            echo "Removing package from cache because PKGCACHE_PRUNE is set"
-            pkg-cache prune $dep-$version
-        else
-            echo "Package found in cache, skipping compilation"
-        fi
-
-    fi
-
-    # Keep 10 packages around. Should be more than enough for all the main
-    # and private branches.
-    pkg-cache autoprune $dep 10
-
-    if pkg-cache find $dep-$version
-    then
-        :
-    else
-        $BASEDIR/buildscripts/deps-packaging/pkg-build-${DEP_PACKAGING}  \
+        # BUILD the packages
+        $BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING  \
             $dep $tests $cross $optimize $debugsym $version
-        pkg-cache store $dep-$version $(pkg-find-${DEP_PACKAGING} $BASEDIR/$dep)
+
+        package_files=`pkg-find-$DEP_PACKAGING $BASEDIR/$dep`
+
+        [ x"$package_files" = x ]  &&  \
+            fatal "Empty output dir after building dependency: $dep"
+
+        # CACHE the newly built package
+        pkg-cache putpkg $dep-$version $package_files
     fi
 
-    install_pkg_files  $(pkg-cache list $dep-$version)
+    # INSTALL the packages
+    install_pkg_files  $package_files
 
+    # CLEAN UP
+    rm -f $package_files
+    # keep 50 most recent packages to preserve disk space
+    pkg-cache keep_newest 50
 done

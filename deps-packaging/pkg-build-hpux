@@ -33,7 +33,7 @@ PKGDIR=$BASEDIR/$PKGNAME/pkg
 rm -rf $PKGDIR
 mkdir -p $PKGDIR
 
-pkg-get-buildscripts-src "$P" | while read srcfile opts; do
+pkg-get-src "$P" | while read srcfile opts; do
   case "$srcfile" in
     *.gz|*.tgz)
       UNCOMPRESS="gzip -dc";;
@@ -68,7 +68,7 @@ for package in `cat $P/hpux/packages`; do
       cd $PKGDIR/out/$package/var/cfengine/
       $BASEDIR/buildscripts/deps-packaging/psf.pl include $package $VERSION > $package.psf
       /usr/sbin/swpackage -s $PWD/$package.psf -x media_type=tape @ $BASEDIR/$PKGNAME/$package.depot
-      cd $PKGDIR 
+      cd $PKGDIR
       ;;
     *)
       cd $PKGDIR/out/$package/var/cfengine/
