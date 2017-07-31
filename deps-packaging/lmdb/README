@@ -1,9 +1,15 @@
-Take the official tree and do:
+# When upgrading to a new version:
 
+git clone https://github.com/LMDB/lmdb.git
 cd lmdb
-git am ../buildscripts/dep-packaging/lmdb/00*
+git checkout <TAG_NAME>
+git am -3 ../buildscripts/deps-packaging/lmdb/00*
 
-If you've made changes to lmdb, you can regenerate the patches with:
+# If there were no conflicts - rejoice!
+
+# If there were any conflicts, resolve them and regenerate the patches with:
 
 git format-patch HEAD~4..HEAD
 mv 00* ../buildscripts/deps-packaging/lmdb
+
+# and push them to proper branch in buildscripts repo
