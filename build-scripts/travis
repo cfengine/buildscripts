@@ -44,6 +44,9 @@ sudo apt-get purge emacs emacs24
 # remove unwanted dependencies
 sudo apt-get purge libltdl-dev libltdl7 libtool
 
+# hide PHP stuff from build process
+[ -d ~/.phpenv ] && mv ~/.phpenv ~/.phpenv.del
+
 BUILD_TYPE=DEBUG; ESCAPETEST=yes;
 export BUILD_TYPE ESCAPETEST
 TEST_MACHINE=chroot; export TEST_MACHINE
