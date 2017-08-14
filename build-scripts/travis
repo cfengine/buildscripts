@@ -39,6 +39,8 @@ NO_CONFIGURE=1 PROJECT=nova ./buildscripts/build-scripts/autogen
 
 # packages needed for building
 sudo apt-get install bison flex binutils build-essential fakeroot ntp dpkg-dev libpam0g-dev python debhelper pkg-config psmisc nfs-common
+# without this line, next one sometimes fails
+sudo apt-get purge emacs emacs24
 # remove unwanted dependencies
 sudo apt-get purge libltdl-dev libltdl7 libtool
 
