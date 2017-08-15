@@ -5,11 +5,10 @@ set -e
 export PATH=$PATH:/usr/local/bin
 VERSION=$1
 
-if echo $VERSION | grep '[0-9]b' > /dev/null; then
-    echo "Beta versions can't be represented by the AIX versioning scheme,"
-    echo "replacing with 99."
-    VERSION=$(echo $VERSION | sed -e 's/[0-9][0-9]*b\([0-9]*\)/99\1/')
-fi
+# Squash version number into AIX format:
+# * delete all non-dot-or-digit symbols
+# * delete third dot and everything after it
+VERSION=$(echo $VERSION | sed -e 's/[^0-9.]//g;s/^\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
 
 BASEDIR=$2
 LPPBASE=$2/..
