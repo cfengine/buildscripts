@@ -80,10 +80,10 @@ case `os_type` in
       # Reload systemd config to pick up newly installed units
       /bin/systemctl daemon-reload > /dev/null 2>&1
       # Enable service units
-      /bin/systemctl enable cf-execd > /dev/null 2>&1
-      /bin/systemctl enable cf-serverd > /dev/null 2>&1
-      /bin/systemctl enable cf-monitord > /dev/null 2>&1
-      /bin/systemctl enable cfengine3 > /dev/null 2>&1
+      /bin/systemctl enable cf-execd.service > /dev/null 2>&1
+      /bin/systemctl enable cf-serverd.service > /dev/null 2>&1
+      /bin/systemctl enable cf-monitord.service > /dev/null 2>&1
+      /bin/systemctl enable cfengine3.service > /dev/null 2>&1
     else
       case `os_type` in
         redhat)
