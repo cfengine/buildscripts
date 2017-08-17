@@ -4,7 +4,7 @@ if [ -x /bin/systemctl ]; then
   # stop due to the command above, the web part may only do so after some
   # delay, which may cause problems later if the binaries are gone by the time
   # it tries to stop them.
-  /bin/systemctl stop cfengine3-web
+  /bin/systemctl stop cfengine3-web.service
 fi
 
 case "`os_type`" in

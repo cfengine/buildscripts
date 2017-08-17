@@ -81,7 +81,7 @@ if is_upgrade; then
     # stop due to the command above, the web part may only do so after some
     # delay, which may cause problems in an upgrade situation, since this script
     # will immediately check whether the ports are in use.
-    /bin/systemctl stop cfengine3-web
+    /bin/systemctl stop cfengine3-web.service
   fi
 fi
 
@@ -89,7 +89,7 @@ fi
 if is_upgrade; then
   if [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
     # It's functionality is replaced with multiple units.
-    /bin/systemctl disable cfengine3-web
+    /bin/systemctl disable cfengine3-web.service
   fi
 fi
 
