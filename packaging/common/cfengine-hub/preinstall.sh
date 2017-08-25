@@ -5,6 +5,10 @@
 
 set -o pipefail
 
+# Exit immediately if any command has a non-zero exit status
+
+set -e
+
 if is_upgrade
 then
     cf_console echo  \
@@ -38,7 +42,7 @@ if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [
   FAILED=0
   for db in $CF_DBS; do
     cf_console echo "Backing up database $db..."
-    $PREFIX/bin/pg_dump $db  | gzip -c > $PREFIX/state/pg/db_dump-$db.sql.gz
+    (cd /tmp && su cfpostgres -c "set -o pipefail; $PREFIX/bin/pg_dump $db  | gzip -c > $PREFIX/state/pg/db_dump-$db.sql.gz")
 
     if [ $? != 0 ]; then
       FAILED=1
