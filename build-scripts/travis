@@ -66,6 +66,13 @@ expr "$job" : "fast" || ./buildscripts/build-scripts/test
 ls output
 ls output/*
 
+cd output/*
+filename=*.deb
+sudo apt-get install curl
+echo ===== uploading $filename to transfer.sh =====
+curl --upload-file $filename https://transfer.sh/$filename
+cd -
+
 if [ "$job" = "fast-php" ]; then
     # clean build leftovers before going to php tests
     ./buildscripts/build-scripts/clean-buildmachine
