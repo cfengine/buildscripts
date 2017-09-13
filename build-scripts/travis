@@ -49,7 +49,7 @@ sudo apt-get purge libltdl-dev libltdl7 libtool
 
 BUILD_TYPE=DEBUG; ESCAPETEST=yes;
 export BUILD_TYPE ESCAPETEST
-TEST_MACHINE=chroot; export TEST_MACHINE
+#TEST_MACHINE=chroot; export TEST_MACHINE
 
 # cleaning not needed, since Travis always gives us a clean VM
 # ./buildscripts/build-scripts/clean-buildmachine
