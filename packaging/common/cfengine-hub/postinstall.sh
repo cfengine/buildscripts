@@ -521,6 +521,7 @@ $PREFIX/httpd/bin/apachectl start
 
 #Mission portal
 #
+(cd /var/cfengine/httpd/htdocs/ldap; sh scripts/post-install.sh)
 CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap
