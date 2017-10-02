@@ -90,6 +90,7 @@ esac
 var_append DEPS "libxml2 libyaml"
 
 # LDAP functions in the agent
+# and LDAP authentication functionality in Mission Portal
 case "$PROJECT" in
     nova)  var_append DEPS "openldap"
 esac
