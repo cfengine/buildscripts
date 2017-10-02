@@ -55,7 +55,7 @@ fi
 cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
 
 mkdir -p /usr/local/sbin
-for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent cf-net;
+for i in cf-agent cf-promises cf-key cf-keycrypt cf-execd cf-serverd cf-monitord cf-runagent cf-net;
 do
   if [ -f $PREFIX/bin/$i ]; then
     ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true

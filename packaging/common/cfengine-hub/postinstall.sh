@@ -226,7 +226,7 @@ then
   fi
 fi
 
-for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent cf-hub cf-net;
+for i in cf-agent cf-promises cf-key cf-keycrypt cf-execd cf-serverd cf-monitord cf-runagent cf-hub cf-net;
 do
   if [ -f $PREFIX/bin/$i -a -d /usr/local/sbin ]; then
     ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
