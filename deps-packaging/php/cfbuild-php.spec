@@ -27,6 +27,7 @@ mkdir -p %{_builddir}
 --with-libxml-dir=%{prefix} \
 --with-curl=shared,%{prefix} \
 --with-mcrypt=shared,%{prefix} \
+--with-ldap=%{prefix} \
 --with-pdo \
 --with-pdo-pgsql=%{prefix} \
 --with-json \

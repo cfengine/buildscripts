@@ -20,6 +20,7 @@ build-stamp:
 --with-libxml-dir=$(PREFIX) \
 --with-curl=shared,$(PREFIX) \
 --with-mcrypt=shared,$(PREFIX) \
+--with-ldap=$(PREFIX) \
 --with-pdo \
 --with-json \
 --with-iconv \
