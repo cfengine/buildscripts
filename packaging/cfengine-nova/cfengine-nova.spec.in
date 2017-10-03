@@ -74,6 +74,7 @@ exit 0
 
 # Executables
 %defattr(755,root,root,755)
+
 # Main program
 %dir %prefix
 %dir %prefix/bin
@@ -92,15 +93,17 @@ exit 0
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
-
-# Initscript, other configuration
+# Initscript etc
 /etc/init.d/cfengine3
 /etc/sysconfig/cfengine3
 /etc/profile.d/cfengine.sh
+
+# Non-executables
+%defattr(644,root,root,755)
+
 /usr/lib/systemd/system/cfengine3.service
 /usr/lib/systemd/system/cfengine3-web.service
 
-%defattr(644,root,root,755)
 %dir %prefix/lib
 %prefix/lib/lib*.so*
 %prefix/lib/cfengine-enterprise.so
@@ -110,8 +113,8 @@ exit 0
 %prefix/share/doc
 
 # Private directories
-
 %defattr(600,root,root,700)
+
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
