@@ -1,5 +1,4 @@
 @exec /bin/mkdir -p /var/cfengine/bin /var/cfengine/rc.d /var/cfengine/software_updates
-@exec /bin/cp /var/cfengine/bin/cf-agent /var/cfengine/bin/cf-twin
 @exec /bin/chmod -R 755 /var/cfengine/lib
 @exec /bin/chmod -R 644 /var/cfengine/lib/lib*
 @exec /bin/chmod -R 755 /var/cfengine/bin
