@@ -27,6 +27,7 @@ sudo hostname localhost
 
 sudo apt-get install s3cmd
 (
+  set +x
   echo $ARTIFACTS_KEY
   echo $ARTIFACTS_SECRET
   echo 
@@ -104,10 +105,11 @@ case "$JOB" in
 
         s3cmd put --reduced-redundancy --no-progress --acl-public \
             output/--/*.deb $DEB_PACKAGE
+	set +ex
         curl -u Lex-2008:$GITHUB_STATUS_TOKEN \
             https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA -d \
-        '{"state":"success","context":"travis/Lex-2008/build","description":"click'\
-        ' there to download the build","target_url":"'$DOWNLOAD_DIR'/build.deb"}'
+	    '{"state":"success","context":"travis/Lex-2008/build",'\
+'"description":"click there to download the build","target_url":"'$DOWNLOAD_DIR'/build.deb"}'
         ;;
 
     ( acceptance-test )
