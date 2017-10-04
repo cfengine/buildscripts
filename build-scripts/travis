@@ -105,7 +105,7 @@ case "$JOB" in
         s3cmd put --reduced-redundancy --no-progress --acl-public \
             output/--/*.deb $DEB_PACKAGE
         curl -u Lex-2008:$GITHUB_STATUS_TOKEN \
-            https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA -d
+            https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA -d \
         '{"state":"success","context":"travis/Lex-2008/build","description":"click'\
         ' there to download the build","target_url":"'$DOWNLOAD_DIR'/build.deb"}'
         ;;
