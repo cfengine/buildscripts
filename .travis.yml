@@ -1,0 +1,28 @@
+# This is a sample file which should be put into other repos.
+# Idea is that other repos (nova, enterprise, mission-portal) should check out
+# this repo (buildscripts) and run common travis script from this repo
+
+sudo: required
+language: generic
+
+install: cd .. && git clone git@github.com:cfengine/buildscripts.git
+script: buildscripts/build-scripts/travis
+
+jobs:
+  include:
+
+    - stage: build
+      env: JOB=build
+      language: c
+      cache:
+        directories:
+          - $HOME/.cache/
+
+
+    - stage: test
+      env: JOB=acceptance-test
+      if: not type = cron
+
+    - stage: test
+      env: JOB=deployment-test
+      if: not type = cron
