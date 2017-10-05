@@ -5,10 +5,22 @@ set -e
 export PATH=$PATH:/usr/local/bin
 VERSION=$1
 
-# Squash version number into AIX format:
-# * delete all non-dot-or-digit symbols
-# * delete third dot and everything after it
-VERSION=$(echo $VERSION | sed -e 's/[^0-9.]//g;s/^\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
+# --=== Convert version number into AIX format ===--
+# Split version into parts:
+# * first and Second parts together (They are called Major.Minor in Linux or Version.Release in AIX)
+# * third part (Patch or Modification)
+# * forth part (Build or FixLevel)
+VER12=$(echo $VERSION | cut -d. -f1-2)
+VER3=$(echo $VERSION | cut -d. -f3)
+VER4=$(echo $VERSION | cut -d. -f4)
+# In third field: change 'a' to '88', 'b' to '99', delete leading zeroes if followed by a number
+VER3=$(echo $VER3 | sed -e 's/a/88/;s/b/99/;s/^0\(.\)/\1/')
+# In 4th field: delete all non-numeric characters, delete leading zeroes if followed by a number, limit length to 4
+VER4=$(echo $VER4 | sed -e 's/[^0-9]//g;s/^0\(.\)/\1/;s/^\(....\).*/\1/')
+# If 4th field is empty, set it to 0
+test -z "$VER4" && VER4=0
+# Build resulted version number
+VERSION="$VER12.$VER3.$VER4"
 
 BASEDIR=$2
 LPPBASE=$2/..
@@ -69,7 +81,7 @@ LIBC_VERSION=`lslpp -l bos.rte.libc | grep bos.rte.libc | head -n1 | sed -e 's/.
 #Create the lpp_name file
 cat >  $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/lpp_name << EOF; 
 4 R I cfengine.cfengine-nova {
-cfengine.cfengine-nova $VERSION.0 01 N U en_US Cfengine Nova, Data Center Automation
+cfengine.cfengine-nova $VERSION 01 N U en_US Cfengine Nova, Data Center Automation
 [
 *prereq bos.rte.libpthreads $PTHREAD_VERSION
 *prereq bos.rte.libc $LIBC_VERSION
