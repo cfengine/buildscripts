@@ -70,6 +70,7 @@ case "$JOB" in
             fi
             else
                 git clone git@github.com:cfengine/$i.git
+		( cd $i && git checkout $TRAVIS_BRANCH )
             fi
         done
 
