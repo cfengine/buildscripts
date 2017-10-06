@@ -1,73 +1,175 @@
 #!/bin/bash
 
 set -ex
-for i in core nova enterprise mission-portal masterfiles design-center
-do
-    if [ -d $i ]
-    then
-        # Repo already checked out. Probably by Travis.
-        # Travis checks out only one branch, what confuses `determine-version.py`.
-        # To fix it, we need to ask git to checkout other branches, too.
-        # But we do it only for "core" and those repos where
-        # ./3rdparty/core/determine-version.py file exists.
-        # (Other repos are not checked for versions, we assume).
-        if [ "$i" = "core" -o -f $i/3rdparty/core/determine-version.py ]
-        then
-            (
-            cd $i
-            # Rename the branch we're on, so that it's not in the way for the
-            # subsequent fetch. It's ok if this fails, it just means we're not on any
-            # branch.
-            git branch -m temp-branch || true
-            # Fetch rest of branches
-            git fetch origin 'refs/heads/*:refs/remotes/origin/*'
-            # Get last remaining tags, if any.
-            git fetch --tags origin
-	    # This was partially taken from Mender repo:
-	    # https://github.com/mendersoftware/mender/blob/fc27422420bd3859d917579484856debdfa50e5f/.travis.yml#L61-L69
-            )
-        fi
-    else
-        git clone git@github.com:cfengine/$i.git
-    fi
-done
 
-# packages needed for autogen
-sudo apt-get install git autoconf automake m4 make bison flex binutils libtool gcc g++ libc-dev libpam0g-dev python libtokyocabinet-dev libssl-dev libpcre3-dev default-jre-headless psmisc
+REPO_DIR=aleksei/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
+test "$TRAVIS_PULL_REQUEST" == "false" || REPO_DIR=$REPO_DIR/$TRAVIS_PULL_REQUEST
+test "$TRAVIS_PULL_REQUEST" == "false" && SHA=$TRAVIS_COMMIT || SHA=$TRAVIS_PULL_REQUEST_SHA
+S3_DIR=s3://cfengine-travis-artifacts/$REPO_DIR
+DOWNLOAD_DIR=https://cfengine-travis-artifacts.s3.amazonaws.com/$REPO_DIR
+DEB_PACKAGE=$S3_DIR/build.deb
+export
 
-NO_CONFIGURE=1 PROJECT=nova ./buildscripts/build-scripts/autogen
+# Assuming we run from a dir where we have subdirs for other repos, at least
+# one of them should contain a file with secrets to access S3 and post build
+# status updates to GitHub.
+# It's not a fatal error if this file does not exist. However, it's a fatal
+# error if any of key variables are unset after sourcing it. This way we can
+# set them in some other way (in .travis.yml or Travis web intreface)
+. */secrets.txt || true
 
-# packages needed for building
-sudo apt-get install bison flex binutils build-essential fakeroot ntp dpkg-dev libpam0g-dev python debhelper pkg-config psmisc nfs-common
-# remove unwanted dependencies
-sudo apt-get purge libltdl-dev libltdl7 libtool
+test -z "$ARTIFACTS_KEY" -o -z "$ARTIFACTS_SECRET" -o -z "$GITHUB_STATUS_TOKEN" && exit 1
 
-BUILD_TYPE=DEBUG; ESCAPETEST=yes;
-export BUILD_TYPE ESCAPETEST
-TEST_MACHINE=chroot; export TEST_MACHINE
+# remove unwanted packages
+sudo apt-get purge apache* postgresql*
+# On Travis, hostname can be ridiculously long - let's truncate it
+sudo hostname localhost
 
-# cleaning not needed, since Travis always gives us a clean VM
-# ./buildscripts/build-scripts/clean-buildmachine
-./buildscripts/build-scripts/build-environment-check
-./buildscripts/build-scripts/install-dependencies
-./buildscripts/build-scripts/configure
-./buildscripts/build-scripts/generate-source-tarballs
-./buildscripts/build-scripts/compile
-# skip running tests on 'fast' and 'fast-php' jobs
-expr "$job" : "fast" || ./buildscripts/build-scripts/test
-./buildscripts/build-scripts/package
-./buildscripts/build-scripts/prepare-results
+sudo apt-get install s3cmd
+(
+  set +x
+  echo $ARTIFACTS_KEY
+  echo $ARTIFACTS_SECRET
+  echo 
+  echo 
+  echo 
+  echo 
+  echo n
+  echo y
+) | s3cmd --configure >/dev/null
 
-ls output
-ls output/*
 
-if [ "$job" = "fast-php" ]; then
-    # clean build leftovers before going to php tests
-    ./buildscripts/build-scripts/clean-buildmachine
-    # bring back PHP stuff which was hidden from build process
-    [ -d ~/.phpenv.del ] && mv ~/.phpenv.del ~/.phpenv
-    cd mission-portal
-    job=php ./travis.sh ../output/*/*.deb
-    exit $?
-fi
+case "$JOB" in
+    ( build )
 
+        for i in core nova enterprise mission-portal masterfiles design-center
+        do
+            if [ -d $i ]
+            then
+            # Repo already checked out. Probably by Travis.
+            # Travis checks out only one branch, what confuses `determine-version.py`.
+            # To fix it, we need to ask git to checkout other branches, too.
+            # But we do it only for "core" and those repos where
+            # ./3rdparty/core/determine-version.py file exists.
+            # (Other repos are not checked for versions, we assume).
+            if [ "$i" = "core" -o -f $i/3rdparty/core/determine-version.py ]
+            then
+                (
+                cd $i
+                # Rename the branch we're on, so that it's not in the way for the
+                # subsequent fetch. It's ok if this fails, it just means we're not on any
+                # branch.
+                git branch -m temp-branch || true
+                # Fetch rest of branches
+                git fetch origin 'refs/heads/*:refs/remotes/origin/*'
+                # Get last remaining tags, if any.
+                git fetch --tags origin
+                # This was partially taken from Mender repo:
+                # https://github.com/mendersoftware/mender/blob/fc27422420bd3859d917579484856debdfa50e5f/.travis.yml#L61-L69
+                )
+            fi
+            else
+                git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/$i.git
+            fi
+        done
+
+        # packages needed for autogen
+        sudo apt-get install git autoconf automake m4 make bison flex \
+            binutils libtool gcc g++ libc-dev libpam0g-dev python psmisc \
+            libtokyocabinet-dev libssl-dev libpcre3-dev default-jre-headless
+
+        NO_CONFIGURE=1 PROJECT=nova ./buildscripts/build-scripts/autogen
+
+        # packages needed for building
+        sudo apt-get install bison flex binutils build-essential fakeroot ntp \
+            dpkg-dev libpam0g-dev python debhelper pkg-config psmisc nfs-common
+        # On Ubuntu Trusty, we need to remove these packages
+        # otherwise apt fails miserably on next line
+        [ "$(lsb_release --release --short)" == "14.04" ] && sudo apt-get purge emacs emacs24
+        # remove unwanted dependencies
+        sudo apt-get purge libltdl-dev libltdl7 libtool
+
+        BUILD_TYPE=DEBUG; ESCAPETEST=yes;
+        export BUILD_TYPE ESCAPETEST
+
+        # cleaning not needed, since Travis always gives us a clean VM
+        # ./buildscripts/build-scripts/clean-buildmachine
+        ./buildscripts/build-scripts/build-environment-check
+        ./buildscripts/build-scripts/install-dependencies
+        ./buildscripts/build-scripts/configure
+        ./buildscripts/build-scripts/generate-source-tarballs
+        ./buildscripts/build-scripts/compile
+        # ./buildscripts/build-scripts/test
+        ./buildscripts/build-scripts/package
+        ./buildscripts/build-scripts/prepare-results
+
+        s3cmd put --reduced-redundancy --no-progress --acl-public \
+            output/--/*.deb $DEB_PACKAGE
+	set +ex
+        curl -u Lex-2008:$GITHUB_STATUS_TOKEN \
+            https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA -d \
+	    '{"state":"success","context":"travis/Lex-2008/build",'\
+'"description":"click there to download the build","target_url":"'$DOWNLOAD_DIR'/build.deb"}'
+        ;;
+
+    ( acceptance-test )
+        s3cmd get $DEB_PACKAGE cfe.deb
+        sudo dpkg -i cfe.deb
+        touch /home/travis/rpmvercmp
+        chmod a+x ~/rpmvercmp
+        cd ..
+        test -d core || git clone git@github.com:cfengine/core.git
+        test -d enterprise || git clone git@github.com:cfengine/enterprise.git
+        chmod -R g-w */tests/acceptance
+        cd core/tests/acceptance
+        rm -rf ./05_processes/01_matching/timed/stime.cf \
+            ./05_processes/01_matching/promiser_match_is_correct.cf \
+            ./07_packages/00*.cf \
+            ./10_files/11_xml_edits \
+            ./25_cf-execd
+        ./testall \
+            --agent=/var/cfengine/bin/cf-agent \
+            --cfpromises=/var/cfengine/bin/cf-promises \
+            --cfserverd=/var/cfengine/bin/cf-serverd \
+            --cfkey=/var/cfengine/bin/cf-key \
+            --cfexecd=/var/cfengine/bin/cf-execd \
+            --cfnet=/var/cfengine/bin/cf-net \
+            --cfrunagent=/var/cfengine/bin/cf-runagent \
+            --rpmvercmp=$HOME/rpmvercmp \
+            --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
+            --gainroot=sudo
+        tar czf core-tests-acceptance.tar.gz *
+        s3cmd put --reduced-redundancy --no-progress \
+            core-tests-acceptance.tar.gz $S3_DIR/core-tests-acceptance.tar.gz
+        cd -
+        cp core/tests/acceptance/*.cf.sub enterprise/tests/acceptance
+        cp core/tests/acceptance/root-*.pub enterprise/tests/acceptance
+        cp core/tests/acceptance/root-*.priv enterprise/tests/acceptance
+        cd enterprise/tests/acceptance
+        rm -rf $(find compliance -name *.cf | grep -v basic.cf)
+        echo export CORE=../../../core > testall.env
+        echo export ENTERPRISE=../.. >> testall.env
+        echo export CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=/var/cfengine/lib >> testall.env
+        ./testall \
+            --agent=/var/cfengine/bin/cf-agent \
+            --cfpromises=/var/cfengine/bin/cf-promises \
+            --cfserverd=/var/cfengine/bin/cf-serverd \
+            --cfkey=/var/cfengine/bin/cf-key \
+            --cfexecd=/var/cfengine/bin/cf-execd \
+            --cfnet=/var/cfengine/bin/cf-net \
+            --cfrunagent=/var/cfengine/bin/cf-runagent \
+            --rpmvercmp=$HOME/rpmvercmp \
+            --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
+            --gainroot=sudo
+        tar czf enterprise-tests-acceptance.tar.gz *
+        s3cmd put --reduced-redundancy --no-progress \
+            enterprise-tests-acceptance.tar.gz $S3_DIR/enterprise-tests-acceptance.tar.gz
+        ;;
+
+    ( deployment-test )
+        s3cmd get $DEB_PACKAGE cfe.deb
+        sudo dpkg -i cfe.deb
+        sudo cf-agent -B "$(ifconfig | grep -A1 Ethernet | sed '2!d;s/.*addr:\([0-9.]*\).*/\1/')"
+    ;;
+
+esac
