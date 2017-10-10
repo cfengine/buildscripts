@@ -138,6 +138,9 @@ cp %{_builddir}/php-%{php_version}/php.ini-production ${RPM_BUILD_ROOT}%{prefix}
 # Reduce information leakage by default
 sed -ri 's/^\s*expose_php\s*=.*/expose_php = Off/g' ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
 
+# Increase the php memory limit so that Mission Portal works with larger infrastructures without modification
+sed -ri 's/^\s*memory_limit\s*=.*/memory_limit = 256M/g' ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
+
 echo "extension=curl.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/curl.ini
 echo "extension=mcrypt.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/mcrypt.ini
 echo "extension=openssl.so" >>${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/openssl.ini
