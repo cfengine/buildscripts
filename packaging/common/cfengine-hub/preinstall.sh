@@ -5,7 +5,7 @@ then
         'WARNING: attempted hub upgrade detected;'  \
         'this is UNSUPPORTED, aborting!'            \
         '(relevant tickets: ENT-3205, ENT-3218)'
-    exit 1
+    # exit 1
 fi
 
 
@@ -233,6 +233,8 @@ if [ -f $PREFIX/share/GUI/application/config/appsettings.php ]; then
     for path in share/GUI httpd/htdocs; do
       sed -i s/"$UUID"/CFE_SESSION_KEY/ $PREFIX/$path/application/config/config.php
       sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/$path/application/config/appsettings.php
+      sed -i s/"$UUID"/LDAP_API_SECRET_KEY/ $PREFIX/$path/application/config/appsettings.php
+      sed -i s/"$UUID"/LDAP_API_SECRET_KEY/ $PREFIX/$path/ldap/config/settings.php
     done
     sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/share/db/ootb_settings.sql
   else
