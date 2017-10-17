@@ -135,7 +135,7 @@ install: build
 	sed -ri 's/^\s*expose_php\s*=.*/expose_php = Off/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
 
 	# Increase the php memory limit so that Mission Portal works with larger infrastructures without modification
-	sed -ri 's/^\s*memory_limit\s*=.*/memory_limit = 256M/g' $(CURDIR)debian/tmp$(PREFIX)/httpd/php/lib/php.ini
+	sed -ri 's/^\s*memory_limit\s*=.*/memory_limit = 256M/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
 
 	# Set the default timezone for php to UTC
 	sed -ri 's/^(\s|;)*date.timezone\s*=.*/date.timezone = "UTC"/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
