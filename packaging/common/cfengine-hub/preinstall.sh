@@ -1,4 +1,14 @@
 
+# Ensure that errors in piped commands are not masked. If any command in the
+# pipeline fails that return code will be used as the return code of the whole
+# pipeline.
+
+set -o pipefail
+
+# Exit immediately if any command has a non-zero exit status
+
+set -e
+
 if is_upgrade
 then
     cf_console echo  \
@@ -32,7 +42,8 @@ if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [
   FAILED=0
   for db in $CF_DBS; do
     cf_console echo "Backing up database $db..."
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_dump $db | gzip -c > $PREFIX/state/pg/db_dump-$db.sql.gz")
+    (cd /tmp && su cfpostgres -c "set -o pipefail; $PREFIX/bin/pg_dump $db  | gzip -c > $PREFIX/state/pg/db_dump-$db.sql.gz")
+
     if [ $? != 0 ]; then
       FAILED=1
       cf_console echo "Not able to migrate database. Aborting."
