@@ -140,7 +140,7 @@ case "$JOB" in
             --rpmvercmp=$HOME/rpmvercmp \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
             --gainroot=sudo
-        tar czf core-tests-acceptance.tar.gz *
+        sudo tar cz * >core-tests-acceptance.tar.gz
         s3cmd put --reduced-redundancy --no-progress \
             core-tests-acceptance.tar.gz $S3_DIR/core-tests-acceptance.tar.gz
         cd -
@@ -163,7 +163,7 @@ case "$JOB" in
             --rpmvercmp=$HOME/rpmvercmp \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
             --gainroot=sudo
-        tar czf enterprise-tests-acceptance.tar.gz *
+        sudo tar cz * >enterprise-tests-acceptance.tar.gz
         s3cmd put --reduced-redundancy --no-progress \
             enterprise-tests-acceptance.tar.gz $S3_DIR/enterprise-tests-acceptance.tar.gz
         ;;
