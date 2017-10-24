@@ -30,3 +30,29 @@ cd $BASEDIR/output/tarballs
 sha256sum *.tar.gz > sha256sums.txt
 CKSUM=`sum sha256sums.txt | cut -d ' ' -f 1`
 mv sha256sums.txt sha256sums.$CKSUM.txt
+
+# Find all pull requests referenced in GIT_BRANCH_n env vars.
+# These PRs will have to be notified of build progress.
+# Note that GitHub accepts PR notifications per-commit
+# (each PR can have multiple commits, each with a green checkmark),
+# so we will save repo names and commit SHAs into PRs file.
+
+# Loop through all existing $GIT_COMMIT_n variables
+i=1
+while [ ! -z "$(eval "echo \$GIT_COMMIT_$i")" ] ; do
+	# We're interested only in pull requests - they look like this:
+	# $GIT_BRANCH_1=origin/pull/260/head
+	# We can remove this `if` (or replace it with `if true; then`)
+	# to try to report to Github for all commits,
+	# but this info won't be visible in Github UI anyway
+	if expr "$(eval "echo \$GIT_BRANCH_$i")" : 'origin/pull/[0-9]*/' ; then
+		# extract repo name from git url.
+		# For example, we want to get 'cfengine/core' part from this:
+		# GIT_URL_2=git@github.com:cfengine/core.git
+		REPO="$(eval "echo \$GIT_URL_$i" | cut -d ':' -f 2 | cut -d '.' -f 1)"
+		# Take commit SHA from a variable
+		SHA="$(eval "echo \$GIT_COMMIT_$i")"
+		echo "$REPO $SHA" >> $BASEDIR/output/PRs
+	fi
+	i=$((i+1))
+done
