@@ -173,7 +173,7 @@ uninstall_freebsd_pkgs()
     PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
     if [ -n "$PKGS" ]
     then
-	retry_wrapper  sudo pkg_delete $PKGS
+	retry_wrapper  sudo pkg delete $PKGS
     fi
 }
 

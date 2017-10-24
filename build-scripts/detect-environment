@@ -209,7 +209,7 @@ detect_packaging()
     DEP_PACKAGING=deb
   elif [ -f /usr/sbin/pkgadd ]; then
     DEP_PACKAGING=solaris
-  elif [ -f /usr/sbin/pkg_add ]; then
+  elif [ -f /usr/sbin/pkg ]; then
     case "$UNAME_S" in
 	  FreeBSD)
 	    DEP_PACKAGING=freebsd;;

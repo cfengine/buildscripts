@@ -11,9 +11,9 @@ for pkg in "$@"; do
   P_FILENAME=`basename $pkg`
   P_NAME=${P_FILENAME%.tbz}
 
-  if pkg_info ${P_NAME}; then
-    sudo pkg_delete ${P_NAME}
+  if pkg info ${P_NAME}; then
+    sudo pkg delete ${P_NAME}
   fi
 
-  sudo pkg_add $pkg
+  sudo pkg add $pkg
 done
