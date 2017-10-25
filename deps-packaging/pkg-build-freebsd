@@ -78,7 +78,7 @@ architecture of $package: $ARCH" > $BASEDIR/$PKGNAME/$package-comment
 
   gen_filelist $package > $BASEDIR/$PKGNAME/$package-plist
 
-  /usr/sbin/pkg create -j -f $BASEDIR/$PKGNAME/$package-plist -c $BASEDIR/$PKGNAME/$package-comment -d $BASEDIR/$PKGNAME/$package-descr -p $BASEDIR/$PKGNAME/pkg/out/$package/ $BASEDIR/$PKGNAME/$package-$VERSION-$ARCH.tbz
+  /usr/sbin/pkg create -f $BASEDIR/$PKGNAME/$package-plist -c $BASEDIR/$PKGNAME/$package-comment -d $BASEDIR/$PKGNAME/$package-descr -p $BASEDIR/$PKGNAME/pkg/out/$package/ $BASEDIR/$PKGNAME/$package-$VERSION-$ARCH.tbz
 
   cd $BASEDIR/$PKGNAME/
 
