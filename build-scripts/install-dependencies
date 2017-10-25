@@ -82,26 +82,26 @@ do
         $BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING  \
             $dep $tests $cross $optimize $debugsym $version
 
-        package_files=`pkg-find-$DEP_PACKAGING $BASEDIR/$dep`
-
-        [ x"$package_files" = x ]  &&  \
-            fatal "Empty output dir after building dependency: $dep"
-
-        # CACHE the newly built package
-        pkg-cache putpkg $dep-$version $package_files
-
-        # CLEAN UP
-        rm -f $package_files
-
-        # Now the package should be in the local cache
-        package_files=`pkg-cache listpkgfiles $dep-$version`
-        [ x"$package_files" = x ]  &&  \
-            fatal "Cache did not find package after putpkg"
+        # package_files=`pkg-find-$DEP_PACKAGING $BASEDIR/$dep`
+        #
+        # [ x"$package_files" = x ]  &&  \
+        #     fatal "Empty output dir after building dependency: $dep"
+        #
+        # # CACHE the newly built package
+        # pkg-cache putpkg $dep-$version $package_files
+        #
+        # # CLEAN UP
+        # rm -f $package_files
+        #
+        # # Now the package should be in the local cache
+        # package_files=`pkg-cache listpkgfiles $dep-$version`
+        # [ x"$package_files" = x ]  &&  \
+        #     fatal "Cache did not find package after putpkg"
     fi
 
     # INSTALL the packages
-    install_pkg_files  $package_files
+    # install_pkg_files  $package_files
 
     # keep 50 most recent packages to preserve disk space
-    pkg-cache keep_newest 50
+    # pkg-cache keep_newest 50
 done
