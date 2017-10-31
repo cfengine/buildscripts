@@ -32,12 +32,15 @@ if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [
   FAILED=0
   for db in $CF_DBS; do
     cf_console echo "Backing up database $db..."
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_dump $db | gzip -c > $PREFIX/state/pg/db_dump-$db.sql.gz")
+    su cfpostgres -c "$PREFIX/bin/pg_dump $db" > $PREFIX/state/pg/db_dump-$db.sql
+
     if [ $? != 0 ]; then
       FAILED=1
       cf_console echo "Not able to migrate database. Aborting."
       break
     fi
+
+    gzip $PREFIX/state/pg/db_dump-$db.sql
   done
 
   if [ "$FAILED" != 0 ]; then
