@@ -4,6 +4,11 @@
 . detect-environment
 . compile-options
 
+if [ "xtrue" = "x$NO_TESTS" ]; then
+  create-empty-test
+  exit 0
+fi
+
 if [ -n "$TEST_MACHINE" ]; then
   local_script_general prepare-testmachine
   local_script_general transfer-to-testmachine

@@ -5,32 +5,14 @@
 . compile-options
 . version
 
-# Windows and possibly other platforms do not produce tests.
-# In order to keep Jenkins happy, we just create an empty
-# test report saying that there were no tests to report.
-create_empty_test() {
-	NO_TESTS=$BASEDIR/core/tests/unit/no_tests.xml
-	touch $NO_TESTS
-    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $NO_TESTS
-    echo "<testsuite name=\"no_tests_to_report\">" >> $NO_TESTS
-    echo "<testcase name=\"no_tests\" />" >> $NO_TESTS
-    echo "</testsuite>" >> $NO_TESTS
-    NO_TESTS=$BASEDIR/nova/tests/unit/no_tests.xml
-    touch $NO_TESTS
-    echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $NO_TESTS
-    echo "<testsuite name=\"no_tests_to_report\">" >> $NO_TESTS
-    echo "<testcase name=\"no_tests\" />" >> $NO_TESTS
-    echo "</testsuite>" >> $NO_TESTS
-}
-
 case "$OS" in
-mingw)
+  mingw)
     if [ "xno" != "x$ESCAPETEST" ]
-     then
-     create_empty_test
-     else
+    then
+      create-empty-test
+    else
       test-on-windows
-     fi
+    fi
     ;;
 esac
 
