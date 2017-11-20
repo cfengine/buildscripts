@@ -75,6 +75,7 @@ sed -i s/CFE_CLIENT_SECRET_KEY/"$UUID"/ $PREFIX/share/GUI/application/config/app
 sed -i s/CFE_CLIENT_SECRET_KEY/"$UUID"/ $PREFIX/share/db/ootb_settings.sql
 sed -i s/LDAP_API_SECRET_KEY/"$UUID"/ $PREFIX/share/GUI/application/config/appsettings.php
 sed -i s/LDAP_API_SECRET_KEY/"$UUID"/ $PREFIX/share/GUI/ldap/config/settings.php
+sed -i /LDAP_API_SECRET_KEY/s/\'\'/"$UUID"/ $PREFIX/share/GUI/api/config/config.php
 
 cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
 mkdir -p $PREFIX/httpd/htdocs/tmp
