@@ -1,8 +1,10 @@
+%define apr_version 1.6.1
+
 Summary: CFEngine Build Automation -- apr-util
 Name: cfbuild-apr-util
 Version: %{version}
 Release: 1
-Source0: apr-util-1.5.4.tar.gz
+Source0: apr-util-%{apr_version}.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +16,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n apr-util-1.5.4
+%setup -q -n apr-util-%{apr_version}
 
 CPPFLAGS=-I%{buildprefix}/include
 
