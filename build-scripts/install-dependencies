@@ -9,6 +9,12 @@ mkdir -p /var/cfengine/include
 
 test -L /usr/local/bin/perl && mv /usr/local/bin/perl /usr/local/bin/perl.del
 
+echo '~~~ ensure this file is there'
+echo $LD_LIBRARY_PATH
+echo '~~~'
+find / -name libgcc_s.so.1 2>/dev/null
+echo '~~~ thanks'
+
 # TODO: find a better place for this
 wget http://www.cpan.org/src/5.0/perl-5.24.1.tar.gz
 gunzip perl-5.24.1.tar.gz
