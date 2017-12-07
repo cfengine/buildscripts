@@ -15,6 +15,8 @@ echo '~~~'
 find / -name libgcc_s.so.1 2>/dev/null || true
 echo '~~~ thanks'
 
+# test "x$label" == "xPACKAGES_sparc64_solaris_11" && export LD_LIBRARY_PATH=/usr/local/lib/
+export LD_LIBRARY_PATH=/usr/local/lib/
 # TODO: find a better place for this
 wget http://www.cpan.org/src/5.0/perl-5.24.1.tar.gz
 gunzip perl-5.24.1.tar.gz
