@@ -50,6 +50,7 @@ echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
     ./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
         $DEBUG_CONFIG_FLAGS \
         --prefix=%{prefix} \
+	-D_GNU_SOURCE \
         $DEBUG_CFLAGS
 
     # Remove -O3 and -fomit-frame-pointer from debug builds
@@ -71,7 +72,7 @@ echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-$MAKE INSTALL_PREFIX=${RPM_BUILD_ROOT} install_sw
+$MAKE DESTDIR=${RPM_BUILD_ROOT} install_sw
 
 # Removing unused files
 

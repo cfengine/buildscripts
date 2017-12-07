@@ -52,7 +52,7 @@ fi
 
 # Install
 
-$MAKE INSTALL_PREFIX=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+$MAKE DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
 
 # Package
 

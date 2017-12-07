@@ -12,7 +12,9 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Configure
 
+export PERL=$HOME/perl-my/bin/perl
 ./Configure hpux-ia64-gcc shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
+    -D_GNU_SOURCE \
     --prefix=$PREFIX
 
 # Build
@@ -29,7 +31,7 @@ fi
 
 # Install
 
-gmake INSTALL_PREFIX=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+gmake DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
 
 # Package
 

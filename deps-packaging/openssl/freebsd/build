@@ -34,7 +34,7 @@ fi
 
 # Install
 
-make INSTALL_PREFIX=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+make DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
 # Package
 
 rm -rf ${OSD}/bin
