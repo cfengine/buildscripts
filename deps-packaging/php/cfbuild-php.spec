@@ -186,7 +186,7 @@ CFEngine Build Automation -- php -- development files
 %prefix/httpd/php/lib/php.ini
 
 %dir %prefix/httpd/modules
-%prefix/httpd/modules/libphp5.so
+%prefix/httpd/modules/libphp7.so
 
 %files devel
 %defattr(-,root,root)
