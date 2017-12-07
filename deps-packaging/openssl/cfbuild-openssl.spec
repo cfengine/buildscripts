@@ -109,21 +109,6 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/lib/libcrypto.so
 %{prefix}/lib/libcrypto.so.1.1
 
-%dir %{prefix}/ssl
-%{prefix}/ssl/openssl.cnf
-
-%dir %{prefix}/ssl/certs
-%dir %{prefix}/ssl/private
-%dir %{prefix}/ssl/misc
-%{prefix}/ssl/misc/CA.pl
-%{prefix}/ssl/misc/CA.sh
-%{prefix}/ssl/misc/c_hash
-%{prefix}/ssl/misc/c_info
-%{prefix}/ssl/misc/c_issuer
-%{prefix}/ssl/misc/c_name
-%{prefix}/ssl/misc/tsget
-
-
 %files devel
 %defattr(-,root,root)
 
