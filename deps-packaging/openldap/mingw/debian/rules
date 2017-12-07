@@ -28,6 +28,7 @@ build-stamp:
 	    --disable-slapd \
 	    --disable-backends \
 	    --with-tls=openssl \
+	    --with-openssl=$(PREFIX) \
 	    --without-gssapi \
 	    CC="$(DEB_HOST_GNU_TYPE)-gcc -static-libgcc" \
 	    AR=$(DEB_HOST_GNU_TYPE)-ar \
