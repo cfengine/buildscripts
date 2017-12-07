@@ -4,6 +4,9 @@
 . detect-environment
 . compile-options
 
+test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
+mkdir -p /var/cfengine/include
+
 test -L /usr/local/bin/perl && mv /usr/local/bin/perl /usr/local/bin/perl.del
 
 # TODO: find a better place for this
