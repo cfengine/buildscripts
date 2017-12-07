@@ -12,7 +12,7 @@ test -L /usr/local/bin/perl && mv /usr/local/bin/perl /usr/local/bin/perl.del
 echo '~~~ ensure this file is there'
 echo $LD_LIBRARY_PATH
 echo '~~~'
-find / -name libgcc_s.so.1 2>/dev/null
+find / -name libgcc_s.so.1 2>/dev/null || true
 echo '~~~ thanks'
 
 # TODO: find a better place for this
