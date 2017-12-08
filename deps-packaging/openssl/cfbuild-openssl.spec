@@ -108,6 +108,8 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/lib/libssl.so.1.1
 %{prefix}/lib/libcrypto.so
 %{prefix}/lib/libcrypto.so.1.1
+%{prefix}/lib/engines-1.1/capi.so
+%{prefix}/lib/engines-1.1/padlock.so
 
 %files devel
 %defattr(-,root,root)
