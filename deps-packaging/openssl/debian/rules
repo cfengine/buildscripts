@@ -29,7 +29,8 @@ build-stamp:
 	PERL=$$HOME/perl-my/bin/perl ./config shared  no-idea no-rc5 no-ssl3  no-dtls no-psk no-srp -D_GNU_SOURCE \
 		$$DEBUG_CONFIG_FLAGS \
                 --prefix=$(PREFIX) \
-		$$DEBUG_CFLAGS
+		$$DEBUG_CFLAGS \
+		$$LDLAGS
 
 	# Remove -O3 and -fomit-frame-pointer from debug and quick builds
 	if [ $$BUILD_TYPE = "DEBUG" ] ;\
