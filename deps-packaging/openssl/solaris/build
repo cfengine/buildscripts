@@ -27,6 +27,12 @@ export PERL=$HOME/perl-my/bin/perl
 
 # Configure
 
+# add -lxnet parameter on Solaris 11
+if [ "$(uname -r)" = "5.11" ]
+then
+    LXNET="-lxnet"
+fi
+
 # config misdetects architecture when building on a 64-kernel with 32-bit
 # userspace.
 if [ "$(uname -p)" = "i386" ]
@@ -37,7 +43,7 @@ else
 fi
 
 $CONFIG shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp no-asm \
-    --prefix=$PREFIX
+    $LXNET --prefix=$PREFIX
 
 # Build
 
