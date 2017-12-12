@@ -52,6 +52,7 @@ echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
         --prefix=%{prefix} \
 	-D_GNU_SOURCE \
         $DEBUG_CFLAGS
+	$LDFLAGS
 
     # Remove -O3 and -fomit-frame-pointer from debug builds
     if [ $BUILD_TYPE = "DEBUG" ]
