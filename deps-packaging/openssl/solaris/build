@@ -26,12 +26,18 @@ mkdir -p /var/cfengine/include
 export PERL=$HOME/perl-my/bin/perl
 
 # Configure
+echo '~~~~ debug'
+uname -r
+echo '~~~'
 
 # add -lxnet parameter on Solaris 11
 if [ "$(uname -r)" = "5.11" ]
 then
     LXNET="-lxnet"
 fi
+
+echo $LXNET
+echo '~~~end'
 
 # config misdetects architecture when building on a 64-kernel with 32-bit
 # userspace.
