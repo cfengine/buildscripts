@@ -14,8 +14,7 @@ build-stamp:
 
 	patch -p1 < 0001-Prefix-windres-with-cross-compiler-name.patch
 	patch -p0 < fix-libtool-magic.patch
-	patch -p1 < openssl-version.patch
-	patch -p1 < openssl-egd.patch
+	patch -p1 --ignore-whitespace < openssl-egd.patch
 	ln -s /var/cfengine/bin/libgnurx-0.dll .
 
 	# Configure is unable to test memcmp for cross-compilation
