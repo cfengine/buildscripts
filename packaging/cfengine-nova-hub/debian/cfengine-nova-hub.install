@@ -104,4 +104,3 @@
 /var/cfengine/bin/redis-check-aof
 /var/cfengine/bin/redis-benchmark
 /var/cfengine/bin/openssl
-/var/cfengine/ssl/*
