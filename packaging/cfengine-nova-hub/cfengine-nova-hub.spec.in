@@ -162,18 +162,6 @@ exit 0
 %{prefix}/bin/cfengine3-nova-hub-init-d.sh
 # OpenSSL tools
 %{prefix}/bin/openssl
-%dir %{prefix}/ssl
-%{prefix}/ssl/openssl.cnf
-%dir %{prefix}/ssl/certs
-%dir %{prefix}/ssl/private
-%dir %{prefix}/ssl/misc
-%{prefix}/ssl/misc/CA.pl
-%{prefix}/ssl/misc/CA.sh
-%{prefix}/ssl/misc/c_hash
-%{prefix}/ssl/misc/c_info
-%{prefix}/ssl/misc/c_issuer
-%{prefix}/ssl/misc/c_name
-%{prefix}/ssl/misc/tsget
 
 %prefix/bin/git
 %prefix/bin/gitk
