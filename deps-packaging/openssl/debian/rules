@@ -30,7 +30,7 @@ build-stamp:
 		$$DEBUG_CONFIG_FLAGS \
                 --prefix=$(PREFIX) \
 		$$DEBUG_CFLAGS \
-		$$LDLAGS
+		$$LDFLAGS
 
 	# Remove -O3 and -fomit-frame-pointer from debug and quick builds
 	if [ $$BUILD_TYPE = "DEBUG" ] ;\
