@@ -1,5 +1,5 @@
 var/cfengine/httpd/php/bin
 var/cfengine/httpd/php/lib
 var/cfengine/httpd/php/php
-var/cfengine/httpd/modules/libphp5.so
+var/cfengine/httpd/modules/libphp7.so
 var/cfengine/httpd/php/lib/php.ini
