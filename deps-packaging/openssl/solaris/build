@@ -8,7 +8,8 @@ OS=${BUILD_ROOT}/cfbuild-openssl${PREFIX}
 OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}
 
 # To pick up libgcc_s.so.1, which is apparently not in dyld path.
-export LD_LIBRARY_PATH=$PREFIX/lib
+#TODO remove /usr/local/lib, I only put it here because the ~/perl-my binary needs it
+export LD_LIBRARY_PATH=$PREFIX/lib:/usr/local/lib
 
 # Patch
 
