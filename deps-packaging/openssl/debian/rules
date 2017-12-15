@@ -25,12 +25,19 @@ build-stamp:
 		DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer" ;\
 	fi ;\
 	\
+	HACK_FLAGS= ;\
+	if [ $$OS = debian ]  &&  [ `echo $$OS_VERSION | cut -d. -f1` = 4 ]  ;\
+	then \
+	    HACK_FLAGS=-D_GNU_SOURCE  ;\
+	fi ;\
+	\
 	export PERL=$$HOME/perl-my/bin/perl; \
 	PERL=$$HOME/perl-my/bin/perl ./config shared  no-idea no-rc5 no-ssl3  no-dtls no-psk no-srp  \
-		$$DEBUG_CONFIG_FLAGS \
-                --prefix=$(PREFIX) \
-		$$DEBUG_CFLAGS \
-		$$LDFLAGS
+	    $$DEBUG_CONFIG_FLAGS \
+	    --prefix=$(PREFIX) \
+	    $$HACK_FLAGS   \
+	    $$DEBUG_CFLAGS \
+	    $$LDFLAGS
 
 	# Remove -O3 and -fomit-frame-pointer from debug and quick builds
 	if [ $$BUILD_TYPE = "DEBUG" ] ;\

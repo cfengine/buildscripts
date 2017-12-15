@@ -46,10 +46,21 @@ then
     DEBUG_CONFIG_FLAGS=no-asm
 fi
 
+# Work around platform-specific issues
+HACK_FLAGS=
+if [ $OS = centos ]  ||  [ $OS = rhel ]
+then
+    if [ `echo $OS_VERSION | cut -d. -f1` = 4 ]
+    then
+        HACK_FLAGS=-D_GNU_SOURCE                              # CentOS 4 issue
+    fi
+fi
+
 export PERL=$HOME/perl-my/bin/perl
 ./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
          $DEBUG_CONFIG_FLAGS \
          --prefix=%{prefix} \
+         $HACK_FLAGS   \
          $DEBUG_CFLAGS \
 	 $LDFLAGS
 
