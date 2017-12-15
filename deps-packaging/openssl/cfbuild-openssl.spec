@@ -30,39 +30,39 @@ SYS=`uname -s`
 
 echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
 
-    test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
-    mkdir -p /var/cfengine/include
+test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
+mkdir -p /var/cfengine/include
 
-    DEBUG_CONFIG_FLAGS=
-    DEBUG_CFLAGS=
-    if [ $BUILD_TYPE = "DEBUG" ]
-    then
-        DEBUG_CONFIG_FLAGS="no-asm -DPURIFY"
-        DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer"
+DEBUG_CONFIG_FLAGS=
+DEBUG_CFLAGS=
+if [ $BUILD_TYPE = "DEBUG" ]
+then
+    DEBUG_CONFIG_FLAGS="no-asm -DPURIFY"
+    DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer"
     # Workaround for OpenSSL build issue on our old SuSE buildslave, see:
     # http://www.mail-archive.com/openssl-dev@openssl.org/msg39231.html
-    elif [ "$OS" = sles ]
-    then
-        DEBUG_CONFIG_FLAGS=no-asm
-    fi
+elif [ "$OS" = sles ]
+then
+    DEBUG_CONFIG_FLAGS=no-asm
+fi
 
-    export PERL=$HOME/perl-my/bin/perl
-    ./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
-        $DEBUG_CONFIG_FLAGS \
-        --prefix=%{prefix} \
-        $DEBUG_CFLAGS \
-	$LDFLAGS
+export PERL=$HOME/perl-my/bin/perl
+./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
+         $DEBUG_CONFIG_FLAGS \
+         --prefix=%{prefix} \
+         $DEBUG_CFLAGS \
+	 $LDFLAGS
 
-    # Remove -O3 and -fomit-frame-pointer from debug builds
-    if [ $BUILD_TYPE = "DEBUG" ]
-    then
-        sed -e '/^CFLAG=/{s/ -O3//;s/ -fomit-frame-pointer//}'   \
-            Makefile > Makefile.cfe \
-            && mv Makefile.cfe Makefile
-    fi
+# Remove -O3 and -fomit-frame-pointer from debug builds
+if [ $BUILD_TYPE = "DEBUG" ]
+then
+    sed -e '/^CFLAG=/{s/ -O3//;s/ -fomit-frame-pointer//}'   \
+        Makefile > Makefile.cfe \
+        && mv Makefile.cfe Makefile
+fi
 
-    $MAKE depend
-    $MAKE
+$MAKE depend
+$MAKE
 
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
     $MAKE test
