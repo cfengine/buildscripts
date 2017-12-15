@@ -50,7 +50,6 @@ echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
     ./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
         $DEBUG_CONFIG_FLAGS \
         --prefix=%{prefix} \
-	-D_GNU_SOURCE \
         $DEBUG_CFLAGS \
 	$LDFLAGS
 

@@ -26,7 +26,7 @@ build-stamp:
 	fi ;\
 	\
 	export PERL=$$HOME/perl-my/bin/perl; \
-	PERL=$$HOME/perl-my/bin/perl ./config shared  no-idea no-rc5 no-ssl3  no-dtls no-psk no-srp -D_GNU_SOURCE \
+	PERL=$$HOME/perl-my/bin/perl ./config shared  no-idea no-rc5 no-ssl3  no-dtls no-psk no-srp  \
 		$$DEBUG_CONFIG_FLAGS \
                 --prefix=$(PREFIX) \
 		$$DEBUG_CFLAGS \
