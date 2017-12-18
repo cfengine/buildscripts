@@ -19,7 +19,6 @@ build-stamp:
 --with-config-file-scan-dir=$(PREFIX)/httpd/php/lib \
 --with-libxml-dir=$(PREFIX) \
 --with-curl=shared,$(PREFIX) \
---with-mcrypt=shared,$(PREFIX) \
 --with-ldap=$(PREFIX) \
 --with-pdo \
 --with-json \
@@ -141,7 +140,6 @@ install: build
 	sed -ri 's/^(\s|;)*date.timezone\s*=.*/date.timezone = "UTC"/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
 
 	echo "extension=curl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/curl.ini
-	echo "extension=mcrypt.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/mcrypt.ini
 	echo "extension=openssl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/openssl.ini
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf
