@@ -15,11 +15,11 @@ echo '~~~ thanks'
 # test "x$label" == "xPACKAGES_sparc64_solaris_11" && export LD_LIBRARY_PATH=/usr/local/lib/
 export LD_LIBRARY_PATH=/usr/local/lib/
 # TODO: find a better place for this
-wget http://www.cpan.org/src/5.0/perl-5.24.1.tar.gz
-gunzip perl-5.24.1.tar.gz
-tar -xf perl-5.24.1.tar
-cd perl-5.24.1
-./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE
+wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
+gunzip perl-5.26.1.tar.gz
+tar -xf perl-5.26.1.tar
+cd perl-5.26.1
+./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE -Accflags=-fno-stack-protector
 $MAKE
 $MAKE install
 
