@@ -111,12 +111,6 @@
               <Component Id='pthreadGC2.dll' Guid='C9A99E1A-8ECE-4EAF-96DA-12B6BC298BFD' Win64='$(var.isWin64)'>
                 <File Id='pthreadGC2.dll' Name='pthreadGC2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\pthreadGC2.dll' />
               </Component>
-              <Component Id='libeay32.dll' Guid='3511EBFA-1D63-49E7-971D-5600CA59FD45' Win64='$(var.isWin64)'>
-                <File Id='libeay32.dll' Name='libeay32.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libeay32.dll' />
-              </Component>
-              <Component Id='ssleay32.dll' Guid='817a8252-375c-495c-a7c1-349457954730' Win64='$(var.isWin64)'>
-                <File Id='ssleay32.dll' Name='ssleay32.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\ssleay32.dll' />
-              </Component>
               <Component Id='libgnurx_0.dll' Guid='18554ae8-9c92-4cc7-8e5a-7f41ed2080d6' Win64='$(var.isWin64)'>
                 <File Id='libgnurx_0.dll' Name='libgnurx-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libgnurx-0.dll' />
               </Component>
