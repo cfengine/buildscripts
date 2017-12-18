@@ -57,7 +57,7 @@ then
 fi
 
 export PERL=$HOME/perl-my/bin/perl
-./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp \
+./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
          $DEBUG_CONFIG_FLAGS \
          --prefix=%{prefix} \
          $HACK_FLAGS   \
@@ -91,7 +91,6 @@ rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/c_rehash
 
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/libssl.a
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/libcrypto.a
-rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/engines
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/pkgconfig/openssl.pc
 
 %clean
@@ -119,8 +118,6 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/lib/libssl.so.1.1
 %{prefix}/lib/libcrypto.so
 %{prefix}/lib/libcrypto.so.1.1
-%{prefix}/lib/engines-1.1/capi.so
-%{prefix}/lib/engines-1.1/padlock.so
 
 %files devel
 %defattr(-,root,root)

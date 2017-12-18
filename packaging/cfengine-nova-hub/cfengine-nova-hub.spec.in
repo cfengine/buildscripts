@@ -234,9 +234,6 @@ exit 0
 %prefix/lib/apr-util-1
 #libs of postgres
 %{prefix}/lib/postgresql/*
-#libs of openssl
-%prefix/lib/engines-1.1/capi.so
-%prefix/lib/engines-1.1/padlock.so
 
 # Initscript, other configuration
 %defattr(755,root,root,755)

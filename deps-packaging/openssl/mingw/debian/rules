@@ -23,7 +23,7 @@ build-stamp:
 
 	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
-		$(TARGET)  no-asm shared  no-idea no-rc5 no-ssl3 no-dtls no-srp \
+		$(TARGET)  no-asm shared  no-idea no-rc5 no-ssl3 no-dtls no-srp no-engine \
 		--prefix=$(PREFIX)
 	make depend
 	make ### build_crypto build_ssl libcrypto.dll.a libssl.dll.a

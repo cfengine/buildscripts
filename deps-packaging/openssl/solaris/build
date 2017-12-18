@@ -35,7 +35,7 @@ else
     CONFIG="./config"
 fi
 
-$CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm \
+$CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm no-engine \
     --prefix=$PREFIX  $LDFLAGS
 
 # Build
@@ -57,7 +57,6 @@ $MAKE DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
 
 rm -rf ${OSD}/bin
 rm -rf ${OSD}/ssl
-rm -rf ${OSD}/lib/engines
 rm -rf ${OSD}/lib/fips*
 rm -rf ${OSD}/lib/*.a
 
