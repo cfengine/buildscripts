@@ -37,12 +37,15 @@ install_pkg_files()
 check_and_install_perl()
 {
 
-    [ x"$PERL" = x ]  &&  PERL=`func_whereis perl`
+    [ x"$PERL" = x ]  &&  [ -x "$HOME/perl-my/bin/perl" ]  \
+        && PERL="$HOME/perl-my/bin/perl"  \
+            || PERL=`func_whereis perl`
 
     PERL_MINOR_VERSION=`$PERL -e 'print $]' | cut -d. -f2`
     if [ "$PERL_MINOR_VERSION" -lt 013004  ]
     then
-        echo "$PERL version is $PERL_MINOR_VERSION, too old, installing new one from source"
+        echo "$PERL version is $PERL_MINOR_VERSION," \
+             "too old, installing new one from source"
 
         ### BUILD PERL
 
