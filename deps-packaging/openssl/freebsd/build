@@ -16,7 +16,7 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 export PATH=`pwd`/solaris:$PATH
 
-./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
+./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp \
     --prefix=$PREFIX
 
 # Build
