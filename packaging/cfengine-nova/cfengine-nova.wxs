@@ -111,11 +111,11 @@
               <Component Id='pthreadGC2.dll' Guid='C9A99E1A-8ECE-4EAF-96DA-12B6BC298BFD' Win64='$(var.isWin64)'>
                 <File Id='pthreadGC2.dll' Name='pthreadGC2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\pthreadGC2.dll' />
               </Component>
-              <Component Id='libcrypto-1_1.dll' Guid='BEC456CE-8CEF-4E4A-B15B-585D0D2AA205' Win64='$(var.isWin64)'>
-                <File Id='libcrypto-1_1.dll' Name='libcrypto-1_1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcrypto-1_1.dll' />
+              <Component Id='libcrypto_1_1.dll' Guid='BEC456CE-8CEF-4E4A-B15B-585D0D2AA205' Win64='$(var.isWin64)'>
+                <File Id='libcrypto_1_1.dll' Name='libcrypto-1_1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcrypto-1_1.dll' />
               </Component>
-              <Component Id='libssl-1_1.dll' Guid='094AA0E1-82AD-478F-9EA0-734607617746' Win64='$(var.isWin64)'>
-                <File Id='libssl-1_1.dll' Name='libssl-1_1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libssl-1_1.dll' />
+              <Component Id='libssl_1_1.dll' Guid='094AA0E1-82AD-478F-9EA0-734607617746' Win64='$(var.isWin64)'>
+                <File Id='libssl_1_1.dll' Name='libssl-1_1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libssl-1_1.dll' />
               </Component>
               <Component Id='libgnurx_0.dll' Guid='18554ae8-9c92-4cc7-8e5a-7f41ed2080d6' Win64='$(var.isWin64)'>
                 <File Id='libgnurx_0.dll' Name='libgnurx-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libgnurx-0.dll' />
@@ -160,8 +160,8 @@
             <ComponentRef Id='libldap.dll' />
             <ComponentRef Id='libpcre_1.dll' />
             <ComponentRef Id='pthreadGC2.dll' />
-            <ComponentRef Id='libcrypto-1_1.dll' />
-            <ComponentRef Id='libssl-1_1.dll' />
+            <ComponentRef Id='libcrypto_1_1.dll' />
+            <ComponentRef Id='libssl_1_1.dll' />
             <ComponentRef Id='libgnurx_0.dll' />
             <ComponentRef Id='liblmdb.dll' />
             <ComponentRef Id='libyaml_0_2.dll' />
