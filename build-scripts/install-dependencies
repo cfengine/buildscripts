@@ -30,6 +30,10 @@ install_pkg_files()
 #
 # By doing this, we rebuild on each and every platform. TODO create a proper
 # package for perl.
+#
+# NOTE: openssl also needs Module::Load::Conditional, which we install in the
+# cloud-init script (package libmodule-load-conditional-perl for debians and
+# perl-Module-Load-Conditional for RHELs).
 check_and_install_perl()
 {
 
