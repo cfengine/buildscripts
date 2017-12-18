@@ -36,10 +36,15 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
+	$(MAKE) install_sw DESTDIR=$(CURDIR)/debian/tmp
+
+	find $(CURDIR)/debian/tmp
+
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
 
+	pwd
 	ls -lahp
 
 	# cp libeay32.dll $(CURDIR)/debian/tmp$(PREFIX)/bin
