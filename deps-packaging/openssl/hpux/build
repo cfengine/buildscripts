@@ -12,8 +12,7 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Configure
 
-export PERL=$HOME/perl-my/bin/perl
-$PERL ./Configure hpux-ia64-gcc shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
+./Configure hpux-ia64-gcc shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
     $LDFLAGS --prefix=$PREFIX
 
 # Build

@@ -31,8 +31,7 @@ build-stamp:
 	    HACK_FLAGS=-D_GNU_SOURCE  ;\
 	fi ;\
 	\
-	export PERL=$$HOME/perl-my/bin/perl; \
-	PERL=$$HOME/perl-my/bin/perl ./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
+	./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
 	    $$DEBUG_CONFIG_FLAGS \
 	    --prefix=$(PREFIX) \
 	    $$HACK_FLAGS   \

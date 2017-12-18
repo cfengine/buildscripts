@@ -4,6 +4,16 @@
 . detect-environment
 . compile-options
 
+### PER VERSION DEPENDENCY ###
+
+PERL=`func_whereis perl`
+PERL_MAJOR_VER=`$PERL -v | head -n5 | grep v[0-9.] | sed 's/.*v\([0-9]*\).*/\1/'`
+PERL_MINOR_VER=`$PERL -v | head -n5 | grep v[0-9.] | sed 's/.*v[0-9]*\.\([0-9]*\).*/\1/'`
+if [  "$PERL_MAJOR_VER" != 5 -o "$PERL_MINOR_VER" -lt 10  ]
+then
+    echo "PERL at least 5.10 required"
+    exit 1
+fi
 
 # WARNING we alter the buildslave: we remove UNWANTED_DEPS
 
