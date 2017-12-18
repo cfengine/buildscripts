@@ -24,6 +24,48 @@ install_pkg_files()
 }
 
 
+# OpenSSL 1.1 requires Perl 5.10.0 and some modules existing only in 5.13.4 to
+# build and test properly, so we require 5.13.4 at least.  See NOTES.PERL in
+# OpenSSL.
+#
+# By doing this, we rebuild on each and every platform. TODO create a proper
+# package for perl.
+check_and_install_perl()
+{
+
+    [ x"$PERL" = x ]  &&  PERL=`func_whereis perl`
+
+    PERL_MINOR_VERSION=`$PERL -e 'print $]' | cut -d. -f2`
+    if [ "$PERL_MINOR_VERSION" -lt 013004  ]
+    then
+        echo "$PERL version is $PERL_MINOR_VERSION, too old, installing new one from source"
+
+        ### BUILD PERL
+
+        # Ensure built perl will not depend on libssp.so
+        if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1
+        then
+            PERL_NO_SSP='-Accflags=-fno-stack-protector'
+        fi
+
+        wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
+        [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
+            &&  fatal "perl checksum error"
+        gzip -dc perl-5.26.1.tar.gz | tar xf -
+        cd perl-5.26.1
+        ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE $PERL_NO_SSP
+        $MAKE
+        $MAKE install
+        PERL=$HOME/perl-my/bin/perl
+    fi
+
+    export PERL
+}
+
+
+
+check_and_install_perl
+
 # Apply necessary changes for alternate /opt/cfengine prefix
 if [ "$BUILDPREFIX" = "/opt/cfengine" ]
 then
