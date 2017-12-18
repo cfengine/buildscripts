@@ -52,11 +52,11 @@ check_and_install_perl()
             PERL_NO_SSP='-Accflags=-fno-stack-protector'
         fi
 
-        wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
-        [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
+        wget http://www.cpan.org/src/5.0/perl-5.24.3.tar.gz
+        [ `func_md5 perl-5.24.3.tar.gz` != "b25f1b1a0082e9e2043eb3c13bba6044" ]  \
             &&  fatal "perl checksum error"
-        gzip -dc perl-5.26.1.tar.gz | tar xf -
-        cd perl-5.26.1
+        gzip -dc perl-5.24.3.tar.gz | tar xf -
+        cd perl-5.24.3
         ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE $PERL_NO_SSP
         $MAKE
         $MAKE install
