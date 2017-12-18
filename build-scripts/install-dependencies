@@ -61,6 +61,7 @@ check_and_install_perl()
             &&  fatal "perl checksum error"
         gzip -dc perl-5.26.1.tar.gz | tar xf -
         cd perl-5.26.1
+        $PATCH -p1 < $BASEDIR/buildscripts/build-scripts/perl-488307ffa6.patch
         ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE $PERL_NO_SSP
         $MAKE
         $MAKE install
