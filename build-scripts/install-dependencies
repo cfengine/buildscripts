@@ -36,6 +36,7 @@ install_pkg_files()
 # perl-Module-Load-Conditional for RHELs).
 check_and_install_perl()
 {
+    rm -rf "$HOME/perl-my"                                 # TODO remove later
 
     [ x"$PERL" = x ]  &&  [ -x "$HOME/perl-my/bin/perl" ]  \
         && PERL="$HOME/perl-my/bin/perl"  \
