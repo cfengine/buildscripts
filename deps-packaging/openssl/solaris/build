@@ -35,8 +35,6 @@ else
     CONFIG="./config"
 fi
 
-echo $CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm \
-    --prefix=$PREFIX  $LDFLAGS
 $CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm \
     --prefix=$PREFIX  $LDFLAGS
 
