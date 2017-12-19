@@ -58,7 +58,7 @@ check_and_install_perl()
 
         # -static-libgcc: ensure that there is no dependency to libgcc_s.so
         PERL_LDFLAGS='-Aldflags=-static-libgcc'
-        PERL_LDDLFLAGS='-Alddlflags=-static-libgcc'
+        PERL_LDDLFLAGS='-Alddlflags=-static-libgcc -Alddlflags=-shared'
 
         wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
         [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
