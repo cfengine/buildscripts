@@ -37,6 +37,7 @@ install: build
 	dh_installdirs
 
 	$(MAKE) install_sw DESTDIR=$(CURDIR)/debian/tmp
+	$(MAKE) install_ssldirs DESTDIR=$(CURDIR)/debian/tmp
 
 	find $(CURDIR)/debian/tmp
 

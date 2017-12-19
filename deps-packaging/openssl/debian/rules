@@ -60,6 +60,7 @@ install: build
 	dh_installdirs
 
 	$(MAKE) install_sw DESTDIR=$(CURDIR)/debian/tmp
+	$(MAKE) install_ssldirs DESTDIR=$(CURDIR)/debian/tmp
 
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/c_rehash
 

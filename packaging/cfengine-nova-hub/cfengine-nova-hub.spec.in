@@ -162,6 +162,8 @@ exit 0
 %{prefix}/bin/cfengine3-nova-hub-init-d.sh
 # OpenSSL tools
 %{prefix}/bin/openssl
+%dir %{prefix}/ssl
+%{prefix}/ssl/openssl.cnf
 
 %prefix/bin/git
 %prefix/bin/gitk

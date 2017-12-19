@@ -103,4 +103,5 @@
 /var/cfengine/bin/redis-server
 /var/cfengine/bin/redis-check-aof
 /var/cfengine/bin/redis-benchmark
+/var/cfengine/ssl/openssl.cnf
 /var/cfengine/bin/openssl

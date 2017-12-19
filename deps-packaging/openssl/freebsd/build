@@ -35,6 +35,7 @@ fi
 # Install
 
 make DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+make DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_ssldirs
 # Package
 
 rm -rf ${OSD}/bin

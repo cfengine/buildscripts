@@ -83,6 +83,7 @@ $MAKE
 rm -rf ${RPM_BUILD_ROOT}
 
 $MAKE DESTDIR=${RPM_BUILD_ROOT} install_sw
+$MAKE DESTDIR=${RPM_BUILD_ROOT} install_ssldirs
 
 # Removing unused files
 

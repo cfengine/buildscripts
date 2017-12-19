@@ -30,6 +30,7 @@ fi
 # Install
 
 gmake DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+gmake DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_ssldirs
 
 # Package
 
