@@ -42,6 +42,11 @@ rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-report-collect.la
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
 
+# Remove ssl things we don't need
+rm -f %{prefix}/ssl/misc/CA.pl
+rm -f %{prefix}/ssl/misc/tsget
+rm -f %{prefix}/ssl/openssl.cnf.dist
+
 # Hub does not need cf-upgrade, it is only present in host packages
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/cf-upgrade
 
