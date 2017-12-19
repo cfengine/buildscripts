@@ -202,10 +202,12 @@ keep_newest)
     done
     cd -  >/dev/null
 
+    set -x
+
     cd $PKGS_CACHEDIR/$firstlabel/
     for f in `ls -t  |  sed -n $number,'$'p`
     do
-        if [ ! -d "$f" ]  ||  [ "$f" == "." ]  ||  [ "$f" == ".." ]  ||  var_contains f /
+        if [ ! -d "$f" ]  ||  [ "$f" = "." ]  ||  [ "$f" = ".." ]  ||  var_contains f /
         then
             log_info "$MYNAME $cmd: skipping invalid directory:  $f"
         else
@@ -218,6 +220,9 @@ keep_newest)
             fi
         fi
     done
+
+    set +x
+
     cd -  >/dev/null
     ;;
 *)
