@@ -42,6 +42,10 @@ pre()
   esac
 
   cp $BASEDIR/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs $P
+  if [ "$ARCH" = "x86" ]
+  then
+      sed -i '/lib\(crypto\|ssl\)/s/[_-]x64//g' $P/cfengine-nova.wxs
+  fi
 }
 
 candle()
