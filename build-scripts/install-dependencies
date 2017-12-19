@@ -56,9 +56,14 @@ check_and_install_perl()
             PERL_CFLAGS='-Accflags=-fno-stack-protector'
         fi
 
-        # -static-libgcc: ensure that there is no dependency to libgcc_s.so
-        PERL_LDFLAGS='-Aldflags=-static-libgcc'
-        PERL_LDDLFLAGS='-Alddlflags=-static-libgcc -Alddlflags=-shared'
+        # Solaris 11 insists on having a dependency to libgcc_s.so which
+        # resides in /opt/csw/lib. Unfortunately the following hack is not
+        # working on other platforms so we have to hide it.
+        if [ $OS = solaris ] && [ $OS_VERSION = 11 ]
+        then
+            PERL_LDFLAGS='-Aldflags=-static-libgcc'
+            PERL_LDDLFLAGS='-Alddlflags=-static-libgcc -Alddlflags=-shared'
+        fi
 
         wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
         [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
