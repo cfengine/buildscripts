@@ -50,11 +50,14 @@ check_and_install_perl()
 
         ### BUILD PERL
 
-        # Ensure built perl will not depend on libssp.so
+        # -fno-stack-protector: Ensure built perl will not depend on libssp.so
         if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1
         then
-            PERL_NO_SSP='-Accflags=-fno-stack-protector'
+            PERL_CFLAGS='-Accflags=-fno-stack-protector'
         fi
+
+        # -static-libgcc: ensure that there is no dependency to libgcc_s.so
+        PERL_LDFLAGS='-Aldflags=-static-libgcc'
 
         wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
         [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
@@ -62,7 +65,8 @@ check_and_install_perl()
         gzip -dc perl-5.26.1.tar.gz | tar xf -
         cd perl-5.26.1
         $PATCH -p1 < $BASEDIR/buildscripts/build-scripts/perl-488307ffa6.patch
-        ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE $PERL_NO_SSP
+        ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE \
+            $PERL_CFLAGS $PERL_LDFLAGS
         $MAKE
         $MAKE install
         PERL=$HOME/perl-my/bin/perl
