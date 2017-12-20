@@ -192,7 +192,6 @@ fi
 if [ -f $PREFIX/bin/cf-twin ]; then
     /bin/rm $PREFIX/bin/cf-twin
 fi
-/bin/cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
 
 #
 #MAN PAGE RELATED

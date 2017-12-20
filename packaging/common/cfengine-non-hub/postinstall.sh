@@ -52,8 +52,6 @@ if [ -f $PREFIX/bin/cf-twin ]; then
   rm -f $PREFIX/bin/cf-twin
 fi
 
-cp $PREFIX/bin/cf-agent $PREFIX/bin/cf-twin
-
 mkdir -p /usr/local/sbin
 for i in cf-agent cf-promises cf-key cf-execd cf-serverd cf-monitord cf-runagent cf-net;
 do
