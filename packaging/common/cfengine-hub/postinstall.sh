@@ -528,6 +528,8 @@ CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap
 
+$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_refresh
+
 # Shut down Apache and Postgres again, because we may need them to start through
 # systemd later.
 $PREFIX/httpd/bin/apachectl stop
