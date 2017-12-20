@@ -173,7 +173,7 @@ uninstall_freebsd_pkgs()
     PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
     if [ -n "$PKGS" ]
     then
-	retry_wrapper  sudo pkg_delete $PKGS
+	retry_wrapper  sudo pkg delete $PKGS
     fi
 }
 
@@ -514,6 +514,7 @@ func_md5 ()
     else
         case "$UNAME_S" in
             SunOS)  digest -a md5 "$@"  ;;
+            *BSD)   md5 "$@" | sed 's/.* //'  ;;
             *)      fatal "Can't find command for computing MD5"  ;;
         esac
     fi

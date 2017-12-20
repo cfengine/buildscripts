@@ -69,6 +69,8 @@ ARCH=`uname -p`
 
 (cd $PKGDIR; BUILD_ROOT=$PKGDIR/out TESTS=$TESTS $P/freebsd/build) || false
 
+exit 0 # TEST: skip packaging at all
+
 for package in `cat $P/freebsd/packages`; do
   echo "$package: dependency of CFEngine Nova.
 version of $package: $VERSION
@@ -78,7 +80,7 @@ architecture of $package: $ARCH" > $BASEDIR/$PKGNAME/$package-comment
 
   gen_filelist $package > $BASEDIR/$PKGNAME/$package-plist
 
-  /usr/sbin/pkg_create -j -f $BASEDIR/$PKGNAME/$package-plist -c $BASEDIR/$PKGNAME/$package-comment -d $BASEDIR/$PKGNAME/$package-descr -p $BASEDIR/$PKGNAME/pkg/out/$package/ $BASEDIR/$PKGNAME/$package-$VERSION-$ARCH.tbz
+  /usr/sbin/pkg create -f $BASEDIR/$PKGNAME/$package-plist -c $BASEDIR/$PKGNAME/$package-comment -d $BASEDIR/$PKGNAME/$package-descr -p $BASEDIR/$PKGNAME/pkg/out/$package/ $BASEDIR/$PKGNAME/$package-$VERSION-$ARCH.tbz
 
   cd $BASEDIR/$PKGNAME/
 
