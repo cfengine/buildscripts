@@ -238,7 +238,7 @@ if [ -f $PREFIX/share/GUI/application/config/appsettings.php ]; then
       sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/$path/application/config/appsettings.php
       sed -i s/"$UUID"/LDAP_API_SECRET_KEY/ $PREFIX/$path/application/config/appsettings.php
       sed -i s/"$UUID"/LDAP_API_SECRET_KEY/ $PREFIX/$path/ldap/config/settings.php
-      sed -i /LDAP_API_SECRET_KEY/s/"$UUID"/\'\'/ $PREFIX/$path/api/config/config.php
+      sed -i /LDAP_API_SECRET_KEY/s/"$UUID"// $PREFIX/$path/api/config/config.php
     done
     sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/share/db/ootb_settings.sql
   else
