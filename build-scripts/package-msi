@@ -42,6 +42,15 @@ pre()
   esac
 
   cp $BASEDIR/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs $P
+  # OpenSSL libs have different names on x32 and x64 platforms:
+  # on 32-bit platforms: libcrypto_1_1.dll     and libssl_1_1.dll
+  # on 64-bit platforms: libcrypto_1_1_x64.dll and libssl_1_1_x64.dll
+  # So in cfengine-nova.wxs we have names for 64-bit platforms,
+  # and on 32-bit platforms we remove the -x64 suffix.
+  if [ "$ARCH" = "x86" ]
+  then
+      sed -i '/lib\(crypto\|ssl\)/s/[_-]x64//g' $P/cfengine-nova.wxs
+  fi
 }
 
 candle()

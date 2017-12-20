@@ -4,7 +4,6 @@
 . detect-environment
 . compile-options
 
-
 # WARNING we alter the buildslave: we remove UNWANTED_DEPS
 
 

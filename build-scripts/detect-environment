@@ -72,7 +72,7 @@ detect_os()
       exit 42;;
   esac
 
-  export OS
+  export OS OS_VERSION
 }
 
 detect_distribution()

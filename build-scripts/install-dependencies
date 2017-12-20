@@ -4,7 +4,6 @@
 . detect-environment
 . compile-options
 
-
 # We use packaging scripts
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
 
@@ -24,6 +23,65 @@ install_pkg_files()
     retry_wrapper  pkg-install-$DEP_PACKAGING  "$@"
 }
 
+
+# OpenSSL 1.1 requires Perl 5.10.0 and some modules existing only in 5.13.4 to
+# build and test properly, so we require 5.13.4 at least.  See NOTES.PERL in
+# OpenSSL.
+#
+# By doing this, we rebuild on each and every platform. TODO create a proper
+# package for perl.
+#
+# NOTE: openssl also needs Module::Load::Conditional, which we install in the
+# cloud-init script (package libmodule-load-conditional-perl for debians and
+# perl-Module-Load-Conditional for RHELs).
+check_and_install_perl()
+{
+    [ x"$PERL" = x ]  &&  [ -x "$HOME/perl-my/bin/perl" ]  \
+        && PERL="$HOME/perl-my/bin/perl"  \
+            || PERL=`func_whereis perl`
+
+    PERL_MINOR_VERSION=`$PERL -e 'print $]' | cut -d. -f2`
+    if [ "$PERL_MINOR_VERSION" -lt 013004  ]
+    then
+        echo "$PERL version is $PERL_MINOR_VERSION," \
+             "too old, installing new one from source"
+
+        ### BUILD PERL
+
+        # -fno-stack-protector: Ensure built perl will not depend on libssp.so
+        if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1
+        then
+            PERL_CFLAGS='-Accflags=-fno-stack-protector'
+        fi
+
+        # Solaris 11 insists on having a dependency to libgcc_s.so which
+        # resides in /opt/csw/lib. Unfortunately the following hack is not
+        # working on other platforms so we have to hide it.
+        if [ $OS = solaris ] && [ $OS_VERSION = 11 ]
+        then
+            PERL_LDFLAGS='-Aldflags=-static-libgcc'
+            PERL_LDDLFLAGS='-Alddlflags=-static-libgcc -Alddlflags=-shared'
+        fi
+
+        wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
+        [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
+            &&  fatal "perl checksum error"
+        gzip -dc perl-5.26.1.tar.gz | tar xf -
+        cd perl-5.26.1
+        $PATCH -p1 < $BASEDIR/buildscripts/build-scripts/perl-488307ffa6.patch
+        ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE \
+            $PERL_CFLAGS $PERL_LDFLAGS $PERL_LDDLFLAGS
+        $MAKE
+        $MAKE install
+        PERL=$HOME/perl-my/bin/perl
+    fi
+
+    export PERL
+}
+
+
+
+check_and_install_perl
 
 # Apply necessary changes for alternate /opt/cfengine prefix
 if [ "$BUILDPREFIX" = "/opt/cfengine" ]

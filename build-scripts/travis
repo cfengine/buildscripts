@@ -3,8 +3,8 @@
 set -ex
 
 REPO_DIR=aleksei/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
-test "$TRAVIS_PULL_REQUEST" == "false" || REPO_DIR=$REPO_DIR/$TRAVIS_PULL_REQUEST
-test "$TRAVIS_PULL_REQUEST" == "false" && SHA=$TRAVIS_COMMIT || SHA=$TRAVIS_PULL_REQUEST_SHA
+test "$TRAVIS_PULL_REQUEST" = "false" || REPO_DIR=$REPO_DIR/$TRAVIS_PULL_REQUEST
+test "$TRAVIS_PULL_REQUEST" = "false" && SHA=$TRAVIS_COMMIT || SHA=$TRAVIS_PULL_REQUEST_SHA
 S3_DIR=s3://cfengine-travis-artifacts/$REPO_DIR
 DOWNLOAD_DIR=https://cfengine-travis-artifacts.s3.amazonaws.com/$REPO_DIR
 DEB_PACKAGE=$S3_DIR/build.deb
@@ -87,7 +87,7 @@ case "$JOB" in
             dpkg-dev libpam0g-dev python debhelper pkg-config psmisc nfs-common
         # On Ubuntu Trusty, we need to remove these packages
         # otherwise apt fails miserably on next line
-        [ "$(lsb_release --release --short)" == "14.04" ] && sudo apt-get purge emacs emacs24
+        [ "$(lsb_release --release --short)" = "14.04" ] && sudo apt-get purge emacs emacs24
         # remove unwanted dependencies
         sudo apt-get purge libltdl-dev libltdl7 libtool
 
