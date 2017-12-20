@@ -1,4 +1,4 @@
-%define php_version 5.6.31
+%define php_version 7.2.0
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -26,7 +26,6 @@ mkdir -p %{_builddir}
 --with-config-file-scan-dir=%{prefix}/httpd/php/lib \
 --with-libxml-dir=%{prefix} \
 --with-curl=shared,%{prefix} \
---with-mcrypt=shared,%{prefix} \
 --with-ldap=%{prefix} \
 --with-pdo \
 --with-pdo-pgsql=%{prefix} \
@@ -146,7 +145,6 @@ sed -ri 's/^\s*memory_limit\s*=.*/memory_limit = 256M/g' ${RPM_BUILD_ROOT}%{pref
 sed -ri 's/^(\s|;)*date.timezone\s*=.*/date.timezone = "UTC"/g' ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
 
 echo "extension=curl.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/curl.ini
-echo "extension=mcrypt.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/mcrypt.ini
 echo "extension=openssl.so" >>${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/openssl.ini
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php/.channels
@@ -186,7 +184,7 @@ CFEngine Build Automation -- php -- development files
 %prefix/httpd/php/lib/php.ini
 
 %dir %prefix/httpd/modules
-%prefix/httpd/modules/libphp5.so
+%prefix/httpd/modules/libphp7.so
 
 %files devel
 %defattr(-,root,root)

@@ -16,7 +16,7 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 export PATH=`pwd`/solaris:$PATH
 
-./config shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp \
+./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
     --prefix=$PREFIX
 
 # Build
@@ -34,12 +34,11 @@ fi
 
 # Install
 
-make INSTALL_PREFIX=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+make DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
 # Package
 
 rm -rf ${OSD}/bin
 rm -rf ${OSD}/ssl
-rm -rf ${OSD}/lib/engines
 rm -rf ${OSD}/lib/fips*
 rm -rf ${OSD}/lib/*.a
 

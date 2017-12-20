@@ -1,4 +1,3 @@
 /var/cfengine/lib/libssl.so.*
 /var/cfengine/lib/libcrypto.so.*
 /var/cfengine/bin/openssl
-/var/cfengine/ssl/*

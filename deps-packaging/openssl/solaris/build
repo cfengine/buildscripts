@@ -12,27 +12,27 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Patch
 
-$PATCH -p1 < honor-LDFLAGS.patch
-
 # Add dummy header files for features which are not compiled, but required
 mkdir -p ${BUILD_ROOT}/../include/openssl
 for f in idea srp; do
 	touch ${BUILD_ROOT}/../include/openssl/${f}.h
 done
 
-# Configure
+# mkdir
+test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
+mkdir -p /var/cfengine/include
 
 # config misdetects architecture when building on a 64-kernel with 32-bit
 # userspace.
 if [ "$(uname -p)" = "i386" ]
 then
-    CONFIG="./Configure solaris-x86-gcc"
+    CONFIG="$PERL ./Configure solaris-x86-gcc"
 else
     CONFIG="./config"
 fi
 
-$CONFIG shared  no-idea no-rc5 no-ssl2 no-ssl3 no-dtls no-psk no-srp no-asm \
-    --prefix=$PREFIX
+$CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm no-engine \
+    --prefix=$PREFIX  $LDFLAGS
 
 # Build
 
@@ -47,13 +47,12 @@ fi
 
 # Install
 
-$MAKE INSTALL_PREFIX=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
+$MAKE DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
 
 # Package
 
 rm -rf ${OSD}/bin
 rm -rf ${OSD}/ssl
-rm -rf ${OSD}/lib/engines
 rm -rf ${OSD}/lib/fips*
 rm -rf ${OSD}/lib/*.a
 
