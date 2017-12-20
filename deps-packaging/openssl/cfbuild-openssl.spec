@@ -92,6 +92,9 @@ rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/c_rehash
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/libssl.a
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/libcrypto.a
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/pkgconfig/openssl.pc
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/CA.pl
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/tsget
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/openssl.cnf.dist
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -118,6 +121,7 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/lib/libssl.so.1.1
 %{prefix}/lib/libcrypto.so
 %{prefix}/lib/libcrypto.so.1.1
+%{prefix}/ssl/openssl.cnf
 
 %files devel
 %defattr(-,root,root)
