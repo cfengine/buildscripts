@@ -18,6 +18,9 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
 
+# AIX is broken without this
+$PATCH   -i $BASEDIR/buildscripts/deps-packaging/libcurl/curl_off_t.diff   include/curl/system.h
+
 ./configure \
     --with-sysroot=%{prefix} \
     --with-ssl=%{prefix} \
