@@ -44,7 +44,7 @@ Hub specific dependencies:
 
 * [APR](https://apr.apache.org/) 1.5.2
 * [apr-util](https://apr.apache.org/) 1.5.4
-* [Apache](http://httpd.apache.org/) 2.2.32
+* [Apache](http://httpd.apache.org/) 2.2.34
 * PostgreSQL for the hub 9.3.16
 * [Redis](http://redis.io/) 2.8.24
 * [PHP](http://php.net/) 5.6.31
