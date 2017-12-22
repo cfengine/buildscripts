@@ -11,7 +11,7 @@ Build dependencies:
 Agent dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.0.2l
+* [OpenSSL](http://openssl.org/) 1.0.2n
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.41
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.21
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.7
@@ -43,13 +43,13 @@ Hub specific dependencies:
 
 * [APR](https://apr.apache.org/) 1.5.2
 * [apr-util](https://apr.apache.org/) 1.5.4
-* [Apache](http://httpd.apache.org/) 2.4.27
-* [PostgreSQL](http://www.postgresql.org/) for the hub 9.6.3
-* [Redis](http://redis.io/) 3.2.9
+* [Apache](http://httpd.apache.org/) 2.4.29
+* [PostgreSQL](http://www.postgresql.org/) for the hub 9.6.6
+* [Redis](http://redis.io/) 3.2.11
 * [PHP](http://php.net/) 5.6.31
 * [libmcrypt](https://sourceforge.net/projects/mcrypt/files/Libmcrypt/) 2.5.8
   * Needed for php module
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.13.3
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.13.6
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.2
 
 Other dependencies (**find out why they are needed!**)
