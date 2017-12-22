@@ -90,7 +90,8 @@ install: build
 	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/phpcfenginenova/migrations/*.sql
 	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/db/*.sql
 
-
+# ENT-3531
+  chmod 755 $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/bin/php
 
 binary-indep: build install
 
