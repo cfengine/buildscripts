@@ -1,0 +1,5 @@
+351c351,352
+<    (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4))
+---
+>    (defined(__SIZEOF_LONG__) && __SIZEOF_LONG__ == 4) ||                \
+>    defined(_AIX) || defined(__hpux__))
