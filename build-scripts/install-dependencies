@@ -40,7 +40,7 @@ check_and_install_perl()
         && PERL="$HOME/perl-my/bin/perl"  \
             || PERL=`func_whereis perl`
 
-    PERL_MINOR_VERSION=`$PERL -e 'print $]' | cut -d. -f2`
+    PERL_MINOR_VERSION=`$PERL -e 'print "$]"."\n"' | cut -d. -f2`
     if [ "$PERL_MINOR_VERSION" -lt 013004  ]
     then
         echo "$PERL version is $PERL_MINOR_VERSION," \
