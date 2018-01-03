@@ -194,15 +194,22 @@ then
   fi
 fi
 #
-# We need a cfapache user for our web server
+# We need a cfapache user and group for our web server
 #
 /usr/bin/getent passwd cfapache >/dev/null || /usr/sbin/useradd -M -r cfapache
 /usr/bin/getent group cfapache >/dev/null || /usr/sbin/groupadd -r cfapache
 
 #
-# We check if there is a postgres user already, otherwise we create one
+# We make sure there is a cfpostgres user and group
 #
 /usr/bin/getent passwd cfpostgres >/dev/null || /usr/sbin/useradd -M -r cfpostgres
+/usr/bin/getent group cfpostgres >/dev/null || /usr/sbin/groupadd -r cfpostgres
+
+#
+# We make sure that the cfapache user is part of the cfpostgres group so that
+# the webserver can read from the socket ENT-2746
+#
+getent group cfpostgres && /bin/gpasswd --add cfapache cfpostgres
 
 #
 # Backup htdocs
@@ -211,7 +218,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
   cf_console echo "A previous version of CFEngine Mission Portal was found,"
   cf_console echo "creating a backup of it at /tmp/cfengine-htdocs.tar.gz"
   tar zcf /tmp/cfengine-htdocs.tar.gz $PREFIX/httpd/htdocs
-  
+
   cf_console echo "Purging old version from $PREFIX/httpd/htdocs"
   # We preserve the tmp directory as it may contain scheduled or exported
   # reports. We preserve cf_robot.php because it is generated
