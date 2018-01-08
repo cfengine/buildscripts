@@ -1,8 +1,10 @@
+%define curl_version 7.57.0
+
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
 Version: %{version}
 Release: 1
-Source: curl-7.54.1.tar.gz
+Source: curl-%{curl_version}.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +16,13 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n curl-7.54.1
+%setup -q -n curl-%{curl_version}
+
+# CentOS 4 is broken without this
+test "$UNAME_S" == "Linux" && $PATCH -p1 < $BASEDIR/buildscripts/deps-packaging/libcurl/centos4-includes.patch
+
+# AIX is broken without this
+$PATCH   -i $BASEDIR/buildscripts/deps-packaging/libcurl/curl_off_t.diff   include/curl/system.h
 
 ./configure --with-sysroot=%{prefix} --with-ldap-lib=libldap-2.4.so.2 --with-lber-lib=liblber-2.4.so.2 --with-ssl=%{prefix} --with-zlib=%{prefix} --prefix=%{prefix} CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
 
