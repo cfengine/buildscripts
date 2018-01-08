@@ -166,7 +166,7 @@ export ROLE
 case "$ROLE" in
     # HUB-ONLY dependencies
     hub)
-        var_append DEPS "libmcrypt libcurl-hub"
+        var_append DEPS "libcurl-hub"
         var_append DEPS "apr apr-util apache git rsync"
         var_append DEPS "postgresql-hub php redis"
         ;;
