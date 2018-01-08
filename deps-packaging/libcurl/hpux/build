@@ -9,6 +9,9 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
 
 # Build
 
+# HP-UX is broken without this
+$PATCH   -i $BASEDIR/buildscripts/deps-packaging/libcurl/curl_off_t.diff   include/curl/system.h
+
 ./configure --prefix=$PREFIX \
     --with-sysroot=$PREFIX \
     --with-ssl=$PREFIX \

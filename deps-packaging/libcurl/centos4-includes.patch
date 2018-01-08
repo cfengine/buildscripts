@@ -1,0 +1,40 @@
+From c103cac3c82dd4484b375b0a940c22aac6f9be74 Mon Sep 17 00:00:00 2001
+From: Per Malmberg <per.malmberg@snowsoftware.com>
+Date: Wed, 6 Dec 2017 09:11:05 +0100
+Subject: include: get netinet/in.h before linux/tcp.h
+
+... to allow build on older Linux dists (specifically CentOS 4.8 on gcc
+4.8.5)
+
+Closes #2160
+
+diff --git a/lib/sendf.c b/lib/sendf.c
+index a1cb8e4..027f97c 100644
+--- a/lib/sendf.c
++++ b/lib/sendf.c
+@@ -22,6 +22,10 @@
+ 
+ #include "curl_setup.h"
+ 
++#ifdef HAVE_NETINET_IN_H
++#include <netinet/in.h>
++#endif
++
+ #ifdef HAVE_LINUX_TCP_H
+ #include <linux/tcp.h>
+ #endif
+diff --git a/lib/setopt.c b/lib/setopt.c
+index 944d173..bd5fb54 100644
+--- a/lib/setopt.c
++++ b/lib/setopt.c
+@@ -26,6 +26,10 @@
+ #include <limits.h>
+ #endif
+ 
++#ifdef HAVE_NETINET_IN_H
++#include <netinet/in.h>
++#endif
++
+ #ifdef HAVE_LINUX_TCP_H
+ #include <linux/tcp.h>
+ #endif
