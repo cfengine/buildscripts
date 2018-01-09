@@ -90,7 +90,7 @@ package()
     REVISION=$(echo $REVISION | sed 's/[a-z]*//g');
   fi
 
-  # convert any alphabets in revison to int as no alphabets are allowed in windows package version
+  # convert any alphabets in revision to int as no alphabets are allowed in windows package version
   alphabet=$(echo $REVISION|sed -e 's/[^a-zA-Z]*\([a-zA-Z]*\).*/\1/');
   if [ -n "$alphabet" ]
   then
