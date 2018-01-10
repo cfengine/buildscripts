@@ -201,7 +201,7 @@ fi
 # We make sure that the cfapache user is part of the cfpostgres group so that
 # the webserver can read from the socket ENT-2746
 #
-getent group cfpostgres && /bin/gpasswd --add cfapache cfpostgres
+getent group cfpostgres && gpasswd --add cfapache cfpostgres
 
 #
 # Backup htdocs
