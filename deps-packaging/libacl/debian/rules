@@ -28,7 +28,7 @@ install: build
 	make install -C getfacl DESTDIR=$(CURDIR)/debian/tmp DIST_ROOT=/
 	make install-dev install-lib DESTDIR=$(CURDIR)/debian/tmp DIST_ROOT=/
 
-# configure fails because acl.h doens't exist in include dir
+# configure fails because acl.h does't exist in include dir
 # it's placed by default in include/sys
 
 	cp $(CURDIR)/debian/tmp$(PREFIX)/include/sys/acl.h $(CURDIR)/debian/tmp$(PREFIX)/include/
