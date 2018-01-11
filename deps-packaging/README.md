@@ -8,7 +8,27 @@ Build dependencies:
 * git
 * rsync
 
-Agent dependencies:
+## Agent Dependencies
+
+| Package      | CFEngine 3.7.x | CFEngine 3.10.x |                      CFEngine 3.12.x | Notes                    |
+| ------------ | -------------- | --------------- | ------------------------------------ | ------------------------ |
+| cyrus-sasl   |         2.1.26 |          2.1.26 |                               2.1.26 | Solaris Enterprise agent |
+| lcov         |           1.13 |            1.13 |                                 1.13 |                          |
+| libacl       |         2.2.52 |          2.2.52 |                               2.2.52 |                          |
+| libattr      |         2.4.47 |          2.4.47 |                               2.4.47 |                          |
+| libcurl      |         7.57.0 |          7.57.0 |                               7.57.0 |                          |
+| libgnurx     |          2.5.1 |           2.5.1 |                                2.5.1 | Windows Enterprise agent |
+| libiconv     |           1.15 |            1.15 |                                 1.15 |                          |
+| libxml2      |          2.9.4 |           2.9.4 |                                2.9.7 |                          |
+| libyaml      |          0.1.7 |           0.1.7 |                                0.1.7 |                          |
+| libvirt      |        1.1.3.9 |         1.1.3.9 | removed from cfengine built packages |                          |
+| LMDB         |         0.9.21 |          0.9.21 |                               0.9.21 |                          |
+| OpenSSL      |         1.0.2n |          1.0.2n |                               1.1.0g |                          |
+| OpenLDAP     |         2.4.45 |          2.4.45 |                               2.4.45 | Enterprise agent only    |
+| PCRE         |           8.41 |            8.41 |                                 8.41 |                          |
+| pthreads-w32 |          2.9.1 |           2.9.1 |                                2.9.1 | Windows Enterprise agent |
+| zlib         |         1.2.11 |          1.2.11 |                               1.2.11 |                          |
+| PostgreSQL   |         9.0.23 |          9.0.23 | removed from cfengine built packages |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
 * [OpenSSL](http://openssl.org/) 1.1.0g
@@ -26,7 +46,22 @@ Agent dependencies:
     to substitute missing system functions
   * "Package" only copies the (outdated) system library to `/var/cfengine`
 
-Enterprise agent specific dependencies:
+## Enterprise Hub dependencies:
+
+
+| Package    | CFEngine 3.7.x | CFEngine 3.10.x | CFEngine 3.12.x |
+| ---------- | -------------- | --------------- | --------------- |
+| Apache     |         2.2.34 |          2.4.29 |          2.4.29 |
+| APR        |          1.5.2 |           1.5.2 |           1.6.3 |
+| apr-util   |          1.5.2 |           1.5.4 |           1.6.1 |
+| Git        |        1.8.5.6 |          2.13.6 |          2.15.1 |
+| libmcrypt  |          2.5.8 |           2.5.8 |         removed |
+| OpenLDAP   |         2.4.45 |          2.4.45 |          2.4.45 |
+| PHP        |         5.6.32 |          5.6.32 |           7.2.0 |
+| PostgreSQL |         9.3.16 |           9.6.6 |           9.6.6 |
+| Redis      |         2.8.24 |          3.2.11 |          3.2.11 |
+| rsync      |          3.1.2 |           3.1.2 |           3.1.2 |
+
 
 * [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
