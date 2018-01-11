@@ -58,6 +58,11 @@ if [ -f $PREFIX/lib/php/curl.so ]; then
   /bin/rm -f $PREFIX/lib/php/curl.*
 fi
 
+# Hack around ENT-3520 In 3.12.0 we moved to php 7, this removes the old php
+if [ -e "$PREFIX/httpd/modules/libphp5.so" ]; then
+    rm "$PREFIX/httpd/modules/libphp5.so"
+fi
+
 #
 #Copy necessary Files and permissions
 #
