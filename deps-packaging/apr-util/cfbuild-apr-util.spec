@@ -31,6 +31,14 @@ SYS=`uname -s`
 ./configure --prefix=%{prefix}  --with-apr=%{prefix} --with-ldap-lib=%{prefix}/lib --with-ldap \
             CPPFLAGS="$CPPFLAGS"
 
+# apr package moves libtool to ${prefix}/build-1 and --with-apr causes apr-util to use that libtool
+# fix for rhel5 to not include /usr/lib64 in RPATH entries 
+# https://fedoraproject.org/wiki/Packaging:Guidelines?rd=Packaging/Guidelines#Alternatives_to_Rpath
+%if 0%{?rhel} == 5
+sudo sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' %{prefix}/build-1/libtool
+sudo sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' %{prefix}/build-1/libtool
+%endif
+
 %build
 
 if [ -z $MAKE ]; then
