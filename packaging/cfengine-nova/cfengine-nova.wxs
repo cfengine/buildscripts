@@ -65,6 +65,9 @@
               <Component Id='cf_key.exe' Guid='2E9A81B7-B10A-4D1A-BE66-F3097E3D0C32' Win64='$(var.isWin64)'>
                 <File Id='cf_key.exe' Name='cf-key.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-key.exe' />
               </Component>
+              <Component Id='cf_keycrypt.exe' Guid='9AC8695E-2525-439C-924A-D8615CDCB663' Win64='$(var.isWin64)'>
+                <File Id='cf_keycrypt.exe' Name='cf-keycrypt.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-keycrypt.exe' />
+              </Component>
               <Component Id='cf_monitord.exe' Guid='F9E42EF0-960C-4DEC-87BB-FB0C53F18E7F' Win64='$(var.isWin64)'>
                 <File Id='cf_monitord.exe' Name='cf-monitord.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-monitord.exe' />
               </Component>

@@ -14,6 +14,7 @@
 @unexec /bin/rm -f /var/cfengine/bin/cf-agent > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-execd > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-key > /dev/null 2>&1
+@unexec /bin/rm -f /var/cfengine/bin/cf-keycrypt > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-hub > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-monitord > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-net > /dev/null 2>&1

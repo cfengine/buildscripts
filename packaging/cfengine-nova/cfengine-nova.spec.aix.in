@@ -61,6 +61,7 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/cf-agent
 %prefix/bin/cf-execd
 %prefix/bin/cf-key
+%prefix/bin/cf-keycrypt
 %prefix/bin/cf-monitord
 %prefix/bin/cf-net
 %prefix/bin/cf-promises
