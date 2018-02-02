@@ -381,7 +381,7 @@ else
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
 
   # Create the cfengine mission portal postgres user
-  (cd /tmp && chown cfpostgres "$PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql" && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql" && chown root "$PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql)
 
   # If upgrading from a version below 3.10 that has PostgreSQL.
   if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
