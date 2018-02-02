@@ -404,8 +404,8 @@ else
   (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql")
 
   #create database for MISSION PORTAL
-  (cd /tmp && chown cfpostgres "$PREFIX/share/GUI/phpcfenginenova/pgschema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/pgschema.sql" && chown root "$PREFIX/share/GUI/phpcfenginenova/pgschema.sql")
-  (cd /tmp && chown cfpostgres "$PREFIX/share/GUI/phpcfenginenova/ootb_import.sql" && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql" && chown root "$PREFIX/share/GUI/phpcfenginenova/ootb_import.sql")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/pgschema.sql)
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql)
 
 
   #create database for hub internal data
