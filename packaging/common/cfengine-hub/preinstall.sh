@@ -32,7 +32,10 @@ if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [
   FAILED=0
   for db in $CF_DBS; do
     cf_console echo "Backing up database $db..."
-    su cfpostgres -c "$PREFIX/bin/pg_dump $db" > $PREFIX/state/pg/db_dump-$db.sql
+    # Note that we MUST execute this command from a cfpostgres-readable dir.
+    # Otherwise, `pg_dump` will fail with error that it can't cd to directory it was executed from.
+    # Ref https://dba.stackexchange.com/questions/40335/postgresql-cannot-change-directory-to-root
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_dump $db" > $PREFIX/state/pg/db_dump-$db.sql)
 
     if [ $? != 0 ]; then
       FAILED=1
