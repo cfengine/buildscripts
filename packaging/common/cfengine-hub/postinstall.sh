@@ -337,12 +337,12 @@ else
 
   #create database for MISSION PORTAL
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp")
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql")
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/pgschema.sql")
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp -f $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql)
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/pgschema.sql)
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql)
 
   #import stored function for MP into cfdb
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/GUI/phpcfenginenova/cfdb_import.sql")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb" < $PREFIX/share/GUI/phpcfenginenova/cfdb_import.sql)
 
   #create database for hub internal data
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
