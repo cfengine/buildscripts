@@ -64,17 +64,15 @@
 /var/cfengine/bin/mdb_stat
 /var/cfengine/bin/clusterdb
 /var/cfengine/bin/createdb
-/var/cfengine/bin/createlang
 /var/cfengine/bin/createuser
 /var/cfengine/bin/dropdb
-/var/cfengine/bin/droplang
 /var/cfengine/bin/dropuser
 /var/cfengine/bin/pg_basebackup
 /var/cfengine/bin/pg_config
 /var/cfengine/bin/pg_dump
 /var/cfengine/bin/pg_dumpall
 /var/cfengine/bin/pg_isready
-/var/cfengine/bin/pg_receivexlog
+/var/cfengine/bin/pg_receivewal
 /var/cfengine/bin/pg_restore
 /var/cfengine/bin/psql
 /var/cfengine/bin/reindexdb
@@ -83,7 +81,7 @@
 /var/cfengine/bin/pg_controldata
 /var/cfengine/bin/pg_ctl
 /var/cfengine/bin/pg_recvlogical
-/var/cfengine/bin/pg_resetxlog
+/var/cfengine/bin/pg_resetwal
 /var/cfengine/bin/pg_rewind
 /var/cfengine/bin/postgres
 /var/cfengine/bin/postmaster
@@ -92,7 +90,7 @@
 /var/cfengine/bin/pg_archivecleanup
 /var/cfengine/bin/oid2name
 /var/cfengine/bin/pg_upgrade
-/var/cfengine/bin/pg_xlogdump
+/var/cfengine/bin/pg_waldump
 /var/cfengine/bin/pgbench
 /var/cfengine/bin/vacuumlo
 /var/cfengine/bin/pg_test_fsync
