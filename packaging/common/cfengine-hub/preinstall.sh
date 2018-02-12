@@ -1,14 +1,4 @@
 
-if is_upgrade
-then
-    cf_console echo  \
-        'WARNING: attempted hub upgrade detected;'  \
-        'this is UNSUPPORTED, aborting!'            \
-        '(relevant tickets: ENT-3205, ENT-3218)'
-    # exit 1
-fi
-
-
 if is_upgrade; then
   # This is nice to know to provide fixes for bugs in already released
   # package scripts.
@@ -223,14 +213,25 @@ if [ -d $PREFIX/httpd/htdocs ]; then
   tar zcf /tmp/cfengine-htdocs.tar.gz $PREFIX/httpd/htdocs
 
   cf_console echo "Purging old version from $PREFIX/httpd/htdocs"
-  # We preserve the tmp directory as it may contain scheduled or exported
-  # reports. We preserve cf_robot.php because it is generated
-  find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/tmp" -prune \) -not \( -name "cf_robot.php" \) -type f -print0 | xargs -0 rm
-fi
-
-# Hack around ENT-3205
-if [ -e "$PREFIX/share/GUI/system/libraries/Session.php" ]; then
-  rm "$PREFIX/share/GUI/system/libraries/Session.php"
+  if [ -d $PREFIX/share/GUI ]; then
+    # Remove only files copied from share/GUI to httpd/htdocs
+    cf_console echo "Using share/GUI as template"
+    ( cd $PREFIX/share/GUI
+      # Make list of files in share/GUI and remove "them" from httpd/htdocs
+      find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs -0 rm )
+    )
+  else
+    # Purge all files in httpd/htdocs with exceptions:
+    # Preserve the tmp directory as it may contain scheduled or exported reports.
+    # Preserve cf_robot.php and settings.ldap.php because they are generated.
+    cf_console echo "No share/GUI found, purging all files except known exceptions"
+    find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/tmp" -prune \) \
+	    -not \( -name "cf_robot.php" \) \
+	    -not \( -name "settings.ldap.php" \) \
+	    -type f -print0 | xargs -0 rm
+  fi
+  # Remove empty dirs in httpd/htdocs
+  find $PREFIX/httpd/htdocs -depth -type d -exec rmdir {} \;
 fi
 
 # Make a backup of the key CFE_CLIENT_SECRET_KEY, if any, and restore the
