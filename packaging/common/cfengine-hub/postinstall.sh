@@ -345,6 +345,20 @@ if [ ! -d $PREFIX/state/pg/data ]; then
   fi
 fi
 
+BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
+if is_upgrade && [ -d "$BACKUP_DIR" ]; then
+  cf_console echo "Migrating database..."
+  (cd /tmp && cf_console time su cfpostgres -c "$PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data --link")
+  if [ $? = 0 ]; then
+    cf_console echo "Migration done, cleaning up"
+    rm -rf $BACKUP_DIR
+  else
+    cf_console echo "Migration failure. Manual interference required."
+    cf_console echo "Old stuff is saved in $BACKUP_DIR. Good luck!"
+    exit 1
+  fi
+fi
+
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
 
 #make sure that server is up and listening
@@ -382,21 +396,6 @@ else
 
   # Create the cfengine mission portal postgres user
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql)
-
-  # If upgrading from a version below 3.10 that has PostgreSQL.
-  if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
-    CF_DBS="cfdb cfsettings cfmp"
-    for db in $CF_DBS; do
-      if ! [ -f "$PREFIX/state/pg/db_dump-$db.sql.gz" ]; then
-        continue
-      fi
-      cf_console echo "Restoring database $db..."
-      (cd /tmp && su cfpostgres -c "gunzip -c $PREFIX/state/pg/db_dump-$db.sql.gz | $PREFIX/bin/psql $db")
-      if [ $? != 0 ]; then
-        cf_console echo "Not able to migrate database $db. Backup is in $PREFIX/state/pg/db_dump-$db.sql.gz"
-      fi
-    done
-  fi
 
   # Ensure cfpostgres can read the sql files it will import. And that they are
   # restored to restrictive state after import ENT-2684
