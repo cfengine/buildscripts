@@ -5,45 +5,19 @@ if is_upgrade; then
   "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
 fi
 
-# If upgrading from a version below 3.10 that has PostgreSQL, and the data dir exists.
-if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
-  cf_console echo "Attempting to migrate Mission Portal database."
-  cf_console echo "This can be very space consuming if the database is big."
+BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
+
+# If upgrading from a version below 3.12 that has PostgreSQL, and the data dir exists.
+if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+  if [ -d "$BACKUP_DIR" ]; then
+    cf_console echo "Old backup in $BACKUP_DIR already exists. Please remove before attempting upgrade."
+    exit 1
+  fi
+  cf_console echo "Attempting to migrate Mission Portal database. This can break stuff."
   cf_console echo "It can be disabled by shutting down CFEngine and removing/renaming $PREFIX/state/pg/data prior to upgrade."
   cf_console echo "Press Ctrl-C in the next 15 seconds if you want to cancel..."
   sleep 15
-
-  if [ -d "$PREFIX/state/pg/data.bak" ]; then
-    cf_console echo "Old backup in $PREFIX/state/pg/data.bak already exists. Please remove before attempting upgrade."
-    exit 1
-  fi
-
-  CF_DBS="cfdb cfsettings cfmp"
-  FAILED=0
-  for db in $CF_DBS; do
-    cf_console echo "Backing up database $db..."
-    # Note that we MUST execute this command from a cfpostgres-readable dir.
-    # Otherwise, `pg_dump` will fail with error that it can't cd to directory it was executed from.
-    # Ref https://dba.stackexchange.com/questions/40335/postgresql-cannot-change-directory-to-root
-    (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_dump $db" > $PREFIX/state/pg/db_dump-$db.sql)
-
-    if [ $? != 0 ]; then
-      FAILED=1
-      cf_console echo "Not able to migrate database. Aborting."
-      break
-    fi
-
-    gzip $PREFIX/state/pg/db_dump-$db.sql
-  done
-
-  if [ "$FAILED" != 0 ]; then
-    for db in $CF_DBS; do
-      rm -f "$PREFIX/state/pg/db_dump-$db.sql.gz"
-    done
-    exit 1
-  fi
-
-  cf_console echo "Done making backup. They will be in $PREFIX/state/pg/db_dump-*.sql.gz."
+  cf_console echo "Ok, moving on..."
 fi
 
 if [ "`package_type`" = "rpm" ]; then
@@ -100,9 +74,16 @@ if is_upgrade; then
   fi
 fi
 
-if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+  cf_console echo "Moving old data and copying old binaries to $BACKUP_DIR"
   # Now that PostgreSQL is shut down, move the old data out of the way.
-  mv "$PREFIX/state/pg/data" "$PREFIX/state/pg/data.bak"
+  mkdir -p "$BACKUP_DIR/lib"
+  mkdir -p "$BACKUP_DIR/share"
+  mv "$PREFIX/state/pg/data" "$BACKUP_DIR"
+  cp -al "$PREFIX/bin" "$BACKUP_DIR"
+  cp -l "$PREFIX/lib"/* "$BACKUP_DIR/lib"
+  cp -al "$PREFIX/lib/postgresql/" "$BACKUP_DIR/lib"
+  cp -al "$PREFIX/share/postgresql/" "$BACKUP_DIR/share"
 fi
 
 filter_netstat_listen()

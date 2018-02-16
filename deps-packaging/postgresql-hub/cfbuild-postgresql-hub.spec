@@ -1,4 +1,4 @@
-%define postgresql_version 9.6.6
+%define postgresql_version 10.2
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
@@ -59,51 +59,43 @@ CFEngine Build Automation -- postgresql -- dev files
 %dir %{prefix}/bin
 %{prefix}/bin/clusterdb
 %{prefix}/bin/createdb
-%{prefix}/bin/createlang
 %{prefix}/bin/createuser
 %{prefix}/bin/dropdb
-%{prefix}/bin/droplang
 %{prefix}/bin/dropuser
 %{prefix}/bin/initdb
 %{prefix}/bin/oid2name
 %{prefix}/bin/pg_archivecleanup
 %{prefix}/bin/pg_basebackup
-%{prefix}/bin/pgbench
 %{prefix}/bin/pg_config
 %{prefix}/bin/pg_controldata
 %{prefix}/bin/pg_ctl
 %{prefix}/bin/pg_dump
 %{prefix}/bin/pg_dumpall
 %{prefix}/bin/pg_isready
-%{prefix}/bin/pg_receivexlog
+%{prefix}/bin/pg_receivewal
 %{prefix}/bin/pg_recvlogical
-%{prefix}/bin/pg_resetxlog
+%{prefix}/bin/pg_resetwal
 %{prefix}/bin/pg_restore
 %{prefix}/bin/pg_rewind
 %{prefix}/bin/pg_standby
 %{prefix}/bin/pg_test_fsync
 %{prefix}/bin/pg_test_timing
 %{prefix}/bin/pg_upgrade
-%{prefix}/bin/pg_xlogdump
+%{prefix}/bin/pg_waldump
+%{prefix}/bin/pgbench
 %{prefix}/bin/postgres
 %{prefix}/bin/postmaster
 %{prefix}/bin/psql
 %{prefix}/bin/reindexdb
 %{prefix}/bin/vacuumdb
 %{prefix}/bin/vacuumlo
-%{prefix}/lib/libecpg_compat.so
-%{prefix}/lib/libecpg_compat.so.3
-%{prefix}/lib/libecpg_compat.so.3.8
-%{prefix}/lib/libecpg.so
-%{prefix}/lib/libecpg.so.6
-%{prefix}/lib/libecpg.so.6.8
-%{prefix}/lib/libpgtypes.so
-%{prefix}/lib/libpgtypes.so.3
-%{prefix}/lib/libpgtypes.so.3.7
-%{prefix}/lib/libpq.so
-%{prefix}/lib/libpq.so.5
-%{prefix}/lib/libpq.so.5.9
+%{prefix}/lib/libecpg.so*
+%{prefix}/lib/libecpg_compat.so*
+%{prefix}/lib/libpgtypes.so*
+%{prefix}/lib/libpq.so*
+%{prefix}/lib/postgresql/_int.so
 %{prefix}/lib/postgresql/adminpack.so
+%{prefix}/lib/postgresql/amcheck.so
 %{prefix}/lib/postgresql/ascii_and_mic.so
 %{prefix}/lib/postgresql/auth_delay.so
 %{prefix}/lib/postgresql/auto_explain.so
@@ -129,7 +121,6 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/lib/postgresql/fuzzystrmatch.so
 %{prefix}/lib/postgresql/hstore.so
 %{prefix}/lib/postgresql/insert_username.so
-%{prefix}/lib/postgresql/_int.so
 %{prefix}/lib/postgresql/isn.so
 %{prefix}/lib/postgresql/latin2_and_win1250.so
 %{prefix}/lib/postgresql/latin_and_mic.so
@@ -140,14 +131,15 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/lib/postgresql/pageinspect.so
 %{prefix}/lib/postgresql/passwordcheck.so
 %{prefix}/lib/postgresql/pg_buffercache.so
-%{prefix}/lib/postgresql/pgcrypto.so
 %{prefix}/lib/postgresql/pg_freespacemap.so
 %{prefix}/lib/postgresql/pg_prewarm.so
-%{prefix}/lib/postgresql/pgrowlocks.so
 %{prefix}/lib/postgresql/pg_stat_statements.so
-%{prefix}/lib/postgresql/pgstattuple.so
 %{prefix}/lib/postgresql/pg_trgm.so
 %{prefix}/lib/postgresql/pg_visibility.so
+%{prefix}/lib/postgresql/pgcrypto.so
+%{prefix}/lib/postgresql/pgoutput.so
+%{prefix}/lib/postgresql/pgrowlocks.so
+%{prefix}/lib/postgresql/pgstattuple.so
 %{prefix}/lib/postgresql/plpgsql.so
 %{prefix}/lib/postgresql/postgres_fdw.so
 %{prefix}/lib/postgresql/refint.so
@@ -157,7 +149,6 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/lib/postgresql/tcn.so
 %{prefix}/lib/postgresql/test_decoding.so
 %{prefix}/lib/postgresql/timetravel.so
-%{prefix}/lib/postgresql/tsearch2.so
 %{prefix}/lib/postgresql/tsm_system_rows.so
 %{prefix}/lib/postgresql/tsm_system_time.so
 %{prefix}/lib/postgresql/unaccent.so
@@ -171,11 +162,11 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/lib/postgresql/utf8_and_euc_tw.so
 %{prefix}/lib/postgresql/utf8_and_gb18030.so
 %{prefix}/lib/postgresql/utf8_and_gbk.so
-%{prefix}/lib/postgresql/utf8_and_iso8859_1.so
 %{prefix}/lib/postgresql/utf8_and_iso8859.so
+%{prefix}/lib/postgresql/utf8_and_iso8859_1.so
 %{prefix}/lib/postgresql/utf8_and_johab.so
-%{prefix}/lib/postgresql/utf8_and_sjis2004.so
 %{prefix}/lib/postgresql/utf8_and_sjis.so
+%{prefix}/lib/postgresql/utf8_and_sjis2004.so
 %{prefix}/lib/postgresql/utf8_and_uhc.so
 %{prefix}/lib/postgresql/utf8_and_win.so
 %{prefix}/share/doc/postgresql/*
