@@ -590,7 +590,3 @@ autovacuum_vacuum_cost_delay = 5ms	# default vacuum cost delay for
 #------------------------------------------------------------------------------
 
 # Add settings for extensions here
-
-# Enable parallel plans in Postgres 9.6+
-max_parallel_workers_per_gather = 8		# total number of workers defaults as well to 8
-min_parallel_relation_size = 128kB 
