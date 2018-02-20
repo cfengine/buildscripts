@@ -445,9 +445,6 @@ EOF
 
 fi
 
-# Proper Database Migrations
-$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php migration/tasks/migrate
-
 #
 # Apache related
 #
