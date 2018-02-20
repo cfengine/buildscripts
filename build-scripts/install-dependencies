@@ -163,3 +163,6 @@ do
     # keep 50 most recent packages to preserve disk space
     pkg-cache keep_newest 50
 done
+
+# stop pretending we only have one CPU now that deps are built
+unset MAKEFLAGS
