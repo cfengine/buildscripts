@@ -36,6 +36,13 @@ case "$OS_FAMILY" in
     # but we need it to make .so libraries. It doesn't work correctly when
     # specified in the Makefile, so we specify it in the environment instead.
     LDFLAGS="-Wl,-brtl"
+
+    # This flag is needed because the AIX linker doesn't export symbols starting
+    # with underscore by default (and some are needed in OpenSSL's ASM tricks).
+    # See https://www.ibm.com/developerworks/aix/library/au-gnu.html for
+    # details.
+    LDFLAGS="$LDFLAGS -Wl,-bexpfull"
+
     # AIX needs default RPATH (libpath on AIX) specified as well, otherwise it
     # won't find libc.
     LDFLAGS="$LDFLAGS -L$BUILDPREFIX/lib -Wl,-blibpath:$BUILDPREFIX/lib:/usr/lib:/lib"
