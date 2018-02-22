@@ -90,6 +90,10 @@ chown -R root:root $PREFIX/httpd/htdocs
 chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.sh
 chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.pl
 
+# ENT-3645: `ldap/config/settings.ldap.php` must be writable by the webserver user or we will be unable to modify settings.
+chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/ldap/config/settings.ldap.php
+chmod 0600 $PREFIX/httpd/htdocs/ldap/config/settings.ldap.php
+
 # plugins directory, empty by default
 mkdir -p ${PREFIX}/plugins
 chown -R root:root ${PREFIX}/plugins
