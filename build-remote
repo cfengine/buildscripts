@@ -244,6 +244,7 @@ checkout() {
       git clone $SOURCE/mission-portal build/mission-portal
       git clone $SOURCE/design-center build/design-center
       git clone $SOURCE/masterfiles build/masterfiles
+      git clone $SOURCE/ldap-api build/mission-portal/ldap
       ;;
     nova-3.6.x)
       VERSION=$BRANCH
@@ -263,10 +264,11 @@ checkout() {
 
     nova-cp)
       rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/buildscripts  >>rsync.log
-      for d in core nova enterprise masterfiles design-center mission-portal
+      for d in core nova enterprise masterfiles design-center mission-portal ldap-api
       do
         rsync -avr $SOURCE/$d build  >>rsync.log
       done
+      mv build/ldap-api build/mission-portal/ldap
       ;;
 
     nova-stable)
