@@ -8,6 +8,7 @@ test "$TRAVIS_PULL_REQUEST" = "false" && SHA=$TRAVIS_COMMIT || SHA=$TRAVIS_PULL_
 S3_DIR=s3://cfengine-travis-artifacts/$REPO_DIR
 DOWNLOAD_DIR=https://cfengine-travis-artifacts.s3.amazonaws.com/$REPO_DIR
 DEB_PACKAGE=$S3_DIR/build.deb
+TESTD=$S3_DIR/cf-testd
 export
 
 # Assuming we run from a dir where we have subdirs for other repos, at least
@@ -16,12 +17,14 @@ export
 # It's not a fatal error if this file does not exist. However, it's a fatal
 # error if any of key variables are unset after sourcing it. This way we can
 # set them in some other way (in .travis.yml or Travis web intreface)
+# We wrap it into set +x / set -x so secrets didn't appear in the log
+set +x
 . */secrets.txt || true
-
 test -z "$ARTIFACTS_KEY" -o -z "$ARTIFACTS_SECRET" -o -z "$GITHUB_STATUS_TOKEN" && exit 1
+set -x
 
 # remove unwanted packages
-sudo apt-get purge apache* postgresql*
+sudo apt-get purge apache* postgresql* redis*
 # On Travis, hostname can be ridiculously long - let's truncate it
 sudo hostname localhost
 
@@ -74,7 +77,7 @@ case "$JOB" in
             fi
         done
 
-	mv -T ldap-api mission-portal/ldap
+        mv -T ldap-api mission-portal/ldap
 
         # packages needed for autogen
         sudo apt-get install git autoconf automake m4 make bison flex \
@@ -108,10 +111,12 @@ case "$JOB" in
 
         s3cmd put --reduced-redundancy --no-progress --acl-public \
             output/--/*.deb $DEB_PACKAGE
-	set +ex
+        s3cmd put --reduced-redundancy --no-progress --acl-public \
+            core/cf-testd/.libs/cf-testd $TESTD
+        set +ex
         curl -u Lex-2008:$GITHUB_STATUS_TOKEN \
             https://api.github.com/repos/$TRAVIS_REPO_SLUG/statuses/$SHA -d \
-	    '{"state":"success","context":"travis/Lex-2008/build",'\
+            '{"state":"success","context":"travis/Lex-2008/build",'\
 '"description":"click there to download the build","target_url":"'$DOWNLOAD_DIR'/build.deb"}'
         ;;
 
@@ -168,6 +173,21 @@ case "$JOB" in
         s3cmd put --reduced-redundancy --no-progress \
             enterprise-tests-acceptance.tar.gz $S3_DIR/enterprise-tests-acceptance.tar.gz
         ;;
+
+    ( reporting-test )
+        s3cmd get $DEB_PACKAGE cfe.deb
+        sudo dpkg -i cfe.deb
+        sudo service cfengine3 restart
+        ps aux | grep cf-
+        s3cmd get $TESTD cf-testd
+        sudo mv cf-testd /var/cfengine/bin
+        sudo chown root:root /var/cfengine/bin/cf-testd
+        sudo chmod a+x /var/cfengine/bin/cf-testd
+        sudo chown root:root nova/tests/reporting/minimal.cf
+        sudo chmod 600 nova/tests/reporting/minimal.cf
+        cd nova
+        sudo bash tests/reporting/run.sh --no-files-setup --no-db-setup
+    ;;
 
     ( deployment-test )
         s3cmd get $DEB_PACKAGE cfe.deb
