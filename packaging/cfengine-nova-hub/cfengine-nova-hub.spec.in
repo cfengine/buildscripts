@@ -71,6 +71,7 @@ rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/application/controllers/testing.php
 rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/unittest_index.php
 rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/unit_test.php
 
+rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/secrets.txt
 
 rm -rf $RPM_BUILD_ROOT%prefix/httpd/build
 rm -rf $RPM_BUILD_ROOT%prefix/httpd/build

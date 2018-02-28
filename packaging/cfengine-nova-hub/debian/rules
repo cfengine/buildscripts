@@ -54,6 +54,7 @@ install: build
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/application/controllers/testing.php
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/unittest_index.php
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/unit_test.php
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/secrets.txt
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/httpd/htdocs/index.html
 
 # Change mode in MP from development to production and change the session key
