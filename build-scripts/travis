@@ -184,6 +184,7 @@ case "$JOB" in
         ;;
 
     ( reporting-test )
+        sudo apt-get install pgtap
         s3cmd get $DEB_PACKAGE cfe.deb
         sudo dpkg -i cfe.deb
         sudo service cfengine3 restart
@@ -194,8 +195,8 @@ case "$JOB" in
         sudo chmod a+x /var/cfengine/bin/cf-testd
         sudo chown root:root nova/tests/reporting/minimal.cf
         sudo chmod 600 nova/tests/reporting/minimal.cf
-        cd nova
-        sudo bash tests/reporting/run.sh --no-files-setup --no-db-setup
+        cd nova/tests/reporting
+        sudo make check --no-files-setup --no-db-setup
     ;;
 
     ( deployment-test )
