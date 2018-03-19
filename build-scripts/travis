@@ -135,6 +135,7 @@ case "$JOB" in
             ./07_packages/00*.cf \
             ./10_files/11_xml_edits \
             ./25_cf-execd
+	set +e
         ./testall \
             --agent=/var/cfengine/bin/cf-agent \
             --cfpromises=/var/cfengine/bin/cf-promises \
@@ -146,6 +147,8 @@ case "$JOB" in
             --rpmvercmp=$HOME/rpmvercmp \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
             --gainroot=sudo
+	RET1=$?
+	set -e
         sudo tar cz * >core-tests-acceptance.tar.gz
         s3cmd put --reduced-redundancy --no-progress \
             core-tests-acceptance.tar.gz $S3_DIR/core-tests-acceptance.tar.gz
@@ -158,6 +161,7 @@ case "$JOB" in
         echo export CORE=../../../core > testall.env
         echo export ENTERPRISE=../.. >> testall.env
         echo export CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=/var/cfengine/lib >> testall.env
+	set +e
         ./testall \
             --agent=/var/cfengine/bin/cf-agent \
             --cfpromises=/var/cfengine/bin/cf-promises \
@@ -169,9 +173,12 @@ case "$JOB" in
             --rpmvercmp=$HOME/rpmvercmp \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
             --gainroot=sudo
+	RET2=$?
+	set -e
         sudo tar cz * >enterprise-tests-acceptance.tar.gz
         s3cmd put --reduced-redundancy --no-progress \
             enterprise-tests-acceptance.tar.gz $S3_DIR/enterprise-tests-acceptance.tar.gz
+	exit `expr $RET1 + $RET2` # if one of them is non-zero, fail the build
         ;;
 
     ( reporting-test )
