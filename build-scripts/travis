@@ -136,7 +136,7 @@ case "$JOB" in
             ./10_files/11_xml_edits \
             ./25_cf-execd
 	set +e
-        ./testall \
+        sudo ./testall \
             --agent=/var/cfengine/bin/cf-agent \
             --cfpromises=/var/cfengine/bin/cf-promises \
             --cfserverd=/var/cfengine/bin/cf-serverd \
@@ -149,6 +149,8 @@ case "$JOB" in
             --gainroot=sudo
 	RET1=$?
 	set -e
+	pwd
+	ls -lad workdir
         sudo tar cz * >core-tests-acceptance.tar.gz
         s3cmd put --reduced-redundancy --no-progress \
             core-tests-acceptance.tar.gz $S3_DIR/core-tests-acceptance.tar.gz
@@ -162,7 +164,7 @@ case "$JOB" in
         echo export ENTERPRISE=../.. >> testall.env
         echo export CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=/var/cfengine/lib >> testall.env
 	set +e
-        ./testall \
+        sudo ./testall \
             --agent=/var/cfengine/bin/cf-agent \
             --cfpromises=/var/cfengine/bin/cf-promises \
             --cfserverd=/var/cfengine/bin/cf-serverd \
