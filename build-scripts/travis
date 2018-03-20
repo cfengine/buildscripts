@@ -121,7 +121,7 @@ case "$JOB" in
         ;;
 
     ( acceptance-test )
-        s3cmd get $DEB_PACKAGE cfe.deb
+        s3cmd get --no-progress $DEB_PACKAGE cfe.deb
         sudo dpkg -i cfe.deb
         touch /home/travis/rpmvercmp
         chmod a+x ~/rpmvercmp
@@ -185,11 +185,11 @@ case "$JOB" in
 
     ( reporting-test )
         sudo apt-get install pgtap
-        s3cmd get $DEB_PACKAGE cfe.deb
+        s3cmd get --no-progress $DEB_PACKAGE cfe.deb
         sudo dpkg -i cfe.deb
         sudo service cfengine3 restart
         ps aux | grep cf-
-        s3cmd get $TESTD cf-testd
+        s3cmd get --no-progress $TESTD cf-testd
         sudo mv cf-testd /var/cfengine/bin
         sudo chown root:root /var/cfengine/bin/cf-testd
         sudo chmod a+x /var/cfengine/bin/cf-testd
@@ -200,7 +200,7 @@ case "$JOB" in
     ;;
 
     ( deployment-test )
-        s3cmd get $DEB_PACKAGE cfe.deb
+        s3cmd get --no-progress $DEB_PACKAGE cfe.deb
         sudo dpkg -i cfe.deb
         sudo cf-agent -B "$(ifconfig | grep -A1 Ethernet | sed '2!d;s/.*addr:\([0-9.]*\).*/\1/')"
     ;;
