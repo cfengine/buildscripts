@@ -184,7 +184,7 @@ case "$JOB" in
         ;;
 
     ( reporting-test )
-        sudo apt-get install pgtap
+        sudo apt-get install postgresql-10-pgtap
         s3cmd get $DEB_PACKAGE cfe.deb
         sudo dpkg -i cfe.deb
         sudo service cfengine3 restart
