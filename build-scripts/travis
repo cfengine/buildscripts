@@ -196,7 +196,7 @@ case "$JOB" in
         sudo chown root:root nova/tests/reporting/minimal.cf
         sudo chmod 600 nova/tests/reporting/minimal.cf
         cd nova/tests/reporting
-        sudo make check --no-files-setup --no-db-setup
+        sudo bash temporary_test_runner.sh --no-files-setup --no-db-setup
     ;;
 
     ( deployment-test )
