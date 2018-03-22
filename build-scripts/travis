@@ -184,10 +184,10 @@ case "$JOB" in
         ;;
 
     ( reporting-test )
-        sudo apt-get install pgtap
         s3cmd get $DEB_PACKAGE cfe.deb
         sudo dpkg -i cfe.deb
         sudo service cfengine3 restart
+        sudo apt-get install pgtap
         ps aux | grep cf-
         s3cmd get $TESTD cf-testd
         sudo mv cf-testd /var/cfengine/bin
