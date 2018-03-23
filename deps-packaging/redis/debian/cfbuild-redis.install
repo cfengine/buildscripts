@@ -1,7 +1,0 @@
-/var/cfengine/bin/redis-cli
-/var/cfengine/bin/redis-server
-/var/cfengine/bin/redis-check-aof
-/var/cfengine/bin/redis-benchmark
-/var/cfengine/lib/libhiredis.so
-/var/cfengine/lib/libhiredis.so.0
-/var/cfengine/lib/libhiredis.so.0.*
