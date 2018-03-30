@@ -33,9 +33,16 @@ pre()
   cp -a $BUILDPREFIX/bin/* $P/bin
   cp -a $BASEDIR/cfengine/dist$BUILDPREFIX/bin/* $P/bin
 
+  # TODO make not hard-coded paths for debian/ubuntu installations of mingw
+  # I couldn't find an easy way to dynamically find the path to this dll so hard-coded
+  # it is. :(
   case "$ARCH" in
-    x86) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll;;
-    x64) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.x86_64.dll $P/bin/cf.events.dll;;
+    x86) 
+        cp -a /usr/i686-w64-mingw32/lib/libwinpthread-1.dll $P/bin/libwinpthread-1.dll
+        cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll;;
+    x64) 
+        cp -a /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll $P/bin/libwinpthread-1.dll
+        cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.x86_64.dll $P/bin/cf.events.dll;;
     *)
       echo "Unknown architecture: $ARCH"
       exit 1;;
