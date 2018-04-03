@@ -201,7 +201,8 @@ case "$JOB" in
         sudo dpkg -i postgresql-10-pgtap_0.97.0-3.pgdg90+1_all.deb || true
         sudo cp /usr/share/postgresql/10/extension/pgtap* /var/cfengine/share/postgresql/extension/
         cd nova/tests/reporting
-        sudo bash temporary_test_runner.sh --no-files-setup --no-db-setup --wipe-db
+        export TEST_OPTIONS=--no-files-setup --no-db-setup --wipe-db
+        sudo make check 
     ;;
 
     ( deployment-test )
