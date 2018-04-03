@@ -24,7 +24,7 @@ test -z "$ARTIFACTS_KEY" -o -z "$ARTIFACTS_SECRET" -o -z "$GITHUB_STATUS_TOKEN" 
 set -x
 
 # remove unwanted packages
-sudo apt-get purge apache* postgresql* redis*
+sudo apt-get purge apache* "postgresql*" redis*
 # On Travis, hostname can be ridiculously long - let's truncate it
 sudo hostname localhost
 
