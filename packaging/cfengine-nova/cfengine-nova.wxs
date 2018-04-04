@@ -166,6 +166,7 @@
             <ComponentRef Id='libwinpthread_1.dll' />
             <ComponentRef Id='libcrypto_1_1_x64.dll' />
             <ComponentRef Id='libssl_1_1_x64.dll' />
+            <ComponentRef Id='libwinpthread_1.dll' />
             <ComponentRef Id='libgnurx_0.dll' />
             <ComponentRef Id='liblmdb.dll' />
             <ComponentRef Id='libyaml_0_2.dll' />
