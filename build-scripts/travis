@@ -200,10 +200,9 @@ case "$JOB" in
         wget https://ftp.postgresql.org/pub/repos/apt/pool/main/p/pgtap/postgresql-10-pgtap_0.97.0-3.pgdg90%2b1_all.deb
         sudo dpkg -i postgresql-10-pgtap_0.97.0-3.pgdg90+1_all.deb || true
         sudo cp /usr/share/postgresql/10/extension/pgtap* /var/cfengine/share/postgresql/extension/
-        NO_CONFIGURE=1 PROJECT=nova ./buildscripts/build-scripts/autogen
         cd nova/tests/reporting
         export TEST_OPTIONS="--no-files-setup --no-db-setup --wipe-db"
-        sudo make check 
+        sudo prove -v *.test
     ;;
 
     ( deployment-test )
