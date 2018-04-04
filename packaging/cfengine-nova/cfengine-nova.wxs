@@ -163,6 +163,7 @@
             <ComponentRef Id='libpcre_1.dll' />
             <ComponentRef Id='libpq.dll' />
             <ComponentRef Id='pthreadGC2.dll' />
+            <ComponentRef Id='libwinpthread_1.dll' />
             <ComponentRef Id='libeay32.dll' />
             <ComponentRef Id='ssleay32.dll' />
             <ComponentRef Id='libwinpthread_1.dll' />
