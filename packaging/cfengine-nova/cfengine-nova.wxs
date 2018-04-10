@@ -65,6 +65,12 @@
               <Component Id='cf_key.exe' Guid='2E9A81B7-B10A-4D1A-BE66-F3097E3D0C32' Win64='$(var.isWin64)'>
                 <File Id='cf_key.exe' Name='cf-key.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-key.exe' />
               </Component>
+              <Component Id='hello.exe' Guid='3E9A81B7-B10A-4D1A-BE66-F3097E3D0C32' Win64='$(var.isWin64)'>
+                <File Id='hello.exe' Name='hello.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\hello.exe' />
+              </Component>
+              <Component Id='test_ipc.exe' Guid='4E9A81B7-B10A-4D1A-BE66-F3097E3D0C32' Win64='$(var.isWin64)'>
+                <File Id='test_ipc.exe' Name='test_ipc.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\test_ipc.exe' />
+              </Component>
               <Component Id='cf_monitord.exe' Guid='F9E42EF0-960C-4DEC-87BB-FB0C53F18E7F' Win64='$(var.isWin64)'>
                 <File Id='cf_monitord.exe' Name='cf-monitord.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-monitord.exe' />
               </Component>
@@ -147,6 +153,8 @@
             <ComponentRef Id='cf_execd.exe' />
             <ComponentRef Id='cf_agent.exe' />
             <ComponentRef Id='cf_key.exe' />
+            <ComponentRef Id='hello.exe' />
+            <ComponentRef Id='test_ipc.exe' />
             <ComponentRef Id='cf_monitord.exe' />
             <ComponentRef Id='cf_net.exe' />
             <ComponentRef Id='cf_promises.exe' />
