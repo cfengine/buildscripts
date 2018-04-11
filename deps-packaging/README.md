@@ -32,7 +32,7 @@ Enterprise agent specific dependencies:
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
 * [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
-* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.45
+* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.46
 * [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3.9
 * [PostgreSQL](http://www.postgresql.org/) 9.0.23 **EOL**
   * From this one we selectively build only `libpq`
