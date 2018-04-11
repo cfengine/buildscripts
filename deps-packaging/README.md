@@ -53,8 +53,8 @@ Hub specific dependencies:
   * Needed for php module
 * libmcrypt 2.5.8
   * Needed for php module
-* Git 1.8.5.6
-* rsync 3.1.2
+* [Git](https://www.kernel.org/pub/software/scm/git/) 1.8.5.6
+* [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)
 
