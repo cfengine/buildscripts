@@ -28,7 +28,7 @@ if [ -z $MAKE ]; then
 fi
 
 $MAKE
-if ! [ $SYS = "AIX" ]; then
+if ! [ "$SYS" = "AIX" ]; then
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
 $MAKE check
 %endif
@@ -72,10 +72,10 @@ CFEngine Build Automation -- pcre -- development files
 %dir %prefix/lib
 %prefix/lib/libpcre.so
 %prefix/lib/libpcre.so.1
-%prefix/lib/libpcre.so.1.2.?
+%prefix/lib/libpcre.so.1.2.*
 %prefix/lib/libpcreposix.so
 %prefix/lib/libpcreposix.so.0
-%prefix/lib/libpcreposix.so.0.0.?
+%prefix/lib/libpcreposix.so.0.0.*
 
 %files devel
 %defattr(-,root,root)
