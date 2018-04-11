@@ -80,7 +80,7 @@ Hub specific dependencies:
 * [Redis](http://redis.io/) 3.2.11
 * [PHP](http://php.net/) 7.2.0
 * [Git](https://www.kernel.org/pub/software/scm/git/) 2.15.1
-* [rsync](https://download.samba.org/pub/rsync/) 3.1.2
+* [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)
 
