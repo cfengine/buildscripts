@@ -1,0 +1,22 @@
+--- xpath.c	2017-12-02 09:58:10.000000000 +0100
++++ xpath.c.new	2018-04-20 13:26:11.776354949 +0200
+@@ -477,17 +477,11 @@
+  *									*
+  ************************************************************************/
+ 
+-#ifndef NAN
+ #define NAN (0.0 / 0.0)
+-#endif
+-
+-#ifndef INFINITY
+-#define INFINITY HUGE_VAL
+-#endif
+ 
+ double xmlXPathNAN = NAN;
+-double xmlXPathPINF = INFINITY;
+-double xmlXPathNINF = -INFINITY;
++double xmlXPathPINF = DBL_MAX;
++double xmlXPathNINF = DBL_MIN;
+ 
+ /**
+  * xmlXPathInit:

@@ -1,4 +1,4 @@
-%define libxml_version 2.9.7
+%define libxml_version 2.9.8
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
@@ -18,6 +18,18 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n libxml2-%{libxml_version}
 
+SYS=`uname -s`
+if [ "z$SYS" = "zAIX" ]
+then
+    ${PATCH} -p0 < ../../SOURCES/aix-nan.patch
+fi
+
+if expr \( "z$SYS" = 'zAIX' \) \| \( "`cat /etc/redhat-release`" : '.* 4\.' \)
+then
+    mv configure configure.bak
+    sed 's/ *-Wno-array-bounds//' configure.bak >configure
+    chmod a+x configure
+fi
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
     CPPFLAGS="-I%{prefix}/include" \
     LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
