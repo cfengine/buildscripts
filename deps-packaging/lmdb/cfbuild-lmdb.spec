@@ -1,8 +1,10 @@
+%define lmdb_version 0.9.22
+
 Summary: CFEngine Build Automation -- lmdb
 Name: cfbuild-lmdb
 Version: %{version}
 Release: 1
-Source0: LMDB_0.9.21.tar.gz
+Source0: LMDB_%{lmdb_version}.tar.gz
 License: OpenLDAP
 Group: Other
 Url: http://symas.com/mdb
@@ -13,7 +15,7 @@ AutoReqProv: no
 Patch0: mdb.patch
 
 %define prefix %{buildprefix}
-%define srcdir lmdb-LMDB_0.9.21/libraries/liblmdb
+%define srcdir lmdb-LMDB_%{lmdb_version}/libraries/liblmdb
 
 %ifarch %ix86
 %define lbits %{nil}
