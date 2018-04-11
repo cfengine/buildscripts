@@ -1,8 +1,10 @@
+%define pcre_version 8.42
+
 Summary: CFEngine Build Automation -- pcre
 Name: cfbuild-pcre
 Version: %{version}
 Release: 1
-Source0: pcre-8.41.tar.gz
+Source0: pcre-%{pcre_version}.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +16,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n pcre-8.41
+%setup -q -n pcre-%{pcre_version}
 
 ./configure --prefix=%{prefix} --enable-unicode-properties --disable-cpp --enable-shared
 
