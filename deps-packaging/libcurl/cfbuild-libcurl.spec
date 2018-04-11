@@ -1,4 +1,4 @@
-%define curl_version 7.57.0
+%define curl_version 7.59.0
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
@@ -17,12 +17,6 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
-
-# CentOS 4 is broken without this
-test "$UNAME_S" == "Linux" && $PATCH -p1 < $BASEDIR/buildscripts/deps-packaging/libcurl/centos4-includes.patch
-
-# AIX is broken without this
-$PATCH   -i $BASEDIR/buildscripts/deps-packaging/libcurl/curl_off_t.diff   include/curl/system.h
 
 ./configure \
     --with-sysroot=%{prefix} \
