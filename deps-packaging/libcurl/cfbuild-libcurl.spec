@@ -18,9 +18,6 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
 
-# AIX is broken without this
-$PATCH   -i $BASEDIR/buildscripts/deps-packaging/libcurl/curl_off_t.diff   include/curl/system.h
-
 ./configure --with-sysroot=%{prefix} --with-ldap-lib=libldap-2.4.so.2 --with-lber-lib=liblber-2.4.so.2 --with-ssl=%{prefix} --with-zlib=%{prefix} --prefix=%{prefix} CPPFLAGS="-I/var/cfengine/include" LD_LIBRARY_PATH="/var/cfengine/lib" LD_RUN_PATH="/var/cfengine/lib"
 
 %build
