@@ -92,6 +92,8 @@ package()
   # ensure all revision components are 4 digits max (MSI allows each part to be up to 65534, but we limit it to 9999)
   REVISION=$(echo $REVISION| tr '.' '\n' | sed 's/\(....\).*/\1/' | tr '\n' '.' | sed 's/\.$//')
 
+  # ensure revision has exactly 4 components - add .0.0.0 at the end and cut unneded parts
+  REVISION=$(echo $REVISION.0.0.0|cut -d '.' -f 1-4)
 
   # Wix tools have a ridiculously short maximum file length of 128 characters.
   # This is easily exceeded when Jenkins workspace paths are involved. Luckily
