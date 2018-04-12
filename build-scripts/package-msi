@@ -89,12 +89,23 @@ package()
   fi
 
   # convert any alphabets in revison to int as no alphabets are allowed in windows package version
-  alphabet=$(echo $REVISION|sed -e 's/[^a-zA-Z]*\([a-zA-Z]*\).*/\1/');
-  if [ -n "$alphabet" ]
-  then
-    convert=$(printf '%d' "'$alphabet")
-    REVISION=$(echo $REVISION|sed -e "s/$alphabet/$convert/");
-  fi
+  while true
+  do
+    alphabet=$(echo $REVISION|sed -e 's/[^a-zA-Z]*\([a-zA-Z]*\).*/\1/');
+    if [ -n "$alphabet" ]
+    then
+      convert=$(printf '%d' "'$alphabet")
+      REVISION=$(echo $REVISION|sed -e "s/$alphabet/$convert/");
+    else
+      break
+    fi
+  done
+
+  # ensure all revision components are 4 digits max (MSI allows each part to be up to 65534, but we limit it to 9999)
+  REVISION=$(echo $REVISION| tr '.' '\n' | sed 's/\(....\).*/\1/' | tr '\n' '.' | sed 's/\.$//')
+
+  # ensure revision has exactly 4 components - add .0.0.0 at the end and cut unneded parts
+  REVISION=$(echo $REVISION.0.0.0|cut -d '.' -f 1-4)
 
   # Wix tools have a ridiculously short maximum file length of 128 characters.
   # This is easily exceeded when Jenkins workspace paths are involved. Luckily
