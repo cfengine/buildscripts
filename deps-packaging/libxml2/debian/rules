@@ -12,7 +12,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	expr $(OS_VERSION) : 4 && sed -i 's/ *-Wno-array-bounds//' configure
+	sed '/VERSION_ID/!d;s/[^0-9]//g' /etc/os-release || true
+	expr `sed '/VERSION_ID/!d;s/[^0-9]//g' /etc/os-release` : 4 && sed -i 's/ *-Wno-array-bounds//' configure || true
 	./configure --prefix=$(PREFIX) --without-python 
 	CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" make
 

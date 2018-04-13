@@ -13,7 +13,7 @@ CPPFLAGS="-I${PREFIX}/include"
 # Configure
 
 mv configure configure.bak
-expr ${OS_VERSION} : 4 && sed 's/ *-Wno-array-bounds//' configure.bak >configure
+sed 's/ *-Wno-array-bounds//' configure.bak >configure
 ./configure CPPFLAGS="$CPPFLAGS" --prefix=${PREFIX} --without-python --without-iconv --without-lzma --without-zlib --with-iso8859x
 
 # Build
