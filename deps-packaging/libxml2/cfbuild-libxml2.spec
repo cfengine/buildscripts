@@ -18,8 +18,8 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n libxml2-%{libxml_version}
 
-sed '/VERSION_ID/!d;s/[^0-9]//g' /etc/os-release || true
-expr `sed '/VERSION_ID/!d;s/[^0-9]//g' /etc/os-release` : 4 && sed -i 's/ *-Wno-array-bounds//' configure || true
+cat /etc/redhat-release
+sed -i 's/ *-Wno-array-bounds//' configure || true
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
     CPPFLAGS="-I%{prefix}/include" \
     LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
