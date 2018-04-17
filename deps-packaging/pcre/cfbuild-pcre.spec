@@ -28,7 +28,7 @@ if [ -z $MAKE ]; then
 fi
 
 $MAKE
-if ! [ $SYS = "AIX" ]; then
+if ! [ "$SYS" = "AIX" ]; then
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
 $MAKE check
 %endif
