@@ -1,4 +1,4 @@
-%define openssl_version 1.0.2n
+%define openssl_version 1.0.2o
 
 Summary: CFEngine Build Automation -- openssl
 Name: cfbuild-openssl
