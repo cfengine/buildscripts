@@ -3,7 +3,6 @@
 /etc/profile.d
 /usr/lib/systemd/system/cfengine3.service
 /usr/lib/systemd/system/cf-apache.service
-/usr/lib/systemd/system/cf-consumer.service
 /usr/lib/systemd/system/cf-execd.service
 /usr/lib/systemd/system/cf-hub.service
 /usr/lib/systemd/system/cf-monitord.service
@@ -19,7 +18,6 @@
 /var/cfengine/bin/cf-promises
 /var/cfengine/bin/cf-runagent
 /var/cfengine/bin/cf-serverd
-/var/cfengine/bin/cf-consumer
 /var/cfengine/bin/runalerts.php
 /var/cfengine/bin/rsync
 /var/cfengine/bin/cfengine3-nova-hub-init-d.sh
