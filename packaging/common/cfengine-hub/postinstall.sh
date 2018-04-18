@@ -555,7 +555,6 @@ if ! is_upgrade; then
     /bin/systemctl enable cf-execd.service > /dev/null 2>&1
     /bin/systemctl enable cf-serverd.service > /dev/null 2>&1
     /bin/systemctl enable cf-runalerts.service > /dev/null 2>&1
-    /bin/systemctl enable cf-consumer.service > /dev/null 2>&1
     /bin/systemctl enable cf-monitord.service > /dev/null 2>&1
     /bin/systemctl enable cf-postgres.service > /dev/null 2>&1
     /bin/systemctl enable cf-redis-server.service > /dev/null 2>&1

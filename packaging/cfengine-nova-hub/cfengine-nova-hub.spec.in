@@ -161,7 +161,6 @@ exit 0
 %prefix/bin/cf-serverd
 # Nova-only binaries
 %prefix/bin/cf-hub
-%prefix/bin/cf-consumer
 %prefix/bin/runalerts.php
 #rsync
 %prefix/bin/rsync
@@ -252,7 +251,6 @@ exit 0
 %defattr(644,root,root,755)
 /usr/lib/systemd/system/cfengine3.service
 /usr/lib/systemd/system/cf-apache.service
-/usr/lib/systemd/system/cf-consumer.service
 /usr/lib/systemd/system/cf-execd.service
 /usr/lib/systemd/system/cf-hub.service
 /usr/lib/systemd/system/cf-monitord.service
