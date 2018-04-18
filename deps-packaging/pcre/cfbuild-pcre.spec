@@ -1,8 +1,10 @@
+%define pcre_version 8.42
+
 Summary: CFEngine Build Automation -- pcre
 Name: cfbuild-pcre
 Version: %{version}
 Release: 1
-Source0: pcre-8.41.tar.gz
+Source0: pcre-%{pcre_version}.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +16,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n pcre-8.41
+%setup -q -n pcre-%{pcre_version}
 
 ./configure --prefix=%{prefix} --enable-unicode-properties --disable-cpp --enable-shared
 
@@ -26,7 +28,9 @@ if [ -z $MAKE ]; then
 fi
 
 $MAKE
-if ! [ $SYS = "AIX" ]; then
+
+SYS=`uname -s`
+if ! [ "z$SYS" = "zAIX" ]; then
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
 $MAKE check
 %endif
@@ -70,10 +74,10 @@ CFEngine Build Automation -- pcre -- development files
 %dir %prefix/lib
 %prefix/lib/libpcre.so
 %prefix/lib/libpcre.so.1
-%prefix/lib/libpcre.so.1.2.?
+%prefix/lib/libpcre.so.1.2.*
 %prefix/lib/libpcreposix.so
 %prefix/lib/libpcreposix.so.0
-%prefix/lib/libpcreposix.so.0.0.?
+%prefix/lib/libpcreposix.so.0.0.*
 
 %files devel
 %defattr(-,root,root)
