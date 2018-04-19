@@ -23,7 +23,7 @@ Build dependencies:
 | libyaml      |          0.1.7 |           0.1.7 |                                0.1.7 |                          |
 | libvirt      |        1.1.3.9 |         1.1.3.9 | removed from cfengine built packages |                          |
 | LMDB         |         0.9.21 |          0.9.21 |                               0.9.21 |                          |
-| OpenSSL      |         1.0.2n |          1.0.2n |                               1.1.0g |                          |
+| OpenSSL      |         1.0.2n |          1.0.2n |                               1.1.0h |                          |
 | OpenLDAP     |         2.4.45 |          2.4.45 |                               2.4.45 | Enterprise agent only    |
 | PCRE         |           8.41 |            8.41 |                                 8.41 |                          |
 | pthreads-w32 |          2.9.1 |           2.9.1 |                                2.9.1 | Windows Enterprise agent |
@@ -31,7 +31,7 @@ Build dependencies:
 | PostgreSQL   |         9.0.23 |          9.0.23 | removed from cfengine built packages |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.1.0g
+* [OpenSSL](http://openssl.org/) 1.1.0h
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.42
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.22
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.7
