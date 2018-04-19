@@ -22,7 +22,7 @@ mkdir -p %{_builddir}
 
 %build
 
-make
+make all doc
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
