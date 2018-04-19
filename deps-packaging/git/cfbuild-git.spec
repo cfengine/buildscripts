@@ -22,7 +22,7 @@ mkdir -p %{_builddir}
 
 %build
 
-make all doc
+make
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -61,7 +61,6 @@ CFEngine Build Automation -- git
 %{prefix}/share/gitk
 %{prefix}/share/gitweb
 %{prefix}/share/locale
-%{prefix}/share/man
 
 %dir %{prefix}/lib
 %{prefix}/lib/git-core
