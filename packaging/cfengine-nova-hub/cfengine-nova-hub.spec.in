@@ -256,7 +256,6 @@ exit 0
 # Documentation
 %defattr(644,root,root,755)
 %dir %prefix/share
-%prefix/share/man
 %prefix/share/doc
 # Web interface
 %prefix/share/GUI
