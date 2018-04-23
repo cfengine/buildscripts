@@ -1,4 +1,4 @@
-%define git_version 2.15.1
+%define git_version 2.17.0
 
 Summary: CFEngine Build Automation -- git
 Name: cfbuild-git
@@ -61,7 +61,6 @@ CFEngine Build Automation -- git
 %{prefix}/share/gitk
 %{prefix}/share/gitweb
 %{prefix}/share/locale
-%{prefix}/share/man
 
 %dir %{prefix}/lib
 %{prefix}/lib/git-core
