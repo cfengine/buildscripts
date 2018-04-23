@@ -187,6 +187,7 @@ case "$JOB" in
         ;;
 
     ( reporting-test )
+        sudo apt-get -y install python-psycopg2
         s3cmd get --no-progress $DEB_PACKAGE cfe.deb
         sudo dpkg -i cfe.deb
         sudo service cfengine3 restart
