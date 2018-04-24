@@ -10,6 +10,7 @@ LXD=${BUILD_ROOT}/cfbuild-libxml2-devel${PREFIX}
 # Patch
 
 $PATCH -p0 < solaris-8-inttypes.patch
+$PATCH -p0 < solaris-huge-val.patch
 
 # Configure
 
