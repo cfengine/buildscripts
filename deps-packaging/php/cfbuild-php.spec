@@ -1,4 +1,4 @@
-%define php_version 7.2.0
+%define php_version 7.2.5
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -18,6 +18,13 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n php-%{php_version}
+
+# really we should maybe check gcc version and if somewhere around 4.1.2 (or <4.3) use this patch.
+# I just check for redhat 5 since this is a hub-related package only.
+if expr "`cat /etc/redhat-release`" : '.* [5]\.'
+then
+  patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
+fi
 
 ./configure --prefix=%{prefix}/httpd/php \
 --with-apxs2=%{prefix}/httpd/bin/apxs \
