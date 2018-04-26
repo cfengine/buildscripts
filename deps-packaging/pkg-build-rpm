@@ -69,8 +69,9 @@ then
         ln -sf $srcfile $BASEDIR/$PKGNAME/SOURCES
     done
 
-    # Almost, but not completely, equivalent to -a, compatible with AIX.
     cp -pPR $P/* $BASEDIR/$PKGNAME/SOURCES
+    sudo chown -R root:root $BASEDIR/$PKGNAME/SOURCES
+    ls -l $BASEDIR/$PKGNAME/SOURCES
 fi
 
 
