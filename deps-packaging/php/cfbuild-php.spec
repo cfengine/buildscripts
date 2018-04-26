@@ -23,7 +23,7 @@ mkdir -p %{_builddir}
 # I just check for redhat 5 since this is a hub-related package only.
 if expr "`cat /etc/redhat-release`" : '.* [5]\.'
 then
-  patch -p0 < old-gcc-isfinite.patch
+  patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
 fi
 
 ./configure --prefix=%{prefix}/httpd/php \
