@@ -20,7 +20,7 @@ mkdir -p %{_builddir}
 
 expr "z$label" : '.*_aix_' && ${PATCH} -p0 < ../../SOURCES/aix-nan.patch
 
-if expr \( "z$label" : '.*_aix_' \) \| \( "`cat /etc/redhat-release`" : '.* 4\.' \)
+if expr \( "z$label" : '.*_aix_' \) \| \( "`cat /etc/redhat-release`" : '.* [45]\.' \)
 then
     mv configure configure.bak
     sed 's/ *-Wno-array-bounds//' configure.bak >configure

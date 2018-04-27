@@ -71,6 +71,8 @@ then
 
     # Almost, but not completely, equivalent to -a, compatible with AIX.
     cp -pPR $P/* $BASEDIR/$PKGNAME/SOURCES
+    # make sure the SOURCES are owned by a known user ('root' is always known)
+    sudo chown -R root:root $BASEDIR/$PKGNAME/SOURCES
 fi
 
 
