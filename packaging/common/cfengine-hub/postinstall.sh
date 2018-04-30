@@ -454,18 +454,6 @@ fi
 #
 mkdir -p $PREFIX/config
 
-#
-#REDIS RELATED
-#
-cat > $PREFIX/config/redis.conf << EOF
-daemonize yes
-pidfile $PREFIX/redis-server.pid
-unixsocket /tmp/redis.sock
-unixsocketperm 600
-bind 127.0.0.1
-port 0
-EOF
-
 # Fix Mission Portal application permissions ENT-3035
 # Replication of https://github.com/cfengine/masterfiles/blob/8e8c648713d947ad9c2412584b238b8c8743130e/cfe_internal/enterprise/CFE_knowledge.cf
 find $PREFIX/httpd/htdocs/ -type f ! -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
@@ -557,7 +545,6 @@ if ! is_upgrade; then
     /bin/systemctl enable cf-runalerts.service > /dev/null 2>&1
     /bin/systemctl enable cf-monitord.service > /dev/null 2>&1
     /bin/systemctl enable cf-postgres.service > /dev/null 2>&1
-    /bin/systemctl enable cf-redis-server.service > /dev/null 2>&1
     /bin/systemctl enable cf-hub.service > /dev/null 2>&1
     /bin/systemctl enable cfengine3.service > /dev/null 2>&1
   else

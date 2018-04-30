@@ -53,7 +53,7 @@ case "$DEPS" in
     *)          var_append ARGS "--without-libcurl" ;;
 esac
 case "$ROLE" in
-    hub)   var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql-hub=$P --with-redis=$P" ;;
+    hub)   var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql-hub=$P --without-redis" ;;
     agent) var_append ARGS "--without-cfmod --without-postgresql-hub --without-redis" ;;
     *)     fatal "Unknown ROLE: $ROLE" ;;
 esac

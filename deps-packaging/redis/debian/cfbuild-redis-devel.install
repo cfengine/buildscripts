@@ -1,6 +1,0 @@
-/var/cfengine/lib/libhiredis.a
-/var/cfengine/include/hiredis/hiredis.h
-/var/cfengine/include/hiredis/async.h
-/var/cfengine/include/hiredis/adapters/ae.h
-/var/cfengine/include/hiredis/adapters/libev.h
-/var/cfengine/include/hiredis/adapters/libevent.h

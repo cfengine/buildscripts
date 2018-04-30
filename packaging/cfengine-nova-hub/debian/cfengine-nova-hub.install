@@ -7,7 +7,6 @@
 /usr/lib/systemd/system/cf-hub.service
 /usr/lib/systemd/system/cf-monitord.service
 /usr/lib/systemd/system/cf-postgres.service
-/usr/lib/systemd/system/cf-redis-server.service
 /usr/lib/systemd/system/cf-runalerts.service
 /usr/lib/systemd/system/cf-serverd.service
 /var/cfengine/bin/cf-agent
@@ -95,9 +94,5 @@
 /var/cfengine/lib/postgresql/*
 /var/cfengine/share/postgresql/*
 /var/cfengine/share/doc/postgresql/extension/*
-/var/cfengine/bin/redis-cli
-/var/cfengine/bin/redis-server
-/var/cfengine/bin/redis-check-aof
-/var/cfengine/bin/redis-benchmark
 /var/cfengine/ssl/openssl.cnf
 /var/cfengine/bin/openssl

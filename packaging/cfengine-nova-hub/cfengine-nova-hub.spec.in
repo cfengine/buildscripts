@@ -213,11 +213,6 @@ exit 0
 %{prefix}/bin/pgbench
 %{prefix}/bin/vacuumlo
 %{prefix}/bin/pg_test_fsync
-#redis server
-%{prefix}/bin/redis-cli
-%{prefix}/bin/redis-server
-%{prefix}/bin/redis-check-aof
-%{prefix}/bin/redis-benchmark
 # LMDB
 %prefix/bin/lmdump
 %prefix/bin/lmmgr
@@ -255,7 +250,6 @@ exit 0
 /usr/lib/systemd/system/cf-hub.service
 /usr/lib/systemd/system/cf-monitord.service
 /usr/lib/systemd/system/cf-postgres.service
-/usr/lib/systemd/system/cf-redis-server.service
 /usr/lib/systemd/system/cf-runalerts.service
 /usr/lib/systemd/system/cf-serverd.service
 
