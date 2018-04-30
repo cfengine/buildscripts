@@ -30,7 +30,6 @@
 /var/cfengine/bin/curl
 /var/cfengine/lib/lib*.so.*
 /var/cfengine/lib/liblmdb.so
-/var/cfengine/lib/libhiredis.so
 /var/cfengine/lib/libpq.so
 /var/cfengine/lib/libecpg.so
 /var/cfengine/lib/cfengine-*.so
