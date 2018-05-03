@@ -35,7 +35,6 @@
 /var/cfengine/lib/cfengine-*.so
 /var/cfengine/lib/apr-util-1
 /var/cfengine/lib/git-core
-/var/cfengine/share/man
 /var/cfengine/share/doc
 /var/cfengine/modules
 /var/cfengine/inputs
@@ -49,8 +48,6 @@
 /var/cfengine/share/solaris_admin_files
 /var/cfengine/share/git-*
 /var/cfengine/share/locale
-/var/cfengine/share/perl
-/var/cfengine/share/man
 /var/cfengine/share/db
 /var/cfengine/design-center
 /var/cfengine/httpd

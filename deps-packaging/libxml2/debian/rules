@@ -12,6 +12,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	expr "`cat /etc/debian_version`" : 4 && sed -i 's/ *-Wno-array-bounds//' configure || true
 	./configure --prefix=$(PREFIX) --without-python 
 	CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" make
 
