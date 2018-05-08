@@ -212,4 +212,16 @@ case "$JOB" in
         sudo cf-agent -B "$(ifconfig | grep -A1 Ethernet | sed '2!d;s/.*addr:\([0-9.]*\).*/\1/')"
     ;;
 
+    ( deployment-test-reporting )
+        sudo apt-get -y install python-psycopg2
+        s3cmd get --no-progress $DEB_PACKAGE cfe.deb
+        sudo dpkg -i cfe.deb
+        sudo touch empty.cf
+        sudo cf-promises --show-vars ./empty.cf | grep -F 'default:sys.ipv4 ' | awk '{print $2}' > ip.txt
+        sudo cf-agent -B "$(head -n 1 ip.txt)"
+        sudo ps aux | grep [c]f-
+        cd nova/tests/reporting
+        sudo python deployment_test.py
+    ;;
+
 esac
