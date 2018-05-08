@@ -55,6 +55,7 @@ case "$OS_FAMILY" in
     ;;
   *)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,-R$BUILDPREFIX/lib"
+    export CFLAGS="-Werror"
     ;;
 esac
 export LDFLAGS
