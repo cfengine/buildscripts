@@ -42,7 +42,7 @@ def main(labels_f_path, exotics_f_path, run_on_exotics):
                 labels_to_run.discard(label.strip())
 
     print("(", end="")
-    labels_eqs = ("label == %s" % label for label in sorted(labels_to_run))
+    labels_eqs = ('label == "%s"' % label for label in sorted(labels_to_run))
     print(" || \\\n ".join(labels_eqs) + ")")
 
     return 0
