@@ -35,11 +35,11 @@ def main(labels_f_path, exotics_f_path, run_on_exotics):
     labels_to_run = set()
     with open(labels_f_path, "r") as f:
         for label in non_empty_lines(f):
-            labels_to_run.add(label)
+            labels_to_run.add(label.strip())
     if not run_on_exotics:
         with open(exotics_f_path, "r") as f:
             for label in non_empty_lines(f):
-                labels_to_run.discard(label)
+                labels_to_run.discard(label.strip())
 
     print("(", end="")
     labels_eqs = ("label == %s" % label for label in sorted(labels_to_run))
