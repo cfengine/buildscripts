@@ -298,6 +298,8 @@ exit 0
 %prefix/httpd/modules
 %prefix/httpd/php/lib
 %prefix/httpd/php/php
+%config(noreplace) %prefix/httpd/php/lib/php.ini
+
 %defattr(755,root,root,755)
 %prefix/httpd/php/bin
 
