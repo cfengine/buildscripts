@@ -305,6 +305,9 @@ if [ ! -d $PREFIX/state/pg/data ]; then
 
   mkdir -p $PREFIX/state/pg/data
   chown -R cfpostgres $PREFIX/state/pg
+  # Note: postgres expects $PWD to be writeable, so all postgres commands
+  # should be executed from cfpostgres-writeable directory.
+  # /tmp is such directory on most cases
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
   touch /var/log/postgresql.log
   chown cfpostgres /var/log/postgresql.log
@@ -349,17 +352,222 @@ if [ ! -d $PREFIX/state/pg/data ]; then
   fi
 fi
 
+check_disk_space() {
+  # checks disk space, prints warning if needed, and returns:
+  # 0 (true) if it's enough disk space
+  # 1 (false) if we need to abort due to low disk space
+  megabytes_free="$(df -PBM $PREFIX | awk 'FNR==2{gsub(/[^0-9]/,"",$4);print $4}')"
+  # note that if df or awk is not installed, or df has different format,
+  # or something else, then $megabytes_free will be empty string.
+  if [ -z "$megabytes_free" ]; then
+    cf_console echo "Please check your disk space."
+    return 0
+  elif [ "$megabytes_free" -lt 100 ]; then
+    cf_console echo "Please check your disk space."
+    return 1
+  else
+    return 0
+  fi
+}
+
+# Here we attempt three upgrade mechanisms, in this order:
+# * using pg_upgrade utility
+# * running two databases side-by-side (old and new),
+#   and dumping from old one into new one via pipe
+# * first dumping from old database into *.sql file,
+#   and then importing it into new one
+
+migrate_db_using_pg_upgrade() {
+  (cd /tmp
+    cf_console su cfpostgres -c "$PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data"
+  )
+  result=$?
+  return $result
+}
+
+migrate_db_using_pipe() {
+  (cd /tmp
+    # setting up: starting postgres servers and creating fifo
+    su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_ctl -w -D $BACKUP_DIR/data/ -o '-p 5433' -l /tmp/postgresql-old.log start"
+    rm -rf $PREFIX/state/pg/data/*
+    su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data"
+    su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data/ -o '-p 5434' -l /tmp/postgresql-new.log start"
+    su cfpostgres -c "mkfifo pg_stream"
+    # dump from old database to pg_stream
+    su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_dumpall --clean --port=5433 >pg_stream" &
+    dump_pid=$!
+    # read into new database from pg_stream
+    su cfpostgres -c "$PREFIX/bin/psql --port=5434 postgres <pg_stream" &
+    restore_pid=$!
+    # wait for processes to finish and save their results
+    wait $dump_pid
+    dump_result=$?
+    wait $restore_pid
+    restore_result=$?
+    # cleaning up: stopping servers and removing fifo
+    su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_ctl -w -D $BACKUP_DIR/data/ -o '-p 5433' stop"
+    su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data/ -o '-p 5434' -l /tmp/postgresql-new.log stop"
+    rm pg_stream # ok to do it as root
+    # analyze the results
+    # return code 141 from pg_dumpall means that the process was killed by signal 13 (141=128+13), which is SIGPIPE -
+    # i.e. downstream process was terminated and pipe was closed - hence, not an error in this process (probably)
+    if [ $dump_result != 0 -a $dump_result != 141 ]; then
+      cf_console echo "Error dumping from old database"
+      exit 1 # this exits only from subshell, i.e. (...) block
+    fi
+    if [ $restore_result != 0 ]; then
+      cf_console echo "Error restoring to new database"
+      exit 2
+    fi
+  )
+  result=$?
+  return $result
+}
+
+migrate_db_using_dump_file() {
+  (cd /tmp
+    # restore old binaries, run pg_dumpall there, restore new binaries, run psql there, and hope we not run out of disk space
+    cf_console echo "Restoring old database..."
+    # move new binaries out of the way
+    rm -rf "$PREFIX/state/pg/data"
+    mkdir -p "$BACKUP_DIR.new/lib"
+    mkdir -p "$BACKUP_DIR.new/share"
+    mv "$PREFIX/bin" "$BACKUP_DIR.new"
+    cp -l "$PREFIX/lib"/* "$BACKUP_DIR.new/lib"
+    rm "$PREFIX/lib"/*
+    mv "$PREFIX/lib/postgresql/" "$BACKUP_DIR.new/lib"
+    mv "$PREFIX/share/postgresql/" "$BACKUP_DIR.new/share"
+    # restore old backup
+    cp -al "$BACKUP_DIR/data" "$PREFIX/state/pg"
+    cp -al "$BACKUP_DIR/bin" "$PREFIX"
+    cp -l "$BACKUP_DIR/lib"/* "$PREFIX/lib"
+    cp -al "$BACKUP_DIR/lib/postgresql/" "$PREFIX/lib"
+    cp -al "$BACKUP_DIR/share/postgresql/" "$PREFIX/share"
+    cf_console echo "Dumping old database to SQL file..."
+    # run pg_dumpall
+    su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_ctl -w -D $BACKUP_DIR/data/ -o '-p 5433' -l /tmp/postgresql-old.log start"
+    su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_dumpall --clean --port=5433" >$BACKUP_DIR/db_dump.sql
+    dump_result=$?
+    su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_ctl -w -D $BACKUP_DIR/data/ -o '-p 5433' stop"
+    # restore new binaries
+    rm -rf "$PREFIX/bin"
+    rm -f "$PREFIX/lib"/*
+    rm -rf "$PREFIX/lib/postgresql/"
+    rm -rf "$PREFIX/share/postgresql/"
+    rm -rf "$PREFIX/state/pg/data"
+    mv "$BACKUP_DIR.new/bin" "$PREFIX"
+    mv "$BACKUP_DIR.new/lib"/* "$PREFIX/lib"
+    mv "$BACKUP_DIR.new/share/postgresql/" "$PREFIX/share"
+    rm -rf "$BACKUP_DIR.new"
+    # did pg_dumpall went well?
+    if [ $dump_result != 0 -o $DEBUG = 3 ]; then
+      cf_console echo "Dumping failed."
+      rm $BACKUP_DIR/db_dump.sql
+      exit 1
+    fi
+    # run psql there
+    cf_console echo "Importing SQL file into new database..."
+    rm -rf $PREFIX/state/pg/data/*
+    su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data"
+    su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data/ -o '-p 5434' -l /tmp/postgresql-new.log start"
+    su cfpostgres -c "$PREFIX/bin/psql --port=5434 postgres" <$BACKUP_DIR/db_dump.sql
+    restore_result=$?
+    su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data/ -o '-p 5434' -l /tmp/postgresql-new.log stop"
+    if [ $restore_result != 0 -o $DEBUG = 4 ]; then
+      cf_console echo "Importing failed."
+      exit 2
+    fi
+  )
+  result=$?
+  return $result
+}
+
 BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
 if is_upgrade && [ -d "$BACKUP_DIR" ]; then
-  cf_console echo "Migrating database..."
-  (cd /tmp && cf_console time su cfpostgres -c "$PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data --link")
-  if [ $? = 0 ]; then
+  # DEBUG variable controls which of migration methods fail:
+  # 0 - do nothing special (usually pg_upgrade, which is first method, succeeds)
+  # 1 - fail first method (so we get a chance to run second method, migration via pipe)
+  # 2 - fail first two methods (so we get a chance to run third method, migration via dump)
+  # 3 - fail first two methods, and third one on "dumping" stage
+  #     (so we get a chance to see error message with instructions
+  #      how to dump and import manually)
+  # 4 - fail first two methods, and third one on "importing" stage
+  #     (so we get a chance to see error message with instructions
+  #      how to import existing dump file)
+  if [ -f $PREFIX/postgres-10-migration-test ]; then
+    DEBUG="$(cat $PREFIX/postgres-10-migration-test)"
+  else
+    DEBUG=0
+  fi
+  export DEBUG
+  MIGRATED=0 # flag that migration succeded
+  cf_console echo "Migrating database using pg_upgrade utility..."
+  cf_console echo
+  migrate_db_using_pg_upgrade
+  result=$?
+  cf_console echo
+  if [ $result = 0 -a $DEBUG -lt 1 ]; then
+    MIGRATED=1
+  else
+    cf_console echo "Migration using pg_upgrade failed."
+    cf_console echo
+    if check_disk_space; then
+      cf_console echo "Migrating database using dumpall | psql way..."
+      migrate_db_using_pipe
+      result=$?
+      if [ $result = 0 -a $DEBUG -lt 2 ]; then
+        MIGRATED=1
+      else
+        cf_console echo "Migration using dumpall | psql failed."
+        cf_console echo
+        if check_disk_space; then
+          cf_console echo "Migrating database using dumpall && psql way..."
+          migrate_db_using_dump_file
+          result=$?
+          if [ $result = 0 ]; then
+            MIGRATED=1
+	  else
+            check_disk_space
+          fi # $result of migrate_db_using_dump_file = 0
+        fi # check_disk_space after Migration using dumpall | psql failed.
+      fi # $result of migrate_db_using_pipe = 0
+    fi # check_disk_space after Migration using pg_upgrade failed.
+  fi # $result of migrate_db_using_pg_upgrade = 0
+  cf_console echo
+  if [ $MIGRATED = 1 ]; then
     cf_console echo "Migration done, cleaning up"
     rm -rf $BACKUP_DIR
   else
-    cf_console echo "Migration failure. Manual interference required."
-    cf_console echo "Old stuff is saved in $BACKUP_DIR. Good luck!"
-    exit 1
+    cf_console echo "Migration failed. Backup is saved in $BACKUP_DIR."
+    if [ -f $BACKUP_DIR/db_dump.sql ]; then
+      DUMP_FILENAME="$BACKUP_DIR/db_dump.sql"
+      cf_console echo "Plaintext dump of the database is in $DUMP_FILENAME file."
+      cf_console echo "You can import it by running these commands as 'cfpostgres' user (cfengine3 service should be stopped):"
+    else
+      DUMP_FILENAME="/tmp/db_dump.sql"
+      cf_console echo "Run these commands as 'cfpostgres' user to produce a plaintext dump of the database:"
+      cf_console echo
+      cf_console echo "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_ctl -w -D $BACKUP_DIR/data/ -o '-p 5433' -l /tmp/postgresql-old.log start"
+      cf_console echo "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_dumpall --clean --port=5433 >$DUMP_FILENAME"
+      cf_console echo "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_ctl -w -D $BACKUP_DIR/data/ -o '-p 5433' stop"
+      cf_console echo
+      cf_console echo "Then, you can import it using these commands (cfengine3 service should be stopped):"
+    fi
+    cf_console echo
+    cf_console echo "rm -rf $PREFIX/state/pg/data/*"
+    cf_console echo "$PREFIX/bin/initdb -D $PREFIX/state/pg/data"
+    cf_console echo "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data/ -o '-p 5434' -l /tmp/postgresql-new.log start"
+    cf_console echo "$PREFIX/bin/psql --port=5434 postgres <$DUMP_FILENAME"
+    cf_console echo "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data/ -o '-p 5434' -l /tmp/postgresql-new.log stop"
+    cf_console echo
+    cf_console echo "Alternatively, reinstall CFEngine Enterprise Policy Server version $(cat "$PREFIX/UPGRADED_FROM.txt"),"
+    cf_console echo "and run these commands as 'root' to restore database (cfengine3 service should be stopped):"
+    cf_console echo
+    cf_console echo "rm -rf $PREFIX/state/pg/data"
+    cf_console echo "mv $BACKUP_DIR/data $PREFIX/state/pg/data"
+    cf_console echo
+    cf_console echo "And now installation will proceed with clean (empty) database"
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
   fi
 fi
 
