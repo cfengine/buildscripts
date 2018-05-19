@@ -352,7 +352,7 @@ fi
 BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
 if is_upgrade && [ -d "$BACKUP_DIR" ]; then
   export PREFIX BACKUP_DIR
-  bash -xe /var/dbm
+  cf_console bash -xe /var/dbm
 fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
