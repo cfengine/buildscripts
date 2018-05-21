@@ -303,6 +303,13 @@ generate_chroot_transfer_script()
 {
   # These rules are processed in a "first that matches" fashion.
 
+  # This should go before 'Cross platform', in order not to be overwritten by
+  # '+ /etc' rule below
+  if [ "$OS_FAMILY" = solaris ]
+  then
+    echo '- /etc/svc/volatile/.inetd.uds'
+  fi
+
   ############# Cross platform #############
   cat <<EOF
 - */proc
