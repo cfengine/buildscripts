@@ -16,7 +16,7 @@ if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/n
   cf_console echo "Attempting to migrate Mission Portal database. This can break stuff."
   cf_console echo "It can be disabled by shutting down CFEngine and removing/renaming $PREFIX/state/pg/data prior to upgrade."
   cf_console echo "Press Ctrl-C in the next 15 seconds if you want to cancel..."
-  sleep 15
+  # sleep 15
   cf_console echo "Ok, moving on..."
 fi
 

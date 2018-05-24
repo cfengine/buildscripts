@@ -351,16 +351,8 @@ fi
 
 BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
 if is_upgrade && [ -d "$BACKUP_DIR" ]; then
-  cf_console echo "Migrating database..."
-  (cd /tmp && cf_console time su cfpostgres -c "$PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data --link")
-  if [ $? = 0 ]; then
-    cf_console echo "Migration done, cleaning up"
-    rm -rf $BACKUP_DIR
-  else
-    cf_console echo "Migration failure. Manual interference required."
-    cf_console echo "Old stuff is saved in $BACKUP_DIR. Good luck!"
-    exit 1
-  fi
+  export PREFIX BACKUP_DIR
+  cf_console bash -x /var/dbm
 fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
