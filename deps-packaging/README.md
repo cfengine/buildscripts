@@ -16,7 +16,7 @@ Build dependencies:
 | lcov         |           1.13 |            1.13 |                                 1.13 |                          |
 | libacl       |         2.2.52 |          2.2.52 |                               2.2.52 |                          |
 | libattr      |         2.4.47 |          2.4.47 |                               2.4.47 |                          |
-| libcurl      |         7.59.0 |          7.59.0 |                               7.59.0 |                          |
+| libcurl      |         7.59.0 |          7.59.0 |                               7.60.0 |                          |
 | libgnurx     |          2.5.1 |           2.5.1 |                                2.5.1 | Windows Enterprise agent |
 | libiconv     |           1.15 |            1.15 |                                 1.15 |                          |
 | libxml2      |          2.9.8 |           2.9.8 |                                2.9.8 |                          |
@@ -40,7 +40,7 @@ Build dependencies:
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
-* [libcurl](http://curl.haxx.se/download.html) 7.59.0
+* [libcurl](http://curl.haxx.se/download.html) 7.60.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
