@@ -54,7 +54,7 @@ Build dependencies:
 | Apache     |         2.2.34 |          2.4.33 |          2.4.29 |
 | APR        |          1.5.2 |           1.5.2 |           1.6.3 |
 | apr-util   |          1.5.2 |           1.5.4 |           1.6.1 |
-| Git        |        1.8.5.6 |          2.13.6 |          2.17.0 |
+| Git        |        1.8.5.6 |          2.13.6 |          2.17.1 |
 | libmcrypt  |          2.5.8 |           2.5.8 |         removed |
 | OpenLDAP   |         2.4.45 |          2.4.45 |          2.4.45 |
 | PHP        |         5.6.35 |          5.6.35 |           7.2.4 |
@@ -79,7 +79,7 @@ Hub specific dependencies:
 * [PostgreSQL](http://www.postgresql.org/) for the hub 10.3
 * [Redis](http://redis.io/) 3.2.11
 * [PHP](http://php.net/) 7.2.4
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.17.0
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.17.1
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)
