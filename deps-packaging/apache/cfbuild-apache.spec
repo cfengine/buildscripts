@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define apache_version 2.4.29
 %global __os_install_post %{nil}
 
@@ -23,7 +26,7 @@ mkdir -p %{_builddir}
 CPPFLAGS=-I%{buildprefix}/include
 
 
-./configure \
+CFLAGS="$CFLAGS -ggdb3" ./configure \
     --prefix=%{prefix}/httpd \
     --enable-so \
     --enable-mods-shared="all ssl ldap authnz_ldap" \

@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 Summary: CFEngine Build Automation -- automake
 Name: cfbuild-automake
 Version: 1.10.1
@@ -14,7 +17,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n automake-1.10.1
 
-./configure --prefix=/usr
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=/usr
 
 %build
 

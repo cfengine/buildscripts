@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define openldap_version 2.4.46
 
 Summary: CFEngine Build Automation -- openldap
@@ -33,7 +36,7 @@ CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 SYS=`uname -s`
 
 
-./configure --prefix=%{prefix} \
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} \
             --enable-shared \
             --disable-slapd \
             --disable-backends \

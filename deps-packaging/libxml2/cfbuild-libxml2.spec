@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define libxml_version 2.9.8
 
 Summary: CFEngine Build Automation -- libxml2
@@ -30,7 +33,7 @@ then
     sed 's/ *-Wno-array-bounds//' configure.bak >configure
     chmod a+x configure
 fi
-./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
     CPPFLAGS="-I%{prefix}/include" \
     LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
 

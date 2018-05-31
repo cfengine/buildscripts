@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 Summary: CFEngine Build Automation -- libattr
 Name: cfbuild-libattr
 Version: %{version}
@@ -19,7 +22,7 @@ mkdir -p %{_builddir}
 
 zcat ../../SOURCES/attr.destdir.diff.gz | $PATCH -p1 || true
 
-./configure --prefix=%{prefix} --includedir=%{incldir} --enable-gettext=no
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --includedir=%{incldir} --enable-gettext=no
 
 %build
 

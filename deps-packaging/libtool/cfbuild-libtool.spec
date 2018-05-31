@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 Summary: CFEngine Build Automation -- libtool
 Name: cfbuild-libtool
 Version: 1.5.24
@@ -14,7 +17,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n libtool-1.5.24
 
-./configure --prefix=/usr
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=/usr
 
 %build
 

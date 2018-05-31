@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define apr_version 1.6.1
 
 Summary: CFEngine Build Automation -- apr-util
@@ -30,7 +33,7 @@ CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 
 SYS=`uname -s`
 
-./configure --prefix=%{prefix}  --with-apr=%{prefix} --with-ldap-lib=%{prefix}/lib --with-ldap \
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix}  --with-apr=%{prefix} --with-ldap-lib=%{prefix}/lib --with-ldap \
             CPPFLAGS="$CPPFLAGS"
 
 %build

@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define php_version 7.2.4
 
 Summary: CFEngine Build Automation -- php
@@ -24,7 +27,7 @@ then
   patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
 fi
 
-./configure --prefix=%{prefix}/httpd/php \
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix}/httpd/php \
 --with-apxs2=%{prefix}/httpd/bin/apxs \
 --with-config-file=%{prefix}/httpd/php \
 --with-openssl=shared,%{prefix} \

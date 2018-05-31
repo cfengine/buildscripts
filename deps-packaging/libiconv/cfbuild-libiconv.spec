@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 Summary: CFEngine Build Automation -- libiconv
 Name: cfbuild-libiconv
 Version: %{version}
@@ -16,7 +19,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n libiconv-1.15
 
-./configure --prefix=%{prefix} --disable-shared --enable-static
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --disable-shared --enable-static
 
 
 %build

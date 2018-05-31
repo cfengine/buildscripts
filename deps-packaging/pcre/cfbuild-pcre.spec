@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define pcre_version 8.42
 
 Summary: CFEngine Build Automation -- pcre
@@ -18,7 +21,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n pcre-%{pcre_version}
 
-./configure --prefix=%{prefix} --enable-unicode-properties --disable-cpp --enable-shared
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --enable-unicode-properties --disable-cpp --enable-shared
 
 %build
 

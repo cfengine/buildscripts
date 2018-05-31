@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 Summary: CFEngine Build Automation -- libyaml
 Name: cfbuild-libyaml
 Version: %{version}
@@ -25,7 +28,7 @@ if [ -z $MAKE ]; then
   export MAKE=$MAKE_PATH
 fi
 
-./configure --prefix=%{prefix}
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix}
 $MAKE
 
 %install

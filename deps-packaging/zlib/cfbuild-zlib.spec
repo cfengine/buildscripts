@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 Summary: CFEngine Build Automation -- zlib
 Name: cfbuild-zlib
 Version: %{version}
@@ -23,7 +26,7 @@ if [ -z $MAKE]; then
   export MAKE=$MAKE_PATH
 fi
 
-./configure --prefix=%{prefix}
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix}
 
 $MAKE
 %if %{?with_testsuite:1}%{!?with_testsuite:0}

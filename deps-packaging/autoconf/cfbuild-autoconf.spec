@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 Summary: CFEngine Build Automation -- autoconf
 Name: cfbuild-autoconf
 Version: 2.69
@@ -14,7 +17,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n autoconf-2.60
 
-./configure --prefix=/usr
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=/usr
 
 %build
 

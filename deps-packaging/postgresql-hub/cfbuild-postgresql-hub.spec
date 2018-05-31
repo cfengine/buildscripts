@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define postgresql_version 10.3
 
 Summary: CFEngine Build Automation -- postgresql
@@ -23,7 +26,7 @@ mkdir -p %{_builddir}
 
 SYS=`uname -s`
 
-LD_LIBRARY_PATH=%{prefix}/lib CPPFLAGS=-I%{prefix}/include ./configure --prefix=%{prefix} --without-zlib --without-readline --with-openssl
+LD_LIBRARY_PATH=%{prefix}/lib CPPFLAGS=-I%{prefix}/include CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --without-zlib --without-readline --with-openssl
 
 if [ -z $MAKE ]; then
   MAKE_PATH=`which make`

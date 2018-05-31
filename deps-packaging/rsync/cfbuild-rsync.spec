@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define rsync_version 3.1.3
 
 Summary: CFEngine Build Automation -- rsync
@@ -18,7 +21,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n rsync-%{rsync_version}
 
-./configure --prefix=%{prefix} --with-included-zlib=%{prefix}
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --with-included-zlib=%{prefix}
 
 %build
 

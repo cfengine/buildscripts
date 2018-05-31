@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define openssl_version 1.1.0h
 
 Summary: CFEngine Build Automation -- openssl

@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define git_version 2.17.0
 
 Summary: CFEngine Build Automation -- git
@@ -18,7 +21,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n git-%{git_version}
 
-./configure --prefix=%{prefix} --with-openssl=%{prefix} --without-iconv --with-gitconfig=%{prefix}/config/gitconfig --with-gitattributes=%{prefix}/config/gitattributes --with-zlib=%{prefix} --with-curl=%{prefix}  --libexecdir=%{prefix}/lib
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --with-openssl=%{prefix} --without-iconv --with-gitconfig=%{prefix}/config/gitconfig --with-gitattributes=%{prefix}/config/gitattributes --with-zlib=%{prefix} --with-curl=%{prefix}  --libexecdir=%{prefix}/lib
 
 %build
 

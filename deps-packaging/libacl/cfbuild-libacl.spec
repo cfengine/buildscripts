@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 Summary: CFEngine Build Automation -- libacl
 Name: cfbuild-libacl
 Version: %{version}
@@ -18,7 +21,7 @@ mkdir -p %{_builddir}
 
 zcat ../../SOURCES/acl.destdir.diff.gz | $PATCH -p1 || true
 
-./configure --prefix=%{prefix} --enable-gettext=no
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --enable-gettext=no
 
 %build
 
