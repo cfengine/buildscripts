@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define lmdb_version 0.9.22
 
 Summary: CFEngine Build Automation -- lmdb

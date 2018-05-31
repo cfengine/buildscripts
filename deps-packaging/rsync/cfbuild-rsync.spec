@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define rsync_version 3.1.3
 
 Summary: CFEngine Build Automation -- rsync

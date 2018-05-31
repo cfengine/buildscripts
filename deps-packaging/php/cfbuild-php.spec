@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define php_version 7.2.4
 
 Summary: CFEngine Build Automation -- php

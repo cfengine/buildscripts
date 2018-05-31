@@ -1,3 +1,6 @@
+%global debug_package %{nil}
+%global __strip /bin/true
+%global _enable_debug_packages 0
 %define postgresql_version 10.3
 
 Summary: CFEngine Build Automation -- postgresql
