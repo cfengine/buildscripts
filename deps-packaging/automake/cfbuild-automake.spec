@@ -14,7 +14,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n automake-1.10.1
 
-./configure --prefix=/usr
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=/usr
 
 %build
 

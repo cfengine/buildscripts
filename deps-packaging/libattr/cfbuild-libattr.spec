@@ -19,7 +19,7 @@ mkdir -p %{_builddir}
 
 zcat ../../SOURCES/attr.destdir.diff.gz | $PATCH -p1 || true
 
-./configure --prefix=%{prefix} --includedir=%{incldir} --enable-gettext=no
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --includedir=%{incldir} --enable-gettext=no
 
 %build
 

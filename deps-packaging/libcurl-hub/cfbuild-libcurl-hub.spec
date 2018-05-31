@@ -18,7 +18,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
 
-./configure \
+CFLAGS="$CFLAGS -ggdb3" ./configure \
     --with-sysroot=%{prefix} \
     --with-ssl=%{prefix} \
     --with-zlib=%{prefix} \

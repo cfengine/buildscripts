@@ -30,7 +30,7 @@ CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 
 SYS=`uname -s`
 
-./configure --prefix=%{prefix} \
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} \
             CPPFLAGS="$CPPFLAGS"
 
 %build

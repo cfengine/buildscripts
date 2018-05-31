@@ -24,7 +24,7 @@ then
   patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
 fi
 
-./configure --prefix=%{prefix}/httpd/php \
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix}/httpd/php \
 --with-apxs2=%{prefix}/httpd/bin/apxs \
 --with-config-file=%{prefix}/httpd/php \
 --with-openssl=shared,%{prefix} \
