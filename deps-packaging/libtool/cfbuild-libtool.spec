@@ -14,7 +14,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n libtool-1.5.24
 
-./configure --prefix=/usr
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=/usr
 
 %build
 

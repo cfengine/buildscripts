@@ -19,7 +19,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n php-%{php_version}
 
-./configure --prefix=%{prefix}/httpd/php \
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix}/httpd/php \
 --with-apxs2=%{prefix}/httpd/bin/apxs \
 --with-config-file=%{prefix}/httpd/php \
 --with-openssl=shared,%{prefix} \
