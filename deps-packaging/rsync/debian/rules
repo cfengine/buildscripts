@@ -35,7 +35,6 @@ binary-arch: build install
 	dh_testroot
 	dh_install --sourcedir=debian/tmp
 	dh_link
-	dh_strip
 	dh_compress
 	dh_fixperms
 	dh_installdeb

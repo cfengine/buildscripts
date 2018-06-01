@@ -38,7 +38,6 @@ binary-arch: build install
 	dh_install --sourcedir=debian/tmp
 	dh_link
 ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
-	dh_strip
 endif
 	dh_compress
 	dh_fixperms
