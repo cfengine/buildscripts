@@ -23,7 +23,7 @@ mkdir -p %{_builddir}
 CPPFLAGS=-I%{buildprefix}/include
 
 
-./configure \
+CFLAGS="$CFLAGS -ggdb3" ./configure \
     --prefix=%{prefix}/httpd \
     --enable-so \
     --enable-mods-shared="all ssl ldap authnz_ldap" \

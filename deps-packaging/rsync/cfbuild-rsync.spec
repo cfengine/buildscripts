@@ -18,7 +18,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n rsync-%{rsync_version}
 
-./configure --prefix=%{prefix} --with-included-zlib=%{prefix}
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --with-included-zlib=%{prefix}
 
 %build
 

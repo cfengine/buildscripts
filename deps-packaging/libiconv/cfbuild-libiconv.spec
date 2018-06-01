@@ -16,7 +16,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n libiconv-1.15
 
-./configure --prefix=%{prefix} --disable-shared --enable-static
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} --disable-shared --enable-static
 
 
 %build

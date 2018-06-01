@@ -28,7 +28,7 @@ CPPFLAGS=-I%{buildprefix}/include
 #
 CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 
-./configure --prefix=%{prefix} \
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix} \
             --enable-shared \
             --disable-slapd \
             --disable-backends \

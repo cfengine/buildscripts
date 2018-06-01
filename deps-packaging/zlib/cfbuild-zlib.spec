@@ -23,7 +23,7 @@ if [ -z $MAKE]; then
   export MAKE=$MAKE_PATH
 fi
 
-./configure --prefix=%{prefix}
+CFLAGS="$CFLAGS -ggdb3" ./configure --prefix=%{prefix}
 
 $MAKE
 %if %{?with_testsuite:1}%{!?with_testsuite:0}
