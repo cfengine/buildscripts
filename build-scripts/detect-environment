@@ -311,7 +311,7 @@ detect_cores()
   case "$OS_FAMILY" in
     aix)
       echo "Detected OS family is aix"
-      NUM_CORES="$(lscfg | grep proc | wc -l)";;
+      NUM_CORES=0;;
     solaris)
       echo "Detected OS family is solaris"
       NUM_CORES="$(psrinfo |wc -l)";;
