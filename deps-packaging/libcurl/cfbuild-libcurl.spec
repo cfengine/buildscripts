@@ -46,12 +46,12 @@ mkdir -p %{_builddir}
 
 %build
 
-make
+/usr/bin/gmake
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-make install DESTDIR=${RPM_BUILD_ROOT}
+/usr/bin/gmake install DESTDIR=${RPM_BUILD_ROOT}
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libcurl.a
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libcurl.la
