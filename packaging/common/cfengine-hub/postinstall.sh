@@ -83,6 +83,15 @@ sed -i s/LDAP_API_SECRET_KEY/"$UUID"/ $PREFIX/share/GUI/ldap/config/settings.php
 sed -i /LDAP_API_SECRET_KEY/s/\'\'/"'$UUID'"/ $PREFIX/share/GUI/api/config/config.php
 
 cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
+
+# If old files were moved aside during upgrade, we should move them back so that
+# rpm can do its cleanup procedures. But avoid overwriting new files with the
+# old ones (hence cp -n).
+if [ -d $PREFIX/share/GUI_old ]; then
+    cp -rn $PREFIX/share/GUI_old/* $PREFIX/share/GUI/
+    rm -rf $PREFIX/share/GUI_old/
+fi
+
 mkdir -p $PREFIX/httpd/htdocs/tmp
 mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
 chmod 755 $PREFIX/httpd
