@@ -201,6 +201,11 @@ if [ -d $PREFIX/httpd/htdocs ]; then
       # Make list of files in share/GUI and remove "them" from httpd/htdocs
       find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs -0 rm )
     )
+    # Make sure old files are not copied over together with new files later
+    # (this only happens during upgrade of RPMs)
+    if [ "x${PKG_TYPE}" = "xrpm" ]; then
+        mv $PREFIX/share/GUI $PREFIX/share/GUI_old
+    fi
   else
     # Purge all files in httpd/htdocs with exceptions:
     # Preserve the tmp directory as it may contain scheduled or exported reports.
