@@ -109,9 +109,6 @@ case "$JOB" in
         ./buildscripts/build-scripts/generate-source-tarballs
         ./buildscripts/build-scripts/compile
         # ./buildscripts/build-scripts/test
-        echo "debug uninstall_debs"
-        dpkg -l cfbuild-.*-devel
-        dpkg --dry-run --purge cf-build-.*-devel
         ./buildscripts/build-scripts/package
         ./buildscripts/build-scripts/prepare-results
 
