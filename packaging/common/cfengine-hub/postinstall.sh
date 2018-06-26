@@ -95,13 +95,9 @@ fi
 mkdir -p $PREFIX/httpd/htdocs/tmp
 mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
 chmod 755 $PREFIX/httpd
-chown -R root:root $PREFIX/httpd/htdocs
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs
 chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.sh
 chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.pl
-
-# ENT-3645: `ldap/config/settings.ldap.php` must be writable by the webserver user or we will be unable to modify settings.
-chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/ldap/config/settings.ldap.php
-chmod 0600 $PREFIX/httpd/htdocs/ldap/config/settings.ldap.php
 
 # plugins directory, empty by default
 mkdir -p ${PREFIX}/plugins
@@ -725,16 +721,25 @@ find $PREFIX/httpd/htdocs -type d -exec chmod g+x {} +
 find $PREFIX/share/GUI -type f -exec chmod 0400 {} +
 
 ##
+# Ldap config
+#
+
+(cd /var/cfengine/httpd/htdocs/ldap; sh scripts/post-install.sh)
+# ENT-3645: `ldap/config/settings.ldap.php` must be writable by the webserver user or we will be unable to modify settings.
+chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/ldap
+chmod 0700 -R $PREFIX/httpd/htdocs/ldap/config
+
+##
 # Start Apache server
 #
 $PREFIX/httpd/bin/apachectl start
 
 #Mission portal
 #
-(cd /var/cfengine/httpd/htdocs/ldap; sh scripts/post-install.sh)
+
 CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
-$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap
+su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap"
 
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_refresh
 
