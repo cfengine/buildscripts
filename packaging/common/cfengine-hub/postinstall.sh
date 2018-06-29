@@ -753,6 +753,11 @@ $PREFIX/httpd/bin/apachectl stop
 #
 rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
 
+##
+# ENT-3921: Make bin/runalerts.php executable
+#
+chmod 755 $PREFIX/bin/runalerts.php
+
 #
 # Register CFEngine initscript, if not yet.
 #
