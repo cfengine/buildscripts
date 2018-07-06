@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
 Version: %{version}
 Release: 1
-Source0: postgresql-9.6.3.tar.gz
+Source0: postgresql-9.6.9.tar.gz
 Source1: postgresql.conf.cfengine
 License: MIT
 Group: Other
@@ -15,7 +15,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n postgresql-9.6.3
+%setup -q -n postgresql-9.6.9
 
 %build
 
@@ -204,3 +204,4 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/lib/pkgconfig/*
 
 %changelog
+
