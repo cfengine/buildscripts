@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
 Version: %{version}
 Release: 1
-Source0: libxml2-2.9.4.tar.gz
+Source0: libxml2-2.9.8.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n libxml2-2.9.4
+%setup -q -n libxml2-2.9.8
 
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
     CPPFLAGS="-I%{prefix}/include" \
@@ -70,3 +70,4 @@ CFEngine Build Automation -- libxml2 -- development files
 %prefix/lib/pkgconfig
 
 %changelog
+
