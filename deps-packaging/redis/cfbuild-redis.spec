@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- redis
 Name: cfbuild-redis
 Version: %{version}
 Release: 1
-Source0: redis-3.2.9.tar.gz
+Source0: redis-3.2.12.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -21,7 +21,7 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 
-%setup -q -n redis-3.2.9
+%setup -q -n redis-3.2.12
 $PATCH -s -p1 < %{_topdir}/SOURCES/redis.patch
 
 %build
@@ -95,3 +95,4 @@ CFEngine Build Automation -- redis -- development files
 %{prefix}/include/hiredis/adapters/libevent.h
 
 %changelog
+
