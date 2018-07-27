@@ -4,6 +4,34 @@
 . detect-environment
 . compile-options
 
+get_GH_PR_info() {
+    # Args:
+    #   $1 - repo identifier ("project/repo")
+    #   $2 - PR identifier (the PR number)
+    # Env:
+    #   $GITHUB_STATUS_TOKEN - token for GitHub authentication
+    # Prints:
+    #   $REPO_ID $PR_ID $PR_STATUSES_URL
+    #   Where:
+    #     $PR_STATUSES_URL - GH API URL to set PR's statuses
+    # Returns:
+    #   0 - success, 1 - error
+    if [ -z "$1" ] || [ -z "$2" ] || [ -z "$GITHUB_STATUS_TOKEN" ]; then return 1; fi
+
+    if which jq > /dev/null; then
+        URL=$(curl -k -H "Authorization: token $GITHUB_STATUS_TOKEN" https://api.github.com/repos/$1/pulls/$2 |
+                  jq ".statuses_url" | tr -d '"')
+        status=$?
+    else
+        URL=$(curl -k -H "Authorization: token $GITHUB_STATUS_TOKEN" https://api.github.com/repos/$1/pulls/$2 |
+                  grep "statuses_url" | head -n1 | sed -r 's/\s+"statuses_url": "([^"]+)",/\1/')
+        status=$?
+    fi
+
+    echo "$1 $2 $URL"
+    return $status
+}
+
 
 mkdir -p $BASEDIR/output/tarballs
 
@@ -33,15 +61,15 @@ mv sha256sums.txt sha256sums.$CKSUM.txt
 
 # Find all pull requests referenced in GIT_BRANCH_n env vars.
 # These PRs will have to be notified of build progress.
-# Note that GitHub accepts PR notifications per-commit
-# (each PR can have multiple commits, each with a green checkmark),
-# so we will save repo names and commit SHAs into PRs file.
+
+# the rest of the script is not really critical
+set +e
 
 # Loop through all existing $GIT_COMMIT_n variables
 i=1
 while [ ! -z "$(eval "echo \$GIT_COMMIT_$i")" ] ; do
 	# We're interested only in pull requests - they look like this:
-	# $GIT_BRANCH_1=origin/pull/260/head
+	# $GIT_BRANCH_1=origin/pull/260/{head,merge}
 	# We can remove this `if` (or replace it with `if true; then`)
 	# to try to report to Github for all commits,
 	# but this info won't be visible in Github UI anyway
@@ -50,9 +78,9 @@ while [ ! -z "$(eval "echo \$GIT_COMMIT_$i")" ] ; do
 		# For example, we want to get 'cfengine/core' part from this:
 		# GIT_URL_2=git@github.com:cfengine/core.git
 		REPO="$(eval "echo \$GIT_URL_$i" | cut -d ':' -f 2 | cut -d '.' -f 1)"
-		# Take commit SHA from a variable
-		SHA="$(eval "echo \$GIT_COMMIT_$i")"
-		echo "$REPO $SHA" >> $BASEDIR/output/PRs
+
+		PULL="$(eval "echo \$GIT_BRANCH_$i" | cut -d '/' -f3)"
+		get_GH_PR_info $REPO $PULL >> $BASEDIR/output/PRs
 	fi
 	i=$((i+1))
 done
