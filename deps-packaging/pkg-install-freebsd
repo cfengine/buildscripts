@@ -1,19 +1,29 @@
-#!/bin/sh
+#!/bin/sh -e
 
-# Installs given packages
+# Install listed packages
+SUDO='/usr/local/bin/sudo '
+PKG='/usr/local/sbin/pkg '
 
-if [ $# -eq 0 ]; then
-  echo "Usage: $0 <pkg> [<pkg> ...]"
-  exit 1
+if [ $# -eq 0 ]
+then
+    echo "Usage: $0 <pkgfile> [<pkgfile ...]"
+    exit 42
 fi
 
-for pkg in "$@"; do
-  P_FILENAME=`basename $pkg`
-  P_NAME=${P_FILENAME%.tbz}
+for pkg in "$@"
+do
+    if [ -r "${pkg}" ]
+    then
+        PKG_NAME=`/usr/local/sbin/pkg query -F ${pkg} '%n-%v'`
 
-  if pkg_info ${P_NAME}; then
-    sudo pkg_delete ${P_NAME}
-  fi
+        if pkg info -q ${PKG_NAME}
+        then
+            ${SUDO} ${PKG} delete -qy ${PKG_NAME}
+        fi
 
-  sudo pkg_add $pkg
+        ${SUDO} ${PKG} install -U -qy  ${pkg}
+    else
+        PKG_NAME=''
+    fi
+
 done

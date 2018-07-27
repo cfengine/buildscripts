@@ -1,0 +1,34 @@
+name = "cfbuild-idn2-devel"
+version = "2.0.5"
+origin = "northerntech/cfbuild-libidn2-devel"
+abi = "FreeBSD:11:amd64";
+arch = "freebsd:11:x86:64";
+comment = "Implementation of IDNA2008 internationalized domain names"
+desc = <<EOD
+Libidn2 is an implementation of IDNA2008 internationalized domain names.                                                      
+
+WWW: https://www.gnu.org/software/libidn/#libidn2
+WWW: https://gitlab.com/libidn/libidn2
+EOD
+licenselogic = "single"
+licenses [
+    "GPL3+",
+]
+www = "https://www.gnu.org/software/libidn/#libidn2"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+deps {
+    indexinfo {
+        origin = "northerntech/indexinfo";
+        version = "0.3.1";
+    }
+    libunistring {
+        origin = "northerntech/libunistring";
+        version = "0.9.10";
+    }
+}
+files {
+    "/var/cfengine/lib/libidn2.a" "9442398c17d5be1e231afb8f7237d8160c2670a49642c957806e88873b59ae12"
+    "/var/cfengine/lib/pkgconfig/libidn2.pc" "65fdf0aceaf1cf24894342f56960eefcfa94e20b2269252dc24717ad188a7cf0"
+    "/var/cfengine/include/idn2.h" "8c63502518a38b16d6ab387ec512a9aa380f87b6de98167338347d18d3ba91e1"
+}

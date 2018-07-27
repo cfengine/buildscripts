@@ -1,0 +1,11 @@
+#!/bin/sh
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+LUstring=${BUILD_ROOT}/cfbuild-libunistring${PREFIX}
+
+./configure --prefix=${PREFIX} --disable-static
+
+make PREFIX=${PREFIX}
+
+make DESTDIR=${LUstring#${PREFIX}} install

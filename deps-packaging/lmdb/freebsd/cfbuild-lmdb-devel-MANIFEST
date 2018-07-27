@@ -1,0 +1,17 @@
+name = "cfbuild-lmdb-devel"
+version = "0.9.22"
+origin = "northerntech/cfbuild-lmdb-devel"
+comment = "Summary: CFEngine Build Automation -- lmdb -- development files"
+desc = <<EOD
+CFEngine Build Automation -- lmdb -- development files
+EOD
+licenselogic = "single"
+licenses [
+   "OpenLDAP"    
+]
+www = "http://symas.com/mdb"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/include/lmdb.h" "3b5cf28fa2c16f61171a8f510c662a3cbd941b01b83e171f97c942ef23aaa075"
+}

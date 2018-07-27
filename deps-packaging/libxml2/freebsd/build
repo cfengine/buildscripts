@@ -2,31 +2,54 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX:-/var/cfengine}
 
-LX=${BUILD_ROOT}/cfbuild-libxml2${PREFIX}
-LXD=${BUILD_ROOT}/cfbuild-libxml2-devel
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-libxml2
+
+LDFLAGS="${LDFLAGS} -fPIC"
+
+if [ -z "${MAKE}" ]
+then
+    MAKE=`which gmake`
+fi
+
+CC=`which gcc6`
 
 # Configure
 
-./configure --prefix=$PREFIX --without-python
+CC=`which gcc6` ./configure --prefix=$PREFIX \
+  --without-python \
+  --enable-shared \
+  --disable-static \
+  --with-zlib=${PREFIX} \
+  --with-iconv=${PREFIX} \
+  --without-lzma \
+  CPPFLAGS="-I${PREFIX}/include" \
+  CFLAGS="$CFLAGS -fPIC" \
+  CXXFLAGS="$CFLAGS -fPIC" \
+  LD_LIBRARY_PATH="${PREFIX}/lib" \
+  LD_RUN_PATH="${PREFIX}/lib"
 
 # Build
 
-gmake
-
+${MAKE} CC=gcc6 -s CFLAGS='${CFLAGS} -fPIC ' CXXFLAGS="$CFLAGS -fPIC"
 
 # Install
 
-gmake install DESTDIR=${LXD}
+${MAKE} CC=gcc6 install DESTDIR=${INSTALL_ROOT} \
+      LDFLAGS="${LDFLAGS}" \
+      LD_LIBRARY_PATH="${PREFIX}/lib" \
+      LD_RUN_PATH="${PREFIX}/lib"
+
+
 # Package
 
-rm -f ${LXD}/bin/xmlcatalog
-rm -f ${LXD}/bin/xmllint
-rm -f ${LXD}/lib/libxml2.a
-rm -f ${LXD}/lib/libxml2.la
-rm -f ${LXD}/lib/xml2Conf.sh
-rm -rf ${LXD}/share
+# rm -vf ${LXD}/bin/xmlcatalog
+# rm -vf ${LXD}/bin/xmllint
+# rm -vf ${LXD}/lib/libxml2.a
+# rm -vf ${LXD}/lib/libxml2.la
+# rm -vf ${LXD}/lib/xml2Conf.sh
+# rm -rf ${LXD}/share
 
-mkdir -p ${LX}/bin ${LX}/lib
-mv ${LXD}/lib/*.so* ${LX}/lib
+# mkdir -pv ${LX}/bin ${LX}/lib
+# mv -vi ${LXD}${PREFIX}/lib/*.so* ${LX}/lib

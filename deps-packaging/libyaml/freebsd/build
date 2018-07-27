@@ -1,0 +1,27 @@
+#!/bin/sh
+
+# Options
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-libyaml
+
+if [ -z "${MAKE}" ]
+then
+    MAKE=`which gmake`
+fi
+
+# Configure
+
+./configure --prefix=$PREFIX --without-python
+
+# Build
+
+${MAKE} -s
+
+# Install
+
+${MAKE} -s install DESTDIR=${INSTALL_ROOT}
+
+# Package
+

@@ -1,0 +1,21 @@
+name = "cfbuild-libiconv-devel"
+version = "1.15"
+origin = "northerntech/cfbuild-libiconv-devel"
+comment = "Summary: CFEngine Build Automation -- libiconv -- development files"
+desc = <<EOD
+comment = "Summary: CFEngine Build Automation -- libiconv -- development files"
+EOD
+licenselogic = "single"
+licenses [
+    GPLv3
+]
+www = "http://www.gnu.org/software/libiconv/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/libcharset.a" "0c757eb6a2d605dfc962c463b11ce63618621545aa3238f71d651d5d918809c3"
+    "/var/cfengine/lib/libiconv.a" "c2f1d600135fc68cabdf83545ea08003461a7fde84c7f188a54bebc9f5241b93"
+    "/var/cfengine/include/libcharset.h" "59ff64ef3e5d32f641eecef77fd964e4f25d46521793c7ebf80c7b8a27e37faa"
+    "/var/cfengine/include/localcharset.h" "46ae629f02059eeadd884cfae9fc82a360a4a9c118aa38a3c1d5a84cc33b4f2c"
+    "/var/cfengine/include/iconv.h" "ff01ef4527407e9e3625e3bc45bf5866c1186e4fbf4f210cd9d565ba38a2d477"
+}

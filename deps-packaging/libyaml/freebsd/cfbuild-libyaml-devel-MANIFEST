@@ -1,0 +1,19 @@
+name = "cfbuild-libyaml-devel"
+version = "0.1.7"
+origin = "northerntech/cfbuild-libyaml-devel"
+comment = "Summary: CFEngine Build Automation -- lmdb -- development files"
+desc = <<EOD
+Summary: CFEngine Build Automation -- lmdb -- development files
+EOD
+licenselogic = "single"
+licenses [
+    MIT
+]
+www = "http://pyyaml.org/wiki/LibYAML"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/pkgconfig/yaml-0.1.pc" "64cb28ecb04aba3a0e218712c35e5fadf082b25986dfaa7da4b7ace5d6ef70ad"
+    "/var/cfengine/include/yaml.h" "5a16306d95841c740f30b118cf528289f2745390008b992d72caa9a0f08b0fe9"
+    "/var/cfengine/lib/libyaml.a" "44349aa09221be8e2b9d5d091810b25b96a3be9c40d6710084de6491330a955d"
+}

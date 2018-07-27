@@ -1,0 +1,41 @@
+name = "cfbuild-libcurl-hub"
+version = "7.59.0"
+origin = "northerntech/cfbuild-libcurl-hub"
+comment = "CFEngine Build Automation -- libcurl"
+desc = <<EOD
+CFEngine Build Automation -- libcurl
+EOD
+licenselogic = "single"
+licenses [
+    MIT
+]
+www = "https://curl.haxx.se/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+deps {
+    cfbuild-idn2 {
+        origin "northerntech/cfbuild-idn2"
+        version "2.0.5"
+    }
+    cfbuild-openssl {
+        origin "northerntech/cfbuild-openssl"
+        version "1.00h"
+    }
+    cfbuild-zlib {
+        origin "northerntech/cfbuild-zlib"
+        version "1.2.11"
+    }
+}
+shlibs_required: [
+    "/var/cfengine/lib/libidn2.so.0",
+    "/var/cfengine/lib/libssl.so.1.1",
+    "/var/cfengine/lib/libcrypto.so.1.1",
+    "/var/cfengine/lib/libz.so.1"
+]
+files {
+    "/var/cfengine/lib/libcurl.so.4.5.0" "d7e9ebc684c7fdb8d04804534aaa1c180920ac9bc5c0c85eb56b258fc33ca574"
+    "/var/cfengine/lib/libcurl.so.4" "-"
+    "/var/cfengine/lib/libcurl.so" "-"
+    "/var/cfengine/lib/pkgconfig/libcurl.pc" "00db0909952f7206e8d500fb40b4141873b712d02deb7f4947a30c01d5c6eff1"
+    "/var/cfengine/bin/curl" "38714e765cd0fb3e12fb978253dc131069a9a72dafeacddccf21ea4749bbf6e7"
+}

@@ -1,0 +1,31 @@
+name = "cfbuild-libxml2"
+version = "2.9.8"
+origin = "northerntech/cfbuild-libxml2"
+comment = "CFEngine Build Automation -- libxml2"
+desc = <<EOD
+CFEngine Build Automation -- libxml2
+EOD
+licenselogic = "single"
+licenses [
+    "MIT"
+]
+www = "http://xmlsoft.org/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+deps {
+  cfbuild-libiconv {
+      origin = "northerntech/libiconv"
+      version = "1.15"
+  }
+  cfbuild-zlib {
+      origin = "northerntech/cfbuild-zlib"
+      version = "1.2.11"
+  }
+}
+files {
+    "/var/cfengine/lib/libxml2.so.2.9.8" "9de065bf9d06ef48e03f9032230df14219416f3d37e59c386d8228ef1f6d1854"
+    "/var/cfengine/lib/libxml2.so.2" "-"
+    "/var/cfengine/lib/libxml2.so" "-"
+    "/var/cfengine/lib/cmake/libxml2/libxml2-config.cmake" "7a1e35fda83628fee48fd038ecc1b8c8d12b1ce0a683ffa8d83d70d7bfacbeb9"
+    "/var/cfengine/bin/xml2-config" "a0697b0e424978d201b6ee3f3625e418c34bd633d8446979cdde683de8eaf52b"
+}

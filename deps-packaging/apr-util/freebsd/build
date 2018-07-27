@@ -1,0 +1,30 @@
+#!/bin/sh
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-apr-util
+
+if [ -z "${MAKE}" ]
+then
+    export MAKE=`which make`
+fi
+
+export CC=`which gcc6`
+
+#export CPPFLAGS="${CPPFLAGS} -I${PFEFIX}/include"
+export CFLAGS="${CPPFLAGS} -I${PFEFIX}/include"
+#export LDFLAGS="${LDFLAGS} -l${PREFIX}/lib -rpath ${PREFIX}/lib"
+
+./configure --prefix=${PREFIX} \
+            --with-apr=${PREFIX}/bin \
+            --with-expat=/usr/local \
+            --without-sqlite \
+            --with-ldap-include=${PREFIX}/include/ \
+            --with-ldap-lib=${PREFIX}/lib \
+            --with-ldap 
+
+
+${MAKE}
+
+${MAKE} install DESTDIR="${INSTALL_ROOT}"
+

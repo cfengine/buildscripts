@@ -1,0 +1,17 @@
+name = "cfbuild-libiconv"
+version = "1.15"
+origin = "northerntech/cfbuild-libiconv"
+comment = "CFEngine Build Automation -- libiconv"
+desc = <<EOD
+CFEngine Build Automation -- libiconv
+EOD
+licenselogic = "single"
+licenses [
+    GPLv3
+]
+www = "http://www.gnu.org/software/libiconv/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/bin/iconv" "ca7b67b5609566c82d0ee9b54540dd9e738cd7d8db1831a608d3aff5c645ffb7"
+}

@@ -2,27 +2,51 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-openssl${PREFIX}
 
-OS=${BUILD_ROOT}/cfbuild-openssl${PREFIX}
-OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}
+if [ -z "$MAKE" ]
+then
+    export MAKE=`which make`
+fi
 
 # To pick up libgcc_s.so.1, which is apparently not in dyld path.
 export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Patch
+DEBUG_CONFIG_FLAGS=
+DEBUG_CFLAGS=
+if [ $BUILD_TYPE = "DEBUG" ]
+then
+    DEBUG_CONFIG_FLAGS="no-asm -DPURIFY"
+    DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer"
+    # Workaround for OpenSSL build issue on our old SuSE buildslave, see:
+    # http://www.mail-archive.com/openssl-dev@openssl.org/msg39231.html
+elif [ "$OS" = sles ]
+then
+    DEBUG_CONFIG_FLAGS=no-asm
+fi
+
 
 # Configure
 
-export PATH=`pwd`/solaris:$PATH
 
 ./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
-    --prefix=$PREFIX
+         ${DEBUG_CONFIG_FLAGS} \
+         --prefix=$PREFIX \
+         ${DEBUG_CFLAGS} \
+         ${LDFLAGS}
 
 # Build
+if [ $BUILD_TYPE = "DEBUG" ]
+then
+    sed -e '/^CFLAGS=/{s/ -O3//;s/ -fomit-frame-pointer//;}'   \
+        Makefile > Makefile.cfe \
+        && mv Makefile.cfe Makefile
+fi
 
-make depend
-make
+${MAKE} -s depend
+${MAKE} -s
 
 # Test
 
@@ -34,16 +58,16 @@ fi
 
 # Install
 
-make DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_sw
-make DESTDIR=${BUILD_ROOT}/cfbuild-openssl-devel install_ssldirs
+make DESTDIR=${INSTALL_ROOT%${PREFIX}} install_sw
+make DESTDIR=${INSTALL_ROOT%${PREFIX}} install_ssldirs
+
 # Package
 
-rm -rf ${OSD}/bin
-rm -rf ${OSD}/ssl
-rm -rf ${OSD}/lib/fips*
-rm -rf ${OSD}/lib/*.a
+# rm -rf ${OSD}/bin
+# rm -rf ${OSD}/ssl
+# rm -rf ${OSD}/lib/fips*
+# rm -rf ${OSD}/lib/*.a
 
-mkdir -p ${OS}/lib
-mv ${OSD}/lib/libcrypto.so* ${OS}/lib
-mv ${OSD}/lib/libssl.so* ${OS}/lib
-
+# mkdir -p ${OS}/lib
+# mv ${OSD}/lib/libcrypto.so* ${OS}/lib
+# mv ${OSD}/lib/libssl.so* ${OS}/lib

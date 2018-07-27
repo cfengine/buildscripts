@@ -24,7 +24,10 @@ case "$OS" in
         DEP_LIST="dpkg-dev debhelper g++ libncurses5 pkg-config build-essential libpam0g-dev"
         UNWANTED_DEPS="libltdl-dev libltdl7"
         ;;
-
+    freebsd)
+	DEP_LIST='devel/pkgconf net/rsync devel/git textproc/expat2 databases/sqlite3'
+	UNWANTED_DEPS='devel/autoconf devel/automake devel/libtool'
+	;;
     # SKIP IN UNKNOWN OS
     *)
         echo "$0: not implemented for OS $OS, skipping"
@@ -36,11 +39,16 @@ esac
 #          It is needed by the debian buildslaves for their packaging scripts
 case "$OS-$OS_VERSION" in
     rhel-* | centos-* ) DEP_LIST="$DEP_LIST" ;;
+    freebsd-*)          DEP_LIST="$DEP_LIST lang/gcc6 devel/gmake security/sudo ftp/wget" ;;
     *)                  DEP_LIST="$DEP_LIST fakeroot"    ;;
 esac
 
 
-DEP_LIST="$DEP_LIST ntp rsync gcc make sudo wget"
+if [ "$OS" = 'freebsd' ] ; then
+    DEP_LIST="$DEP_LIST "
+else
+    DEP_LIST="$DEP_LIST ntp rsync gcc make sudo wget"
+fi
 #UNWANTED_DEPS="$UNWANTED_DEPS libtool"    # TODO automake autoconf bison byacc flex
 
 

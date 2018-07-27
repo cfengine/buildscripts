@@ -1,0 +1,23 @@
+name = "cfbuild-lcov"
+version = "1.13_1"
+origin = "northerntech/cfbuild-lcov"
+comment = "CFEngine Build Automation -- lcov"
+desc = <<EOD
+CFEngine Build Automation -- lcov
+EOD
+licenselogic = "single"
+licenses [
+    GPL
+]
+www = "http://ltp.sourceforge.net/coverage/lcov.php"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+dir - /var/cfengine/etc
+files {
+    "/var/cfengine/bin/lcov" "e7197a1d7ecd79de6bccc0537b6185a3202b949d7a442665d4ace00a67f14a61"
+    "/var/cfengine/bin/genhtml" "a1d83d0cd282677ffce9fd127308472d20c2c13723a14bc3be96df124d321e69"
+    "/var/cfengine/bin/geninfo" "b9dbedfb82a916680061709d768303fc9aefce72e57ce8a0cff753c54201e121"
+    "/var/cfengine/bin/genpng" "48e410d60b86e7e3336723e36928787f25357355a4521122accaa8339487318c"
+    "/var/cfengine/bin/gendesc" "a999fc08c3fd389eaa16308999037c1be0ac7d089774f6f3b6b6eb520c92e07b"
+    "/var/cfengine/etc/lcovrc" "e6903815d0814d37cf23cd5bd807f72099e183fc251d6e053b7c736715762f9c"
+}

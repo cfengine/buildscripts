@@ -1,0 +1,53 @@
+#!/bin/sh -e
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+fix_shebang()
+{
+    FILENAME=$1
+    if [ -r "${FILENAME}" ] ; then
+        CURR_LANG=`head -1 ${FILENAME} | sed -e 's/^#!//; s/ .*//;'`
+        NEW_LANG=''
+        case "${CURR_LANG}" in
+            /usr/bin/perl)
+                NEW_LANG='/usr/bin/env perl' ;;
+            /bin/bash)
+                NEW_LANG='/usr/bin/env bash' ;;
+        esac
+        if [ -n "${NEW_LANG}" ] ; then
+            /usr/bin/sed -i '' -e "s,${CURR_LANG},${NEW_LANG}," "$FILENAME"
+        fi
+    fi
+}
+
+set -x
+env
+mkdir -pv "${BUILD_ROOT}"
+if [ -d "${BUILD_ROOT}" ] ; then
+    for fil in $BUILD_ROOT/usr/local/bin/* \
+                   ${BUILD_ROOT}/../bin/*.pl \
+                   ${BUILD_ROOT}/../bin/*.sh; do
+        fix_shebang "$fil"
+    done
+    pwd
+    for patchfile in \
+        0001-Add-extra-tools-and-CFEngine-modifications-for-LMDB.patch \
+            0002-Autoconf-files.patch \
+            0003-Optimization-Define-correct-cacheline-size-on-HPUX.patch \
+            0004-Generated-autoconf-files.patch \
+            0005-_XOPEN_SOURCE-500-i.e.-XPG5-can-t-be-used-with-C99-c.patch \
+            0006-fix-warnings.patch \
+        ; do patch -p1 <`dirname $0`/../$patchfile || exit 42 ; done
+    cd libraries/liblmdb
+    chmod 755 config.guess
+    chmod 755 config.sub
+    chmod 755 configure
+    chmod 755 depcomp
+    chmod 755 install-sh
+    chmod 755 missing
+    touch Makefile.in
+
+    ./configure --prefix=${PREFIX}
+    /usr/local/bin/gmake -s PREFIX=/var/cfengine DESTDIR=$BUILD_ROOT/cfbuild-lmdb install
+fi
+

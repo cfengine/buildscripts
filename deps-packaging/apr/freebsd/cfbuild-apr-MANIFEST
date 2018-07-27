@@ -1,0 +1,19 @@
+name = "cfbuild-apr"
+version = "1.6.3"
+origin = "northerntech/cfbuild-apr"
+comment = "CFEngine Build Automation -- apr"
+desc = <<EOD
+CFEngine Build Automation -- apr
+EOD
+licenselogic = "single"
+licenses [
+    APACHE20
+]
+www = "http://apr.apache.org/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/libapr-1.so.0.6.3" "3792facb09acf0111b2bd625a8d695e9cb204f2cf18c80d666d6b90649d41fd3"
+    /var/cfengine/lib/libapr-1.so.0 -
+    /var/cfengine/lib/libapr-1.so -
+}

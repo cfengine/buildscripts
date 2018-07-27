@@ -1,0 +1,40 @@
+name = "cfbuild-openssl"
+version = "1.10h"
+origin = "northerntech/cfbuild-openssl"
+comment = "CFEngine Build Automation -- openssl"
+desc = <<EOD
+CFEngine Build Automation -- openssl
+
+The OpenSSL Project is a collaborative effort to develop a robust,                                              
+commercial-grade, full-featured, and Open Source toolkit implementing                                           
+the Secure Sockets Layer (SSL v2/v3) and Transport Layer Security                                               
+(TLS v1) protocols with full-strength cryptography world-wide. The                                              
+project is managed by a worldwide community of volunteers that use                                              
+the Internet to communicate, plan, and develop the OpenSSL tookit                                               
+and its related documentation.
+
+OpenSSL is based on the excellent SSLeay library developed by Eric
+A. Young and Tim J. Hudson. The OpenSSL toolkit is licensed under
+an Apache-style licence, which basically means that you are free
+to get and use it for commercial and non-commercial purposes subject
+to some simple license conditions.
+
+WWW: http://www.openssl.org/
+WWW: http://sctp.fh-muenster.de/dtls-patches.html
+EOD
+licenselogic = "single"
+licenses [
+    OpenSSL
+]
+www = "http://www.openssl.org/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/libcrypto.so.1.1" "58a0577aaa29ea94df6b6bce11ff774ee0ac20b224a71d05ac20a7dcc11baf96"
+    "/var/cfengine/lib/libcrypto.so" "-"
+    "/var/cfengine/lib/libssl.so.1.1" "4cac020d0c916d638c2b1f324fa2607ad6ad5b725f33436e66c6b29f4a09b65e"
+    "/var/cfengine/lib/libssl.so" "-"
+    "/var/cfengine/bin/c_rehash" "9c81fcaeab6c02cd073b8fe31dc2279171a676cc3b2ec3bd872667fb91641a8f"
+    "/var/cfengine/bin/openssl" "c24dc737c5cdf59f81ab3c81817689ac4f3f064c40acb2d304f6efe056ad3351"
+    "/var/cfengine/ssl/openssl.cnf" "1f877b6a065b7f0147e3d0fcb5c93383cb3f1082bb5bfb4934f49385e898bc2c"
+}

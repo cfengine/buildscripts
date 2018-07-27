@@ -1,0 +1,22 @@
+#!/bin/sh
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-apr
+
+if [ -z "${MAKE}" ]
+then
+    export MAKE=`which make`
+fi
+
+# export CC=`which gcc6`
+
+export CPPFLAGS="${CPPFLAGS} -I${PFEFIX}/include"
+
+./configure --prefix=${PREFIX} \
+            CPPFLAGS="${CPPFLAGS}"
+
+${MAKE}
+
+${MAKE} install DESTDIR="${INSTALL_ROOT}"
+

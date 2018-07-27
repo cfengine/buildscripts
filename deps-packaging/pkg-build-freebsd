@@ -1,98 +1,203 @@
-#!/bin/sh 
+#!/bin/sh -e
+
+# Comment when not debugging
+# set -o xtrace # -o verbose 
+
+# Build a FreeBSD package using command line parameters and environment variables
+# This script was written using pkg-build-rpm as a template
+# ENVIRONMENT:
+#   BASEDIR: parent of checked-out repositories (parent of buildscritps, core, enterprise, etc.)
+#   BUILDPREFIX: Prefix under which files will be packaged (DEFAULT: /var/cfengine)
+# COMMAND LINE
+#   PKGNAME - package to build
+#   TESTS - run tests (yes/no)
+#   TARGET - (native/???)
+#   OPTIMIZE - (yes/no)
+#   DEBUGSYM - (yes/no)
+#   CFVERSION - version of CFEngine for which build is performed.
+
+SCRIPTDIR=`/usr/bin/dirname $0`
+BASEDIR=${BASEDIR:=$(/bin/realpath "${SCRIPTDIR}/../../")"/."}
+PKGNAME=${1:?"Package name is required, but not set"}
+TESTS=${2:-"yes"}
+TARGET=${3:-"native"}
+OPTIMIZE=${4:-"yes"}
+DEBUGSYM=${5:-"no"}
+CFVERSION=${6:-"0+ed0846f+untested"}
+DEPDIR="${BASEDIR}/buildscripts/deps-packaging/${PKGNAME}"
+BUILDPREFIX=${BUILDPREFIX:="/var/cfengine"}
+BUILDDIR=${BASEDIR}/${PKGNAME}
+WORKDIR=${BUILDDIR}/work
+PKGDIR=${BUILDDIR}/pkg
+UNAME_M=${UNAME_M:-$(/usr/bin/uname -m)}
+PATH="${PATH}:${SCRIPTDIR}"
+
+usage()
+{
+    exec >&2
+    echo "$0 <pkgname> <tests> <cross-target/native> <optimize> <debugsymbols> <version>"
+    exit 1
+}
+
+fatal()
+{
+    set +o verbose +o xtrace
+    echo "FATAL ERROR: $0" >&2
+    echo "$@" >&2
+    exit 42
+}
+
+unpack_src()
+{
+    SRC=$1
+    if [ -r "${SRC}" ]
+    then
+	case "${SRC}" in
+	    *.tar.gz|*.tgz)
+		COMPRESSION='z' ;;
+	    *.tar.bz|*.tbz)
+		COMPRESSION='j' ;;
+	    *.tar.xz|*.txz)
+		COMPRESSION='J' ;;
+	    *)
+		fatal "Unknown compression type for `basename ${SRC}`"
+		;;
+	esac
+
+	/usr/bin/tar -C ${WORKDIR} -x${COMPRESSION}f ${SRC}
+    else
+	fatal "Cannot find archive ${SRC}"
+    fi
+}
+
+# Given a filename parameter, inspect the file's shebang line and corrects the path
+fix_shebang()
+{
+    FILENAME="$1"
+    if [ -r "${FILENAME}" ] ; then
+        CURR_LANG=`head -1 ${FILENAME} | sed -e 's/^#! *//; s/ .*$//;'`
+        NEW_LANG=''
+        case "${CURR_LANG}" in
+            /usr/bin/perl)
+                NEW_LANG='/usr/bin/env perl' ;;
+            /bin/bash)
+                NEW_LANG='/usr/local/bin/bash' ;;
+        esac
+        if [ -n "${NEW_LANG}" ] ; then
+            /usr/bin/sed -i '' -e "s,${CURR_LANG},${NEW_LANG}," "$FILENAME"
+        fi
+    else
+       fatal "Cannot open '${FILENAME}'."
+    fi
+}
 
 gen_filelist()
 {
-  package="$1"
-  pkgdir="$PKGDIR/out/$package/"
-
-  echo "@comment pkg-list, v 1.00 `date`"
-  echo "@comment ORIGIN:sysutils/$package"
-  for f in `find $pkgdir`; do
-    if [ -f $f ]; then
-      destf=${f#$pkgdir}
-	  echo "$destf"
-    fi
-  done
+    package="$1"
+    pkgdir="${BUILDDIR}/out/$package"
+    for f in `/usr/bin/find $pkgdir ! -type d`
+    do
+	if [ -f "$f" ] || [ -l "$f" ]
+	then
+	    destf=${f#$pkgdir}
+	    echo -n "    \"$destf\" "
+	    if [ -f "$f" ]
+	    then
+		destfsha256=$(/sbin/sha256 -q $f)
+		echo '"'"$destfsha256"'"'
+	    elif [ -l "$f" ]
+	    then
+		echo "-"
+	    fi
+	fi
+    done
 }
 
-case `dirname "$0"` in
-  .)
-    SCRIPTDIR=`pwd`;;
-  *)
-    case "$0" in
-      /*) SCRIPTDIR=`dirname "$0"`;;
-      *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
-    esac;;
+echo
+echo "========================= Building package for: $PKGNAME =========================="
+echo
+
+# %prep 
+
+if [ $(/usr/bin/id -u) -eq 0 ] ; then fatal "Do not run as root" ; fi
+
+# Copy source code
+rm -rf "${BUILDDIR}"
+mkdir -p ${PKGDIR}
+mkdir -p ${WORKDIR}
+
+SRCFILES=$(pkg-get-src ${DEPDIR})
+
+if [ -n "${SRCFILES}" ]
+then
+    echo "${SRCFILES}" | while read srcfile opts
+    do
+	ln -svf ${srcfile} ${BUILDDIR}/
+
+	unpack_src "${srcfile}"
+
+	/usr/bin/tar -C ${WORKDIR} -x${COMPRESSION}f ${srcfile}
+
+    done
+else
+    fatal "No source file(s)"
+fi
+
+# Prepare options
+if [ $TARGET != native ]; then
+    fatal "WHAT? Don't know how to cross-compile"
+fi
+
+case "$TESTS" in
+    [Nn][Oo]|[Yy][Ee][Ss]) ;;
+    *)
+	fatal "Unknown tests option: $TESTS";;
 esac
 
-BASEDIR=`dirname "$SCRIPTDIR"`
-BASEDIR=`dirname "$BASEDIR"`
-
-PATH="$PATH:$SCRIPTDIR"
-
-PKGNAME="$1"
-TESTS="$2"
-TARGET="$3"
-VERSION="$4"
-
-P=$BASEDIR/buildscripts/deps-packaging/$PKGNAME
-PKGDIR=$BASEDIR/$PKGNAME/pkg
-
-rm -rf $PKGDIR
-mkdir -p $PKGDIR
-
-pkg-get-src "$P" | while read srcfile opts; do
-  case "$srcfile" in
-    *.gz|*.tgz)
-      UNCOMPRESS="gzip -dc";;
-    *.bz2)
-      UNCOMPRESS=bzcat;;
+case "$OPTIMIZE" in
+    [Nn][Oo]|[Yy][Ee][Ss]) ;;
     *)
-      echo "Unknown compression: $srcfile"
-      exit 42;;
-  esac
+	fatal "Unknown optimize option: $OPTIMIZE";;
+esac
 
-  if [ x$opts = xsubdir ]; then
-    $UNCOMPRESS $srcfile | (cd $PKGDIR; tar xf -) || false
-  else
-    TD=/tmp/`basename $srcfile`.$$
-    mkdir -p "$TD"
-    $UNCOMPRESS $srcfile | (cd "$TD" && tar xf -) || false
-    mv $TD/*/* $PKGDIR
-    rm -r "$TD"
-  fi
+case "$DEBUGSYM" in
+    [Nn][Oo]|[Yy][Ee][Ss]) ;;
+    *)
+	fatal "Unknown debugsym option: $DEBUGSYM";;
+esac
+
+# %build
+# %install
+# %check
+for SUBDIR in `/usr/bin/find ${WORKDIR} -mindepth 1 -maxdepth 1 -type d`
+do
+    (cd $SUBDIR ; BUILD_ROOT=${BUILDDIR}/out TESTS=${TESTS} ${DEPDIR}/freebsd/build) || false
 done
 
-cp -R $P/* $PKGDIR
+# %package
+cd ${PKGDIR}
+for mfest in `/bin/ls ${DEPDIR}/freebsd/*-MANIFEST`
+do
+    package=`/usr/bin/basename ${mfest}`
+    package=${package%-MANIFEST}
+    PKGROOT=${BUILDDIR}/out/$package
 
-ARCH=`uname -p`
-
-(cd $PKGDIR; BUILD_ROOT=$PKGDIR/out TESTS=$TESTS $P/freebsd/build) || false
-
-for package in `cat $P/freebsd/packages`; do
-  echo "$package: dependency of CFEngine Nova.
-version of $package: $VERSION
-architecture of $package: $ARCH" > $BASEDIR/$PKGNAME/$package-comment
-
-  echo "$package: created by buildscripts system" > $BASEDIR/$PKGNAME/$package-descr
-
-  gen_filelist $package > $BASEDIR/$PKGNAME/$package-plist
-
-  /usr/sbin/pkg_create -j -f $BASEDIR/$PKGNAME/$package-plist -c $BASEDIR/$PKGNAME/$package-comment -d $BASEDIR/$PKGNAME/$package-descr -p $BASEDIR/$PKGNAME/pkg/out/$package/ $BASEDIR/$PKGNAME/$package-$VERSION-$ARCH.tbz
-
-  cd $BASEDIR/$PKGNAME/
-
-  echo "`pwd`"
-
-  tar xvf $package-$VERSION-$ARCH.tbz
-
-  head -n 2 ./+CONTENTS > plist-head
-  sed '1,3d' ./+CONTENTS > tmp
-  rm ./+CONTENTS
-  cat plist-head > CONTENTS
-  echo "@cwd /" >> CONTENTS
-  cat tmp >> CONTENTS
-  rm plist-head tmp
-  mv CONTENTS ./+CONTENTS
-  tar cjvf $package-$VERSION-$ARCH.tbz +CONTENTS +DESC +COMMENT var/
+    if [ ! -d "${PKGROOT}" ]
+    then
+        PKGROOT=${PKGROOT%-devel}
+    fi
+    
+    if [ -z "`/usr/bin/grep ^files ${mfest}`" ]
+    then
+        echo "files {"        >>${mfest}
+        gen_filelist $package >>${mfest}
+        echo '}'              >>${mfest}
+    fi
+    
+    /usr/local/sbin/pkg create \
+                        --verbose \
+			--manifest ${mfest} \
+                        --root-dir ${PKGROOT} \
+	                --out-dir  ${PKGDIR}
 done
+

@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Options
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+export CC=/usr/local/bin/gcc6
+export GCC=/usr/local/bin/gcc6
+
+LTdir=${BUILD_ROOT}/cfbuild-libtool
+
+# Patch configure to get around it confusing
+# FreeBSD 11.1-RELEASE for FreeBSD 1 (which didn't do shared objects)
+# I don't think FreeBSD 1 is a concern anymore.
+/usr/bin/patch <./freebsd/patch-freebsd-configure
+
+# Configure
+
+if [ -d "${BUILD_ROOT}" ] ; then
+    rm -rf "${BUILD_ROOT}"
+fi
+
+mkdir -pv "${BUILD_ROOT}"
+
+./configure --prefix=${PREFIX} 
+
+# Build
+
+make -s
+
+# Install
+
+make -s DESTDIR=${LTdir} install
+

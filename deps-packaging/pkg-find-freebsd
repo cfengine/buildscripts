@@ -4,7 +4,8 @@
 
 if [ $# -ne 1 ]; then
   echo "Usage: $0 <dir>" >&2
-  exit 1
+  exit 42
 fi
 
-find "$1" -name '*.tbz'
+find "$1" -name '*.tbz' -o -name '*.txz'
+

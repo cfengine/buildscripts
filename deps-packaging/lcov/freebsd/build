@@ -1,0 +1,34 @@
+#!/bin/sh -ex
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+fix_shebang()
+{
+    FILENAME=$1
+    if [ -r "${FILENAME}" ] ; then
+	CURR_LANG=`head -1 ${FILENAME} | sed -e 's/^#!//; s/ .*//;'`
+	NEW_LANG=''
+	case "${CURR_LANG}" in
+	    /usr/bin/perl)
+		NEW_LANG='/usr/bin/env perl' ;;
+	    /bin/bash)
+		NEW_LANG='/usr/bin/env bash' ;;
+	esac
+	if [ -n "${NEW_LANG}" ] ; then
+	    /usr/bin/sed -i '' -e "1s,${CURR_LANG}.*,${NEW_LANG}," "$FILENAME"
+	fi
+    fi
+}
+
+
+mkdir -pv "${BUILD_ROOT}"
+
+if [ -d "${BUILD_ROOT}" ] ; then
+    for fil in ./bin/* 
+    do
+	fix_shebang "$fil"
+    done
+    /usr/local/bin/gmake -s PREFIX=/var/cfengine DESTDIR=$BUILD_ROOT/cfbuild-lcov install
+fi
+
+

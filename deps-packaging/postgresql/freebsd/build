@@ -1,0 +1,48 @@
+#!/bin/sh -e
+ 
+# Options
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-postgresql
+
+if [ -z "${MAKE}" ]
+then
+    export MAKE=`which gmake`
+fi
+
+if [ -z "{$CC}" ]
+then
+    export CC=/usr/bin/cc
+    # export CC=`which gcc6`
+    # export GCC=`which gcc6`
+fi
+
+## export CC=/usr/local/bin/gcc6
+## export GCC=/usr/local/bin/gcc6
+export CPPFLAGS="${CPPFLAGS} -I${PREFIX}/include -D_GNU_SOURCE"
+export LDFLAGS="${LDFLAGS} -L${PREFIX}/lib"
+export LD_LIBRARY_PATH="${PREFIX}/lib"
+
+# Configure
+echo "LDFLAGS = '${LDFLAGS}'"
+ 
+./configure --prefix=$PREFIX \
+            --without-zlib \
+            --without-readline \
+            PTHREAD_LIBS="-lpthread" \
+            LDFLAGS="${LDFLAGS} -lpthread"
+
+ 
+ # Build
+${MAKE}
+${MAKE} -C contrib
+
+${MAKE} install                         DESTDIR=${INSTALL_ROOT}
+${MAKE} install -C contrib              DESTDIR=${INSTALL_ROOT}
+${MAKE} install -C src/bin/pg_config    DESTDIR=${INSTALL_ROOT}
+${MAKE} install -C src/include          DESTDIR=${INSTALL_ROOT}
+${MAKE} install -C src/interfaces/libpq DESTDIR=${INSTALL_ROOT}
+
+# Package
+mkdir -pv ${INSTALL_ROOT}/${PREFIX}/share/postgresql
+cp $(/usr/bin/dirname $0)/../postgresql.conf.cfengine ${INSTALL_ROOT}/${PREFIX}/share/postgresql/

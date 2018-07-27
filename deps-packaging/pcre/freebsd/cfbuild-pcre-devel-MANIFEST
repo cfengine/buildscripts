@@ -1,0 +1,20 @@
+name = "cfbuild-pcre-devel"
+version = "8.42"
+origin = "northerntech/cfbuild-pcre-devel"
+comment = "Summary: CFEngine Build Automation -- pcre -- development files"
+desc = <<EOD
+CFEngine Build Automation -- pcre -- development files
+EOD
+licenselogic = "single"
+licenses [
+    BSD3CLAUSE    
+]
+www = "https://www.pcre.org/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/libpcre.a" "fc0bd5262812f630af5ef6de1a91262d8a15a08e0f7a95b10358217a2905de23"
+    "/var/cfengine/lib/libpcreposix.a" "3f93bb717a5ecf8de76495ebe6d2de446baf5d243c175abace5f2a3bf32e3487"
+    "/var/cfengine/include/pcreposix.h" "1770f2b30c0af2f24543428173cf6e6479e921045efdbd009fd07817b84e04ad"
+    "/var/cfengine/include/pcre.h" "5108a3b35033d6ce1594794db03dc357577a5bef5dc4fc77dafe855ff6c70485"
+}

@@ -1,0 +1,21 @@
+name = "cfbuild-lmdb"
+version = "0.9.22"
+origin = "northerntech/cfbuild-lmdb"
+comment = "CFEngine Build Automation -- lmdb"
+desc = <<EOD
+CFEngine Build Automation -- lmdb
+EOD
+licenselogic = "single"
+licenses [
+    OpenLDAP
+]
+www = "http://symas.com/mdb"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/liblmdb.so" "8563846a00449e45c792e0b4d80065c7970c42f9881f6b13166faea56c254be1"
+    "/var/cfengine/bin/mdb_stat" "0f25c4c63306bfe10fa1b053784f27a5cbf4383bad967cecbe0ea911ae7bc716"
+    "/var/cfengine/bin/mdb_copy" "e863c530d029f5b086b6e7eef65ab29510be1a185ab7f7e58c1fefc2a643ae84"
+    "/var/cfengine/bin/lmdump" "ebc865225342998e35978339a0804d69cd968d9f34160c637931b490cdd895d5"
+    "/var/cfengine/bin/lmmgr" "57a3427912d490ae456047e30bd696e9b564f20467693d7473d28cbc8f44358b"
+}

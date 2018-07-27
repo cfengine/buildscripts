@@ -1,32 +1,32 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX:-/var/cfengine}
 
 TZ=${BUILD_ROOT}/cfbuild-zlib${PREFIX}
 TZD=${BUILD_ROOT}/cfbuild-zlib-devel${PREFIX}
 
 # Configure
 
-./configure --prefix=${PREFIX}
+CC=gcc6 ./configure --prefix=${PREFIX}
 
-sed -e "s@TEST_LDFLAGS=@TEST_LDFLAGS=-Wl,-R${PREFIX}/lib @" < Makefile > Makefile.new
-mv Makefile.new Makefile
+/usr/bin/sed -i '' -e "s@TEST_LDFLAGS=@TEST_LDFLAGS=-Wl,-R${PREFIX}/lib @" Makefile 
 
 # Build
 
-make
+make CC=gcc6 -s
 
 # Test
 
 if [ "$TESTS" != no ]; then
-  make check
+    echo "Running tests"
+    make -s check
 fi
 
 # Install
 
-make install prefix=${TZD}
+make -s install prefix=${TZD}
 # Package
 
 rm -f ${TZD}/lib/libz.a

@@ -1,0 +1,14 @@
+#!/bin/sh -e
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-libiconv
+
+MAKE=`which gmake`
+
+./configure --prefix=${PREFIX} --disable-shared --enable-static
+
+${MAKE} LDFLAGS="${LDFLAGS}" CFLAGS="$CFLAGS -fPIC"
+
+${MAKE} install DESTDIR=${INSTALL_ROOT} LDFLAGS="${LDFLAGS}"
+

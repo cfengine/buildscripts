@@ -1,0 +1,47 @@
+name = "cfbuild-apr-util"
+version = "1.6.1"
+origin = "northerntech/cfbuild-apr-util"
+comment = "CFEngine Build Automation -- apr-util"
+desc = <<EOD
+   CFEngine Build Automation -- apr-util
+EOD
+licenselogic = "single"
+licenses [
+     APACHE20
+]
+www = "http://apr.apache.org/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+deps {
+    expat {
+        origin "textproc/expat2"
+        version "2.2.5"
+    }
+    sqlite {
+        origin "databases/sqlite3"
+        version "3.24.0_1"
+    }
+    cfbuild-openldap {
+        origin "northerntech/cfbuild-openldap"
+        version "2.4.46"
+    }
+    cfbuild-apr {
+        origin "northerntech/cfbuild-apr"
+        version "1.6.3"
+    }
+    cfbuild-postgresql-hub {
+        origin "northerntech/cfbuild/postgresql-hub"
+        version "10.4"
+    }
+}
+files {
+    "/var/cfengine/lib/apr-util-1/apr_dbd_pgsql-1.so" "c3ff6b3886f8c4134e5459c8ff8715c7192e4c218114cb063a94e282a200d791"
+    "/var/cfengine/lib/apr-util-1/apr_dbd_pgsql.so" "-"
+    "/var/cfengine/lib/apr-util-1/apr_dbd_sqlite3-1.so" "19a8a8f6d208497716ccafec0c48918767633b0113456eadb810b5c3a47c6c85"
+    "/var/cfengine/lib/apr-util-1/apr_dbd_sqlite3.so" "-"
+    "/var/cfengine/lib/apr-util-1/apr_ldap-1.so" "b8fec02549ffa6fda975532d0fd42149adf95c6b1b4b5b25e23c72e7d8bfae61"
+    "/var/cfengine/lib/apr-util-1/apr_ldap.so" "-"
+    "/var/cfengine/lib/libaprutil-1.so.0.6.1" "c0bec5e551ece174f3e3fa4a2805d636490916dcba3ba4b894fda36f9419979c"
+    "/var/cfengine/lib/libaprutil-1.so.0" "-"
+    "/var/cfengine/lib/libaprutil-1.so" "-"
+}

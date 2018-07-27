@@ -212,7 +212,7 @@ detect_packaging()
     DEP_PACKAGING=deb
   elif [ -f /usr/sbin/pkgadd ]; then
     DEP_PACKAGING=solaris
-  elif [ -f /usr/sbin/pkg_add ]; then
+  elif [ -f /usr/local/sbin/pkg ]; then
     case "$UNAME_S" in
 	  FreeBSD)
 	    DEP_PACKAGING=freebsd;;
@@ -260,7 +260,7 @@ detect_arch()
       ARCH=$UNAME_M
       OS_VERSION=$UNAME_R ;;
     *)
-      echo "Unknown packaging system"
+      echo "Unknown architecture"
       exit 42;;
   esac
 
@@ -321,6 +321,9 @@ detect_cores()
     hpux)
       echo "Detected OS family is hpux"
       NUM_CORES="$(ioscan -k -C processor |grep processor | wc -l)";;
+    freebsd)
+      echo "Detected OS family is freebsd"
+      NUM_CORES="$(/sbin/sysctl -n hw.ncpu)" ;;
     *)
       echo "Detected OS family is UNKNOWN, defaulting amount of CPU cores to 1"
       NUM_CORES=1;;

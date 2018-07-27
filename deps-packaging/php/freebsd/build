@@ -1,0 +1,141 @@
+#!/bin/sh -e
+ 
+# Options
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-php
+
+if [ -z "${MAKE}" ]
+then
+    export MAKE=`which make`
+fi
+
+if [ -z "{$CC}" ]
+then
+    export CC=/usr/bin/cc
+    # export CC=`which gcc6`
+    # export GCC=`which gcc6`
+fi
+
+export CPPFLAGS="${CPPFLAGS} -I${PREFIX}/include -D_GNU_SOURCE"
+## export LDFLAGS="${LDFLAGS} -L${PREFIX}/lib -rpath=${PREFIX}/lib"
+export LDFLAGS="${LDFLAGS} -L${PREFIX}/lib"
+export LD_RUN_PATH="${PREFIX}/lib"
+
+./configure \
+    --prefix="${PREFIX}"/httpd/php \
+    --with-apxs2="${PREFIX}"/httpd/bin/apxs \
+    --with-config-file-path="${PREFIX}"/httpd/php \
+    --with-config-file-scan-dir="${PREFIX}"/httpd/php/lib \
+    --with-libxml-dir="${PREFIX}" \
+    --with-openssl="${PREFIX}" \
+    --with-ldap="${PREFIX}" \
+    --with-curl="${PREFIX}" \
+    --with-pdo-pgsql="${PREFIX}" \
+    --enable-json \
+    --without-fpm-user \
+    --without-fpm-group \
+    --without-fpm-systemd \
+    --without-fpm-acl \
+    --without-litespeed \
+    --without-layout \
+    --without-sqlite3 \
+    --without-bz2 \
+    --without-qdbm \
+    --without-gdbm \
+    --without-ndbm \
+    --without-db4 \
+    --without-db3 \
+    --without-db2 \
+    --without-db1 \
+    --without-dbm \
+    --without-tcadb \
+    --without-cdb \
+    --without-enchant \
+    --without-gd \
+    --without-gettext \
+    --without-gmp \
+    --without-mhash \
+    --without-imap \
+    --without-imap-ssl \
+    --without-interbase \
+    --without-icu-dir \
+    --without-libmbfl \
+    --without-onig \
+    --without-mysql-sock \
+    --without-mysqli \
+    --without-oci8 \
+    --without-odbcver \
+    --without-adabas \
+    --without-sapdb \
+    --without-solid \
+    --without-ibm-db2 \
+    --without-ODBCRouter \
+    --without-empress \
+    --without-empress-bcs \
+    --without-birdstep \
+    --without-custom-odbc \
+    --without-iodbc \
+    --without-esoob \
+    --without-unixODBC \
+    --without-dbmaker \
+    --without-pdo-dblib \
+    --without-pdo-firebird \
+    --without-pdo-mysql \
+    --without-pdo-oci \
+    --without-pdo-odbc \
+    --without-pdo-sqlite \
+    --without-pgsql \
+    --without-pspell \
+    --without-libedit \
+    --without-readline \
+    --without-recode \
+    --without-mm \
+    --without-snmp \
+    --without-tidy \
+    --without-xmlrpc \
+    --without-xsl \
+    --without-libzip \
+    --without-pear \
+    --without-pear \
+    --without-tsrm-pth \
+    --without-tsrm-st \
+    --without-tsrm-pthreads \
+    --with-zlib="${PREFIX}" \
+    --with-lmdb="${PREFIX}" \
+    --disable-phar \
+    CPPFLAGS="${CPPFLAGS}"
+
+ 
+# Build
+${MAKE} 
+
+case "${TESTS}" in
+    [Yy][Ee][Ss])
+        ${MAKE} test
+        ;;
+esac
+
+# Install
+mkdir -p ${INSTALL_ROOT}/${PREFIX}/httpd/conf
+cp  ${PREFIX}/httpd/conf/httpd.conf ${INSTALL_ROOT}${PREFIX}/httpd/conf/
+
+${MAKE} install INSTALL_ROOT=${INSTALL_ROOT}
+
+
+# Package
+
+rm ${INSTALL_ROOT}${PREFIX}/httpd/conf/httpd.conf
+cp -vi php.ini-production ${INSTALL_ROOT}/${PREFIX}/httpd/php/lib/php.ini
+
+# Reduce information leakage by default
+/usr/bin/sed -r -i '' -e 's/^\s*expose_php\s*=.*/expose_php = Off/g' ${INSTALL_ROOT}${PREFIX}/httpd/php/lib/php.ini
+
+# Increase the php memory limit so that Mission Portal works with larger infrastructures without modification
+/usr/bin/sed -r -i '' -e 's/^\s*memory_limit\s*=.*/memory_limit = 256M/g' ${INSTALL_ROOT}${PREFIX}/httpd/php/lib/php.ini
+
+# Set the default timezone for php
+/usr/bin/sed -r -i '' -e 's/^(\s|;)*date.timezone\s*=.*/date.timezone = "UTC"/g' ${INSTALL_ROOT}${PREFIX}/httpd/php/lib/php.ini
+
+echo "extension=curl.so" >> ${INSTALL_ROOT}${PREFIX}/httpd/php/lib/curl.ini
+echo "extension=openssl.so" >>${INSTALL_ROOT}${PREFIX}/httpd/php/lib/openssl.ini

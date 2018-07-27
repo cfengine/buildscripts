@@ -1,0 +1,12 @@
+#!/bin/sh
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+Lidn2=${BUILD_ROOT}/cfbuild-libidn2${PREFIX}
+
+./configure --prefix=${PREFIX} --disable-nls --with-libunistring-prefix=${PREFIX}
+
+make PREFIX=${PREFIX}
+
+make DESTDIR=${Lidn2%${PREFIX}} install
+

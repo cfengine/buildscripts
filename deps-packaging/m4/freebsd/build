@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Options
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+INSTALL_ROOT="${BUILD_ROOT}/cfbuild-m4"
+
+export CC=/usr/local/bin/gcc6
+
+# Configure
+
+./configure --prefix=${PREFIX} --with-gnu-ld --silent
+
+/usr/local/bin/gmake 
+
+/usr/local/bin/gmake -s DESTDIR=${INSTALL_ROOT} install

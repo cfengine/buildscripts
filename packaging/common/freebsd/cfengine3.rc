@@ -1,0 +1,59 @@
+#!/bin/sh
+#
+# PROVIDE: cfengine3
+# REQUIRE: LOGIN
+# KEYWORD: shutdown
+#
+# Add the following line to /etc/rc.conf[.local] to enable cf-execd(8)
+#
+# cfengine3_enable (bool):      Set to "YES" to run cf-agent
+#
+# cfengine3_flags (str):        Default to force run of update.cf to start
+#                               background processes and udate policy
+
+. /etc/rc.subr
+
+name="cfengine3"
+desc="CFEngine"
+rcvar=cfengine3_enable
+
+stop_cmd='cfengine3_stop'
+status_cmd='cfengine3_status'
+
+command="@@PREFIX@@/bin/cf-agent"
+procname='*cf-execd'
+
+                  
+load_rc_config $name
+
+: ${cfengine3_enable="NO"}
+: ${cfengine3_flags='-K -f update.cf'}
+    
+cfengine3_stop()
+{
+    local wait_pids=''
+    for cf_proc in cf-execd cf-serverd cf-monitord ; do
+        rc_pid=`check_process "*${cf_proc}"`
+        if [ -n "$rc_pid" ] ; then
+            wait_pids="$wait_pids $rc_pid"
+            echo "Stopping ${cf_proc}."
+            _doit=$(_run_rc_killcmd "${sig_stop:-TERM}")
+            _run_rc_doit "$_doit" || return 1
+        fi
+    done
+    wait_for_pids $wait_pids
+}
+
+cfengine3_status()
+{
+    for cf_proc in cf-execd cf-serverd cf-monitord ; do
+        rc_pid=`check_process "*${cf_proc}"`
+        if [ -n "$rc_pid" ]; then
+            echo "${cf_proc} is running as pid $rc_pid."
+        else
+            echo "${cf_proc} is not running."
+        fi
+    done
+}
+
+run_rc_command "$1"

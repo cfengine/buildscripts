@@ -67,6 +67,7 @@ EMBEDDED_DB="lmdb"
 DEPS=
 [ $OS_FAMILY = linux ]  &&  var_append DEPS "lcov"
 [ $OS_FAMILY = mingw ]  &&  var_append DEPS "pthreads-w32 libgnurx"
+[ $OS_FAMILY = freebsd ] && var_append DEPS "libunistring libidn2 lcov"
 
 # libgcc_s.so is needed before we compile any other dependency
 #             on some platforms!
@@ -85,7 +86,7 @@ esac
 
 # iconv is needed for libxml2 on some platforms
 case "$OS_FAMILY" in
-   aix|solaris)  var_append DEPS "libiconv" ;;
+   aix|solaris|freebsd)  var_append DEPS "libiconv" ;;
 esac
 
 var_append DEPS "libxml2 libyaml"
@@ -129,6 +130,7 @@ case "$EXPLICIT_ROLE" in
                 nova-*-sles-*) ROLE=hub;;
                 nova-*-ubuntu-*) ROLE=hub;;
                 nova-*-mingw-*) ROLE=agent;;
+                nova-*-freebsd-*) ROLE=agent;;
                 nova-*) ROLE=agent;;
                 *)
                     echo "Unknown project: $PROJECT"

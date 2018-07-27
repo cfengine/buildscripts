@@ -1,0 +1,19 @@
+name = "cfbuild-zlib-devel"
+version = "1.2.11"
+origin = "northerntech/cfbuild-zlib-devel"
+comment = "Summary: CFEngine Build Automation -- zlib -- development files"
+desc = <<EOD
+CFEngine Build Automation -- zlib -- development files
+EOD
+licenselogic = "single"
+licenses [
+    ZLIB
+]
+www = "https://zlib.net/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/pkgconfig/zlib.pc" "fea842502c85c0d8ae35d390e757a6351ca0f28e9e9be2db114f80dba28c3bcb"
+    "/var/cfengine/include/zlib.h" "4ddc82b4af931ab55f44d977bde81bfbc4151b5dcdccc03142831a301b5ec3c8"
+    "/var/cfengine/include/zconf.h" "77304005ceb5f0d03ad4c37eb8386a10866e4ceeb204f7c3b6599834c7319541"
+}

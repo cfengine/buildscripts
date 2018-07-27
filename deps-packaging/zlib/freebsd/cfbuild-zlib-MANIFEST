@@ -1,0 +1,19 @@
+name = "cfbuild-zlib"
+version = "1.2.11"
+origin = "northerntech/cfbuild-zlib"
+comment = "CFEngine Build Automation -- zlib"
+desc = <<EOD
+CFEngine Build Automation -- zlib
+EOD
+licenselogic = "single"
+licenses [
+    ZLIB
+]
+www = "https://zlib.net/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/libz.so" "-"
+    "/var/cfengine/lib/libz.so.1" "-"
+    "/var/cfengine/lib/libz.so.1.2.11" "7e2d2f38569143e4df029b64d00ea4c9ec38a1d35e8ace07741042a3f16f73d3"
+}

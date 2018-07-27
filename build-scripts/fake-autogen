@@ -1,0 +1,12 @@
+#!/bin/sh -ex
+
+. `dirname "$0"`/functions
+
+
+projects="core enterprise "
+
+for p in $projects
+do
+    (cd $BASEDIR/$p && NO_CONFIGURE=1 ./autogen.sh) || false
+done
+

@@ -10,18 +10,25 @@ case "$PROJECT" in
     ;;
   nova)
     NOVA=yes
-    GITSHAOF="$GITSHAOF enterprise nova"
+    GITSHAOF="$GITSHAOF enterprise"
+    if test "x$ROLE" = "xhub"
+    then
+      GITSHAOF="$GITSHAOF nova"
+    fi
     ;;
   *)
     echo "Unknown project: $PROJECT"
     exit 42;;
 esac
 
+projects="core masterfiles"
 if test "x$NOVA" = "xyes"
 then
-    projects="core enterprise nova masterfiles"
-else
-    projects="core masterfiles"
+  projects="$projects enterprise"
+fi
+if test "x$ROLE" = "xhub"
+then
+  projects="$projects nova"
 fi
 
 for p in $projects
@@ -48,7 +55,7 @@ number_of_different_versions=`echo $detected_versions  \
     | sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/'  \
     | uniq  |  wc -l`
 
-if [ x"$number_of_different_versions" != x1 ]
+if [ "$number_of_different_versions" -ne 1 ]
 then
     echo "Detected versions mismatch:" "$detected_versions"  1>&2
     exit 33

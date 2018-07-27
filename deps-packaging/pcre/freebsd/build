@@ -2,36 +2,41 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX:-/var/cfengine}
 
-PC=${BUILD_ROOT}/cfbuild-pcre${PREFIX}
-PCD=${BUILD_ROOT}/cfbuild-pcre-devel${PREFIX}
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-pcre
+
+if [ -z "$MAKE" ]
+then
+    export MAKE=`which make`
+fi
 
 # Configure
 
-./configure --prefix=$PREFIX --enable-unicode-properties -disable-cpp
+./configure --prefix=$PREFIX --enable-unicode-properties --disable-cpp --enable-shared
 
 # Build
 
-make
+${MAKE}
 
 # Test
 
 if [ "$TESTS" != no ]; then
-  make check
+  ${MAKE} -s check
 fi
 
 # Install
 
-make install DESTDIR=${BUILD_ROOT}/cfbuild-pcre-devel
+make install DESTDIR=${INSTALL_ROOT}
+
 # Package
 
-rm -f ${PCD}/bin/pcregrep
-rm -f ${PCD}/bin/pcretest
-rm -f ${PCD}/lib/*.a
-rm -f ${PCD}/lib/*.la
-rm -rf ${PCD}/share
+# rm -f ${PCD}/bin/pcregrep
+# rm -f ${PCD}/bin/pcretest
+# rm -f ${PCD}/lib/*.a
+# rm -f ${PCD}/lib/*.la
+# rm -rf ${PCD}/share
 
-mkdir -p ${PC}/lib
-mv ${PCD}/lib/*.so* ${PC}/lib
+# mkdir -p ${PC}/lib
+# mv ${PCD}/lib/*.so* ${PC}/lib
 

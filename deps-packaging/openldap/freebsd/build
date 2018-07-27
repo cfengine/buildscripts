@@ -1,37 +1,66 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX:-/var/cfengine}
 
-OL=${BUILD_ROOT}/cfbuild-openldap${PREFIX}
-OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-openldap
+
+if [ -z "${MAKE}" ]
+then
+    MAKE=`which gmake`
+fi
+
+export CC=/usr/local/bin/gcc6
+export GCC=/usr/local/bin/gcc6
+export CPPFLAGS="${CPPFLAGS} -I${BUILD_ROOT}/include -I${PREFIX}/include -D_GNU_SOURCE"
+export LDFLAGS="${LDFLAGS} -L${BUILD_ROOT}/lib -L${PREFIX}/lib -rpath=${PREFIX}/lib"
 
 # Patch
 
+# Patch configure to get around it confusing
+# FreeBSD 11.1-RELEASE for FreeBSD 1 (which didn't do shared objects)
+# I don't think FreeBSD 1 is a concern anymore.
+/usr/bin/sed -i '' \
+             -e 's/freebsd1\*)/freebsd1.*)/' \
+             -e 's/freebsd1\*)/freebsd1.*)/' \
+             -e 's/freebsd2\*)/freebsd2.*)/' \
+             -e 's/freebsd\[123\]\*)/freebsd[123].*)/' \
+             configure
+
 # Configure
 
-./configure --prefix=$PREFIX --enable-shared --disable-slapd --disable-backends \
-            --with-tls=openssl --without-gssapi \
-            CPPFLAGS=-I/var/cfengine/include
+./configure --prefix=$PREFIX \
+            --enable-shared \
+            --disable-slapd \
+            --disable-backends \
+            --disable-overlays \
+            --with-tls=openssl \
+            --without-cyrus-sasl \
+            --without-fetch \
+            --disable-monitor \
+            --disable-bdb \
+            --disable-relay \
+            --disable-syncprov 
 
 # Build
 
-make -C include
-make -C libraries
+${MAKE} -s depend
+${MAKE} -s -C include
+${MAKE} -s -C libraries
 
 # Test
 
 # Install
 
-make -C include install DESTDIR=${BUILD_ROOT}/cfbuild-openldap-devel
-make -C libraries install DESTDIR=${BUILD_ROOT}/cfbuild-openldap-devel
+${MAKE} -s -C include   install DESTDIR=${INSTALL_ROOT}
+${MAKE} -s -C libraries install DESTDIR=${INSTALL_ROOT}
+
 # Package
+# rm -rf ${OLD}/etc
+# rm -f ${OLD}/lib/*.a
+# rm -f ${OLD}/lib/*.la
 
-rm -rf ${OLD}/etc
-rm -f ${OLD}/lib/*.a
-rm -f ${OLD}/lib/*.la
-
-mkdir -p ${OL}/lib
-mv ${OLD}/lib/*.so* ${OL}/lib
+# mkdir -p ${OL}/lib
+# mv ${OLD}/lib/*.so* ${OL}/lib
 

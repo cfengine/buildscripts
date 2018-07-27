@@ -1,0 +1,27 @@
+name = "cfbuild-openldap-devel"
+version = "2.4.46"
+origin = "northerntech/cfbuild-openldap-devel"
+comment = "CFEngine Build Automation -- openldap -- development files"
+desc = <<EOD
+CFEngine Build Automation -- openldap -- development files
+EOD
+licenselogic = "single"
+licenses [
+    OPENLDAP
+]
+www = "http://www.OpenLDAP.org/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/include/lber.h" "580f36d19ca6a26250e8df7b41d3c25228ce02f9c432d39bbc1da543938bd673"
+    "/var/cfengine/include/lber_types.h" "a2b6d6ab192265b2851d891db81a75bed9696d79d8f93291c3db93025fa4cdf5"
+    "/var/cfengine/include/ldap.h" "cae1a2adc2bea9118ce3a73214e247d35b1352c1d589a5cd231a95f8ef49c999"
+    "/var/cfengine/include/ldap_cdefs.h" "27b92ab08adc0ad19a4db020f186c0dd4defe31ffaf7ea39f701d93bdaffdcea"
+    "/var/cfengine/include/ldap_schema.h" "9b62289067d896eaf9a70e05b0f9636b0862aa6ae2f2d31f7bc53978bc49105d"
+    "/var/cfengine/include/ldap_utf8.h" "304af82dfc0846ef12c1bcf2fff9dc8c64afbb137fa5bdd37c2164c0b288a4b1"
+    "/var/cfengine/include/slapi-plugin.h" "c155e6ad14c54de1ea581c97f805caab3a5316b09a4f1f3c68f7f6f00771ca1f"
+    "/var/cfengine/include/ldap_features.h" "caec54975f7198552201e4b8b398c715290598fb16e587fcf8c88b1676fb9a76"
+    "/var/cfengine/include/ldif.h" "59f1323a5d2437cd3614e8b969d4e293b927fde001685303812c624884d33cc5"
+    "/var/cfengine/lib/liblber.a" "2dd8fa80bc940f2b3a67443f74244a5625f79542898f6a6d748d4dafab96721d"
+    "/var/cfengine/lib/libldap.a" "c1b2c44a2365ef3da23b57590847fc81a5e6939f46b23d3719aff2b25b0c03f1"
+}

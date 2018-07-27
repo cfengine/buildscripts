@@ -1,0 +1,48 @@
+name = "cfbuild-libunistring-devel"
+version = "0.9.10"
+origin = "northerntech/cfbuild-libunistring-devel"
+abi = "FreeBSD:11:amd64";
+arch = "freebsd:11:x86:64";
+comment = "Unicode string library"
+desc = <<EOD
+GNU LIBUNISTRING - Unicode string library
+
+This library provides functions for manipulating Unicode strings and
+for manipulating C strings according to the Unicode standard.
+EOD
+licenselogic = "and"
+licenses [
+    "GPLv2, LGPL3+, GFDL",
+]
+www = "https://www.gnu.org/software/libunistring/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+deps {
+    indexinfo {
+        origin = "northerntech/indexinfo";
+        version = "0.3.1";
+    }
+}
+dir - /var/cfengine/var/cfengine/include/unistring
+files {
+    "/var/cfengine/var/cfengine/include/unistring/inline.h" "d3649f94018159d911398adfbf2efcc86ba8b2ad4466b0d9cff1987533561427"
+    "/var/cfengine/var/cfengine/include/unistring/stdbool.h" "bda8d4e29b5baed61e42c0b6b944fb37260011994406cc63e44752cbe01a4d40"
+    "/var/cfengine/var/cfengine/include/unistring/stdint.h" "8cb4a06f54ca9dfc2eaec9cda2d6b7b2944b09406b3e7fc2e69593a93a67f66e"
+    "/var/cfengine/var/cfengine/include/unistring/localcharset.h" "865e19355d5774d95b852e2446e2384a8a9ffdc7eaa3d690bdae544c7fac9cd6"
+    "/var/cfengine/var/cfengine/include/unistring/iconveh.h" "563ff9407dfd63511678a4848e984f443aa7c47ba1aae329b245d10c14a67427"
+    "/var/cfengine/var/cfengine/include/unistring/version.h" "1e787901d1923f81a685474cfad203ac856d4fd5b207c3197b8b2a3220e21998"
+    "/var/cfengine/var/cfengine/include/unistring/cdefs.h" "30ccbdefae2a6157659e0107cd06705b4b34270d4837d2ffb30b8601dc7e54af"
+    "/var/cfengine/var/cfengine/include/unistring/woe32dll.h" "1a4cfc61c61c1ac83aae83ea1b8697748f74a028d07ec73992ec4a97cdd77646"
+    "/var/cfengine/var/cfengine/include/unitypes.h" "b1b1c9bca963198bb00650ff8d6779bad1c9bfbf7458756ec9f95f7592d0e8f2"
+    "/var/cfengine/var/cfengine/include/unistr.h" "d136b1abfd2c64f80c97fcce821f6e263ae65aa47d904c0a99a1c7ae7d5b9bb6"
+    "/var/cfengine/var/cfengine/include/uniconv.h" "4a4ad73549dc501b7aa0e3846587abd2d21b27fb1db6177285a830f8277b1534"
+    "/var/cfengine/var/cfengine/include/unistdio.h" "862b1880c2ce0ea9e0f89ade877bd133a9dc8fe564cc2470ebad459fb039828c"
+    "/var/cfengine/var/cfengine/include/uniname.h" "0b1f40159d7cd345c8e668b74e7aa9a100c135515c478b68cfb111dd43b05ec2"
+    "/var/cfengine/var/cfengine/include/unictype.h" "fdea031fec9942e46635cac6e17dd4b1d57da0adfa723eb83ee225abb222cabc"
+    "/var/cfengine/var/cfengine/include/uniwidth.h" "3a2a1dd93be24e7bc74100db891928128ad8d30cc63924e22fff1d144a694645"
+    "/var/cfengine/var/cfengine/include/unigbrk.h" "542c84d90560e2e8daa9b21e86921d7a4541793e0a70449178d3e0499d52174a"
+    "/var/cfengine/var/cfengine/include/uniwbrk.h" "1f08161d32a3e878fb66d3e3469e5cb860c04d25a96352c4eba84b156d251502"
+    "/var/cfengine/var/cfengine/include/unilbrk.h" "df0beda39fc38fbcdad261f4854fd78448939a76497ecba27b12b86afc0b16c8"
+    "/var/cfengine/var/cfengine/include/uninorm.h" "c797082a7cd90f9306831eb1cfa397a148bdf2884208a41f202407c802ffc58d"
+    "/var/cfengine/var/cfengine/include/unicase.h" "5808b5911dc47472bf07919430a22cefe60fdde65bd3b65d5624cd29af8c8db3"
+}

@@ -1,0 +1,70 @@
+#!/bin/sh -e
+
+# Options
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+INSTALL_ROOT=${BUILD_ROOT}/cfbuild-libcurl
+
+if [ -z "${MAKE}" ]
+then
+    MAKE=`which gmake`
+fi
+
+export CC=`which gcc6`
+
+export CPPFLAGS="${CPPFLAGS} -I${BUILD_ROOT}/include -I${PREFIX}/include "
+export LDFLAGS="${LDFLAGS} -L${BUILD_ROOT}/lib -L${PREFIX}/lib -rpath=${PREFIX}/lib"
+
+# Patch
+
+# Patch configure to get around it confusing
+# FreeBSD 11.1-RELEASE for FreeBSD 1 (which didn't do shared objects)
+# I don't think FreeBSD 1 is a concern anymore.
+# /usr/bin/patch <./freebsd/patch-configure-libtool
+
+# Configure
+
+./configure \
+    --with-sysroot=${PREFIX} \
+    --with-ssl=${PREFIX} \
+    --with-zlib=${PREFIX} \
+    --disable-ldap \
+    --disable-ldaps \
+    --without-axtls \
+    --without-cyassl \
+    --without-darwinssl \
+    --without-egd-socket \
+    --without-gnutls \
+    --without-gssapi \
+    --without-libidn \
+    --without-libmetalink \
+    --without-librtmp \
+    --without-libssh2 \
+    --without-nghttp2 \
+    --without-nss \
+    --without-polarssl \
+    --without-winidn \
+    --without-winssl \
+    --prefix=${PREFIX} \
+    LD_LIBRARY_PATH="${PREFIX}/lib" \
+    LD_RUN_PATH="${PREFIX}/lib"
+
+# Build
+
+${MAKE}
+
+# Test
+
+# Install
+
+${MAKE} -s install DESTDIR=${INSTALL_ROOT}
+
+# Package
+# rm -rf ${LCDevelDir}/etc
+# rm -f ${LCDevelDir}/lib/*.a
+# rm -f ${LCDevelDir}/lib/*.la
+
+# mkdir -p ${LCDir}/lib
+# mv ${LCDevelDir}/lib/*.so* ${LCDir}/lib
+

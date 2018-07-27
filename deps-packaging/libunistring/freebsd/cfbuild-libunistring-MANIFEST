@@ -1,0 +1,30 @@
+name = "cfbuild-libunistring"
+version = "0.9.10"
+origin = "northerntech/cfbuild-libunistring"
+abi = "FreeBSD:11:amd64";
+arch = "freebsd:11:x86:64";
+comment = "Unicode string library"
+desc = <<EOD
+GNU LIBUNISTRING - Unicode string library
+
+This library provides functions for manipulating Unicode strings and
+for manipulating C strings according to the Unicode standard.
+EOD
+licenselogic = "and"
+licenses [
+    "GPLv2, LGPL3+, GFDL",
+]
+www = "https://www.gnu.org/software/libunistring/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+deps {
+    indexinfo {
+        origin = "northerntech/indexinfo";
+        version = "0.3.1";
+    }
+}
+files {
+    "/var/cfengine/var/cfengine/lib/libunistring.so.2.1.0" "38898117568f2bee41b6b901d1dbf16de552a1a85e466277737db78e0d8a9e64"
+    "/var/cfengine/var/cfengine/lib/libunistring.so.2" "-"
+    "/var/cfengine/var/cfengine/lib/libunistring.so" "-"
+}

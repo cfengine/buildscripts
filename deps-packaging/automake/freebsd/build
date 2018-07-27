@@ -1,0 +1,34 @@
+#!/bin/sh
+
+# Options
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+AMdir="${BUILD_ROOT}/cfbuild-automake"
+
+export CC=/usr/local/bin/gcc6
+
+# Configure
+
+./configure --prefix=${PREFIX} --silent
+
+/usr/local/bin/gmake 
+
+/usr/local/bin/gmake -s DESTDIR=${AMdir} install
+#!/bin/sh
+
+#!/bin/sh
+
+# Options
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+
+AMdir="${BUILD_ROOT}/cfbuild-automake"
+
+export CC=/usr/local/bin/gcc6
+
+# Configure
+
+./configure --prefix=${PREFIX} --silent
+
+/usr/local/bin/gmake 
+
+/usr/local/bin/gmake -s DESTDIR=${AMdir} install

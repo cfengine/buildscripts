@@ -170,10 +170,10 @@ uninstall_hpux_pkgs()
 }
 uninstall_freebsd_pkgs()
 {
-    PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
+    PKGS=`pkg info -ox ^$1 | awk '{print $2;}' || true`
     if [ -n "$PKGS" ]
     then
-	retry_wrapper  sudo pkg_delete $PKGS
+	retry_wrapper  sudo pkg delete -y $PKGS
     fi
 }
 
@@ -197,7 +197,7 @@ uninstall_cfbuild_devel()
     deb) uninstall_debs 'cfbuild-.*-devel';;
     solaris) uninstall_solaris_pkgs 'cfbuild-.*-devel';;
     freebsd) uninstall_freebsd_pkgs 'cfbuild-.*-devel';;
-    hpux) uninstall_hpux_pkgs 'cfbuild-.*-devel';;
+    hpux) uninstall_hpux_pkgs 'cfbuild-.\*-devel';;
     *)
       echo "Unknown packaging system: $DEP_PACKAGING"
       exit 42;;
@@ -206,8 +206,9 @@ uninstall_cfbuild_devel()
 query_pkg()
 {
     case "$DEP_PACKAGING" in
-        rpm) rpm  -q --quiet $1 ;;
-        deb) dpkg -s         $1 2>&1    |    grep_q '^Status: .*ok installed' ;;
+        rpm) rpm  -q --quiet  $1 ;;
+        deb) dpkg -s          $1 2>&1    |    grep_q '^Status: .*ok installed' ;;
+	freebsd) pkg info -eq $1 ;;
         *)
             echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
             exit 1
@@ -519,7 +520,8 @@ func_md5 ()
         md5sum "$@" | cut -d ' ' -f 1
     else
         case "$UNAME_S" in
-            SunOS)  digest -a md5 "$@"  ;;
+            SunOS)   digest -a md5 "$@"  ;;
+	    FreeBSD) /sbin/md5 -qr  "$@" ;;
             AIX)    csum -h MD5 "$@"  | cut -d ' ' -f 1 ;;
             *)      fatal "Can't find command for computing MD5"  ;;
         esac

@@ -1,0 +1,111 @@
+name = "cfbuild-openssl-devel"
+version = "1.1.0h"
+origin = "northerntech/cfbuild-openssl-devel"
+comment = "Summary: CFEngine Build Automation -- openssl -- development files"
+desc = <<EOD
+CFEngine Build Automation -- openssl -- development files
+
+The OpenSSL Project is a collaborative effort to develop a robust,                                              
+commercial-grade, full-featured, and Open Source toolkit implementing                                           
+the Secure Sockets Layer (SSL v2/v3) and Transport Layer Security                                               
+(TLS v1) protocols with full-strength cryptography world-wide. The                                              
+project is managed by a worldwide community of volunteers that use                                              
+the Internet to communicate, plan, and develop the OpenSSL tookit                                               
+and its related documentation.
+
+OpenSSL is based on the excellent SSLeay library developed by Eric                                              
+A. Young and Tim J. Hudson. The OpenSSL toolkit is licensed under                                               
+an Apache-style licence, which basically means that you are free                                                
+to get and use it for commercial and non-commercial purposes subject                                            
+to some simple license conditions.
+
+WWW: http://www.openssl.org/
+WWW: http://sctp.fh-muenster.de/dtls-patches.html
+EOD
+licenselogic = "single"
+licenses [
+    "OpenSSL"    
+]
+www = "http://www.openssl.org/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+dir - /var/cfengine/include/openssl
+files {
+    "/var/cfengine/lib/pkgconfig/libcrypto.pc" "3ac56d2c088186a3357d4bf576dd00af09290f2d6a56d90ccfb3d36962b38456"
+    "/var/cfengine/lib/pkgconfig/libssl.pc" "2c9ae3712bbdaf5a9f1cedae2762fd86531b26e8aedb166ef942cfb93e6e8628"
+    "/var/cfengine/include/openssl/aes.h" "f6ba27e87d97ea578f01540a8f84b7eab05d42c178badce712d0cc668d8a9981"
+    "/var/cfengine/include/openssl/asn1.h" "d66650f953c0f6f9e40284b56add65910275b316f0e0cd7b3dd4da711d48ded8"
+    "/var/cfengine/include/openssl/asn1_mac.h" "db4883ed3aa74e07338001b31ec7e3e68546521c54bbdfe68c473b33f8511ca6"
+    "/var/cfengine/include/openssl/asn1t.h" "d0489b24166679455f77673c9d97d98532853f13aacd22956343bf45724f865e"
+    "/var/cfengine/include/openssl/async.h" "62f00a64fb03933532b2b0f8301315589f311b29e8cd35305ad87f2ef967d22f"
+    "/var/cfengine/include/openssl/bio.h" "70477b5e1934f210f05890141a22d6bbb2647c17cce10a476ec43150dfa0c121"
+    "/var/cfengine/include/openssl/blowfish.h" "813b2c7cff888b5b709b90d4da584afef59b5ce1ea888617d682f1af48578faf"
+    "/var/cfengine/include/openssl/bn.h" "dc95c515309668c78ffc8a55108cfd6b6004f8a991de0e9cda2009b70354feef"
+    "/var/cfengine/include/openssl/buffer.h" "e547a1943b2db85be0e968e8ab1cabdaa806a4b1a25d00877137ee41de511cab"
+    "/var/cfengine/include/openssl/camellia.h" "561bdb2e985458e809e656c60e4bc83e1d6707746dd8b5badbc10b64198d4770"
+    "/var/cfengine/include/openssl/cast.h" "a14c51a129b3ae5795dafd98065be0bb0cbf00b4d4528e85adbf629966f42f53"
+    "/var/cfengine/include/openssl/cmac.h" "75bf95d1da118ff1e2f143ccb7a564d949de440097b97a49725c03976e167b52"
+    "/var/cfengine/include/openssl/cms.h" "13edbd68543b876ef9c67b66914778d3e7c5b4e03f31fb6a8ba9c6ec4133eac0"
+    "/var/cfengine/include/openssl/comp.h" "552ec58c965b2743c7a114563579a92708d0fb8058e8c96f574d33569e918bdc"
+    "/var/cfengine/include/openssl/conf.h" "2161d85989ba0e294eaae0786c0f6a308f667376b0781603dc9e131e843cf792"
+    "/var/cfengine/include/openssl/conf_api.h" "175f86b69b58b0cd1da6c9b27d87ab4e4ed52f37dc76b7895c210c43469504eb"
+    "/var/cfengine/include/openssl/crypto.h" "ad3ff1db9f9e3a8197e507b38541102ddbfb577c985cb3b6733a9556497a7e4b"
+    "/var/cfengine/include/openssl/ct.h" "5156e379e655d505eaa8ada6446db220478d9d425f531057cb76f8c27ae98778"
+    "/var/cfengine/include/openssl/des.h" "3cb68fbb498e34e19e46f9d41561596ab69ccf78b1d8bdf2f312e892c060015f"
+    "/var/cfengine/include/openssl/dh.h" "8884c27e82c54ccf9e7588a71d670ac524a1e11983f887db239a7303c978405d"
+    "/var/cfengine/include/openssl/dsa.h" "ad1189e5068038af42df549ea215cc8c591f1f79077297e7e6236e10dfc7e7a9"
+    "/var/cfengine/include/openssl/dtls1.h" "d5864edad1d73ac8af24da4a607a26d465a4dff2b3b216b6f0fdd6332b733b56"
+    "/var/cfengine/include/openssl/e_os2.h" "6efabc6725510fb63ce8b8a21dd2253dda74ec653e262c4213d9bdb03c13b2b3"
+    "/var/cfengine/include/openssl/ebcdic.h" "2289f14f11e75ac739d1123651d16e841f3c74e36daa483c1fed9f8c5c144720"
+    "/var/cfengine/include/openssl/ec.h" "c8ca5a5379e19355708e259ea14b11631edcd1e3c974468dcf264e43bf067922"
+    "/var/cfengine/include/openssl/ecdh.h" "95fb89add3bd32b6d43dcf1a51d1839b915e774d7138afaf618e690efbf414bb"
+    "/var/cfengine/include/openssl/ecdsa.h" "95fb89add3bd32b6d43dcf1a51d1839b915e774d7138afaf618e690efbf414bb"
+    "/var/cfengine/include/openssl/engine.h" "1592565a4e5e6c7ed3974b913f24c0306a79a61b7ad6184b82f206d46721e657"
+    "/var/cfengine/include/openssl/err.h" "5f12a38f3f77744b0633b166941abf146a613aebaa3fb00b4ab0421595ea1893"
+    "/var/cfengine/include/openssl/evp.h" "bc2d33db50641e1293fa1cb7c0fba38754cca16aa5c57de169e34c39c1da5f49"
+    "/var/cfengine/include/openssl/hmac.h" "c7a4b4ea4584d4aae2f3330f43085e374d48c7ab19ba5684373f562e4b912745"
+    "/var/cfengine/include/openssl/idea.h" "bab682c5cc06027c82d126ed8e65d7dd9dcc75fa464ccbc95d7f168bd69c732d"
+    "/var/cfengine/include/openssl/kdf.h" "9bde7c4860cd0ca87f256fcc792f682d1753f0d1951d2b5e6c005172be0cbe2a"
+    "/var/cfengine/include/openssl/lhash.h" "29db80c6905fe14bfe59f09350a02b4531c9c479aa3907bd5a40a918a6e9f24d"
+    "/var/cfengine/include/openssl/md2.h" "9e28f0a8d5e2297649af298f5e3209d32fe9486edb1793cc698a757c91270662"
+    "/var/cfengine/include/openssl/md4.h" "03d3fc9dceec6c168d219eb9f404ca08b478d5521622834bc24b7d45945702e4"
+    "/var/cfengine/include/openssl/md5.h" "a0612a8f7e69e3bc166fc186ca44be1e5b1d020b5da8b5be021f73d48c270b82"
+    "/var/cfengine/include/openssl/mdc2.h" "f13b01ec09c45c2634673d1b9b1a79adbd6ec32bdff94287308e2bb27408e537"
+    "/var/cfengine/include/openssl/modes.h" "cee733edaff544b3839959e5c46954cd900e02c35e066bbad72fda2d864d23f0"
+    "/var/cfengine/include/openssl/obj_mac.h" "ca1b21ff06c012e8353c7c7b1f6884db7f7ac6587922b9e660248998645256e3"
+    "/var/cfengine/include/openssl/objects.h" "aa765ad3eef5501831a5774768a4c6937c2de8d89bea61688b859a613f9ba5a0"
+    "/var/cfengine/include/openssl/ocsp.h" "cf0991f60f928fd4eaef77654d9257eb638d4a0144ed6da530fec67ff4c67724"
+    "/var/cfengine/include/openssl/opensslconf.h" "0a999d84eb9cb786b842b9bb49f2e4a7f5034a1079d2872f42e11206ed5b0808"
+    "/var/cfengine/include/openssl/opensslv.h" "930682d9e7754c7638e67b00fe6f42c6292ea5e5588430e86a8ddeff18e81b78"
+    "/var/cfengine/include/openssl/ossl_typ.h" "cccdd0c9dc6aa2c0f7c59eaf2dd22e29250f6e7fc9d977f98e096767d298d36e"
+    "/var/cfengine/include/openssl/pem.h" "a29c948650e4573b0dfe25f51d712d9fe6246be10fa2ccb4c2bf19f7aa98747d"
+    "/var/cfengine/include/openssl/pem2.h" "98ee3f28118860066f15d45f57e8ad50976664a8c4f91e9cee1cbb13b8bb2c87"
+    "/var/cfengine/include/openssl/pkcs12.h" "e05cb9abe442c1c863af05e1fda4d0cdb9de7aca342924247d8238023b938a0d"
+    "/var/cfengine/include/openssl/pkcs7.h" "a44a85bf29cfb4416083a7fb0aede8ca8f69ff1ca824157e202358ec9cf10fe7"
+    "/var/cfengine/include/openssl/rand.h" "e0930675968d59a0f392af0b843a8635fc08e3d8068c183cf599fdd8a9696c5d"
+    "/var/cfengine/include/openssl/rc2.h" "ec2b9196898bbc45ff2ab00204f93a6f20c974225510f29097ad69a6eeebcdfe"
+    "/var/cfengine/include/openssl/rc4.h" "6fc023442f524349685d13d50854ad773b12b8c7a153d72d615ab27dd4a3d609"
+    "/var/cfengine/include/openssl/rc5.h" "c238954a1df23f52362d6e5fa78df2c7a5a2ad6ef9536e489f0a23295efa0cab"
+    "/var/cfengine/include/openssl/ripemd.h" "8c74b93c10a9e83abc17ced3a8021af7506f39a0fadab07b5db2d4faebcf68b6"
+    "/var/cfengine/include/openssl/rsa.h" "4f9fde7d8238d50e4caec4511da32566a2385726bfc2fb0bd78ef83d217ab223"
+    "/var/cfengine/include/openssl/safestack.h" "349b5c158ddc71fb13dff936e63c684512983d6a1e51f54c4a0a1cd6b21509fd"
+    "/var/cfengine/include/openssl/seed.h" "6bf2373dfb10dc5cbc626cf2fe86b9b1c82373d799bdd6be13eedaf7d4540d55"
+    "/var/cfengine/include/openssl/sha.h" "0bb6745481ac56b67f450d09033e813bf8f6a5f2025e90d5eb539eab1ad5e323"
+    "/var/cfengine/include/openssl/srp.h" "db48a4b7fa97e7ccedf5fabe76c739cee0d6c5712ec854eb917a54b070c82764"
+    "/var/cfengine/include/openssl/srtp.h" "e50e2dd5df6a0db219091cd1c6768a6d319ef6485b16e1f361fce43067847626"
+    "/var/cfengine/include/openssl/ssl.h" "756e02a96f0414858eed2514793da46e6fb292f5036cab2a0b9c0e53384726aa"
+    "/var/cfengine/include/openssl/ssl2.h" "7fb557a32488ad44a25420abff8279abd0bd1f4ab768e73d3e1d5c2dab36c0c5"
+    "/var/cfengine/include/openssl/ssl3.h" "383f369729270ed9e6e51a36b198f2c89fe7507b9f4b22dceec73b96097927d7"
+    "/var/cfengine/include/openssl/stack.h" "387ffb14f48464117470c8997c9d80e9ad8c07e5167718badaa805b291fa30df"
+    "/var/cfengine/include/openssl/symhacks.h" "fe5cc08e6399f111e00d36ac575929fc9399c9a402a1ca7633cb6fc9590c71ac"
+    "/var/cfengine/include/openssl/tls1.h" "4c55555a7905e38c5cc8dd90c4f5f92e2b6e07831eef8333f51362161e725fb2"
+    "/var/cfengine/include/openssl/ts.h" "63e5b609a90f34ef228fd0d02f3bfc5d81a8d7d473ff1b6d53cf1288337d8df4"
+    "/var/cfengine/include/openssl/txt_db.h" "b7b466589dbe8e68d6ec69d70a824aa2d055fd2bc8241d8dd02be7aecd353567"
+    "/var/cfengine/include/openssl/ui.h" "64b9f6b557e20face0ff3eca08e7d4385809e9d73d68c48b511d98c3d491351d"
+    "/var/cfengine/include/openssl/whrlpool.h" "38750722d1737083fa8caedfccd3bce574080e35692010d2f91dd303b154af69"
+    "/var/cfengine/include/openssl/x509.h" "f6bf39c5c9f3d1774bfa9319d7ab3915694ed9c52e067c66c5dd501c91e32c13"
+    "/var/cfengine/include/openssl/x509_vfy.h" "1b7d8645e1009c103d05d549eb79a2b9239568eb65269ddcd333e2cf4a5e2f22"
+    "/var/cfengine/include/openssl/x509v3.h" "7e01e637462836536ee1f17d6efb3ce8c7f4d72cb9174bf2ff810ab0a91f13e1"
+    "/var/cfengine/lib/libcrypto.a" "8a8ce9a43681b7262bf8b056d83e2bbb55647d04d1b630b293fa8a62699bc1cc"
+    "/var/cfengine/lib/libssl.a" "38ab6653edd381cb423498a195b05a677c230f852a166742debfe4f051452031"
+}

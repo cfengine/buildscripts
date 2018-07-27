@@ -1,0 +1,18 @@
+name = "cfengine-nova"
+version = "@@VERSION@@@@RELEASE@@"
+origin = "northerntech/cfengine-nova"
+comment = "The CFEngine Configuration System"
+desc = <<EOD
+CFEngine is the standalone, open-source datacenter management platform run by
+leading enterprises since 1993. Customize your IT systems, align to network,
+business and regulatory needs, monitor problems, automatically repair and
+maintain systems.
+EOD
+licenselogic = "single"
+licenses [
+    COSL
+]
+www = "http://cfengine.com/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+categories [ sysutils ]

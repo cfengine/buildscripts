@@ -1,0 +1,55 @@
+name = "cfbuild-php"
+version = "7.2.6"
+origin = "northerntech/cfbuild-php"
+comment = "CFEngine Build Automation -- php"
+desc = <<EOD
+CFEngine Build Automation -- php
+EOD
+licenselogic = "single"
+licenses [
+    PHP301
+]
+www = "http://www.php.net/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+deps {
+    cfbuild-libxml2 {
+        origin = "northerntech/cfbuild-libxml2"
+        version = "2.9.8"
+    }
+    cfbuild-pcre {
+        origin = "northerntech/cfbuild-pcre"
+        version = "8.42"
+    }
+}
+dir - /var/cfengine/httpd/modules
+dir - /var/cfengine/httpd/php/bin
+dir - /var/cfengine/httpd/php/lib
+dir - /var/cfengine/httpd/php/lib/php
+dir - /var/cfengine/httpd/php/lib/php/build
+dir - /var/cfengine/httpd/php/lib/php/extensions
+dir - /var/cfengine/httpd/php/lib/php/extensions/no-debug-non-zts-20170718
+files {
+    "/var/cfengine/httpd/php/bin/php" "655b966237d055110c91eb860a4b225b81243bc8650588ed59e582e75265059d"
+    "/var/cfengine/httpd/php/bin/phpdbg" "ae8b019f5e9693099bba59cffde8c3c067f3b11bbf603c7b6a43abb0806b7a47"
+    "/var/cfengine/httpd/php/bin/php-cgi" "64c5aa619befe01a0fa32f21b73d7866377834760575c75b398cac938d19717c"
+    "/var/cfengine/httpd/php/bin/phpize" "72375974b0620b500c75e4f42fe15b95917e8e9b4897dbe0d899dbb80c67fa37"
+    "/var/cfengine/httpd/php/bin/php-config" "dc30aeb93434aae82fe007ad523e779433a4ae17c38937c931ff42e5157cd3a4"
+    "/var/cfengine/httpd/php/lib/php/extensions/no-debug-non-zts-20170718/opcache.so" "debfc76c1dc286f05aa81e936b815a61b96f6a7de3d70662f656cc07ceb0352a"
+    "/var/cfengine/httpd/php/lib/php/build/shtool" "875c6f071a3b7caa83d551809194bd82a0e6ad048a4bb89078928f9183d2b98c"
+    "/var/cfengine/httpd/php/lib/php/build/config.guess" "b7eab9b8a73dc6e0421366bca6921cd2621dab6c3909d6e3bebf863011442d15"
+    "/var/cfengine/httpd/php/lib/php/build/config.sub" "589f2e1880a709e152dde43b3a97fec6e848b5c0a423bd8601b1eeaf7b79c0b8"
+    "/var/cfengine/httpd/php/lib/php/build/phpize.m4" "f562ca29dfd5b39626c4e951ecef42bd0f5771d20e9fb0b44b4fba1e308312da"
+    "/var/cfengine/httpd/php/lib/php/build/mkdep.awk" "26947b91dd6e8f938f1956895ac85fb7bbd956c904cef023fae471874587113e"
+    "/var/cfengine/httpd/php/lib/php/build/scan_makefile_in.awk" "3dd037adbe281a28a40c43aadbb29c9186fbeb65f6a679b152983ed25a5bce84"
+    "/var/cfengine/httpd/php/lib/php/build/libtool.m4" "7d0592d26f34ad758b1e3f2db5be54fa3856f854d3d13c9f7e586fc496899f4a"
+    "/var/cfengine/httpd/php/lib/php/build/ax_check_compile_flag.m4" "75f03045fde15ef1e901f17246812fcc751c1a5b070f7f88d482ef336435da87"
+    "/var/cfengine/httpd/php/lib/php/build/Makefile.global" "be260d308341e47a775828b61db5f8614c9874e90100b14e771dfa8ebcf5ae83"
+    "/var/cfengine/httpd/php/lib/php/build/acinclude.m4" "62875c336cbd0f7adb706fc249182aff2cf197240a5d1269e665f097e31e0616"
+    "/var/cfengine/httpd/php/lib/php/build/ltmain.sh" "0f1170e72050e8e2049632f2c094976dd30c51bd80bd004433487cda2aa89646"
+    "/var/cfengine/httpd/php/lib/php/build/run-tests.php" "28beb5a83ec9699ce87edc4f55c53a9aaea3c8248f7727de78e46ab4ccfb1e1d"
+    "/var/cfengine/httpd/php/lib/php.ini" "e7b9f15a1626e23eb2b8581f7bc59dfeda975cdd0d8b8ad596e5154caf638947"
+    "/var/cfengine/httpd/php/lib/curl.ini" "8cace061802bb27b150c7bfaf26223b46ff69ecc29d3a2a638a9021bcb742737"
+    "/var/cfengine/httpd/php/lib/openssl.ini" "b700cc59f6e86d57ed6b4974c8ae6fa1bdd015b63d6195d108e7b26e3605ee9d"
+    "/var/cfengine/httpd/modules/libphp7.so" "be200cb7a1d5f90943b808bee1ed17fb4dbcb31f9373acad35daa8843a7f138c"
+}

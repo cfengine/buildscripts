@@ -239,45 +239,134 @@ case "$PACKAGING" in
     pkgtrans -o -s $BASEDIR/$PKG/pkg $BASEDIR/$PKG/$NAME CFE$PKG
     ;;
   freebsd)
-	  PREFIX=/var/cfengine
-	  rm -rf $BASEDIR/$PKG/pkg
-	  mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
+      PREFIX=${PREFIX:-/var/cfengine}
+      INSTALL_ROOT="${BASEDIR}/${PKG}/pkg"
+      CF_DIR="${INSTALL_ROOT}${PREFIX}"
+      COREBASE="${CF_DIR}/share/CoreBase"
+      PKG_VERSION="${MAIN_VERSION}"
+      MANIFEST="${BASEDIR}/${PKG}/${PKG}-MANIFEST"
+      MANIFEST_IN="${P}/freebsd/${PKG}-MANIFEST.in"
+      PLIST="${P}/freebsd/${PKG}-pkg-plist"
+      if [ -z "${SUPP_VERSION}" ]
+      then
+          if [ "${BUILD_TYPE}" = 'RELEASE' ]
+          then
+              PKG_RELEASE=${EXPLICIT_RELEASE:-_1}
+          else
+              PKG_RELEASE="_${BUILD_NUMBER}"
+          fi
+      else
+          # SUPP_VERSION is the part of the git tag after the dash, e.g. build1
+          if [ "${BUILD_TYPE}" = 'RELEASE' ]
+          then
+              PKG_RELEASE="_${SUPP_VERSION}"
+          else
+              PKG_RELEASE="_${SUPP_VERSION},${BUILD_NUMBER}"
+          fi
+      fi
+      if [ '_' = "${PKG_RELEASE}" ] || [ '_1' = "${PKG_RELEASE}" ]
+      then
+          PKG_RELEASE=''
+      fi
 
-	  cp -pr $P/freebsd/* $BASEDIR/$PKG/pkg/
-	  cp -pr $BASEDIR/cfengine/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
-	  cp -pr /var/cfengine/bin/* $BASEDIR/$PKG/pkg${PREFIX}/bin
-	  cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
+      if [ ! -r "${MANIFEST_IN}" ]
+      then
+          fatal "No input -MANIFEST (${MANIFEST_IN})"
+      fi
+      /usr/local/bin/sudo /bin/rm -rf ${INSTALL_ROOT}
+      /bin/mkdir -p ${CF_DIR}
+      # Generate -MANIFEST
+      /usr/bin/sed \
+          -e "s,@@VERSION@@,${PKG_VERSION},g" \
+          -e "s,@@RELEASE@@,${PKG_RELEASE},g" \
+          ${MANIFEST_IN} >${MANIFEST}
+      
+      # Bring over compiled CFEngine files
+      /bin/cp -pr $BASEDIR/cfengine/dist/var/cfengine/* ${CF_DIR}/
+      # Bring over dependency binaries and libraries
+      /bin/cp -a /var/cfengine/bin/ ${CF_DIR}/bin/
+      /bin/cp -a /var/cfengine/lib/ ${CF_DIR}/lib/
 
-	  cd $BASEDIR/$PKG/pkg
-	  echo "@comment pkg-plist,v 1.00 `date`" >> pkg-plist
-	  echo "@comment ORIGIN:sysutils/cfengine-nova" >> pkg-plist
-      pkgdir=$BASEDIR/$PKG/pkg/
-      for f in `find $BASEDIR/$PKG/pkg/ | egrep -v 'pkg-comment|pkg-descr|pkg-plist.foot|pkg-plist'`; do
+      # Remove things we don't need
+      /bin/rm -rf ${CF_DIR}/lib/cmake ${CF_DIR}/lib/pkgconfig 
+      
+      # Shuffle some files about for Community Edition
+      if [ "${PROJECT}" = 'community' ]
+      then
+          /bin/mkdir -p ${COREBASE}
+          /bin/mv ${CF_DIR}/masterfiles ${COREBASE}/masterfiles
+          /bin/mv ${CF_DIR}/modules     ${COREBASE}/modules
+      fi
+      
+      # Modify profile.sh, rc script, and dynamic linker config
+      /bin/mkdir -p ${INSTALL_ROOT}/usr/local/etc/profile.d
+      /bin/mkdir -p ${INSTALL_ROOT}/usr/local/etc/rc.d
+      /bin/mkdir -p ${INSTALL_ROOT}/usr/local/libdata/ldconfig
+      /usr/bin/sed -e "s,@@PREFIX@@,${PREFIX},g" \
+                   ${P}/../common/freebsd/profile.sh >${INSTALL_ROOT}/usr/local/etc/profile.d/cfengine3.sh
+      /usr/bin/sed -e "s,@@PREFIX@@,${PREFIX},g" -e "s,@@PROJECT@@,${PROJECT},g" \
+                   ${P}/../common/freebsd/cfengine3.rc >${INSTALL_ROOT}/usr/local/etc/rc.d/cfengine3
+      /bin/chmod 755 ${INSTALL_ROOT}/usr/local/etc/rc.d/cfengine3
+      /usr/bin/sed -e "s,@@PREFIX@@,${PREFIX},g" \
+                   ${P}/../common/freebsd/cfengine3.ldconfig >${INSTALL_ROOT}/usr/local/libdata/ldconfig/cfengine3
 
-      		  destf=${f#$pkgdir}
-              if [ -f $destf ]; then
-                      echo "$destf" >> pkg-plist
-              fi
-       done
+      echo 'scripts {' >>${MANIFEST}
+      { echo '    pre-install    = <<EOD' ; $P/../common/produce-script $PKG preinstall  freebsd | /usr/bin/sed -e "s,@@PREFIX@@,${PREFIX},g" ; echo 'EOD' ; } >>${MANIFEST}
+      { echo '    post-install   = <<EOD' ; $P/../common/produce-script $PKG postinstall freebsd | /usr/bin/sed -e "s,@@PREFIX@@,${PREFIX},g" ; echo 'EOD' ; } >>${MANIFEST}
+      { echo '    pre-deinstall  = <<EOD' ; $P/../common/produce-script $PKG preremove   freebsd | /usr/bin/sed -e "s,@@PREFIX@@,${PREFIX},g" ; echo 'EOD' ; } >>${MANIFEST}
+      { echo '    post-deinstall = <<EOD' ; $P/../common/produce-script $PKG postremove  freebsd | /usr/bin/sed -e "s,@@PREFIX@@,${PREFIX},g" ; echo 'EOD' ; } >>${MANIFEST}
+      echo '}' >>${MANIFEST}
 
-       cat pkg-plist.foot >> pkg-plist
+      # Design Center
+      /bin/mkdir -p ${CF_DIR}/design-center
+      if [ "${PROJECT}" = 'community' ]
+      then
+          /bin/mv ${COREBASE}/masterfiles/sketches ${COREBASE}/sketches
+      else
+          /bin/cp -a ${BASEDIR}/design-center/sketches ${CF_DIR}/design-center/sketches
+      fi
+      /bin/cp -a ${BASEDIR}/design-center/tools/*  ${CF_DIR}/design-center
+      
+      if [ ! -r "${PLIST}" ]
+      then
+          fatal "No input -pkg-plist (${PLIST})"
+      fi
 
-       /usr/sbin/pkg_create -j -f ${pkgdir}/pkg-plist -c ${pkgdir}/pkg-comment -d ${pkgdir}/pkg-descr -p ${pkgdir} ${pkgdir}/cfengine-nova-$VERSION\_1.tbz
+      /bin/cat "${PLIST}" | while read pathtype pathname
+      do
+          pathname=$(echo $pathname | sed -e 's/"//g')
+          case "${pathtype}" in
+              dir)
+                  echo "     \"${pathname}\" \"y\"" >>${MANIFEST}
+                  ;;
+              file)
+                  sha256=$(/sbin/sha256 -q ${INSTALL_ROOT}${pathname})
+                  echo "    \"${pathname}\" \"${sha256}\"" >>${MANIFEST}
+                  ;;
+              link)
+                  echo "    \"${pathname}\" -" >>${MANIFEST}
+                  ;;
+              files*|directories*)
+                  echo "${pathtype}: {" >>${MANIFEST}
+                  ;;
+              -)
+                  echo '}' >>${MANIFEST}
+                  ;;
+              *)
+                  fatal "Unknown path type"
+                  ;;
+          esac
+      done
 
-       cd $pkgdir/
-
-       tar xvf cfengine-nova-$VERSION\_1.tbz
-
-       head -n 2 ./+CONTENTS > plist-head
-       sed '1,3d' ./+CONTENTS > tmp
-       rm ./+CONTENTS
-       cat plist-head > CONTENTS
-       echo "@cwd /" >> CONTENTS
-       cat tmp >> CONTENTS
-       rm plist-head tmp
-       mv CONTENTS ./+CONTENTS
-       tar cjvf cfengine-nova-$VERSION\_1.tbz +CONTENTS +DESC +COMMENT var/
-	  ;;
+      # Make every owned by root:wheel
+      /usr/local/bin/sudo /usr/sbin/chown -R root:wheel ${INSTALL_ROOT}
+      
+      /usr/local/bin/sudo /usr/local/sbin/pkg create \
+                          --verbose \
+                          --manifest ${MANIFEST} \
+                          --root-dir ${INSTALL_ROOT} \
+                          --out-dir ${BASEDIR}/${PKG}
+      ;;
   hpux)
       PREFIX=/var/cfengine
       ARCH=$UNAME_M

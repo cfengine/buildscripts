@@ -1,0 +1,26 @@
+name = "cfbuild-libcurl-hub-devel"
+version = "7.59.0"
+origin = "northerntech/cfbuild-libcurl-hub-devel"
+comment = "CFEngine Build Automation -- libcurl -- development files"
+desc = <<EOD
+Summary: CFEngine Build Automation -- libcurl -- development files
+EOD
+licenselogic = "single"
+licenses [
+    MIT
+]
+www = "https://curl.haxx.se/"
+maintainer = " Trix Farrar <trix@basement.net>"
+prefix = "/var/cfengine"
+files {
+    "/var/cfengine/lib/libcurl.a" "65e6f5c4d4e367ddf812de6ca64b9768432f21a1376d0c505b257649ec56101e"
+    "/var/cfengine/include/curl/curl.h" "1118379fe0d22846d19529840c1773ece623dfb05f563a7710a0577c85d7d621"
+    "/var/cfengine/include/curl/curlver.h" "8a8a4412f07dfe363847b21c7683f799a3c6004ab405f140d15f53f0c2408137"
+    "/var/cfengine/include/curl/easy.h" "58b2142e4bd3287e53b98cc0f4f8a23dd9ba502db4aae08dea51ff00823a5824"
+    "/var/cfengine/include/curl/mprintf.h" "61e8e3918f879fe4cf63992bd108eb08dfb2568fa907ec528d8ed3ac02ba0c56"
+    "/var/cfengine/include/curl/stdcheaders.h" "78eb917e7082bf7ce255840c3af5fadd927b7eb5a62305c54b36c7da852cbfd4"
+    "/var/cfengine/include/curl/multi.h" "e2e68e6c37d69abbf281a545bc8a6a0cdc867b34f9e254e3cc1f5e710ef32955"
+    "/var/cfengine/include/curl/typecheck-gcc.h" "bde6321b067fe32cf551bb1631afc7b2a983c5281122a11b95a2eefa0aef72bf"
+    "/var/cfengine/include/curl/system.h" "70a785571c0c9441bdb10c662f1078bc2905366dd9aa6103d4c168f9a5f270ee"
+    "/var/cfengine/bin/curl-config" "3a9689d692ff2406f9c99f4535bed4eb5271ef51fd6ba421bff6c04cea5b745e"
+}
