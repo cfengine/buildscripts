@@ -14,7 +14,6 @@ PACKAGES_ia64_hpux_11.23
 PACKAGES_ppc64_aix_53
 PACKAGES_sparc64_solaris_10
 PACKAGES_sparc64_solaris_11
-PACKAGES_sparc64_solaris_9
 PACKAGES_x86_64_linux_debian_4
 PACKAGES_x86_64_linux_debian_7
 PACKAGES_x86_64_linux_redhat_4
