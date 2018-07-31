@@ -20,7 +20,7 @@ Agent dependencies:
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
-* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
+* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
 * [MySQL](https://downloads.mysql.com/archives/community/) 5.1.72
 * [libcurl](http://curl.haxx.se/download.html) 7.61.0
 * libgcc
