@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libacl
 Name: cfbuild-libacl
 Version: %{version}
 Release: 1
-Source: acl-2.2.52.src.tar.gz
+Source: acl-2.2.53.src.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n acl-2.2.52
+%setup -q -n acl-2.2.53
 
 zcat ../../SOURCES/acl.destdir.diff.gz | $PATCH -p1 || true
 
@@ -67,3 +67,4 @@ CFEngine Build Automation -- libacl devel
 %prefix/lib/*.so
 
 %changelog
+

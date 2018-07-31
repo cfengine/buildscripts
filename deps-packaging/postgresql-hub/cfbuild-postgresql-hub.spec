@@ -1,4 +1,4 @@
-%define postgresql_version 9.3.22
+%define postgresql_version 9.3.23
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
@@ -407,3 +407,4 @@ CFEngine Build Automation -- postgresql -- contrib
 %{prefix}/lib/postgresql/dblink.so
 %{prefix}/lib/postgresql/pgrowlocks.so
 %changelog
+
