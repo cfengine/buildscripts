@@ -15,14 +15,14 @@ Agent dependencies:
 * [OpenSSL](http://openssl.org/) 1.0.2o
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.42
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.22
-* [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.7
+* [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.1
 * [libxml2](http://xmlsoft.org/sources/) 2.9.8
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
 * [MySQL](https://downloads.mysql.com/archives/community/) 5.1.72
-* [libcurl](http://curl.haxx.se/download.html) 7.59.0
+* [libcurl](http://curl.haxx.se/download.html) 7.61.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -43,12 +43,12 @@ Enterprise agent specific dependencies:
 
 Hub specific dependencies:
 
-* [APR](https://apr.apache.org/) 1.5.2
-* [apr-util](https://apr.apache.org/) 1.5.4
+* [APR](https://apr.apache.org/) 1.6.3
+* [apr-util](https://apr.apache.org/) 1.6.1
 * [Apache](http://httpd.apache.org/) 2.2.34
 * PostgreSQL for the hub 9.3.22
 * [Redis](http://redis.io/) 2.8.24
-* [PHP](http://php.net/) 5.6.35
+* [PHP](http://php.net/) 5.6.37
 * [libcurl](http://curl.haxx.se/download.html) 7.57.0
   * Needed for php module
 * libmcrypt 2.5.8

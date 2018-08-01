@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- libyaml
 Name: cfbuild-libyaml
 Version: %{version}
 Release: 1
-Source0: yaml-0.1.7.tar.gz
+Source0: yaml-0.2.1.tar.gz
 License: MIT
 Group: Other
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
@@ -10,7 +10,7 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 AutoReqProv: no
 
 %define prefix %{buildprefix}
-%define srcdir yaml-0.1.7
+%define srcdir yaml-0.2.1
 
 %prep
 mkdir -p %{_builddir}
@@ -66,3 +66,4 @@ CFEngine Build Automation -- lmdb -- development files
 %{prefix}/lib/*.la
 
 %changelog
+
