@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- apr
 Name: cfbuild-apr
 Version: %{version}
 Release: 1
-Source0: apr-1.5.2.tar.gz
+Source0: apr-1.6.3.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n apr-1.5.2
+%setup -q -n apr-1.6.3
 
 CPPFLAGS=-I%{buildprefix}/include
 
@@ -84,3 +84,4 @@ CFEngine Build Automation -- apr -- development files
 %{prefix}/lib/*.so
 %{prefix}/build-1
 %changelog
+
