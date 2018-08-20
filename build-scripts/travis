@@ -199,7 +199,7 @@ case "$JOB" in
         sudo chown root:root nova/tests/reporting/minimal.cf
         sudo chmod 600 nova/tests/reporting/minimal.cf
         wget https://ftp.postgresql.org/pub/repos/apt/pool/main/p/pgtap/postgresql-10-pgtap_0.98.0-22-gda005fb-1.pgdg100%2b1_all.deb
-        sudo dpkg -i postgresql-10-pgtap_0.97.0-3.pgdg90+1_all.deb || true
+        sudo dpkg -i postgresql-10-pgtap_0.98.0-22-gda005fb-1.pgdg100+1_all.deb || true
         sudo cp /usr/share/postgresql/10/extension/pgtap* /var/cfengine/share/postgresql/extension/
         cd nova/tests/reporting
         export TEST_OPTIONS="--no-files-setup --no-db-setup --wipe-db"
