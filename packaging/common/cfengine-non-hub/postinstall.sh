@@ -130,7 +130,12 @@ if [ -f $PREFIX/policy_server.dat ]; then
     cf_console platform_service cfengine3 stop
   fi
 
-  cf_console platform_service cfengine3 start
+  if is_upgrade && [ -f "$PREFIX/UPGRADED_FROM_STATE.txt" ]; then
+      cf_console restore_cfengine_state "$PREFIX/UPGRADED_FROM_STATE.txt"
+      rm -f "$PREFIX/UPGRADED_FROM_STATE.txt"
+  else
+      cf_console platform_service cfengine3 start
+  fi
 fi
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"

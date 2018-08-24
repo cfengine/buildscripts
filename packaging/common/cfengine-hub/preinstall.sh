@@ -1,7 +1,10 @@
 if is_upgrade; then
-  # This is nice to know to provide fixes for bugs in already released
-  # package scripts.
-  "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
+    # This is nice to know to provide fixes for bugs in already released
+    # package scripts.
+    "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
+
+    # Save the pre-upgrade state so that it can be restored
+    get_cfengine_state > "${PREFIX}/UPGRADED_FROM_STATE.txt"
 fi
 
 # If upgrading from a version below 3.10 that has PostgreSQL, and the data dir exists.
