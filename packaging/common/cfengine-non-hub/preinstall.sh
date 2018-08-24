@@ -3,6 +3,9 @@ if is_upgrade; then
   # package scripts.
   "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
 
+  # Save the pre-upgrade state so that it can be restored
+  get_cfengine_state > "${PREFIX}/UPGRADED_FROM_STATE.txt"
+
   # Stop the services on upgrade.
   cf_console platform_service cfengine3 stop
 fi
