@@ -36,7 +36,7 @@ if [ "`package_type`" = "rpm" ]; then
   # from the 3.6 series.
   #
   if is_upgrade; then
-    if $PREFIX/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]|6\.[01])' > /dev/null; then
+    if $PREFIX/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]\.|6\.[01])' > /dev/null; then
       ( echo "Upgraded from:"; $PREFIX/bin/cf-agent -V ) > $PREFIX/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
     fi
   fi

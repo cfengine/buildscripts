@@ -25,7 +25,7 @@ case `os_type` in
     # from the 3.6 series, as well as the posttrans script.
     #
     if is_upgrade; then
-      if %{prefix}/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]|6\.[01])' > /dev/null; then
+      if %{prefix}/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]\.|6\.[01])' > /dev/null; then
         ( echo "Upgraded from:"; %{prefix}/bin/cf-agent -V ) > %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
       fi
     fi
