@@ -28,9 +28,12 @@ sudo apt-get purge apache* "postgresql*" redis*
 # On Travis, hostname can be ridiculously long - let's truncate it
 sudo hostname localhost
 
+# Purge saved lists to avoid "Hash Sum mismatch" apt-get error on the next line
+sudo rm -rf /var/lib/apt/lists/*
 sudo apt-get update
 sudo apt-get install s3cmd
 (
+  # avoid showing secrets in log
   set +x
   echo $ARTIFACTS_KEY
   echo $ARTIFACTS_SECRET
@@ -129,8 +132,8 @@ case "$JOB" in
         touch /home/travis/rpmvercmp
         chmod a+x ~/rpmvercmp
         cd ..
-        test -d core || git clone git@github.com:cfengine/core.git
-        test -d enterprise || git clone git@github.com:cfengine/enterprise.git
+        test -d core || git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/core.git
+        test -d enterprise || git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/enterprise.git
         chmod -R g-w */tests/acceptance
         cd core/tests/acceptance
         rm -rf ./05_processes/01_matching/timed/stime.cf \
