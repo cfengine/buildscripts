@@ -3,6 +3,9 @@ if is_upgrade; then
   # package scripts.
   "$PREFIX/bin/cf-agent" -V | grep '^CFEngine Core' | sed -e 's/^CFEngine Core \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\).*/\1/' > "$PREFIX/UPGRADED_FROM.txt"
 
+  # Save the pre-upgrade state so that it can be restored
+  get_cfengine_state > "${PREFIX}/UPGRADED_FROM_STATE.txt"
+
   # Stop the services on upgrade.
   cf_console platform_service cfengine3 stop
 fi
@@ -22,7 +25,7 @@ case `os_type` in
     # from the 3.6 series, as well as the posttrans script.
     #
     if is_upgrade; then
-      if %{prefix}/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]|6\.[01])' > /dev/null; then
+      if %{prefix}/bin/cf-agent -V | egrep '^CFEngine Core 3\.([0-5]\.|6\.[01])' > /dev/null; then
         ( echo "Upgraded from:"; %{prefix}/bin/cf-agent -V ) > %{prefix}/BROKEN_UPGRADE_NEED_TO_RESTART_DAEMONS.txt
       fi
     fi
