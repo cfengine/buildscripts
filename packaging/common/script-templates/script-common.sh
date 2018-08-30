@@ -40,3 +40,33 @@ case "$PKG_TYPE" in
     esac
     ;;
 esac
+
+get_cfengine_state() {
+    if type systemctl >/dev/null 2>&1; then
+        systemctl list-units -l | grep -P '^\s*cf-' | sed -r 's/\s*(cf-[-a-z]+)\.service.*/\1/'
+    else
+        platform_service cfengine3 status | grep 'is running' | sed -r 's/^([-a-z]+).*/\1/'
+    fi
+}
+
+restore_cfengine_state() {
+    # $1 -- file where the state to restore is saved (see get_cfengine_state())
+
+    if type systemctl >/dev/null 2>&1; then
+        xargs -n1 -a "$1" systemctl start
+    else
+        if [ -f ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh ]; then
+            . ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh
+            if grep postgres "$1" >/dev/null; then
+                start_postgres >/dev/null
+            fi
+            if grep httpd "$1" >/dev/null; then
+                start_httpd >/dev/null
+            fi
+        fi
+
+        for d in `grep 'cf-' "$1"`; do
+            ${PREFIX}/bin/${d}
+        done
+    fi
+}
