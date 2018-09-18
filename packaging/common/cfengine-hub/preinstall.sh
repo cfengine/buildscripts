@@ -170,10 +170,13 @@ then
       cf_console echo "The PostgreSQL server belongs to a previous CFEngine deployment, shutting it down."
       if [ -x "$PREFIX/bin/pg_ctl" ];
       then
-	(cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart")
+        (cd /tmp &&
+         su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart" ||
+         # '-m fast' quits directly, without proper session shutdown
+         su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m fast")
       else
-	cf_console echo "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
-	exit 1
+	    cf_console echo "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
+	    exit 1
       fi
     else
       cf_console echo "The PostgreSQL is not from a previous CFEngine deployment"
