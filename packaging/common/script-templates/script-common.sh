@@ -55,6 +55,7 @@ restore_cfengine_state() {
     if type systemctl >/dev/null 2>&1; then
         xargs -n1 -a "$1" systemctl start
     else
+        CALLED_FROM_STATE_RESTORE=1
         if [ -f ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh ]; then
             . ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh
             if grep postgres "$1" >/dev/null; then
