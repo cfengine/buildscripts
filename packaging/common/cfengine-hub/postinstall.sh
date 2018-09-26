@@ -352,7 +352,8 @@ if [ ! -d $PREFIX/state/pg/data ]; then
       cp $PREFIX/share/postgresql/postgresql.conf.cfengine $PREFIX/state/pg/data/postgresql.conf
       chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
     else
-      cf_console echo "Warning: not enough total memory needed to set shared_buffers=2GB"
+      cf_console echo "Warning: not enough total memory needed to use the CFEngine"
+      cf_console echo "recommended PostgreSQL configuration, using the defaults."
     fi
   fi
 fi
