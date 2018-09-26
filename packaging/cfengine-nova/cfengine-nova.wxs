@@ -35,7 +35,7 @@
 
 	  <!-- Run cf-key after new installation -->
 	  <Property Id='GenerateKey' Value='empty, for now'  />
-	  <CustomAction Id='GenerateKeyPath' Property='GenerateKey' Value='&quot;[$(var.dirProgFiles)]\Cfengine\bin\cf-key.exe&quot;' Return='check' />
+	  <CustomAction Id='GenerateKeyPath' Property='GenerateKey' Value='&quot;C:\windows\system32\cmd.exe&quot; /c if not exist &quot;[$(var.dirProgFiles)]\Cfengine\ppkeys\localhost.pub&quot; &quot;[$(var.dirProgFiles)]\Cfengine\bin\cf-key.exe&quot;' Return='check' />
 	  <CustomAction Id='GenerateKey' BinaryKey='WixCA' DllEntry='CAQuietExec' Execute='deferred' Impersonate='no' Return='check' />
 
 	  <!-- Start service if the host has already been bootstrapped -->
