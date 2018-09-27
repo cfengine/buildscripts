@@ -116,8 +116,13 @@ then
     HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
     if [ ! -z "$HTTPD_RUNNING" ];
     then
-      cf_console echo "Could not shutdown the process, aborting the installation"
-      exit 1
+      sleep 5s
+      HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+      if [ ! -z "$HTTPD_RUNNING" ];
+      then
+        cf_console echo "Could not shutdown the process, aborting the installation"
+        exit 1
+      fi
     fi
   else
     cf_console echo "No apachectl found, aborting the installation!"
