@@ -25,7 +25,9 @@ install: build
 	make install DESTDIR=$(CURDIR)/debian/tmp
 	make -C contrib install DESTDIR=$(CURDIR)/debian/tmp
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresl.conf.cfengine
-	cp $(CURDIR)/postgresql.conf.cfengine $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/
+	patch -d $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/ -o postgresql.conf.cfengine < $(CURDIR)/postgresql.conf.cfengine.patch
+	chmod --reference $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.cfengine
+	chown --reference $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.cfengine
 
 binary-indep: build install
 
