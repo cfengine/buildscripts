@@ -210,7 +210,7 @@ generate_preserve_filter() {
     \_/$_!{   # for lines not ending with /
               # treat them as filenames to be excluded:
     s_.*_-not \( -name "&" \)_
-    }' -e "s/PREFIX/$PREFIX/" $PREFIX/httpd/htdocs/preserve_during_upgrade.txt
+    }' -e "s_PREFIX_${PREFIX}_" $PREFIX/httpd/htdocs/preserve_during_upgrade.txt
 }
 
 if [ -d $PREFIX/httpd/htdocs ]; then
