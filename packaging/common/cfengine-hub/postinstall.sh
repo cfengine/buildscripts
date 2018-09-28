@@ -304,19 +304,7 @@ sed -i -e s:INSERT_CERT_HERE:$CFENGINE_MP_CERT:g $PREFIX/httpd/conf/httpd.conf
 sed -i -e s:INSERT_CERT_KEY_HERE:$CFENGINE_MP_KEY:g $PREFIX/httpd/conf/httpd.conf
 sed -i -e s:INSERT_FQDN_HERE:$CFENGINE_LOCALHOST:g $PREFIX/httpd/conf/httpd.conf
 
-#POSTGRES RELATED
-#
-if [ ! -d $PREFIX/state/pg/data ]; then
-
-  mkdir -p $PREFIX/state/pg/data
-  chown -R cfpostgres $PREFIX/state/pg
-  # Note: postgres expects $PWD to be writeable, so all postgres commands
-  # should be executed from cfpostgres-writeable directory.
-  # /tmp is such directory on most cases
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
-  touch /var/log/postgresql.log
-  chown cfpostgres /var/log/postgresql.log
-
+generate_new_postgres_conf() {
   # Generating a new postgresql.conf if enough total memory is present
   #
   # If total memory is lower than 3GB, we use the default pgsql conf file
@@ -349,11 +337,66 @@ if [ ! -d $PREFIX/state/pg/data ]; then
       sed -i -e "s/^.effective_cache_size.*/effective_cache_size=$effect/" $PREFIX/share/postgresql/postgresql.conf.cfengine
       sed -i -e "s/^shared_buffers.*/shared_buffers=$shared/" $PREFIX/share/postgresql/postgresql.conf.cfengine
       sed -i -e "s/^maintenance_work_mem.*/maintenance_work_mem=$maint/" $PREFIX/share/postgresql/postgresql.conf.cfengine
-      cp $PREFIX/share/postgresql/postgresql.conf.cfengine $PREFIX/state/pg/data/postgresql.conf
-      chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
+      echo "$PREFIX/share/postgresql/postgresql.conf.cfengine"
     else
       cf_console echo "Warning: not enough total memory needed to use the CFEngine"
       cf_console echo "recommended PostgreSQL configuration, using the defaults."
+      echo "$PREFIX/share/postgresql/postgresql.conf.sample"
+    fi
+  fi
+}
+
+#POSTGRES RELATED
+BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
+if [ ! -d $PREFIX/state/pg/data ]; then
+  mkdir -p $PREFIX/state/pg/data
+  chown -R cfpostgres $PREFIX/state/pg
+  # Note: postgres expects $PWD to be writeable, so all postgres commands
+  # should be executed from cfpostgres-writeable directory.
+  # /tmp is such directory on most cases
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
+  touch /var/log/postgresql.log
+  chown cfpostgres /var/log/postgresql.log
+
+  new_pgconfig_file=`generate_new_postgres_conf`
+  if [ `basename "$new_pgconfig_file"` = "postgresql.conf.cfengine" ]; then
+    pgconfig_type="CFEngine recommended"
+  else
+    pgconfig_type="PostgreSQL default"
+  fi
+
+  if ! is_upgrade; then
+    # Not an upgrade, just use the recommended or default file (see generate_new_postgres_conf())
+    cp -a "$new_pgconfig_file" $PREFIX/state/pg/data/postgresql.conf
+    chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
+  else
+    # Determine which postgresql.conf file to use and put it in the right place.
+    if [ -f "$BACKUP_DIR/data/postgresql.conf.modified" ]; then
+      # User-modified file from the previous old version of CFEngine exists, try to use it.
+      cp -a "$BACKUP_DIR/data/postgresql.conf.modified" "$PREFIX/state/pg/data/postgresql.conf"
+      (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
+      if [ $? = 0 ]; then
+        # Started successfully, stop it again, the migration requires it to be not running.
+        (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log stop")
+
+        # Copy over the new config as well, user should take at look at it.
+        cf_console echo "Installing the $pgconfig_type postgresql.conf file as $PREFIX/state/pg/data/postgresql.conf.new."
+        cf_console echo "Please review it and update $PREFIX/state/pg/data/postgresql.conf accordingly."
+        cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf.new"
+        chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf.new"
+      else
+        # Failed to start, move the old file aside and use the new one.
+        mv "$PREFIX/state/pg/data/postgresql.conf" "$PREFIX/state/pg/data/postgresql.conf.old"
+        cf_console echo "Warning: failed to use the old postgresql.conf file, using the $pgconfig_type one."
+        cf_console echo "Please review the $PREFIX/state/pg/data/postgresql.conf file and update it accordingly."
+        cf_console echo "The original file was saved as $PREFIX/state/pg/data/postgresql.conf.old"
+        cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf"
+        chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf"
+      fi
+    else
+      # No user-modified file, just use the new recommended or default config (see generate_new_postgres_conf())
+      cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf"
+      chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf"
     fi
   fi
 fi
@@ -488,7 +531,6 @@ migrate_db_using_dump_file() {
   return $result
 }
 
-BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
 if is_upgrade && [ -d "$BACKUP_DIR" ]; then
   # DEBUG variable controls which of migration methods fail:
   # 0 - do nothing special (usually pg_upgrade, which is first method, succeeds)
