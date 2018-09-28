@@ -222,7 +222,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
   if [ -f $PREFIX/httpd/htdocs/preserve_during_upgrade.txt ]; then
     # Purge all files in httpd/htdocs with exceptions listed in preserve_during_upgrade.txt
     cf_console echo "Keeping only what's listed in preserve_during_upgrade.txt file"
-    $PRESERVE_FILTER="`generate_preserve_filter`"
+    PRESERVE_FILTER="`generate_preserve_filter`"
     find "$PREFIX/httpd/htdocs" $PRESERVE_FILTER -type f -print0 | xargs -0 rm
   elif [ -d $PREFIX/share/GUI ]; then
     # Remove only files copied from share/GUI to httpd/htdocs
