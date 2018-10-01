@@ -385,7 +385,7 @@ check_disk_space() {
 
 migrate_db_using_pg_upgrade() {
   (cd /tmp
-    cf_console su cfpostgres -c "$PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data"
+   su cfpostgres -c "$PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data"
   )
   result=$?
   return $result
@@ -511,7 +511,6 @@ if is_upgrade && [ -d "$BACKUP_DIR" ]; then
   cf_console echo
   migrate_db_using_pg_upgrade
   result=$?
-  cf_console echo
   if [ $result = 0 -a $DEBUG -lt 1 ]; then
     MIGRATED=1
   else
@@ -539,11 +538,11 @@ if is_upgrade && [ -d "$BACKUP_DIR" ]; then
       fi # $result of migrate_db_using_pipe = 0
     fi # check_disk_space after Migration using pg_upgrade failed.
   fi # $result of migrate_db_using_pg_upgrade = 0
-  cf_console echo
   if [ $MIGRATED = 1 ]; then
     cf_console echo "Migration done, cleaning up"
     rm -rf $BACKUP_DIR
   else
+    cf_console echo
     cf_console echo "Migration failed. Backup is saved in $BACKUP_DIR."
     if [ -f $BACKUP_DIR/db_dump.sql ]; then
       DUMP_FILENAME="$BACKUP_DIR/db_dump.sql"
