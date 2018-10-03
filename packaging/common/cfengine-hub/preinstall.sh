@@ -83,6 +83,11 @@ if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/n
   mkdir -p "$BACKUP_DIR/lib"
   mkdir -p "$BACKUP_DIR/share"
   mv "$PREFIX/state/pg/data" "$BACKUP_DIR"
+  if ! diff "$BACKUP_DIR/data/postgresql.conf" "$PREFIX/share/postgresql/postgresql.conf.cfengine" > /dev/null; then
+    # diff exits with 0 if the files are the same
+    # the postgresql.conf file was modified, we should try to use it after migration
+    cp -a "$BACKUP_DIR/data/postgresql.conf" "$BACKUP_DIR/data/postgresql.conf.modified"
+  fi
   cp -al "$PREFIX/bin" "$BACKUP_DIR"
   cp -l "$PREFIX/lib"/* "$BACKUP_DIR/lib"
   cp -al "$PREFIX/lib/postgresql/" "$BACKUP_DIR/lib"

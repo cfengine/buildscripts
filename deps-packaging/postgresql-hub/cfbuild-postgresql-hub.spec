@@ -5,7 +5,7 @@ Name: cfbuild-postgresql
 Version: %{version}
 Release: 1
 Source0: postgresql-%{postgresql_version}.tar.gz
-Source1: postgresql.conf.cfengine
+Source1: postgresql.conf.cfengine.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -38,7 +38,9 @@ rm -rf ${RPM_BUILD_ROOT}
 
 $MAKE install DESTDIR=${RPM_BUILD_ROOT}
 $MAKE -C contrib install DESTDIR=${RPM_BUILD_ROOT}
-cp ${RPM_BUILD_ROOT}/../../SOURCES/postgresql.conf.cfengine ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/
+patch -d ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/ -o postgresql.conf.cfengine < ${RPM_BUILD_ROOT}/../../SOURCES/postgresql.conf.cfengine.patch
+chmod --reference ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.cfengine
+chown --reference ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.cfengine
 
 %clean
 rm -rf $RPM_BUILD_ROOT
