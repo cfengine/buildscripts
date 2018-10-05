@@ -135,7 +135,6 @@ if ! is_upgrade; then
   touch $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
   chmod 600 $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
 
-#!/bin/bash
   cat > $DCPARAMS <<EOHIPPUS
 ROOT="$DCWORKDIR/masterfiles_staging"
 GIT_URL="$DCWORKDIR/masterfiles.git"
@@ -171,7 +170,6 @@ EOHIPPUS
 }
 EOHIPPUS
 
-  chmod 700 $DCWORKDIR/dc-scripts/params.sh
   chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/userworkdir
   chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/dc-scripts
   chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/stage_backup
