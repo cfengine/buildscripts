@@ -125,7 +125,6 @@ DCWORKDIR=/opt/cfengine
 DCPARAMS=$DCWORKDIR/dc-scripts/params.sh
 if ! is_upgrade; then
   # This folder is required for Design Center and Mission Portal to talk to each other
-  $PREFIX/design-center/bin/cf-sketch --inputs=$PREFIX/design-center --installsource=$PREFIX/share/NovaBase/sketches/cfsketches.json --install-all
   mkdir -p $DCWORKDIR/userworkdir/admin/.ssh
   mkdir -p $DCWORKDIR/stage_backup
   mkdir -p $DCWORKDIR/dc-scripts
