@@ -209,10 +209,58 @@ getent group cfpostgres && gpasswd --add cfapache cfpostgres
 #
 # Backup htdocs
 #
+
+generate_preserve_filter() {
+  # generates filter for `find` command to exclude files and dirs listed in
+  # "preserve_during_upgrade.txt" file: for each directory, prints
+  # "-not \( -path "$PREFIX/httpd/htdocs/$NAME" -prune \)";
+  # for each file, prints "-not \( -name "$NAME" \)".
+  sed '
+    /^\s*#/d  # skip lines beginning with #
+    /^\s*$/d  # also skip empty lines
+              # if line ends with /, treat it as dirname and exclude all files inside:
+    s_\(.*\)/$_-not \( -path PREFIX/httpd/htdocs/\1 -prune \)_
+    t         # if above commans was successful (line ended with /), done processing this line
+              # otherwise, treat it as filename to be excluded:
+    s_.*_-not \( -name & \)_
+    ' $PREFIX/httpd/htdocs/preserve_during_upgrade.txt | sed "s_PREFIX_${PREFIX}_"
+}
+
 if [ -d $PREFIX/httpd/htdocs ]; then
   cf_console echo "A previous version of CFEngine Mission Portal was found,"
   cf_console echo "creating a backup of it at /tmp/cfengine-htdocs.tar.gz"
   tar zcf /tmp/cfengine-htdocs.tar.gz $PREFIX/httpd/htdocs
+
+  cf_console echo "Purging old version from $PREFIX/httpd/htdocs"
+  if [ -f $PREFIX/httpd/htdocs/preserve_during_upgrade.txt ]; then
+    # Purge all files in httpd/htdocs with exceptions listed in preserve_during_upgrade.txt
+    cf_console echo "Keeping only what's listed in preserve_during_upgrade.txt file"
+    PRESERVE_FILTER="`generate_preserve_filter`"
+    find "$PREFIX/httpd/htdocs" $PRESERVE_FILTER -type f -print0 | xargs -0 rm
+  elif [ -d $PREFIX/share/GUI ]; then
+    # Remove only files copied from share/GUI to httpd/htdocs
+    cf_console echo "Using share/GUI as template"
+    ( cd $PREFIX/share/GUI
+      # Make list of files in share/GUI and remove "them" from httpd/htdocs
+      find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs -0 rm )
+    )
+  else
+    # Purge all files in httpd/htdocs with hardcoded exceptions:
+    # Preserve the tmp directory as it may contain scheduled or exported reports.
+    # Preserve cf_robot.php and settings.ldap.php because they are generated.
+    cf_console echo "No share/GUI found, purging all files except known exceptions"
+    find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/tmp" -prune \) \
+	    -not \( -name "cf_robot.php" \) \
+	    -not \( -name "settings.ldap.php" \) \
+	    -type f -print0 | xargs -0 rm
+  fi
+  if [ -d $PREFIX/share/GUI -a "x${PKG_TYPE}" = "xrpm" ]; then
+    # Make sure old files are not copied over together with new files later
+    # (this only happens during upgrade of RPMs)
+    mv $PREFIX/share/GUI $PREFIX/share/GUI_old
+  fi
+  # Remove empty dirs in httpd/htdocs
+  find $PREFIX/httpd/htdocs -depth -type d -exec rmdir {} \;
 fi
 
 #
