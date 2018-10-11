@@ -134,6 +134,7 @@ case "$JOB" in
         cd ..
         test -d core || git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/core.git
         test -d enterprise || git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/enterprise.git
+        chmod -R u+w */tests/acceptance
         chmod -R g-w */tests/acceptance
         cd core/tests/acceptance
         rm -rf ./05_processes/01_matching/timed/stime.cf \
