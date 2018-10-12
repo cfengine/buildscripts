@@ -210,17 +210,15 @@ generate_preserve_filter() {
   # "preserve_during_upgrade.txt" file: for each directory, prints
   # "-not \( -path "$PREFIX/httpd/htdocs/$NAME" -prune \)";
   # for each file, prints "-not \( -name "$NAME" \)".
-  sed -e '
+  sed '
     /^\s*#/d  # skip lines beginning with #
     /^\s*$/d  # also skip empty lines
-    \_/$_{    # for lines ending with /
-              # treat them as dirnames and exclude all files inside:
-      s_.*_-not \( -path "PREFIX/httpd/htdocs/&" -prune \)_
-    }
-    \_/$_!{   # for lines not ending with /
-              # treat them as filenames to be excluded:
-    s_.*_-not \( -name "&" \)_
-    }' -e "s/PREFIX/$PREFIX/" $PREFIX/httpd/htdocs/preserve_during_upgrade.txt
+              # if line ends with /, treat it as dirname and exclude all files inside:
+    s_\(.*\)/$_-not \( -path PREFIX/httpd/htdocs/\1 -prune \)_
+    t         # if above commans was successful (line ended with /), done processing this line
+              # otherwise, treat it as filename to be excluded:
+    s_.*_-not \( -name & \)_
+    ' $PREFIX/httpd/htdocs/preserve_during_upgrade.txt | sed "s_PREFIX_${PREFIX}_"
 }
 
 if [ -d $PREFIX/httpd/htdocs ]; then
@@ -232,7 +230,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
   if [ -f $PREFIX/httpd/htdocs/preserve_during_upgrade.txt ]; then
     # Purge all files in httpd/htdocs with exceptions listed in preserve_during_upgrade.txt
     cf_console echo "Keeping only what's listed in preserve_during_upgrade.txt file"
-    $PRESERVE_FILTER="`generate_preserve_filter`"
+    PRESERVE_FILTER="`generate_preserve_filter`"
     find "$PREFIX/httpd/htdocs" $PRESERVE_FILTER -type f -print0 | xargs -0 rm
   elif [ -d $PREFIX/share/GUI ]; then
     # Remove only files copied from share/GUI to httpd/htdocs
