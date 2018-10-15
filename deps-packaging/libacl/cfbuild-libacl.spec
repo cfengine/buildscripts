@@ -1,8 +1,10 @@
+%define acl_version 2.2.53
+
 Summary: CFEngine Build Automation -- libacl
 Name: cfbuild-libacl
 Version: %{version}
 Release: 1
-Source: acl-2.2.52.src.tar.gz
+Source: acl-%{acl_version}.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com
@@ -14,7 +16,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n acl-2.2.52
+%setup -q -n %{acl_version}
 
 zcat ../../SOURCES/acl.destdir.diff.gz | $PATCH -p1 || true
 

@@ -38,7 +38,7 @@ Build dependencies:
 * [libxml2](http://xmlsoft.org/sources/) 2.9.8
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
   * Needed by libxml2
-* [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
+* [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
 * [libcurl](http://curl.haxx.se/download.html) 7.60.0
 * libgcc
