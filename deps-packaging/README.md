@@ -31,7 +31,7 @@ Build dependencies:
 | PostgreSQL   |         9.0.23 |          9.0.23 | removed from cfengine built packages |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.1.0h
+* [OpenSSL](http://openssl.org/) 1.1.1
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.42
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.22
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.7
