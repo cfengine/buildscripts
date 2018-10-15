@@ -1,4 +1,4 @@
-%define apache_version 2.4.33
+%define apache_version 2.4.35
 %global __os_install_post %{nil}
 
 Summary: CFEngine Build Automation -- apache
