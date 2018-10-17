@@ -5,6 +5,13 @@ if is_upgrade; then
 
     # Save the pre-upgrade state so that it can be restored
     get_cfengine_state > "${PREFIX}/UPGRADED_FROM_STATE.txt"
+
+    # 3.7.x has broken reporting of postgres status, let's assume it was running
+    # if cf-hub was running
+    if grep '^3\.7\.' "${PREFIX}/UPGRADED_FROM.txt" >/dev/null &&
+       grep "cf-hub" "${PREFIX}/UPGRADED_FROM_STATE.txt" > /dev/null; then
+        echo "postgres" >> "${PREFIX}/UPGRADED_FROM_STATE.txt"
+    fi
 fi
 
 # If upgrading from a version below 3.10 that has PostgreSQL, and the data dir exists.
