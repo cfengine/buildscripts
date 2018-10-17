@@ -46,6 +46,7 @@ rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
 rm -f %{prefix}/ssl/misc/CA.pl
 rm -f %{prefix}/ssl/misc/tsget
 rm -f %{prefix}/ssl/openssl.cnf.dist
+rm -f %{prefix}/ssl/misc/tsget.pl
 
 # Hub does not need cf-upgrade, it is only present in host packages
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/cf-upgrade
@@ -171,6 +172,8 @@ exit 0
 %{prefix}/bin/openssl
 %dir %{prefix}/ssl
 %{prefix}/ssl/openssl.cnf
+%{prefix}/ssl/ct_log_list.cnf
+%{prefix}/ssl/ct_log_list.cnf.dist
 
 %prefix/bin/git
 %prefix/bin/gitk
