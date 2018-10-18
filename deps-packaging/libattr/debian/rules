@@ -13,13 +13,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-# we need to patch attr sources cause by default they don't support DESTDIR
-
-	zcat attr.destdir.diff.gz | $(PATCH) -p1 --verbose || true
-
-# installing header files in usr/include is a hack required to compile libacl
-# configure of acl is not able to find headers in any other location than usr/include
-# libraries are installed in var/cfengine as usual
+	patch -p1 -i no_fancy_gcc.patch
 
 	./configure --prefix=$(PREFIX) --includedir=$(INCLUDEPREFIX) --enable-gettext=no
 
@@ -33,8 +27,10 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	make install-dev install-lib DESTDIR=$(CURDIR)/debian/tmp
+	make install DESTDIR=$(CURDIR)/debian/tmp
 
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/etc/xattr.conf
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/pkgconfig/libattr.pc
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.a
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/libexec
