@@ -5,6 +5,7 @@ Name: cfbuild-libattr
 Version: %{version}
 Release: 1
 Source: attr-%{attr_version}.tar.gz
+Patch0: no_fancy_gcc.patch
 License: MIT
 Group: Other
 Url: http://example.com
@@ -18,8 +19,7 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n attr-%{attr_version}
-
-zcat ../../SOURCES/attr.destdir.diff.gz | $PATCH -p1 || true
+%patch0 -p1
 
 ./configure --prefix=%{prefix} --includedir=%{incldir} --enable-gettext=no
 
@@ -30,10 +30,11 @@ make
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-make install-dev DESTDIR=${RPM_BUILD_ROOT}
-make install-lib DESTDIR=${RPM_BUILD_ROOT}
+make install DESTDIR=${RPM_BUILD_ROOT}
 
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/bin
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/etc/xattr.conf
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/pkgconfig/libattr.pc
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/*.la
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/libexec
