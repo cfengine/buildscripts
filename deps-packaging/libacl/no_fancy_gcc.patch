@@ -1,0 +1,28 @@
+--- ./libacl/acl_from_text.c.orig	2018-01-21 06:18:26.000000000 +0100
++++ ./libacl/acl_from_text.c	2018-10-20 12:15:33.667925049 +0200
+@@ -191,6 +191,8 @@
+ 		-1 on error, 0 on success.
+ */
+ 
++#pragma GCC diagnostic push
++#pragma GCC diagnostic ignored "-Waddress"
+ static int
+ parse_acl_entry(const char **text_p, acl_t *acl_p)
+ {
+@@ -304,15 +306,12 @@
+ create_entry:
+ 	if (acl_create_entry(acl_p, &entry_d) != 0)
+ 		return -1;
+-#pragma GCC diagnostic push
+-#pragma GCC diagnostic ignored "-Waddress"
+ 	if (acl_copy_entry(entry_d, int2ext(&entry_obj)) != 0)
+ 		return -1;
+-#pragma GCC diagnostic pop
+ 	return 0;
+ 
+ fail:
+ 	errno = EINVAL;
+ 	return -1;
+ }
+-
++#pragma GCC diagnostic pop
