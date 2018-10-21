@@ -52,8 +52,6 @@
 +# actively intend to use prepared transactions.
 +work_mem = 48MB				# min 64kB
 +maintenance_work_mem = 512MB		# min 1MB
-+
- #replacement_sort_tuples = 150000	# limits use of replacement selection sort
  #autovacuum_work_mem = -1		# min 1MB, or -1 to use maintenance_work_mem
 -#max_stack_depth = 2MB			# min 100kB
 +max_stack_depth = 4MB			# min 100kB
