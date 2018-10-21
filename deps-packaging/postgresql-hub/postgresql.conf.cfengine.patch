@@ -1,5 +1,5 @@
---- src/backend/utils/misc/postgresql.conf.sample	2018-09-27 13:27:41.003428305 +0200
-+++ src/backend/utils/misc/postgresql.conf.cfengine	2018-09-27 13:41:01.367354915 +0200
+--- postgresql.conf.sample	2018-10-15 23:12:02.000000000 +0200
++++ postgresql.conf.cfengine	2018-10-21 11:09:26.385725601 +0200
 @@ -1,6 +1,6 @@
 -# -----------------------------
 -# PostgreSQL configuration file
@@ -10,7 +10,7 @@
  #
  # This file consists of lines of the form:
  #
-@@ -59,12 +59,16 @@
+@@ -61,12 +61,16 @@
  					# defaults to 'localhost'; use '*' for all
  					# (change requires restart)
  #port = 5432				# (change requires restart)
@@ -24,13 +24,13 @@
  #unix_socket_directories = '/tmp'	# comma-separated list of directories
  					# (change requires restart)
 -#unix_socket_group = ''			# (change requires restart)
-+#unix_socket_group = 'cfpostgres'			# (change requires restart)
 -#unix_socket_permissions = 0777		# begin with 0 to use octal notation
++#unix_socket_group = 'cfpostgres'			# (change requires restart)
 +unix_socket_permissions = 0770		# begin with 0 to use octal notation
  					# (change requires restart)
  #bonjour = off				# advertise server via Bonjour
  					# (change requires restart)
-@@ -108,7 +112,7 @@
+@@ -114,7 +118,7 @@
  
  # - Memory -
  
@@ -39,7 +39,7 @@
  					# (change requires restart)
  #huge_pages = try			# on, off, or try
  					# (change requires restart)
-@@ -117,8 +121,14 @@
+@@ -123,8 +127,13 @@
  					# (change requires restart)
  # Caution: it is not advisable to set max_prepared_transactions nonzero unless
  # you actively intend to use prepared transactions.
@@ -52,11 +52,10 @@
 +# actively intend to use prepared transactions.
 +work_mem = 48MB				# min 64kB
 +maintenance_work_mem = 512MB		# min 1MB
-+
- #replacement_sort_tuples = 150000	# limits use of replacement selection sort
  #autovacuum_work_mem = -1		# min 1MB, or -1 to use maintenance_work_mem
  #max_stack_depth = 2MB			# min 100kB
-@@ -180,7 +190,7 @@
+ #dynamic_shared_memory_type = posix	# the default is the first option
+@@ -186,7 +195,7 @@
  #fsync = on				# flush data to disk for crash safety
  					# (turning this off can cause
  					# unrecoverable data corruption)
@@ -65,7 +64,7 @@
  					# off, local, remote_write, remote_apply, or on
  #wal_sync_method = fsync		# the default is the first option
  					# supported by the operating system:
-@@ -204,8 +214,9 @@
+@@ -210,8 +219,9 @@
  # - Checkpoints -
  
  #checkpoint_timeout = 5min		# range 30s-1d
@@ -76,7 +75,7 @@
  #checkpoint_completion_target = 0.5	# checkpoint target duration, 0.0 - 1.0
  #checkpoint_flush_after = 0		# measured in pages, 0 disables
  #checkpoint_warning = 30s		# 0 disables
-@@ -440,7 +451,7 @@
+@@ -462,7 +472,7 @@
  #log_duration = off
  #log_error_verbosity = default		# terse, default, or verbose messages
  #log_hostname = off
@@ -85,7 +84,7 @@
  					#   %a = application name
  					#   %u = user name
  					#   %d = database name
-@@ -509,21 +520,21 @@
+@@ -532,21 +542,21 @@
  					# their durations, > 0 logs only
  					# actions running at least this number
  					# of milliseconds.
@@ -110,7 +109,7 @@
  					# autovacuum, in milliseconds;
  					# -1 means use vacuum_cost_delay
  #autovacuum_vacuum_cost_limit = -1	# default vacuum cost limit for
-@@ -596,6 +607,10 @@
+@@ -628,6 +638,10 @@
  # LOCK MANAGEMENT
  #------------------------------------------------------------------------------
  
