@@ -145,16 +145,25 @@ then
   fi
 fi
 
-#
-# We check if there is a postgres db server running already
-#
-PSQL_RUNNING=`filter_netstat_listen ":5432\s"`
-if [ ! -z "$PSQL_RUNNING" ];
-then
+ensure_postgres_terminated() {
+  PSQL_RUNNING=`filter_netstat_listen ":5432\s"`
+  if [ -z "$PSQL_RUNNING" ];
+  then
+    return 0;
+  fi
+
   cf_console echo "There seems to be a server listening on port 5432"
   cf_console echo "This might mean that there is a PostgreSQL server running on the machine already"
   cf_console echo "Checking if the Postgres installation belongs to a previous CFEngine deployment"
-  PSQL_COMMAND=$(ps -p $(fuser -n tcp 5432 2>/dev/null) -o args=|cut -d' ' -f1)
+
+  pgpid=$(echo "$PSQL_RUNNING" | sed -r -e '/pid=/!d' -e 's/.*pid=([0-9]+),.*/\1/' | tail -1)
+  pgargs=$(ps -p $pgpid -o args=)
+  if [ $? != 0 ];
+  then
+    cf_console echo "The PostgreSQL server terminated, moving on."
+    return 0
+  fi
+  PSQL_COMMAND=$(echo "$pgargs" | cut -d' ' -f1)
   if [ ! -z "$PSQL_COMMAND" ];
   then
     if [ "$PSQL_COMMAND" = "$PREFIX/bin/postgres" ];
@@ -163,33 +172,38 @@ then
       if [ -x "$PREFIX/bin/pg_ctl" ];
       then
         (cd /tmp &&
-         su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $BACKUP_DIR/data -m smart" ||
-         # '-m fast' quits directly, without proper session shutdown
-         su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $BACKUP_DIR/data -m fast")
+           su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $BACKUP_DIR/data -m smart" ||
+             # '-m fast' quits directly, without proper session shutdown
+             su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $BACKUP_DIR/data -m fast")
       else
-	    cf_console echo "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
-	    exit 1
+        cf_console echo "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
+        return 1
       fi
     else
       cf_console echo "The PostgreSQL is not from a previous CFEngine deployment"
       cf_console echo "This scenario is not supported, aborting installation"
       ps -p `fuser -n tcp 5432 2>/dev/null` -o args=
-      exit 1
+      return 1
     fi
   else
     cf_console echo "There is a process listening on the PostgreSQL port but it is not PostgreSQL, aborting."
-    cf_console echo -n "Command: "
-    ps -p `fuser -n tcp 5432 2>/dev/null` -o args=
+    cf_console echo -n "Command: $pgargs"
     cf_console echo "Please make sure that the process is not running before attempting the installation again."
-    exit 1
+    return 1
   fi
   PSQL_FINAL_CHECK=`filter_netstat_listen ":5432\s"`
   if [ ! -z "$PSQL_FINAL_CHECK" ];
   then
     cf_console echo "There is still a process listening on 5432, please kill it before retrying the installation. Aborting."
-    exit 1
+    return 1
   fi
-fi
+}
+
+#
+# We check if there is still a PostgreSQL server running
+#
+ensure_postgres_terminated || exit 1
+
 #
 # We need a cfapache user and group for our web server
 #
