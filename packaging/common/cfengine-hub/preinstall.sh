@@ -163,9 +163,9 @@ then
       if [ -x "$PREFIX/bin/pg_ctl" ];
       then
         (cd /tmp &&
-         su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart" ||
+         su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $BACKUP_DIR/data -m smart" ||
          # '-m fast' quits directly, without proper session shutdown
-         su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m fast")
+         su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $BACKUP_DIR/data -m fast")
       else
 	    cf_console echo "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
 	    exit 1
