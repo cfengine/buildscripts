@@ -62,6 +62,9 @@
               <Component Id='cf_agent.exe' Guid='8CEA06F4-1133-4E98-9EEF-9C1D39DEFAA5' Win64='$(var.isWin64)'>
                 <File Id='cf_agent.exe' Name='cf-agent.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-agent.exe' />
               </Component>
+              <Component Id='cf_check.exe' Guid='8A933D36-1C68-48E3-8A3E-391CFE9C88B4' Win64='$(var.isWin64)'>
+                <File Id='cf_check.exe' Name='cf-check.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-check.exe' />
+              </Component>
               <Component Id='cf_key.exe' Guid='2E9A81B7-B10A-4D1A-BE66-F3097E3D0C32' Win64='$(var.isWin64)'>
                 <File Id='cf_key.exe' Name='cf-key.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-key.exe' />
               </Component>
@@ -146,6 +149,7 @@
       <Feature Id='CfFeature' Title='CfFeature' Level='1'>
             <ComponentRef Id='cf_execd.exe' />
             <ComponentRef Id='cf_agent.exe' />
+            <ComponentRef Id='cf_check.exe' />
             <ComponentRef Id='cf_key.exe' />
             <ComponentRef Id='cf_monitord.exe' />
             <ComponentRef Id='cf_net.exe' />

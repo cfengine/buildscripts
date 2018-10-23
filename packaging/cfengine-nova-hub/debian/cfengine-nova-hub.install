@@ -10,6 +10,7 @@
 /usr/lib/systemd/system/cf-runalerts.service
 /usr/lib/systemd/system/cf-serverd.service
 /var/cfengine/bin/cf-agent
+/var/cfengine/bin/cf-check
 /var/cfengine/bin/cf-execd
 /var/cfengine/bin/cf-key
 /var/cfengine/bin/cf-monitord
