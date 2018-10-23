@@ -152,6 +152,7 @@ exit 0
 %dir %prefix
 %dir %prefix/bin
 %prefix/bin/cf-agent
+%prefix/bin/cf-check
 %prefix/bin/cf-execd
 %prefix/bin/cf-key
 %prefix/bin/cf-monitord

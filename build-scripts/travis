@@ -150,6 +150,7 @@ case "$JOB" in
             --cfkey=/var/cfengine/bin/cf-key \
             --cfexecd=/var/cfengine/bin/cf-execd \
             --cfnet=/var/cfengine/bin/cf-net \
+            --cfcheck=/var/cfengine/bin/cf-check \
             --cfrunagent=/var/cfengine/bin/cf-runagent \
             --rpmvercmp=$HOME/rpmvercmp \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
@@ -178,6 +179,7 @@ case "$JOB" in
             --cfkey=/var/cfengine/bin/cf-key \
             --cfexecd=/var/cfengine/bin/cf-execd \
             --cfnet=/var/cfengine/bin/cf-net \
+            --cfcheck=/var/cfengine/bin/cf-check \
             --cfrunagent=/var/cfengine/bin/cf-runagent \
             --rpmvercmp=$HOME/rpmvercmp \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \

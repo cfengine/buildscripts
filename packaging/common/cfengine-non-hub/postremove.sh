@@ -8,7 +8,7 @@ case `os_type` in
 esac
 
 if [ -d /usr/local/sbin ]; then
-  rm -f /usr/local/sbin/cf-agent /usr/local/sbin/cf-execd \
+  rm -f /usr/local/sbin/cf-agent /usr/local/sbin/cf-check /usr/local/sbin/cf-execd \
     /usr/local/sbin/cf-key /usr/local/sbin/cf-know /usr/local/sbin/cf-monitord \
     /usr/local/sbin/cf-net \
     /usr/local/sbin/cf-promises /usr/local/sbin/cf-report /usr/local/sbin/cf-runagent \
