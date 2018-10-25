@@ -1,4 +1,4 @@
-%define openssl_version 1.0.2o
+%define openssl_version 1.0.2p
 
 Summary: CFEngine Build Automation -- openssl
 Name: cfbuild-openssl
@@ -135,3 +135,4 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/lib/pkgconfig
 
 %changelog
+
