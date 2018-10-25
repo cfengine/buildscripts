@@ -44,7 +44,7 @@ Hub specific dependencies:
 * [APR](https://apr.apache.org/) 1.6.5
 * [apr-util](https://apr.apache.org/) 1.6.1
 * [Apache](http://httpd.apache.org/) 2.4.35
-* [PostgreSQL](http://www.postgresql.org/) for the hub 9.6.8
+* [PostgreSQL](http://www.postgresql.org/) for the hub 9.6.10
 * [Redis](http://redis.io/) 3.2.11
 * [PHP](http://php.net/) 5.6.35
 * [libmcrypt](https://sourceforge.net/projects/mcrypt/files/Libmcrypt/) 2.5.8
