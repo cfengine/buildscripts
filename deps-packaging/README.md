@@ -41,7 +41,7 @@ Enterprise agent specific dependencies:
 
 Hub specific dependencies:
 
-* [APR](https://apr.apache.org/) 1.5.2
+* [APR](https://apr.apache.org/) 1.6.5
 * [apr-util](https://apr.apache.org/) 1.5.4
 * [Apache](http://httpd.apache.org/) 2.4.33
 * [PostgreSQL](http://www.postgresql.org/) for the hub 9.6.8
