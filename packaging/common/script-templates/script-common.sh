@@ -43,9 +43,9 @@ esac
 
 get_cfengine_state() {
     if type systemctl >/dev/null 2>&1; then
-        systemctl list-units -l | grep -P '^\s*cf-' | sed -r 's/\s*(cf-[-a-z]+)\.service.*/\1/'
+        systemctl list-units -l | sed -r -e '/^\s*(cf-[-a-z]+|cfengine3)\.service/!d' -e 's/\s*(cf-[-a-z]+|cfengine3)\.service.*/\1/'
     else
-        platform_service cfengine3 status | grep 'is running' | sed -r 's/^([-a-z]+).*/\1/'
+        platform_service cfengine3 status | sed -r -e '/is running/!d' -e 's/^([-a-z]+).*/\1/'
     fi
 }
 
