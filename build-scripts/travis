@@ -37,10 +37,10 @@ sudo apt-get install s3cmd
   set +x
   echo $ARTIFACTS_KEY
   echo $ARTIFACTS_SECRET
-  echo 
-  echo 
-  echo 
-  echo 
+  echo
+  echo
+  echo
+  echo
   echo n
   echo y
 ) | s3cmd --configure >/dev/null
