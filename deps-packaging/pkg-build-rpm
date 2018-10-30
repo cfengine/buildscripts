@@ -108,6 +108,8 @@ case "$DEBUGSYM" in
     fatal "Unknown debugsym option: $DEBUGSYM";;
 esac
 
+env
+
 # eval and double quoting is needed to separate args,
 # example cmd --define 'a b':
 #     - argv[1] = --define
