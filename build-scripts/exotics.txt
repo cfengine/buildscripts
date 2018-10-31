@@ -4,6 +4,7 @@ PACKAGES_i386_linux_debian_4   # nested VM
 PACKAGES_i386_linux_redhat_4   # nested VM
 PACKAGES_ia64_hpux_11.23
 PACKAGES_ppc64_aix_53
+PACKAGES_ppc64_aix_61
 PACKAGES_sparc64_solaris_10
 PACKAGES_sparc64_solaris_11
 PACKAGES_sparc64_solaris_9
