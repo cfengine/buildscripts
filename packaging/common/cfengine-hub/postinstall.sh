@@ -97,7 +97,6 @@ mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
 chmod 755 $PREFIX/httpd
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs
 chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.sh
-chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.pl
 
 # plugins directory, empty by default
 mkdir -p ${PREFIX}/plugins
@@ -761,12 +760,12 @@ find $PREFIX/httpd/htdocs/application/ -type f -exec chown -R root:$MP_APACHE_US
 find $PREFIX/httpd/htdocs/application/ -type f -exec chmod 0440 {} +
 
 # API non-executable
-find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -a ! -name '*.pl' -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -a ! -name '*.pl' -exec chmod 0440 {} +
+find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -exec chmod 0440 {} +
 
 # API executable
-find $PREFIX/httpd/htdocs/api/ -type f \( -name '*.sh' -o -name '*.pl' \) -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/api/ -type f \( -name '*.sh' -o -name '*.pl' \) -exec chmod 0550 {} +
+find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -exec chmod 0550 {} +
 
 # API static non htaccess
 find $PREFIX/httpd/htdocs/api/static -type f ! -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
