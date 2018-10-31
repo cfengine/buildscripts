@@ -97,7 +97,6 @@ mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
 chmod 755 $PREFIX/httpd
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs
 chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.sh
-chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.pl
 
 # plugins directory, empty by default
 mkdir -p ${PREFIX}/plugins
@@ -121,10 +120,10 @@ chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/logs/application
 #
 # Do all the prelimenary Design Center setup only on the first install of cfengine package
 #
+DCWORKDIR=/opt/cfengine
+DCPARAMS=$DCWORKDIR/dc-scripts/params.sh
 if ! is_upgrade; then
   # This folder is required for Design Center and Mission Portal to talk to each other
-  DCWORKDIR=/opt/cfengine
-  $PREFIX/design-center/bin/cf-sketch --inputs=$PREFIX/design-center --installsource=$PREFIX/share/NovaBase/sketches/cfsketches.json --install-all
   mkdir -p $DCWORKDIR/userworkdir/admin/.ssh
   mkdir -p $DCWORKDIR/stage_backup
   mkdir -p $DCWORKDIR/dc-scripts
@@ -134,20 +133,23 @@ if ! is_upgrade; then
   touch $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
   chmod 600 $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
 
-  cat > $DCWORKDIR/dc-scripts/params.sh <<EOHIPPUS
-#!/bin/bash
+  cat > $DCPARAMS <<EOHIPPUS
 ROOT="$DCWORKDIR/masterfiles_staging"
 GIT_URL="$DCWORKDIR/masterfiles.git"
-GIT_BRANCH="master"
+GIT_REFSPEC="master"
+GIT_USERNAME=""
+GIT_PASSWORD=""
 GIT_WORKING_BRANCH="CF_WORKING_BRANCH"
-GIT_EMAIL="default-committer@your-cfe-site.com"
-GIT_AUTHOR="Default Committer"
 PKEY="$DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt"
 SCRIPT_DIR="$PREFIX/httpd/htdocs/api/dc-scripts"
 VCS_TYPE="GIT"
+
 export PATH="\${PATH}:$PREFIX/bin"
-export PKEY="\${PKEY}"
+export PKEY
+export GIT_USERNAME
+export GIT_PASSWORD
 export GIT_SSH="\${SCRIPT_DIR}/ssh-wrapper.sh"
+export GIT_ASKPASS="\${SCRIPT_DIR}/git-askpass.sh"
 EOHIPPUS
 
   # The runfile key in the below JSON is not needed anymore, all the
@@ -165,8 +167,6 @@ EOHIPPUS
   "runfile": {"location":"$DCWORKDIR/userworkdir/admin/masterfiles/sketches/meta/api-runfile.cf"}
 }
 EOHIPPUS
-
-  chmod 700 $DCWORKDIR/dc-scripts/params.sh
 
   chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/userworkdir
   chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/dc-scripts
@@ -201,6 +201,35 @@ EOHIPPUS
   if [ ! -f /usr/bin/curl ]; then
     ln -sf $PREFIX/bin/curl /usr/bin/curl
   fi
+else
+  # Migrate DC params.sh
+  # change GIT_BRANCH to GIT_REFSPEC, if it exists
+  # or add it after first line
+  if ! grep 'GIT_REFSPEC=' $DCPARAMS >/dev/null; then
+    if grep 'GIT_BRANCH=' $DCPARAMS >/dev/null; then
+      sed -i 's/GIT_BRANCH=/GIT_REFSPEC=/' $DCPARAMS
+    else
+      sed -i '1a GIT_REFSPEC="master"' $DCPARAMS
+    fi
+  fi
+  # Add git username and password, if they're missing
+  if ! grep 'GIT_USERNAME=' $DCPARAMS >/dev/null; then
+    sed -i '1a GIT_USERNAME=""' $DCPARAMS
+  fi
+  if ! grep 'GIT_PASSWORD=' $DCPARAMS >/dev/null; then
+    sed -i '1a GIT_PASSWORD=""' $DCPARAMS
+  fi
+  # Add export lines at the end, if they're missing
+  if ! grep 'export GIT_USERNAME' $DCPARAMS >/dev/null; then
+    echo 'export GIT_USERNAME' >>$DCPARAMS
+  fi
+  if ! grep 'export GIT_PASSWORD' $DCPARAMS >/dev/null; then
+    echo 'export GIT_PASSWORD' >>$DCPARAMS
+  fi
+  if ! grep 'export GIT_ASKPASS' $DCPARAMS >/dev/null; then
+    echo 'export GIT_ASKPASS="${SCRIPT_DIR}/git-askpass.sh"' >>$DCPARAMS
+  fi
+
 fi
 
 if [ -f $PREFIX/bin/cf-twin ]; then
@@ -731,12 +760,12 @@ find $PREFIX/httpd/htdocs/application/ -type f -exec chown -R root:$MP_APACHE_US
 find $PREFIX/httpd/htdocs/application/ -type f -exec chmod 0440 {} +
 
 # API non-executable
-find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -o ! -name '*.pl' -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -o ! -name '*.pl' -exec chmod 0440 {} +
+find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -exec chmod 0440 {} +
 
 # API executable
-find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -o -name '*.pl' -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -o -name '*.pl' -exec chmod 0550 {} +
+find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -exec chmod 0550 {} +
 
 # API static non htaccess
 find $PREFIX/httpd/htdocs/api/static -type f ! -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
