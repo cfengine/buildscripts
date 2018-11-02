@@ -1,4 +1,4 @@
-%define redis_version 3.2.11
+%define redis_version 3.2.12
 
 Summary: CFEngine Build Automation -- redis
 Name: cfbuild-redis
@@ -97,3 +97,4 @@ CFEngine Build Automation -- redis -- development files
 %{prefix}/include/hiredis/adapters/libevent.h
 
 %changelog
+
