@@ -7,9 +7,6 @@
 # We use packaging scripts
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
 
-# Not all dependencies support building in parallel.
-MAKEFLAGS=-j1
-
 set -x
 
 # This should be already set from sourcing "functions" at the top, but
