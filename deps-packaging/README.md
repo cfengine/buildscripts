@@ -1,3 +1,5 @@
+TRIGGER REBUILD
+
 File `install-dependencies` and the relevant subdirectories
 in `deps-packaging` are the source of this information.
 
