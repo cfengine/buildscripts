@@ -402,6 +402,14 @@ if [ ! -d $PREFIX/state/pg/data ]; then
       cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf"
       chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf"
     fi
+
+    # Preserve the recovery.conf file if it existed, it defines how this
+    # PostgreSQL should behave as a slave (has to be done AFTER checking/writing
+    # the postgresql.conf file above).
+    if [ -f "$BACKUP_DIR/data/recovery.conf" ]; then
+      cp -a "$BACKUP_DIR/data/recovery.conf" "$PREFIX/state/pg/data/recovery.conf"
+      chown cfpostgres "$PREFIX/state/pg/data/recovery.conf"
+    fi
   fi
 fi
 
