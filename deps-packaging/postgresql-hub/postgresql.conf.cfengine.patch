@@ -1,5 +1,5 @@
---- src/backend/utils/misc/postgresql.conf.sample	2018-05-07 22:51:40.000000000 +0200
-+++ src/backend/utils/misc/postgresql.conf.cfengine	2018-11-02 09:00:53.333034654 +0100
+--- postgresql.conf.sample	2018-10-15 23:12:02.000000000 +0200
++++ postgresql.conf.cfengine	2018-11-02 11:20:59.706886428 +0100
 @@ -1,6 +1,6 @@
 -# -----------------------------
 -# PostgreSQL configuration file
@@ -30,7 +30,7 @@
  					# (change requires restart)
  #bonjour = off				# advertise server via Bonjour
  					# (change requires restart)
-@@ -110,7 +114,7 @@
+@@ -114,7 +118,7 @@
  
  # - Memory -
  
@@ -39,7 +39,7 @@
  					# (change requires restart)
  #huge_pages = try			# on, off, or try
  					# (change requires restart)
-@@ -119,11 +123,17 @@
+@@ -123,10 +127,16 @@
  					# (change requires restart)
  # Caution: it is not advisable to set max_prepared_transactions nonzero unless
  # you actively intend to use prepared transactions.
@@ -53,14 +53,13 @@
 +work_mem = 48MB				# min 64kB
 +maintenance_work_mem = 512MB		# min 1MB
 +
- #replacement_sort_tuples = 150000	# limits use of replacement selection sort
  #autovacuum_work_mem = -1		# min 1MB, or -1 to use maintenance_work_mem
 -#max_stack_depth = 2MB			# min 100kB
 +max_stack_depth = 4MB			# min 100kB
  #dynamic_shared_memory_type = posix	# the default is the first option
  					# supported by the operating system:
  					#   posix
-@@ -182,7 +192,7 @@
+@@ -186,7 +196,7 @@
  #fsync = on				# flush data to disk for crash safety
  					# (turning this off can cause
  					# unrecoverable data corruption)
@@ -69,7 +68,7 @@
  					# off, local, remote_write, remote_apply, or on
  #wal_sync_method = fsync		# the default is the first option
  					# supported by the operating system:
-@@ -206,8 +216,9 @@
+@@ -210,8 +220,9 @@
  # - Checkpoints -
  
  #checkpoint_timeout = 5min		# range 30s-1d
@@ -80,7 +79,7 @@
  #checkpoint_completion_target = 0.5	# checkpoint target duration, 0.0 - 1.0
  #checkpoint_flush_after = 0		# measured in pages, 0 disables
  #checkpoint_warning = 30s		# 0 disables
-@@ -442,7 +453,7 @@
+@@ -462,7 +473,7 @@
  #log_duration = off
  #log_error_verbosity = default		# terse, default, or verbose messages
  #log_hostname = off
@@ -89,7 +88,7 @@
  					#   %a = application name
  					#   %u = user name
  					#   %d = database name
-@@ -511,21 +522,21 @@
+@@ -532,21 +543,21 @@
  					# their durations, > 0 logs only
  					# actions running at least this number
  					# of milliseconds.
@@ -114,7 +113,7 @@
  					# autovacuum, in milliseconds;
  					# -1 means use vacuum_cost_delay
  #autovacuum_vacuum_cost_limit = -1	# default vacuum cost limit for
-@@ -598,6 +609,10 @@
+@@ -628,6 +639,10 @@
  # LOCK MANAGEMENT
  #------------------------------------------------------------------------------
  

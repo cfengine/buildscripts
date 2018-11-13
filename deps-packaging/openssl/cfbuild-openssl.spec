@@ -1,10 +1,10 @@
-%define openssl_version 1.1.0h
+%define openssl_version 1_1_1
 
 Summary: CFEngine Build Automation -- openssl
 Name: cfbuild-openssl
 Version: %{version}
 Release: 1
-Source0: openssl-%{openssl_version}.tar.gz
+Source0: OpenSSL_%{openssl_version}.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -16,7 +16,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n openssl-%{openssl_version}
+%setup -q -n openssl-OpenSSL_%{openssl_version}
 
 %build
 
@@ -88,13 +88,33 @@ $MAKE DESTDIR=${RPM_BUILD_ROOT} install_ssldirs
 # Removing unused files
 
 rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/c_rehash
-
-rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/libssl.a
-rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/libcrypto.a
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/pkgconfig/openssl.pc
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/CA.pl
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/tsget
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/openssl.cnf.dist
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/tsget.pl
+
+SYS=`uname -s`
+if [ x$SYS = "xAIX" ]; then
+  # we need to keep these files in place on AIX, they are archives containing
+  # shared objects and the runtime linker needs them
+  echo %{prefix}/lib/libssl.a > extra-lib-files
+  echo %{prefix}/lib/libcrypto.a >> extra-lib-files
+
+  # no devel files for libraries on AIX
+  echo > devel-lib-files
+else
+  # .a files are static libraries on other platforms, let's get rid of them
+  rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libssl.a
+  rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libcrypto.a
+
+  # no extra library files
+  echo > extra-lib-files
+
+  # but make sure devel symlinks are packaged
+  echo %{prefix}/lib/libssl.so > devel-lib-files
+  echo %{prefix}/lib/libcrypto.so >> devel-lib-files
+fi
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -110,27 +130,25 @@ CFEngine Build Automation -- openssl
 %description devel
 CFEngine Build Automation -- openssl -- development files
 
-%files
+%files -f extra-lib-files
 %defattr(-,root,root)
 
 %dir %{prefix}/bin
 %{prefix}/bin/openssl
 
 %dir %{prefix}/lib
-%{prefix}/lib/libssl.so
 %{prefix}/lib/libssl.so.1.1
-%{prefix}/lib/libcrypto.so
 %{prefix}/lib/libcrypto.so.1.1
 %{prefix}/ssl/openssl.cnf
+%{prefix}/ssl/ct_log_list.cnf
+%{prefix}/ssl/ct_log_list.cnf.dist
 
-%files devel
+%files devel -f devel-lib-files
 %defattr(-,root,root)
 
 %{prefix}/include
 
 %dir %{prefix}/lib
-%{prefix}/lib/libssl.so
-%{prefix}/lib/libcrypto.so
 
 %{prefix}/lib/pkgconfig
 

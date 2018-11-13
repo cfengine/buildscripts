@@ -1,8 +1,11 @@
+%define acl_version 2.2.53
+
 Summary: CFEngine Build Automation -- libacl
 Name: cfbuild-libacl
 Version: %{version}
 Release: 1
-Source: acl-2.2.52.src.tar.gz
+Source: acl-%{acl_version}.tar.gz
+Patch0: no_fancy_gcc.patch
 License: MIT
 Group: Other
 Url: http://example.com
@@ -14,10 +17,9 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n acl-2.2.52
+%setup -q -n acl-%{acl_version}
 
-zcat ../../SOURCES/acl.destdir.diff.gz | $PATCH -p1 || true
-
+%patch0 -p1
 ./configure --prefix=%{prefix} --enable-gettext=no
 
 %build
@@ -27,15 +29,15 @@ make
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-make install -C getfacl DESTDIR=${RPM_BUILD_ROOT} DIST_ROOT=/
-make install-dev install-lib DESTDIR=${RPM_BUILD_ROOT} DIST_ROOT=/
+make install DESTDIR=${RPM_BUILD_ROOT}
 
 cp ${RPM_BUILD_ROOT}%{prefix}/include/sys/acl.h ${RPM_BUILD_ROOT}%{prefix}/include/
 
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/share
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/*.la
-rm -rf ${RPM_BUILD_ROOT}%{prefix}/libexec
-rm -rf ${RPM_BUILD_ROOT}%{prefix}/share
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/pkgconfig
+find ${RPM_BUILD_ROOT}%{prefix}/bin/ -mindepth 1 -name 'getfacl' -o -print0 | xargs -0 rm -rf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
