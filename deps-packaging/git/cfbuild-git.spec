@@ -59,6 +59,7 @@ CFEngine Build Automation -- git
 %{prefix}/share/gitk
 %{prefix}/share/gitweb
 %{prefix}/share/locale
+%{prefix}/share/man
 
 %dir %{prefix}/lib
 %{prefix}/lib/git-core
