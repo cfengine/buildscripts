@@ -370,6 +370,10 @@ if [ ! -d $PREFIX/state/pg/data ]; then
     cp -a "$new_pgconfig_file" $PREFIX/state/pg/data/postgresql.conf
     chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
   else
+    # Always use the original pg_hba.conf file, it defines access control to PostgreSQL
+    cp -a "$BACKUP_DIR/data/pg_hba.conf" "$PREFIX/state/pg/data/pg_hba.conf"
+    chown cfpostgres "$PREFIX/state/pg/data/pg_hba.conf"
+
     # Determine which postgresql.conf file to use and put it in the right place.
     if [ -f "$BACKUP_DIR/data/postgresql.conf.modified" ]; then
       # User-modified file from the previous old version of CFEngine exists, try to use it.
@@ -397,6 +401,14 @@ if [ ! -d $PREFIX/state/pg/data ]; then
       # No user-modified file, just use the new recommended or default config (see generate_new_postgres_conf())
       cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf"
       chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf"
+    fi
+
+    # Preserve the recovery.conf file if it existed, it defines how this
+    # PostgreSQL should behave as a slave (has to be done AFTER checking/writing
+    # the postgresql.conf file above).
+    if [ -f "$BACKUP_DIR/data/recovery.conf" ]; then
+      cp -a "$BACKUP_DIR/data/recovery.conf" "$PREFIX/state/pg/data/recovery.conf"
+      chown cfpostgres "$PREFIX/state/pg/data/recovery.conf"
     fi
   fi
 fi
