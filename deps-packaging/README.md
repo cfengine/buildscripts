@@ -31,16 +31,16 @@ Build dependencies:
 | PostgreSQL   |         9.0.23 |          9.0.23 | removed from cfengine built packages |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.1.0h
+* [OpenSSL](http://openssl.org/) 1.1.0i
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.42
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.22
-* [libyaml](http://pyyaml.org/wiki/LibYAML) 0.1.7
+* [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.1
 * [libxml2](http://xmlsoft.org/sources/) 2.9.8
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
   * Needed by libxml2
-* [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.52
-* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.47
-* [libcurl](http://curl.haxx.se/download.html) 7.60.0
+* [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
+* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
+* [libcurl](http://curl.haxx.se/download.html) 7.62.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -73,13 +73,13 @@ Build dependencies:
 
 Hub specific dependencies:
 
-* [APR](https://apr.apache.org/) 1.6.3
+* [APR](https://apr.apache.org/) 1.6.5
 * [apr-util](https://apr.apache.org/) 1.6.1
-* [Apache](http://httpd.apache.org/) 2.4.33
-* [PostgreSQL](http://www.postgresql.org/) for the hub 10.4
+* [Apache](http://httpd.apache.org/) 2.4.35
+* [PostgreSQL](http://www.postgresql.org/) for the hub 10.6
 * [Redis](http://redis.io/) 3.2.11
-* [PHP](http://php.net/) 7.2.6
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.17.1
+* [PHP](http://php.net/) 7.2.12
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.19.1
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)

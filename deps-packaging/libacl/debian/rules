@@ -11,7 +11,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	zcat acl.destdir.diff.gz | $(PATCH) -p1 || true
+	patch -p1 -i no_fancy_gcc.patch
 
 	./configure --prefix=$(PREFIX) --enable-gettext=no
 
@@ -25,17 +25,18 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	make install -C getfacl DESTDIR=$(CURDIR)/debian/tmp DIST_ROOT=/
-	make install-dev install-lib DESTDIR=$(CURDIR)/debian/tmp DIST_ROOT=/
+	make install DESTDIR=$(CURDIR)/debian/tmp
 
 # configure fails because acl.h does't exist in include dir
 # it's placed by default in include/sys
 
 	cp $(CURDIR)/debian/tmp$(PREFIX)/include/sys/acl.h $(CURDIR)/debian/tmp$(PREFIX)/include/
 
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.a
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/libexec
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/pkgconfig
+	find $(CURDIR)/debian/tmp$(PREFIX)/bin/ -mindepth 1 -name 'getfacl' -o -print0 | xargs -0 rm -rf
 
 binary-indep: build install
 

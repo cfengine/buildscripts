@@ -1,4 +1,4 @@
-%define apr_version 1.6.3
+%define apr_version 1.6.5
 
 Summary: CFEngine Build Automation -- apr
 Name: cfbuild-apr
@@ -86,3 +86,4 @@ CFEngine Build Automation -- apr -- development files
 %{prefix}/lib/*.so
 %{prefix}/build-1
 %changelog
+
