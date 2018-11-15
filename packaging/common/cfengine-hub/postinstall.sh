@@ -742,6 +742,11 @@ find $PREFIX/httpd/htdocs/logs/ -type f -exec chmod 0640 {} +
 find $PREFIX/httpd/htdocs/application/ -type f -exec chown -R root:$MP_APACHE_USER {} +
 find $PREFIX/httpd/htdocs/application/ -type f -exec chmod 0440 {} +
 
+# API dirs ENT-4250
+# Note that this will include the 'api' dir itself
+find $PREFIX/httpd/htdocs/api/ -type d ! -name 'static' -exec chown root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/api/ -type d ! -name 'static' -exec chmod 0550 {} +
+
 # API non-executable
 find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -o ! -name '*.pl' -exec chown -R root:$MP_APACHE_USER {} +
 find $PREFIX/httpd/htdocs/api/ -type f ! -name '*.sh' -o ! -name '*.pl' -exec chmod 0440 {} +
@@ -753,6 +758,7 @@ find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -o -name '*.pl' -exec chmod 
 # API static non htaccess
 find $PREFIX/httpd/htdocs/api/static -type f ! -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
 find $PREFIX/httpd/htdocs/api/static -type f ! -name '.htaccess' -exec chmod 0440 {} +
+
 chown root:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
 chmod 0660 $PREFIX/httpd/htdocs/api/static
 
