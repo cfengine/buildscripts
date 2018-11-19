@@ -130,7 +130,27 @@ if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/n
   # Now that PostgreSQL is shut down, move the old data out of the way.
   mkdir -p "$BACKUP_DIR/lib"
   mkdir -p "$BACKUP_DIR/share"
-  mv "$PREFIX/state/pg/data" "$BACKUP_DIR"
+
+  # instead of `mv`, do `cp && rm` - in case `cp` operation fails, we won't
+  # have "some files here, some files there" situation
+  # First, try copying files creating hardlinks
+  if cp -al "$PREFIX/state/pg/data" "$BACKUP_DIR"; then
+    # Copy succeeded - so we can delete old dir.
+    rm -rf "$PREFIX/state/pg/data"
+  else
+    # Copy creating hardlinks failed, so remove partially-copied data and try simple copying
+    rm -rf "$BACKUP_DIR/data"
+    if cp -a "$PREFIX/state/pg/data" "$BACKUP_DIR"; then
+      # Copy succeeded - so we can delete old dir.
+      rm -rf "$PREFIX/state/pg/data"
+    else
+      # Copy failed, so remove partially-copied data and abort
+      rm -rf "$BACKUP_DIR/data"
+      cf_console echo "Creating of backup failed"
+      cf_console echo "Please fix it before upgrading or disable upgrade by removing/renaming $PREFIX/state/pg/data prior to upgrade."
+      exit 1
+    fi
+  fi
 
   if ! diff "$BACKUP_DIR/data/postgresql.conf" "$PREFIX/share/postgresql/postgresql.conf.cfengine" > /dev/null; then
     # diff exits with 0 if the files are the same
