@@ -376,7 +376,7 @@ generate_new_postgres_conf() {
 }
 
 #POSTGRES RELATED
-BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
+BACKUP_DIR=$PREFIX/backup-before-postgres11-migration
 if [ ! -d $PREFIX/state/pg/data ]; then
   mkdir -p $PREFIX/state/pg/data
   chown -R cfpostgres $PREFIX/state/pg
