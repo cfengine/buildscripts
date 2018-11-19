@@ -19,11 +19,12 @@ BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
 
 # If upgrading from a version below 3.12 that has PostgreSQL, and the data dir exists.
 if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
-  if [ -d "$BACKUP_DIR" ]; then
+  if [ -d "$BACKUP_DIR/data" ]; then
     cf_console echo "Old backup in $BACKUP_DIR already exists. Please remove before attempting upgrade."
     exit 1
   fi
   cf_console echo "Attempting to migrate Mission Portal database. This can break stuff."
+  cf_console echo "Copy will be created in $BACKUP_DIR dir."
   cf_console echo "It can be disabled by shutting down CFEngine and removing/renaming $PREFIX/state/pg/data prior to upgrade."
   cf_console echo "Press Ctrl-C in the next 15 seconds if you want to cancel..."
   sleep 15
