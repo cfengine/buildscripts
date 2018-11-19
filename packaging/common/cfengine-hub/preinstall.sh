@@ -23,6 +23,46 @@ if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/n
     cf_console echo "Old backup in $BACKUP_DIR already exists. Please remove before attempting upgrade."
     exit 1
   fi
+  mkdir -p "$BACKUP_DIR"
+  # Try to check if free space on $BACKUP_DIR drive is not less than $PREFIX/state/pg/data contains
+  if command -v df >/dev/null && command -v du >/dev/null && command -v awk >/dev/null; then
+    # We have enough commands to test it.
+    # Explanation of arguments:
+    # `df`
+    #   `-P` - use POSIX output format (free space in 4th column),
+    #   `-BM` - print output in Megabytes
+    # `awk`
+    #   `FNR==2` - take record (line) number two (first line in `df` output is table header)
+    #   `gsub(...)` - remove non-numbers from 4th column
+    #   `print $4` - well, print 4th column
+    # `du`
+    #   `-s` - print only summary - i.e. only one line with total size of all
+    #     files in direcrory passed as argument - unlike in normal case when it
+    #     prints disk usage by each nested directory, recursively
+    #   `-BM` - print output in Megabytes
+    #
+    # Example of `df -PBM .` output on my machine:
+    # ```
+    # Filesystem     1048576-blocks    Used Available Capacity Mounted on
+    # /dev/sda1             246599M 210974M    24564M      90% /
+    # ```
+    # and awk would extract "24564" number from it
+    # Example of `du -sBM .` output on my machine:
+    # ```
+    # 172831M	.
+    # ```
+    # and awk would extract "172831" number from it
+    #
+    megabytes_free="$(df -PBM $BACKUP_DIR | awk 'FNR==2{gsub(/[^0-9]/,"",$4);print $4}')"
+    megabytes_need="$(du -sBM $PREFIX/state/pg/data | awk '{gsub(/[^0-9]/,"",$1);print $1}')"
+    if [ "$megabytes_free" -le "$megabytes_need" ]; then
+      cf_console echo "Not enough disk space to create DB backup:"
+      cf_console echo "${megabytes_free}M available in $BACKUP_DIR"
+      cf_console echo "${megabytes_need}M used by $PREFIX/state/pg/data"
+      cf_console echo "Please free up some disk space before upgrading or disable upgrade by removing/renaming $PREFIX/state/pg/data prior to upgrade."
+      exit 1
+    fi
+  fi
   cf_console echo "Attempting to migrate Mission Portal database. This can break stuff."
   cf_console echo "Copy will be created in $BACKUP_DIR dir."
   cf_console echo "It can be disabled by shutting down CFEngine and removing/renaming $PREFIX/state/pg/data prior to upgrade."
@@ -91,6 +131,7 @@ if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/n
   mkdir -p "$BACKUP_DIR/lib"
   mkdir -p "$BACKUP_DIR/share"
   mv "$PREFIX/state/pg/data" "$BACKUP_DIR"
+
   if ! diff "$BACKUP_DIR/data/postgresql.conf" "$PREFIX/share/postgresql/postgresql.conf.cfengine" > /dev/null; then
     # diff exits with 0 if the files are the same
     # the postgresql.conf file was modified, we should try to use it after migration
