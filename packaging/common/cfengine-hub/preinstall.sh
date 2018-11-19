@@ -23,6 +23,20 @@ if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/n
     cf_console echo "Old backup in $BACKUP_DIR already exists. Please remove before attempting upgrade."
     exit 1
   fi
+  mkdir -p "$BACKUP_DIR"
+  # Try to check if free space on $BACKUP_DIR drive is not less than $PREFIX/state/pg/data contains
+  if command -v df >/dev/null && command -v du >/dev/null && command -v awk >/dev/null; then
+    # we have enough commands to test it
+    megabytes_free="$(df -PBM $BACKUP_DIR | awk 'FNR==2{gsub(/[^0-9]/,"",$4);print $4}')"
+    megabytes_need="$(du -sBM $PREFIX/state/pg/data | awk '{gsub(/[^0-9]/,"",$1);print $1}')"
+    if [ "$megabytes_free" -le "$megabytes_need" ]; then
+      cf_console echo "Not enough disk space to create DB backup:"
+      cf_console echo "${megabytes_free}M available in $BACKUP_DIR"
+      cf_console echo "${megabytes_need}M used by $PREFIX/state/pg/data"
+      cf_console echo "Please free up some disk space before upgrading or disable upgrade by removing/renaming $PREFIX/state/pg/data prior to upgrade."
+      exit 1
+    fi
+  fi
   cf_console echo "Attempting to migrate Mission Portal database. This can break stuff."
   cf_console echo "Copy will be created in $BACKUP_DIR dir."
   cf_console echo "It can be disabled by shutting down CFEngine and removing/renaming $PREFIX/state/pg/data prior to upgrade."
