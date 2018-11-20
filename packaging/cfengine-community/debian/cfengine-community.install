@@ -10,6 +10,7 @@
 /etc/default/cfengine3
 /etc/profile.d/cfengine3.sh
 /var/cfengine/bin/cf-agent
+/var/cfengine/bin/cf-check
 /var/cfengine/bin/cf-execd
 /var/cfengine/bin/cf-key
 /var/cfengine/bin/cf-monitord
