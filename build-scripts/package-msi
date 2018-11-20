@@ -78,7 +78,7 @@ package()
         REVISION=$VERSION.0
         ;;
       DEBUG|CODE_COVERAGE)
-        MAIN_VERSION=${VERSION%\~*}
+        MAIN_VERSION=${VERSION%%\~*}
         REVISION=$MAIN_VERSION.$BUILD_NUMBER
         ;;
     esac
