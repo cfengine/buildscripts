@@ -26,7 +26,33 @@ if is_upgrade && egrep '^3\.([6-9]|1[012])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/
   mkdir -p "$BACKUP_DIR"
   # Try to check if free space on $BACKUP_DIR drive is not less than $PREFIX/state/pg/data contains
   if command -v df >/dev/null && command -v du >/dev/null && command -v awk >/dev/null; then
-    # we have enough commands to test it
+    # We have enough commands to test it.
+    # Explanation of arguments:
+    # `df`
+    #   `-P` - use POSIX output format (free space in 4th column),
+    #   `-BM` - print output in Megabytes
+    # `awk`
+    #   `FNR==2` - take record (line) number two (first line in `df` output is table header)
+    #   `gsub(...)` - remove non-numbers from 4th column
+    #   `print $4` - well, print 4th column
+    # `du`
+    #   `-s` - print only summary - i.e. only one line with total size of all
+    #     files in direcrory passed as argument - unlike in normal case when it
+    #     prints disk usage by each nested directory, recursively
+    #   `-BM` - print output in Megabytes
+    #
+    # Example of `df -PBM .` output on my machine:
+    # ```
+    # Filesystem     1048576-blocks    Used Available Capacity Mounted on
+    # /dev/sda1             246599M 210974M    24564M      90% /
+    # ```
+    # and awk would extract "24564" number from it
+    # Example of `du -sBM .` output on my machine:
+    # ```
+    # 172831M	.
+    # ```
+    # and awk would extract "172831" number from it
+    #
     megabytes_free="$(df -PBM $BACKUP_DIR | awk 'FNR==2{gsub(/[^0-9]/,"",$4);print $4}')"
     megabytes_need="$(du -sBM $PREFIX/state/pg/data | awk '{gsub(/[^0-9]/,"",$1);print $1}')"
     if [ "$megabytes_free" -le "$megabytes_need" ]; then
@@ -120,7 +146,7 @@ if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/n
     else
       # Copy failed, so remove partially-copied data and abort
       rm -rf "$BACKUP_DIR/data"
-      cf_console echo "Creating of backup failed"
+      cf_console echo "Backup creation failed"
       cf_console echo "Please fix it before upgrading or disable upgrade by removing/renaming $PREFIX/state/pg/data prior to upgrade."
       exit 1
     fi
