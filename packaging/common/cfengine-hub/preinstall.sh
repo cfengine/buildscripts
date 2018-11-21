@@ -15,10 +15,16 @@ if is_upgrade; then
     fi
 fi
 
-BACKUP_DIR=$PREFIX/backup-before-postgres11-migration
-
 # If upgrading from a version below 3.13 that has PostgreSQL, and the data dir exists.
 if is_upgrade && egrep '^3\.([6-9]|1[012])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+  alias migrating_postgres='true'
+else
+  alias migrating_postgres='false'
+fi
+
+BACKUP_DIR=$PREFIX/backup-before-postgres11-migration
+
+if migrating_postgres; then
   if [ -d "$BACKUP_DIR/data" ]; then
     cf_console echo "Old backup in $BACKUP_DIR already exists. Please remove before attempting upgrade."
     exit 1
@@ -125,7 +131,7 @@ if is_upgrade; then
   fi
 fi
 
-if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+if migrating_postgres; then
   cf_console echo "Moving old data and copying old binaries to $BACKUP_DIR"
   # Now that PostgreSQL is shut down, move the old data out of the way.
   mkdir -p "$BACKUP_DIR/lib"
