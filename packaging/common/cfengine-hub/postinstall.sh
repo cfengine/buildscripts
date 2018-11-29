@@ -543,7 +543,7 @@ migrate_db_using_dump_file() {
   return $result
 }
 
-if is_upgrade && [ -d "$BACKUP_DIR" ]; then
+if is_upgrade && [ -d "$BACKUP_DIR/data" ]; then
   # DEBUG variable controls which of migration methods fail:
   # 0 - do nothing special (usually pg_upgrade, which is first method, succeeds)
   # 1 - fail first method (so we get a chance to run second method, migration via pipe)
