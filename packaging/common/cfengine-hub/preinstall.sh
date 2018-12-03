@@ -347,6 +347,10 @@ if [ -d $PREFIX/httpd/htdocs ]; then
   find $PREFIX/httpd/htdocs -depth -type d -exec rmdir {} \;
 fi
 
+if [ -d $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718 ]; then
+  rm $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718/*
+fi
+
 # Make a backup of the key CFE_CLIENT_SECRET_KEY, if any, and restore the
 # original file content.
 #
