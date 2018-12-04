@@ -57,12 +57,17 @@ restore_cfengine_state() {
     else
         CALLED_FROM_STATE_RESTORE=1
         if [ -f ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh ]; then
-            . ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh
+            # we need to source the core init script which itself sources the
+            # enterprise one, but provides it with necessary functions
+            . /etc/init.d/cfengine3
             if grep postgres "$1" >/dev/null; then
                 start_postgres >/dev/null
             fi
             if grep httpd "$1" >/dev/null; then
                 start_httpd >/dev/null
+            fi
+            if grep redis "$1" >/dev/null; then
+                start_redis >/dev/null
             fi
         fi
 
