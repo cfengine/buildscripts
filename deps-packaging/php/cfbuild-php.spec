@@ -149,6 +149,9 @@ sed -ri 's/^\s*memory_limit\s*=.*/memory_limit = 256M/g' ${RPM_BUILD_ROOT}%{pref
 # Set the default timezone for php
 sed -ri 's/^(\s|;)*date.timezone\s*=.*/date.timezone = "UTC"/g' ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
 
+# Set the phar readonly Off for php
+sed -ri 's/^(\s|;)phar.readonly = On/phar.readonly = Off/' ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php.ini
+
 echo "extension=curl.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/curl.ini
 echo "extension=openssl.so" >>${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/openssl.ini
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
