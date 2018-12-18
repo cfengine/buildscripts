@@ -11,7 +11,7 @@ for pkg in "$@"; do
   P_FILENAME=`basename $pkg`
   P_NAME=${P_FILENAME%.pkg}
 
-  if pkginfo ${P_NAME}; then
+  if pkginfo ${P_NAME} > /dev/null 2>&1; then
     sudo /usr/sbin/pkgrm -n ${P_NAME}
   fi
   sudo /usr/sbin/pkgadd -n -d $pkg ${P_NAME}
