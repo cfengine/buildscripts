@@ -35,6 +35,12 @@ include_script()
 
 include_script "$TEMPLATEDIR/$PKG_TYPE-script-common.sh"
 
+case "$PKG_TYPE" in
+    deb|rpm)
+      echo "set -e"
+      ;;
+esac
+
 echo "PKG_TYPE=$PKG_TYPE"
 echo "SCRIPT_TYPE=$SCRIPT_TYPE"
 echo "PROJECT_TYPE=$PROJECT_TYPE"
