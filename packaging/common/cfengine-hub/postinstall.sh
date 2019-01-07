@@ -195,7 +195,6 @@ EOHIPPUS
   find "$DCWORKDIR/masterfiles.git" -type f -exec chmod 600 {} \;
 
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT branch CF_WORKING_BRANCH")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote rm origin")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote add origin $DCWORKDIR/masterfiles.git")
 
   if [ ! -f /usr/bin/curl ]; then
