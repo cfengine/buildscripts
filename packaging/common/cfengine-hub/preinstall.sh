@@ -171,11 +171,14 @@ fi
 
 filter_netstat_listen()
 {
+  set +e
   if [ -x /usr/sbin/ss ]; then
     ss -natp | egrep "LISTEN.*($1)"
   else
     netstat -natp | egrep "($1).*LISTEN"
   fi
+  set -e
+  return 0
 }
 
 #
