@@ -696,7 +696,7 @@ else
 
   # Ensure cfpostgres can read the sql files it will import. And that they are
   # restored to restrictive state after import ENT-2684
-  (chown cfpostgres "$PREFIX/share/db/*.sql")
+  chown cfpostgres $PREFIX/share/db/*.sql
   (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql")
 
   #create database for MISSION PORTAL
