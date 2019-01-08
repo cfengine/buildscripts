@@ -264,8 +264,7 @@ esac
 
 if [ -f "$MAN_CONFIG" ];
 then
-  MAN=`cat "$MAN_CONFIG"| grep cfengine`
-  if [ -z "$MAN" ]; then
+  if grep cfengine "$MAN_CONFIG" >/dev/null; then
     echo "$MAN_PATH     $PREFIX/share/man" >> "$MAN_CONFIG"
   fi
 fi
