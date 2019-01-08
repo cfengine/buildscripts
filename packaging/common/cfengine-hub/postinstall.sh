@@ -570,6 +570,7 @@ migrate_db_using_dump_file() {
 }
 
 if is_upgrade && [ -d "$BACKUP_DIR/data" ]; then
+  set +e              # this block has its own error detection/handling
   # DEBUG variable controls which of migration methods fail:
   # 0 - do nothing special (usually pg_upgrade, which is first method, succeeds)
   # 1 - fail first method (so we get a chance to run second method, migration via pipe)
@@ -654,6 +655,7 @@ if is_upgrade && [ -d "$BACKUP_DIR/data" ]; then
     cf_console echo "And now installation will proceed with clean (empty) database"
     (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
   fi
+  set -e
 fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
