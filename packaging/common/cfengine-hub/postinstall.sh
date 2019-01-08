@@ -760,9 +760,11 @@ find $PREFIX/httpd/htdocs/scripts/ -type f -exec chmod 0440 {} +
 find $PREFIX/httpd/htdocs/tmp/ -type f -exec chown -R root:$MP_APACHE_USER {} +
 find $PREFIX/httpd/htdocs/tmp/ -type f -exec chmod 0660 {} +
 
-# logs
-find $PREFIX/httpd/htdocs/logs/ -type f -exec chown -R $MP_APACHE_USER:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/logs/ -type f -exec chmod 0640 {} +
+# logs (if any)
+if [ -d $PREFIX/httpd/htdocs/logs/ ]; then
+  find $PREFIX/httpd/htdocs/logs/ -type f -exec chown -R $MP_APACHE_USER:$MP_APACHE_USER {} +
+  find $PREFIX/httpd/htdocs/logs/ -type f -exec chmod 0640 {} +
+fi
 
 # application
 find $PREFIX/httpd/htdocs/application/ -type f -exec chown -R root:$MP_APACHE_USER {} +
