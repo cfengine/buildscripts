@@ -339,8 +339,7 @@ generate_new_postgres_conf() {
   # Otherwise, we use a shared_buffers equal to 25% of total memory
   total=`cat /proc/meminfo |grep "^MemTotal:.*[0-9]\+ kB"|awk '{print $2}'`
 
-  echo "$total" | grep -q '^[0-9]\+$'
-  if [ $? -ne 0 ] ;then
+  if ! echo "$total" | grep -q '^[0-9]\+$' >/dev/null; then
     cf_console echo "Error calculating total memory for setting postgresql shared_buffers";
   else
     upper=$(( 64 * 1024 * 1024 ))  #in KB
