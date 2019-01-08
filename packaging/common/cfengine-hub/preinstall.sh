@@ -164,7 +164,11 @@ if migrating_postgres; then
     cp -a "$BACKUP_DIR/data/postgresql.conf" "$BACKUP_DIR/data/postgresql.conf.modified"
   fi
   cp -al "$PREFIX/bin" "$BACKUP_DIR"
-  cp -l "$PREFIX/lib"/* "$BACKUP_DIR/lib"
+  for file in "$PREFIX/lib"/*; do
+    if [ -f $file ]; then
+      cp -l $file "$BACKUP_DIR/lib"
+    fi
+  done
   cp -al "$PREFIX/lib/postgresql/" "$BACKUP_DIR/lib"
   cp -al "$PREFIX/share/postgresql/" "$BACKUP_DIR/share"
 fi
