@@ -114,20 +114,13 @@ fi
 #stop the remaining services on upgrade
 if is_upgrade; then
   cf_console platform_service cfengine3 stop
-  if [ -x /bin/systemctl ]; then
+  # CFE-2278: Migrate to split units
+  if [ -x /bin/systemctl ] && [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
     # When using systemd, the services are split in two, and although both will
     # stop due to the command above, the web part may only do so after some
     # delay, which may cause problems in an upgrade situation, since this script
     # will immediately check whether the ports are in use.
     /bin/systemctl stop cfengine3-web.service
-  fi
-fi
-
-# CFE-2278: Migrate to split units
-if is_upgrade; then
-  if [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
-    # It's functionality is replaced with multiple units.
-    /bin/systemctl disable cfengine3-web.service
   fi
 fi
 
