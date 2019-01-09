@@ -67,7 +67,9 @@ restore_cfengine_state() {
         fi
 
         for d in `grep 'cf-' "$1"`; do
-            ${PREFIX}/bin/${d}
+            if [ -f ${PREFIX}/bin/${d} ]; then
+                ${PREFIX}/bin/${d}
+            fi
         done
     fi
 }
