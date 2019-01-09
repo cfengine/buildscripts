@@ -39,11 +39,8 @@ case "`package_type`" in
     ;;
 esac
 
-if [ -f "$MAN_CONFIG" ]; then
-  grep -q cfengine "$MAN_CONFIG"
-  if [ $? = "0" ]; then
-    sed -i '/cfengine/d' "$MAN_CONFIG"
-  fi
+if [ -f "$MAN_CONFIG" ] && grep -q cfengine "$MAN_CONFIG"; then
+  sed -i '/cfengine/d' "$MAN_CONFIG"
 fi
 
 #
