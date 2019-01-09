@@ -326,7 +326,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
     cf_console echo "Using share/GUI as template"
     ( cd $PREFIX/share/GUI
       # Make list of files in share/GUI and remove "them" from httpd/htdocs
-      find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs -0 rm )
+      find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs -0 rm -f )
     )
   else
     # Purge all files in httpd/htdocs with hardcoded exceptions:
