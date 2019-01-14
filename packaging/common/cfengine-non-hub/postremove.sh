@@ -3,7 +3,7 @@ case `os_type` in
     #
     # Unregister CFEngine initscript.
     #
-    /usr/sbin/update-rc.d cfengine3 remove
+    /usr/sbin/update-rc.d -f cfengine3 remove
     ;;
 esac
 

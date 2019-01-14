@@ -12,7 +12,7 @@ case "`os_type`" in
     chkconfig --del cfengine3
     ;;
   debian)
-    update-rc.d cfengine3 remove
+    update-rc.d -f cfengine3 remove
     ;;
 esac
 
