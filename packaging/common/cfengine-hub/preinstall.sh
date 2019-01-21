@@ -243,6 +243,10 @@ ensure_postgres_terminated() {
            su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $BACKUP_DIR/data -m smart" ||
              # '-m fast' quits directly, without proper session shutdown
              su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $BACKUP_DIR/data -m fast")
+        # Older versions of pg_ctl don't guarantee all postgres processes being
+        # terminated. Give them an extra second to go away before we do the
+        # final check below.
+        sleep 1
       else
         cf_console echo "No pg_ctl found at $PREFIX/bin/pg_ctl, aborting"
         return 1
