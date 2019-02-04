@@ -698,7 +698,9 @@ if [ ! -d $PREFIX/state/pg/data ]; then
   init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"
 fi
 if is_upgrade && [ -d "$BACKUP_DIR/data" ]; then
+  set -e
   do_migration "$new_pgconfig_file" "$pgconfig_type"
+  set +e
 fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
