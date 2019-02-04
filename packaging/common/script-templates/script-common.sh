@@ -80,3 +80,80 @@ restore_cfengine_state() {
         done
     fi
 }
+
+safe_cp() {
+    # "safe" alternative to `cp`. Tries `cp -al` first, and if it fails - `cp -l`.
+    # Deletes partially-copied files if copy operation fails.
+    # Args:
+    #   * dir you're copying stuff from
+    #   * name of stuff you're copying (one arg!)
+    #   * dir you're copying stuff to
+    # Example: instead of
+    #   cp "$PREFIX/state/pg/data" "$BACKUP_DIR"
+    # use
+    #   safe_cp "$PREFIX/state/pg" data "$BACKUP_DIR"
+    test "$#" -eq 3 || return 2
+    from="$1"
+    name="$2"
+    to="$3"
+    # First, try copying files creating hardlinks
+    # Do not print errors - we'll do it another way
+    if cp -al "$from/$name" "$to" 2>/dev/null; then
+        # Copy succeeded
+        return 0
+    fi
+    # Copy creating hardlinks failed, so remove partially-copied data and try simple copying
+    rm -rf "$to/$name"
+    if cp -a "$from/$name" "$to"; then
+        # Copy succeeded
+        return 0
+    fi
+    # Copy failed, so remove partially-copied data and abort
+    rm -rf "$to/$name"
+    return 1
+}
+
+safe_mv() {
+    # "safe" alternative to `mv`. Executes `safe_cp` and deletes source dir if
+    # that succeeds.
+    # Args are same as in safe_cp
+    # Exampe: instead of
+    #   mv "$PREFIX/state/pg/data" "$BACKUP_DIR"
+    # use
+    #   safe_mv "$PREFIX/state/pg" data "$BACKUP_DIR"
+    test "$#" -eq 3 || return 2
+    from="$1"
+    name="$2"
+    to="$3"
+    if safe_cp "$from" "$name" "$to"; then
+        # Copy succeeded - so we can delete old dir
+        rm -rf "$from/$name"
+        return 0
+    else
+        # Copy failed (partially-copied data is removed by safe_cp)
+        return 1
+    fi
+}
+
+on_files() {
+    # perform operation $1 on each file in $2 with optional extra argument $3
+    # Examples:
+    # to copy only files:
+    #   on_files cp "$PREFIX/lib" "$BACKUP_DIR/lib"
+    # to move only files:
+    #   on_files mv "$PREFIX/lib" "$PREFIX/lib.new"
+    # to remove only files:
+    #   on_files rm "$PREFIX/lib"
+    test "$#" -ge 2 || return 2
+    # Split on newlines, not on spaces.
+    IFS='
+'
+    for file in $(ls -a1 "$2"); do
+        if [ -f "$2/$file" ]; then
+            $1 "$2/$file" $3
+        fi
+    done
+    # Restore normal splitting semantics.
+    unset IFS
+}
+
