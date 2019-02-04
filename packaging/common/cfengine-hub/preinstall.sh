@@ -15,14 +15,14 @@ if is_upgrade; then
     fi
 fi
 
-BACKUP_DIR=$PREFIX/backup-before-postgres10-migration
-
 # If upgrading from a version below 3.12 that has PostgreSQL, and the data dir exists.
 if is_upgrade && egrep '^3\.([6-9]|1[01])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
   alias migrating_postgres='true'
 else
   alias migrating_postgres='false'
 fi
+
+test -z "$BACKUP_DIR" && BACKUP_DIR=$PREFIX/state/pg/backup
 
 if migrating_postgres; then
   if [ -d "$BACKUP_DIR/data" ]; then
@@ -65,7 +65,10 @@ if migrating_postgres; then
       cf_console echo "Not enough disk space to create DB backup:"
       cf_console echo "${megabytes_free}M available in $BACKUP_DIR"
       cf_console echo "${megabytes_need}M used by $PREFIX/state/pg/data"
-      cf_console echo "Please free up some disk space before upgrading or disable upgrade by removing/renaming $PREFIX/state/pg/data prior to upgrade."
+      cf_console echo "You have the following options:"
+      cf_console echo "* Free up some disk space before upgrading"
+      cf_console echo "* Use another directory for database backup by exporting BACKUP_DIR env variable"
+      cf_console echo "* Disable database upgrade by removing/renaming $PREFIX/state/pg/data prior to upgrade"
       exit 1
     fi
   fi
@@ -137,25 +140,11 @@ if migrating_postgres; then
   mkdir -p "$BACKUP_DIR/lib"
   mkdir -p "$BACKUP_DIR/share"
 
-  # instead of `mv`, do `cp && rm` - in case `cp` operation fails, we won't
-  # have "some files here, some files there" situation
-  # First, try copying files creating hardlinks
-  if cp -al "$PREFIX/state/pg/data" "$BACKUP_DIR"; then
-    # Copy succeeded - so we can delete old dir.
-    rm -rf "$PREFIX/state/pg/data"
-  else
-    # Copy creating hardlinks failed, so remove partially-copied data and try simple copying
-    rm -rf "$BACKUP_DIR/data"
-    if cp -a "$PREFIX/state/pg/data" "$BACKUP_DIR"; then
-      # Copy succeeded - so we can delete old dir.
-      rm -rf "$PREFIX/state/pg/data"
-    else
-      # Copy failed, so remove partially-copied data and abort
-      rm -rf "$BACKUP_DIR/data"
-      cf_console echo "Creating of backup failed"
-      cf_console echo "Please fix it before upgrading or disable upgrade by removing/renaming $PREFIX/state/pg/data prior to upgrade."
-      exit 1
-    fi
+  if ! safe_mv "$PREFIX/state/pg" data "$BACKUP_DIR"; then
+    # Copy failed
+    cf_console echo "Backup creation failed"
+    cf_console echo "Please fix it before upgrading or disable upgrade by removing/renaming $PREFIX/state/pg/data prior to upgrade."
+    exit 1
   fi
 
   if ! diff "$BACKUP_DIR/data/postgresql.conf" "$PREFIX/share/postgresql/postgresql.conf.cfengine" > /dev/null; then
@@ -163,10 +152,10 @@ if migrating_postgres; then
     # the postgresql.conf file was modified, we should try to use it after migration
     cp -a "$BACKUP_DIR/data/postgresql.conf" "$BACKUP_DIR/data/postgresql.conf.modified"
   fi
-  cp -al "$PREFIX/bin" "$BACKUP_DIR"
-  cp -l "$PREFIX/lib"/* "$BACKUP_DIR/lib"
-  cp -al "$PREFIX/lib/postgresql/" "$BACKUP_DIR/lib"
-  cp -al "$PREFIX/share/postgresql/" "$BACKUP_DIR/share"
+  safe_cp "$PREFIX" bin "$BACKUP_DIR"
+  on_files cp "$PREFIX/lib" "$BACKUP_DIR/lib"
+  safe_cp "$PREFIX/lib" postgresql "$BACKUP_DIR/lib"
+  safe_cp "$PREFIX/share" postgresql "$BACKUP_DIR/share"
 fi
 
 filter_netstat_listen()
