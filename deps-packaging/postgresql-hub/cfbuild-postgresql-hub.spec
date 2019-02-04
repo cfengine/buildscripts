@@ -23,7 +23,8 @@ mkdir -p %{_builddir}
 
 SYS=`uname -s`
 
-LD_LIBRARY_PATH=%{prefix}/lib CPPFLAGS=-I%{prefix}/include ./configure --prefix=%{prefix} --without-zlib --without-readline --with-openssl
+# let PostgreSQL pick up system libreadline
+LD_LIBRARY_PATH=%{prefix}/lib CPPFLAGS=-I%{prefix}/include ./configure --prefix=%{prefix} --without-zlib --with-openssl
 
 if [ -z $MAKE ]; then
   MAKE_PATH=`which make`
