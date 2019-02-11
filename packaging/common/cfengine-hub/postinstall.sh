@@ -187,7 +187,7 @@ EOHIPPUS
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "(echo '/cf_promises_*'; echo '.*.sw[po]'; echo '*~'; echo '\\#*#') >.gitignore")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add .gitignore")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Ignore cf_promise_*'")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add *")
+  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add *") || true "Ignoring warning about ignored files not being added"
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Initial pristine masterfiles'")
 
   (cd $DCWORKDIR/ && su $MP_APACHE_USER -c "$GIT clone --no-hardlinks --bare $DCWORKDIR/masterfiles_staging $DCWORKDIR/masterfiles.git")
@@ -195,7 +195,6 @@ EOHIPPUS
   find "$DCWORKDIR/masterfiles.git" -type f -exec chmod 600 {} \;
 
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT branch CF_WORKING_BRANCH")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote rm origin")
   (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote add origin $DCWORKDIR/masterfiles.git")
 
   if [ ! -f /usr/bin/curl ]; then
@@ -265,8 +264,7 @@ esac
 
 if [ -f "$MAN_CONFIG" ];
 then
-  MAN=`cat "$MAN_CONFIG"| grep cfengine`
-  if [ -z "$MAN" ]; then
+  if grep cfengine "$MAN_CONFIG" >/dev/null; then
     echo "$MAN_PATH     $PREFIX/share/man" >> "$MAN_CONFIG"
   fi
 fi
@@ -341,8 +339,7 @@ generate_new_postgres_conf() {
   # Otherwise, we use a shared_buffers equal to 25% of total memory
   total=`cat /proc/meminfo |grep "^MemTotal:.*[0-9]\+ kB"|awk '{print $2}'`
 
-  echo "$total" | grep -q '^[0-9]\+$'
-  if [ $? -ne 0 ] ;then
+  if ! echo "$total" | grep -q '^[0-9]\+$' >/dev/null; then
     cf_console echo "Error calculating total memory for setting postgresql shared_buffers";
   else
     upper=$(( 64 * 1024 * 1024 ))  #in KB
@@ -573,6 +570,7 @@ migrate_db_using_dump_file() {
 }
 
 if is_upgrade && [ -d "$BACKUP_DIR/data" ]; then
+  set +e              # this block has its own error detection/handling
   # DEBUG variable controls which of migration methods fail:
   # 0 - do nothing special (usually pg_upgrade, which is first method, succeeds)
   # 1 - fail first method (so we get a chance to run second method, migration via pipe)
@@ -657,6 +655,7 @@ if is_upgrade && [ -d "$BACKUP_DIR/data" ]; then
     cf_console echo "And now installation will proceed with clean (empty) database"
     (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
   fi
+  set -e
 fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
@@ -688,18 +687,23 @@ then
     cf_console echo "Database migration also failed for the above reason. Backups are in $PREFIX/state/pg/*.sql.gz"
   fi
 else
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb")
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER")
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root")
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp")
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings")
+  (
+    cd /tmp
+    set +e
+    su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb"
+    su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER"
+    su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root"
+    su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp"
+    su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings"
+    exit 0
+  )
 
   # Create the cfengine mission portal postgres user
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql)
 
   # Ensure cfpostgres can read the sql files it will import. And that they are
   # restored to restrictive state after import ENT-2684
-  (chown cfpostgres "$PREFIX/share/db/*.sql")
+  chown cfpostgres $PREFIX/share/db/*.sql
   (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql")
 
   #create database for MISSION PORTAL
@@ -708,9 +712,12 @@ else
 
 
   #create database for hub internal data
-  (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql" && chown root "$PREFIX/share/db/schema_settings.sql")
-  (cd /tmp && chown cfpostgres "$PREFIX/share/db/ootb_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql" && chown root "$PREFIX/share/db/ootb_settings.sql")
-  (cd /tmp && chown cfpostgres "$PREFIX/share/db/ootb_import.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/ootb_import.sql" && chown root "$PREFIX/share/db/ootb_import.sql")
+  (
+    cd /tmp
+    chown cfpostgres "$PREFIX/share/db/schema_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql" && chown root "$PREFIX/share/db/schema_settings.sql"
+    chown cfpostgres "$PREFIX/share/db/ootb_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql" && chown root "$PREFIX/share/db/ootb_settings.sql"
+    chown cfpostgres "$PREFIX/share/db/ootb_import.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/ootb_import.sql" && chown root "$PREFIX/share/db/ootb_import.sql"
+  )
 
   #revoke create permission on public schema for cfdb database
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
@@ -763,9 +770,11 @@ find $PREFIX/httpd/htdocs/scripts/ -type f -exec chmod 0440 {} +
 find $PREFIX/httpd/htdocs/tmp/ -type f -exec chown -R root:$MP_APACHE_USER {} +
 find $PREFIX/httpd/htdocs/tmp/ -type f -exec chmod 0660 {} +
 
-# logs
-find $PREFIX/httpd/htdocs/logs/ -type f -exec chown -R $MP_APACHE_USER:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/logs/ -type f -exec chmod 0640 {} +
+# logs (if any)
+if [ -d $PREFIX/httpd/htdocs/logs/ ]; then
+  find $PREFIX/httpd/htdocs/logs/ -type f -exec chown -R $MP_APACHE_USER:$MP_APACHE_USER {} +
+  find $PREFIX/httpd/htdocs/logs/ -type f -exec chmod 0640 {} +
+fi
 
 # application
 find $PREFIX/httpd/htdocs/application/ -type f -exec chown -R root:$MP_APACHE_USER {} +

@@ -114,20 +114,13 @@ fi
 #stop the remaining services on upgrade
 if is_upgrade; then
   cf_console platform_service cfengine3 stop
-  if [ -x /bin/systemctl ]; then
+  # CFE-2278: Migrate to split units
+  if [ -x /bin/systemctl ] && [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
     # When using systemd, the services are split in two, and although both will
     # stop due to the command above, the web part may only do so after some
     # delay, which may cause problems in an upgrade situation, since this script
     # will immediately check whether the ports are in use.
     /bin/systemctl stop cfengine3-web.service
-  fi
-fi
-
-# CFE-2278: Migrate to split units
-if is_upgrade; then
-  if [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
-    # It's functionality is replaced with multiple units.
-    /bin/systemctl disable cfengine3-web.service
   fi
 fi
 
@@ -164,18 +157,25 @@ if migrating_postgres; then
     cp -a "$BACKUP_DIR/data/postgresql.conf" "$BACKUP_DIR/data/postgresql.conf.modified"
   fi
   cp -al "$PREFIX/bin" "$BACKUP_DIR"
-  cp -l "$PREFIX/lib"/* "$BACKUP_DIR/lib"
+  for file in "$PREFIX/lib"/*; do
+    if [ -f $file ]; then
+      cp -l $file "$BACKUP_DIR/lib"
+    fi
+  done
   cp -al "$PREFIX/lib/postgresql/" "$BACKUP_DIR/lib"
   cp -al "$PREFIX/share/postgresql/" "$BACKUP_DIR/share"
 fi
 
 filter_netstat_listen()
 {
+  set +e
   if [ -x /usr/sbin/ss ]; then
     ss -natp | egrep "LISTEN.*($1)"
   else
     netstat -natp | egrep "($1).*LISTEN"
   fi
+  set -e
+  return 0
 }
 
 #
@@ -326,7 +326,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
     cf_console echo "Using share/GUI as template"
     ( cd $PREFIX/share/GUI
       # Make list of files in share/GUI and remove "them" from httpd/htdocs
-      find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs -0 rm )
+      find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs -0 rm -f )
     )
   else
     # Purge all files in httpd/htdocs with hardcoded exceptions:

@@ -35,7 +35,7 @@ esac
 case `os_type` in
   debian)
     if [ -x /etc/init.d/cfengine3 ]; then
-      /usr/sbin/update-rc.d cfengine3 remove
+      /usr/sbin/update-rc.d -f cfengine3 remove
     fi
     ;;
 esac

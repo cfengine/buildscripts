@@ -1,5 +1,5 @@
 cf_console platform_service cfengine3 stop
-if [ -x /bin/systemctl ]; then
+if [ -x /bin/systemctl ] && [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
   # When using systemd, the services are split in two, and although both will
   # stop due to the command above, the web part may only do so after some
   # delay, which may cause problems later if the binaries are gone by the time
@@ -12,7 +12,7 @@ case "`os_type`" in
     chkconfig --del cfengine3
     ;;
   debian)
-    update-rc.d cfengine3 remove
+    update-rc.d -f cfengine3 remove
     ;;
 esac
 
@@ -39,11 +39,8 @@ case "`package_type`" in
     ;;
 esac
 
-if [ -f "$MAN_CONFIG" ]; then
-  grep -q cfengine "$MAN_CONFIG"
-  if [ $? = "0" ]; then
-    sed -i '/cfengine/d' "$MAN_CONFIG"
-  fi
+if [ -f "$MAN_CONFIG" ] && grep -q cfengine "$MAN_CONFIG"; then
+  sed -i '/cfengine/d' "$MAN_CONFIG"
 fi
 
 #
