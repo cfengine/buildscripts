@@ -209,6 +209,14 @@ case "$JOB" in
         sudo prove -v *.test
     ;;
 
+    ( schema-test )
+        s3cmd get --no-progress $DEB_PACKAGE cfe.deb
+        sudo dpkg -i cfe.deb
+        sudo service cfengine3 restart
+        ps aux | grep cf-
+        cd nova/tests/schema
+        sudo prove -v *.test
+    ;;
     ( deployment-test )
         s3cmd get --no-progress $DEB_PACKAGE cfe.deb
         sudo dpkg -i cfe.deb
