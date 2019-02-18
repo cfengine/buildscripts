@@ -733,6 +733,7 @@ fi
 TRYNO=1
 LISTENING=no
 echo -n "pinging pgsql server"
+set +e
 while [ $TRYNO -le 10 ]
 do
   echo -n .
@@ -746,6 +747,7 @@ do
   sleep 1
   TRYNO=`expr $TRYNO + 1`
 done
+set -e
 echo done
 
 if [ "$LISTENING" = "no" ]
