@@ -39,16 +39,20 @@ def get_labels_from_file(f_path):
             yield label
 
 def main(labels_f_path, exotics_f_path, run_on_exotics, only_exotics):
+    all_labels = set()
+    exotics = set()
+    for label in get_labels_from_file(labels_f_path):
+        all_labels.add(label.strip())
+    for label in get_labels_from_file(exotics_f_path):
+        exotics.add(label.strip())
+
     labels_to_run = set()
     if only_exotics:
-        for label in get_labels_from_file(exotics_f_path):
-            labels_to_run.add(label.strip())
+        labels_to_run = all_labels.intersection(exotics)
+    elif not run_on_exotics:
+        labels_to_run = all_labels.difference(exotics)
     else:
-        for label in get_labels_from_file(labels_f_path):
-            labels_to_run.add(label.strip())
-        if not run_on_exotics:
-            for label in get_labels_from_file(exotics_f_path):
-                labels_to_run.discard(label.strip())
+        labels_to_run = all_labels
 
     print("(", end="")
     labels_eqs = ('label == "%s"' % label for label in sorted(labels_to_run))
