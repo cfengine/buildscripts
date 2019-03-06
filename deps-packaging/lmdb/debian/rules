@@ -36,6 +36,7 @@ install: build
 	dh_installdirs
 
 	cd libraries/liblmdb/ && make DESTDIR=$(CURDIR)/debian/tmp install
+	find $(CURDIR)/debian/tmp/$(PREFIX)/lib/ -type f -a ! -name '*.so*' -delete
 
 binary-indep: build install
 
