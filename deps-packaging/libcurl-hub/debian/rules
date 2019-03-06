@@ -55,8 +55,7 @@ install: build
 
 	make install DESTDIR=$(CURDIR)/debian/tmp
 
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.a
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/*.la
+	find $(CURDIR)/debian/tmp/$(PREFIX)/lib/ -type f ! -name '*.so*' -delete
 
 binary-indep: build install
 
