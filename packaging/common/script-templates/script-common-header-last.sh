@@ -21,7 +21,7 @@ is_nova()
   test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
 }
 
-INSTLOG=/var/log/CFEngineHub-Install.log
+INSTLOG=/var/log/CFEngine-Install.log
 mkdir -p "$(dirname "$INSTLOG")"
 touch "$INSTLOG"
 chown root:root "$INSTLOG"
