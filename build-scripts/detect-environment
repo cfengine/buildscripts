@@ -292,7 +292,7 @@ detect_tools()
         fatal "GNU Make not found"
     fi
 
-    if [ "x$OS" = "xaix" ]; then
+    if [ "x$OS" = "xaix" ] && [ "x$OS_VERSION" = "x5.3" ]; then
         RPMBUILD_CMD=rpm
     else
         RPMBUILD_CMD=rpmbuild
