@@ -120,7 +120,7 @@ get_src()
     else
         [ -f "$local_filename" ]  &&  rm -f "$local_filename"
 
-        tmp_filename=`fetch_file $FILENAME $CHECKSUM`
+        tmp_filename=`fetch_file "$FILENAME" $CHECKSUM`
 
         # Cache it, both locally and remotely, to avoid hitting upstream every time.
         # pkg-cache will also print the locally stored file, which we want.
