@@ -1,4 +1,4 @@
-%define postgresql_version 9.6.10
+%define postgresql_version 9.6.12
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
@@ -206,4 +206,5 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/lib/pkgconfig/*
 
 %changelog
+
 
