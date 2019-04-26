@@ -58,7 +58,7 @@ install: build
 	dh_installdirs
 
 	make install DESTDIR=$(CURDIR)/debian/tmp
-	find $(CURDIR)/debian/tmp/$(PREFIX)/lib/ -type f ! -name '*.so*' -a ! -name '*.dll' -delete
+	find $(CURDIR)/debian/tmp/$(PREFIX)/lib/ -type f ! -name '*.so*' -a ! -name '*.dll' -a ! -name '*.dll.a' -delete
 
 binary-indep: build install
 
