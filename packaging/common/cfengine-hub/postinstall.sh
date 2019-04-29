@@ -617,8 +617,6 @@ do_migration() {
     else
       DEBUG=0
     fi
-    # this directory should not exist - it should've been moved away in preinstall script
-    test ! -d "$PREFIX/state/pg"
     cd /tmp
     cf_console echo "Migrating database using pg_upgrade utility..."
     cf_console echo
