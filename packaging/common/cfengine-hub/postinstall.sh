@@ -70,17 +70,21 @@ cp $PREFIX/lib/php/*.ini $PREFIX/httpd/php/lib
 cp $PREFIX/lib/php/*.so $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718
 
 #Change keys in files
-if [ -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp ]; then
-  UUID=$(tr -d '\n\r' < $PREFIX/CF_CLIENT_SECRET_KEY.tmp)
-else
-  UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-fi
-sed -i s/CFE_SESSION_KEY/"$UUID"/ $PREFIX/share/GUI/application/config/config.php
-sed -i s/CFE_CLIENT_SECRET_KEY/"$UUID"/ $PREFIX/share/GUI/application/config/appsettings.php
-sed -i s/CFE_CLIENT_SECRET_KEY/"$UUID"/ $PREFIX/share/db/ootb_settings.sql
-sed -i s/LDAP_API_SECRET_KEY/"$UUID"/ $PREFIX/share/GUI/application/config/appsettings.php
-sed -i s/LDAP_API_SECRET_KEY/"$UUID"/ $PREFIX/share/GUI/ldap/config/settings.php
-sed -i /LDAP_API_SECRET_KEY/s/\'\'/"'$UUID'"/ $PREFIX/share/GUI/api/config/config.php
+true "Adding CF_CLIENT_SECRET keys"
+( set +x
+  if [ -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp ]; then
+    UUID=$(tr -d '\n\r' < $PREFIX/CF_CLIENT_SECRET_KEY.tmp)
+  else
+    UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+    sed  -i  s/CFE_SESSION_KEY/"$UUID"/              $PREFIX/share/GUI/application/config/config.php
+    sed  -i  s/CFE_CLIENT_SECRET_KEY/"$UUID"/        $PREFIX/share/GUI/application/config/appsettings.php
+    sed  -i  s/LDAP_API_SECRET_KEY/"$UUID"/          $PREFIX/share/GUI/application/config/appsettings.php
+    sed  -i  s/LDAP_API_SECRET_KEY/"$UUID"/          $PREFIX/share/GUI/ldap/config/settings.php
+    sed  -i  /LDAP_API_SECRET_KEY/s/\'\'/"'$UUID'"/  $PREFIX/share/GUI/api/config/config.php
+    sed  -i  s/CFE_CLIENT_SECRET_KEY/"$UUID"/        $PREFIX/share/db/ootb_settings.sql
+  fi
+)
+true "Done adding keys"
 
 cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
 
@@ -906,8 +910,12 @@ $PREFIX/httpd/bin/apachectl start
 #Mission portal
 #
 
-CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
+true "Adding CFE_ROBOT key"
+( set +x
+  CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+  $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
+)
+true "Done adding key"
 su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap"
 
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_refresh
