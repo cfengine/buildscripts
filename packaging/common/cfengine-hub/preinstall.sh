@@ -244,21 +244,25 @@ fi
 # original file content.
 #
 if [ -f $PREFIX/share/GUI/application/config/appsettings.php ]; then
-  # Tricky quotes, because we need to both prevent expansion of $config,
-  # and keep the internal ' quotes.
-  UUID_REGEX="[a-z0-9]{32}"
-  fgrep '$config'"['MP_CLIENT_SECRET']" $PREFIX/httpd/htdocs/application/config/appsettings.php | sed -r -e "s/.*($UUID_REGEX).*/\1/i" > $PREFIX/CF_CLIENT_SECRET_KEY.tmp
-  if [ "$(egrep -i "$UUID_REGEX" $PREFIX/CF_CLIENT_SECRET_KEY.tmp | wc -l)" -eq 1 ]; then
-    UUID=$(tr -d '\n\r' < $PREFIX/CF_CLIENT_SECRET_KEY.tmp)
-    for path in share/GUI httpd/htdocs; do
-      sed -i s/"$UUID"/CFE_SESSION_KEY/ $PREFIX/$path/application/config/config.php
-      sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/$path/application/config/appsettings.php
-    done
-    sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/share/db/ootb_settings.sql
-  else
-    # Extraction failed. Remove file so that we generate a new UUID later.
-    rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
-  fi
+  true "Removing keys from files maintained by package manager"
+  ( set +x
+    # Tricky quotes, because we need to both prevent expansion of $config,
+    # and keep the internal ' quotes.
+    UUID_REGEX="[a-z0-9]{32}"
+    fgrep '$config'"['MP_CLIENT_SECRET']" $PREFIX/httpd/htdocs/application/config/appsettings.php | sed -r -e "s/.*($UUID_REGEX).*/\1/i" > $PREFIX/CF_CLIENT_SECRET_KEY.tmp
+    if [ "$(egrep -i "$UUID_REGEX" $PREFIX/CF_CLIENT_SECRET_KEY.tmp | wc -l)" -eq 1 ]; then
+      UUID=$(tr -d '\n\r' < $PREFIX/CF_CLIENT_SECRET_KEY.tmp)
+      for path in share/GUI httpd/htdocs; do
+        sed -i s/"$UUID"/CFE_SESSION_KEY/ $PREFIX/$path/application/config/config.php
+        sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/$path/application/config/appsettings.php
+      done
+      sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/share/db/ootb_settings.sql
+    else
+      # Extraction failed. Remove file so that we generate a new UUID later.
+      rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
+    fi
+  )
+  true "Done removing keys"
 fi
 
 exit 0
