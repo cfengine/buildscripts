@@ -1,11 +1,11 @@
 Summary: CFEngine Build Automation -- lcov
 Name: cfbuild-lcov
-Version: 1.13
+Version: 1.14
 Release: 1
 License: GPL
 Group: Development/Tools
 URL: http://ltp.sourceforge.net/coverage/lcov.php
-Source0: lcov-1.13.tar.gz
+Source0: lcov-1.14.tar.gz
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-root
 BuildArch: noarch
 Requires: perl >= 5.8.8
@@ -60,3 +60,4 @@ rm -rf $RPM_BUILD_ROOT
 - implemented variables for version/release
 * Fri Oct 8 2002 Peter Oberparleiter (Peter.Oberparleiter@de.ibm.com)
 - created initial spec file
+
