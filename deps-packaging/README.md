@@ -34,7 +34,7 @@ Build dependencies:
 * [OpenSSL](http://openssl.org/) 1.1.0i
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.43
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.23
-* [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.1
+* [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
 * [libxml2](http://xmlsoft.org/sources/) 2.9.9
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
   * Needed by libxml2
