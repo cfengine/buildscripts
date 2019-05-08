@@ -328,6 +328,8 @@ exit 0
 %dir %prefix/ppkeys
 %dir %prefix/outputs
 %dir %prefix/inputs
+%dir %prefix/state
+%defattr(755,root,root,755)
 %dir %prefix/modules
 
 %changelog
