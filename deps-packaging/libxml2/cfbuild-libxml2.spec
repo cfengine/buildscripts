@@ -19,10 +19,6 @@ mkdir -p %{_builddir}
 %setup -q -n libxml2-%{libxml_version}
 
 SYS=`uname -s`
-if [ "z$SYS" = "zAIX" ]
-then
-    ${PATCH} -p0 < ../../SOURCES/aix-nan.patch
-fi
 
 if expr \( "z$SYS" = 'zAIX' \) \| \( "`cat /etc/redhat-release`" : '.* 4\.' \)
 then
