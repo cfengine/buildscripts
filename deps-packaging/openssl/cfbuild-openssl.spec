@@ -74,7 +74,7 @@ fi
 $MAKE depend
 $MAKE
 
-%if %{?with_testsuite:1}%{!?with_testsuite:0}
+%if %{?with_testsuite}%{!?with_testsuite:0}
     $MAKE test
 %endif
 
