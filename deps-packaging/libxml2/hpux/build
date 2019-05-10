@@ -10,8 +10,6 @@ CPPFLAGS="-I${PREFIX}/include"
 
 # Patch
 
-${PATCH} -p0 < aix-nan.patch
-
 # Configure
 
 mv configure configure.bak

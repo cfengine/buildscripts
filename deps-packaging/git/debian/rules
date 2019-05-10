@@ -13,7 +13,7 @@ build-stamp:
 	dh_testdir
 
 	./configure --prefix=$(PREFIX) --with-openssl=$(PREFIX) --without-iconv --with-gitconfig=$(PREFIX)/config/gitconfig --with-gitattributes=$(PREFIX)/config/gitattributes --with-zlib=$(PREFIX) --with-curl=$(PREFIX) --libexecdir=$(PREFIX)/lib
-	make
+	make CURL_LDFLAGS="-lcurl"
 
 	touch build-stamp
 
