@@ -41,10 +41,6 @@ install: build
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.so
 
-	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/design-center
-	cp -R $(CURDIR)/debian/tmp/sketches/* $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase/sketches
-	cp -R $(CURDIR)/debian/tmp/tools/* $(CURDIR)/debian/tmp$(PREFIX)/design-center
-
 binary-indep: build install
 
 binary-arch: build install
