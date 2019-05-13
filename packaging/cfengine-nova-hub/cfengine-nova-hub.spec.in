@@ -98,15 +98,6 @@ rm -rf $RPM_BUILD_ROOT%prefix/masterfiles
 cp -R $RPM_BUILD_ROOT%prefix/modules $RPM_BUILD_ROOT%prefix/share/NovaBase/modules
 rm -rf $RPM_BUILD_ROOT%prefix/modules/*
 
-#Design center
-mkdir -p ${RPM_BUILD_ROOT}%prefix/design-center
-cp -R $RPM_BUILD_ROOT/sketches/* $RPM_BUILD_ROOT%prefix/share/NovaBase/sketches
-rm -rf $RPM_BUILD_ROOT/sketches
-cp -R $RPM_BUILD_ROOT/tools/* $RPM_BUILD_ROOT%prefix/design-center
-rm -rf $RPM_BUILD_ROOT/tools
-
-
-
 
 if [ -f %{prefix}/include/sqlite3.h ]; then
   sudo rm -rf %{prefix}/include
@@ -317,12 +308,6 @@ exit 0
 
 # Software upgrade delivery area
 %dir %prefix/master_software_updates
-
-# Design Center
-%defattr(755,root,root,755)
-%dir %prefix/design-center
-%prefix/design-center/bin
-%prefix/design-center/lib
 
 # Private directories
 %defattr(700,root,root,700)

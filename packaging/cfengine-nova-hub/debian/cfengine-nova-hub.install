@@ -51,7 +51,6 @@
 /var/cfengine/share/git-*
 /var/cfengine/share/locale
 /var/cfengine/share/db
-/var/cfengine/design-center
 /var/cfengine/httpd
 /var/cfengine/bin/lmdump
 /var/cfengine/bin/lmmgr
