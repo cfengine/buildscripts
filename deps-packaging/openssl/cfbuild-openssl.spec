@@ -9,6 +9,7 @@ License: MIT
 Group: Other
 Url: http://example.com/
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
+Patch0: 0001-cfi-build-fixes-in-x86-64-ghash-assembly.patch
 
 AutoReqProv: no
 
@@ -17,6 +18,7 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n openssl-%{openssl_version}
+%patch0 -p1
 
 %build
 
