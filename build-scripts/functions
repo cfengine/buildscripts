@@ -332,7 +332,6 @@ EOF
   case "$OS_FAMILY" in
     aix)
       cat <<EOF
-+ /dev
 + /TT_DB
 + /audit
 + /lpp
