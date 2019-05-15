@@ -958,14 +958,14 @@ if is_upgrade; then
     CFE_ROBOT_PW_HASH=`pwhash "$CFE_ROBOT_PW_SALT$CFE_ROBOT_PW"`
 
     sed -i '/$config."CFE_ROBOT_PASSWORD"/s/.*/$config["CFE_ROBOT_PASSWORD"] = "'$CFE_ROBOT_PW'";/' $PREFIX/httpd/htdocs/application/config/cf_robot.php
-    sed -i "/\$config.'MP_CLIENT_SECRET'/s/.*/\$config['MP_CLIENT_SECRET'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/appsettings.php
-    sed -i "/\$config.'encryption_key'/s/.*/\$config['encryption_key'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/config.php
+    sed -i "/\$config.'MP_CLIENT_SECRET'/s/.*/\$config['MP_CLIENT_SECRET'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/appsettings.php $PREFIX/httpd/htdocs/application/config/appsettings.php
+    sed -i "/\$config.'encryption_key'/s/.*/\$config['encryption_key'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/config.php $PREFIX/httpd/htdocs/application/config/config.php
     sed -i "/INSERT INTO oauth_clients VALUES ('MP',/s/.*/INSERT INTO oauth_clients VALUES ('MP', '$MP_CLIENT_SECRET', '', 'password refresh_token', NULL, NULL);/" $PREFIX/share/db/ootb_settings.sql
 
     if test -d $PREFIX/share/GUI/ldap; then # New LDAP back end introduced in 3.11.0
-        sed -i "/\$config.'LDAP_API_SERVER_SECRET'/s/.*/\$config['LDAP_API_SERVER_SECRET'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/appsettings.php
-        sed -i "/'accessToken'/s/.*/    'accessToken' => '$MP_CLIENT_SECRET',/" $PREFIX/share/GUI/ldap/config/settings.php
-        sed -i "/define('LDAP_API_SECRET_KEY',/s/.*/define('LDAP_API_SECRET_KEY', '$MP_CLIENT_SECRET');/" $PREFIX/share/GUI/api/config/config.php
+        sed -i "/\$config.'LDAP_API_SERVER_SECRET'/s/.*/\$config['LDAP_API_SERVER_SECRET'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/appsettings.php $PREFIX/httpd/htdocs/application/config/appsettings.php
+        sed -i "/'accessToken'/s/.*/    'accessToken' => '$MP_CLIENT_SECRET',/" $PREFIX/share/GUI/ldap/config/settings.php $PREFIX/httpd/htdocs/ldap/config/settings.php
+        sed -i "/define('LDAP_API_SECRET_KEY',/s/.*/define('LDAP_API_SECRET_KEY', '$MP_CLIENT_SECRET');/" $PREFIX/share/GUI/api/config/config.php $PREFIX/httpd/htdocs/api/config/config.php
     fi
 
     $PREFIX/bin/psql cfsettings -c "UPDATE oauth_clients  SET client_secret = '$MP_CLIENT_SECRET' WHERE client_id = 'MP'"
