@@ -56,6 +56,14 @@ then
     fi
 fi
 
+if [ x$SYS = "xAIX" ]; then
+  # This flag is needed because the AIX linker doesn't export symbols starting
+  # with underscore by default (and some are needed in OpenSSL's ASM tricks).
+  # See https://www.ibm.com/developerworks/aix/library/au-gnu.html for
+  # details.
+  LDFLAGS="$LDFLAGS -Wl,-bexpfull"
+fi
+
 ./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
          $DEBUG_CONFIG_FLAGS \
          --prefix=%{prefix} \
@@ -74,7 +82,7 @@ fi
 $MAKE depend
 $MAKE
 
-%if %{?with_testsuite:1}%{!?with_testsuite:0}
+%if %{?with_testsuite}%{!?with_testsuite:0}
     $MAKE test
 %endif
 

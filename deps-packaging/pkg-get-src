@@ -19,7 +19,7 @@ checksum()
 {
     [ $# -lt 2 ]  &&  fatal "$MYNAME: at least 2 args required but got: $*"  2
 
-    FILENAME="$1"
+    LOCAL_FILENAME="$1"
     CHECKSUM="$2"
 
     TAR=`func_which tar gtar`
@@ -30,7 +30,7 @@ checksum()
 
             rm -rf temp  &&  mkdir -p temp  &&  cd temp
 
-            func_decompress "$FILENAME" | $TAR xf - >/dev/null 2>&1
+            func_decompress "$LOCAL_FILENAME" | $TAR xf - >/dev/null 2>&1
             # Bogus file created by older versions of tar trying to untar newer archives.
             rm -f pax_global_header
 
@@ -39,7 +39,7 @@ checksum()
             cd ..  &&  rm -rf temp
             ;;
         *)
-            ACTUAL_CHECKSUM=`func_md5 $FILENAME` ;;
+            ACTUAL_CHECKSUM=`func_md5 $LOCAL_FILENAME` ;;
     esac
 
     test "$CHECKSUM" = "$ACTUAL_CHECKSUM"
@@ -120,7 +120,7 @@ get_src()
     else
         [ -f "$local_filename" ]  &&  rm -f "$local_filename"
 
-        tmp_filename=`fetch_file $FILENAME $CHECKSUM`
+        tmp_filename=`fetch_file "$FILENAME" $CHECKSUM`
 
         # Cache it, both locally and remotely, to avoid hitting upstream every time.
         # pkg-cache will also print the locally stored file, which we want.
