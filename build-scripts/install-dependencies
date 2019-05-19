@@ -118,6 +118,12 @@ do
         exit 42;;
     esac
 
+    # Only allow running tests on AIX on 5.3, on newer versions Perl somehow
+    # fails when running OpenSSL tests.
+    if [ "x$OS" = "xaix" ] && [ "x$OS_VERSION" != "x5.3" ]; then
+      tests=no
+    fi
+
     case "$ARCH" in
     x86|x64)
         crossver=+mingw$ARCH
