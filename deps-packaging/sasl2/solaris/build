@@ -23,6 +23,7 @@ fi
 #Build
 
 $MAKE -C include
+$MAKE -C common
 $MAKE -C lib
 
 #Test
@@ -30,6 +31,7 @@ $MAKE -C lib
 #Install
 
 $MAKE -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+$MAKE -C common install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
 $MAKE -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
 
 #Package
