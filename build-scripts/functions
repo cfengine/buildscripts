@@ -332,7 +332,6 @@ EOF
   case "$OS_FAMILY" in
     aix)
       cat <<EOF
-+ /dev
 + /TT_DB
 + /audit
 + /lpp
@@ -521,6 +520,7 @@ func_md5 ()
     else
         case "$UNAME_S" in
             SunOS)  digest -a md5 "$@"  ;;
+            AIX)    csum -h MD5 "$@"  | cut -d ' ' -f 1 ;;
             *)      fatal "Can't find command for computing MD5"  ;;
         esac
     fi
