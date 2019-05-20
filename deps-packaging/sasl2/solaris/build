@@ -8,7 +8,7 @@ LS=${BUILD_ROOT}/cfbuild-sasl2${PREFIX}
 LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
 
 #Patch
-$PATCH -p1 < solaris-unistd.patch
+
 #Configure
 
 # Work around bug in ancient libtool: -R is not passed to the linker.
