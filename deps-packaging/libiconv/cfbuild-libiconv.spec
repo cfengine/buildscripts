@@ -52,7 +52,6 @@ CFEngine Build Automation -- libiconv -- development files
 
 %dir %prefix/lib
 %prefix/lib/*.a
-%prefix/lib/charset.alias
 
 %files devel
 %defattr(-,root,root)
@@ -61,7 +60,6 @@ CFEngine Build Automation -- libiconv -- development files
 
 %dir %prefix/lib
 %prefix/lib/*.a
-%prefix/lib/charset.alias
 
 %changelog
 
