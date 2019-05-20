@@ -63,6 +63,14 @@ check_and_install_perl()
             PERL_LDDLFLAGS='-Alddlflags=-static-libgcc -Alddlflags=-shared'
         fi
 
+        if [ $OS = aix ] && [ $OS_VERSION != 5.3 ]
+        then
+            # AIX says it provides the nexttoward() 128bit floating point API,
+            # but it actually doesn't provide the function. So let's make sure
+            # the function is declared missing and not used.
+            PERL_EXTRA_FLAGS='-Ud_nexttoward'
+        fi
+
         wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
         [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
             &&  fatal "perl checksum error"
@@ -70,7 +78,7 @@ check_and_install_perl()
         cd perl-5.26.1
         $PATCH -p1 < $BASEDIR/buildscripts/build-scripts/perl-488307ffa6.patch
         ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE \
-            $PERL_CFLAGS $PERL_LDFLAGS $PERL_LDDLFLAGS
+            $PERL_EXTRA_FLAGS $PERL_CFLAGS $PERL_LDFLAGS $PERL_LDDLFLAGS
         $MAKE
         $MAKE install
         PERL=$HOME/perl-my/bin/perl
