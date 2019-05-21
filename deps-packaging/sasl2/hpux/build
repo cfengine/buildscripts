@@ -11,7 +11,7 @@ LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
 
 #Configure
 
-./configure --prefix=$PREFIX LDFLAGS=-L/var/cfengine/lib CPPFLAGS=-I/var/cfengine/include
+./configure --prefix=$PREFIX CPPFLAGS=-I/var/cfengine/include
 
 #Build
 
