@@ -359,9 +359,14 @@ init_postgres_dir()
   test "$#" = 2 || exit 1
   new_pgconfig_file="$1"
   pgconfig_type="$2"
+  # make sure cfpostgres can access state/pg
+  chown root:cfpostgres $PREFIX/state
+  chmod 0750 $PREFIX/state
+
   rm -rf $PREFIX/state/pg/data
   mkdir -p $PREFIX/state/pg/data
   chown -R cfpostgres $PREFIX/state/pg
+
   # Note: postgres expects $PWD to be writeable, so all postgres commands
   # should be executed from cfpostgres-writeable directory.
   # /tmp is such directory on most cases

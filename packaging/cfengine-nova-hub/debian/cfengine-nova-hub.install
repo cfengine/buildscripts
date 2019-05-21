@@ -41,6 +41,7 @@
 /var/cfengine/inputs
 /var/cfengine/outputs
 /var/cfengine/ppkeys
+/var/cfengine/state
 /var/cfengine/bin/cf-hub
 /var/cfengine/lib/php
 /var/cfengine/share/NovaBase
