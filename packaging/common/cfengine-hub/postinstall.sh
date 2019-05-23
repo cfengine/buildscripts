@@ -67,7 +67,8 @@ fi
 #Copy necessary Files and permissions
 #
 cp $PREFIX/lib/php/*.ini $PREFIX/httpd/php/lib
-cp $PREFIX/lib/php/*.so $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718
+EXTENSIONS_DIR="$(ls -d -1 "$PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-"*|tail -1)"
+cp $PREFIX/lib/php/*.so "$EXTENSIONS_DIR"
 
 #Change keys in files
 true "Adding CF_CLIENT_SECRET keys"

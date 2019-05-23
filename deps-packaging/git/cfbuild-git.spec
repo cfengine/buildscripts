@@ -1,4 +1,4 @@
-%define git_version 2.19.1
+%define git_version 2.21.0
 
 Summary: CFEngine Build Automation -- git
 Name: cfbuild-git
@@ -22,7 +22,7 @@ mkdir -p %{_builddir}
 
 %build
 
-make
+make CURL_LDFLAGS="-lcurl"
 
 %install
 rm -rf ${RPM_BUILD_ROOT}

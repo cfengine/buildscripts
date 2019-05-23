@@ -1,10 +1,10 @@
-%define openssl_version 1_1_1
+%define openssl_version 1.1.1b
 
 Summary: CFEngine Build Automation -- openssl
 Name: cfbuild-openssl
 Version: %{version}
 Release: 1
-Source0: OpenSSL_%{openssl_version}.tar.gz
+Source0: openssl-%{openssl_version}.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -16,7 +16,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n openssl-OpenSSL_%{openssl_version}
+%setup -q -n openssl-%{openssl_version}
 
 %build
 

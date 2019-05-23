@@ -8,7 +8,7 @@ LS=${BUILD_ROOT}/cfbuild-sasl2${PREFIX}
 LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
 
 #Patch
-$PATCH -p1 < solaris-unistd.patch
+
 #Configure
 
 # Work around bug in ancient libtool: -R is not passed to the linker.
@@ -23,6 +23,7 @@ fi
 #Build
 
 $MAKE -C include
+$MAKE -C common
 $MAKE -C lib
 
 #Test
@@ -30,6 +31,7 @@ $MAKE -C lib
 #Install
 
 $MAKE -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+$MAKE -C common install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
 $MAKE -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
 
 #Package

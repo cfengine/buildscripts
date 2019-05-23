@@ -1,4 +1,4 @@
-%define libxml_version 2.9.8
+%define libxml_version 2.9.9
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
@@ -19,10 +19,6 @@ mkdir -p %{_builddir}
 %setup -q -n libxml2-%{libxml_version}
 
 SYS=`uname -s`
-if [ "z$SYS" = "zAIX" ]
-then
-    ${PATCH} -p0 < ../../SOURCES/aix-nan.patch
-fi
 
 if expr \( "z$SYS" = 'zAIX' \) \| \( "`cat /etc/redhat-release`" : '.* 4\.' \)
 then
@@ -84,3 +80,4 @@ CFEngine Build Automation -- libxml2 -- development files
 %prefix/lib/pkgconfig
 
 %changelog
+
