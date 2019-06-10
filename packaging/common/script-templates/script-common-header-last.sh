@@ -22,9 +22,18 @@ is_nova()
 }
 
 INSTLOG=/var/log/CFEngineHub-Install.log
+case os_type() in
+    aix)
+        INSTLOGGROUP="system"
+        ;;
+    *)
+        INSTLOGGROUP="root"
+        ;;
+esac
+
 mkdir -p "$(dirname "$INSTLOG")"
 touch "$INSTLOG"
-chown root:root "$INSTLOG"
+chown root:$INSTLOGGROUP "$INSTLOG"
 chmod 600 "$INSTLOG"
 CONSOLE=7
 # Redirect most output to log file, but keep console around for custom output.
