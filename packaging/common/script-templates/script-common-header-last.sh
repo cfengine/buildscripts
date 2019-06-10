@@ -21,10 +21,19 @@ is_nova()
   test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
 }
 
+case os_type() in
+    aix)
+        INSTLOGGROUP="system"
+        ;;
+    *)
+        INSTLOGGROUP="root"
+        ;;
+esac
+
 INSTLOG=/var/log/CFEngine-Install.log
 mkdir -p "$(dirname "$INSTLOG")"
 touch "$INSTLOG"
-chown root:root "$INSTLOG"
+chown root:$INSTLOGGROUP "$INSTLOG"
 chmod 600 "$INSTLOG"
 CONSOLE=7
 # Redirect most output to log file, but keep console around for custom output.
