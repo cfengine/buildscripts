@@ -21,7 +21,7 @@ is_nova()
   test "$PROJECT_TYPE" = "cfengine-nova" || test "$PROJECT_TYPE" = "cfengine-nova-hub"
 }
 
-case os_type() in
+case "`os_type`" in
     aix)
         INSTLOGGROUP="system"
         ;;
