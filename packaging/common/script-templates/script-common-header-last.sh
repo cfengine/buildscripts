@@ -22,7 +22,7 @@ is_nova()
 }
 
 INSTLOG=/var/log/CFEngineHub-Install.log
-case os_type() in
+case "`os_type`" in
     aix)
         INSTLOGGROUP="system"
         ;;
