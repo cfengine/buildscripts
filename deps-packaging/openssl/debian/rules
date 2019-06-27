@@ -12,6 +12,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	patch -p1 -i 0001-cfi-build-fixes-in-x86-64-ghash-assembly.patch
+
 	echo ==================== BUILD_TYPE is $$BUILD_TYPE ====================
 
 	test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
