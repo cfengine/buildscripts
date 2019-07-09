@@ -27,6 +27,7 @@ CPPFLAGS=-I%{buildprefix}/include
     --prefix=%{prefix}/httpd \
     --enable-so \
     --enable-mods-shared="all ssl ldap authnz_ldap" \
+    --enable-http2 \
     --with-z=%{prefix} \
     --with-ssl=%{prefix} \
     --with-ldap=%{prefix} \

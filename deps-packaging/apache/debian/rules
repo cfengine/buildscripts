@@ -17,6 +17,7 @@ build-stamp:
 --prefix=$(PREFIX)/httpd \
 --enable-so \
 --enable-mods-shared="all ssl ldap authnz_ldap" \
+--enable-http2 \
 --with-z=$(PREFIX) \
 --with-ssl=$(PREFIX) \
 --with-ldap=$(PREFIX) \
