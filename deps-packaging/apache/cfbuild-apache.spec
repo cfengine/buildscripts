@@ -16,6 +16,13 @@ AutoReqProv: no
 
 %define prefix %{buildprefix}
 
+wget https://github.com/nghttp2/nghttp2/releases/download/v1.37.0/nghttp2-1.37.0.tar.gz
+tar -xvf nghttp2-1.37.0.tar.gz
+cd ./nghttp2-1.37.0
+./configure
+make
+make install
+
 %prep
 mkdir -p %{_builddir}
 %setup -q -n httpd-%{apache_version}

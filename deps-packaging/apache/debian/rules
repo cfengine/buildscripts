@@ -3,6 +3,13 @@ PREFIX=$(BUILDPREFIX)
 
 CPPFLAGS=-I$(BUILDPREFIX)/include
 
+wget https://github.com/nghttp2/nghttp2/releases/download/v1.37.0/nghttp2-1.37.0.tar.gz
+tar -xvf nghttp2-1.37.0.tar.gz
+cd ./nghttp2-1.37.0
+./configure
+make
+make install
+
 clean:
 	dh_testdir
 	dh_testroot
