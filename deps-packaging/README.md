@@ -59,7 +59,7 @@ Build dependencies:
 |  libmcrypt       | 2.5.8   | -      | -      |
 |  openldap        | 2.4.47  | 2.4.47 | 2.4.47 |
 |  php             | 5.6.40  | 7.2.18 | 7.3.5  |
-|  postgresql      | 9.0.23  | -      | -      |
+|  postgresql      | 9.6.12  | 10.7   | 11.3   |
 |  redis           | 3.2.13  | -      | -      |
 |  rsync           | 3.1.3   | 3.1.3  | 3.1.3  |
 
