@@ -22,7 +22,7 @@
 /var/cfengine/bin/pg_test_fsync
 /var/cfengine/bin/pg_test_timing
 /var/cfengine/bin/pg_upgrade
-/var/cfengine/bin/pg_verify_checksums
+/var/cfengine/bin/pg_checksums
 /var/cfengine/bin/pg_waldump
 /var/cfengine/bin/pgbench
 /var/cfengine/bin/postgres

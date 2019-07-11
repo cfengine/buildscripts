@@ -83,7 +83,7 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/bin/pg_test_fsync
 %{prefix}/bin/pg_test_timing
 %{prefix}/bin/pg_upgrade
-%{prefix}/bin/pg_verify_checksums
+%{prefix}/bin/pg_checksums
 %{prefix}/bin/pg_waldump
 %{prefix}/bin/pgbench
 %{prefix}/bin/postgres
