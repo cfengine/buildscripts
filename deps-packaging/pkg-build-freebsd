@@ -1,7 +1,7 @@
 #!/bin/sh -e
 
 # Comment when not debugging
-# set -o xtrace # -o verbose 
+set -o xtrace # -o verbose 
 
 # Build a FreeBSD package using command line parameters and environment variables
 # This script was written using pkg-build-rpm as a template
@@ -94,10 +94,10 @@ fix_shebang()
 gen_filelist()
 {
     package="$1"
-    pkgdir="${BUILDDIR}/out/$package"
-    for f in `/usr/bin/find $pkgdir ! -type d`
+    pkgdir="${BUILDDIR}/out/cfbuild-$package"
+    for f in `/usr/bin/find $pkgdir ! -type d` # TODO why not -type f ?
     do
-	if [ -f "$f" ] || [ -l "$f" ]
+	if [ -f "$f" ] || [ -L "$f" ]
 	then
 	    destf=${f#$pkgdir}
 	    echo -n "    \"$destf\" "
@@ -105,13 +105,36 @@ gen_filelist()
 	    then
 		destfsha256=$(/sbin/sha256 -q $f)
 		echo '"'"$destfsha256"'"'
-	    elif [ -l "$f" ]
+	    elif [ -L "$f" ]
 	    then
 		echo "-"
 	    fi
 	fi
     done
 }
+
+# update *-MANIFEST based on version in distfiles
+version_update()
+{
+    package="$1"
+    distfiles=${DEPDIR}/distfiles
+    if [ -f $distfiles ]
+    then
+        version=$(cat $distfiles | sed -n 's/.*-\([0-9\.]*\).tar.gz/\1/p')
+        if [ -n "${version}" ] ; then
+            for mfest in `/bin/ls ${DEPDIR}/freebsd/*-MANIFEST`
+            do
+                if [ -z "`grep '^version = \"${version}\"' $mfest`"]
+                then
+                    /usr/bin/sed -i .old -e "s/^version.*/version = \""${version}"\"/" $mfest
+                    /usr/bin/sed -i .old -e "/^files {/,/^}/d" $mfest
+                    /bin/rm $mfest.old # TODO should we leave this around for inspection?
+                fi
+            done
+        fi
+    fi
+}    
+
 
 echo
 echo "========================= Building package for: $PKGNAME =========================="
@@ -186,6 +209,8 @@ do
     then
         PKGROOT=${PKGROOT%-devel}
     fi
+
+    version_update
     
     if [ -z "`/usr/bin/grep ^files ${mfest}`" ]
     then
