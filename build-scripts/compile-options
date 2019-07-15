@@ -169,7 +169,7 @@ case "$ROLE" in
     hub)
         var_append DEPS "libcurl-hub"
         var_append DEPS "apr apr-util apache git rsync"
-        var_append DEPS "postgresql-hub php"
+        var_append DEPS "postgresql php"
         ;;
     # AGENT-ONLY dependencies
     agent)
