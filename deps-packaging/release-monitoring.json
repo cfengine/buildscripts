@@ -17,7 +17,7 @@
         "openssl":"20334",
         "pcre":"2610",
         "php":"19261",
-        "postgresql-hub":"20335",
+        "postgresql":"20335",
         "pthreads-w32":"17517",
         "rsync":"4217",
         "sasl2":"13280",
