@@ -42,6 +42,8 @@ patch -d ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/ -o postgresql.conf.cfengin
 chmod --reference ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.cfengine
 chown --reference ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.cfengine
 
+rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -108,15 +110,6 @@ CFEngine Build Automation -- postgresql -- dev files
 
 %dir %{prefix}/bin
 %{prefix}/bin/ecpg
-
-%dir %{prefix}/lib
-%{prefix}/lib/libecpg.a
-%{prefix}/lib/libecpg_compat.a
-%{prefix}/lib/libpgcommon.a
-%{prefix}/lib/libpgfeutils.a
-%{prefix}/lib/libpgport.a
-%{prefix}/lib/libpgtypes.a
-%{prefix}/lib/libpq.a
 
 %dir %{prefix}/lib/postgresql/pgxs
 %{prefix}/lib/postgresql/pgxs/*

@@ -1,11 +1,4 @@
 /var/cfengine/include/*
 /var/cfengine/bin/ecpg
-/var/cfengine/lib/libecpg.a
-/var/cfengine/lib/libecpg_compat.a
-/var/cfengine/lib/libpgcommon.a
-/var/cfengine/lib/libpgfeutils.a
-/var/cfengine/lib/libpgport.a
-/var/cfengine/lib/libpgtypes.a
-/var/cfengine/lib/libpq.a
 /var/cfengine/lib/postgresql/pgxs/*
 /var/cfengine/lib/pkgconfig/*
