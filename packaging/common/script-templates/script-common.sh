@@ -81,6 +81,24 @@ restore_cfengine_state() {
     fi
 }
 
+wait_for_cf_postgres() {
+    # wait for CFEngine Postgresql service to be available, up to 5 sec.
+    # Returns 0 is psql command succeeds,
+    # Returns non-0 otherwise (1 if exited by timeout)
+    for i in $(seq 1 5); do
+        true "checking if Postgresql is available..."
+        if $PREFIX/bin/psql cfsettings -c "SELECT 1;" >/dev/null 2>&1; then
+            true "Postgresql is available, moving on"
+            return 0
+        fi
+        true "waiting 1 sec for Postgresql to become available..."
+        sleep 1
+    done
+    # Note: it is important that this is the last command of this function.
+    # Return code of `psql` is the return code of whole function.
+    $PREFIX/bin/psql cfsettings -c "SELECT 1;" >/dev/null 2>&1
+}
+
 safe_cp() {
     # "safe" alternative to `cp`. Tries `cp -al` first, and if it fails - `cp -l`.
     # Deletes partially-copied files if copy operation fails.
