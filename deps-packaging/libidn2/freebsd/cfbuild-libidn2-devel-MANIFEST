@@ -28,7 +28,4 @@ deps {
     }
 }
 files {
-    "/var/cfengine/lib/libidn2.a" "9442398c17d5be1e231afb8f7237d8160c2670a49642c957806e88873b59ae12"
-    "/var/cfengine/lib/pkgconfig/libidn2.pc" "65fdf0aceaf1cf24894342f56960eefcfa94e20b2269252dc24717ad188a7cf0"
-    "/var/cfengine/include/idn2.h" "8c63502518a38b16d6ab387ec512a9aa380f87b6de98167338347d18d3ba91e1"
 }
