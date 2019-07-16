@@ -1,4 +1,4 @@
-%define postgresql_version 11.3
+%define postgresql_version 12beta2
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
@@ -42,6 +42,8 @@ patch -d ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/ -o postgresql.conf.cfengin
 chmod --reference ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.cfengine
 chown --reference ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.cfengine
 
+rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -83,7 +85,7 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/bin/pg_test_fsync
 %{prefix}/bin/pg_test_timing
 %{prefix}/bin/pg_upgrade
-%{prefix}/bin/pg_verify_checksums
+%{prefix}/bin/pg_checksums
 %{prefix}/bin/pg_waldump
 %{prefix}/bin/pgbench
 %{prefix}/bin/postgres
@@ -108,15 +110,6 @@ CFEngine Build Automation -- postgresql -- dev files
 
 %dir %{prefix}/bin
 %{prefix}/bin/ecpg
-
-%dir %{prefix}/lib
-%{prefix}/lib/libecpg.a
-%{prefix}/lib/libecpg_compat.a
-%{prefix}/lib/libpgcommon.a
-%{prefix}/lib/libpgfeutils.a
-%{prefix}/lib/libpgport.a
-%{prefix}/lib/libpgtypes.a
-%{prefix}/lib/libpq.a
 
 %dir %{prefix}/lib/postgresql/pgxs
 %{prefix}/lib/postgresql/pgxs/*
