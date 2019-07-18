@@ -49,8 +49,8 @@ sudo pkg delete -qy devel/autoconf devel/automake devel/libtool m4
 sudo pkg delete -qyx 'auto.*wrapper'
 sudo pkg install -qy devel/gmake lang/gcc6
 sudo pkg install -qy databases/sqlite3
-./buildscripts/build-scripts/build-environment-check
 sudo pkg install -qy devel/pkgconf ftp/wget
+./buildscripts/build-scripts/build-environment-check
 ./buildscripts/build-scripts/install-dependencies
 ./buildscripts/build-scripts/configure
 ./buildscripts/build-scripts/generate-source-tarballs
@@ -71,3 +71,9 @@ sudo pkg delete -qyx cfbuild-.*
 ```
 sudo pkg install cfengine-<nova|community>/cfengine-<nova|community>-<version>.txz
 ```
+
+Dependency Updates
+------------------
+When a dependency version changes in the deps-packages/*/distfile file the deps-packages/*/freebsd/*-MANIFEST files will be automatically updated in this repository. This should be done manually and then the changes to *-MANIFEST should be committed to this repository.
+
+The automated process updates the version number in *-MANIFEST and also updates the files{} section which contains sha hashes for each distribution file. Pruning of the distribution files to include might also be desired but is optional.
