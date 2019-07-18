@@ -985,7 +985,7 @@ else
     cf_console platform_service cfengine3 start
 fi
 
-if is_upgrade; then
+if is_upgrade && wait_for_cf_postgres; then
     true "Rotating keys..."
     set +x
     pwgen() {
