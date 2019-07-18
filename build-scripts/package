@@ -142,7 +142,7 @@ case "$PACKAGING" in
     then
         # Create AIX bff packages
         chmod +x $P/$PKG.bff.sh
-        $P/$PKG.bff.sh $RPM_VERSION $BASEDIR
+        $P/$PKG.bff.sh $RPM_VERSION.$RPM_RELEASE $BASEDIR
     else
         # Create TAR package
         TARBALL=$BASEDIR/$PKG/RPMS/$PKG-$VERSION.$ARCH.pkg.tar.gz
