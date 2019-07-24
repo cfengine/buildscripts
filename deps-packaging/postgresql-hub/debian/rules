@@ -13,6 +13,8 @@ build-stamp:
 	dh_testdir
 
 	LD_LIBRARY_PATH=$(PREFIX)/lib CPPFLAGS=-I$(PREFIX)/include ./configure --prefix=$(PREFIX) --without-zlib --without-readline --with-openssl
+	patch -p1 < $(CURDIR)/CVE-2019-10164.1.patch
+	patch -p1 < $(CURDIR)/CVE-2019-10164.2.patch
 	make 
 	make -C contrib
 	touch build-stamp
