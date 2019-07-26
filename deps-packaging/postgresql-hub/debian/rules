@@ -14,6 +14,8 @@ build-stamp:
 
 	LD_LIBRARY_PATH=$(PREFIX)/lib CPPFLAGS=-I$(PREFIX)/include ./configure --prefix=$(PREFIX) --without-zlib --without-readline --with-openssl
 # force generated-headers in src/backend because the headers are needed for other things and somehow dependencies don't work properly
+	patch -p1 < $(CURDIR)/CVE-2019-10164.1.patch
+	patch -p1 < $(CURDIR)/CVE-2019-10164.2.patch
 	make -C ./src/backend generated-headers
 	make
 	make -C contrib
