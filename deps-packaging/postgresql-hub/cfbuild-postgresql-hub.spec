@@ -6,6 +6,8 @@ Version: %{version}
 Release: 1
 Source0: postgresql-%{postgresql_version}.tar.gz
 Source1: postgresql.conf.cfengine.patch
+Patch0: CVE-2019-10164.1.patch
+Patch1: CVE-2019-10164.2.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -18,6 +20,9 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n postgresql-%{postgresql_version}
+
+%patch0 -p1
+%patch1 -p1
 
 %build
 
