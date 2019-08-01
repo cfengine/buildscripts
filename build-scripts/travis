@@ -30,6 +30,8 @@ sudo hostname localhost
 
 # Purge saved lists to avoid "Hash Sum mismatch" apt-get error on the next line
 sudo rm -rf /var/lib/apt/lists/*
+# Purge extra sources to be efficient and avoid dependency/outdated key problems
+sudo rm -rf /etc/apt/sources.list.d/*
 sudo apt-get update
 sudo apt-get install s3cmd
 (
