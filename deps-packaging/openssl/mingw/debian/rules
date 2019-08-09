@@ -12,9 +12,11 @@ clean:
 
 # AFAIK it is either i686-w64-mingw32 or x86_64-w64-mingw32
 ifeq ($(DEB_HOST_GNU_TYPE),i686-w64-mingw32)
-    TARGET=mingw
+TARGET=mingw
+CFENGINE_DIR=C:/Program Files/Cfengine
 else
-    TARGET=mingw64
+TARGET=mingw64
+CFENGINE_DIR=C:/Program Files (x86)/Cfengine
 endif
 
 build: build-stamp
@@ -25,8 +27,7 @@ build-stamp:
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
 		$(TARGET)  no-asm shared  no-idea no-rc5 no-ssl3 no-dtls no-srp no-engine \
 		--prefix=$(PREFIX)
-	make depend
-	make ### build_crypto build_ssl libcrypto.dll.a libssl.dll.a
+	make CPPFLAGS=-DOPENSSLDIR="\"\\\"$(CFENGINE_DIR)/ssl\\\"\"" ### build_crypto build_ssl libcrypto.dll.a libssl.dll.a
 
 	touch build-stamp
 
