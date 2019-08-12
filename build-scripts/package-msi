@@ -29,8 +29,10 @@ pre()
 {
   rm -rf $PKGD
   mkdir -p $P/bin
+  mkdir -p $P/ssl
 
   cp -a $BUILDPREFIX/bin/* $P/bin
+  cp -a $BUILDPREFIX/ssl/* $P/ssl
   cp -a $BASEDIR/cfengine/dist$BUILDPREFIX/bin/* $P/bin
 
   # TODO make not hard-coded paths for debian/ubuntu installations of mingw
