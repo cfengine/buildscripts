@@ -142,6 +142,12 @@
                 <File Id='libcurl_4.dll' Name='libcurl-4.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcurl-4.dll' />
               </Component>
             </Directory>
+			<!-- ===== Cfengine\ssl ===== -->
+            <Directory Id='dir_ssl' Name='ssl'>
+              <Component Id='openssl.cnf' Guid='51EF6C21-D0AD-4A29-9F83-B72B5DF614A5' Win64='$(var.isWin64)'>
+                <File Id='openssl.cnf' Name='openssl.cnf' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\ssl\openssl.cnf' />
+              </Component>
+            </Directory>
           </Directory>
         </Directory>
       </Directory>
@@ -176,6 +182,8 @@
             <ComponentRef Id='zlib1.dll' />
 	    <ComponentRef Id='libxml2.dll' />
 	    <ComponentRef Id='libcurl_4.dll' />
+
+	    <ComponentRef Id='openssl.cnf' />
       </Feature>
 
       <UI>
