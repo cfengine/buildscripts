@@ -90,7 +90,7 @@ case "$JOB" in
                 )
             fi
             else
-                git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/$i.git
+                git clone --recursive -b "$TRAVIS_BRANCH" git@github.com:cfengine/$i.git
             fi
         done
 
@@ -143,8 +143,8 @@ case "$JOB" in
         touch /home/travis/rpmvercmp
         chmod a+x ~/rpmvercmp
         cd ..
-        test -d core || git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/core.git
-        test -d enterprise || git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/enterprise.git
+        test -d core || git clone --recursive -b "$TRAVIS_BRANCH" git@github.com:cfengine/core.git
+        test -d enterprise || git clone --recursive -b "$TRAVIS_BRANCH" git@github.com:cfengine/enterprise.git
         chmod -R u+w */tests/acceptance
         chmod -R g-w */tests/acceptance
         cd core/tests/acceptance

@@ -194,10 +194,10 @@ checkout() {
 
   case "$PROJECT-$BRANCH" in
     community-master)
-      git clone $SOURCE/core build/core
-      git clone $SOURCE/masterfiles build/masterfiles
+      git clone --recursive $SOURCE/core build/core
+      git clone --recursive $SOURCE/masterfiles build/masterfiles
       (cd build/masterfiles && git checkout $VERSION) || false
-      git clone $SOURCE/design-center build/design-center
+      git clone --recursive $SOURCE/design-center build/design-center
       (cd build/design-center && git checkout $VERSION) || false
       ;;
     community-3.4.x)
@@ -238,13 +238,13 @@ checkout() {
       (cd build/core && git checkout -b 3.3.x remotes/origin/3.3.x || git checkout 3.3.x) || false
       ;;
     nova-master)
-      git clone $SOURCE/core build/core
-      git clone $SOURCE/enterprise build/enterprise
-      git clone $SOURCE/nova build/nova
-      git clone $SOURCE/mission-portal build/mission-portal
-      git clone $SOURCE/design-center build/design-center
-      git clone $SOURCE/masterfiles build/masterfiles
-      git clone $SOURCE/ldap-api build/mission-portal/ldap
+      git clone --recursive $SOURCE/core build/core
+      git clone --recursive $SOURCE/enterprise build/enterprise
+      git clone --recursive $SOURCE/nova build/nova
+      git clone --recursive $SOURCE/mission-portal build/mission-portal
+      git clone --recursive $SOURCE/design-center build/design-center
+      git clone --recursive $SOURCE/masterfiles build/masterfiles
+      git clone --recursive $SOURCE/ldap-api build/mission-portal/ldap
       ;;
     nova-3.6.x)
       VERSION=$BRANCH
