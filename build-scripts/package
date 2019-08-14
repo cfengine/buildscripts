@@ -52,43 +52,41 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
 case "$VERSION" in
   *~*)
     # everything before the tilde
-    MAIN_VERSION="${VERSION%\~*}"
+    MAIN_VERSION=${VERSION%\~*}
     # everything after the tilde
-    SUPP_VERSION="${VERSION#*~}"
-    ;;
+    SUPP_VERSION=${VERSION#*~};;
   *)
-    MAIN_VERSION="${VERSION}"
-    SUPP_VERSION=""
-    ;;
+    MAIN_VERSION=${VERSION}
+    SUPP_VERSION=;;
 esac
 
 case "$PACKAGING" in
   rpm|lpp)
-    mkdir -p "$BASEDIR/$PKG/BUILD"
-    mkdir -p "$BASEDIR/$PKG/RPMS"
-    mkdir -p "$BASEDIR/$PKG/SOURCES"
-    mkdir -p "$BASEDIR/$PKG/SRPMS"
+    mkdir -p $BASEDIR/$PKG/BUILD
+    mkdir -p $BASEDIR/$PKG/RPMS
+    mkdir -p $BASEDIR/$PKG/SOURCES
+    mkdir -p $BASEDIR/$PKG/SRPMS
 
-    SPEC="$P/$PKG.spec"
-    PREINSTALL="$P/generated.preinstall"
-    POSTINSTALL="$P/generated.postinstall"
-    PREREMOVE="$P/generated.preremove"
-    POSTREMOVE="$P/generated.postremove"
+    SPEC=$P/$PKG.spec
+    PREINSTALL=$P/generated.preinstall
+    POSTINSTALL=$P/generated.postinstall
+    PREREMOVE=$P/generated.preremove
+    POSTREMOVE=$P/generated.postremove
 
     if [ "$PACKAGING" = lpp ]
     then
-        SPECIN="$P/$PKG.spec.aix.in"
+        SPECIN=$P/$PKG.spec.aix.in
     else
-        SPECIN="$P/$PKG.spec.in"
+        SPECIN=$P/$PKG.spec.in
     fi
 
-    "$P/../common/produce-script" "$PKG" preinstall rpm > "$PREINSTALL"
-    "$P/../common/produce-script" "$PKG" postinstall rpm > "$POSTINSTALL"
-    "$P/../common/produce-script" "$PKG" preremove rpm > "$PREREMOVE"
-    "$P/../common/produce-script" "$PKG" postremove rpm > "$POSTREMOVE"
+    $P/../common/produce-script $PKG preinstall rpm > $PREINSTALL
+    $P/../common/produce-script $PKG postinstall rpm > $POSTINSTALL
+    $P/../common/produce-script $PKG preremove rpm > $PREREMOVE
+    $P/../common/produce-script $PKG postremove rpm > $POSTREMOVE
 
 
-    RPM_VERSION="$MAIN_VERSION"
+    RPM_VERSION=$MAIN_VERSION
 
     # Set RPM_RELEASE, which sets the "release" tag in the RPM spec
     # file, which is an incremental version of the specific package in
@@ -97,21 +95,21 @@ case "$PACKAGING" in
     if [ -z "$SUPP_VERSION" ]
     then
 
-        if [ "$BUILD_TYPE" = "RELEASE" ]
+        if [ $BUILD_TYPE = "RELEASE" ]
         then
-            RPM_RELEASE="${EXPLICIT_RELEASE:-1}"
+            RPM_RELEASE=${EXPLICIT_RELEASE:-1}
         else
-            RPM_RELEASE="$BUILD_NUMBER"
+            RPM_RELEASE=$BUILD_NUMBER
         fi
 
     else
         # SUPP_VERSION is the part of the git tag after the dash, e.g. build1
 
-        if [ "$BUILD_TYPE" = "RELEASE" ]
+        if [ $BUILD_TYPE = "RELEASE" ]
         then
-            RPM_RELEASE="$SUPP_VERSION"
+            RPM_RELEASE=$SUPP_VERSION
         else
-            RPM_RELEASE="$SUPP_VERSION.$BUILD_NUMBER"
+            RPM_RELEASE=$SUPP_VERSION.$BUILD_NUMBER
         fi
     fi
 
@@ -122,69 +120,41 @@ case "$PACKAGING" in
         -e "/^%post\$/r $POSTINSTALL" \
         -e "/^%preun\$/r $PREREMOVE" \
         -e "/^%postun\$/r $POSTREMOVE" \
-        "$SPECIN" > "$SPEC"
+        $SPECIN > $SPEC
 
-    for i in `find "$BASEDIR/buildscripts/packaging/$PKG" ! -name "*.spec"`
+    for i in `find $BASEDIR/buildscripts/packaging/$PKG ! -name "*.spec"`
     do
-        (cd "$BASEDIR/$PKG/SOURCES"; ln -sf "$i") || false
+        (cd $BASEDIR/$PKG/SOURCES; ln -sf $i) || false
     done
 
     # eval and double quoting is needed to separate args,
     # example cmd --define 'a b':
     #     - argv[1] = --define
     #     - argv[2] = a b
-    # Also note that $RPMBUILD_OPTIONS might have spaces
-    # which must be preserved
-    eval "$RPMBUILD_CMD" -bb \
+    eval $RPMBUILD_CMD -bb \
       --define "'_topdir $BASEDIR/$PKG'" \
       --define "'buildprefix $BUILDPREFIX'" \
       --define "'_basedir $BASEDIR'" \
-      $RPMBUILD_OPTIONS "$SPEC"
+      $RPMBUILD_OPTIONS $SPEC
 
 
     if [ "$PACKAGING" = lpp ]
     then
         # Create AIX bff packages
-        chmod +x "$P/$PKG.bff.sh"
-        "$P/$PKG.bff.sh" "$RPM_VERSION.$RPM_RELEASE" "$BASEDIR"
+        chmod +x $P/$PKG.bff.sh
+        $P/$PKG.bff.sh $RPM_VERSION.$RPM_RELEASE $BASEDIR
     else
         # Create TAR package
-        TARBALL="$BASEDIR/$PKG/RPMS/$PKG-$VERSION.$ARCH.pkg.tar.gz"
+        TARBALL=$BASEDIR/$PKG/RPMS/$PKG-$VERSION.$ARCH.pkg.tar.gz
 	# RHEL4 and RHEL6 have buildroot in different folders.
 	# Below lines try to be careful about finding it.
 	# Note that `mv` command will fail and abort the build
 	# if it was found incorrectly (doesn't have expected subdirs)
-        cd "$BASEDIR/$PKG/"
+        cd $BASEDIR/$PKG/
         [ -d BUILDROOT ] && cd BUILDROOT
-	# test that there are 0 or 1 $PKG-* dirs
-	# note that * must be unquoted!
-	[ "$(ls -1 "$PKG"-* | wc -l)" -lt 2 ] || exit 1
-        [ -d "$PKG"-* ] && cd "$PKG"-*
+        [ -d $PKG-* ] && cd $PKG-*
         mv usr etc var/cfengine/share/
-        tar czvf "$TARBALL" .  > "$TARBALL.filelist"
-    fi
-    if [ -d "$P/coreos" ]
-    then
-        # Create filesystem image
-        IMAGE="$P/coreos/cfengine3.img"
-        dd if=/dev/zero of="$IMAGE" bs=1M count=1 seek=102399  # create a 100GiB big sparse file
-	"$(func_whereis mkfs.xfs)" -L CFENGINE "$IMAGE"
-        LOOP_DEV="$(sudo losetup --show -f "$IMAGE")"
-        MOUNT_DIR=cfengine.img
-        mkdir "$MOUNT_DIR"
-        sudo mount "$LOOP_DEV" "$MOUNT_DIR"
-        sudo cp -pr var/cfengine/* "$MOUNT_DIR"
-        sudo umount "$LOOP_DEV"
-        sudo losetup --detach "$LOOP_DEV"
-	rmdir "$MOUNT_DIR"
-	# create "nested" tarball containing only *.img file
-	tar czf "$P/coreos/cfengine3.img.tar.gz" --sparse -C "$(dirname "$IMAGE")" "$(basename "$IMAGE")"
-	rm "$IMAGE"
-	# create tarball containing everything
-	NAME="$PKG-$VERSION.$ARCH.fs-img.pkg"
-        TARBALL="$BASEDIR/$PKG/RPMS/$NAME.tar.gz"
-	mv "$P/coreos" "$P/$NAME"
-        tar czvf "$TARBALL" -C "$P" "$NAME" > "$TARBALL.filelist"
+        tar czvf $TARBALL .  > $TARBALL.filelist
     fi
     ;;
 
@@ -192,56 +162,56 @@ case "$PACKAGING" in
     if [ "$BUILDPREFIX" = "/opt/cfengine" ]
     then
        #change the base path of cfengine files
-        for i in "$P/debian/$PKG"*;  do
-          sed -i "s/var/opt/g" "$i"
+        for i in $P/debian/$PKG*;  do
+          sed -i "s/var/opt/g" $i
         done 
     fi
 
-    rm -rf "$BASEDIR/$PKG/pkg"
-    mkdir -p "$BASEDIR/$PKG/pkg"
-    cp -a "$P"/* "$BASEDIR/$PKG/pkg"
+    rm -rf $BASEDIR/$PKG/pkg
+    mkdir -p $BASEDIR/$PKG/pkg
+    cp -a $P/* $BASEDIR/$PKG/pkg
 
-    if [ "$BUILD_TYPE" = "RELEASE" ]
+    if [ $BUILD_TYPE = "RELEASE" ]
     then
 
-      if [ -z "$EXPLICIT_RELEASE" ]
+      if [ -z $EXPLICIT_RELEASE ]
       then
-          DEB_VERSION="$VERSION-1"
+          DEB_VERSION=$VERSION-1
         else
-          DEB_VERSION="$VERSION-$EXPLICIT_RELEASE"
+          DEB_VERSION=$VERSION-$EXPLICIT_RELEASE
         fi
 
    else
-      DEB_VERSION="$VERSION~$BUILD_NUMBER"
+      DEB_VERSION=$VERSION~$BUILD_NUMBER
     fi
 
 
-    sed -e "s/@@VERSION@@/$DEB_VERSION/" "$BASEDIR/$PKG/pkg/debian/changelog.in" > "$BASEDIR/$PKG/pkg/debian/changelog"
+    sed -e "s/@@VERSION@@/$DEB_VERSION/" $BASEDIR/$PKG/pkg/debian/changelog.in > $BASEDIR/$PKG/pkg/debian/changelog
 
-    "$P/../common/produce-script" "$PKG" preinstall deb > "$BASEDIR/$PKG/pkg/debian/$PKG.preinst"
-    "$P/../common/produce-script" "$PKG" postinstall deb > "$BASEDIR/$PKG/pkg/debian/$PKG.postinst"
-    "$P/../common/produce-script" "$PKG" preremove deb > "$BASEDIR/$PKG/pkg/debian/$PKG.prerm"
-    "$P/../common/produce-script" "$PKG" postremove deb > "$BASEDIR/$PKG/pkg/debian/$PKG.postrm"
+    $P/../common/produce-script $PKG preinstall deb > $BASEDIR/$PKG/pkg/debian/$PKG.preinst
+    $P/../common/produce-script $PKG postinstall deb > $BASEDIR/$PKG/pkg/debian/$PKG.postinst
+    $P/../common/produce-script $PKG preremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.prerm
+    $P/../common/produce-script $PKG postremove deb > $BASEDIR/$PKG/pkg/debian/$PKG.postrm
 
-    (cd "$BASEDIR/$PKG/pkg"; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
+    (cd $BASEDIR/$PKG/pkg; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
 
     # Create TAR package
-    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$VERSION.$ARCH.pkg.tar.gz"
-    cd "$BASEDIR/$PKG/pkg/debian/tmp/"
+    TARBALL=$BASEDIR/$PKG/pkg/$PKG-$VERSION.$ARCH.pkg.tar.gz
+    cd $BASEDIR/$PKG/pkg/debian/tmp/
     mv usr etc var/cfengine/share/
-    tar czvf "$TARBALL" .  > "$TARBALL.filelist"
+    tar czvf $TARBALL .  > $TARBALL.filelist
     ;;
 
   solaris)
     PREFIX=/var/cfengine
-    sudo rm -rf "$BASEDIR/$PKG/pkg"
-    mkdir -p "$BASEDIR/$PKG/pkg"
+    sudo rm -rf $BASEDIR/$PKG/pkg
+    mkdir -p $BASEDIR/$PKG/pkg
 
-    rsync -lpr "$BASEDIR/cfengine/dist"/* "$BASEDIR/$PKG/pkg/"
-    rsync -lpr /var/cfengine/bin/* "$BASEDIR/$PKG/pkg/var/cfengine/bin/"
-    rsync -lpr /var/cfengine/lib/* "$BASEDIR/$PKG/pkg/var/cfengine/lib/"
+    rsync -lpr $BASEDIR/cfengine/dist/* $BASEDIR/$PKG/pkg/
+    rsync -lpr /var/cfengine/bin/* $BASEDIR/$PKG/pkg/var/cfengine/bin/
+    rsync -lpr /var/cfengine/lib/* $BASEDIR/$PKG/pkg/var/cfengine/lib/
 
-    cd "$BASEDIR/$PKG/pkg"
+    cd $BASEDIR/$PKG/pkg
     # IMPORTANT: Before this step, do not copy any files into the current
     # directory that shouldn't be in the package, otherwise they will be
     # included as package files.
@@ -250,53 +220,53 @@ case "$PACKAGING" in
 
     # Paste several things together in the prototype.
     (
-      cat "$P/solaris/prototype.head"
+      cat $P/solaris/prototype.head
       # Replace last two words with "root root" and filter out directories that
       # aren't ours.
       sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp | egrep '^([^d]|d none /var/cfengine)'
     ) > prototype
 
-    ARCH="`uname -p`"
-    sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION/g" "$P/solaris/pkginfo.in" > "$BASEDIR/$PKG/pkg/pkginfo"
+    ARCH=`uname -p`
+    sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION/g" $P/solaris/pkginfo.in > $BASEDIR/$PKG/pkg/pkginfo
 
-    "$P/../common/produce-script" "$PKG" preinstall pkg > preinstall
-    "$P/../common/produce-script" "$PKG" postinstall pkg > postinstall
-    "$P/../common/produce-script" "$PKG" preremove pkg > preremove
-    "$P/../common/produce-script" "$PKG" postremove pkg > postremove
+    $P/../common/produce-script $PKG preinstall pkg > preinstall
+    $P/../common/produce-script $PKG postinstall pkg > postinstall
+    $P/../common/produce-script $PKG preremove pkg > preremove
+    $P/../common/produce-script $PKG postremove pkg > postremove
 
-    pkgmk -o -r "`pwd`" -d "$BASEDIR/$PKG/pkg"
-    NAME="CFE$PKG-$VERSION-$ARCH.pkg"
-    pkgtrans -o -s "$BASEDIR/$PKG/pkg" "$BASEDIR/$PKG/$NAME" "CFE$PKG"
+    pkgmk -o -r `pwd` -d $BASEDIR/$PKG/pkg
+    NAME=CFE$PKG-$VERSION-$ARCH.pkg
+    pkgtrans -o -s $BASEDIR/$PKG/pkg $BASEDIR/$PKG/$NAME CFE$PKG
     ;;
   freebsd)
 	  PREFIX=/var/cfengine
-	  rm -rf "$BASEDIR/$PKG/pkg"
-	  mkdir -p "$BASEDIR/$PKG/pkg${PREFIX}"
+	  rm -rf $BASEDIR/$PKG/pkg
+	  mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
 
-	  cp -pr "$P/freebsd"/* "$BASEDIR/$PKG/pkg/"
-	  cp -pr "$BASEDIR/cfengine/dist/var/cfengine"/* "$BASEDIR/$PKG/pkg${PREFIX}"
-	  cp -pr /var/cfengine/bin/* "$BASEDIR/$PKG/pkg${PREFIX}/bin"
-	  cp -pr /var/cfengine/lib/* "$BASEDIR/$PKG/pkg${PREFIX}/lib"
+	  cp -pr $P/freebsd/* $BASEDIR/$PKG/pkg/
+	  cp -pr $BASEDIR/cfengine/dist/var/cfengine/* $BASEDIR/$PKG/pkg${PREFIX}
+	  cp -pr /var/cfengine/bin/* $BASEDIR/$PKG/pkg${PREFIX}/bin
+	  cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
 
-	  cd "$BASEDIR/$PKG/pkg"
+	  cd $BASEDIR/$PKG/pkg
 	  echo "@comment pkg-plist,v 1.00 `date`" >> pkg-plist
 	  echo "@comment ORIGIN:sysutils/cfengine-nova" >> pkg-plist
-      pkgdir="$BASEDIR/$PKG/pkg/"
-      for f in `find "$BASEDIR/$PKG/pkg/" | egrep -v 'pkg-comment|pkg-descr|pkg-plist.foot|pkg-plist'`; do
+      pkgdir=$BASEDIR/$PKG/pkg/
+      for f in `find $BASEDIR/$PKG/pkg/ | egrep -v 'pkg-comment|pkg-descr|pkg-plist.foot|pkg-plist'`; do
 
-      		  destf="${f#$pkgdir}"
-              if [ -f "$destf" ]; then
+      		  destf=${f#$pkgdir}
+              if [ -f $destf ]; then
                       echo "$destf" >> pkg-plist
               fi
        done
 
        cat pkg-plist.foot >> pkg-plist
 
-       /usr/sbin/pkg_create -j -f "${pkgdir}/pkg-plist" -c "${pkgdir}/pkg-comment" -d "${pkgdir}/pkg-descr" -p "${pkgdir}" "${pkgdir}/cfengine-nova-$VERSION\_1.tbz"
+       /usr/sbin/pkg_create -j -f ${pkgdir}/pkg-plist -c ${pkgdir}/pkg-comment -d ${pkgdir}/pkg-descr -p ${pkgdir} ${pkgdir}/cfengine-nova-$VERSION\_1.tbz
 
-       cd "$pkgdir/"
+       cd $pkgdir/
 
-       tar xvf "cfengine-nova-$VERSION\_1.tbz"
+       tar xvf cfengine-nova-$VERSION\_1.tbz
 
        head -n 2 ./+CONTENTS > plist-head
        sed '1,3d' ./+CONTENTS > tmp
@@ -306,33 +276,33 @@ case "$PACKAGING" in
        cat tmp >> CONTENTS
        rm plist-head tmp
        mv CONTENTS ./+CONTENTS
-       tar cjvf "cfengine-nova-$VERSION\_1.tbz" +CONTENTS +DESC +COMMENT var/
+       tar cjvf cfengine-nova-$VERSION\_1.tbz +CONTENTS +DESC +COMMENT var/
 	  ;;
   hpux)
       PREFIX=/var/cfengine
-      ARCH="$UNAME_M"
-      OS_VER="$UNAME_R"
+      ARCH=$UNAME_M
+      OS_VER=$UNAME_R
 
-      rm -rf "$BASEDIR/$PKG/pkg"
-      mkdir -p "$BASEDIR/$PKG/pkg${PREFIX}"
+      rm -rf $BASEDIR/$PKG/pkg
+      mkdir -p $BASEDIR/$PKG/pkg${PREFIX}
 
-      cp -pr "$BASEDIR/cfengine/dist"/* "$BASEDIR/$PKG/pkg"
-      cp -pr /var/cfengine/lib/* "$BASEDIR/$PKG/pkg${PREFIX}/lib"
+      cp -pr $BASEDIR/cfengine/dist/* $BASEDIR/$PKG/pkg
+      cp -pr /var/cfengine/lib/* $BASEDIR/$PKG/pkg${PREFIX}/lib
 
-      PREINSTALL="$BASEDIR/$PKG/pkg/generated.preinstall"
-      POSTINSTALL="$BASEDIR/$PKG/pkg/generated.postinstall"
-      PREREMOVE="$BASEDIR/$PKG/pkg/generated.preremove"
-      POSTREMOVE="$BASEDIR/$PKG/pkg/generated.postremove"
+      PREINSTALL=$BASEDIR/$PKG/pkg/generated.preinstall
+      POSTINSTALL=$BASEDIR/$PKG/pkg/generated.postinstall
+      PREREMOVE=$BASEDIR/$PKG/pkg/generated.preremove
+      POSTREMOVE=$BASEDIR/$PKG/pkg/generated.postremove
 
-      "$P/../common/produce-script" "$PKG" preinstall depot > "$PREINSTALL"
-      "$P/../common/produce-script" "$PKG" postinstall depot > "$POSTINSTALL"
-      "$P/../common/produce-script" "$PKG" preremove depot > "$PREREMOVE"
-      "$P/../common/produce-script" "$PKG" postremove depot > "$POSTREMOVE"
+      $P/../common/produce-script $PKG preinstall depot > $PREINSTALL
+      $P/../common/produce-script $PKG postinstall depot > $POSTINSTALL
+      $P/../common/produce-script $PKG preremove depot > $PREREMOVE
+      $P/../common/produce-script $PKG postremove depot > $POSTREMOVE
 
-      cd "$BASEDIR/$PKG/pkg/"
+      cd $BASEDIR/$PKG/pkg/
 
-      "$P/hpux/psf.pl" . "$PKG" "$VERSION" > "$BASEDIR/$PKG/$PKG-$VERSION.psf"
-      /usr/sbin/swpackage -s "$BASEDIR/$PKG/$PKG-$VERSION.psf" -x media_type=tape @ "$BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot"
+      $P/hpux/psf.pl . $PKG $VERSION > $BASEDIR/$PKG/$PKG-$VERSION.psf
+      /usr/sbin/swpackage -s $BASEDIR/$PKG/$PKG-$VERSION.psf -x media_type=tape @ $BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot
       ;;
   msi)
     package-msi;;
@@ -341,3 +311,5 @@ case "$PACKAGING" in
     exit 1;;
 esac
 
+#TARBALL=$BASEDIR/$PKG/cfengine-$VERSION.generic-pkg.tar.gz
+#tar czf $TARBALL /var/cfengine
