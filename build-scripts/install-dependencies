@@ -91,14 +91,13 @@ check_and_install_perl()
 
 check_and_install_perl
 
-# Apply necessary changes for alternate /opt/cfengine prefix
-if [ "$BUILDPREFIX" = "/opt/cfengine" ]
+# Apply necessary changes for alternate prefix
+if [ "$BUILDPREFIX" != "/var/cfengine" ]
 then
-    sed -i "s:var/cfengine:opt/cfengine:"  \
+    sed -i "s:/var/cfengine:$BUILDPREFIX:"  \
         $BASEDIR/buildscripts/deps-packaging/*/debian/*.install  \
         $BASEDIR/buildscripts/deps-packaging/*/mingw/debian/*.install \
-        $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf \
-        $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
+        $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
 fi
 
 # Override for manual testing

@@ -160,7 +160,7 @@ case "$PACKAGING" in
 	# note that * must be unquoted!
 	[ "$(ls -1d "$PKG"-* | wc -l)" -lt 2 ] || exit 1
         [ -d "$PKG"-* ] && cd "$PKG"-*
-        mv usr etc var/cfengine/share/
+        mv usr etc "$PREFIX/share/"
         tar czvf "$TARBALL" .  > "$TARBALL.filelist"
         # $OS_VERSION is 7.6, ${OS_VERSION%.*} is 7
         if [ -d "$P/coreos" -a "${OS_VERSION%.*}" = 7 ]
@@ -190,11 +190,11 @@ case "$PACKAGING" in
     ;;
 
   deb)
-    if [ "$BUILDPREFIX" = "/opt/cfengine" ]
+    if [ "$BUILDPREFIX" != "/var/cfengine" ]
     then
        #change the base path of cfengine files
-        for i in "$P/debian/$PKG"*;  do
-          sed -i "s/var/opt/g" "$i"
+        for i in "$P/debian"/*;  do
+          sed -i "s:/var/cfengine:$BUILDPREFIX:" "$i"
         done 
     fi
 
@@ -234,18 +234,17 @@ case "$PACKAGING" in
     # Create TAR package
     TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION.$OS$os_version_major.$ARCH.pkg.tar.gz"
     cd "$BASEDIR/$PKG/pkg/debian/tmp/"
-    mv usr etc var/cfengine/share/
+    mv usr etc "$PREFIX/share/"
     tar czvf "$TARBALL" .  > "$TARBALL.filelist"
     ;;
 
   solaris)
-    PREFIX=/var/cfengine
     sudo rm -rf "$BASEDIR/$PKG/pkg"
     mkdir -p "$BASEDIR/$PKG/pkg"
 
     rsync -lpr "$BASEDIR/cfengine/dist"/* "$BASEDIR/$PKG/pkg/"
-    rsync -lpr /var/cfengine/bin/* "$BASEDIR/$PKG/pkg/var/cfengine/bin/"
-    rsync -lpr /var/cfengine/lib/* "$BASEDIR/$PKG/pkg/var/cfengine/lib/"
+    rsync -lpr "$PREFIX/bin"/* "$BASEDIR/$PKG/pkg$PREFIX/bin/"
+    rsync -lpr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib/"
 
     cd "$BASEDIR/$PKG/pkg"
     # IMPORTANT: Before this step, do not copy any files into the current
@@ -259,7 +258,7 @@ case "$PACKAGING" in
       cat "$P/solaris/prototype.head"
       # Replace last two words with "root root" and filter out directories that
       # aren't ours.
-      sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp | egrep '^([^d]|d none /var/cfengine)'
+      sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp | egrep "^([^d]|d none $PREFIX)"
     ) > prototype
 
     ARCH="`uname -p`"
@@ -285,14 +284,13 @@ case "$PACKAGING" in
     pkgtrans -o -s "$BASEDIR/$PKG/pkg" "$BASEDIR/$PKG/$NAME" "CFE$PKG"
     ;;
   freebsd)
-	  PREFIX=/var/cfengine
 	  rm -rf "$BASEDIR/$PKG/pkg"
-	  mkdir -p "$BASEDIR/$PKG/pkg${PREFIX}"
+	  mkdir -p "$BASEDIR/$PKG/pkg$PREFIX"
 
 	  cp -pr "$P/freebsd"/* "$BASEDIR/$PKG/pkg/"
-	  cp -pr "$BASEDIR/cfengine/dist/var/cfengine"/* "$BASEDIR/$PKG/pkg${PREFIX}"
-	  cp -pr /var/cfengine/bin/* "$BASEDIR/$PKG/pkg${PREFIX}/bin"
-	  cp -pr /var/cfengine/lib/* "$BASEDIR/$PKG/pkg${PREFIX}/lib"
+	  cp -pr "$BASEDIR/cfengine/dist$PREFIX"/* "$BASEDIR/$PKG/pkg$PREFIX"
+	  cp -pr "$PREFIX/bin"/* "$BASEDIR/$PKG/pkg$PREFIX/bin"
+	  cp -pr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib"
 
 	  cd "$BASEDIR/$PKG/pkg"
 	  echo "@comment pkg-plist,v 1.00 `date`" >> pkg-plist
@@ -322,18 +320,17 @@ case "$PACKAGING" in
        cat tmp >> CONTENTS
        rm plist-head tmp
        mv CONTENTS ./+CONTENTS
-       tar cjvf "cfengine-nova-$VERSION\_1.tbz" +CONTENTS +DESC +COMMENT var/
+       tar cjvf "cfengine-nova-$VERSION\_1.tbz" +CONTENTS +DESC +COMMENT *
 	  ;;
   hpux)
-      PREFIX=/var/cfengine
       ARCH="$UNAME_M"
       OS_VER="$UNAME_R"
 
       rm -rf "$BASEDIR/$PKG/pkg"
-      mkdir -p "$BASEDIR/$PKG/pkg${PREFIX}"
+      mkdir -p "$BASEDIR/$PKG/pkg$PREFIX"
 
       cp -pr "$BASEDIR/cfengine/dist"/* "$BASEDIR/$PKG/pkg"
-      cp -pr /var/cfengine/lib/* "$BASEDIR/$PKG/pkg${PREFIX}/lib"
+      cp -pr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib"
 
       PREINSTALL="$BASEDIR/$PKG/pkg/generated.preinstall"
       POSTINSTALL="$BASEDIR/$PKG/pkg/generated.postinstall"
@@ -368,4 +365,3 @@ case "$PACKAGING" in
     echo "Unknown packaging system: $PACKAGING"
     exit 1;;
 esac
-

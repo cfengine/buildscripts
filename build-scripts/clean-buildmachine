@@ -7,9 +7,9 @@ uninstall_cfbuild
 
 case $OS in
 aix)
-sudo rm -rf /var/cfengine/*
+sudo rm -rf "$PREFIX"/*
 ;;
 *)
-sudo rm -rf /var/cfengine
+sudo rm -rf "$PREFIX"
 ;;
 esac

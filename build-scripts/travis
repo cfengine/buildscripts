@@ -2,6 +2,8 @@
 
 set -ex
 
+PREFIX=/var/cfengine
+
 REPO_DIR=aleksei/$TRAVIS_REPO_SLUG/$TRAVIS_BRANCH
 test "$TRAVIS_PULL_REQUEST" = "false" || REPO_DIR=$REPO_DIR/$TRAVIS_PULL_REQUEST
 test "$TRAVIS_PULL_REQUEST" = "false" && SHA=$TRAVIS_COMMIT || SHA=$TRAVIS_PULL_REQUEST_SHA
@@ -154,15 +156,15 @@ case "$JOB" in
             ./25_cf-execd
         set +e
         sudo ./testall \
-            --agent=/var/cfengine/bin/cf-agent \
-            --cfpromises=/var/cfengine/bin/cf-promises \
-            --cfserverd=/var/cfengine/bin/cf-serverd \
-            --cfkey=/var/cfengine/bin/cf-key \
-            --cfexecd=/var/cfengine/bin/cf-execd \
-            --cfnet=/var/cfengine/bin/cf-net \
-            --cfcheck=/var/cfengine/bin/cf-check \
-            --cfrunagent=/var/cfengine/bin/cf-runagent \
-            --rpmvercmp=$HOME/rpmvercmp \
+            --agent="$PREFIX/bin/cf-agent" \
+            --cfpromises="$PREFIX/bin/cf-promises" \
+            --cfserverd="$PREFIX/bin/cf-serverd" \
+            --cfkey="$PREFIX/bin/cf-key" \
+            --cfexecd="$PREFIX/bin/cf-execd" \
+            --cfnet="$PREFIX/bin/cf-net" \
+            --cfcheck="$PREFIX/bin/cf-check" \
+            --cfrunagent="$PREFIX/bin/cf-runagent" \
+            --rpmvercmp="$HOME/rpmvercmp" \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
             --gainroot=sudo
         RET1=$?
@@ -180,17 +182,17 @@ case "$JOB" in
         rm -rf $(find compliance -name *.cf | grep -v basic.cf)
         echo export CORE=../../../core > testall.env
         echo export ENTERPRISE=../.. >> testall.env
-        echo export CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=/var/cfengine/lib >> testall.env
+        echo export \"CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=$PREFIX/lib\" >> testall.env
         set +e
         sudo ./testall \
-            --agent=/var/cfengine/bin/cf-agent \
-            --cfpromises=/var/cfengine/bin/cf-promises \
-            --cfserverd=/var/cfengine/bin/cf-serverd \
-            --cfkey=/var/cfengine/bin/cf-key \
-            --cfexecd=/var/cfengine/bin/cf-execd \
-            --cfnet=/var/cfengine/bin/cf-net \
-            --cfcheck=/var/cfengine/bin/cf-check \
-            --cfrunagent=/var/cfengine/bin/cf-runagent \
+            --agent="$PREFIX/bin/cf-agent" \
+            --cfpromises="$PREFIX/bin/cf-promises" \
+            --cfserverd="$PREFIX/bin/cf-serverd" \
+            --cfkey="$PREFIX/bin/cf-key" \
+            --cfexecd="$PREFIX/bin/cf-execd" \
+            --cfnet="$PREFIX/bin/cf-net" \
+            --cfcheck="$PREFIX/bin/cf-check" \
+            --cfrunagent="$PREFIX/bin/cf-runagent" \
             --rpmvercmp=$HOME/rpmvercmp \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
             --gainroot=sudo
@@ -209,9 +211,9 @@ case "$JOB" in
         sudo service cfengine3 restart
         ps aux | grep cf-
         s3cmd get --no-progress $TESTD cf-testd
-        sudo mv cf-testd /var/cfengine/bin
-        sudo chown root:root /var/cfengine/bin/cf-testd
-        sudo chmod a+x /var/cfengine/bin/cf-testd
+        sudo mv cf-testd "$PREFIX/bin"
+        sudo chown root:root "$PREFIX/bin/cf-testd"
+        sudo chmod a+x "$PREFIX/bin/cf-testd"
         sudo chown root:root nova/tests/reporting/minimal.cf
         sudo chmod 600 nova/tests/reporting/minimal.cf
         cd nova/tests/reporting
