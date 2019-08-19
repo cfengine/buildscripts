@@ -135,7 +135,11 @@ do
     esac
 
     revision=$(cat $BASEDIR/buildscripts/deps-packaging/revision)
-    version=0+$revision$versuffix$crossver
+    if [ "$BUILDPREFIX" != "/var/cfengine" ]
+    then
+        safe_prefix="+$(echo "$PREFIX" | sed 's:/::g')"
+    fi
+    version=0+$revision$versuffix$crossver$safe_prefix
 
     # FETCH dependency packages if needed
     package_files=`pkg-cache listpkgfiles $dep-$version`
