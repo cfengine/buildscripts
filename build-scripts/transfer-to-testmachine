@@ -26,5 +26,5 @@ esac
 # middle of BASEDIR like "/home/jenkins/.jenkinsdir/etc"
 # (Google Cloud Jenkins plugin likes to create them)
 BASEDIR_NO_DOT="$(echo $BASEDIR | sed -e 's,/\./,/,g;s,/\.$,,')"
-sudo rsync -avR $EXCLUDES --delete --delete-excluded $BASEDIR_NO_DOT/ $TESTMACHINE_URI  >rsync.log
-sudo rsync -avR $EXCLUDES --delete --delete-excluded /var/cfengine/ $TESTMACHINE_URI    >>rsync.log
+sudo rsync -avR $EXCLUDES --delete --delete-excluded "$BASEDIR_NO_DOT/" $TESTMACHINE_URI  >rsync.log
+sudo rsync -avR $EXCLUDES --delete --delete-excluded "$PREFIX/" $TESTMACHINE_URI    >>rsync.log

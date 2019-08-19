@@ -12,9 +12,9 @@ else
     echo "Producing debug symbols"
 fi
 
-EXECUTABLES_DIR=$BASEDIR/cfengine/dist/var/cfengine/bin
+EXECUTABLES_DIR="$BASEDIR/cfengine/dist$PREFIX/bin"
 EXECUTABLES_LIST=`ls $EXECUTABLES_DIR/cf-*`
-LIBRARIES_DIR=$BASEDIR/cfengine/dist/var/cfengine/lib
+LIBRARIES_DIR="$BASEDIR/cfengine/dist$PREFIX/lib"
 LIBRARIES_LIST=`ls $LIBRARIES_DIR/*.so*`
 DEBUG_SUFFIX=debug
 PAYLOAD_DIR=payload
@@ -68,12 +68,12 @@ echo "# Install debug symbols for executables"
 echo "for i in \`ls exe/*.gz\`; do" >> $PAYLOAD_DIR/install-ds.sh
 echo "  gunzip \$i" >> $PAYLOAD_DIR/install-ds.sh
 echo "done" >> $PAYLOAD_DIR/install-ds.sh
-echo "mv exe/*.$DEBUG_SUFFIX /var/cfengine/bin" >> $PAYLOAD_DIR/install-ds.sh
+echo "mv exe/*.$DEBUG_SUFFIX $PREFIX/bin" >> $PAYLOAD_DIR/install-ds.sh
 echo "# Install debug symbols for libraries"
 echo "for i in \`ls lib/*.gz\`; do" >> $PAYLOAD_DIR/install-ds.sh
 echo "  gunzip \$i" >> $PAYLOAD_DIR/install-ds.sh
 echo "done" >> $PAYLOAD_DIR/install-ds.sh
-echo "mv lib/*.$DEBUG_SUFFIX /var/cfengine/lib" >> $PAYLOAD_DIR/install-ds.sh
+echo "mv lib/*.$DEBUG_SUFFIX $PREFIX/lib" >> $PAYLOAD_DIR/install-ds.sh
 echo "exit 0" >> $PAYLOAD_DIR/install-ds.sh
 
 # Write the decompression script
@@ -98,8 +98,8 @@ echo "__ARCHIVE_BELOW__" >> decompress-ds.sh
 echo "Writing the uninstall script"
 echo "#!/bin/sh" > $PAYLOAD_DIR/uninstall-ds.sh
 echo "echo \"Uninstalling debug symbols\"" >> $PAYLOAD_DIR/uninstall-ds.sh
-echo "rm -f /var/cfengine/bin/*.\$DEBUG_SUFFIX" >> $PAYLOAD_DIR/uninstall-ds.sh
-echo "rm -f /var/cfengine/lib/*.\$DEBUG_SUFFIX" >> $PAYLOAD_DIR/uninstall-ds.sh
+echo "rm -f \"$PREFIX\"/bin/*.\$DEBUG_SUFFIX" >> $PAYLOAD_DIR/uninstall-ds.sh
+echo "rm -f \"$PREFIX\"/lib/*.\$DEBUG_SUFFIX" >> $PAYLOAD_DIR/uninstall-ds.sh
 echo "echo \"Done\"" >> $PAYLOAD_DIR/uninstall-ds.sh
 
 # Now create the self extracting script

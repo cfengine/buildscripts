@@ -14,7 +14,7 @@ sudo $FUSER -k $CHROOT_ROOT || true
 sudo umount ${CHROOT_ROOT}proc || true
 
 echo "P $BASEDIR" > $TRANSFER_SCRIPT
-echo "P /var/cfengine" >> $TRANSFER_SCRIPT
+echo "P $PREFIX" >> $TRANSFER_SCRIPT
 generate_chroot_transfer_script >> $TRANSFER_SCRIPT
 
 RETURN_CODE=0
