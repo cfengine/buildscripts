@@ -26,6 +26,8 @@ BASEDIR=$2
 LPPBASE=$2/..
 P="$BASEDIR/buildscripts/packaging/cfengine-nova"
 
+PREFIX="$3"
+
 # Clean up old build artifacts.
 for i in bff lpp out
 do
@@ -71,7 +73,7 @@ PRE_RM=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.p
 $P/../common/produce-script cfengine-nova preinstall bff > $PRE_RM
 
 # Create the info file
-env LD_LIBRARY_PATH=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/lib $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/var/cfengine/bin/cf-agent -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.copyright
+env LD_LIBRARY_PATH="$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/lib" CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR="$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/lib" "$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/bin/cf-agent" -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.copyright
 
 # Detect build machine versions of important libraries so we can compare with
 # the install machine.
