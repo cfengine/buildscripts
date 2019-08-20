@@ -160,8 +160,18 @@ case "$PACKAGING" in
 	# note that * must be unquoted!
 	[ "$(ls -1d "$PKG"-* | wc -l)" -lt 2 ] || exit 1
         [ -d "$PKG"-* ] && cd "$PKG"-*
-        mv usr etc "$PREFIX/share/"
-        tar czvf "$TARBALL" .  > "$TARBALL.filelist"
+        # $LOCAL_PREFIX is $PREFIX without first slash, i.e. var/cfengine
+        # $LOCAL_DIR is first (outermost) dir in $LOCAL_PREFIX, i.e. var
+        LOCAL_PREFIX="$(echo "$PREFIX" | sed 's_^/__')"
+        LOCAL_DIR="$(echo "$LOCAL_PREFIX" | sed 's_/.*__')"
+        mkdir -p "$LOCAL_PREFIX/share/usr/lib/systemd"
+        mv usr/lib/systemd/system "$LOCAL_PREFIX/share/usr/lib/systemd/"
+        mkdir -p "$LOCAL_PREFIX/share/etc"
+        for dir in etc/init.d etc/sysconfig etc/profile.d
+        do
+            test -d $dir && mv $dir "$LOCAL_PREFIX/share/etc"
+        done
+        tar czvf "$TARBALL" "$LOCAL_DIR" > "$TARBALL.filelist"
         # $OS_VERSION is 7.6, ${OS_VERSION%.*} is 7
         if [ -d "$P/coreos" -a "${OS_VERSION%.*}" = 7 ]
         then
@@ -173,7 +183,7 @@ case "$PACKAGING" in
             MOUNT_DIR=cfengine.img
             mkdir "$MOUNT_DIR"
             sudo mount "$LOOP_DEV" "$MOUNT_DIR"
-            sudo cp -pr var/cfengine/* "$MOUNT_DIR"
+            sudo cp -pr "$LOCAL_PREFIX"/* "$MOUNT_DIR"
             sudo umount "$LOOP_DEV"
             sudo losetup --detach "$LOOP_DEV"
             rmdir "$MOUNT_DIR"
@@ -229,8 +239,18 @@ case "$PACKAGING" in
     # Create TAR package
     TARBALL="$BASEDIR/$PKG/pkg/$PKG-$VERSION.$ARCH.pkg.tar.gz"
     cd "$BASEDIR/$PKG/pkg/debian/tmp/"
-    mv usr etc "$PREFIX/share/"
-    tar czvf "$TARBALL" .  > "$TARBALL.filelist"
+    # $LOCAL_PREFIX is $PREFIX without first slash, i.e. var/cfengine
+    # $LOCAL_DIR is first (outermost) dir in $LOCAL_PREFIX, i.e. var
+    LOCAL_PREFIX="$(echo "$PREFIX" | sed 's_^/__')"
+    LOCAL_DIR="$(echo "$LOCAL_PREFIX" | sed 's_/.*__')"
+    mkdir -p "$LOCAL_PREFIX/share/usr/lib/systemd"
+    mv usr/lib/systemd/system "$LOCAL_PREFIX/share/usr/lib/systemd/"
+    mkdir -p "$LOCAL_PREFIX/share/etc"
+    for dir in etc/init.d etc/sysconfig etc/profile.d
+    do
+        test -d $dir && mv $dir "$LOCAL_PREFIX/share/etc"
+    done
+    tar czvf "$TARBALL" "$LOCAL_DIR" > "$TARBALL.filelist"
     ;;
 
   solaris)
