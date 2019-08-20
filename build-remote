@@ -183,7 +183,7 @@ prepare_workdir() {
 
 checkout() {
   mkdir -p build
-  rsync -avr --exclude='workdir-*' ../ build/buildscripts  >>rsync.log
+  rsync -avr --exclude='workdir-*' $(dirname $0)/ build/buildscripts  >>rsync.log
 
   REPOS="core masterfiles"
 
