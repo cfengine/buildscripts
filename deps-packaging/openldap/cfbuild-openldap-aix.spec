@@ -57,8 +57,8 @@ $MAKE -C libraries
 %install
 
 $MAKE -C include install DESTDIR=${RPM_BUILD_ROOT}
-sudo cp ./libraries/liblber/.libs/liblber.a /var/cfengine/lib
-sudo cp ./libraries/liblber/.libs/liblber.so /var/cfengine/lib
+sudo cp ./libraries/liblber/.libs/liblber.a %{prefix}/lib
+sudo cp ./libraries/liblber/.libs/liblber.so %{prefix}/lib
 $MAKE -C libraries install DESTDIR=${RPM_BUILD_ROOT}
 
 # Removing unused files

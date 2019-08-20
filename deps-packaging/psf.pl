@@ -57,8 +57,8 @@ sub listdir {
     my @directories;
 
     opendir CWD, "$dir" or die "$0: opendir $dir: $!\n";
-    printf "      directory         %s=/var/cfengine/%s\n",
-        $dir, $dir;
+    printf "      directory         %s=%s/%s\n",
+        $dir, $ENV{'BUILDPREFIX'}, $dir;
     foreach $entry ( sort readdir CWD ) {
         next if ( $entry eq "." or $entry eq ".." or
             $entry eq "..install_finish" or

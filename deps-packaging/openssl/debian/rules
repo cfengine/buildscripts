@@ -14,8 +14,8 @@ build-stamp:
 
 	echo ==================== BUILD_TYPE is $$BUILD_TYPE ====================
 
-	test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
-	mkdir -p /var/cfengine/include
+	test -d $(PREFIX) || ( sudo mkdir $(PREFIX) && sudo chmod 777 $(PREFIX) )
+	mkdir -p $(PREFIX)/include
 
 	DEBUG_CONFIG_FLAGS= ;\
 	DEBUG_CFLAGS= ;\

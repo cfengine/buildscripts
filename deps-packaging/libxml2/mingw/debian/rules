@@ -1,6 +1,6 @@
 #!/usr/bin/make -f
 
-PREFIX=/var/cfengine
+PREFIX=$(BUILDPREFIX)
 
 clean:
 	dh_testdir

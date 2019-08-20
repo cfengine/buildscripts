@@ -2,7 +2,7 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX}
 
 OL=${BUILD_ROOT}/cfbuild-openldap${PREFIX}
 OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}

@@ -40,9 +40,9 @@ mkdir -p %{_builddir}
     --without-winidn \
     --without-winssl \
     --prefix=%{prefix} \
-    CPPFLAGS="-I/var/cfengine/include" \
-    LD_LIBRARY_PATH="/var/cfengine/lib" \
-    LD_RUN_PATH="/var/cfengine/lib"
+    CPPFLAGS="-I%{prefix}/include" \
+    LD_LIBRARY_PATH="%{prefix}/lib" \
+    LD_RUN_PATH="%{prefix}/lib"
 
 %build
 

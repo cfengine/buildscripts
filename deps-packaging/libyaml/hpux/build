@@ -2,7 +2,7 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX}
 
 TT=${BUILD_ROOT}/cfbuild-libyaml${PREFIX}
 TTD=${BUILD_ROOT}/cfbuild-libyaml-devel${PREFIX}

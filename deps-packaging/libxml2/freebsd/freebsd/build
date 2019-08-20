@@ -2,7 +2,7 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX}
 
 OL=${BUILD_ROOT}/cfbuild-openldap${PREFIX}
 OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
@@ -13,7 +13,7 @@ OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
 
 ./configure --prefix=$PREFIX --enable-shared --disable-slapd --disable-backends \
             --with-tls=openssl --without-gssapi \
-            CPPFLAGS=-I/var/cfengine/include
+            CPPFLAGS=-I$PREFIX/include
 
 # Build
 
