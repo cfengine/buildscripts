@@ -1,2 +1,3 @@
 /var/cfengine/bin/*.dll
+/var/cfengine/bin/openssl.exe
 /var/cfengine/ssl/openssl.cnf

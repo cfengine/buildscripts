@@ -74,6 +74,9 @@
               <Component Id='cf_net.exe' Guid='E247749E-7C73-4E13-BF3F-315A19774635' Win64='$(var.isWin64)'>
                 <File Id='cf_net.exe' Name='cf-net.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-net.exe' />
               </Component>
+	      <Component Id='openssl.exe' Guid='B33B56DE-B51E-48DA-8F3B-1A00178EE235' Win64='$(var.isWin64)'>
+                <File Id='openssl.exe' Name='openssl.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\openssl.exe' />
+              </Component>
               <Component Id='cf_promises.exe' Guid='D3875D39-C53D-47DF-98CC-C393353ACCCD' Win64='$(var.isWin64)'>
                 <File Id='cf_promises.exe' Name='cf-promises.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-promises.exe' />
               </Component>
@@ -153,6 +156,7 @@
             <ComponentRef Id='cf_key.exe' />
             <ComponentRef Id='cf_monitord.exe' />
             <ComponentRef Id='cf_net.exe' />
+            <ComponentRef Id='openssl.exe' />
             <ComponentRef Id='cf_promises.exe' />
             <ComponentRef Id='cf_runagent.exe' />
             <ComponentRef Id='cf_serverd.exe' />
