@@ -49,13 +49,18 @@ fi
 
 P="$BASEDIR/buildscripts/packaging/$PKG"
 
-file_to_patch=$P/../common/script-templates/$PACKAGING-script-common.sh
-if [ "$BUILDPREFIX" != "/var/cfengine" -a -f $file_to_patch ]
+if [ "$BUILDPREFIX" != "/var/cfengine" ]
 then
-    # replace PREFIX in *-script-common.sh file
-    sed "s:/var/cfengine:$BUILDPREFIX:g" $file_to_patch >$file_to_patch.new
-    mv $file_to_patch.new $file_to_patch
+    safe_prefix="$(echo "$BUILDPREFIX" | sed -e 's:/::g')"
+    file_to_patch=$P/../common/script-templates/$PACKAGING-script-common.sh
+    if [ -f $file_to_patch ]
+    then
+        # replace PREFIX in *-script-common.sh file
+        sed "s:/var/cfengine:$BUILDPREFIX:" $file_to_patch >$file_to_patch.new
+        mv $file_to_patch.new $file_to_patch
+    fi
 fi
+
 
 
 case "$VERSION" in
@@ -126,7 +131,7 @@ case "$PACKAGING" in
 
     sed \
         -e "s/@@VERSION@@/$RPM_VERSION/g" \
-        -e "s/@@RELEASE@@/$RPM_RELEASE/g" \
+        -e "s/@@RELEASE@@/$safe_prefix$RPM_RELEASE/g" \
         -e "/^%pre\$/r $PREINSTALL" \
         -e "/^%post\$/r $POSTINSTALL" \
         -e "/^%preun\$/r $PREREMOVE" \
@@ -155,10 +160,10 @@ case "$PACKAGING" in
     then
         # Create AIX bff packages
         chmod +x "$P/$PKG.bff.sh"
-        "$P/$PKG.bff.sh" "$RPM_VERSION.$RPM_RELEASE" "$BASEDIR" "$PREFIX"
+        "$P/$PKG.bff.sh" "$RPM_VERSION.$safe_prefix$RPM_RELEASE" "$BASEDIR" "$PREFIX"
     else
         # Create TAR package
-        TARBALL="$BASEDIR/$PKG/RPMS/$PKG-$VERSION.$ARCH.pkg.tar.gz"
+        TARBALL="$BASEDIR/$PKG/RPMS/$PKG-$VERSION$safe_prefix.$ARCH.pkg.tar.gz"
 	# RHEL4 and RHEL6 have buildroot in different folders.
 	# Below lines try to be careful about finding it.
 	# Note that `mv` command will fail and abort the build
@@ -235,13 +240,8 @@ case "$PACKAGING" in
       DEB_VERSION="$VERSION~$BUILD_NUMBER"
     fi
 
-    # on debian/ubuntu, $OS_VERSION contains too many details.
-    # leave only major version:
-    # 7.0 => 7
-    # 16.04 => 16
-    os_version_major="${OS_VERSION%%.*}"
 
-    sed -e "s/@@VERSION@@/$DEB_VERSION.$OS$os_version_major/" "$BASEDIR/$PKG/pkg/debian/changelog.in" > "$BASEDIR/$PKG/pkg/debian/changelog"
+    sed -e "s/@@VERSION@@/$DEB_VERSION$safe_prefix/" "$BASEDIR/$PKG/pkg/debian/changelog.in" > "$BASEDIR/$PKG/pkg/debian/changelog"
 
     "$P/../common/produce-script" "$PKG" preinstall deb > "$BASEDIR/$PKG/pkg/debian/$PKG.preinst"
     "$P/../common/produce-script" "$PKG" postinstall deb > "$BASEDIR/$PKG/pkg/debian/$PKG.postinst"
@@ -251,7 +251,7 @@ case "$PACKAGING" in
     (cd "$BASEDIR/$PKG/pkg"; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
 
     # Create TAR package
-    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION.$OS$os_version_major.$ARCH.pkg.tar.gz"
+    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$VERSION$safe_prefix.$ARCH.pkg.tar.gz"
     cd "$BASEDIR/$PKG/pkg/debian/tmp/"
     # $LOCAL_PREFIX is $PREFIX without first slash, i.e. var/cfengine
     # $LOCAL_DIR is first (outermost) dir in $LOCAL_PREFIX, i.e. var
@@ -291,7 +291,7 @@ case "$PACKAGING" in
     ) > prototype
 
     ARCH="`uname -p`"
-    sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION/g" "$P/solaris/pkginfo.in" > "$BASEDIR/$PKG/pkg/pkginfo"
+    sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION$safe_prefix/g" "$P/solaris/pkginfo.in" > "$BASEDIR/$PKG/pkg/pkginfo"
 
     "$P/../common/produce-script" "$PKG" preinstall pkg > preinstall
     "$P/../common/produce-script" "$PKG" postinstall pkg > postinstall
@@ -335,7 +335,7 @@ case "$PACKAGING" in
 
        cat pkg-plist.foot >> pkg-plist
 
-       /usr/sbin/pkg_create -j -f "${pkgdir}/pkg-plist" -c "${pkgdir}/pkg-comment" -d "${pkgdir}/pkg-descr" -p "${pkgdir}" "${pkgdir}/cfengine-nova-$VERSION\_1.tbz"
+       /usr/sbin/pkg_create -j -f "${pkgdir}/pkg-plist" -c "${pkgdir}/pkg-comment" -d "${pkgdir}/pkg-descr" -p "${pkgdir}" "${pkgdir}/cfengine-nova-$VERSION$safe_prefix\_1.tbz"
 
        cd "$pkgdir/"
 
@@ -373,20 +373,8 @@ case "$PACKAGING" in
 
       cd "$BASEDIR/$PKG/pkg/"
 
-      if [ "$BUILD_TYPE" = "RELEASE" ]
-      then
-        if [ -z "$EXPLICIT_RELEASE" ]
-        then
-          NAME="$PKG-$VERSION.1-$OS_VER-$ARCH"
-        else
-          NAME="$PKG-$VERSION.$EXPLICIT_RELEASE-$OS_VER-$ARCH"
-        fi
-      else
-        NAME="$PKG-$VERSION-$OS_VER-$ARCH"
-      fi
-
-      "$P/hpux/psf.pl" . "$PKG" "$VERSION" > "$BASEDIR/$PKG/$PKG-$VERSION.psf"
-      /usr/sbin/swpackage -s "$BASEDIR/$PKG/$PKG-$VERSION.psf" -x media_type=tape @ "$BASEDIR/$PKG/pkg/$NAME.depot"
+      "$P/hpux/psf.pl" . "$PKG" "$VERSION" > "$BASEDIR/$PKG/$PKG-$VERSION$safe_prefix.psf"
+      /usr/sbin/swpackage -s "$BASEDIR/$PKG/$PKG-$VERSION$safe_prefix.psf" -x media_type=tape @ "$BASEDIR/$PKG/pkg/$PKG-$VERSION$safe_prefix-$OS_VER-$ARCH.depot"
       ;;
   msi)
     package-msi;;
