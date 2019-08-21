@@ -49,6 +49,15 @@ fi
 
 P="$BASEDIR/buildscripts/packaging/$PKG"
 
+file_to_patch=$P/../common/script-templates/$PACKAGING-script-common.sh
+if [ "$BUILDPREFIX" != "/var/cfengine" -a -f $file_to_patch ]
+then
+    # replace PREFIX in *-script-common.sh file
+    sed "s:/var/cfengine:$BUILDPREFIX:g" $file_to_patch >$file_to_patch.new
+    mv $file_to_patch.new $file_to_patch
+fi
+
+
 case "$VERSION" in
   *~*)
     # everything before the tilde

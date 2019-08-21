@@ -845,7 +845,7 @@ find $PREFIX/share/GUI -type f -exec chmod 0400 {} +
 # Ldap config
 #
 
-(cd /var/cfengine/httpd/htdocs/ldap; sh scripts/post-install.sh)
+(cd "$PREFIX/httpd/htdocs/ldap"; sh scripts/post-install.sh)
 # ENT-3645: `ldap/config/settings.ldap.php` must be writable by the webserver user or we will be unable to modify settings.
 chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/ldap
 chmod 0700 -R $PREFIX/httpd/htdocs/ldap/config
