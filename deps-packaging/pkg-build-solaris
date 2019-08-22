@@ -4,11 +4,21 @@ gen_prototype() {
   package="$1"
   pkgdir="$PKGDIR/out/$package/"
   echo "i pkginfo=$BASEDIR/$PKGNAME/$package.pkginfo"
+  # $BUILDPREFIX is usually /var/cfengine or /usr/localcw/opt/cfengine. Its
+  # parent directories are usually provided by some other package, so adding
+  # them to our package causes these packages to conflict, and we don't want
+  # that. Hence, we need to exlude them. To do that, we find the parent dir for
+  # $BUILDPREFIX:
+  PREPREFIX=${BUILDPREFIX%/*}
+  # (for example, it can be /usr/localcw/opt) and exclude all dirs that are in
+  # its name - for example, /usr and /usr/localcw.
   for f in `find $pkgdir`; do
     destf=/${f#$pkgdir}
-    if [ "$destf" = "/" ]; then
-      continue
-    elif [ "$destf" = "/var" ]; then
+    # To check if $destf is substring of $PREPREFIX (or rather if $PREPREFIX
+    # starts with $destf), we extract first N characters from $PREPREFIX, where
+    # N is length of $destf, i.e. ${#destf}
+    if [ "$(echo "$PREPREFIX" | cut -c 1-${#destf})" = "$destf" ]; then
+      # $PREPREFIX starts from $destf, so it should be excluded
       continue
     elif [ -h $f ]; then
       dest=`LANG= file -h $f | sed -e 's/.*symbolic link to //'`
