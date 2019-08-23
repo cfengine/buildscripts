@@ -23,6 +23,7 @@ build-stamp:
 --with-pdo \
 --with-json \
 --with-iconv \
+--with-zlib=$(PREFIX) \
 --with-pdo-pgsql=$(PREFIX) \
 --without-aolserver \
 --without-caudium \

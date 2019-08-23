@@ -36,6 +36,7 @@ fi
 --with-pdo-pgsql=%{prefix} \
 --with-json \
 --with-iconv \
+--with-zlib=%{prefix} \
 --without-aolserver \
 --without-caudium \
 --without-continuity \
