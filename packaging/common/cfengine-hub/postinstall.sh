@@ -73,17 +73,13 @@ cp $PREFIX/lib/php/*.so "$EXTENSIONS_DIR"
 #Change keys in files
 true "Adding CF_CLIENT_SECRET keys"
 ( set +x
-  if [ -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp ]; then
-    UUID=$(tr -d '\n\r' < $PREFIX/CF_CLIENT_SECRET_KEY.tmp)
-  else
-    UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-    sed  -i  s/CFE_SESSION_KEY/"$UUID"/              $PREFIX/share/GUI/application/config/config.php
-    sed  -i  s/CFE_CLIENT_SECRET_KEY/"$UUID"/        $PREFIX/share/GUI/application/config/appsettings.php
-    sed  -i  s/LDAP_API_SECRET_KEY/"$UUID"/          $PREFIX/share/GUI/application/config/appsettings.php
-    sed  -i  s/LDAP_API_SECRET_KEY/"$UUID"/          $PREFIX/share/GUI/ldap/config/settings.php
-    sed  -i  /LDAP_API_SECRET_KEY/s/\'\'/"'$UUID'"/  $PREFIX/share/GUI/api/config/config.php
-    sed  -i  s/CFE_CLIENT_SECRET_KEY/"$UUID"/        $PREFIX/share/db/ootb_settings.sql
-  fi
+  UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+  sed  -i  s/CFE_SESSION_KEY/"$UUID"/              $PREFIX/share/GUI/application/config/config.php
+  sed  -i  s/CFE_CLIENT_SECRET_KEY/"$UUID"/        $PREFIX/share/GUI/application/config/appsettings.php
+  sed  -i  s/LDAP_API_SECRET_KEY/"$UUID"/          $PREFIX/share/GUI/application/config/appsettings.php
+  sed  -i  s/LDAP_API_SECRET_KEY/"$UUID"/          $PREFIX/share/GUI/ldap/config/settings.php
+  sed  -i  /LDAP_API_SECRET_KEY/s/\'\'/"'$UUID'"/  $PREFIX/share/GUI/api/config/config.php
+  sed  -i  s/CFE_CLIENT_SECRET_KEY/"$UUID"/        $PREFIX/share/db/ootb_settings.sql
 )
 true "Done adding keys"
 
@@ -869,7 +865,26 @@ if ! is_upgrade; then
     $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
   )
   true "Done adding user"
+else
+  true "Rotating CFE_ROBOT password"
+  ( set +x
+    pwgen() {
+        dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w $1 | head -n 1
+    }
+
+    pwhash() {
+        echo -n "$1" | openssl dgst -sha256 | awk '{print $2}'
+    }
+    CFE_ROBOT_PW=`pwgen 32`
+    CFE_ROBOT_PW_SALT=`pwgen 10`
+    CFE_ROBOT_PW_HASH=`pwhash "$CFE_ROBOT_PW_SALT$CFE_ROBOT_PW"`
+
+    sed -i '/$config."CFE_ROBOT_PASSWORD"/s/.*/$config["CFE_ROBOT_PASSWORD"] = "'$CFE_ROBOT_PW'";/' $PREFIX/httpd/htdocs/application/config/cf_robot.php
+    $PREFIX/bin/psql cfsettings -c "UPDATE users SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT' WHERE username = 'CFE_ROBOT'"
+  )
+  true "Done rotating password"
 fi
+
 su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap"
 
 $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_refresh
@@ -878,11 +893,6 @@ $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_ref
 # systemd later.
 $PREFIX/httpd/bin/apachectl stop
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart")
-
-#
-# Delete temporarily stored key.
-#
-rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
 
 ##
 # ENT-3921: Make bin/runalerts.php executable
@@ -931,39 +941,6 @@ if is_upgrade && [ -f "$PREFIX/UPGRADED_FROM_STATE.txt" ]; then
     rm -f "$PREFIX/UPGRADED_FROM_STATE.txt"
 else
     cf_console platform_service cfengine3 start
-fi
-
-if is_upgrade && wait_for_cf_postgres; then
-    true "Rotating keys..."
-    set +x
-    pwgen() {
-        dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w $1 | head -n 1
-    }
-
-    pwhash() {
-        echo -n "$1" | openssl dgst -sha256 | awk '{print $2}'
-    }
-
-    MP_CLIENT_SECRET=`pwgen 32`
-    CFE_ROBOT_PW=`pwgen 32`
-    CFE_ROBOT_PW_SALT=`pwgen 10`
-    CFE_ROBOT_PW_HASH=`pwhash "$CFE_ROBOT_PW_SALT$CFE_ROBOT_PW"`
-
-    sed -i '/$config."CFE_ROBOT_PASSWORD"/s/.*/$config["CFE_ROBOT_PASSWORD"] = "'$CFE_ROBOT_PW'";/' $PREFIX/httpd/htdocs/application/config/cf_robot.php
-    sed -i "/\$config.'MP_CLIENT_SECRET'/s/.*/\$config['MP_CLIENT_SECRET'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/appsettings.php $PREFIX/httpd/htdocs/application/config/appsettings.php
-    sed -i "/\$config.'encryption_key'/s/.*/\$config['encryption_key'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/config.php $PREFIX/httpd/htdocs/application/config/config.php
-    sed -i "/INSERT INTO oauth_clients VALUES ('MP',/s/.*/INSERT INTO oauth_clients VALUES ('MP', '$MP_CLIENT_SECRET', '', 'password refresh_token', NULL, NULL);/" $PREFIX/share/db/ootb_settings.sql
-
-    if test -d $PREFIX/share/GUI/ldap; then # New LDAP back end introduced in 3.11.0
-        sed -i "/\$config.'LDAP_API_SERVER_SECRET'/s/.*/\$config['LDAP_API_SERVER_SECRET'] = '$MP_CLIENT_SECRET';/" $PREFIX/share/GUI/application/config/appsettings.php $PREFIX/httpd/htdocs/application/config/appsettings.php
-        sed -i "/'accessToken'/s/.*/    'accessToken' => '$MP_CLIENT_SECRET',/" $PREFIX/share/GUI/ldap/config/settings.php $PREFIX/httpd/htdocs/ldap/config/settings.php
-        sed -i "/define('LDAP_API_SECRET_KEY',/s/.*/define('LDAP_API_SECRET_KEY', '$MP_CLIENT_SECRET');/" $PREFIX/share/GUI/api/config/config.php $PREFIX/httpd/htdocs/api/config/config.php
-    fi
-
-    $PREFIX/bin/psql cfsettings -c "UPDATE oauth_clients  SET client_secret = '$MP_CLIENT_SECRET' WHERE client_id = 'MP'"
-    $PREFIX/bin/psql cfsettings -c "UPDATE users SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT' WHERE username = 'CFE_ROBOT'"
-    set -x
-    true "Done rotating keys"
 fi
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"
