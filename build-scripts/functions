@@ -206,7 +206,7 @@ uninstall_cfbuild_devel()
 query_pkg()
 {
     case "$DEP_PACKAGING" in
-        rpm) rpm  -q --quiet $1 ;;
+        rpm) rpm  -qa --provides|grep_q "^$1 " ;;
         deb) dpkg -s         $1 2>&1    |    grep_q '^Status: .*ok installed' ;;
         *)
             echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
