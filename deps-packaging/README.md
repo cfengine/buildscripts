@@ -78,7 +78,7 @@ Hub specific dependencies:
 * [Apache](http://httpd.apache.org/) 2.4.41
 * [PostgreSQL](http://www.postgresql.org/) for the hub 12 beta 3
 * [Redis](http://redis.io/) 3.2.11
-* [PHP](http://php.net/) 7.3.5
+* [PHP](http://php.net/) 7.3.8
 * [Git](https://www.kernel.org/pub/software/scm/git/) 2.23.0
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
