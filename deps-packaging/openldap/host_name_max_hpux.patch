@@ -1,0 +1,11 @@
+--- openldap-2.4.48/libraries/libldap/cyrus.c	2019-07-23 16:46:22.000000000 +0200
++++ openldap-2.4.48/libraries/libldap/cyrus.c.new	2019-09-03 12:57:24.634034347 +0200
+@@ -39,6 +39,8 @@
+ 
+ #if !defined(HOST_NAME_MAX) && defined(_POSIX_HOST_NAME_MAX)
+ #define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
++#else
++#define HOST_NAME_MAX 63
+ #endif
+ 
+ #ifdef HAVE_SASL_SASL_H
