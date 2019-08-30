@@ -121,6 +121,18 @@ case `os_type` in
     ;;
 esac
 
+# (re)load SELinux policy if available and required
+if [ `os_type` = "redhat" ] &&
+   command -v semodule >/dev/null &&
+   [ -f "$PREFIX/selinux/cfengine-enterprise.pp" ];
+then
+  semodule -n -i "$PREFIX/selinux/cfengine-enterprise.pp"
+  if /usr/sbin/selinuxenabled; then
+    /usr/sbin/load_policy
+    /usr/sbin/restorecon -R /var/cfengine
+  fi
+fi
+
 if [ -f $PREFIX/policy_server.dat ]; then
   if ! [ -f "$PREFIX/UPGRADED_FROM.txt" ] || egrep '3\.([0-6]\.|7\.0)' "$PREFIX/UPGRADED_FROM.txt" > /dev/null; then
     # Versions <= 3.7.0 are unreliable in their daemon killing. Kill them one

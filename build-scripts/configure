@@ -62,6 +62,10 @@ case "$WITH_SYSTEMD" in
   *)    var_append ARGS "--without-systemd-service" ;;
 esac
 
+# RHEL 8 requires an SELinux policy
+if [ "x$OS" = "xrhel" ] && [ "x${VER:0:1}" = "x8" ]; then
+  var_append ARGS "--with-selinux-policy"
+fi
 
 # Cross-compiling Windows?
 case "$ARCH-${OS_FAMILY}" in
