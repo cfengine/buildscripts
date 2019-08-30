@@ -18,6 +18,7 @@ PACKAGES_i386_linux_redhat_5
 PACKAGES_x86_64_linux_redhat_5
 PACKAGES_x86_64_linux_redhat_6
 PACKAGES_x86_64_linux_redhat_7
+PACKAGES_x86_64_linux_redhat_8
 
 PACKAGES_x86_64_linux_ubuntu_14
 PACKAGES_x86_64_linux_ubuntu_16
