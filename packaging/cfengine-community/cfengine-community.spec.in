@@ -45,13 +45,6 @@ cp $RPM_SOURCE_DIR/sysconfig $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
 mkdir -p $RPM_BUILD_ROOT/etc/profile.d
 cp $RPM_SOURCE_DIR/profile.sh $RPM_BUILD_ROOT/etc/profile.d/cfengine3.sh
 
-#Design center
-mkdir -p ${RPM_BUILD_ROOT}%prefix/design-center
-cp -R $RPM_BUILD_ROOT/sketches/* $RPM_BUILD_ROOT%prefix/share/CoreBase/sketches
-rm -rf $RPM_BUILD_ROOT/sketches
-cp -R $RPM_BUILD_ROOT/tools/* $RPM_BUILD_ROOT%prefix/design-center
-rm -rf $RPM_BUILD_ROOT/tools
-
 # Remove useless stuff
 
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la

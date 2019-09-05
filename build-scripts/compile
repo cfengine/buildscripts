@@ -26,13 +26,9 @@ if test "x$NOVA" = "xyes"; then
         $MAKE -C $BASEDIR/nova -k
         $MAKE -C $BASEDIR/nova install DESTDIR=$BASEDIR/cfengine/dist
         $MAKE -C $BASEDIR/masterfiles install DESTDIR=$BASEDIR/cfengine/dist
-        $MAKE -C $BASEDIR/design-center install-sketches DESTDIR=$BASEDIR/cfengine/dist/sketches
-        $MAKE -C $BASEDIR/design-center install-tools DESTDIR=$BASEDIR/cfengine/dist/tools
     fi
 else
     $MAKE -C $BASEDIR/masterfiles install DESTDIR=$BASEDIR/cfengine/dist
-    $MAKE -C $BASEDIR/design-center install-sketches DESTDIR=$BASEDIR/cfengine/dist/sketches
-    $MAKE -C $BASEDIR/design-center install-tools DESTDIR=$BASEDIR/cfengine/dist/tools
 fi
 
 

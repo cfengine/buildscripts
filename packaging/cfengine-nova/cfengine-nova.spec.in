@@ -100,6 +100,12 @@ exit 0
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
 
+%if %{?rhel}%{!?rhel:0} > 7
+# SELinux policy
+%dir %prefix/selinux
+%prefix/selinux/cfengine-enterprise.pp
+%endif
+
 # Globally installed configs, scripts
 %attr(755,root,root) /etc/init.d/cfengine3
 %attr(644,root,root) /etc/sysconfig/cfengine3

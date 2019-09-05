@@ -20,5 +20,6 @@ PACKAGES_x86_64_linux_debian_7
 PACKAGES_x86_64_linux_redhat_4
 PACKAGES_x86_64_linux_redhat_6
 PACKAGES_x86_64_linux_redhat_7
+PACKAGES_x86_64_linux_redhat_8
 PACKAGES_x86_64_mingw
 PACKAGES_x86_64_solaris_10
