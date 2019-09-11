@@ -123,21 +123,13 @@ fi
 chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/logs/application
 
 #
-# Do all the prelimenary Design Center setup only on the first install of cfengine package
+# Do all the prelimenary VCS setup only on the first install of cfengine package
 #
 if ! is_upgrade; then
   # This folder is required for Design Center and Mission Portal to talk to each other
   DCWORKDIR=/opt/cfengine
-  $PREFIX/design-center/bin/cf-sketch --inputs=$PREFIX/design-center --installsource=$PREFIX/share/NovaBase/sketches/cfsketches.json --install-all
   mkdir -p $DCWORKDIR/userworkdir/admin/.ssh
-  mkdir -p $DCWORKDIR/stage_backup
-  mkdir -p $DCWORKDIR/dc-scripts
-  mkdir -p $DCWORKDIR/masterfiles_staging
-  mkdir -p $DCWORKDIR/masterfiles.git
-
-  touch $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
-  chmod 600 $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
-
+  mkdir -p $DCWORKDIR/dc-scripts/
   cat > $DCWORKDIR/dc-scripts/params.sh <<EOHIPPUS
 #!/bin/bash
 ROOT="$DCWORKDIR/masterfiles_staging"
@@ -154,54 +146,7 @@ export PKEY="\${PKEY}"
 export GIT_SSH="\${SCRIPT_DIR}/ssh-wrapper.sh"
 EOHIPPUS
 
-  # The runfile key in the below JSON is not needed anymore, all the
-  # values in it are OK by default, especially the runfile location,
-  # which is the first element of repolist plus `/meta/api-runfile.cf`.
-
-  cat > $DCWORKDIR/userworkdir/admin/api-config.json <<EOHIPPUS
-{
-  "log":"STDERR",
-  "log_level":"3",
-  "repolist":["sketches"],
-  "recognized_sources":["$PREFIX/design-center/sketches"],
-  "constdata":"$PREFIX/design-center/tools/cf-sketch/constdata.conf",
-  "vardata":"$DCWORKDIR/userworkdir/admin/masterfiles/sketches/meta/vardata.conf",
-  "runfile": {"location":"$DCWORKDIR/userworkdir/admin/masterfiles/sketches/meta/api-runfile.cf"}
-}
-EOHIPPUS
-
-  chmod 700 $DCWORKDIR/dc-scripts/params.sh
-
-  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/userworkdir
-  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/dc-scripts
-  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/stage_backup
-  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/masterfiles.git
-
-  chown $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
-  cp -R $PREFIX/masterfiles/* $DCWORKDIR/masterfiles_staging
-  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR/masterfiles_staging
-
-  chmod 700 $DCWORKDIR/stage_backup
   chmod -R 700 $DCWORKDIR/userworkdir
-
-  GIT=$PREFIX/bin/git
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT init")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.email admin@cfengine.com")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT config user.name admin")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "(echo '/cf_promises_*'; echo '.*.sw[po]'; echo '*~'; echo '\\#*#') >.gitignore")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add .gitignore")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Ignore cf_promise_*'")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT add *")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT commit -m 'Initial pristine masterfiles'")
-
-  (cd $DCWORKDIR/ && su $MP_APACHE_USER -c "$GIT clone --no-hardlinks --bare $DCWORKDIR/masterfiles_staging $DCWORKDIR/masterfiles.git")
-  find "$DCWORKDIR/masterfiles.git" -type d -exec chmod 700 {} \;
-  find "$DCWORKDIR/masterfiles.git" -type f -exec chmod 600 {} \;
-
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT branch CF_WORKING_BRANCH")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote rm origin")
-  (cd $DCWORKDIR/masterfiles_staging && su $MP_APACHE_USER -c "$GIT remote add origin $DCWORKDIR/masterfiles.git")
-
   if [ ! -f /usr/bin/curl ]; then
     ln -sf $PREFIX/bin/curl /usr/bin/curl
   fi
