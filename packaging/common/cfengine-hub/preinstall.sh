@@ -336,31 +336,23 @@ if [ -d $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718 ]; then
   rm $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718/*
 fi
 
-# Make a backup of the key CFE_CLIENT_SECRET_KEY, if any, and restore the
-# original file content.
-#
 if [ -f $PREFIX/share/GUI/application/config/appsettings.php ]; then
   true "Removing keys from files maintained by package manager"
-  ( set +x
-    # Tricky quotes, because we need to both prevent expansion of $config,
-    # and keep the internal ' quotes.
-    UUID_REGEX="[a-z0-9]{32}"
-    fgrep '$config'"['MP_CLIENT_SECRET']" $PREFIX/httpd/htdocs/application/config/appsettings.php | sed -r -e "s/.*($UUID_REGEX).*/\1/i" > $PREFIX/CF_CLIENT_SECRET_KEY.tmp
-    if [ "$(egrep -i "$UUID_REGEX" $PREFIX/CF_CLIENT_SECRET_KEY.tmp | wc -l)" -eq 1 ]; then
-      UUID=$(tr -d '\n\r' < $PREFIX/CF_CLIENT_SECRET_KEY.tmp)
-      for path in share/GUI httpd/htdocs; do
-        sed -i s/"$UUID"/CFE_SESSION_KEY/ $PREFIX/$path/application/config/config.php
-        sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/$path/application/config/appsettings.php
-        sed -i s/"$UUID"/LDAP_API_SECRET_KEY/ $PREFIX/$path/application/config/appsettings.php
-        sed -i s/"$UUID"/LDAP_API_SECRET_KEY/ $PREFIX/$path/ldap/config/settings.php
-        sed -i /LDAP_API_SECRET_KEY/s/"$UUID"// $PREFIX/$path/api/config/config.php
-      done
-      sed -i s/"$UUID"/CFE_CLIENT_SECRET_KEY/ $PREFIX/share/db/ootb_settings.sql
-    else
-      # Extraction failed. Remove file so that we generate a new UUID later.
-      rm -f $PREFIX/CF_CLIENT_SECRET_KEY.tmp
+  sed -i "/INSERT INTO oauth_clients VALUES ('MP',/s/.*/INSERT INTO oauth_clients VALUES ('MP', 'CFE_CLIENT_SECRET_KEY', '', 'password refresh_token', NULL, NULL);/" $PREFIX/share/db/ootb_settings.sql
+  for path in share/GUI httpd/htdocs; do
+    sed -i "/\$config.'encryption_key'/s/.*/\$config['encryption_key'] = 'CFE_SESSION_KEY';/" \
+      $PREFIX/$path/application/config/config.php
+    sed -i "/\$config.'MP_CLIENT_SECRET'/s/.*/\$config['MP_CLIENT_SECRET'] = 'CFE_CLIENT_SECRET_KEY';/" \
+      $PREFIX/$path/application/config/appsettings.php
+    if test -d $PREFIX/$path/ldap; then # New LDAP back end introduced in 3.11.0
+        sed -i "/\$config.'LDAP_API_SERVER_SECRET'/s/.*/\$config['LDAP_API_SERVER_SECRET'] = 'LDAP_API_SECRET_KEY';/" \
+          $PREFIX/$path/application/config/appsettings.php
+        sed -i "/'accessToken'/s/.*/    'accessToken' => 'LDAP_API_SECRET_KEY',/" \
+          $PREFIX/$path/ldap/config/settings.php
+        sed -i "/define('LDAP_API_SECRET_KEY',/s/.*/define('LDAP_API_SECRET_KEY', '');/" \
+          $PREFIX/$path/api/config/config.php
     fi
-  )
+  done
   true "Done removing keys"
 fi
 
