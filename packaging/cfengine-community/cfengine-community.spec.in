@@ -95,6 +95,12 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 %prefix/bin/mdb_dump
 %prefix/bin/mdb_load
 
+%if %{?rhel}%{!?rhel:0} > 7
+# SELinux policy
+%dir %prefix/selinux
+%prefix/selinux/cfengine-enterprise.pp
+%endif
+
 # Globally installed configs, scripts
 %attr(644,root,root) /etc/sysconfig/cfengine3
 %attr(755,root,root) /etc/profile.d/cfengine3.sh
