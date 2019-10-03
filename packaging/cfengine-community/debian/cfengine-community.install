@@ -32,3 +32,5 @@
 /var/cfengine/bin/lmmgr
 /var/cfengine/bin/mdb_copy
 /var/cfengine/bin/mdb_stat
+/var/cfengine/bin/mdb_dump
+/var/cfengine/bin/mdb_load

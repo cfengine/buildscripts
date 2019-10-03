@@ -214,6 +214,8 @@ exit 0
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
+%prefix/bin/mdb_dump
+%prefix/bin/mdb_load
 # Auxiliary programs
 %prefix/bin/rpmvercmp
 #libexec of git

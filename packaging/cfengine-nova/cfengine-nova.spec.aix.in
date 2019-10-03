@@ -79,6 +79,8 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
+%prefix/bin/mdb_dump
+%prefix/bin/mdb_load
 
 # Static libraries
 %defattr(644,root,root,755)

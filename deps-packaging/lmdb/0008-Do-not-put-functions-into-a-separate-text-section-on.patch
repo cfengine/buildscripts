@@ -1,7 +1,7 @@
 From 38c3cf2a2b7fb572c7a75657971e1596355c928d Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <vratislav.podzimek@northern.tech>
 Date: Wed, 22 Aug 2018 16:47:04 +0200
-Subject: [PATCH 8/8] Do not put functions into a separate text section on
+Subject: [PATCH 08/10] Do not put functions into a separate text section on
  PPC64
 
 Somehow this breaks things horribly and such functions seem to

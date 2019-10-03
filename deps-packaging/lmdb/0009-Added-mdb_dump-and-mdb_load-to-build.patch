@@ -1,0 +1,32 @@
+From 95b4e8024e8dae0b4b906acecfec2cbc34bf9d99 Mon Sep 17 00:00:00 2001
+From: Ole Herman Schumacher Elgesem <ole@northern.tech>
+Date: Thu, 3 Oct 2019 22:40:23 +0200
+Subject: [PATCH 09/10] Added mdb_dump and mdb_load to build
+
+Changelog: mdb_dump and mdb_load utilities are now packaged
+Ticket: CFE-3133
+Signed-off-by: Ole Herman Schumacher Elgesem <ole@northern.tech>
+---
+ libraries/liblmdb/Makefile.am | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/libraries/liblmdb/Makefile.am b/libraries/liblmdb/Makefile.am
+index e331a15..736a41d 100644
+--- a/libraries/liblmdb/Makefile.am
++++ b/libraries/liblmdb/Makefile.am
+@@ -4,9 +4,11 @@ lib_LTLIBRARIES = liblmdb.la
+ liblmdb_la_SOURCES = mdb.c midl.c
+ liblmdb_la_LDFLAGS=-no-undefined -avoid-version
+ 
+-bin_PROGRAMS = mdb_stat mdb_copy lmdump lmmgr
++bin_PROGRAMS = mdb_stat mdb_copy mdb_dump mdb_load lmdump lmmgr
+ mdb_stat_LDADD = liblmdb.la
+ mdb_copy_LDADD = liblmdb.la
++mdb_dump_LDADD = liblmdb.la
++mdb_load_LDADD = liblmdb.la
+ lmdump_LDADD = liblmdb.la
+ lmmgr_LDADD = liblmdb.la
+ 
+-- 
+2.21.0 (Apple Git-122)
+
