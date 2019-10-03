@@ -1,7 +1,7 @@
-From 53556430561ac2ecb4bd715563bc19ab12c71a07 Mon Sep 17 00:00:00 2001
+From 600edd2be2499cb5e0b31b287ecd84534d1743f8 Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Thu, 23 Apr 2015 11:28:56 +0200
-Subject: [PATCH 3/4] Optimization: Define correct cacheline size on HPUX.
+Subject: [PATCH 4/8] Optimization: Define correct cacheline size on HPUX.
 
 This only affects performance.
 ---
@@ -32,5 +32,5 @@ index 3db2251..2a5834b 100644
  AC_CONFIG_FILES([Makefile])
  AC_OUTPUT
 -- 
-2.7.4
+2.21.0 (Apple Git-122)
 

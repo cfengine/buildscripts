@@ -1,7 +1,7 @@
-From 83891ea6d20f21194ea3cf7164db74b131ebdf74 Mon Sep 17 00:00:00 2001
+From 4388827eaf324901619315cabcae2c7846631277 Mon Sep 17 00:00:00 2001
 From: Dimitrios Apostolou <dimitrios.apostolou@cfengine.com>
 Date: Fri, 13 Jan 2017 18:59:32 +0100
-Subject: [PATCH 5/6] _XOPEN_SOURCE 500, i.e. XPG5, can't be used with C99
+Subject: [PATCH 6/8] _XOPEN_SOURCE 500, i.e. XPG5, can't be used with C99
  compiler.
 
 It was useless anyway, srandom() and random() were not used anywhere.
@@ -13,12 +13,7 @@ diff --git a/libraries/liblmdb/lmdump.c b/libraries/liblmdb/lmdump.c
 index 0e3ee4b..9065468 100644
 --- a/libraries/liblmdb/lmdump.c
 +++ b/libraries/liblmdb/lmdump.c
-@@ -1,17 +1,16 @@
- /* lmdump.c - Lmdb database dumper
-    Has three modes :
-      -a : print keys in ascii form
-      -A : print keys and values in ascii form
-      -x : print keys and values in hexadecimal form
+@@ -6,7 +6,6 @@
       -d : print only the size of keys and values
   */
  
@@ -26,11 +21,6 @@ index 0e3ee4b..9065468 100644
  #include <stdio.h>
  #include <stdlib.h>
  #include <time.h>
- #include <string.h>
- #include "lmdb.h"
- 
- static void print_hex(char *s,  int len) 
- {
 -- 
-2.7.4
+2.21.0 (Apple Git-122)
 
