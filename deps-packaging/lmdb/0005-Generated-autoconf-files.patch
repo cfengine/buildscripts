@@ -1,23 +1,23 @@
-From 20c508a7bcaec56c9c30b48a8f61830079f75842 Mon Sep 17 00:00:00 2001
+From a099d56f96d7b254d5cace0cc8c0e610ddadbd52 Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Mon, 9 Jan 2017 08:56:11 +0100
-Subject: [PATCH 4/4] Generated autoconf files.
+Subject: [PATCH 5/7] Generated autoconf files.
 
 ---
  libraries/liblmdb/Makefile.in             |   940 ++
- libraries/liblmdb/aclocal.m4              | 10200 ++++++++++++++++++++
- libraries/liblmdb/autom4te.cache/output.0 | 14204 ++++++++++++++++++++++++++++
- libraries/liblmdb/autom4te.cache/output.1 | 14200 +++++++++++++++++++++++++++
+ libraries/liblmdb/aclocal.m4              | 10200 ++++++++++++++
+ libraries/liblmdb/autom4te.cache/output.0 | 14204 ++++++++++++++++++++
+ libraries/liblmdb/autom4te.cache/output.1 | 14200 +++++++++++++++++++
  libraries/liblmdb/autom4te.cache/requests |   300 +
- libraries/liblmdb/autom4te.cache/traces.0 |  2705 ++++++
- libraries/liblmdb/autom4te.cache/traces.1 |   541 ++
+ libraries/liblmdb/autom4te.cache/traces.0 |  2705 ++++
+ libraries/liblmdb/autom4te.cache/traces.1 |   541 +
  libraries/liblmdb/compile                 |   347 +
- libraries/liblmdb/config.guess            |  1441 +++
- libraries/liblmdb/config.sub              |  1813 ++++
- libraries/liblmdb/configure               | 14200 +++++++++++++++++++++++++++
+ libraries/liblmdb/config.guess            |  1441 ++
+ libraries/liblmdb/config.sub              |  1813 +++
+ libraries/liblmdb/configure               | 14200 +++++++++++++++++++
  libraries/liblmdb/depcomp                 |   791 ++
  libraries/liblmdb/install-sh              |   508 +
- libraries/liblmdb/ltmain.sh               | 11156 ++++++++++++++++++++++
+ libraries/liblmdb/ltmain.sh               | 11156 +++++++++++++++
  libraries/liblmdb/missing                 |   215 +
  15 files changed, 73561 insertions(+)
  create mode 100644 libraries/liblmdb/Makefile.in
@@ -73688,5 +73688,5 @@ index 0000000..f62bbae
 +# time-stamp-end: "; # UTC"
 +# End:
 -- 
-2.7.4
+2.21.0 (Apple Git-122)
 
