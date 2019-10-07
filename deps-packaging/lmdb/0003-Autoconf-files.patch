@@ -1,13 +1,13 @@
-From 1a79170162b25974b9c1650e0d166c63e888ec6a Mon Sep 17 00:00:00 2001
+From dd6f773c9e22922f239856ee2073ae1519ad80f2 Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Wed, 18 Feb 2015 09:40:20 +0100
-Subject: [PATCH 2/4] Autoconf files.
+Subject: [PATCH 03/10] Autoconf files.
 
 ---
- libraries/liblmdb/Makefile     | 117 -----------------------------------------
- libraries/liblmdb/Makefile.am  |  13 +++++
- libraries/liblmdb/configure.ac |  42 +++++++++++++++
- libraries/liblmdb/mdb.c        |   6 +++
+ libraries/liblmdb/Makefile     | 117 ---------------------------------
+ libraries/liblmdb/Makefile.am  |  13 ++++
+ libraries/liblmdb/configure.ac |  42 ++++++++++++
+ libraries/liblmdb/mdb.c        |   6 ++
  4 files changed, 61 insertions(+), 117 deletions(-)
  delete mode 100644 libraries/liblmdb/Makefile
  create mode 100644 libraries/liblmdb/Makefile.am
@@ -204,22 +204,22 @@ index 0000000..3db2251
 +AC_CONFIG_FILES([Makefile])
 +AC_OUTPUT
 diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
-index 23c1f00..4ea8c5e 100644
+index fe95cd3..efeae67 100644
 --- a/libraries/liblmdb/mdb.c
 +++ b/libraries/liblmdb/mdb.c
-@@ -226,6 +226,12 @@ typedef SSIZE_T	ssize_t;
+@@ -228,6 +228,12 @@ typedef SSIZE_T	ssize_t;
+ 	/** Features under development */
+ #ifndef MDB_DEVEL
  #define MDB_DEVEL 0
- #endif
- 
++#endif
++
 +#ifdef HAVE_PTHREAD_MUTEXATTR_SETROBUST
 +#define MDB_USE_ROBUST 1
 +#else
 +#define MDB_USE_ROBUST 0
-+#endif
-+
+ #endif
+ 
  	/** Wrapper around __func__, which is a C99 feature */
- #if __STDC_VERSION__ >= 199901L
- # define mdb_func_	__func__
 -- 
-2.7.4
+2.21.0 (Apple Git-122)
 

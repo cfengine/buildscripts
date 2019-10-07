@@ -92,6 +92,8 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
+%prefix/bin/mdb_dump
+%prefix/bin/mdb_load
 
 %if %{?rhel}%{!?rhel:0} > 7
 # SELinux policy

@@ -99,6 +99,8 @@ exit 0
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
+%prefix/bin/mdb_dump
+%prefix/bin/mdb_load
 
 %if %{?rhel}%{!?rhel:0} > 7
 # SELinux policy

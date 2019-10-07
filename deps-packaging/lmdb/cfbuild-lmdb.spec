@@ -86,6 +86,8 @@ CFEngine Build Automation -- lmdb -- development files
 %dir %{prefix}/bin
 %{prefix}/bin/mdb_stat
 %{prefix}/bin/mdb_copy
+%{prefix}/bin/mdb_dump
+%{prefix}/bin/mdb_load
 %{prefix}/bin/lmdump
 %{prefix}/bin/lmmgr
 
