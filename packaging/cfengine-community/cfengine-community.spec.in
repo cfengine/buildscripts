@@ -99,6 +99,8 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
+%prefix/bin/mdb_dump
+%prefix/bin/mdb_load
 
 # Globally installed configs, scripts
 %attr(644,root,root) /etc/sysconfig/cfengine3

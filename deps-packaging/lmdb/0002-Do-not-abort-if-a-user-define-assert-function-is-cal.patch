@@ -1,7 +1,7 @@
 From 31ba1cfb0e3b08939fbaa09c13e600561a99a9e1 Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <v.podzimek@mykolab.com>
 Date: Wed, 4 Sep 2019 16:25:53 +0200
-Subject: [PATCH 2/7] Do not abort() if a user-define assert function is called
+Subject: [PATCH 2/9] Do not abort() if a user-define assert function is called
 
 It's up to the user code to handle the problem. If it wants to
 abort(), it can do it itself, there's no point in enforcing it.

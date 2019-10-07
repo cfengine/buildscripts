@@ -1,7 +1,7 @@
 From 22fcef64d49b99fcdb56c0fcc2ec7cea309bebe2 Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Thu, 23 Apr 2015 11:28:56 +0200
-Subject: [PATCH 4/7] Optimization: Define correct cacheline size on HPUX.
+Subject: [PATCH 4/9] Optimization: Define correct cacheline size on HPUX.
 
 This only affects performance.
 ---

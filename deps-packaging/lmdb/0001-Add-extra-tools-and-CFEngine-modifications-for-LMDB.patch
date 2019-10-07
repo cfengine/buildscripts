@@ -1,7 +1,7 @@
 From ce9db0ffcfb681b9426b5f5de61f0fdd4c4408c7 Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Mon, 28 Jul 2014 11:28:38 +0200
-Subject: [PATCH 1/7] Add extra tools and CFEngine modifications for LMDB.
+Subject: [PATCH 1/9] Add extra tools and CFEngine modifications for LMDB.
 
 ---
  libraries/liblmdb/lmdump.c   | 128 ++++++++++++++++++++++

@@ -99,6 +99,8 @@ exit 0
 %prefix/bin/lmmgr
 %prefix/bin/mdb_copy
 %prefix/bin/mdb_stat
+%prefix/bin/mdb_dump
+%prefix/bin/mdb_load
 
 # Globally installed configs, scripts
 %attr(755,root,root) /etc/init.d/cfengine3

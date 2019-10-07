@@ -1,7 +1,7 @@
 From a099d56f96d7b254d5cace0cc8c0e610ddadbd52 Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Mon, 9 Jan 2017 08:56:11 +0100
-Subject: [PATCH 5/7] Generated autoconf files.
+Subject: [PATCH 5/9] Generated autoconf files.
 
 ---
  libraries/liblmdb/Makefile.in             |   940 ++
