@@ -20,7 +20,7 @@ mkdir -p %{_builddir}
 
 SYS=`uname -s`
 
-if expr \( "z$SYS" = 'zAIX' \) \| \( "`cat /etc/redhat-release`" : '.* 4\.' \)
+if expr \( "z$SYS" = 'zAIX' \) \| \( "`cat /etc/redhat-release`" : '.* [45]\.' \)
 then
     mv configure configure.bak
     sed 's/ *-Wno-array-bounds//' configure.bak >configure
