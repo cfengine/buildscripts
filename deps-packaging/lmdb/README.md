@@ -11,7 +11,8 @@ $ git fetch --all --tags
 Check out the desired version (see distfiles for current version, or use a newer tag to upgrade):
 
 ```
-$ git checkout LMDB_0.9.24
+$ export LMDB_TAG="LMDB_0.9.24"
+$ git checkout $LMDB_TAG
 ```
 
 Apply our patches:
@@ -26,7 +27,8 @@ If there were no conflicts - rejoice!
 If there were any conflicts, resolve them and regenerate the patches with:
 
 ```
-$ git format-patch LMDB_0.9.24..HEAD
+$ git format-patch $LMDB_TAG..HEAD
+$ rm ../../../buildscripts/deps-packaging/lmdb/*.patch
 $ mv 00* ../../../buildscripts/deps-packaging/lmdb
 ```
 
@@ -53,6 +55,7 @@ $ git commit
 Once again, regenerate and commit the patch files in buildscripts repo:
 
 ```
-$ git format-patch LMDB_0.9.24..HEAD
+$ git format-patch $LMDB_TAG..HEAD
+$ rm ../../../buildscripts/deps-packaging/lmdb/*.patch
 $ mv 00* ../../../buildscripts/deps-packaging/lmdb
 ```
