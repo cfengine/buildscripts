@@ -225,9 +225,8 @@ case "$JOB" in
         s3cmd get --no-progress $DEB_PACKAGE cfe.deb
         install_package
         sudo service cfengine3 restart
-        sudo bash nova/tests/schema/check_reqs.sh
         cd nova/tests/schema
-        sudo --preserve-env sh -c "prove -v *.test 2>&1"
+        sudo --preserve-env sh -c "./runtests.sh 2>&1"
     ;;
 
     ( deployment-test )
