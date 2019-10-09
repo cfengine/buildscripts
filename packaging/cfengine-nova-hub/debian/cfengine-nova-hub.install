@@ -57,6 +57,8 @@
 /var/cfengine/bin/lmmgr
 /var/cfengine/bin/mdb_copy
 /var/cfengine/bin/mdb_stat
+/var/cfengine/bin/mdb_dump
+/var/cfengine/bin/mdb_load
 /var/cfengine/bin/clusterdb
 /var/cfengine/bin/createdb
 /var/cfengine/bin/createuser

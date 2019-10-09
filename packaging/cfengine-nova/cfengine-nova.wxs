@@ -90,6 +90,12 @@
               <Component Id='mdb_stat.exe' Guid='2F61CE79-B0E8-4351-BE3E-7AEE65FE9D8A' Win64='$(var.isWin64)'>
                 <File Id='mdb_stat.exe' Name='mdb_stat.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_stat.exe' />
               </Component>
+              <Component Id='mdb_dump.exe' Guid='AC5DC7F1-80CE-476F-877D-2D94879839E3' Win64='$(var.isWin64)'>
+                <File Id='mdb_dump.exe' Name='mdb_dump.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_dump.exe' />
+              </Component>
+              <Component Id='mdb_load.exe' Guid='0C48B31C-A05D-43F5-A452-2CE6CC91E963' Win64='$(var.isWin64)'>
+                <File Id='mdb_load.exe' Name='mdb_load.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_load.exe' />
+              </Component>
               <Component Id='lmmgr.exe' Guid='DBF87C39-43FA-4DFE-A442-D2AB5B8985F0' Win64='$(var.isWin64)'>
                 <File Id='lmmgr.exe' Name='lmmgr.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\lmmgr.exe' />
               </Component>
