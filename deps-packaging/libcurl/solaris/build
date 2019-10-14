@@ -29,7 +29,8 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
     --without-nss \
     --without-polarssl \
     --without-winidn \
-    --without-winssl
+    --without-winssl \
+    CPPFLAGS="-DAF_LOCAL=AF_UNIX"
 $MAKE
 
 # Test

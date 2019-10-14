@@ -40,7 +40,7 @@ mkdir -p %{_builddir}
     --without-winidn \
     --without-winssl \
     --prefix=%{prefix} \
-    CPPFLAGS="-I%{prefix}/include" \
+    CPPFLAGS="-I%{prefix}/include -DAF_LOCAL=AF_UNIX" \
     LD_LIBRARY_PATH="%{prefix}/lib" \
     LD_RUN_PATH="%{prefix}/lib"
 
