@@ -2,7 +2,7 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX}
 
 TZ=${BUILD_ROOT}/cfbuild-zlib${PREFIX}
 TZD=${BUILD_ROOT}/cfbuild-zlib-devel${PREFIX}

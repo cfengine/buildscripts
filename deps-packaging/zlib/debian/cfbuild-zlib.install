@@ -1,1 +1,1 @@
-var/cfengine/lib/libz.so.*
+/var/cfengine/lib/libz.so.*

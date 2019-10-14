@@ -29,6 +29,7 @@ fi
 
 P=$BASEDIR/buildscripts/deps-packaging/$PKGNAME
 PKGDIR=$BASEDIR/$PKGNAME/pkg
+PREFIX=$BUILDPREFIX
 
 rm -rf $PKGDIR
 mkdir -p $PKGDIR
@@ -65,13 +66,13 @@ for package in `cat $P/hpux/packages`; do
 
   case $package in
     *-devel)
-      cd $PKGDIR/out/$package/var/cfengine/
+      cd $PKGDIR/out/$package$PREFIX/
       $BASEDIR/buildscripts/deps-packaging/psf.pl include $package $VERSION > $package.psf
       /usr/sbin/swpackage -s $PWD/$package.psf -x media_type=tape @ $BASEDIR/$PKGNAME/$package.depot
       cd $PKGDIR
       ;;
     *)
-      cd $PKGDIR/out/$package/var/cfengine/
+      cd $PKGDIR/out/$package$PREFIX/
       $BASEDIR/buildscripts/deps-packaging/psf.pl lib $package $VERSION > $package.psf
       /usr/sbin/swpackage -s $PWD/$package.psf -x media_type=tape @ $BASEDIR/$PKGNAME/$package.depot
       cd $PKGDIR

@@ -11,51 +11,51 @@ MP_APACHE_USER=cfapache
 if [ -d "$PREFIX/$MP_APACHE_USER" ];
 then
 	cf_console echo "cfapache folder already exists, deleting it"
-	rm -rf $PREFIX/$MP_APACHE_USER
+	rm -rf "$PREFIX/$MP_APACHE_USER"
 fi
-/usr/sbin/usermod -d $PREFIX/$MP_APACHE_USER $MP_APACHE_USER
-mkdir -p $PREFIX/$MP_APACHE_USER/.ssh
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/$MP_APACHE_USER
+/usr/sbin/usermod -d "$PREFIX/$MP_APACHE_USER" $MP_APACHE_USER
+mkdir -p "$PREFIX/$MP_APACHE_USER/.ssh"
+chown -R $MP_APACHE_USER:$MP_APACHE_USER "$PREFIX/$MP_APACHE_USER"
 echo "Host *
 StrictHostKeyChecking no
-UserKnownHostsFile=/dev/null" >> $PREFIX/$MP_APACHE_USER/.ssh/config
+UserKnownHostsFile=/dev/null" >> "$PREFIX/$MP_APACHE_USER/.ssh/config"
 
 #
 # Generate a host key
 #
-if [ ! -f $PREFIX/ppkeys/localhost.priv ]; then
-    $PREFIX/bin/cf-key >/dev/null || :
+if [ ! -f "$PREFIX/ppkeys/localhost.priv" ]; then
+    "$PREFIX/bin/cf-key" >/dev/null || :
 fi
 
-if [ ! -f $PREFIX/masterfiles/promises.cf ]; then
-    /bin/cp -R $PREFIX/share/NovaBase/masterfiles $PREFIX/
-    touch $PREFIX/masterfiles/cf_promises_validated
-    find $PREFIX/masterfiles -type d -exec chmod 700 {} \;
-    find $PREFIX/masterfiles -type f -exec chmod 600 {} \;
+if [ ! -f "$PREFIX/masterfiles/promises.cf" ]; then
+    /bin/cp -R "$PREFIX/share/NovaBase/masterfiles" "$PREFIX"
+    touch "$PREFIX/masterfiles/cf_promises_validated"
+    find "$PREFIX/masterfiles" -type d -exec chmod 700 {} \;
+    find "$PREFIX/masterfiles" -type f -exec chmod 600 {} \;
 fi
 
 #
 # Copy the stock package modules for the new installations
 #
 (
-  if ! [ -d $PREFIX/modules/packages ]; then
-    mkdir -p $PREFIX/modules/packages
+  if ! [ -d "$PREFIX/modules/packages" ]; then
+    mkdir -p "$PREFIX/modules/packages"
   fi
-  if cd $PREFIX/share/NovaBase/modules/packages; then
+  if cd "$PREFIX/share/NovaBase/modules/packages"; then
     for module in *; do
-      if ! [ -f $PREFIX/modules/packages/$module ]; then
-        cp $module $PREFIX/modules/packages
+      if ! [ -f "$PREFIX/modules/packages/$module" ]; then
+        cp $module "$PREFIX/modules/packages"
       fi
     done
   fi
 )
 
-if [ -f $PREFIX/lib/php/mcrypt.so ]; then
-  /bin/rm -f $PREFIX/lib/php/mcrypt.*
+if [ -f "$PREFIX/lib/php/mcrypt.so" ]; then
+  /bin/rm -f "$PREFIX/lib/php"/mcrypt.*
 fi
 
-if [ -f $PREFIX/lib/php/curl.so ]; then
-  /bin/rm -f $PREFIX/lib/php/curl.*
+if [ -f "$PREFIX/lib/php/curl.so" ]; then
+  /bin/rm -f "$PREFIX/lib/php"/curl.*
 fi
 
 # Hack around ENT-3520 In 3.12.0 we moved to php 7, this removes the old php
@@ -66,9 +66,9 @@ fi
 #
 #Copy necessary Files and permissions
 #
-cp $PREFIX/lib/php/*.ini $PREFIX/httpd/php/lib
+cp "$PREFIX/lib/php"/*.ini "$PREFIX/httpd/php/lib"
 EXTENSIONS_DIR="$(ls -d -1 "$PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-"*|tail -1)"
-cp $PREFIX/lib/php/*.so "$EXTENSIONS_DIR"
+cp "$PREFIX/lib/php"/*.so "$EXTENSIONS_DIR"
 
 #Change keys in files
 true "Adding CF_CLIENT_SECRET keys"
@@ -845,7 +845,7 @@ find $PREFIX/share/GUI -type f -exec chmod 0400 {} +
 # Ldap config
 #
 
-(cd /var/cfengine/httpd/htdocs/ldap; sh scripts/post-install.sh)
+(cd "$PREFIX/httpd/htdocs/ldap"; sh scripts/post-install.sh)
 # ENT-3645: `ldap/config/settings.ldap.php` must be writable by the webserver user or we will be unable to modify settings.
 chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/ldap
 chmod 0700 -R $PREFIX/httpd/htdocs/ldap/config

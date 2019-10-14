@@ -82,6 +82,10 @@ export_variables ()
     BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
     export BUILDPREFIX
 
+    # same
+    PREFIX="$BUILDPREFIX"
+    export PREFIX
+
 
     # Set PATH according to the needs of each platform and build-type
     # TODO: remove the generic PATH setting completely,
@@ -313,6 +317,7 @@ generate_chroot_transfer_script()
   ############# Cross platform #############
   cat <<EOF
 - */proc
+- $PREFIX
 + /bin
 + /etc
 - /lib/modules
@@ -323,7 +328,6 @@ generate_chroot_transfer_script()
 - /usr/src
 - /usr/local/src
 + /usr
-- /var/cfengine
 - /var/tmp
 + /var
 EOF

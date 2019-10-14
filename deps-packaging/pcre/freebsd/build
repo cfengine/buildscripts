@@ -2,7 +2,7 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX}
 
 PC=${BUILD_ROOT}/cfbuild-pcre${PREFIX}
 PCD=${BUILD_ROOT}/cfbuild-pcre-devel${PREFIX}

@@ -1,5 +1,8 @@
 #!/bin/sh -x
 
+# assume `. `dirname "$0"`/functions` was executed by caller
+test -z "$PREFIX" && exit 1
+
 SSH="ssh -o BatchMode=yes -o StrictHostKeyChecking=no"
 SFTP="sftp -o BatchMode=yes -o StrictHostKeyChecking=no"
 
@@ -33,8 +36,8 @@ P=$PKGD/$DIRNAME
 rm -rf $PKGD
 mkdir -p $P/bin
 
-cp -a /var/cfengine/bin/* $P/bin
-cp -a $BASEDIR/cfengine/dist/var/cfengine/bin/* $P/bin
+cp -a "$PREFIX/bin"/* $P/bin
+cp -a "$BASEDIR/cfengine/dist$PREFIX/bin"/* $P/bin
 
 case "$ARCH" in
   x86) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll;;

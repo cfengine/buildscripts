@@ -2,7 +2,7 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX}
 
 OS=${BUILD_ROOT}/cfbuild-openssl${PREFIX}
 OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}

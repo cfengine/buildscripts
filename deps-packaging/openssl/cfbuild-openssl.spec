@@ -30,8 +30,8 @@ SYS=`uname -s`
 
 echo ==================== BUILD_TYPE is $BUILD_TYPE ====================
 
-test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
-mkdir -p /var/cfengine/include
+test -d %{prefix} || ( sudo mkdir %{prefix} && sudo chmod 777 %{prefix} )
+mkdir -p %{prefix}/include
 
 DEBUG_CONFIG_FLAGS=
 DEBUG_CFLAGS=

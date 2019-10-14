@@ -91,14 +91,15 @@ check_and_install_perl()
 
 check_and_install_perl
 
-# Apply necessary changes for alternate /opt/cfengine prefix
-if [ "$BUILDPREFIX" = "/opt/cfengine" ]
+# non-gnu exotics don't support sed -i,
+# and only hub or deb packages use files mentioned below
+if [ "$BUILDPREFIX" != "/var/cfengine" -a \( "$DEP_PACKAGING" = "deb" -o "$ROLE" = hub \) ]
 then
-    sed -i "s:var/cfengine:opt/cfengine:"  \
+    # Apply necessary changes for alternate prefix
+    sed -i "s:/var/cfengine:$BUILDPREFIX:"  \
         $BASEDIR/buildscripts/deps-packaging/*/debian/*.install  \
         $BASEDIR/buildscripts/deps-packaging/*/mingw/debian/*.install \
-        $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf \
-        $BASEDIR/buildscripts/deps-packaging/apache/httpd-ssl.conf
+        $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
 fi
 
 # Override for manual testing
@@ -136,7 +137,11 @@ do
     esac
 
     revision=$(cat $BASEDIR/buildscripts/deps-packaging/revision)
-    version=0+$revision$versuffix$crossver
+    if [ "$BUILDPREFIX" != "/var/cfengine" ]
+    then
+        safe_prefix="+$(echo "$PREFIX" | sed 's:/::g')"
+    fi
+    version=0+$revision$versuffix$crossver$safe_prefix
 
     # FETCH dependency packages if needed
     package_files=`pkg-cache listpkgfiles $dep-$version`

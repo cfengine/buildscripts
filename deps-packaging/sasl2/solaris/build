@@ -2,7 +2,7 @@
 
 #Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX}
 
 LS=${BUILD_ROOT}/cfbuild-sasl2${PREFIX}
 LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
@@ -18,7 +18,7 @@ then
     export LD
 fi
 
-./configure --prefix=$PREFIX CPPFLAGS=-I/var/cfengine/include
+./configure --prefix=$PREFIX CPPFLAGS=-I$PREFIX/include
 
 #Build
 

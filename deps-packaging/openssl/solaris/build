@@ -2,7 +2,7 @@
 
 # Options
 
-PREFIX=/var/cfengine
+PREFIX=${BUILDPREFIX}
 
 OS=${BUILD_ROOT}/cfbuild-openssl${PREFIX}
 OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}
@@ -19,8 +19,8 @@ for f in idea srp; do
 done
 
 # mkdir
-test -d /var/cfengine || ( sudo mkdir /var/cfengine && sudo chmod 777 /var/cfengine )
-mkdir -p /var/cfengine/include
+test -d $PREFIX || ( sudo mkdir $PREFIX && sudo chmod 777 $PREFIX )
+mkdir -p $PREFIX/include
 
 # config misdetects architecture when building on a 64-kernel with 32-bit
 # userspace.

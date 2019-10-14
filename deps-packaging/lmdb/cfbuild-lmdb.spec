@@ -62,7 +62,7 @@ $MAKE
 %install
 rm -rf ${RPM_BUILD_ROOT}
 $MAKE DESTDIR=${RPM_BUILD_ROOT} install
-rm -f ${RPM_BUILD_ROOT}/var/cfengine/lib/liblmdb.la
+rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/liblmdb.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
