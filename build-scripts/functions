@@ -149,7 +149,7 @@ uninstall_rpms()
 }
 uninstall_debs()
 {
-    PKGS=`dpkg -l | tail -n+6 | awk '{print $2}' | grep '^'$1'$' || true`
+    PKGS=`dpkg -l | tail -n+6 | awk '{print $2}' | grep '^'$1 || true`
     if [ -n "$PKGS" ]
     then
         retry_wrapper  sudo dpkg --purge $PKGS
