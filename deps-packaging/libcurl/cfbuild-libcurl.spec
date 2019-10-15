@@ -1,4 +1,4 @@
-%define curl_version 7.65.3
+%define curl_version 7.66.0
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
@@ -40,7 +40,7 @@ mkdir -p %{_builddir}
     --without-winidn \
     --without-winssl \
     --prefix=%{prefix} \
-    CPPFLAGS="-I%{prefix}/include" \
+    CPPFLAGS="-I%{prefix}/include -DAF_LOCAL=AF_UNIX" \
     LD_LIBRARY_PATH="%{prefix}/lib" \
     LD_RUN_PATH="%{prefix}/lib"
 
@@ -93,5 +93,6 @@ CFEngine Build Automation -- libcurl
 %prefix/lib/pkgconfig
 
 %changelog
+
 
 

@@ -1,4 +1,4 @@
-%define php_version 7.3.8
+%define php_version 7.3.10
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -202,5 +202,6 @@ CFEngine Build Automation -- php -- development files
 %prefix/httpd/php/include
 
 %changelog
+
 
 
