@@ -27,14 +27,14 @@ MYNAME=`basename $0`
 CACHE_IS_ONLY_LOCAL=${CACHE_IS_ONLY_LOCAL:-no}
 
 # Check for Jenkins node label and use that as index.
-# There can be multiple labels, pick the first one.
-firstlabel=${NODE_LABELS%% *}
-if [ x"$firstlabel" = x ]
+# JOB_BASE_NAME is something like label=PACKAGES_HUB_x86_64_linux_debian_7
+label=${JOB_BASE_NAME#*=}
+if [ x"$label" = x ]
 then
     echo "Jenkins has not assigned a LABEL to this node," \
          "you are probably building manually;" \
          "disabling remote sftp cache"  1>&2
-    firstlabel=NO_LABEL
+    label=NO_LABEL
     CACHE_IS_ONLY_LOCAL=yes
 fi
 
@@ -108,7 +108,7 @@ putpkg)
     pkgname=$1
     shift
 
-    pkg_cache_dir="$PKGS_CACHEDIR/$firstlabel/$pkgname"
+    pkg_cache_dir="$PKGS_CACHEDIR/$label/$pkgname"
 
     # Remove bogus or empty dirs
     rmdir_if_bogus $pkg_cache_dir
@@ -123,7 +123,7 @@ putpkg)
 
         if [ $CACHE_IS_ONLY_LOCAL = no ]
         then
-            cache-sftp putdir  $firstlabel/$pkgname  "$@"
+            cache-sftp putdir  $label/$pkgname  "$@"
         fi
     fi
     ;;
@@ -133,7 +133,7 @@ listpkgfiles)
         fatal  "$MYNAME $cmd:  requires exactly one package name as argument with no slashes or spaces"
     fi
     pkgname="$1"
-    pkg_cache_dir="$PKGS_CACHEDIR/$firstlabel/$pkgname"
+    pkg_cache_dir="$PKGS_CACHEDIR/$label/$pkgname"
 
     # Remove bogus or empty dirs
     rmdir_if_bogus $pkg_cache_dir
@@ -142,7 +142,7 @@ listpkgfiles)
     then
         mkdir -p $pkg_cache_dir
         cd $pkg_cache_dir
-        cache-sftp getdir  $firstlabel/$pkgname
+        cache-sftp getdir  $label/$pkgname
         cd -  >/dev/null
     fi
 
@@ -202,7 +202,7 @@ keep_newest)
     done
     cd -  >/dev/null
 
-    cd $PKGS_CACHEDIR/$firstlabel/
+    cd $PKGS_CACHEDIR/$label/
     for f in `ls -t  |  sed -n $number,'$'p`
     do
         if [ ! -d "$f" ]  ||  [ "$f" = "." ]  ||  [ "$f" = ".." ]  ||  var_contains f /
