@@ -41,7 +41,7 @@ esac
 
 
 DEP_LIST="$DEP_LIST ntp rsync gcc make sudo wget"
-UNWANTED_DEPS="$UNWANTED_DEPS libtool"    # TODO automake autoconf bison byacc flex
+#UNWANTED_DEPS="$UNWANTED_DEPS libtool"    # TODO automake autoconf bison byacc flex
 
 
 RET=0
