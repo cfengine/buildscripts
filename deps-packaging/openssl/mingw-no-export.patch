@@ -1,0 +1,7 @@
+--- openssl-1.0.2t/util/libeay.num	2019-09-10 15:35:47.000000000 +0200
++++ openssl-1.0.2r/util/libeay.num	2019-02-26 15:20:37.000000000 +0100
+@@ -4432,4 +4432,3 @@
+ EVP_PKEY_meth_get_encrypt               4787	EXIST::FUNCTION:
+ EVP_PKEY_meth_get_copy                  4788	EXIST::FUNCTION:
+ ossl_safe_getenv                        4789	EXIST::FUNCTION:
+-OPENSSL_rdtsc                           4790	EXIST::FUNCTION:
