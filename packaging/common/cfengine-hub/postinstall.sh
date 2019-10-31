@@ -727,19 +727,19 @@ else
   # Ensure cfpostgres can read the sql files it will import. And that they are
   # restored to restrictive state after import ENT-2684
   chown cfpostgres $PREFIX/share/db/*.sql
-  (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql")
+  (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -v ON_ERROR_STOP=1 -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql")
 
   #create database for MISSION PORTAL
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/pgschema.sql)
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql)
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql  -v ON_ERROR_STOP=1 cfmp" < $PREFIX/share/GUI/phpcfenginenova/pgschema.sql)
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql  -v ON_ERROR_STOP=1 cfmp" < $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql)
 
 
   #create database for hub internal data
   (
     cd /tmp
-    chown cfpostgres "$PREFIX/share/db/schema_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql" && chown root "$PREFIX/share/db/schema_settings.sql"
-    chown cfpostgres "$PREFIX/share/db/ootb_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql" && chown root "$PREFIX/share/db/ootb_settings.sql"
-    chown cfpostgres "$PREFIX/share/db/ootb_import.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/ootb_import.sql" && chown root "$PREFIX/share/db/ootb_import.sql"
+    chown cfpostgres "$PREFIX/share/db/schema_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings  -v ON_ERROR_STOP=1 -f $PREFIX/share/db/schema_settings.sql" && chown root "$PREFIX/share/db/schema_settings.sql"
+    chown cfpostgres "$PREFIX/share/db/ootb_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings  -v ON_ERROR_STOP=1 -f $PREFIX/share/db/ootb_settings.sql" && chown root "$PREFIX/share/db/ootb_settings.sql"
+    chown cfpostgres "$PREFIX/share/db/ootb_import.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb  -v ON_ERROR_STOP=1 -f $PREFIX/share/db/ootb_import.sql" && chown root "$PREFIX/share/db/ootb_import.sql"
   )
 
   #revoke create permission on public schema for cfdb database
