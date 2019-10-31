@@ -54,7 +54,7 @@ Hub specific dependencies:
 
 Other dependencies (**find out why they are needed!**)
 
-* [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads) 2.1.26
+* [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads) 2.1.27
   * Only build on Solaris and HP-UX, why? What makes it necessary?
 
 * autoconf 2.69
