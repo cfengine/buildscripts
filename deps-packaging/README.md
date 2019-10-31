@@ -36,7 +36,7 @@ Build dependencies:
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
 * [libxml2](http://xmlsoft.org/sources/) 2.9.9
-* [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
+* [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.16
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
