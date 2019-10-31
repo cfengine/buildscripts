@@ -13,7 +13,7 @@ Agent dependencies:
 * [zlib](http://www.zlib.net/) 1.2.11
 * [OpenSSL](http://openssl.org/) 1.0.2r
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.43
-* [LMDB](https://github.com/LMDB/lmdb/) 0.9.23
+* [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
 * [libxml2](http://xmlsoft.org/sources/) 2.9.8
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
