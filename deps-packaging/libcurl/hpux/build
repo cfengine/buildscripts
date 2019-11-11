@@ -7,6 +7,9 @@ PREFIX=/var/cfengine
 TT=${BUILD_ROOT}/cfbuild-libcurl${PREFIX}
 TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
 
+#Patch
+$PATCH -p1 < asyn-thread-AF_LOCAL-AF_UNIX.patch
+
 # Build
 
 ./configure --prefix=$PREFIX \
