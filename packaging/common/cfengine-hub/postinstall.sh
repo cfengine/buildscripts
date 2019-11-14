@@ -330,9 +330,6 @@ init_postgres_dir()
   test "$#" = 2 || exit 1
   new_pgconfig_file="$1"
   pgconfig_type="$2"
-  # make sure cfpostgres can access state/pg
-  chown root:cfpostgres $PREFIX/state
-  chmod 0750 $PREFIX/state
 
   rm -rf $PREFIX/state/pg/data
   mkdir -p $PREFIX/state/pg/data
@@ -664,6 +661,11 @@ do_migration() {
   cf_console echo "And now installation will proceed with clean (empty) database"
   init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"
 }
+
+# make sure cfpostgres can access state/pg
+mkdir -p "$PREFIX/state/pg"
+chown root:cfpostgres "$PREFIX/state" "$PREFIX/state/pg"
+chmod 0750 "$PREFIX/state" "$PREFIX/state/pg"
 
 test -z "$BACKUP_DIR" && BACKUP_DIR=$PREFIX/state/pg/backup
 if [ ! -d $PREFIX/state/pg/data ]; then
