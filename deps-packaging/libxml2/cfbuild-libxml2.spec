@@ -18,8 +18,6 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n libxml2-%{libxml_version}
 
-expr "z$label" : '.*_aix_' && ${PATCH} -p0 < ../../SOURCES/aix-nan.patch
-
 if expr \( "z$label" : '.*_aix_' \) \| \( "`cat /etc/redhat-release`" : '.* 4\.' \)
 then
     mv configure configure.bak
