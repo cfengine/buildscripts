@@ -11,11 +11,12 @@ LSD=${BUILD_ROOT}/cfbuild-sasl2-devel${PREFIX}
 
 #Configure
 
-./configure --prefix=$PREFIX LDFLAGS=-L/var/cfengine/lib CPPFLAGS=-I/var/cfengine/include
+./configure --prefix=$PREFIX CPPFLAGS=-I/var/cfengine/include
 
 #Build
 
 gmake -C include
+gmake -C common
 gmake -C lib
 
 #Test
@@ -23,6 +24,7 @@ gmake -C lib
 #Install
 
 gmake -C include install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
+gmake -C common install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
 gmake -C lib install DESTDIR=${BUILD_ROOT}/cfbuild-sasl2-devel
 
 #Package

@@ -1,4 +1,4 @@
-%define openssl_version 1.1.1b
+%define openssl_version 1.1.1d
 
 Summary: CFEngine Build Automation -- openssl
 Name: cfbuild-openssl
@@ -9,7 +9,6 @@ License: MIT
 Group: Other
 Url: http://example.com/
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
-Patch0: 0001-cfi-build-fixes-in-x86-64-ghash-assembly.patch
 
 AutoReqProv: no
 
@@ -18,7 +17,6 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n openssl-%{openssl_version}
-%patch0 -p1
 
 %build
 
@@ -163,3 +161,4 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/lib/pkgconfig
 
 %changelog
+

@@ -1,10 +1,11 @@
-%define curl_version 7.64.1
+%define curl_version 7.66.0
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
 Version: %{version}
 Release: 1
 Source: curl-%{curl_version}.tar.gz
+Patch0:  asyn-thread-AF_LOCAL-AF_UNIX.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -17,6 +18,10 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
+
+%ifos aix5.3 aix7.1
+%patch0 -p1
+%endif
 
 ./configure \
     --with-sysroot=%{prefix} \
@@ -93,5 +98,6 @@ CFEngine Build Automation -- libcurl
 %prefix/lib/pkgconfig
 
 %changelog
+
 
 

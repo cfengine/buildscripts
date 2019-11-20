@@ -15,6 +15,8 @@ export LDFLAGS
 
 # Patch
 
+${PATCH} -p1 <host_name_max_hpux.patch
+
 # Configure
 
 ./configure --prefix=$PREFIX --enable-shared --disable-slapd --disable-backends \

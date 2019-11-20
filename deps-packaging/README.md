@@ -31,16 +31,16 @@ Build dependencies:
 | PostgreSQL   |         9.0.23 |          9.0.23 | removed from cfengine built packages |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.1.1b
+* [OpenSSL](http://openssl.org/) 1.1.1d
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.43
-* [LMDB](https://github.com/LMDB/lmdb/) 0.9.23
+* [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
-* [libxml2](http://xmlsoft.org/sources/) 2.9.9
-* [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
+* [libxml2](http://xmlsoft.org/sources/) 2.9.10
+* [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.16
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
-* [libcurl](http://curl.haxx.se/download.html) 7.64.1
+* [libcurl](http://curl.haxx.se/download.html) 7.66.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -67,7 +67,7 @@ Build dependencies:
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
 * [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
-* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.47
+* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.48
 * [gnu rx](http://www.gnu.org/software/rx/rx.html) 2.5.1 **DEPRECATED**
   * Needed by MinGW
 
@@ -75,16 +75,16 @@ Hub specific dependencies:
 
 * [APR](https://apr.apache.org/) 1.7.0
 * [apr-util](https://apr.apache.org/) 1.6.1
-* [Apache](http://httpd.apache.org/) 2.4.39
-* [PostgreSQL](http://www.postgresql.org/) for the hub 10.7
+* [Apache](http://httpd.apache.org/) 2.4.41
+* [PostgreSQL](http://www.postgresql.org/) for the hub 10.10
 * [Redis](http://redis.io/) 3.2.11
-* [PHP](http://php.net/) 7.2.18
+* [PHP](http://php.net/) 7.2.24
 * [Git](https://www.kernel.org/pub/software/scm/git/) 2.21.0
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)
 
-* [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads) 2.1.26
+* [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads) 2.1.27
   * Only build on Solaris and HP-UX, why? What makes it necessary?
 
 * autoconf 2.69
