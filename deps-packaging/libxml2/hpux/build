@@ -8,10 +8,6 @@ LX=${BUILD_ROOT}/cfbuild-libxml2${PREFIX}
 LXD=${BUILD_ROOT}/cfbuild-libxml2-devel${PREFIX}
 CPPFLAGS="-I${PREFIX}/include"
 
-# Patch
-
-${PATCH} -p0 < aix-nan.patch
-
 # Configure
 
 mv configure configure.bak

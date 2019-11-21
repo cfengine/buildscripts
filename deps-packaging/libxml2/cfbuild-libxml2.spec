@@ -1,4 +1,4 @@
-%define libxml_version 2.9.8
+%define libxml_version 2.9.10
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
@@ -17,8 +17,6 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n libxml2-%{libxml_version}
-
-expr "z$label" : '.*_aix_' && ${PATCH} -p0 < ../../SOURCES/aix-nan.patch
 
 if expr \( "z$label" : '.*_aix_' \) \| \( "`cat /etc/redhat-release`" : '.* 4\.' \)
 then
@@ -80,3 +78,4 @@ CFEngine Build Automation -- libxml2 -- development files
 %prefix/lib/pkgconfig
 
 %changelog
+

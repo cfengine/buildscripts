@@ -11,16 +11,16 @@ Build dependencies:
 Agent dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.0.2r
+* [OpenSSL](http://openssl.org/) 1.0.2t
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.43
-* [LMDB](https://github.com/LMDB/lmdb/) 0.9.23
+* [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
-* [libxml2](http://xmlsoft.org/sources/) 2.9.8
-* [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.15
+* [libxml2](http://xmlsoft.org/sources/) 2.9.10
+* [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.16
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
-* [libcurl](http://curl.haxx.se/download.html) 7.64.1
+* [libcurl](http://curl.haxx.se/download.html) 7.66.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -32,7 +32,7 @@ Enterprise agent specific dependencies:
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
 * [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
-* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.47
+* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.48
 * [libvirt](http://libvirt.org/sources/stable_updates/) 1.1.3.9
 * [PostgreSQL](http://www.postgresql.org/) 9.0.23 **EOL**
   * From this one we selectively build only `libpq`
@@ -43,8 +43,8 @@ Hub specific dependencies:
 
 * [APR](https://apr.apache.org/) 1.7.0
 * [apr-util](https://apr.apache.org/) 1.6.1
-* [Apache](http://httpd.apache.org/) 2.4.39
-* [PostgreSQL](http://www.postgresql.org/) for the hub 9.6.12
+* [Apache](http://httpd.apache.org/) 2.4.41
+* [PostgreSQL](http://www.postgresql.org/) for the hub 9.6.15
 * [Redis](http://redis.io/) 3.2.13
 * [PHP](http://php.net/) 5.6.40
 * [libmcrypt](https://sourceforge.net/projects/mcrypt/files/Libmcrypt/) 2.5.8
@@ -54,7 +54,7 @@ Hub specific dependencies:
 
 Other dependencies (**find out why they are needed!**)
 
-* [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads) 2.1.26
+* [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads) 2.1.27
   * Only build on Solaris and HP-UX, why? What makes it necessary?
 
 * autoconf 2.69
