@@ -702,6 +702,10 @@ done
 set -e
 echo done
 
+if "$PREFIX/bin/cf-promises" --show-classes | grep -q passive_ha_hub; then
+  IS_PASSIVE_HA_HUB=yes
+fi
+
 if [ "$LISTENING" = "no" ]
 then
   cf_console echo "Could not create necessary database and users, make sure Postgres server is running.."
@@ -709,6 +713,9 @@ then
   if is_upgrade && egrep '^3\.[6-9]\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
     cf_console echo "Database migration also failed for the above reason. Backups are in $PREFIX/state/pg/*.sql.gz"
   fi
+elif [ "$IS_PASSIVE_HA_HUB" = "yes" ]
+then
+  echo "Skipping database operations for passive HA hub"
 else
   (
     cd /tmp
@@ -865,6 +872,8 @@ if ! is_upgrade; then
     $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
   )
   true "Done adding user"
+elif [ "$IS_PASSIVE_HA_HUB" = "yes" ]; then
+  true "Skipping CFE_ROBOT operations for passive HA hub."
 else
   true "Rotating CFE_ROBOT password"
   ( set +x
@@ -885,9 +894,12 @@ else
   true "Done rotating password"
 fi
 
-su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap"
-
-$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_refresh
+if [ "$IS_PASSIVE_HA_HUB" = "yes" ]; then
+  true "Skipping database operations for passive HA hub"
+else
+  su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap"
+  $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_refresh
+fi
 
 # Shut down Apache and Postgres again, because we may need them to start through
 # systemd later.
