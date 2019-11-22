@@ -36,12 +36,12 @@ Build dependencies:
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.43
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
-* [libxml2](http://xmlsoft.org/sources/) 2.9.9
+* [libxml2](http://xmlsoft.org/sources/) 2.9.10
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.16
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
-* [libcurl](http://curl.haxx.se/download.html) 7.66.0
+* [libcurl](http://curl.haxx.se/download.html) 7.67.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -78,8 +78,8 @@ Hub specific dependencies:
 * [Apache](http://httpd.apache.org/) 2.4.41
 * [PostgreSQL](http://www.postgresql.org/) for the hub 12 beta 3
 * [Redis](http://redis.io/) 3.2.11
-* [PHP](http://php.net/) 7.3.10
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.23.0
+* [PHP](http://php.net/) 7.3.11
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.24.0
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)
