@@ -12,22 +12,22 @@ Build dependencies:
 
 | CFEngine version | 3.10.x  | 3.12.x | master | Notes |
 |  --------------  | ------- | ------ | ------ | ----- |
-|  sasl2           | 2.1.26  | 2.1.26 | 2.1.27 | Solaris Enterprise agent |
+|  sasl2           | 2.1.27  | 2.1.27 | 2.1.27 | Solaris Enterprise agent |
 |  lcov            | 1.14    | 1.14   | 1.14   |                          |
 |  libacl          | 2.2.53  | 2.2.53 | 2.2.53 |                          |
 |  libattr         | 2.4.48  | 2.4.48 | 2.4.48 |                          |
-|  libcurl         | 7.64.1  | 7.64.1 | 7.64.1 |                          |
+|  libcurl         | 7.66.0  | 7.67.0 | 7.67.0 |                          |
 |  libgnurx        | 2.5.1   | 2.5.1  | 2.5.1  | Windows Enterprise agent |
-|  libiconv        | 1.15    | 1.15   | 1.16   |                          |
+|  libiconv        | 1.16    | 1.16   | 1.16   |                          |
 |  libmcrypt       | 2.5.8   | -      | -      |                          |
 |  libvirt         | 1.1.3.9 | -      | -      |                          |
-|  libxml2         | 2.9.8   | 2.9.9  | 2.9.9  |                          |
+|  libxml2         | 2.9.10  | 2.9.10 | 2.9.10 |                          |
 |  libyaml         | 0.2.2   | 0.2.2  | 0.2.2  |                          |
-|  lmdb            | 0.9.23  | 0.9.23 | 0.9.23 |                          |
-|  openldap        | 2.4.47  | 2.4.47 | 2.4.47 | Enterprise agent only    |
-|  openssl         | 1.0.2r  | 1.1.1b | 1.1.1b |                          |
+|  lmdb            | 0.9.24  | 0.9.24 | 0.9.24 |                          |
+|  openldap        | 2.4.48  | 2.4.48 | 2.4.48 | Enterprise agent only    |
+|  openssl         | 1.0.2t  | 1.1.1d | 1.1.1d |                          |
 |  pcre            | 8.43    | 8.43   | 8.43   |                          |
-|  postgresql      | 9.0.23  | -      | -      |                          |
+|  postgresql      | 9.0.23  | 10.11  | 12.1   |                          |
 |  pthreads-w32    | 2-9-1   | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 |  zlib            | 1.2.11  | 1.2.11 | 1.2.11 |                          |
 
@@ -52,14 +52,14 @@ Build dependencies:
 
 | CFEngine version | 3.10.x  | 3.12.x | master |
 |  --------------  | ------- | ------ | ------ |
-|  apache          | 2.4.39  | 2.4.39 | 2.4.39 |
+|  apache          | 2.4.41  | 2.4.41 | 2.4.41 |
 |  apr             | 1.7.0   | 1.7.0  | 1.7.0  |
 |  apr-util        | 1.6.1   | 1.6.1  | 1.6.1  |
-|  git             | 2.13.7  | 2.21.0 | 2.21.0 |
+|  git             | 2.13.7  | 2.24.0 | 2.24.0 |
 |  libmcrypt       | 2.5.8   | -      | -      |
-|  openldap        | 2.4.47  | 2.4.47 | 2.4.47 |
-|  php             | 5.6.40  | 7.2.18 | 7.3.5  |
-|  postgresql      | 9.6.12  | 10.7   | 11.3   |
+|  openldap        | 2.4.48  | 2.4.48 | 2.4.48 |
+|  php             | 5.6.40  | 7.2.24 | 7.3.11 |
+|  postgresql      | 9.6.15  | -      | -      |
 |  redis           | 3.2.13  | -      | -      |
 |  rsync           | 3.1.3   | 3.1.3  | 3.1.3  |
 
