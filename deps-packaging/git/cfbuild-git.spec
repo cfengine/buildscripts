@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- git
 Name: cfbuild-git
 Version: %{version}
 Release: 1
-Source0: git-2.13.7.tar.gz
+Source0: git-2.24.0.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,7 +14,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n git-2.13.7
+%setup -q -n git-2.24.0
 
 ./configure --prefix=%{prefix} --with-libpcre=%{prefix} --with-openssl=%{prefix} --without-iconv --with-gitconfig=%{prefix}/config/gitconfig --with-gitattributes=%{prefix}/config/gitattributes --with-zlib=%{prefix} --with-curl=%{prefix}  --libexecdir=%{prefix}/lib
 
@@ -65,4 +65,5 @@ CFEngine Build Automation -- git
 %{prefix}/lib/git-core
 
 %changelog
+
 
