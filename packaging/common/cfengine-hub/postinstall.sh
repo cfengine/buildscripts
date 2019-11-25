@@ -893,7 +893,15 @@ else
     cf_console platform_service cfengine3 start
 fi
 
-if is_upgrade && wait_for_cf_postgres; then
+# In HA configuration, init scripts and systemd units don't manage PostgreSQL so
+# we need to start it explicitly here for key rotation.
+STARTED_PSQL=0
+if [ -f "$PREFIX/ha.cfg" ]; then
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
+  STARTED_PSQL=1
+fi
+
+if is_upgrade && wait_for_cf_postgres && [ ! -f "$PREFIX/state/pg/data/recovery.conf" ]; then
     true "Rotating keys..."
     set +x
     pwgen() {
@@ -924,6 +932,10 @@ if is_upgrade && wait_for_cf_postgres; then
     $PREFIX/bin/psql cfsettings -c "UPDATE users SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT' WHERE username = 'CFE_ROBOT'"
     set -x
     true "Done rotating keys"
+fi
+
+if [ $STARTED_PSQL = 1 ]; then
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart")
 fi
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"
