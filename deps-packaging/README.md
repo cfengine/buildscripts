@@ -40,7 +40,7 @@ Build dependencies:
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
 * [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
-* [libcurl](http://curl.haxx.se/download.html) 7.66.0
+* [libcurl](http://curl.haxx.se/download.html) 7.67.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -76,10 +76,10 @@ Hub specific dependencies:
 * [APR](https://apr.apache.org/) 1.7.0
 * [apr-util](https://apr.apache.org/) 1.6.1
 * [Apache](http://httpd.apache.org/) 2.4.41
-* [PostgreSQL](http://www.postgresql.org/) for the hub 10.10
+* [PostgreSQL](http://www.postgresql.org/) for the hub 10.11
 * [Redis](http://redis.io/) 3.2.11
 * [PHP](http://php.net/) 7.2.24
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.21.0
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.24.0
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)
