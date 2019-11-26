@@ -181,7 +181,7 @@ case "$PACKAGING" in
             tar czf "$P/coreos/cfengine3.img.tar.gz" --sparse -C "$(dirname "$IMAGE")" "$(basename "$IMAGE")"
             rm "$IMAGE"
             # create tarball containing everything
-            NAME="$PKG-$VERSION.$ARCH.fs-img.pkg"
+            NAME="$PKG-$VERSION-$RPM_RELEASE.$ARCH.fs-img.pkg"
             TARBALL="$BASEDIR/$PKG/RPMS/$NAME.tar.gz"
             mv "$P/coreos" "$P/$NAME"
             tar czvf "$TARBALL" -C "$P" "$NAME" > "$TARBALL.filelist"
