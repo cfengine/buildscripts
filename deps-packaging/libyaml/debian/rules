@@ -29,6 +29,7 @@ install: build
 
 	make DESTDIR=$(CURDIR)/debian/tmp install
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	find $(CURDIR)/debian/tmp/$(PREFIX)/lib/ -type f -a ! -name '*.so*' -a ! -name 'pkgconfig' -a ! -name '*.dll.a' -delete
 
 binary-indep: build install
 

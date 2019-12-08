@@ -1,2 +1,2 @@
-/var/cfengine/lib/*.so*
-/var/cfengine/bin/*.dll
+/var/cfengine/lib/
+/var/cfengine/bin/
