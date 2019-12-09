@@ -1,2 +1,4 @@
 /var/cfengine/bin/curl-config
 /var/cfengine/include
+/var/cfengine/lib/pkgconfig
+/var/cfengine/lib/*.so

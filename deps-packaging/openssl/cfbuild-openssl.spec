@@ -96,7 +96,6 @@ $MAKE DESTDIR=${RPM_BUILD_ROOT} install_ssldirs
 # Removing unused files
 
 rm -f ${RPM_BUILD_ROOT}%{prefix}/bin/c_rehash
-rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/pkgconfig/openssl.pc
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/CA.pl
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/tsget
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/openssl.cnf.dist
