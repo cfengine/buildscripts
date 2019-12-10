@@ -44,7 +44,7 @@ build-stamp:
 				CPPFLAGS="-I$(PREFIX)/include" \
 
 	make
-	
+
 	touch build-stamp
 
 install: build
@@ -55,7 +55,7 @@ install: build
 
 	make install DESTDIR=$(CURDIR)/debian/tmp
 
-	find $(CURDIR)/debian/tmp/$(PREFIX)/lib/ -type f ! -name '*.so*' -delete
+	find $(CURDIR)/debian/tmp/$(PREFIX)/lib/ -type f ! \( -name '*.so*' -o -name '*.pc' \) -delete
 
 binary-indep: build install
 

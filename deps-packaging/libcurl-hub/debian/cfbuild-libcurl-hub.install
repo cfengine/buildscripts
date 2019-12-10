@@ -1,2 +1,2 @@
 /var/cfengine/bin/curl
-/var/cfengine/lib/
+/var/cfengine/lib/*.so.*
