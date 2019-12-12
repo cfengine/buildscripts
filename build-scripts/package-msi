@@ -86,7 +86,12 @@ package()
 
     case $BUILD_TYPE in
       RELEASE)
-        REVISION=$VERSION.0
+        if [ -z "$EXPLICIT_RELEASE" ]
+        then
+          REVISION="$VERSION.1"
+        else
+          REVISION="$VERSION.$EXPLICIT_RELEASE"
+        fi
         ;;
       DEBUG|CODE_COVERAGE)
         MAIN_VERSION=${VERSION%\~*}
