@@ -266,7 +266,17 @@ case "$PACKAGING" in
     "$P/../common/produce-script" "$PKG" postremove pkg > postremove
 
     pkgmk -o -r "`pwd`" -d "$BASEDIR/$PKG/pkg"
-    NAME="CFE$PKG-$VERSION-$ARCH.pkg"
+    if [ "$BUILD_TYPE" = "RELEASE" ]
+    then
+      if [ -z "$EXPLICIT_RELEASE" ]
+      then
+        NAME="CFE$PKG-$VERSION.1-$ARCH.pkg"
+      else
+        NAME="CFE$PKG-$VERSION.$EXPLICIT_RELEASE-$ARCH.pkg"
+      fi
+    else
+      NAME="CFE$PKG-$VERSION-$ARCH.pkg"
+    fi
     pkgtrans -o -s "$BASEDIR/$PKG/pkg" "$BASEDIR/$PKG/$NAME" "CFE$PKG"
     ;;
   freebsd)
@@ -332,8 +342,20 @@ case "$PACKAGING" in
 
       cd "$BASEDIR/$PKG/pkg/"
 
+      if [ "$BUILD_TYPE" = "RELEASE" ]
+      then
+        if [ -z "$EXPLICIT_RELEASE" ]
+        then
+          NAME="$PKG-$VERSION.1-$OS_VER-$ARCH"
+        else
+          NAME="$PKG-$VERSION.$EXPLICIT_RELEASE-$OS_VER-$ARCH"
+        fi
+      else
+        NAME="$PKG-$VERSION-$OS_VER-$ARCH"
+      fi
+
       "$P/hpux/psf.pl" . "$PKG" "$VERSION" > "$BASEDIR/$PKG/$PKG-$VERSION.psf"
-      /usr/sbin/swpackage -s "$BASEDIR/$PKG/$PKG-$VERSION.psf" -x media_type=tape @ "$BASEDIR/$PKG/pkg/$PKG-$VERSION-$OS_VER-$ARCH.depot"
+      /usr/sbin/swpackage -s "$BASEDIR/$PKG/$PKG-$VERSION.psf" -x media_type=tape @ "$BASEDIR/$PKG/pkg/$NAME.depot"
       ;;
   msi)
     package-msi;;
