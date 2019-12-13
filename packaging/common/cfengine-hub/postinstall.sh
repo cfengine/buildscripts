@@ -119,16 +119,15 @@ fi
 chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/logs/application
 
 #
-# Do all the prelimenary VCS setup only on the first install of cfengine package
+# VCS setup
 #
-DCWORKDIR=/opt/cfengine
-DCPARAMS=$DCWORKDIR/dc-scripts/params.sh
-if ! is_upgrade; then
-  # Dir to store SSH key to access git repo
-  mkdir -p $DCWORKDIR/userworkdir/admin/.ssh
-  mkdir -p $(dirname $DCPARAMS)
+DCWORKDIR="/opt/cfengine"
+DCPARAMS="$DCWORKDIR/dc-scripts/params.sh"
+if ! test -f "$DCPARAMS"; then
+  # Create new DC params.sh
+  mkdir -p "$(dirname "$DCPARAMS")"
 
-  cat > $DCPARAMS <<EOHIPPUS
+  cat > "$DCPARAMS" <<EOHIPPUS
 ROOT="$DCWORKDIR/masterfiles_staging"
 GIT_URL="$DCWORKDIR/masterfiles.git"
 GIT_REFSPEC="master"
@@ -179,6 +178,9 @@ else
   fi
 
 fi
+
+# Dir to store SSH key to access git repo
+mkdir -p "$DCWORKDIR/userworkdir/admin/.ssh"
 
 if [ -f $PREFIX/bin/cf-twin ]; then
     /bin/rm $PREFIX/bin/cf-twin
