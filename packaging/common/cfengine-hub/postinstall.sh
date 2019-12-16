@@ -146,8 +146,6 @@ export GIT_SSH="\${SCRIPT_DIR}/ssh-wrapper.sh"
 export GIT_ASKPASS="\${SCRIPT_DIR}/git-askpass.sh"
 EOHIPPUS
 
-  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
-  chmod -R 700 $DCWORKDIR/userworkdir
 else
   # Migrate DC params.sh
   # change GIT_BRANCH to GIT_REFSPEC, if it exists
@@ -181,6 +179,8 @@ fi
 
 # Dir to store SSH key to access git repo
 mkdir -p "$DCWORKDIR/userworkdir/admin/.ssh"
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
+chmod -R 700 $DCWORKDIR/userworkdir
 
 if [ -f $PREFIX/bin/cf-twin ]; then
     /bin/rm $PREFIX/bin/cf-twin
