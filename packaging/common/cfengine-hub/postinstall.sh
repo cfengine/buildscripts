@@ -111,7 +111,9 @@ chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/tmp
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
 
 if [ -d "$PREFIX/httpd/htdocs/application/logs" ]; then
-    mv "$PREFIX/httpd/htdocs/application/logs" "$PREFIX/httpd/logs/application"
+    mkdir -p "$PREFIX/httpd/logs/application/logs"
+    mv "$PREFIX/httpd/htdocs/application/logs/"* "$PREFIX/httpd/logs/application/logs/"
+    rm -rf "$PREFIX/httpd/htdocs/application/logs"
 fi
 if [ ! -d "$PREFIX/httpd/logs/application" ]; then
     mkdir -p "$PREFIX/httpd/logs/application"
