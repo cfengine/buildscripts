@@ -27,6 +27,23 @@ if [ ! -f "$PREFIX/ppkeys/localhost.priv" ]; then
     "$PREFIX/bin/cf-key" >/dev/null || :
 fi
 
+if command -v debconf >/dev/null; then
+  . /usr/share/debconf/confmodule
+
+  db_input high cfengine-nova-hub/upgrade-masterfiles-modules || true
+  db_go
+  db_get cfengine-nova-hub/upgrade-masterfiles-modules
+  if [ "$RET" = "true" ]; then
+    datestamp=$(date +%F_%H-%M-%S)
+    mpf_backup="$PREFIX/masterfiles-${datestamp}"
+    modules_backup="$PREFIX/modules-${datestamp}"
+    cf_console echo "Backing up current masterfiles to ${mpf_backup}"
+    mv "$PREFIX/masterfiles" "$mpf_backup"
+    cf_console echo "Backing up current modules to ${modules_backup}"
+    mv "$PREFIX/modules" "$modules_backup"
+  fi
+fi
+
 if [ ! -f "$PREFIX/masterfiles/promises.cf" ]; then
     /bin/cp -R "$PREFIX/share/NovaBase/masterfiles" "$PREFIX"
     touch "$PREFIX/masterfiles/cf_promises_validated"

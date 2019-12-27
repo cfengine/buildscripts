@@ -1,0 +1,4 @@
+Template: cfengine-nova-hub/upgrade-masterfiles-modules
+Type: boolean
+Description: Do you wish to upgrade masterfiles and modules automatically?
+ Our policy upgrade tool can be run to upgrade your masterfiles and modules directories to the latest version.
