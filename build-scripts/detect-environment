@@ -126,6 +126,21 @@ detect_distribution()
         OS=rhel
         OS_VERSION="$VER"
         ;;
+
+      "Red Hat Enterprise Linux release "*)
+        VER=${REL#Red Hat Enterprise Linux release }
+        VER=${VER% \(*};
+        case "$VER" in
+          [0-9].[0-9]);;
+          *)
+          echo "Unknown RHEL Server version: $VER"
+          exit 42;;
+        esac
+
+        OS=rhel
+        OS_VERSION="$VER"
+        ;;
+
       *)
         echo "Unknown RedHat-like distribution: $REL"
         exit 42;;

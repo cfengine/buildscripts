@@ -72,12 +72,6 @@ install: build
 	cp -R $(CURDIR)/debian/tmp$(PREFIX)/modules $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase/modules
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/modules/*
 
-#Design Center
-
-	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/design-center
-	cp -R $(CURDIR)/debian/tmp/sketches/* $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase/sketches
-	cp -R $(CURDIR)/debian/tmp/tools/* $(CURDIR)/debian/tmp$(PREFIX)/design-center
-
 #Postgres
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/share/db
 	cp $(BASEDIR)/nova/db/schema.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
