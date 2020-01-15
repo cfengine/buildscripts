@@ -11,7 +11,7 @@ cd $BASEDIR/core
 rm cfengine-3.*.tar.gz || true
 git rev-parse HEAD > $BASEDIR/output/core-commitID
 # Configure in order to run "make dist", deleted later.
-./configure --with-tokyocabinet=/usr
+./configure
 make dist
 mv cfengine-3.*.tar.gz $BASEDIR/output/tarballs/
 make distclean
