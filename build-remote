@@ -189,7 +189,7 @@ checkout() {
 
   case "$PROJECT" in
     nova)
-      REPOS="$REPOS nova design-center mission-portal"
+      REPOS="$REPOS nova mission-portal"
   esac
 
   case "$PROJECT-$BRANCH" in
@@ -197,8 +197,6 @@ checkout() {
       git clone --recursive $SOURCE/core build/core
       git clone --recursive $SOURCE/masterfiles build/masterfiles
       (cd build/masterfiles && git checkout $VERSION) || false
-      git clone --recursive $SOURCE/design-center build/design-center
-      (cd build/design-center && git checkout $VERSION) || false
       ;;
     community-3.4.x)
       git clone $SOURCE/core build/core
@@ -227,8 +225,6 @@ checkout() {
       git clone $SOURCE/core build/core
       (cd build/core && git checkout $VERSION) || false
       git clone $SOURCE/mission-portal build/mission-portal
-      git clone $SOURCE/design-center build/design-center
-      (cd build/design-center && git checkout $VERSION)
       ;;
     nova-2.2.*)
       VERSION=$BRANCH
@@ -242,7 +238,6 @@ checkout() {
       git clone --recursive $SOURCE/enterprise build/enterprise
       git clone --recursive $SOURCE/nova build/nova
       git clone --recursive $SOURCE/mission-portal build/mission-portal
-      git clone --recursive $SOURCE/design-center build/design-center
       git clone --recursive $SOURCE/masterfiles build/masterfiles
       git clone --recursive $SOURCE/ldap-api build/mission-portal/ldap
       ;;
@@ -256,15 +251,13 @@ checkout() {
       (cd build/enterprise && git checkout $VERSION) || false
       git clone $SOURCE/mission-portal build/mission-portal
       (cd build/mission-portal && git checkout $VERSION) || false
-      git clone $SOURCE/design-center build/design-center
-      (cd build/design-center && git checkout $VERSION) || false
       git clone $SOURCE/masterfiles build/masterfiles
       (cd build/masterfiles && git checkout $VERSION)
       ;;
 
     nova-cp)
       rsync -avr --exclude='workdir-*' $AUTOBUILD_PATH/ build/buildscripts  >>rsync.log
-      for d in core nova enterprise masterfiles design-center mission-portal ldap-api
+      for d in core nova enterprise masterfiles mission-portal ldap-api
       do
         rsync -avr $SOURCE/$d build  >>rsync.log
       done
