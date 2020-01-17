@@ -164,7 +164,7 @@ post()
 
   case $BUILD_TYPE in
     RELEASE)
-      PKGNAME="cfengine-nova-$VERSION"
+      PKGNAME="cfengine-nova-$VERSION-${EXPLICIT_RELEASE:-1}"
       ;;
     DEBUG|CODE_COVERAGE)
       PKGNAME="cfengine-nova-$VERSION-$BUILD_NUMBER"
