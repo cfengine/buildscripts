@@ -160,10 +160,10 @@ case "$PACKAGING" in
     then
         # Create AIX bff packages
         chmod +x "$P/$PKG.bff.sh"
-        "$P/$PKG.bff.sh" "$RPM_VERSION.$safe_prefix$RPM_RELEASE" "$BASEDIR" "$PREFIX"
+        "$P/$PKG.bff.sh" "$RPM_VERSION-$safe_prefix$RPM_RELEASE" "$BASEDIR" "$PREFIX"
     else
         # Create TAR package
-        TARBALL="$BASEDIR/$PKG/RPMS/$PKG-$VERSION.$safe_prefix-$RPM_RELEASE.$ARCH.pkg.tar.gz"
+        TARBALL="$BASEDIR/$PKG/RPMS/$PKG-$VERSION-$safe_prefix$RPM_RELEASE.$ARCH.pkg.tar.gz"
 	# RHEL4 and RHEL6 have buildroot in different folders.
 	# Below lines try to be careful about finding it.
 	# Note that `mv` command will fail and abort the build
@@ -205,7 +205,7 @@ case "$PACKAGING" in
             tar czf "$P/coreos/cfengine3.img.tar.gz" --sparse -C "$(dirname "$IMAGE")" "$(basename "$IMAGE")"
             rm "$IMAGE"
             # create tarball containing everything
-            NAME="$PKG-$VERSION.$safe_prefix-$RPM_RELEASE.$ARCH.fs-img.pkg"
+            NAME="$PKG-$VERSION-$safe_prefix$RPM_RELEASE.$ARCH.fs-img.pkg"
             TARBALL="$BASEDIR/$PKG/RPMS/$NAME.tar.gz"
             mv "$P/coreos" "$P/$NAME"
             tar czvf "$TARBALL" -C "$P" "$NAME" > "$TARBALL.filelist"
