@@ -39,9 +39,10 @@ rm -rf ${RPM_BUILD_ROOT}
 $MAKE install DESTDIR=${RPM_BUILD_ROOT}
 $MAKE -C contrib install DESTDIR=${RPM_BUILD_ROOT}
 patch -d ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/ -o postgresql.conf.cfengine < ${RPM_BUILD_ROOT}/../../SOURCES/postgresql.conf.cfengine.patch
+patch ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}/../../SOURCES/postgresql.conf.sample.patch
 chmod --reference ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.cfengine
 chown --reference ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.sample ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/postgresql.conf.cfengine
-
+patch ${RPM_BUILD_ROOT}%{prefix}/share/postgresql/pg_hba.conf.sample ${RPM_BUILD_ROOT}/../../SOURCES/pg_hba.conf.sample.patch
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
 
 %clean
