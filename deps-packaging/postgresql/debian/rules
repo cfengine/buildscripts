@@ -13,7 +13,7 @@ build-stamp:
 	dh_testdir
 
 	LD_LIBRARY_PATH=$(PREFIX)/lib CPPFLAGS=-I$(PREFIX)/include ./configure --prefix=$(PREFIX) --without-zlib --without-readline --with-openssl
-	make 
+	make
 	make -C contrib
 	touch build-stamp
 
@@ -26,8 +26,10 @@ install: build
 	make -C contrib install DESTDIR=$(CURDIR)/debian/tmp
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresl.conf.cfengine
 	patch -d $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/ -o postgresql.conf.cfengine < $(CURDIR)/postgresql.conf.cfengine.patch
+	patch $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/postgresql.conf.sample.patch
 	chmod --reference $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.cfengine
 	chown --reference $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.cfengine
+	patch $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/pg_hba.conf.sample $(CURDIR)/pg_hba.conf.sample.patch
 
 binary-indep: build install
 
