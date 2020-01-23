@@ -227,7 +227,7 @@ case "$PACKAGING" in
     (cd "$BASEDIR/$PKG/pkg"; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
 
     # Create TAR package
-    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$VERSION.$ARCH.pkg.tar.gz"
+    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION.$ARCH.pkg.tar.gz"
     cd "$BASEDIR/$PKG/pkg/debian/tmp/"
     mv usr etc var/cfengine/share/
     tar czvf "$TARBALL" .  > "$TARBALL.filelist"
