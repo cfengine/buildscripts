@@ -216,8 +216,13 @@ case "$PACKAGING" in
       DEB_VERSION="$VERSION~$BUILD_NUMBER"
     fi
 
+    # on debian/ubuntu, $OS_VERSION contains too many details.
+    # leave only major version:
+    # 7.0 => 7
+    # 16.04 => 16
+    os_version_major="${OS_VERSION%%.*}"
 
-    sed -e "s/@@VERSION@@/$DEB_VERSION/" "$BASEDIR/$PKG/pkg/debian/changelog.in" > "$BASEDIR/$PKG/pkg/debian/changelog"
+    sed -e "s/@@VERSION@@/$DEB_VERSION.$os_version_major/" "$BASEDIR/$PKG/pkg/debian/changelog.in" > "$BASEDIR/$PKG/pkg/debian/changelog"
 
     "$P/../common/produce-script" "$PKG" preinstall deb > "$BASEDIR/$PKG/pkg/debian/$PKG.preinst"
     "$P/../common/produce-script" "$PKG" postinstall deb > "$BASEDIR/$PKG/pkg/debian/$PKG.postinst"
@@ -227,7 +232,7 @@ case "$PACKAGING" in
     (cd "$BASEDIR/$PKG/pkg"; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
 
     # Create TAR package
-    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION.$ARCH.pkg.tar.gz"
+    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION.$os_version_major.$ARCH.pkg.tar.gz"
     cd "$BASEDIR/$PKG/pkg/debian/tmp/"
     mv usr etc var/cfengine/share/
     tar czvf "$TARBALL" .  > "$TARBALL.filelist"
