@@ -270,12 +270,12 @@ case "$PACKAGING" in
     then
       if [ -z "$EXPLICIT_RELEASE" ]
       then
-        NAME="CFE$PKG-$VERSION.1-$ARCH.pkg"
+        NAME="CFE$PKG-$VERSION.1-solaris$OS_VERSION-$ARCH.pkg"
       else
-        NAME="CFE$PKG-$VERSION.$EXPLICIT_RELEASE-$ARCH.pkg"
+        NAME="CFE$PKG-$VERSION.$EXPLICIT_RELEASE-solaris$OS_VERSION-$ARCH.pkg"
       fi
     else
-      NAME="CFE$PKG-$VERSION-$ARCH.pkg"
+      NAME="CFE$PKG-$VERSION-solaris$OS_VERSION-$ARCH.pkg"
     fi
     pkgtrans -o -s "$BASEDIR/$PKG/pkg" "$BASEDIR/$PKG/$NAME" "CFE$PKG"
     ;;
