@@ -3,7 +3,7 @@
 Summary: The CFEngine Configuration System
 Name: cfengine-nova
 Version: @@VERSION@@
-Release: @@RELEASE@@
+Release: @@RELEASE@@%{?dist}
 Vendor: CFEngine AS
 License: COSL
 Group: Applications/System
