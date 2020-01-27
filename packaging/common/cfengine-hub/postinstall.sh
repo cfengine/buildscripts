@@ -718,66 +718,74 @@ then
 else
   (
     cd /tmp
-    set +e
-    su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfdb"
-    su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER"
-    su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root"
-    su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfmp"
-    su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 cfsettings"
-    exit 0
+
+    db_name_list=$(su cfpostgres -c "$PREFIX/bin/psql --list")
+    for db_name in cfdb cfmp cfsettings; do
+      if ! echo "$db_name_list" | grep ${db_name} >/dev/null; then
+        su cfpostgres -c "$PREFIX/bin/createdb -E SQL_ASCII --lc-collate=C --lc-ctype=C -T template0 ${db_name}"
+      fi
+    done
+
+    db_user_list=$(su cfpostgres -c "$PREFIX/bin/psql -d postgres -c '\du'")
+    if ! echo "$db_user_list" | grep $MP_APACHE_USER >/dev/null; then
+        su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER"
+    fi
+    if ! echo "$db_user_list" | grep root >/dev/null; then
+      su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root"
+    fi
   )
 
   # Create the cfengine mission portal postgres user
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql)
+  (
+    cd /tmp &&
+      if ! su cfpostgres -c "$PREFIX/bin/psql  -d postgres -c '\du' | grep cfmppostgres >/dev/null"; then
+        su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/create_cfmppostgres_user.sql
+      fi
+  )
 
   # Ensure cfpostgres can read the sql files it will import. And that they are
   # restored to restrictive state after import ENT-2684
   chown cfpostgres $PREFIX/share/db/*.sql
-  (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -v ON_ERROR_STOP=1 -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql")
+  (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql")
 
   #create database for MISSION PORTAL
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql  -v ON_ERROR_STOP=1 cfmp" < $PREFIX/share/GUI/phpcfenginenova/pgschema.sql)
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql  -v ON_ERROR_STOP=1 cfmp" < $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql)
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/pgschema.sql)
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/ootb_import.sql)
 
 
   #create database for hub internal data
   (
+    set -e
     cd /tmp
-    chown cfpostgres "$PREFIX/share/db/schema_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings  -v ON_ERROR_STOP=1 -f $PREFIX/share/db/schema_settings.sql" && chown root "$PREFIX/share/db/schema_settings.sql"
-    chown cfpostgres "$PREFIX/share/db/ootb_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings  -v ON_ERROR_STOP=1 -f $PREFIX/share/db/ootb_settings.sql" && chown root "$PREFIX/share/db/ootb_settings.sql"
-    chown cfpostgres "$PREFIX/share/db/ootb_import.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb  -v ON_ERROR_STOP=1 -f $PREFIX/share/db/ootb_import.sql" && chown root "$PREFIX/share/db/ootb_import.sql"
+    chown cfpostgres "$PREFIX/share/db/schema_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/schema_settings.sql" && chown root "$PREFIX/share/db/schema_settings.sql"
+    chown cfpostgres "$PREFIX/share/db/ootb_settings.sql" && su cfpostgres -c "$PREFIX/bin/psql cfsettings -f $PREFIX/share/db/ootb_settings.sql" && chown root "$PREFIX/share/db/ootb_settings.sql"
+    chown cfpostgres "$PREFIX/share/db/ootb_import.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/ootb_import.sql" && chown root "$PREFIX/share/db/ootb_import.sql"
   )
 
-  #revoke create permission on public schema for cfdb database
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
-    REVOKE CREATE ON SCHEMA public FROM public;
+  (
+    cd /tmp
+    su cfpostgres -c "$PREFIX/bin/psql cfdb" << EOF
+\set ON_ERROR_STOP true
+-- revoke create permission on public schema for cfdb database
+REVOKE CREATE ON SCHEMA public FROM public;
+
+-- grant permission for apache user to use the cfdb database
+GRANT ALL ON DATABASE cfdb TO $MP_APACHE_USER;
+GRANT SELECT, DELETE ON ALL TABLES IN SCHEMA PUBLIC TO $MP_APACHE_USER;
+ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
+EOF
+   )
+
+  (
+    cd /tmp
+    su cfpostgres -c "$PREFIX/bin/psql cfsettings" << EOF
+-- grant permission for apache user to use the cfsettings database
+GRANT ALL ON DATABASE cfsettings TO $MP_APACHE_USER;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $MP_APACHE_USER;
+ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
 EOF
 
-  #grant permission for apache user to use the cfdb database
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
-    GRANT ALL ON DATABASE cfdb TO $MP_APACHE_USER;
-EOF
-
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
-    GRANT SELECT, DELETE ON ALL TABLES IN SCHEMA PUBLIC TO $MP_APACHE_USER;
-EOF
-
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb") << EOF
-    ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
-EOF
-
-  #grant permission for apache user to use the cfsettings database
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
-    GRANT ALL ON DATABASE cfsettings TO $MP_APACHE_USER;
-EOF
-
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
-    GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO $MP_APACHE_USER;
-EOF
-
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfsettings") << EOF
-    ALTER DEFAULT PRIVILEGES FOR ROLE root,cfpostgres IN SCHEMA PUBLIC GRANT SELECT ON TABLES TO PUBLIC;
-EOF
+  )
 
 fi
 
