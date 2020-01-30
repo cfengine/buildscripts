@@ -3,7 +3,8 @@
 Summary: The CFEngine Configuration System
 Name: cfengine-nova
 Version: @@VERSION@@
-Release: @@RELEASE@@
+# {?dist} adds a dot-separated OS codename (like .el6 or .fc30)
+Release: @@RELEASE@@%{?dist}
 Vendor: CFEngine AS
 License: COSL
 Group: Applications/System
