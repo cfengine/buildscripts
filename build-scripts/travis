@@ -53,7 +53,7 @@ case "$JOB" in
         # (while we need PHP7 minimum)
         mv /home/travis/.phpenv /home/travis/.phpenv.del || true
 
-        for i in core nova enterprise mission-portal masterfiles design-center ldap-api
+        for i in core nova enterprise mission-portal masterfiles ldap-api
         do
             if [ -d $i ]
             then
