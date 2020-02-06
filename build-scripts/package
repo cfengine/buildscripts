@@ -246,7 +246,7 @@ case "$PACKAGING" in
     # 16.04 => 16
     os_version_major="${OS_VERSION%%.*}"
 
-    sed -e "s/@@VERSION@@/$DEB_VERSION$safe_prefix.$os_version_major/" "$BASEDIR/$PKG/pkg/debian/changelog.in" > "$BASEDIR/$PKG/pkg/debian/changelog"
+    sed -e "s/@@VERSION@@/$DEB_VERSION$safe_prefix.$OS$os_version_major/" "$BASEDIR/$PKG/pkg/debian/changelog.in" > "$BASEDIR/$PKG/pkg/debian/changelog"
 
     "$P/../common/produce-script" "$PKG" preinstall deb > "$BASEDIR/$PKG/pkg/debian/$PKG.preinst"
     "$P/../common/produce-script" "$PKG" postinstall deb > "$BASEDIR/$PKG/pkg/debian/$PKG.postinst"
@@ -256,7 +256,7 @@ case "$PACKAGING" in
     (cd "$BASEDIR/$PKG/pkg"; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
 
     # Create TAR package
-    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION$safe_prefix.$os_version_major.$ARCH.pkg.tar.gz"
+    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION$safe_prefix.$OS$os_version_major.$ARCH.pkg.tar.gz"
     cd "$BASEDIR/$PKG/pkg/debian/tmp/"
     # $LOCAL_PREFIX is $PREFIX without first slash, i.e. var/cfengine
     # $LOCAL_DIR is first (outermost) dir in $LOCAL_PREFIX, i.e. var
