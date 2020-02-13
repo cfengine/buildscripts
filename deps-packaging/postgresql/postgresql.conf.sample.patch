@@ -1,0 +1,13 @@
+--- postgresql.conf.sample	2019-11-11 16:03:10.000000000 -0600
++++ postgresql.conf.sample	2020-01-21 13:07:32.232910689 -0600
+@@ -65,8 +65,8 @@
+ #superuser_reserved_connections = 3	# (change requires restart)
+ #unix_socket_directories = '/tmp'	# comma-separated list of directories
+ 					# (change requires restart)
+-#unix_socket_group = ''			# (change requires restart)
+-#unix_socket_permissions = 0777		# begin with 0 to use octal notation
++unix_socket_group = 'cfpostgres'			# (change requires restart)
++unix_socket_permissions = 0660		# begin with 0 to use octal notation
+ 					# (change requires restart)
+ #bonjour = off				# advertise server via Bonjour
+ 					# (change requires restart)
