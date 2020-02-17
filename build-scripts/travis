@@ -142,9 +142,8 @@ case "$JOB" in
     ( acceptance-test )
         s3cmd get --no-progress $DEB_PACKAGE cfe.deb
         install_package
-        touch /home/travis/rpmvercmp
-        chmod a+x ~/rpmvercmp
-        cd ..
+        # create a fake rpmvercmp which always returns true
+        sudo ln -s "$(which true)" "$PREFIX/bin/rpmvercmp"
         test -d core || git clone --recursive -b "$TRAVIS_BRANCH" git@github.com:cfengine/core.git
         test -d enterprise || git clone --recursive -b "$TRAVIS_BRANCH" git@github.com:cfengine/enterprise.git
         chmod -R u+w */tests/acceptance
@@ -157,15 +156,7 @@ case "$JOB" in
             ./25_cf-execd
         set +e
         sudo ./testall \
-            --agent="$PREFIX/bin/cf-agent" \
-            --cfpromises="$PREFIX/bin/cf-promises" \
-            --cfserverd="$PREFIX/bin/cf-serverd" \
-            --cfkey="$PREFIX/bin/cf-key" \
-            --cfexecd="$PREFIX/bin/cf-execd" \
-            --cfnet="$PREFIX/bin/cf-net" \
-            --cfcheck="$PREFIX/bin/cf-check" \
-            --cfrunagent="$PREFIX/bin/cf-runagent" \
-            --rpmvercmp="$HOME/rpmvercmp" \
+            --bindir="$PREFIX/bin" \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
             --gainroot=sudo
         RET1=$?
@@ -186,15 +177,7 @@ case "$JOB" in
         echo export \"CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR=$PREFIX/lib\" >> testall.env
         set +e
         sudo ./testall \
-            --agent="$PREFIX/bin/cf-agent" \
-            --cfpromises="$PREFIX/bin/cf-promises" \
-            --cfserverd="$PREFIX/bin/cf-serverd" \
-            --cfkey="$PREFIX/bin/cf-key" \
-            --cfexecd="$PREFIX/bin/cf-execd" \
-            --cfnet="$PREFIX/bin/cf-net" \
-            --cfcheck="$PREFIX/bin/cf-check" \
-            --cfrunagent="$PREFIX/bin/cf-runagent" \
-            --rpmvercmp=$HOME/rpmvercmp \
+            --bindir="$PREFIX/bin" \
             --tests=common,timed,slow,errorexit,serial,network,libxml2,libcurl,unsafe \
             --gainroot=sudo
         RET2=$?
