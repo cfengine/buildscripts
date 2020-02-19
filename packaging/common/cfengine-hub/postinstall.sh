@@ -855,7 +855,7 @@ $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_ref
 # Shut down Apache and Postgres again, because we may need them to start through
 # systemd later.
 $PREFIX/httpd/bin/apachectl stop
-(cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart")
+(cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart" || su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m fast")
 
 #
 # Delete temporarily stored key.
