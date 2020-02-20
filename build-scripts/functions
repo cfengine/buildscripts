@@ -367,6 +367,9 @@ EOF
 - /run/*
 + /run
 - /var/lib/lxcfs
+- /etc/yum.repos.d/*
+- /etc/zypp/repos.d/*
+- /etc/apt/*
 EOF
       ;;
   esac
