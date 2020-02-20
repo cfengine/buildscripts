@@ -30,7 +30,7 @@ Build dependencies:
 
 * [zlib](http://www.zlib.net/) 1.2.11
 * [OpenSSL](http://openssl.org/) 1.1.1d
-* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.43
+* [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.44
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
 * [libxml2](http://xmlsoft.org/sources/) 2.9.10
