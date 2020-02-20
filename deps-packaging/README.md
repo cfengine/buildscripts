@@ -62,7 +62,7 @@ Build dependencies:
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
 * [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
-* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.48
+* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.49
 * [gnu rx](http://www.gnu.org/software/rx/rx.html) 2.5.1 **DEPRECATED**
   * Needed by MinGW
 
