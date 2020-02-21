@@ -26,9 +26,11 @@ CPPFLAGS=-I%{buildprefix}/include
 ./configure \
     --prefix=%{prefix}/httpd \
     --enable-so \
+    --enable-http2 \
     --enable-mods-shared="all ssl ldap authnz_ldap" \
     --with-z=%{prefix} \
     --with-ssl=%{prefix} \
+    --with-nghttp2=%{prefix} \
     --with-ldap=%{prefix} \
     --with-apr=%{prefix} \
     --with-apr-util=%{prefix} \
