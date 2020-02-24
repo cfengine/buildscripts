@@ -1,0 +1,3 @@
+/var/cfengine/include/nghttp2
+/var/cfengine/lib/libnghttp2.la
+/var/cfengine/lib/libnghttp2.a

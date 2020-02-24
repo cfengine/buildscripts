@@ -1,0 +1,19 @@
+Source: cfbuild-nghttp2
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <patuch@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-nghttp2
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- cfbuild-nghttp2
+ CFEngine Build Automation -- cfbuild-nghttp2
+
+Package: cfbuild-nghttp2-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- cfbuild-nghttp2-devel
+ CFEngine Build Automation -- cfbuild-nghttp2-devel
+

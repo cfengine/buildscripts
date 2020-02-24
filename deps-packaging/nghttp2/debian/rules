@@ -1,0 +1,57 @@
+#!/usr/bin/make -f
+PREFIX=$(BUILDPREFIX)
+
+CPPFLAGS=-I$(BUILDPREFIX)/include
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure \
+--prefix=$(PREFIX) \
+--enable-lib-only \
+CPPFLAGS="$(CPPFLAGS)"
+	make
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+
+	echo "all files"
+	find $(CURDIR)/debian/tmp
+
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/man
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/doc
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/pkgconfig
+
+	echo "after clean"
+	find $(CURDIR)/debian/tmp
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
