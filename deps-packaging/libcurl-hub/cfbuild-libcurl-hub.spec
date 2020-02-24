@@ -22,6 +22,7 @@ mkdir -p %{_builddir}
     --with-sysroot=%{prefix} \
     --with-ssl=%{prefix} \
     --with-zlib=%{prefix} \
+    --with-nghttp2=%{prefix} \
     --disable-ldap \
     --disable-ldaps \
     --without-axtls \
@@ -34,7 +35,6 @@ mkdir -p %{_builddir}
     --without-libmetalink \
     --without-librtmp \
     --without-libssh2 \
-    --without-nghttp2 \
     --without-nss \
     --without-polarssl \
     --without-winidn \

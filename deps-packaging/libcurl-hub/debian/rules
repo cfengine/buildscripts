@@ -23,6 +23,7 @@ build-stamp:
 				$(PTHREAD) \
 				--with-ssl=$(PREFIX) \
 				--with-zlib=$(PREFIX) \
+				--with-nghttp2=$(PREFIX) \
 				--prefix=$(PREFIX) \
 				--disable-ldap \
 				--disable-ldaps \
@@ -36,7 +37,6 @@ build-stamp:
 				--without-libmetalink \
 				--without-librtmp \
 				--without-libssh2 \
-				--without-nghttp2 \
 				--without-nss \
 				--without-polarssl \
 				--without-winidn \
