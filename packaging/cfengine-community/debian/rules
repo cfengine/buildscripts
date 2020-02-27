@@ -38,7 +38,7 @@ install: build
 	cp -a $(CURDIR)/profile.sh $(CURDIR)/debian/tmp/etc/profile.d/cfengine3.sh
 	chmod 644 $(CURDIR)/debian/tmp/etc/profile.d/cfengine3.sh
 
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la $(CURDIR)/debian/tmp$(PREFIX)/lib/libcfcrypto.la
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.so
 
 binary-indep: build install

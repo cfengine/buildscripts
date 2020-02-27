@@ -48,7 +48,7 @@ cp $RPM_SOURCE_DIR/profile.sh $RPM_BUILD_ROOT/etc/profile.d/cfengine3.sh
 
 # Remove useless stuff
 
-rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la $RPM_BUILD_ROOT%{prefix}/lib/libcfcrypto.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/curl

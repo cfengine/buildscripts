@@ -35,7 +35,7 @@ cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
 # Remove useless stuff
 
-rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la $RPM_BUILD_ROOT%{prefix}/lib/libcfcrypto.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
 rm -rf $RPM_BUILD_ROOT%{prefix}/share/CoreBase
