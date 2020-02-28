@@ -260,13 +260,17 @@ ensure_postgres_terminated || exit 1
 #
 # We need a cfapache user and group for our web server
 #
-/usr/bin/getent passwd cfapache >/dev/null || /usr/sbin/useradd -M -r cfapache
+
+noshell="$(which nologin)"
+test -z "$noshell" && noshell="$(which false)"
+
+/usr/bin/getent passwd cfapache >/dev/null || /usr/sbin/useradd -M -r -s "$noshell" cfapache
 /usr/bin/getent group cfapache >/dev/null || /usr/sbin/groupadd -r cfapache
 
 #
 # We make sure there is a cfpostgres user and group
 #
-/usr/bin/getent passwd cfpostgres >/dev/null || /usr/sbin/useradd -M -r cfpostgres
+/usr/bin/getent passwd cfpostgres >/dev/null || /usr/sbin/useradd -M -r -s "$noshell" cfpostgres
 /usr/bin/getent group cfpostgres >/dev/null || /usr/sbin/groupadd -r cfpostgres
 
 #
