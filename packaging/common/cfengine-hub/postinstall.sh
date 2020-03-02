@@ -104,7 +104,7 @@ if [ -d $PREFIX/share/GUI_old ]; then
     rm -rf $PREFIX/share/GUI_old/
 fi
 
-mkdir -p $PREFIX/httpd/htdocs/tmp
+mkdir -p $PREFIX/httpd/htdocs/public/tmp
 mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
 chmod 755 $PREFIX/httpd
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs
@@ -118,7 +118,7 @@ chmod 700 ${PREFIX}/plugins
 #these directories should be write able by apache
 chown root:$MP_APACHE_USER $PREFIX/httpd/logs
 chmod 775 $PREFIX/httpd/logs
-chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/tmp
+chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/public/tmp
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
 
 if [ -d "$PREFIX/httpd/htdocs/application/logs" ]; then
@@ -823,8 +823,8 @@ find $PREFIX/httpd/htdocs/scripts/ -type f -exec chown -R root:$MP_APACHE_USER {
 find $PREFIX/httpd/htdocs/scripts/ -type f -exec chmod 0440 {} +
 
 # Tmp
-find $PREFIX/httpd/htdocs/tmp/ -type f -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/tmp/ -type f -exec chmod 0660 {} +
+find $PREFIX/httpd/htdocs/public/tmp/ -type f -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/public/tmp/ -type f -exec chmod 0660 {} +
 
 # logs (if any)
 if [ -d $PREFIX/httpd/htdocs/logs/ ]; then
