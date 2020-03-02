@@ -35,20 +35,9 @@ if [ ! -f "$PREFIX/masterfiles/promises.cf" ]; then
 fi
 
 #
-# Copy the stock package modules for the new installations
+# Copy all package modules
 #
-(
-  if ! [ -d "$PREFIX/modules/packages" ]; then
-    mkdir -p "$PREFIX/modules/packages"
-  fi
-  if cd "$PREFIX/share/NovaBase/modules/packages"; then
-    for module in *; do
-      if ! [ -f "$PREFIX/modules/packages/$module" ]; then
-        cp $module "$PREFIX/modules/packages"
-      fi
-    done
-  fi
-)
+cp -aT "$PREFIX/share/NovaBase/modules/packages" "$PREFIX/modules/packages"
 
 if [ -f "$PREFIX/lib/php/mcrypt.so" ]; then
   /bin/rm -f "$PREFIX/lib/php"/mcrypt.*
