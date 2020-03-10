@@ -363,6 +363,14 @@ init_postgres_dir()
       cp -a "$BACKUP_DIR/data/recovery.conf" "$PREFIX/state/pg/data/recovery.conf"
       chown cfpostgres "$PREFIX/state/pg/data/recovery.conf"
     fi
+
+    # Make sure the 'pg_arch' directory exists if it existed before the
+    # upgrade. This directory is used in HA setups. Files from the directory
+    # should be discarded so we can just recreate the directory if needed.
+    if [ -d "$BACKUP_DIR/data/pg_arch" ]; then
+      mkdir "$PREFIX/state/pg/data/pg_arch"
+      chown cfpostgres:cfpostgres "$PREFIX/state/pg/data/pg_arch"
+    fi
   fi
 }
 
