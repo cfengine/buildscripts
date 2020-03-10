@@ -1,4 +1,4 @@
-%define pcre_version 8.43
+%define pcre_version 8.44
 
 Summary: CFEngine Build Automation -- pcre
 Name: cfbuild-pcre
@@ -98,4 +98,5 @@ CFEngine Build Automation -- pcre -- development files
 %prefix/lib/pkgconfig/libpcreposix.pc
 
 %changelog
+
 
