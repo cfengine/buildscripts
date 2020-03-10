@@ -58,7 +58,7 @@ restore_cfengine_state() {
             # only try to start service that are defined/exist (some may be gone
             # in the new version)
             if [ -n "$definition" ]; then
-                systemctl start "$service"
+                systemctl start "$service" || echo "Failed to start service $service"
             fi
         done
     else
@@ -66,16 +66,16 @@ restore_cfengine_state() {
         if [ -f ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh ]; then
             . ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh
             if grep postgres "$1" >/dev/null; then
-                start_postgres >/dev/null
+                start_postgres >/dev/null || echo "Failed to start PostgreSQL"
             fi
             if grep httpd "$1" >/dev/null; then
-                start_httpd >/dev/null
+                start_httpd >/dev/null || echo "Failed to start Apache"
             fi
         fi
 
         for d in `grep 'cf-' "$1"`; do
             if [ -f ${PREFIX}/bin/${d} ]; then
-                ${PREFIX}/bin/${d}
+                ${PREFIX}/bin/${d} || echo "Failed to start $d"
             fi
         done
     fi
