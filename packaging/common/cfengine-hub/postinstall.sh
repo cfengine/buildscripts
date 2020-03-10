@@ -70,18 +70,29 @@ cp "$PREFIX/lib/php"/*.ini "$PREFIX/httpd/php/lib"
 EXTENSIONS_DIR="$(ls -d -1 "$PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-"*|tail -1)"
 cp "$PREFIX/lib/php"/*.so "$EXTENSIONS_DIR"
 
-#Change keys in files
-true "Adding CF_CLIENT_SECRET keys"
+#
+#Create a secrets file
+#
+true "Creating httpd/secrets.ini file"
+touch "$PREFIX/httpd/secrets.ini"
+chmod 400 "$PREFIX/httpd/secrets.ini"
+chown cfapache "$PREFIX/httpd/secrets.ini"
+pwgen() {
+dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w $1 | head -n 1
+}
 ( set +x
-  UUID=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-  sed  -i  s/CFE_SESSION_KEY/"$UUID"/              $PREFIX/share/GUI/application/config/config.php
-  sed  -i  s/CFE_CLIENT_SECRET_KEY/"$UUID"/        $PREFIX/share/GUI/application/config/appsettings.php
-  sed  -i  s/LDAP_API_SECRET_KEY/"$UUID"/          $PREFIX/share/GUI/application/config/appsettings.php
-  sed  -i  s/LDAP_API_SECRET_KEY/"$UUID"/          $PREFIX/share/GUI/ldap/config/settings.php
-  sed  -i  /LDAP_API_SECRET_KEY/s/\'\'/"'$UUID'"/  $PREFIX/share/GUI/api/config/config.php
-  sed  -i  s/CFE_CLIENT_SECRET_KEY/"$UUID"/        $PREFIX/share/db/ootb_settings.sql
+  cat >"$PREFIX/httpd/secrets.ini" <<EOF
+; Comments should start with semicolon
+[passwords]
+cf_robot_password=$(pwgen 32)
+
+[tokens]
+mp_client_secret=$(pwgen 32)
+ldap_api_secret=$(pwgen 32)
+CFE_SESSION_KEY=$(pwgen 32)
+EOF
 )
-true "Done adding keys"
+true "Done creating httpd/secrets.ini file"
 
 cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
 
@@ -875,29 +886,34 @@ $PREFIX/httpd/bin/apachectl start
 if ! is_upgrade; then
   true "Adding CFE_ROBOT user"
   ( set +x
-    CFE_ROBOT_PWD=$(dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-    $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user $CFE_ROBOT_PWD
+    $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user
   )
   true "Done adding user"
 else
-  true "Rotating CFE_ROBOT password"
+  true "Updating CFE_ROBOT password"
   ( set +x
-    pwgen() {
-        dd if=/dev/urandom bs=1024 count=1 2>/dev/null | tr -dc 'a-zA-Z0-9' | fold -w $1 | head -n 1
-    }
-
     pwhash() {
-        echo -n "$1" | openssl dgst -sha256 | awk '{print $2}'
+        echo -n "$1" | "$PREFIX/bin/openssl" dgst -sha256 | awk '{print $2}'
     }
-    CFE_ROBOT_PW=`pwgen 32`
+    CFE_ROBOT_PW="$(sed '/^cf_robot_password=/!d;s/.*=//' "$PREFIX/httpd/secrets.ini")"
+    test -n "$CFE_ROBOT_PW" || { echo "ERROR reading cf_robot_password from secrets.ini"; exit 1; }
     CFE_ROBOT_PW_SALT=`pwgen 10`
     CFE_ROBOT_PW_HASH=`pwhash "$CFE_ROBOT_PW_SALT$CFE_ROBOT_PW"`
 
-    sed -i '/$config."CFE_ROBOT_PASSWORD"/s/.*/$config["CFE_ROBOT_PASSWORD"] = "'$CFE_ROBOT_PW'";/' $PREFIX/httpd/htdocs/application/config/cf_robot.php
-    $PREFIX/bin/psql cfsettings -c "UPDATE users SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT' WHERE username = 'CFE_ROBOT'"
+    # note that here we `echo "..." | psql` instead of `psql -c "..."` to avoid
+    # leaking secrets in `ps -ef` output.
+   echo "UPDATE users SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT' WHERE username = 'CFE_ROBOT'" | "$PREFIX/bin/psql" cfsettings
   )
-  true "Done rotating password"
+  true "Done updating password"
 fi
+
+true "Updating MP password"
+( set +x
+  MP_PW="$(sed '/^mp_client_secret=/!d;s/.*=//' "$PREFIX/httpd/secrets.ini")"
+  test -n "$MP_PW" || { echo "ERROR reading mp_client_secret from secrets.ini"; exit 1; }
+  echo "UPDATE oauth_clients SET client_secret='$MP_PW' WHERE client_id='MP'" | "$PREFIX/bin/psql" cfsettings
+)
+true "Done updating password"
 
 su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap"
 
