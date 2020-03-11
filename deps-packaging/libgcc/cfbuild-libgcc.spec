@@ -23,7 +23,7 @@ rm -rf $RPM_BUILD_ROOT
 
 mkdir -p $RPM_BUILD_ROOT%{prefix}/lib
 
-cp  /opt/freeware/lib/gcc/powerpc-ibm-aix*.0.0/[64].*/libgcc_s.a $RPM_BUILD_ROOT%{prefix}/lib/
+cp  /opt/freeware/lib/gcc/powerpc-ibm-aix*.0.0/*/libgcc_s.a $RPM_BUILD_ROOT%{prefix}/lib/
 #cp  /opt/freeware/lib/gcc/powerpc-ibm-aix*.0.0/4.*/libstdc++.a $RPM_BUILD_ROOT%{prefix}/lib/
 
 %clean
