@@ -113,7 +113,7 @@ case "$PACKAGING" in
 
         if [ "$BUILD_TYPE" = "RELEASE" ]
         then
-            RPM_RELEASE="${EXPLICIT_RELEASE:-1}"
+            RPM_RELEASE="$RELEASE"
         else
             RPM_RELEASE="$BUILD_NUMBER"
         fi
@@ -228,15 +228,8 @@ case "$PACKAGING" in
 
     if [ "$BUILD_TYPE" = "RELEASE" ]
     then
-
-      if [ -z "$EXPLICIT_RELEASE" ]
-      then
-          DEB_VERSION="$VERSION-1"
-        else
-          DEB_VERSION="$VERSION-$EXPLICIT_RELEASE"
-        fi
-
-   else
+      DEB_VERSION="$VERSION-$RELEASE"
+    else
       DEB_VERSION="$VERSION~$BUILD_NUMBER"
     fi
 
@@ -306,12 +299,7 @@ case "$PACKAGING" in
     pkgmk -o -r "`pwd`" -d "$BASEDIR/$PKG/pkg"
     if [ "$BUILD_TYPE" = "RELEASE" ]
     then
-      if [ -z "$EXPLICIT_RELEASE" ]
-      then
-        NAME="CFE$PKG-$VERSION.1-solaris$OS_VERSION-$ARCH.pkg"
-      else
-        NAME="CFE$PKG-$VERSION.$EXPLICIT_RELEASE-solaris$OS_VERSION-$ARCH.pkg"
-      fi
+      NAME="CFE$PKG-$VERSION.$RELEASE-solaris$OS_VERSION-$ARCH.pkg"
     else
       NAME="CFE$PKG-$VERSION-solaris$OS_VERSION-$ARCH.pkg"
     fi
@@ -380,12 +368,7 @@ case "$PACKAGING" in
 
       if [ "$BUILD_TYPE" = "RELEASE" ]
       then
-        if [ -z "$EXPLICIT_RELEASE" ]
-        then
-          NAME="$PKG-$VERSION.1$safe_prefix-$OS_VER-$ARCH"
-        else
-          NAME="$PKG-$VERSION.$EXPLICIT_RELEASE$safe_prefix-$OS_VER-$ARCH"
-        fi
+        NAME="$PKG-$VERSION.$RELEASE$safe_prefix-$OS_VER-$ARCH"
       else
         NAME="$PKG-$VERSION$safe_prefix-$OS_VER-$ARCH"
       fi
