@@ -46,6 +46,16 @@ sudo apt-get install s3cmd
   echo y
 ) | s3cmd --configure >/dev/null
 
+install_package() {
+    sudo dpkg -i cfe.deb || (
+        exit_code=$?
+        echo "Problem installing CFEngine package $exit_code"
+        echo "=== BEGIN /var/log/CFEngine*-Install.log ==="
+        sudo cat /var/log/CFEngine*-Install.log
+        echo "=== END /var/log/CFEngine*-Install.log ==="
+        return $exit_code
+    )
+}
 
 case "$JOB" in
     ( build )
@@ -129,7 +139,7 @@ case "$JOB" in
 
     ( acceptance-test )
         s3cmd get --no-progress $DEB_PACKAGE cfe.deb
-        sudo dpkg -i cfe.deb
+        install_package
         touch /home/travis/rpmvercmp
         chmod a+x ~/rpmvercmp
         cd ..
@@ -195,7 +205,7 @@ case "$JOB" in
     ( reporting-test )
         sudo apt-get -y install python-psycopg2
         s3cmd get --no-progress $DEB_PACKAGE cfe.deb
-        sudo dpkg -i cfe.deb
+        install_package
         sudo service cfengine3 restart
         ps aux | grep cf-
         s3cmd get --no-progress $TESTD cf-testd
@@ -209,9 +219,19 @@ case "$JOB" in
         sudo prove -v *.test
     ;;
 
+    ( schema-test )
+        # NOTE: these tests will manipulate the system "cfdb" database
+        # so parallel execution is not possible
+        s3cmd get --no-progress $DEB_PACKAGE cfe.deb
+        install_package
+        sudo service cfengine3 restart
+        cd nova/tests/schema
+        sudo --preserve-env sh -c "./runtests.sh 2>&1"
+    ;;
+
     ( deployment-test )
         s3cmd get --no-progress $DEB_PACKAGE cfe.deb
-        sudo dpkg -i cfe.deb
+        install_package
         sudo cf-agent -B "$(ifconfig | grep -A1 Ethernet | sed '2!d;s/.*addr:\([0-9.]*\).*/\1/')"
     ;;
 
