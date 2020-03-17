@@ -80,3 +80,7 @@ then
 else
   VERSION=$EXPLICIT_VERSION
 fi
+
+# resolving release number is easy
+RELEASE="${EXPLICIT_RELEASE:-1}"
+export RELEASE
