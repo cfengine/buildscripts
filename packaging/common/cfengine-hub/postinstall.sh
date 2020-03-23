@@ -131,6 +131,7 @@ if ! is_upgrade; then
   # This folder is required for Design Center and Mission Portal to talk to each other
   DCWORKDIR=/opt/cfengine
   mkdir -p $DCWORKDIR/userworkdir/admin/.ssh
+  touch $DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt
   mkdir -p $DCWORKDIR/dc-scripts/
   cat > $DCWORKDIR/dc-scripts/params.sh <<EOHIPPUS
 #!/bin/bash
@@ -147,8 +148,8 @@ export PATH="\${PATH}:$PREFIX/bin"
 export PKEY="\${PKEY}"
 export GIT_SSH="\${SCRIPT_DIR}/ssh-wrapper.sh"
 EOHIPPUS
-
-  chmod -R 700 $DCWORKDIR/userworkdir
+  chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
+  chmod -R 700 $DCWORKDIR
   if [ ! -f /usr/bin/curl ]; then
     ln -sf $PREFIX/bin/curl /usr/bin/curl
   fi
