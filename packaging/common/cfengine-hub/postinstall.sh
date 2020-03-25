@@ -149,7 +149,7 @@ export PKEY="\${PKEY}"
 export GIT_SSH="\${SCRIPT_DIR}/ssh-wrapper.sh"
 EOHIPPUS
   chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
-  chmod -R 700 $DCWORKDIR
+  chmod -R 700 $DCWORKDIR/userworkdir
   if [ ! -f /usr/bin/curl ]; then
     ln -sf $PREFIX/bin/curl /usr/bin/curl
   fi
