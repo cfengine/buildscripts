@@ -23,13 +23,13 @@ Build dependencies:
 |  libyaml         | 0.2.2  | 0.2.2  | 0.2.2  |                          |
 |  lmdb            | 0.9.24 | 0.9.24 | 0.9.24 |                          |
 |  openldap        | 2.4.49 | 2.4.49 | 2.4.49 | Enterprise agent only    |
-|  openssl         | 1.1.1d | 1.1.1d | 1.1.1d |                          |
+|  openssl         | 1.1.1f | 1.1.1f | 1.1.1f |                          |
 |  pcre            | 8.44   | 8.44   | 8.44   |                          |
 |  pthreads-w32    | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 |  zlib            | 1.2.11 | 1.2.11 | 1.2.11 |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.1.1d
+* [OpenSSL](http://openssl.org/) 1.1.1f
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.44
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
