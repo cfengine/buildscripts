@@ -55,7 +55,7 @@ Build dependencies:
 |  git             | 2.25.1 | 2.25.1 | 2.25.1 |
 |  openldap        | 2.4.49 | 2.4.49 | 2.4.49 |
 |  php             | 7.2.28 | 7.4.3  | 7.4.2  |
-|  postgresql      | 10.12  | 12.2   | 12.2   |
+|  postgresql      | -      | -      | -      |
 |  rsync           | 3.1.3  | 3.1.3  | 3.1.3  |
 
 * [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
