@@ -25,14 +25,14 @@ Build dependencies:
 |  libyaml         | 0.2.2   | 0.2.2  | 0.2.2  |                          |
 |  lmdb            | 0.9.23  | 0.9.23 | 0.9.23 |                          |
 |  openldap        | 2.4.47  | 2.4.47 | 2.4.47 | Enterprise agent only    |
-|  openssl         | 1.0.2r  | 1.1.1b | 1.1.1b |                          |
+|  openssl         | 1.0.2r  | 1.1.1f | 1.1.1f |                          |
 |  pcre            | 8.43    | 8.43   | 8.43   |                          |
 |  postgresql      | 9.0.23  | -      | -      |                          |
 |  pthreads-w32    | 2-9-1   | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 |  zlib            | 1.2.11  | 1.2.11 | 1.2.11 |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.1.1d
+* [OpenSSL](http://openssl.org/) 1.1.1f
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.44
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.2
