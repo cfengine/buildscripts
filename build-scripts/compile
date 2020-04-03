@@ -26,6 +26,17 @@ if test "x$NOVA" = "xyes"; then
         $MAKE -C $BASEDIR/nova -k
         $MAKE -C $BASEDIR/nova install DESTDIR=$BASEDIR/cfengine/dist
         $MAKE -C $BASEDIR/masterfiles install DESTDIR=$BASEDIR/cfengine/dist
+        if test -f "$BASEDIR/mission-portal/scripts/package.json"; then
+            cd $BASEDIR/mission-portal/scripts
+            # install dependencies from npmjs
+            npm i
+            # make a build of jquery-ui from sources
+            cd node_modules/jquery-ui
+            npm i
+            nodejs node_modules/grunt-cli/bin/grunt sizer concat
+            rm -rf ./node_modules
+            cd ../../../../
+        fi
     fi
 else
     $MAKE -C $BASEDIR/masterfiles install DESTDIR=$BASEDIR/cfengine/dist
