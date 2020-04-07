@@ -86,13 +86,13 @@ while [ ! -z "$(eval "echo \$GIT_COMMIT_$i")" ] ; do
 done
 
 (
-if test -f "$BASEDIR/mission-portal/scripts/package.json"; then
-  cd $BASEDIR/mission-portal/scripts
+if test -f "$BASEDIR/mission-portal/public/scripts/package.json"; then
+  cd $BASEDIR/mission-portal/public/scripts
   # install dependencies from npmjs
-  npm i --prefix $BASEDIR/mission-portal/scripts/
+  npm i --prefix $BASEDIR/mission-portal/public/scripts/
   # make a build of jquery-ui from sources
   cd node_modules/jquery-ui
-  npm i --prefix $BASEDIR/mission-portal/scripts/node_modules/jquery-ui
+  npm i --prefix $BASEDIR/mission-portal/public/scripts/node_modules/jquery-ui
   nodejs node_modules/grunt-cli/bin/grunt sizer concat
   rm -rf ./node_modules
 fi
