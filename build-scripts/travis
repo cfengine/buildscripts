@@ -97,11 +97,11 @@ case "$JOB" in
         done
 
         mv -T ldap-api mission-portal/ldap
-
-        if test -f "mission-portal/scripts/package.json"; then
+        (
+        if test -f "mission-portal/public/scripts/package.json"; then
             # packages needed for installing Mission portal dependencies
             sudo apt-get -y install npm
-            cd mission-portal/scripts
+            cd mission-portal/public/scripts
             # install dependencies from npmjs
             npm i
             # make a build of jquery-ui from sources
@@ -109,8 +109,8 @@ case "$JOB" in
             npm i
             nodejs node_modules/grunt-cli/bin/grunt sizer concat
             rm -rf ./node_modules
-            cd ../../../../
         fi
+        )
 
         # packages needed for autogen
         sudo apt-get install git autoconf automake m4 make bison flex \

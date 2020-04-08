@@ -86,10 +86,10 @@ rm -rf $RPM_BUILD_ROOT%prefix/bin/apu-1-config
 
 # Change development mode in MP to production mode and generate a session key
 # Also change the client secret for Oauth2 api
-sed "s/define('ENVIRONMENT', 'development')/define('ENVIRONMENT','production')/g" $RPM_BUILD_ROOT%prefix/share/GUI/index.php > $RPM_BUILD_ROOT%prefix/share/GUI/index.php.tmp
+sed "s/define('ENVIRONMENT', 'development')/define('ENVIRONMENT','production')/g" $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php > $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php.tmp
 
-mv $RPM_BUILD_ROOT%prefix/share/GUI/index.php.tmp $RPM_BUILD_ROOT%prefix/share/GUI/index.php
-rm -f $RPM_BUILD_ROOT%prefix/share/GUI/index.php.tmp
+mv $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php.tmp $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php
+rm -f $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php.tmp
 
 find $RPM_BUILD_ROOT%prefix/share/GUI -type f -exec sed -i 's/cfapi_log/syslog/' {} \;
 # NovaBase

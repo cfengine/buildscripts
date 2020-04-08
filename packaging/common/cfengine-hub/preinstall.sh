@@ -318,7 +318,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
     # Preserve the tmp directory as it may contain scheduled or exported reports.
     # Preserve cf_robot.php and settings.ldap.php because they are generated.
     cf_console echo "No share/GUI found, purging all files except known exceptions"
-    find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/tmp" -prune \) \
+    find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/public/tmp" -prune \) \
 	    -not \( -name "cf_robot.php" \) \
 	    -not \( -name "settings.ldap.php" \) \
 	    -type f -print0 | xargs -0 rm

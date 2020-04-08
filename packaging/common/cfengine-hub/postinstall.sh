@@ -104,7 +104,7 @@ if [ -d $PREFIX/share/GUI_old ]; then
     rm -rf $PREFIX/share/GUI_old/
 fi
 
-mkdir -p $PREFIX/httpd/htdocs/tmp
+mkdir -p $PREFIX/httpd/htdocs/public/tmp
 mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
 chmod 755 $PREFIX/httpd
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs
@@ -118,7 +118,7 @@ chmod 700 ${PREFIX}/plugins
 #these directories should be write able by apache
 chown root:$MP_APACHE_USER $PREFIX/httpd/logs
 chmod 775 $PREFIX/httpd/logs
-chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/tmp
+chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/public/tmp
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
 
 if [ -d "$PREFIX/httpd/htdocs/application/logs" ]; then
@@ -819,12 +819,12 @@ find $PREFIX/httpd/htdocs/ -type f ! -name '.htaccess' -exec chown -R root:$MP_A
 find $PREFIX/httpd/htdocs/ -type f ! -name '.htaccess' -exec chmod 0440 {} +
 
 # Scripts
-find $PREFIX/httpd/htdocs/scripts/ -type f -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/scripts/ -type f -exec chmod 0440 {} +
+find $PREFIX/httpd/htdocs/public/scripts/ -type f -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/public/scripts/ -type f -exec chmod 0440 {} +
 
 # Tmp
-find $PREFIX/httpd/htdocs/tmp/ -type f -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/tmp/ -type f -exec chmod 0660 {} +
+find $PREFIX/httpd/htdocs/public/tmp/ -type f -exec chown -R root:$MP_APACHE_USER {} +
+find $PREFIX/httpd/htdocs/public/tmp/ -type f -exec chmod 0660 {} +
 
 # logs (if any)
 if [ -d $PREFIX/httpd/htdocs/logs/ ]; then
@@ -894,7 +894,7 @@ $PREFIX/httpd/bin/apachectl start
 if ! is_upgrade; then
   true "Adding CFE_ROBOT user"
   ( set +x
-    $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks create_cfe_robot_user
+    $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/public/index.php cli_tasks create_cfe_robot_user
   )
   true "Done adding user"
 else
@@ -923,9 +923,9 @@ true "Updating MP password"
 )
 true "Done updating password"
 
-su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks migrate_ldap_settings https://localhost/ldap"
+su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/public/index.php cli_tasks migrate_ldap_settings https://localhost/ldap"
 
-$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_variables_refresh
+$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/public/index.php cli_tasks inventory_variables_refresh
 
 # Shut down Apache and Postgres again, because we may need them to start through
 # systemd later.

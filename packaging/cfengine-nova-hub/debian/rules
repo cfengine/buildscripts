@@ -61,9 +61,9 @@ install: build
 
 
 
-	sed "s/define('ENVIRONMENT', 'development')/define('ENVIRONMENT','production')/g" $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php > $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp
-	mv $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/index.php.tmp
+	sed "s/define('ENVIRONMENT', 'development')/define('ENVIRONMENT','production')/g" $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/public/index.php > $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/public/index.php.tmp
+	mv $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/public/index.php.tmp $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/public/index.php
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/public/index.php.tmp
 
 # NovaBase
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase
