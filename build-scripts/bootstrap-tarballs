@@ -3,6 +3,7 @@
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
+. version
 
 
 mkdir -p $BASEDIR/output/tarballs
