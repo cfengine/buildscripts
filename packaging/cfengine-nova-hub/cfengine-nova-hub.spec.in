@@ -96,8 +96,6 @@ find $RPM_BUILD_ROOT%prefix/share/GUI -type f -exec sed -i 's/cfapi_log/syslog/'
 mkdir -p $RPM_BUILD_ROOT%prefix/share/NovaBase
 cp -R $RPM_BUILD_ROOT%prefix/masterfiles $RPM_BUILD_ROOT%prefix/share/NovaBase/masterfiles
 rm -rf $RPM_BUILD_ROOT%prefix/masterfiles
-cp -R $RPM_BUILD_ROOT%prefix/modules $RPM_BUILD_ROOT%prefix/share/NovaBase/modules
-rm -rf $RPM_BUILD_ROOT%prefix/modules/*
 
 
 if [ -f %{prefix}/include/sqlite3.h ]; then
@@ -275,10 +273,8 @@ exit 0
 # Base policy
 %defattr(644,root,root,755)
 %prefix/share/NovaBase
-
-# Package modules
 %defattr(755,root,root,755)
-%prefix/share/NovaBase/modules
+%prefix/modules
 
 #DC deps
 %defattr(755,root,root,755)
@@ -319,7 +315,5 @@ exit 0
 %dir %prefix/outputs
 %dir %prefix/inputs
 %dir %prefix/state
-%defattr(755,root,root,755)
-%dir %prefix/modules
 
 %changelog
