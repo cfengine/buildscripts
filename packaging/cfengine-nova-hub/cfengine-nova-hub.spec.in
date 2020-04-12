@@ -259,8 +259,6 @@ exit 0
 %prefix/share/GUI
 #postgresql share
 %prefix/share/postgresql/*
-%prefix/share/db
-%{prefix}/share/doc/postgresql/extension/*
 
 # ENT-2708, ENT-2846
 %defattr(600,root,root,700)
