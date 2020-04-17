@@ -114,7 +114,7 @@ case "$JOB" in
 
         (
         if test -f "mission-portal/composer.json"; then
-            sudo apt-get -y install curl php php-culr php-zip php-mbstring php-xml composer
+            sudo apt-get -y install curl php php-curl php-zip php-mbstring php-xml composer
             cd mission-portal
             # install PHP dependencies from composer
             composer install
