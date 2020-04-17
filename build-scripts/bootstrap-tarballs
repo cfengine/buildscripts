@@ -99,3 +99,11 @@ if test -f "$BASEDIR/mission-portal/public/scripts/package.json"; then
   rm -rf ./node_modules
 fi
 )
+
+(
+if test -f "$BASEDIR/mission-portal/composer.json"; then
+  cd $BASEDIR/mission-portal
+  # install PHP dependencies from composer
+  php /usr/bin/composer.phar install
+fi
+)
