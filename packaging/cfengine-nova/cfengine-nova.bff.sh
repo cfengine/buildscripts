@@ -104,6 +104,6 @@ sudo chown -hR root:system $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION
 
 # Make the LPP
 cd $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION
- 
+
 # sometimes the following command needs to be done twice
-sudo mklpp || sudo mklpp
+sudo -E mklpp || sudo -E mklpp
