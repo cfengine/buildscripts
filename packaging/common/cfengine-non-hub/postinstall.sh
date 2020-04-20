@@ -22,22 +22,6 @@ if is_community; then
     #
     $PREFIX/bin/cf-promises -T $PREFIX/masterfiles
   fi
-
-  #
-  # Copy the stock package modules for the new installations
-  #
-  (
-    if ! [ -d $PREFIX/modules/packages ]; then
-      mkdir -p $PREFIX/modules/packages
-    fi
-    if cd $PREFIX/share/CoreBase/modules/packages; then
-      for module in *; do
-        if ! [ -f $PREFIX/modules/packages/$module ]; then
-          cp $module $PREFIX/modules/packages
-        fi
-      done
-    fi
-  )
 fi
 
 #

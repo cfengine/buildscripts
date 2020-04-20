@@ -37,8 +37,6 @@ cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{prefix}/share/CoreBase
 cp -R $RPM_BUILD_ROOT%{prefix}/masterfiles $RPM_BUILD_ROOT%prefix/share/CoreBase/masterfiles
 rm -rf $RPM_BUILD_ROOT%{prefix}/masterfiles
-cp -R $RPM_BUILD_ROOT%{prefix}/modules $RPM_BUILD_ROOT%prefix/share/CoreBase/modules
-rm -rf $RPM_BUILD_ROOT%{prefix}/modules/*
 
 mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
 cp $RPM_SOURCE_DIR/sysconfig $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
@@ -127,9 +125,6 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 # CoreBase
 %defattr(644,root,root,755)
 %prefix/share/CoreBase
-# Executables in CoreBase
-%defattr(755,root,root,755)
-%prefix/share/CoreBase/modules
 
 # Private directories
 %defattr(600,root,root,700)
