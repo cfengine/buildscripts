@@ -33,6 +33,9 @@ fi
   --with-pdo-pgsql=%{prefix} \
   --with-iconv \
   --with-zlib=%{prefix} \
+  --with-libmbfl=%{prefix} \
+  --enable-mbstring \
+  --disable-mbregex \
   --without-fpm-user \
   --without-fpm-group \
   --without-fpm-systemd \
