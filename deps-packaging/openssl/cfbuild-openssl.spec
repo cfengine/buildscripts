@@ -5,6 +5,7 @@ Name: cfbuild-openssl
 Version: %{version}
 Release: 1
 Source0: openssl-%{openssl_version}.tar.gz
+Patch0: openssl-1.1.1-evp-kdf.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -17,6 +18,7 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n openssl-%{openssl_version}
+%patch0 -p1
 
 %build
 
