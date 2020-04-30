@@ -21,6 +21,9 @@ build-stamp:
 --with-pdo-pgsql=$(PREFIX) \
 --with-iconv \
 --with-zlib=$(PREFIX) \
+--with-libmbfl=$(PREFIX) \
+--enable-mbstring \
+--disable-mbregex \
 --without-fpm-user \
 --without-fpm-group \
 --without-fpm-systemd \
