@@ -18,7 +18,12 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n openldap-%{openldap_version}
 
+# we don't bundle OpenSSL on RHEL 8 (and newer in the future)
+%if %{?rhel}%{!?rhel:0} > 7
+CPPFLAGS=-I%{buildprefix}/include:/usr/include
+%else
 CPPFLAGS=-I%{buildprefix}/include
+%endif
 
 #
 # glibc-2.8 errorneously hides peercred(3) under #ifdef __USE_GNU.
