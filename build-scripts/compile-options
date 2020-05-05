@@ -51,6 +51,13 @@ case "$OS_FAMILY" in
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,-R$BUILDPREFIX/lib"
     ;;
 esac
+
+# We don't bundle OpenSSL on RHEL 8 (and newer in the future) so we need to pull
+# it from /usr/lib64.
+if [ "$OS" = "rhel" ] && expr "$OS_VERSION" ">=" "8" >/dev/null
+then
+  LDFLAGS="$LDFLAGS -L/usr/lib64"
+fi
 export LDFLAGS
 
 # For Debian builds, which do not automatically inherit build flags
@@ -74,9 +81,15 @@ case "$OS_FAMILY" in
     solaris|aix)  var_append DEPS "libgcc" ;;
 esac
 
-# FIXME: Why do we need zlib?
-# ANSWER: Openssl uses it optionally, TODO DISABLE
-var_append DEPS "zlib $EMBEDDED_DB openssl pcre"
+# We don't bundle OpenSSL on RHEL 8 (and newer in the future)
+if [ "$OS" = "rhel" ] && expr "$OS_VERSION" ">=" "8" >/dev/null
+then
+  var_append DEPS "$EMBEDDED_DB pcre"
+else
+  # FIXME: Why do we need zlib?
+  # ANSWER: Openssl uses it optionally, TODO DISABLE
+  var_append DEPS "zlib $EMBEDDED_DB openssl pcre"
+fi
 
 # libsasl needed for solaris
 case "$OS_FAMILY" in
