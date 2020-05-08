@@ -867,6 +867,13 @@ find $PREFIX/share/GUI -type f -exec chmod 0400 {} +
 chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/ldap
 chmod 0700 -R $PREFIX/httpd/htdocs/ldap/config
 
+# changed permissions and owner of PHP and JS dependencies
+chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/vendor
+chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/public/scripts/node_modules
+
+chmod 0550 -R $PREFIX/httpd/htdocs/vendor
+chmod 0550 -R $PREFIX/httpd/htdocs/public/scripts/node_modules
+
 ##
 # Start Apache server
 #
