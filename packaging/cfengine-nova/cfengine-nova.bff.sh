@@ -15,6 +15,13 @@ VER3=$(echo $VERSION | cut -d. -f3)
 VER4=$(echo $VERSION | cut -d. -f4)
 # In third field: change 'a' to '88', 'b' to '99', delete leading zeroes if followed by a number
 VER3=$(echo $VER3 | sed -e 's/a/88/;s/b/99/;s/^0\(.\)/\1/')
+# If third field contains '-' (happens during release builds) - remove it, adding stuff after dash to the beginning of 4th field.
+# i.e. from $VER3=1-2 $VER4=3 go to $VER3=1 $VER4=23
+# Note that currently, when third field contains '-', 4th field is empty
+if echo $VER3 | grep - >/dev/null; then
+    VER4="$(echo $VER3 | cut -d- -f2)$VER4"
+    VER3="$(echo $VER3 | cut -d- -f1)"
+fi
 # In 4th field: delete all non-numeric characters, delete leading zeroes if followed by a number, limit length to 4
 VER4=$(echo $VER4 | sed -e 's/[^0-9]//g;s/^0\(.\)/\1/;s/^\(....\).*/\1/')
 # If 4th field is empty, set it to 0
