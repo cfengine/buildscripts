@@ -2,18 +2,19 @@ File `install-dependencies` and the relevant subdirectories
 in `deps-packaging` are the source of this information.
 
 
-Build dependencies:
+## Build dependencies
 
-* lcov
-* git
-* rsync
+| CFEngine version | 3.12.x | 3.15.x | master |
+| ---------------- | ------ | ------ | ------ |
+| lcov             | 1.14   | 1.14   | 1.14   |
+| git              |        |        |        |
+| rsync            |        |        |        |
 
 ## Agent Dependencies
 
 | CFEngine version | 3.12.x | 3.15.x | master | Notes |
 |  --------------  | ------ | ------ | ------ | ----- |
 |  [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                     | 2.1.27 | 2.1.27 | 2.1.27 | Solaris Enterprise agent |
-|  lcov            | 1.14   | 1.14   | 1.14   |                          |
 |  [libacl](http://download.savannah.gnu.org/releases/acl/)                         | 2.2.53 | 2.2.53 | 2.2.53 |                          |
 |  [libattr](http://download.savannah.gnu.org/releases/attr/)                       | 2.4.48 | 2.4.48 | 2.4.48 |                          |
 |  [libcurl](http://curl.haxx.se/download.html)                                     | 7.70.0 | 7.70.0 | 7.68.0 |                          |
