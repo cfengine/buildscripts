@@ -16,14 +16,14 @@ Build dependencies:
 |  lcov            | 1.14   | 1.14   | 1.14   |                          |
 |  libacl          | 2.2.53 | 2.2.53 | 2.2.53 |                          |
 |  libattr         | 2.4.48 | 2.4.48 | 2.4.48 |                          |
-|  libcurl         | 7.69.0 | 7.69.0 | 7.68.0 |                          |
+|  libcurl         | 7.70.0 | 7.70.0 | 7.68.0 |                          |
 |  libgnurx        | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 |  libiconv        | 1.16   | 1.16   | 1.16   |                          |
 |  libxml2         | 2.9.10 | 2.9.10 | 2.9.10 |                          |
-|  libyaml         | 0.2.2  | 0.2.2  | 0.2.2  |                          |
+|  libyaml         | 0.2.4  | 0.2.4  | 0.2.2  |                          |
 |  lmdb            | 0.9.24 | 0.9.24 | 0.9.24 |                          |
-|  openldap        | 2.4.49 | 2.4.49 | 2.4.49 | Enterprise agent only    |
-|  openssl         | 1.1.1f | 1.1.1f | 1.1.1f |                          |
+|  openldap        | 2.4.50 | 2.4.50 | 2.4.49 | Enterprise agent only    |
+|  openssl         | 1.1.1g | 1.1.1g | 1.1.1f |                          |
 |  pcre            | 8.44   | 8.44   | 8.44   |                          |
 |  pthreads-w32    | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 |  zlib            | 1.2.11 | 1.2.11 | 1.2.11 |                          |
@@ -49,12 +49,12 @@ Build dependencies:
 
 | CFEngine version | 3.12.x | 3.15.x | master |
 |  --------------  | ------ | ------ | ------ |
-|  apache          | 2.4.41 | 2.4.41 | 2.4.41 |
+|  apache          | 2.4.43 | 2.4.43 | 2.4.41 |
 |  apr             | 1.7.0  | 1.7.0  | 1.7.0  |
 |  apr-util        | 1.6.1  | 1.6.1  | 1.6.1  |
-|  git             | 2.25.1 | 2.25.1 | 2.25.1 |
-|  openldap        | 2.4.49 | 2.4.49 | 2.4.49 |
-|  php             | 7.2.28 | 7.4.3  | 7.4.2  |
+|  git             | 2.26.2 | 2.26.2 | 2.25.1 |
+|  openldap        | 2.4.50 | 2.4.50 | 2.4.49 |
+|  php             | 7.2.30 | 7.4.5  | 7.4.2  |
 |  postgresql      | 10.12  | 12.2   | 12.2   |
 |  rsync           | 3.1.3  | 3.1.3  | 3.1.3  |
 
