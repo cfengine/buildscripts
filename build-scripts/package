@@ -149,7 +149,7 @@ case "$PACKAGING" in
         "$P/$PKG.bff.sh" "$RPM_VERSION-$RPM_RELEASE" "$BASEDIR"
     else
         # Create TAR package
-        TARBALL="$BASEDIR/$PKG/RPMS/$PKG-$VERSION.$ARCH.pkg.tar.gz"
+        TARBALL="$BASEDIR/$PKG/RPMS/$PKG-$VERSION-$RPM_RELEASE.$ARCH.pkg.tar.gz"
 	# RHEL4 and RHEL6 have buildroot in different folders.
 	# Below lines try to be careful about finding it.
 	# Note that `mv` command will fail and abort the build
