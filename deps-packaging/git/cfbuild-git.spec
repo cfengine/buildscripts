@@ -1,4 +1,4 @@
-%define git_version 2.25.1
+%define git_version 2.27.0
 
 Summary: CFEngine Build Automation -- git
 Name: cfbuild-git
@@ -66,6 +66,7 @@ CFEngine Build Automation -- git
 %{prefix}/lib/git-core
 
 %changelog
+
 
 
 
