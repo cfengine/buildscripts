@@ -127,6 +127,16 @@ if is_upgrade; then
   fi
 fi
 
+# ENT-6036: disable old services
+if is_upgrade; then
+    if [ -x /bin/systemctl ] && [ -e /usr/lib/systemd/system/cf-consumer.service ]; then
+        /bin/systemctl disable cf-consumer.service
+    fi
+    if [ -x /bin/systemctl ] && [ -e /usr/lib/systemd/system/cf-redis-server.service ]; then
+        /bin/systemctl disable cf-redis-server.service
+    fi
+fi
+
 if migrating_postgres; then
   cf_console echo "Moving old data and copying old binaries to $BACKUP_DIR"
   # Now that PostgreSQL is shut down, move the old data out of the way.
