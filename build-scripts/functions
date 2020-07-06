@@ -105,6 +105,9 @@ export_variables ()
     PATH="$PATH:/usr/local/bin:/usr/sbin:/usr/local/sbin"
     PATH="$PATH:$BASEDIR/buildscripts/build-scripts"
     PATH="$PATH:$BUILDPREFIX/httpd/php/bin"                # TODO REMOVE
+    if [ -x /usr/lib64/ccache/gcc ]; then
+      PATH="/usr/lib64/ccache:$PATH"
+    fi
     export PATH
 
     # /bin/sh in Solaris 11 behaves badly only when /usr/xpg4/bin is
