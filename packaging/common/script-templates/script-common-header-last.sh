@@ -35,14 +35,14 @@ mkdir -p "$(dirname "$INSTLOG")"
 touch "$INSTLOG"
 chown root:$INSTLOGGROUP "$INSTLOG"
 chmod 600 "$INSTLOG"
-CONSOLE=7
+CONSOLE=1
 # Redirect most output to log file, but keep console around for custom output.
 case "$SCRIPT_TYPE" in
   pre*)
-    eval "exec $CONSOLE>&1 > $INSTLOG 2>&1"
+    echo eval "exec $CONSOLE>&1 > $INSTLOG 2>&1"
     ;;
   *)
-    eval "exec $CONSOLE>&1 >> $INSTLOG 2>&1"
+    echo eval "exec $CONSOLE>&1 >> $INSTLOG 2>&1"
     ;;
 esac
 echo "$SCRIPT_TYPE:"

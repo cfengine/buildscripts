@@ -914,7 +914,7 @@ if ! [ -f "$PREFIX/UPGRADED_FROM.txt" ] || egrep '3\.([0-6]\.|7\.0)' "$PREFIX/UP
 fi
 
 if is_upgrade && [ -f "$PREFIX/UPGRADED_FROM_STATE.txt" ]; then
-    cf_console restore_cfengine_state "$PREFIX/UPGRADED_FROM_STATE.txt"
+    restore_cfengine_state "$PREFIX/UPGRADED_FROM_STATE.txt"
     rm -f "$PREFIX/UPGRADED_FROM_STATE.txt"
 else
     cf_console platform_service cfengine3 start
