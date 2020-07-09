@@ -53,21 +53,28 @@ restore_cfengine_state() {
     # $1 -- file where the state to restore is saved (see get_cfengine_state())
 
     if type systemctl >/dev/null 2>&1; then
-        xargs -n1 -a "$1" systemctl start
+        for service in `cat "$1"`; do
+            definition=`systemctl cat "$service"` || continue
+            # only try to start service that are defined/exist (some may be gone
+            # in the new version)
+            if [ -n "$definition" ]; then
+                systemctl start "$service" || echo "Failed to start service $service"
+            fi
+        done
     else
         CALLED_FROM_STATE_RESTORE=1
         if [ -f ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh ]; then
             . ${PREFIX}/bin/cfengine3-nova-hub-init-d.sh
             if grep postgres "$1" >/dev/null; then
-                start_postgres >/dev/null
+                start_postgres >/dev/null || echo "Failed to start PostgreSQL"
             fi
             if grep httpd "$1" >/dev/null; then
-                start_httpd >/dev/null
+                start_httpd >/dev/null || echo "Failed to start Apache"
             fi
         fi
 
         for d in `grep 'cf-' "$1"`; do
-            ${PREFIX}/bin/${d}
+            ${PREFIX}/bin/${d} || echo "Failed to start $d"
         done
     fi
 }
