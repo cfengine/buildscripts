@@ -206,12 +206,13 @@ case "$JOB" in
     ;;
 
     ( schema-test )
-        # NOTE: these tests will manipulate the system "cfdb" database
+        # NOTE: these tests will manipulate any of our CFE databases
         # so parallel execution is not possible
         s3cmd get --no-progress $DEB_PACKAGE cfe.deb
         install_package
         sudo service cfengine3 restart
-        cd nova/tests/schema
+        test -d nova && cd nova/tests/schema
+        test -d mission-portal && cd mission-portal/tests/schema
         sudo --preserve-env sh -c "./runtests.sh 2>&1"
     ;;
         
