@@ -7,7 +7,6 @@
 
 SOURCE_TARBALL="$BASEDIR/output/tarballs/cfengine-3.*.tar.gz"
 MASTERFILES_TARBALL=`ls $BASEDIR/output/tarballs/cfengine-masterfiles*.tar.gz | grep -v 'pkg.tar.gz$'`
-cd $BASEDIR
 
 # DELETE the git-checked-out directories, they are tainted with
 # ./configure artifacts anyway.  The tarballs are unpacked and symlinked
@@ -15,16 +14,25 @@ cd $BASEDIR
 # verified.
 
 echo "Ensuring that the git-checked-out directories core/ and masterfiles/ are not here"
-rm -rf "$BASEDIR/core/" "$BASEDIR/masterfiles/"
+sudo rm -rf "$BASEDIR/core/" "$BASEDIR/masterfiles/"
+if [ -e "$BASEDIR/core/" ] || [ -e "$BASEDIR/masterfiles/" ]; then
+    echo 'core or masterfiles not deleted!'
+    echo "core:"
+    find "$BASEDIR/core/"
+    echo "masterfiles:"
+    find "$BASEDIR/masterfiles/"
+    exit 1
+fi
 
 if [ x$PROJECT = xcommunity ]
 then
-    rm -rf "$BASEDIR/enterprise/" "$BASEDIR/nova/" "$BASEDIR/mission-portal/"
+    sudo rm -rf "$BASEDIR/enterprise/" "$BASEDIR/nova/" "$BASEDIR/mission-portal/"
 fi
 
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
 echo "UNPACKING SOURCE TARBALL AND SYMLINKING core/"
+cd $BASEDIR
 gzip -dc $SOURCE_TARBALL  | tar -xf -
 ln -s cfengine-3* core
 
