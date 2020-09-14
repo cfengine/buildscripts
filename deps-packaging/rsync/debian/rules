@@ -12,10 +12,13 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=$(PREFIX) --with-included-zlib=$(PREFIX)
+	# liblz4, libxxhash, libzstd, and libssl give rsync extra compression
+	# algorithms, extra checksum algorithms, and allow use of openssl's crypto
+	# lib for (potentially) faster MD4/MD5 checksums.
+	./configure --prefix=$(PREFIX) --with-included-zlib=$(PREFIX) CPPFLAGS=-I$(PREFIX)/include --disable-xxhash --disable-zstd --disable-lz4
 
 	make
-	
+
 	touch build-stamp
 
 install: build
@@ -27,6 +30,7 @@ install: build
 	make install DESTDIR=$(CURDIR)/debian/tmp
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share
+	rm $(CURDIR)/debian/tmp$(PREFIX)/bin/rsync-ssl
 
 binary-indep: build install
 
