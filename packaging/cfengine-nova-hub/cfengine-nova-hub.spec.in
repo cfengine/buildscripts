@@ -251,6 +251,12 @@ exit 0
 /usr/lib/systemd/system/cf-runalerts.service
 /usr/lib/systemd/system/cf-serverd.service
 
+%if %{?rhel}%{!?rhel:0} > 7
+# SELinux policy
+%dir %prefix/selinux
+%prefix/selinux/cfengine-enterprise.pp
+%endif
+
 # Documentation
 %defattr(644,root,root,755)
 %dir %prefix/share
