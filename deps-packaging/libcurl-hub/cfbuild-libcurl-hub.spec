@@ -18,9 +18,16 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
 
+# we don't bundle OpenSSL on RHEL 8 (and newer in the future)
+%if %{?rhel}%{!?rhel:0} > 7
+%define ssl_prefix /usr
+%else
+%define ssl_prefix %{prefix}
+%endif
+
 ./configure \
     --with-sysroot=%{prefix} \
-    --with-ssl=%{prefix} \
+    --with-ssl=%{ssl_prefix} \
     --with-zlib=%{prefix} \
     --disable-ldap \
     --disable-ldaps \
