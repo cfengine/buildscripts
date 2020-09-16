@@ -57,6 +57,7 @@ fetch_file()
     OUTFILE="$TMPDIR/$FILENAME"
     rm_if_empty "$OUTFILE"
     WGET=`func_whereis wget`
+    CURL=`func_whereis curl`
 
     for URL in $URLS
     do
@@ -67,6 +68,10 @@ fetch_file()
         $WGET --no-check-certificate -t5 "$URL$FILENAME" -O "$OUTFILE" 1>&2  ||  true
 
         # Sometimes wget returns error, but leaves an empty file
+        rm_if_empty "$OUTFILE"
+
+        # try with curl
+        [ -f "$OUTFILE" ]  || curl "$URL$FILENAME" >"$OUTFILE"
         rm_if_empty "$OUTFILE"
 
         # Some wget (1.9.1 on AIX) return 0 even when they failed! So we
