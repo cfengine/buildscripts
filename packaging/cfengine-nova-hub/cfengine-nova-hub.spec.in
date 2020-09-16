@@ -16,6 +16,13 @@ Obsoletes: cfengine3, cfengine-community
 Requires: coreutils gzip
 Requires(pre): /usr/sbin/useradd, /usr/sbin/userdel, /usr/bin/getent
 Requires(post): /usr/sbin/usermod, /bin/sed
+
+# we don't bundle OpenSSL on RHEL 8 (and newer in the future)
+%if %{?rhel}%{!?rhel:0} > 7
+Requires: libssl.so.1.1()(64bit) libssl.so.1.1(OPENSSL_1_1_0)(64bit) libssl.so.1.1(OPENSSL_1_1_1)(64bit)
+Requires: libcrypto.so.1.1()(64bit) libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)
+%endif
+
 AutoReqProv: no
 
 %if %{?with_debugsym}%{!?with_debugsym:0}
@@ -161,12 +168,15 @@ exit 0
 %prefix/bin/rsync
 # init.d script enterprise part
 %{prefix}/bin/cfengine3-nova-hub-init-d.sh
-# OpenSSL tools
+
+# OpenSSL tools (we don't bundle OpenSSL on RHEL 8)
+%if %{?rhel}%{!?rhel:0} <= 7
 %{prefix}/bin/openssl
 %dir %{prefix}/ssl
 %{prefix}/ssl/openssl.cnf
 %{prefix}/ssl/ct_log_list.cnf
 %{prefix}/ssl/ct_log_list.cnf.dist
+%endif
 
 %prefix/bin/git
 %prefix/bin/gitk
