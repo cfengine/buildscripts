@@ -31,4 +31,16 @@ do
     rm -f /usr/local/sbin/$i || true
 done
 
+# unload SELinux policy if not upgrading
+if ! is_upgrade; then
+  if [ `os_type` = "redhat" ] &&
+     command -v semodule >/dev/null;
+  then
+    semodule -n -r cfengine-enterprise
+    if /usr/sbin/selinuxenabled; then
+      /usr/sbin/load_policy
+    fi
+  fi
+fi
+
 exit 0

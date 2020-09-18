@@ -1,3 +1,16 @@
+# (re)load SELinux policy if available and required before we start working with
+# our daemons and services below
+if [ `os_type` = "redhat" ] &&
+   command -v semodule >/dev/null &&
+   [ -f "$PREFIX/selinux/cfengine-enterprise.pp" ];
+then
+  semodule -n -i "$PREFIX/selinux/cfengine-enterprise.pp"
+  if /usr/sbin/selinuxenabled; then
+    /usr/sbin/load_policy
+    /usr/sbin/restorecon -R /var/cfengine
+  fi
+fi
+
 if [ -x /bin/systemctl ]; then
   # This is important in case any of the units have been replaced by the package
   # and we call them in the postinstall script.
