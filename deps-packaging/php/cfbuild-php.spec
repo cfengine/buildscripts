@@ -34,6 +34,7 @@ fi
   --with-iconv \
   --with-zlib=%{prefix} \
   --with-libmbfl=%{prefix} \
+  --with-yaml=%{prefix} \
   --enable-mbstring \
   --disable-mbregex \
   --without-fpm-user \

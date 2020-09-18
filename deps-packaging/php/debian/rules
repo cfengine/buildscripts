@@ -22,6 +22,7 @@ build-stamp:
 --with-iconv \
 --with-zlib=$(PREFIX) \
 --with-libmbfl=$(PREFIX) \
+--with-yaml=$(PREFIX) \
 --enable-mbstring \
 --disable-mbregex \
 --without-fpm-user \
