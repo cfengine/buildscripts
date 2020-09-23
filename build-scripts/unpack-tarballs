@@ -13,8 +13,8 @@ MASTERFILES_TARBALL=`ls $BASEDIR/output/tarballs/cfengine-masterfiles*.tar.gz | 
 # into place. That way unpacking of tarballs on all platforms is
 # verified.
 
-echo "Ensuring that the git-checked-out directories core/ and masterfiles/ are not here"
-sudo rm -rf "$BASEDIR/core/" "$BASEDIR/masterfiles/"
+echo "Ensuring that core and masterfiles are not here"
+sudo rm -rf "$BASEDIR/core" "$BASEDIR/masterfiles"
 if [ -e "$BASEDIR/core/" ] || [ -e "$BASEDIR/masterfiles/" ]; then
     echo 'core or masterfiles not deleted!'
     echo "core:"
@@ -26,12 +26,12 @@ fi
 
 if [ x$PROJECT = xcommunity ]
 then
-    sudo rm -rf "$BASEDIR/enterprise/" "$BASEDIR/nova/" "$BASEDIR/mission-portal/"
+    sudo rm -rf "$BASEDIR/enterprise" "$BASEDIR/nova" "$BASEDIR/mission-portal"
 fi
 
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
-echo "UNPACKING SOURCE TARBALL AND SYMLINKING core/"
+echo "UNPACKING SOURCE TARBALL AND SYMLINKING core"
 cd $BASEDIR
 gzip -dc $SOURCE_TARBALL  | tar -xf -
 ln -s cfengine-3* core
