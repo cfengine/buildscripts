@@ -948,6 +948,19 @@ $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/public/index.php cli_tasks invent
 # Shut down Apache and Postgres again, because we may need them to start through
 # systemd later.
 $PREFIX/httpd/bin/apachectl stop
+
+# The above sometimes fails to stop the httpd processes properly. Let's make
+# sure none are left behind.
+httpds="$(ps -eo pid,cmd|awk '/\/var\/cfengine\/httpd\/bin\/httpd/ { print $1; }')"
+if [ -n "$httpds" ]; then
+  echo "$httpds" | xargs kill
+  sleep 1s
+  httpds="$(ps -eo pid,cmd|awk '/\/var\/cfengine\/httpd\/bin\/httpd/ { print $1; }')"
+  if [ -n "$httpds" ]; then
+    echo "$httpds" | xargs kill -9
+  fi
+fi
+
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart" || su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m fast")
 
 ##
