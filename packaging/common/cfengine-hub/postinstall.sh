@@ -946,11 +946,11 @@ $PREFIX/httpd/bin/apachectl stop
 # sure none are left behind.
 httpds="$(ps -eo pid,cmd|awk '/\/var\/cfengine\/httpd\/bin\/httpd/ { print $1; }')"
 if [ -n "$httpds" ]; then
-  echo "$httpds" | xargs kill
+  echo "$httpds" | xargs kill || true "kill failed, but moving on"
   sleep 1s
   httpds="$(ps -eo pid,cmd|awk '/\/var\/cfengine\/httpd\/bin\/httpd/ { print $1; }')"
   if [ -n "$httpds" ]; then
-    echo "$httpds" | xargs kill -9
+    echo "$httpds" | xargs kill -9 || true "kill -9 failed, but moving on"
   fi
 fi
 
