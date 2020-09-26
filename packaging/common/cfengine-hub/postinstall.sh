@@ -1,3 +1,16 @@
+# (re)load SELinux policy if available and required before we start working with
+# our daemons and services below
+if [ `os_type` = "redhat" ] &&
+   command -v semodule >/dev/null &&
+   [ -f "$PREFIX/selinux/cfengine-enterprise.pp" ];
+then
+  semodule -n -i "$PREFIX/selinux/cfengine-enterprise.pp"
+  if /usr/sbin/selinuxenabled; then
+    /usr/sbin/load_policy
+    /usr/sbin/restorecon -R /var/cfengine
+  fi
+fi
+
 if [ -x /bin/systemctl ]; then
   # This is important in case any of the units have been replaced by the package
   # and we call them in the postinstall script.
@@ -241,10 +254,24 @@ CFENGINE_MP_DEFAULT_CERT_LOCATION="$PREFIX/httpd/ssl/certs"
 CFENGINE_MP_DEFAULT_CERT_LINK_LOCATION="$PREFIX/ssl"
 CFENGINE_MP_DEFAULT_KEY_LOCATION="$PREFIX/httpd/ssl/private"
 CFENGINE_MP_DEFAULT_CSR_LOCATION="$PREFIX/httpd/ssl/csr"
-CFENGINE_OPENSSL="$PREFIX/bin/openssl"
+if [ -x "$PREFIX/bin/openssl" ]; then
+  CFENGINE_OPENSSL="$PREFIX/bin/openssl"
+elif [ -x "/usr/bin/openssl" ]; then
+  CFENGINE_OPENSSL="/usr/bin/openssl"
+else
+  cf_console echo "No 'openssl' binary found!"
+  exit 1
+fi
+if [ -f "${PREFIX}/ssl/openssl.cnf" ]; then
+  OPENSSL_CNF="-config ${PREFIX}/ssl/openssl.cnf"
+else
+  # otherwise use default config
+  OPENSSL_CNF=""
+fi
 mkdir -p $CFENGINE_MP_DEFAULT_CERT_LOCATION
 mkdir -p $CFENGINE_MP_DEFAULT_KEY_LOCATION
 mkdir -p $CFENGINE_MP_DEFAULT_CSR_LOCATION
+mkdir -p $CFENGINE_MP_DEFAULT_CERT_LINK_LOCATION
 CFENGINE_LOCALHOST=$(hostname -f | tr '[:upper:]' '[:lower:]')
 CFENGINE_SSL_KEY_SIZE="4096"
 CFENGINE_SSL_DAYS_VALID="3650"
@@ -263,7 +290,7 @@ if [ ! -f $CFENGINE_MP_CERT ]; then
   ${CFENGINE_OPENSSL} rsa -passin pass:x -in ${CFENGINE_MP_PASS_KEY} -out ${CFENGINE_MP_KEY}
 
   # Generate a CSR in ${CFENGINE_MP_CSR} with key ${CFENGINE_MP_KEY}
-  ${CFENGINE_OPENSSL} req -utf8 -sha256 -nodes -new -subj "/CN=$CFENGINE_LOCALHOST" -key ${CFENGINE_MP_KEY} -out ${CFENGINE_MP_CSR} -config ${PREFIX}/ssl/openssl.cnf
+  ${CFENGINE_OPENSSL} req -utf8 -sha256 -nodes -new -subj "/CN=$CFENGINE_LOCALHOST" -key ${CFENGINE_MP_KEY} -out ${CFENGINE_MP_CSR} ${OPENSSL_CNF}
 
   # Generate CRT
   ${CFENGINE_OPENSSL} x509 -req -days ${CFENGINE_SSL_DAYS_VALID} -in ${CFENGINE_MP_CSR} -signkey ${CFENGINE_MP_KEY} -out ${CFENGINE_MP_CERT}
@@ -914,6 +941,19 @@ $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/index.php cli_tasks inventory_ref
 # Shut down Apache and Postgres again, because we may need them to start through
 # systemd later.
 $PREFIX/httpd/bin/apachectl stop
+
+# The above sometimes fails to stop the httpd processes properly. Let's make
+# sure none are left behind.
+httpds="$(ps -eo pid,cmd|awk '/\/var\/cfengine\/httpd\/bin\/httpd/ { print $1; }')"
+if [ -n "$httpds" ]; then
+  echo "$httpds" | xargs kill || true "kill failed, but moving on"
+  sleep 1s
+  httpds="$(ps -eo pid,cmd|awk '/\/var\/cfengine\/httpd\/bin\/httpd/ { print $1; }')"
+  if [ -n "$httpds" ]; then
+    echo "$httpds" | xargs kill -9 || true "kill -9 failed, but moving on"
+  fi
+fi
+
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart" || su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m fast")
 
 ##
