@@ -46,6 +46,12 @@ case "$TEST_MACHINE" in
             then
                 continue
             fi
+            # gpg-agent sometimes is spawned on suse during our tests.
+            # This happens only in chroot. Ignore that.
+            if grep suse /etc/os-release && ps -o command --pid "$pid" | grep "gpg-agent --homedir /var/tmp/zypp.*zypp-trusted.*--daemon"
+            then
+                continue
+            fi
 
             # Leaving processes behind is an error. It should never happen.
             return_code=1
