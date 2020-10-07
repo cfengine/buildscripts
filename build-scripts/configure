@@ -82,9 +82,8 @@ case "$BUILD_TYPE" in
     ;;
   DEBUG)
     ARGS="$ARGS --enable-debug"
-    # Override the default "-g3 -O0" that comes with ./configure --enable-debug
-    # in order to reduce the size of the packages
-    CFLAGS="-g2 -O1 $CFLAGS"
+    # from https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html, optimize debugging experience with `-Og`
+    CFLAGS="-Og $CFLAGS"
     ;;
   CODE_COVERAGE)
     ARGS="$ARGS --enable-debug"
