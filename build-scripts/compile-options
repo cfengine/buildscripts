@@ -102,6 +102,7 @@ case "$OS_FAMILY" in
 esac
 
 var_append DEPS "libxml2 libyaml"
+var_append DEPS "diffutils"
 
 # LDAP functions in the agent
 # and LDAP authentication functionality in Mission Portal

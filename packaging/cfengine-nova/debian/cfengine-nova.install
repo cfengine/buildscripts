@@ -34,3 +34,7 @@
 /var/cfengine/bin/mdb_stat
 /var/cfengine/bin/mdb_dump
 /var/cfengine/bin/mdb_load
+/var/cfengine/bin/diff
+/var/cfengine/bin/sdiff
+/var/cfengine/bin/cmp
+/var/cfengine/bin/diff3

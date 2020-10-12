@@ -94,6 +94,14 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 %prefix/bin/mdb_stat
 %prefix/bin/mdb_dump
 %prefix/bin/mdb_load
+# diffutils
+%prefix/bin/diff
+%prefix/bin/sdiff
+%prefix/bin/cmp
+%prefix/bin/diff3
+
+# diffutils
+%prefix/bin/diff
 
 %if %{?rhel}%{!?rhel:0} > 7
 # SELinux policy

@@ -110,6 +110,12 @@ exit 0
 %prefix/bin/mdb_dump
 %prefix/bin/mdb_load
 
+# diffutils
+%prefix/bin/diff
+%prefix/bin/sdiff
+%prefix/bin/cmp
+%prefix/bin/diff3
+
 %if %{?rhel}%{!?rhel:0} > 7
 # SELinux policy
 %dir %prefix/selinux
