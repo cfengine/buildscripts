@@ -83,7 +83,7 @@ case "$BUILD_TYPE" in
   DEBUG)
     ARGS="$ARGS --enable-debug"
     # from https://gcc.gnu.org/onlinedocs/gcc/Optimize-Options.html, optimize debugging experience with `-Og`
-    CFLAGS="-Og $CFLAGS"
+    CFLAGS="-O0 $CFLAGS"
     ;;
   CODE_COVERAGE)
     ARGS="$ARGS --enable-debug"
