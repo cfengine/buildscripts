@@ -87,6 +87,18 @@
                 <Environment Id='Path' Name='Path' Value='[dir_bin]' Separator=';' Action='set' Part='last' System='yes' />
                 <File Id='cf_serverd.exe' Name='cf-serverd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-serverd.exe' />
               </Component>
+              <Component Id='diff.exe' Guid='A343B6FD-A0E9-468A-8678-84647C609DC6' Win64='$(var.isWin64)'>
+                <File Id='diff.exe' Name='diff.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\diff.exe' />
+              </Component>
+              <Component Id='cmp.exe' Guid='587163db-db68-4c1c-9783-09d0eb938482' Win64='$(var.isWin64)'>
+                <File Id='cmp.exe' Name='cmp.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cmp.exe' />
+              </Component>
+              <Component Id='sdiff.exe' Guid='5f25a9a9-ccf3-424b-9dcb-2574953eba92' Win64='$(var.isWin64)'>
+                <File Id='sdiff.exe' Name='sdiff.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\sdiff.exe' />
+              </Component>
+              <Component Id='diff3.exe' Guid='73fe2642-63b1-4e98-bd4f-60594049be49' Win64='$(var.isWin64)'>
+                <File Id='diff3.exe' Name='diff3.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\diff3.exe' />
+              </Component>
               <Component Id='mdb_copy.exe' Guid='E41C3638-9BBE-497D-A5A8-DB2021030113' Win64='$(var.isWin64)'>
                 <File Id='mdb_copy.exe' Name='mdb_copy.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_copy.exe' />
               </Component>
@@ -176,6 +188,10 @@
             <ComponentRef Id='mdb_stat.exe' />
             <ComponentRef Id='lmmgr.exe' />
             <ComponentRef Id='lmdump.exe' />
+            <ComponentRef Id='diff.exe' />
+            <ComponentRef Id='diff3.exe' />
+            <ComponentRef Id='cmp.exe' />
+            <ComponentRef Id='sdiff.exe' />
 
             <ComponentRef Id='cf.events.dll' />
             <ComponentRef Id='liblber.dll' />

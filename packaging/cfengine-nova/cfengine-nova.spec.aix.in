@@ -83,6 +83,13 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/mdb_dump
 %prefix/bin/mdb_load
 
+# diffutils
+%prefix/bin/diff
+%prefix/bin/sdiff
+%prefix/bin/cmp
+%prefix/bin/diff3
+
+
 # Static libraries
 %defattr(644,root,root,755)
 %prefix/lib/*.a

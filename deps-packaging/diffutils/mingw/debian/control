@@ -1,0 +1,13 @@
+Source: cfbuild-diffutils
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-diffutils-mingw64
+Section: libs
+Architecture: all
+Description: CFEngine Build Automation -- diffutils -- mingw64
+ CFEngine Build Automation -- diffutils -- mingw64
+

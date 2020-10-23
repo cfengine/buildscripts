@@ -1,0 +1,4 @@
+/var/cfengine/bin/diff
+/var/cfengine/bin/diff3
+/var/cfengine/bin/sdiff
+/var/cfengine/bin/cmp

@@ -1,0 +1,95 @@
+--- src/util.c.orig	2020-10-13 18:29:22.603742642 +0000
++++ src/util.c	2020-10-13 18:37:21.213040329 +0000
+@@ -247,7 +247,24 @@
+       SIGTSTP,
+ 
+       /* The usual suspects.  */
+-      SIGALRM, SIGHUP, SIGINT, SIGPIPE, SIGQUIT, SIGTERM,
++     #ifdef SIGALRM
++            SIGALRM,
++     #endif
++     #ifdef SIGHUP
++            SIGHUP,
++     #endif
++     #ifdef SIGINT
++            SIGINT,
++     #endif
++     #ifdef SIGPIPE
++            SIGPIPE,
++     #endif
++     #ifdef SIGQUIT
++            SIGQUIT,
++     #endif
++     #ifdef SIGTERM
++            SIGTERM,
++     #endif
+ #ifdef SIGPOLL
+       SIGPOLL,
+ #endif
+--- src/util.c	2020-10-13 20:46:32.187936980 +0000
++++ src/util.c	2020-10-13 20:46:22.671085320 +0000
+@@ -220,12 +220,14 @@
+       /* SIGTSTP is special, since the application can receive that signal
+          more than once.  In this case, don't set the signal handler to the
+          default.  Instead, just raise the uncatchable SIGSTOP.  */
++/* don't try and handle SIGTSTP on windows, not available
+       if (stops)
+         {
+           stop_signal_count = stops - 1;
+           sig = SIGSTOP;
+         }
+       else
++*/
+         signal (sig, SIG_DFL);
+ 
+       /* Exit or suspend the program.  */
+@@ -244,7 +246,9 @@
+   static int const sig[] =
+     {
+       /* This one is handled specially.  */
++     #ifdef SIGTSTP
+       SIGTSTP,
++     #endif
+ 
+       /* The usual suspects.  */
+      #ifdef SIGALRM
+@@ -305,7 +309,7 @@
+     for (j = 0; j < nsigs; j++)
+       if (sigismember (&caught_signals, sig[j]))
+         {
+-          act.sa_handler = sig[j] == SIGTSTP ? stophandler : sighandler;
++          act.sa_handler = sighandler;
+           sigaction (sig[j], &act, NULL);
+         }
+ #else
+@@ -314,7 +318,7 @@
+         caught_sig[j] = (signal (sig[j], SIG_IGN) != SIG_IGN);
+         if (caught_sig[j])
+           {
+-            signal (sig[j], sig[j] == SIGTSTP ? stophandler : sighandler);
++            signal (sig[j], sighandler);
+             siginterrupt (sig[j], 0);
+           }
+       }
+--- lib/tzset.c	2020-10-14 14:13:08.776669337 +0000
++++ lib/tzset.c	2020-10-13 21:09:01.486011455 +0000
+@@ -18,6 +18,8 @@
+ /* written by Jim Meyering */
+ 
+ #include <config.h>
++#include <stdlib.h>
++#include <string.h>
+ 
+ /* Specification.  */
+ #include <time.h>
+--- src/system.h	2020-10-14 14:39:47.162300939 +0000
++++ src/system.h	2020-10-14 14:39:58.911858384 +0000
+@@ -71,7 +71,7 @@
+ #include <string.h>
+ #if ! HAVE_STRCASECOLL
+ # if HAVE_STRICOLL || defined stricoll
+-#  define strcasecoll(a, b) stricoll (a, b)
++#  define strcasecoll(a, b) _stricoll (a, b)
+ # else
+ #  define strcasecoll(a, b) strcasecmp (a, b) /* best we can do */
+ # endif

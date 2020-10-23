@@ -1,0 +1,4 @@
+/var/cfengine/bin/diff.exe
+/var/cfengine/bin/sdiff.exe
+/var/cfengine/bin/diff3.exe
+/var/cfengine/bin/cmp.exe

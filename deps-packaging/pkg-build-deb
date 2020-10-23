@@ -50,6 +50,8 @@ echo "$SRCFILES" | while read srcfile opts; do
       UNCOMPRESS=zcat;;
     *.bz2)
       UNCOMPRESS=bzcat;;
+    *.xz)
+      UNCOMPRESS=xzcat;;
     *)
       echo "Unknown compression: $srcfile"
       exit 42;;

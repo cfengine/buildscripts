@@ -82,6 +82,8 @@ pkg-get-src "$P" | while read srcfile opts; do
       UNCOMPRESS="gzip -dc";;
     *.bz2)
       UNCOMPRESS=bzcat;;
+    *.xz)
+      UNCOMPRESS=xzcat;;
     *)
       echo "Unknown compression: $srcfile"
       exit 42;;

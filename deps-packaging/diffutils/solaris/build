@@ -1,0 +1,26 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-diffutils${PREFIX}
+
+# Build
+
+./configure --prefix=$PREFIX
+
+$MAKE
+
+# Test
+
+# Install
+
+mkdir -p $TT/bin
+$MAKE install prefix=${TT}
+
+# Package
+
+
+rm -rf $TT/share
+
