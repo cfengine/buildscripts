@@ -1,4 +1,4 @@
-%define yaml_version 0.2.4
+%define yaml_version 0.2.5
 
 Summary: CFEngine Build Automation -- libyaml
 Name: cfbuild-libyaml

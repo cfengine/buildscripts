@@ -1,4 +1,4 @@
-%define rsync_version 3.1.3
+%define rsync_version 3.2.3
 
 Summary: CFEngine Build Automation -- rsync
 Name: cfbuild-rsync
@@ -18,7 +18,10 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n rsync-%{rsync_version}
 
-./configure --prefix=%{prefix} --with-included-zlib=%{prefix}
+# liblz4, libxxhash, libzstd, and libssl give rsync extra compression
+# algorithms, extra checksum algorithms, and allow use of openssl's crypto lib
+# for (potentially) faster MD4/MD5 checksums.
+./configure --prefix=%{prefix} --with-included-zlib=%{prefix} CPPFLAGS="-I%{prefix}/include" --disable-xxhash --disable-zstd --disable-lz4
 
 %build
 
@@ -31,6 +34,7 @@ rm -rf ${RPM_BUILD_ROOT}
 make install DESTDIR=${RPM_BUILD_ROOT}
 
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share/
+rm ${RPM_BUILD_ROOT}%{prefix}/bin/rsync-ssl
 
 %clean
 rm -rf $RPM_BUILD_ROOT

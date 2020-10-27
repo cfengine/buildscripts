@@ -1,4 +1,4 @@
-%define openldap_version 2.4.50
+%define openldap_version 2.4.53
 
 Summary: CFEngine Build Automation -- openldap
 Name: cfbuild-openldap
