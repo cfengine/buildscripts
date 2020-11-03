@@ -74,15 +74,15 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 ### Build dependencies
 
 | CFEngine version | 3.12.x | 3.15.x | master |
-| ---------------- | ------ | ------ | ------ |
+| -------------- | ------ | ------ | ------ |
 | lcov             | 1.14   | 1.14   | 1.14   |
 | git              |        |        |        |
 | rsync            |        |        |        |
 
 ### Agent Dependencies
 
-| CFEngine version                                                                 | 3.12.x | 3.15.x | master | Notes                    |
-| -------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
+| CFEngine version | 3.12.x | 3.15.x | master | Notes |
+| -------------- | ------ | ------ | ------ | ----- |
 | [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                     | 2.1.27 | 2.1.27 | 2.1.27 | Solaris Enterprise agent |
 | [libacl](http://download.savannah.gnu.org/releases/acl/)                         | 2.2.53 | 2.2.53 | 2.2.53 |                          |
 | [libattr](http://download.savannah.gnu.org/releases/attr/)                       | 2.4.48 | 2.4.48 | 2.4.48 |                          |
@@ -101,8 +101,8 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 
 ### Enterprise Hub dependencies:
 
-| CFEngine version                                    | 3.12.x | 3.15.x | master |
-| --------------------------------------------------- | ------ | ------ | ------ |
+| CFEngine version | 3.12.x | 3.15.x | master |
+| -------------- | ------ | ------ | ------ |
 | [Apache](http://httpd.apache.org/)                  | 2.4.43 | 2.4.43 | 2.4.41 |
 | [APR](https://apr.apache.org/)                      | 1.7.0  | 1.7.0  | 1.7.0  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.1  | 1.6.1  | 1.6.1  |
