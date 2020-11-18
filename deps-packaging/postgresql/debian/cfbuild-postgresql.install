@@ -7,6 +7,7 @@
 /var/cfengine/bin/oid2name
 /var/cfengine/bin/pg_archivecleanup
 /var/cfengine/bin/pg_basebackup
+/var/cfengine/bin/pg_verifybackup
 /var/cfengine/bin/pg_config
 /var/cfengine/bin/pg_controldata
 /var/cfengine/bin/pg_ctl

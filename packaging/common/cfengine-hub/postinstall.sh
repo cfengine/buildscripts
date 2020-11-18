@@ -761,7 +761,7 @@ else
         su cfpostgres -c "$PREFIX/bin/createuser -S -D -R -w $MP_APACHE_USER"
     fi
     if ! echo "$db_user_list" | grep root >/dev/null; then
-      su cfpostgres -c "$PREFIX/bin/createuser -d -a -w root"
+      su cfpostgres -c "$PREFIX/bin/createuser -d -s -w root"
     fi
   )
 

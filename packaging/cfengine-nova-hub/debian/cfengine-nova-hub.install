@@ -75,6 +75,7 @@
 /var/cfengine/bin/pg_isready
 /var/cfengine/bin/pg_receivewal
 /var/cfengine/bin/pg_restore
+/var/cfengine/bin/pg_verifybackup
 /var/cfengine/bin/psql
 /var/cfengine/bin/reindexdb
 /var/cfengine/bin/vacuumdb

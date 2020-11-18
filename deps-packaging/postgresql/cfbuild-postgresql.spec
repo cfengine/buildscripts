@@ -1,4 +1,4 @@
-%define postgresql_version 12.4
+%define postgresql_version 13.1
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
@@ -71,6 +71,7 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/bin/oid2name
 %{prefix}/bin/pg_archivecleanup
 %{prefix}/bin/pg_basebackup
+%{prefix}/bin/pg_verifybackup
 %{prefix}/bin/pg_config
 %{prefix}/bin/pg_controldata
 %{prefix}/bin/pg_ctl
