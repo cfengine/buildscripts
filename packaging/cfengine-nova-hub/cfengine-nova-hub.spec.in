@@ -316,6 +316,9 @@ exit 0
 %prefix/httpd/conf
 %prefix/httpd/error
 %prefix/httpd/htdocs
+%prefix/httpd/htdocs/public/scripts/node_modules/highcharts/es-modules/Core/Interaction.js
+%prefix/httpd/htdocs/public/scripts/node_modules/highcharts/es-modules/highcharts.src.js
+%prefix/httpd/htdocs/public/scripts/node_modules/highcharts/es-modules/Accessibility/Accessibility.js
 %prefix/httpd/icons
 %prefix/httpd/logs
 %prefix/httpd/modules
