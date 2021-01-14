@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh -x -e
 
 . `dirname "$0"`/functions
 . detect-environment
@@ -52,6 +52,7 @@ git rev-parse HEAD > $BASEDIR/output/masterfiles-commitID
 ./configure
 make dist                                               # source tarball
 make tar-package                                       # package tarball
+test -s cfengine-masterfiles*.tar.gz # ensure the files exist and are non-zero in size
 mv cfengine-masterfiles*.tar.gz $BASEDIR/output/tarballs/
 make distclean
 
