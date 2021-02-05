@@ -1,0 +1,110 @@
+From be1410e8968da73b409a51e87c130bad44977aef Mon Sep 17 00:00:00 2001
+From: Vratislav Podzimek <v.podzimek@mykolab.com>
+Date: Fri, 5 Feb 2021 10:20:30 +0100
+Subject: [PATCH] Add asserts to find where EINVAL shows up in mdb_txn_begin()
+
+To find out why mdb_txn_begin() returns EINVAL in some cases.
+---
+ libraries/liblmdb/mdb.c | 24 +++++++++++++++++++-----
+ 1 file changed, 19 insertions(+), 5 deletions(-)
+
+diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
+index f89720d..aa211a5 100644
+--- a/libraries/liblmdb/mdb.c
++++ b/libraries/liblmdb/mdb.c
+@@ -130,6 +130,7 @@ extern int cacheflush(char *addr, int nbytes, int cache);
+ #define	BROKEN_FDATASYNC
+ #endif
+ 
++#include <assert.h>
+ #include <errno.h>
+ #include <limits.h>
+ #include <stddef.h>
+@@ -3018,13 +3019,17 @@ mdb_txn_renew0(MDB_txn *txn)
+ 
+ 				if (!env->me_live_reader) {
+ 					rc = mdb_reader_pid(env, Pidset, pid);
+-					if (rc)
++					if (rc) {
++                        assert(rc != EINVAL);
+ 						return rc;
++                    }
+ 					env->me_live_reader = 1;
+ 				}
+ 
+-				if (LOCK_MUTEX(rc, env, rmutex))
++				if (LOCK_MUTEX(rc, env, rmutex)) {
++                    assert(rc != EINVAL);
+ 					return rc;
++                }
+ 				nr = ti->mti_numreaders;
+ 				for (i=0; i<nr; i++)
+ 					if (ti->mti_readers[i].mr_pid == 0)
+@@ -3052,6 +3057,7 @@ mdb_txn_renew0(MDB_txn *txn)
+ 				new_notls = (env->me_flags & MDB_NOTLS);
+ 				if (!new_notls && (rc=pthread_setspecific(env->me_txkey, r))) {
+ 					r->mr_pid = 0;
++                    assert(rc != EINVAL);
+ 					return rc;
+ 				}
+ 			}
+@@ -3066,8 +3072,10 @@ mdb_txn_renew0(MDB_txn *txn)
+ 	} else {
+ 		/* Not yet touching txn == env->me_txn0, it may be active */
+ 		if (ti) {
+-			if (LOCK_MUTEX(rc, env, env->me_wmutex))
++			if (LOCK_MUTEX(rc, env, env->me_wmutex)) {
++                assert(rc != EINVAL);
+ 				return rc;
++            }
+ 			txn->mt_txnid = ti->mti_txnid;
+ 			meta = env->me_metas[txn->mt_txnid & 1];
+ 		} else {
+@@ -3122,6 +3130,7 @@ mdb_txn_renew0(MDB_txn *txn)
+ 		return MDB_SUCCESS;
+ 	}
+ 	mdb_txn_end(txn, new_notls /*0 or MDB_END_SLOT*/ | MDB_END_FAIL_BEGIN);
++    assert(rc != EINVAL);
+ 	return rc;
+ }
+ 
+@@ -3159,6 +3168,7 @@ mdb_txn_begin(MDB_env *env, MDB_txn *parent, unsigned int flags, MDB_txn **ret)
+ 		/* Nested transactions: Max 1 child, write txns only, no writemap */
+ 		flags |= parent->mt_flags;
+ 		if (flags & (MDB_RDONLY|MDB_WRITEMAP|MDB_TXN_BLOCKED)) {
++            assert((parent->mt_flags & MDB_TXN_RDONLY) == 0);
+ 			return (parent->mt_flags & MDB_TXN_RDONLY) ? EINVAL : MDB_BAD_TXN;
+ 		}
+ 		/* Child txns save MDB_pgstate and use own copy of cursors */
+@@ -3234,14 +3244,17 @@ mdb_txn_begin(MDB_env *env, MDB_txn *parent, unsigned int flags, MDB_txn **ret)
+ 			else
+ 				rc = ENOMEM;
+ 		}
+-		if (!rc)
++		if (!rc) {
+ 			rc = mdb_cursor_shadow(parent, txn);
++            assert(rc != EINVAL);
++        }
+ 		if (rc)
+ 			mdb_txn_end(txn, MDB_END_FAIL_BEGINCHILD);
+ 	} else { /* MDB_RDONLY */
+ 		txn->mt_dbiseqs = env->me_dbiseqs;
+ renew:
+ 		rc = mdb_txn_renew0(txn);
++        assert(rc != EINVAL);
+ 	}
+ 	if (rc) {
+ 		if (txn != env->me_txn0) {
+@@ -3258,7 +3271,8 @@ renew:
+ 			(void *) txn, (void *) env, txn->mt_dbs[MAIN_DBI].md_root));
+ 	}
+ 
+-	return rc;
++    assert(rc != EINVAL);
++    return rc;
+ }
+ 
+ MDB_env *
+-- 
+2.26.2
+
