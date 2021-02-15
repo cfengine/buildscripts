@@ -35,6 +35,7 @@ fi
   --with-zlib=%{prefix} \
   --with-libmbfl=%{prefix} \
   --enable-mbstring \
+  --enable-sockets \
   --disable-mbregex \
   --without-fpm-user \
   --without-fpm-group \
