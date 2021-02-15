@@ -1,4 +1,4 @@
-%define php_version 7.4.12
+%define php_version 8.0.2
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -163,7 +163,7 @@ CFEngine Build Automation -- php -- development files
 %prefix/httpd/php/lib/php.ini
 
 %dir %prefix/httpd/modules
-%prefix/httpd/modules/libphp7.so
+%prefix/httpd/modules/libphp.so
 
 %files devel
 %defattr(-,root,root)
