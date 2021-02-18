@@ -536,6 +536,21 @@ func_md5 ()
     fi
 }
 
+# Print the sha256sum of $1 or stdin.
+func_sha256 ()
+{
+    if func_which sha256sum >/dev/null
+    then
+        sha256sum "$@" | cut -d ' ' -f 1
+    else
+        case "$UNAME_S" in
+            SunOS)  digest -a sha256 "$@"  ;;
+            AIX)    openssl dgst -sha256 "$@" | cut -d ' ' -f 2 ;;
+            *)      fatal "Can't find command for computing SHA-256"  ;;
+        esac
+    fi
+}
+
 # Decompresses $1 or stdin to stdout
 func_decompress ()
 {
