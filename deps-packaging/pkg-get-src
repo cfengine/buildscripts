@@ -34,12 +34,12 @@ checksum()
             # Bogus file created by older versions of tar trying to untar newer archives.
             rm -f pax_global_header
 
-            ACTUAL_CHECKSUM=`find . -type f | env LC_ALL=C sort | xargs cat | func_md5`
+            ACTUAL_CHECKSUM=`find . -type f | env LC_ALL=C sort | xargs cat | func_sha256`
 
             cd ..  &&  rm -rf temp
             ;;
         *)
-            ACTUAL_CHECKSUM=`func_md5 $LOCAL_FILENAME` ;;
+            ACTUAL_CHECKSUM=`func_sha256 $LOCAL_FILENAME` ;;
     esac
 
     test "$CHECKSUM" = "$ACTUAL_CHECKSUM"
