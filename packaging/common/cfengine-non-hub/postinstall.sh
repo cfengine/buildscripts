@@ -25,11 +25,14 @@ if is_community; then
 fi
 
 #
-# Create a plugins directory if it doesnot exist
+# Cleanup deprecated plugins directory
 #
-if ! [ -d $PREFIX/plugins ]; then
-  mkdir -p $PREFIX/plugins
-  chmod 700 $PREFIX/plugins
+if ! rmdir $PREFIX/plugins 2> /dev/null; then
+    # CFE-3618
+    echo "$PREFIX/plugins has been removed from the default distribution, we \
+tried to clean up the unused directory but found it was not empty. Please \
+review your policy, if you believe this directory should remain part of the \
+default distribution, please open a ticket in the CFEngine bug tracker."
 fi
 
 if [ -f $PREFIX/bin/cf-twin ]; then
