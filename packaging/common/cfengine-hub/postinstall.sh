@@ -107,10 +107,16 @@ chmod 755 $PREFIX/httpd
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs
 chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.sh
 
-# plugins directory, empty by default
-mkdir -p ${PREFIX}/plugins
-chown -R root:root ${PREFIX}/plugins
-chmod 700 ${PREFIX}/plugins
+#
+# Cleanup deprecated plugins directory
+#
+if ! rmdir $PREFIX/plugins 2> /dev/null; then
+    # CFE-3618
+    echo "$PREFIX/plugins has been removed from the default distribution, we \
+tried to clean up the unused directory but found it was not empty. Please \
+review your policy, if you believe this directory should remain part of the \
+default distribution, please open a ticket in the CFEngine bug tracker."
+fi
 
 #these directories should be write able by apache
 chown root:$MP_APACHE_USER $PREFIX/httpd/logs
