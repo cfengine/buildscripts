@@ -1,4 +1,4 @@
-%define lmdb_version 0.9.26
+%define lmdb_version 0.9.29
 
 Summary: CFEngine Build Automation -- lmdb
 Name: cfbuild-lmdb
