@@ -1,4 +1,4 @@
-%define attr_version 2.4.48
+%define attr_version 2.5.1
 
 Summary: CFEngine Build Automation -- libattr
 Name: cfbuild-libattr
