@@ -16,7 +16,7 @@
         "openldap":"2551",
         "openssl":"2566",
         "pcre":"2610",
-        "php":"3627",
+        "php":"57896",
         "postgresql":"138114",
         "pthreads-w32":"17517",
         "rsync":"4217",
