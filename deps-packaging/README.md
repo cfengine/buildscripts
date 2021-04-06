@@ -39,7 +39,7 @@ Build dependencies:
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.16
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
-* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
+* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.5.1
 * [libcurl](http://curl.haxx.se/download.html) 7.72.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
