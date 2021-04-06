@@ -32,7 +32,7 @@ Build dependencies:
 |  zlib            | 1.2.11  | 1.2.11 | 1.2.11 |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.1.1g
+* [OpenSSL](http://openssl.org/) 1.1.1k
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.44
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.5
