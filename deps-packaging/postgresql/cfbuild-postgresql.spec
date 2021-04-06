@@ -1,4 +1,4 @@
-%define postgresql_version 10.14
+%define postgresql_version 10.16
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
