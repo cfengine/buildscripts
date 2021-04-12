@@ -51,3 +51,8 @@ for project in `projects_to_test`; do
     cp $BASEDIR/$project/tests/acceptance/test.xml "$OUTDIR"/$project-test.xml
   fi
 done
+
+echo "==== CRAIG FIND test.xml in $BASEDIR ===="
+find $BASEDIR -name 'test.xml'
+echo "==== CRAIG find *.xml in $BASEDIR ===="
+find $BASEDIR -name '*.xml'
