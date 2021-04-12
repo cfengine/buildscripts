@@ -46,9 +46,9 @@ done
 
 for project in `projects_to_test`; do
   if [ -f $BASEDIR/$project/tests/acceptance/summary.log ]; then
-    cp $BASEDIR/$project/tests/acceptance/summary.log "$OUTDIR"/$project-summary.log
-    cp $BASEDIR/$project/tests/acceptance/test.log "$OUTDIR"/$project-test.log
-    cp $BASEDIR/$project/tests/acceptance/test.xml "$OUTDIR"/$project-test.xml
+    mv $BASEDIR/$project/tests/acceptance/summary.log "$OUTDIR"/$project-summary.log
+    mv $BASEDIR/$project/tests/acceptance/test.log "$OUTDIR"/$project-test.log
+    mv $BASEDIR/$project/tests/acceptance/test.xml "$OUTDIR"/$project-test.xml
   fi
 done
 
