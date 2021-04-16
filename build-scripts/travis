@@ -63,7 +63,7 @@ case "$JOB" in
         # (while we need PHP7 minimum)
         mv /home/travis/.phpenv /home/travis/.phpenv.del || true
 
-        for i in core nova enterprise mission-portal masterfiles ldap-api
+        for i in core nova enterprise mission-portal masterfiles
         do
             if [ -d $i ]
             then
@@ -93,8 +93,6 @@ case "$JOB" in
                 git clone -b "$TRAVIS_BRANCH" git@github.com:cfengine/$i.git
             fi
         done
-
-        mv -T ldap-api mission-portal/ldap
 
         # packages needed for autogen
         sudo apt-get install git autoconf automake m4 make bison flex \
