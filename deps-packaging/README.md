@@ -38,9 +38,9 @@ Build dependencies:
 * [libxml2](http://xmlsoft.org/sources/) 2.9.10
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.16
   * Needed by libxml2
-* [libacl](http://download.savannah.gnu.org/releases/acl/) 2.2.53
-* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.4.48
-* [libcurl](http://curl.haxx.se/download.html) 7.72.0
+* [libacl](http://download.savannah.gnu.org/releases/acl/) 2.3.1
+* [libattr](http://download.savannah.gnu.org/releases/attr/) 2.5.1
+* [libcurl](http://curl.haxx.se/download.html) 7.75.0
 * libgcc
   * Currently only in use on AIX, Solaris, GCC dynamically links to it in order
     to substitute missing system functions
@@ -67,7 +67,7 @@ Build dependencies:
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
 * [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/) 2.9.1
-* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.53
+* [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) 2.4.58
 * [gnu rx](http://www.gnu.org/software/rx/rx.html) 2.5.1 **DEPRECATED**
   * Needed by MinGW
 
@@ -76,10 +76,10 @@ Hub specific dependencies:
 * [APR](https://apr.apache.org/) 1.7.0
 * [apr-util](https://apr.apache.org/) 1.6.1
 * [Apache](http://httpd.apache.org/) 2.4.46
-* [PostgreSQL](http://www.postgresql.org/) for the hub 10.14
+* [PostgreSQL](http://www.postgresql.org/) for the hub 10.16
 * [Redis](http://redis.io/) 3.2.11
 * [PHP](http://php.net/) 7.2.34
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.28.0
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.31.1
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)
