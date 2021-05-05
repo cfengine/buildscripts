@@ -176,7 +176,8 @@ case "$JOB" in
             ./05_processes/01_matching/promiser_match_is_correct.cf \
             ./07_packages/00*.cf \
             ./10_files/11_xml_edits \
-            ./25_cf-execd
+            ./25_cf-execd \
+            ./30_custom_promise_types/13_binary_path.cf
         set +e
         sudo ./testall \
             --bindir="$PREFIX/bin" \
