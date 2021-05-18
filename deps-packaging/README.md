@@ -35,7 +35,7 @@ Build dependencies:
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.44
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.5
-* [libxml2](http://xmlsoft.org/sources/) 2.9.10
+* [libxml2](http://xmlsoft.org/sources/) 2.9.12
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.16
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.3.1
