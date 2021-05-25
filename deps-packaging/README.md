@@ -36,7 +36,7 @@ Build dependencies:
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.44
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.5
-* [libxml2](http://xmlsoft.org/sources/) 2.9.10
+* [libxml2](http://xmlsoft.org/sources/) 2.9.12
 * [libiconv](http://ftp.gnu.org/gnu/libiconv/) 1.16
   * Needed by libxml2
 * [libacl](http://download.savannah.gnu.org/releases/acl/) 2.3.1
@@ -75,10 +75,10 @@ Hub specific dependencies:
 
 * [APR](https://apr.apache.org/) 1.7.0
 * [apr-util](https://apr.apache.org/) 1.6.1
-* [Apache](http://httpd.apache.org/) 2.4.46
-* [PostgreSQL](http://www.postgresql.org/) 12.6
+* [Apache](http://httpd.apache.org/) 2.4.47
+* [PostgreSQL](http://www.postgresql.org/) 12.7
 * [Redis](http://redis.io/) 3.2.11
-* [PHP](http://php.net/) 7.4.16
+* [PHP](http://php.net/) 7.4.19
 * [Git](https://www.kernel.org/pub/software/scm/git/) 2.31.1
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
