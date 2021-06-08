@@ -12,8 +12,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p1 < 0001-Prefix-windres-with-cross-compiler-name.patch
-	patch -p0 < fix-libtool-magic.patch
+	patch -p0 < mingw_build_fixes.patch
 	ln -s $(PREFIX)/bin/libgnurx-0.dll .
 
 	# Configure is unable to test memcmp for cross-compilation
