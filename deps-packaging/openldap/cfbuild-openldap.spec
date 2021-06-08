@@ -62,6 +62,7 @@ $MAKE -C libraries install DESTDIR=${RPM_BUILD_ROOT}
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/etc
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.la
+rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/pkgconfig/*.pc
 
 %clean
 rm -rf $RPM_BUILD_ROOT
