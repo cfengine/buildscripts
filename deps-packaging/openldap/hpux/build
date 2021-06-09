@@ -16,6 +16,7 @@ export LDFLAGS
 # Patch
 
 ${PATCH} -p1 <host_name_max_hpux.patch
+${PATCH} -p0 <no_Sockaddr_redefine.patch
 
 # Configure
 
