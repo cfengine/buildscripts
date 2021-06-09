@@ -5,6 +5,7 @@ Name: cfbuild-openldap
 Version: %{version}
 Release: 1
 Source0: openldap-%{openldap_version}.tgz
+Patch0:  no_Sockaddr_redefine.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -17,6 +18,8 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n openldap-%{openldap_version}
+
+%patch0 -p0
 
 # we don't bundle OpenSSL on RHEL 8 (and newer in the future)
 %if %{?rhel}%{!?rhel:0} > 7
