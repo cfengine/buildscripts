@@ -1,11 +1,11 @@
-%define openldap_version 2.4.58
+%define openldap_version 2.5.5
 
 Summary: CFEngine Build Automation -- openldap
 Name: cfbuild-openldap
 Version: %{version}
 Release: 1
 Source0: openldap-%{openldap_version}.tgz
-Patch0:  aix_7_linking.patch
+Patch0:  no_Sockaddr_redefine.patch
 License: MIT
 Group: Other
 Url: http://example.com/

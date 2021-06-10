@@ -43,6 +43,8 @@ case "$OS_FAMILY" in
     ;;
   hpux)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,+b$BUILDPREFIX/lib"
+    CC=gcc
+    export CC
     ;;
   mingw)
     LDFLAGS="-static-libgcc -L$BUILDPREFIX/lib"

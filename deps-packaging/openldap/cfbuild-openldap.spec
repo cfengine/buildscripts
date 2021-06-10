@@ -1,10 +1,11 @@
-%define openldap_version 2.4.58
+%define openldap_version 2.5.5
 
 Summary: CFEngine Build Automation -- openldap
 Name: cfbuild-openldap
 Version: %{version}
 Release: 1
 Source0: openldap-%{openldap_version}.tgz
+Patch0:  no_Sockaddr_redefine.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -17,6 +18,8 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n openldap-%{openldap_version}
+
+%patch0 -p0
 
 # we don't bundle OpenSSL on RHEL 8 (and newer in the future)
 %if %{?rhel}%{!?rhel:0} > 7
@@ -62,6 +65,7 @@ $MAKE -C libraries install DESTDIR=${RPM_BUILD_ROOT}
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/etc
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.a
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/*.la
+rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/pkgconfig/*.pc
 
 %clean
 rm -rf $RPM_BUILD_ROOT

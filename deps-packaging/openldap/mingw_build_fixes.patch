@@ -1,0 +1,11 @@
+--- include/ac/time.h.orig	2021-06-09 11:42:13.532890440 +0200
++++ include/ac/time.h	2021-06-09 11:42:33.555635766 +0200
+@@ -29,7 +29,7 @@
+ # include <time.h>
+ #endif
+ 
+-#if defined(_WIN32) && !defined(HAVE_CLOCK_GETTIME)
++#if defined(_WIN32) && !defined(HAVE_CLOCK_GETTIME) && !defined(_TIMESPEC_DEFINED)
+ 	struct timespec {
+ 		time_t	tv_sec;
+ 		int 	tv_nsec;
