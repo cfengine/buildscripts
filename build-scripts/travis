@@ -122,6 +122,14 @@ case "$JOB" in
         )
 
         (
+        if test -f "mission-portal/public/themes/default/bootstrap/cfengine_theme.less"; then
+            sudo apt-get -y install npm
+            cd mission-portal/public/themes/default/bootstrap
+            npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
+        fi
+        )
+
+        (
         if test -f "mission-portal/ldap/composer.json"; then
             sudo apt-get -y install php-ldap
             cd mission-portal/ldap
