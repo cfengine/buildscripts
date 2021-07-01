@@ -123,6 +123,7 @@ case "$JOB" in
 
         (
         if test -f "mission-portal/ldap/composer.json"; then
+            sudo apt-get -y install php-ldap
             cd mission-portal/ldap
             # install PHP dependencies from composer
             composer install
