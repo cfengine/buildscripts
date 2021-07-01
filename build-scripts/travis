@@ -121,6 +121,14 @@ case "$JOB" in
         fi
         )
 
+        (
+        if test -f "mission-portal/ldap/composer.json"; then
+            cd mission-portal/ldap
+            # install PHP dependencies from composer
+            composer install
+        fi
+        )
+
         # packages needed for autogen
         sudo apt-get install git autoconf automake m4 make bison flex \
             binutils libtool gcc g++ libc-dev libpam0g-dev python psmisc \
