@@ -249,7 +249,7 @@ case "$PACKAGING" in
     (cd "$BASEDIR/$PKG/pkg"; export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"; dpkg-buildpackage -b -us -uc -rfakeroot) || false
 
     # Create TAR package
-    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION$safe_prefix.$OS$os_version_major.$ARCH.pkg.tar.gz"
+    TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION$safe_prefix.$ARCH.pkg.tar.gz"
     cd "$BASEDIR/$PKG/pkg/debian/tmp/"
     # $LOCAL_PREFIX is $PREFIX without first slash, i.e. var/cfengine
     # $LOCAL_DIR is first (outermost) dir in $LOCAL_PREFIX, i.e. var
