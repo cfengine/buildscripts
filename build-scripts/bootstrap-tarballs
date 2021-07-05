@@ -109,6 +109,13 @@ fi
 )
 
 (
+if test -f "$BASEDIR/mission-portal/public/themes/default/bootstrap/cfengine_theme.less"; then
+  cd $BASEDIR/mission-portal/public/themes/default/bootstrap
+  npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
+fi
+)
+
+(
 if test -f "$BASEDIR/mission-portal/ldap/composer.json"; then
   cd $BASEDIR/mission-portal/ldap
   # install PHP dependencies from composer
