@@ -107,3 +107,11 @@ if test -f "$BASEDIR/mission-portal/composer.json"; then
   php /usr/bin/composer.phar install
 fi
 )
+
+(
+if test -f "$BASEDIR/mission-portal/ldap/composer.json"; then
+  cd $BASEDIR/mission-portal/ldap
+  # install PHP dependencies from composer
+  php /usr/bin/composer.phar install
+fi
+)
