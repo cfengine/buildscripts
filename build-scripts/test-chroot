@@ -4,9 +4,6 @@
 . detect-environment
 . compile-options
 
-# Ensure hostname -f is working (required for some tests)
-hostname -f || echo "127.0.0.1 $(hostname).example.com $(hostname)" >>/etc/hosts
-
 # We should already be root inside the chroot, so sudo is not necessary,
 # and "GAINROOT=env" might be faster.
 env GAINROOT=env UNSAFE_TESTS=1 $BASEDIR/buildscripts/build-scripts/test-on-thismachine
