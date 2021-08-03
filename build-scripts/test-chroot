@@ -5,7 +5,11 @@
 . compile-options
 
 # Ensure hostname -f is working (required for some tests)
-hostname -f || echo "127.0.0.1 $(hostname).example.com $(hostname)" >>/etc/hosts
+# This check is limited to Linux only, since on exotics `hostname -f` sometimes
+# sets hostname to "-f", and tests mentioned above are not running there anyway.
+if [ "`uname -s`" = "Linux" ]; then
+    hostname -f || echo "127.0.0.1 $(hostname).example.com $(hostname)" >>/etc/hosts
+fi
 
 # We should already be root inside the chroot, so sudo is not necessary,
 # and "GAINROOT=env" might be faster.
