@@ -99,9 +99,12 @@ package()
         ;;
     esac
   else
-    REVISION=$EXPLICIT_VERSION.65534
-    #fix me, come up with some way of specifying a version number. right now get rid of alphabets.
-    REVISION=$(echo $REVISION | sed 's/[a-z]*//g');
+    if [ -z "$EXPLICIT_RELEASE" ]
+    then
+        REVISION="$EXPLICIT_VERSION.1"
+    else
+        REVISION="$EXPLICIT_VERSION.$EXPLICIT_RELEASE"
+    fi
   fi
 
   # convert any alphabets in revison to int as no alphabets are allowed in windows package version
