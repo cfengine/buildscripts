@@ -39,10 +39,10 @@ pre()
   # I couldn't find an easy way to dynamically find the path to this dll so hard-coded
   # it is. :(
   case "$ARCH" in
-    x86) 
+    x86)
         cp -a /usr/i686-w64-mingw32/lib/libwinpthread-1.dll $P/bin/libwinpthread-1.dll
         cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll;;
-    x64) 
+    x64)
         cp -a /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll $P/bin/libwinpthread-1.dll
         cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.x86_64.dll $P/bin/cf.events.dll;;
     *)
@@ -99,9 +99,12 @@ package()
         ;;
     esac
   else
-    REVISION=$EXPLICIT_VERSION.65534
-    #fix me, come up with some way of specifying a version number. right now get rid of alphabets.
-    REVISION=$(echo $REVISION | sed 's/[a-z]*//g');
+    if [ -z "$EXPLICIT_RELEASE" ]
+    then
+        REVISION="$EXPLICIT_VERSION.1"
+    else
+        REVISION="$EXPLICIT_VERSION.$EXPLICIT_RELEASE"
+    fi
   fi
 
   # convert any alphabets in revison to int as no alphabets are allowed in windows package version
