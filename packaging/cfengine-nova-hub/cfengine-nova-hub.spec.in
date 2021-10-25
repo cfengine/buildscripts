@@ -56,6 +56,11 @@ rm -f %{prefix}/ssl/misc/tsget
 rm -f %{prefix}/ssl/openssl.cnf.dist
 rm -f %{prefix}/ssl/misc/tsget.pl
 
+# Add an openssl symlink if openssl binary doesn't exist
+if ! [ -f $RPM_BUILD_ROOT%{prefix}/bin/openssl ]; then
+  ln -s `which openssl` $RPM_BUILD_ROOT%{prefix}/bin/openssl
+fi
+
 # Hub does not need cf-upgrade, it is only present in host packages
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/cf-upgrade
 
@@ -168,8 +173,10 @@ exit 0
 %{prefix}/bin/cfengine3-nova-hub-init-d.sh
 
 # OpenSSL tools (we don't bundle OpenSSL on RHEL 8)
-%if %{?rhel}%{!?rhel:0} <= 7
+# Note that %{prefix}/bin/openssl is outside of `if`, since
+# on RHEL8 it's a symlink to a system-wide openssl binary
 %{prefix}/bin/openssl
+%if %{?rhel}%{!?rhel:0} <= 7
 %dir %{prefix}/ssl
 %{prefix}/ssl/openssl.cnf
 %{prefix}/ssl/ct_log_list.cnf
