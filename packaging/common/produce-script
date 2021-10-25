@@ -44,17 +44,22 @@ esac
 echo "PKG_TYPE=$PKG_TYPE"
 echo "SCRIPT_TYPE=$SCRIPT_TYPE"
 echo "PROJECT_TYPE=$PROJECT_TYPE"
+echo "BUILT_ON_OS=$OS"
+BUILT_ON_OS_VERSION="`expr "$OS_VERSION" : "\([0-9]*\)"`"
+echo "BUILT_ON_OS_VERSION=$BUILT_ON_OS_VERSION"
 
 case "$SCRIPT_TYPE" in
   *install)
     include_script "$TEMPLATEDIR/$PKG_TYPE-script-common-install.sh"
     include_script "$TEMPLATEDIR/script-common.sh"
     include_script "$TEMPLATEDIR/script-common-install.sh"
+    include_script "$TEMPLATEDIR/script-common-$SCRIPT_TYPE.sh"
     ;;
   *remove)
     include_script "$TEMPLATEDIR/$PKG_TYPE-script-common-remove.sh"
     include_script "$TEMPLATEDIR/script-common.sh"
     include_script "$TEMPLATEDIR/script-common-remove.sh"
+    include_script "$TEMPLATEDIR/script-common-$SCRIPT_TYPE.sh"
     ;;
 esac
 
