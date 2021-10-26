@@ -33,7 +33,6 @@ mkdir -p %{_builddir}
     --disable-ldaps \
     --without-axtls \
     --without-cyassl \
-    --without-darwinssl \
     --without-egd-socket \
     --without-gnutls \
     --without-gssapi \
