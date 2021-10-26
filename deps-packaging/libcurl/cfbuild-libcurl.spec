@@ -37,7 +37,6 @@ mkdir -p %{_builddir}
     --without-gnutls \
     --without-gssapi \
     --without-libidn \
-    --without-libmetalink \
     --without-librtmp \
     --without-libssh2 \
     --without-nghttp2 \
