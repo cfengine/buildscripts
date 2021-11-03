@@ -1023,4 +1023,10 @@ fi
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"
 
+# Let's make sure all files and directories created above have correct SELinux
+# labels.
+if command -v restorecon >/dev/null; then
+  restorecon -iR /var/cfengine /opt/cfengine
+fi
+
 exit 0
