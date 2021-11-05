@@ -53,8 +53,10 @@ fetch_file()
 
     FILENAME="$1"
     CHECKSUM="$2"
+    OPTS="$3"
 
     OUTFILE="$TMPDIR/$FILENAME"
+    [ -n "$OPTS" ] && OUTFILE="$TMPDIR/$OPTS" # to rename the URL
     rm_if_empty "$OUTFILE"
     WGET=`func_whereis wget`
     CURL=`func_whereis curl`
@@ -127,7 +129,8 @@ get_src()
     else
         [ -f "$local_filename" ]  &&  rm -f "$local_filename"
 
-        tmp_filename=`fetch_file "$FILENAME" $CHECKSUM`
+        tmp_filename=`fetch_file "$FILENAME" $CHECKSUM $OPTS`
+        FILENAME=$(basename "$tmp_filename") # because fetch_file might rename it
 
         # Cache it, both locally and remotely, to avoid hitting upstream every time.
         # pkg-cache will also print the locally stored file, which we want.
