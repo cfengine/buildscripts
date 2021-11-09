@@ -9,3 +9,13 @@
  	struct timespec {
  		time_t	tv_sec;
  		int 	tv_nsec;
+--- libraries/liblber/lber.map.orig	2021-11-09 15:43:46.876482616 +0100
++++ libraries/liblber/lber.map	2021-11-09 15:45:03.819040549 +0100
+@@ -102,6 +102,7 @@
+     ber_pvt_sb_do_write;
+     ber_pvt_sb_grow_buffer;
+     ber_pvt_socket_set_nonblock;
++    ber_pvt_wsa_err2string;
+     ber_read;
+     ber_realloc;
+     ber_remaining;
