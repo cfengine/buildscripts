@@ -15,7 +15,7 @@ build-stamp:
 	ls -l
 	patch -p0 < 01-mingw-signals.patch
 
-	./configure --host=\$(DEB_HOST_GNU_TYPE) --prefix=\$(PREFIX)
+	./configure --host=\$(DEB_HOST_GNU_TYPE) --prefix=\$(PREFIX) LDFLAGS="-pthread"
 	make -C lib
 	make -C src
 
