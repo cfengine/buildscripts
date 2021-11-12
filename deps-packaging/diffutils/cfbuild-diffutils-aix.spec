@@ -1,4 +1,4 @@
-%define diffutils_version 3.7
+%define diffutils_version 3.8
 
 Summary: CFEngine Build Automation -- diffutils
 Name: cfbuild-diffutils
