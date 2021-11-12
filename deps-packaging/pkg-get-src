@@ -119,6 +119,7 @@ get_src()
     exec <"$DISTFILE"
     read CHECKSUM FILENAME OPTS
 
+    [ -n "$OPTS" ] && FILENAME="$OPTS" # rename file if third arg is provided
     local_filename=`pkg-cache listfile $FILENAME`  ||  true
 
     if [ -f "$local_filename" ]  &&  checksum "$local_filename" "$CHECKSUM"
