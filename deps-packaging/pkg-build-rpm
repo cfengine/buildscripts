@@ -40,13 +40,8 @@ echo
 echo "========================= Building RPM for: $PKGNAME =========================="
 echo
 
-if [ $SYS = "AIX" ]; then
-  case "$PKGNAME" in
-    openldap)
-      SPEC="$P/cfbuild-$PKGNAME-aix.spec";;
-    *)
-      SPEC="$P/cfbuild-$PKGNAME.spec";;
-  esac
+if [ "$SYS" = "AIX" ] && [ -f "$P/cfbuild-$PKGNAME-aix.spec" ]; then
+  SPEC="$P/cfbuild-$PKGNAME-aix.spec"
 else
   SPEC="$P/cfbuild-$PKGNAME.spec"
 fi
