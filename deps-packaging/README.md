@@ -32,7 +32,7 @@ Build dependencies:
 |  zlib            | 1.2.11  | 1.2.11 | 1.2.11 |                          |
 
 * [zlib](http://www.zlib.net/) 1.2.11
-* [OpenSSL](http://openssl.org/) 1.1.1k
+* [OpenSSL](http://openssl.org/) 1.1.1l
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.44
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
 * [libyaml](http://pyyaml.org/wiki/LibYAML) 0.2.5
@@ -76,10 +76,10 @@ Hub specific dependencies:
 * [APR](https://apr.apache.org/) 1.7.0
 * [apr-util](https://apr.apache.org/) 1.6.1
 * [Apache](http://httpd.apache.org/) 2.4.47
-* [PostgreSQL](http://www.postgresql.org/) 12.7
+* [PostgreSQL](http://www.postgresql.org/) 12.8
 * [Redis](http://redis.io/) 3.2.11
-* [PHP](http://php.net/) 7.4.19
-* [Git](https://www.kernel.org/pub/software/scm/git/) 2.31.1
+* [PHP](http://php.net/) 7.4.25
+* [Git](https://www.kernel.org/pub/software/scm/git/) 2.33.1
 * [rsync](https://download.samba.org/pub/rsync/) 3.1.3
 
 Other dependencies (**find out why they are needed!**)
