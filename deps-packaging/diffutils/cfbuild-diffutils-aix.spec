@@ -1,4 +1,4 @@
-%define diffutils_version 3.8
+%define diffutils_version 3.7
 
 Summary: CFEngine Build Automation -- diffutils
 Name: cfbuild-diffutils
@@ -19,7 +19,7 @@ mkdir -p %{_builddir}
 export PATH=/opt/freeware/bin:$PATH # to use newer version of tar on aix platform
 %setup -q -n diffutils-%{diffutils_version}
 
-./configure --prefix=%{prefix}
+./configure --prefix=%{prefix} LDFLAGS="-pthread"
 
 %build
 

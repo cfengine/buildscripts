@@ -1,4 +1,4 @@
-%define curl_version 7.77.0
+%define curl_version 7.79.1
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl-hub
@@ -33,12 +33,10 @@ mkdir -p %{_builddir}
     --disable-ldaps \
     --without-axtls \
     --without-cyassl \
-    --without-darwinssl \
     --without-egd-socket \
     --without-gnutls \
     --without-gssapi \
     --without-libidn \
-    --without-libmetalink \
     --without-librtmp \
     --without-libssh2 \
     --without-nghttp2 \
