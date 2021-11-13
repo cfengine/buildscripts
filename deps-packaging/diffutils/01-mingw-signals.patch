@@ -93,3 +93,16 @@
  # else
  #  define strcasecoll(a, b) strcasecmp (a, b) /* best we can do */
  # endif
+--- lib/cmpbuf.c.orig	2021-11-11 12:48:36.407735837 +0100
++++ lib/cmpbuf.c	2021-11-11 12:48:51.001818765 +0100
+@@ -32,6 +32,10 @@
+ # define SSIZE_MAX TYPE_MAXIMUM (ssize_t)
+ #endif
+
++#ifndef SA_RESTART
++# define SA_RESTART 0
++#endif
++
+ #undef MIN
+ #define MIN(a, b) ((a) <= (b) ? (a) : (b))
+
