@@ -45,6 +45,9 @@ rm -rf ${RPM_BUILD_ROOT}
 
 make install DESTDIR=${RPM_BUILD_ROOT}
 
+# ensure apache-created files are not readable by others, ENT-7948
+echo "umask 0177" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/bin/envvars
+
 # Removing unused files
 
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/man
