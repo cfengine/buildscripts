@@ -1,4 +1,4 @@
-%define pcre_version 8.45
+%define pcre_version 8.44
 
 Summary: CFEngine Build Automation -- pcre
 Name: cfbuild-pcre
