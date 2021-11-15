@@ -279,6 +279,8 @@ exit 0
 %prefix/share/postgresql/*
 %prefix/share/db
 %{prefix}/share/doc/postgresql/extension/*
+# PostgreSQL log file
+%attr(600,cfpostgres,cfpostgres) /var/log/postgresql.log
 
 # ENT-2708, ENT-2846
 %defattr(600,root,root,700)
