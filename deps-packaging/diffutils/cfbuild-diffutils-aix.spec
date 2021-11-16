@@ -19,7 +19,7 @@ mkdir -p %{_builddir}
 export PATH=/opt/freeware/bin:$PATH # to use newer version of tar on aix platform
 %setup -q -n diffutils-%{diffutils_version}
 
-./configure --prefix=%{prefix}
+./configure --prefix=%{prefix} LDFLAGS="-pthread"
 
 %build
 
