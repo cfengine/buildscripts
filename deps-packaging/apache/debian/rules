@@ -37,6 +37,9 @@ install: build
 
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 
+	# ensure apache-created files are not readable by others, ENT-7948
+	echo "umask 0177" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/bin/envvars
+
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/httpd/man
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/httpd/manual
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/httpd.conf
