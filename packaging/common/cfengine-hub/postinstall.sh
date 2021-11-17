@@ -372,7 +372,8 @@ init_postgres_dir()
   # /tmp is such directory on most cases
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
   touch /var/log/postgresql.log
-  chown cfpostgres /var/log/postgresql.log
+  chown cfpostgres:cfpostgres /var/log/postgresql.log
+  chmod 600 /var/log/postgresql.log
 
   if ! is_upgrade; then
     # Not an upgrade, just use the recommended or default file (see generate_new_postgres_conf())
