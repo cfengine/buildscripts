@@ -2,6 +2,7 @@
 
 PACKAGES_HUB_x86_64_linux_debian_9
 PACKAGES_HUB_x86_64_linux_debian_10
+PACKAGES_HUB_x86_64_linux_debian_11
 
 PACKAGES_HUB_x86_64_linux_redhat_6
 PACKAGES_HUB_x86_64_linux_redhat_7
@@ -13,6 +14,7 @@ PACKAGES_HUB_x86_64_linux_ubuntu_20
 
 PACKAGES_x86_64_linux_debian_9
 PACKAGES_x86_64_linux_debian_10
+PACKAGES_x86_64_linux_debian_11
 
 PACKAGES_x86_64_linux_redhat_6
 PACKAGES_x86_64_linux_redhat_7
