@@ -314,7 +314,7 @@ exit 0
 %prefix/httpd/bin
 %prefix/httpd/cgi-bin
 
-%defattr(644,root,root,755)
+%defattr(460,root,cfapache,570)
 %prefix/httpd/conf
 %prefix/httpd/error
 %prefix/httpd/htdocs
