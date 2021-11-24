@@ -194,8 +194,13 @@ fi
 
 # Dir to store SSH key to access git repo
 mkdir -p "$DCWORKDIR/userworkdir/admin/.ssh"
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $DCWORKDIR
 chmod -R 700 $DCWORKDIR/userworkdir
+
+# Dir for notification/alert scripts
+mkdir "$DCWORKDIR/notification_scripts"
+chmod -R 700 "$DCWORKDIR/notification_scripts"
+
+chown -R $MP_APACHE_USER:$MP_APACHE_USER "$DCWORKDIR"
 
 if [ -f $PREFIX/bin/cf-twin ]; then
     /bin/rm $PREFIX/bin/cf-twin
