@@ -17,8 +17,11 @@ echo "P $BASEDIR" > $TRANSFER_SCRIPT
 echo "P $PREFIX" >> $TRANSFER_SCRIPT
 generate_chroot_transfer_script >> $TRANSFER_SCRIPT
 
+touch .keepalive-echo
+(while test -e .keepalive-echo; do sleep 60; echo Keep alive; done)&
 RETURN_CODE=0
 sudo rsync --filter=". $TRANSFER_SCRIPT" -Da --delete --delete-excluded / $CHROOT_ROOT || RETURN_CODE=$?
+rm .keepalive-echo
 # Return code 24 means "some files vanished before they could be transferred",
 # which we don't care about, since a running system might experience this
 # without it being an error.
