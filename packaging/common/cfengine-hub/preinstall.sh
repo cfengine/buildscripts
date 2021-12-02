@@ -361,4 +361,5 @@ if is_upgrade && egrep '^3\.([2-9]|1[012345])\.' "$PREFIX/UPGRADED_FROM.txt" >/d
   true "Done removing keys"
 fi
 
+ulimit -c unlimited
 exit 0
