@@ -25,8 +25,10 @@ fi
 test -z "$BACKUP_DIR" && BACKUP_DIR=$PREFIX/state/pg/backup
 
 if migrating_postgres; then
-  if [ -d "$BACKUP_DIR/data" ]; then
-    cf_console echo "Old backup in $BACKUP_DIR already exists. Please remove before attempting upgrade."
+    if [ -d "$BACKUP_DIR" ] && [ -n "$(ls -A "$BACKUP_DIR")" ]; then
+    cf_console echo "Backup directory $BACKUP_DIR already exists and is not empty."
+    cf_console echo 'Please remove it, clean it, or set a different directory by setting a BACKUP_DIR env variable, like this:'
+    cf_console echo 'export BACKUP_DIR=/mnt/plenty-of-free-space'
     exit 1
   fi
   mkdir -p "$BACKUP_DIR"
