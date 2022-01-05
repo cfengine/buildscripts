@@ -10,6 +10,7 @@
 @unexec /bin/pkill -9 cf-monitord > /dev/null 2>&1
 @unexec /bin/pkill -9 cf-serverd > /dev/null 2>&1
 @unexec /bin/pkill -9 cf-hub > /dev/null 2>&1
+@unexec /bin/pkill -9 cf-reactor > /dev/null 2>&1
 @unexec /bin/rm -rf /var/cfengine/rc.d > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-agent > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-check > /dev/null 2>&1
@@ -17,6 +18,7 @@
 @unexec /bin/rm -f /var/cfengine/bin/cf-key > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-secret > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-hub > /dev/null 2>&1
+@unexec /bin/rm -f /var/cfengine/bin/cf-reactor > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-monitord > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-net > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-promises > /dev/null 2>&1

@@ -46,7 +46,7 @@ fi
 #
 # Clean lock files created by initscript, if any
 #
-for i in cf-execd cf-serverd cf-monitord cf-hub; do
+for i in cf-execd cf-serverd cf-monitord cf-hub cf-reactor; do
   rm -f /var/lock/$i /var/lock/subsys/$i
 done
 
