@@ -156,7 +156,7 @@ fi
 filter_netstat_listen()
 {
   set +e
-  if [ -x /usr/sbin/ss ]; then
+  if command -v ss >/dev/null; then
     ss -natp | egrep "LISTEN.*($1)"
   else
     netstat -natp | egrep "($1).*LISTEN"
