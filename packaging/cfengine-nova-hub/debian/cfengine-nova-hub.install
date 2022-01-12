@@ -5,6 +5,7 @@
 /usr/lib/systemd/system/cf-apache.service
 /usr/lib/systemd/system/cf-execd.service
 /usr/lib/systemd/system/cf-hub.service
+/usr/lib/systemd/system/cf-reactor.service
 /usr/lib/systemd/system/cf-monitord.service
 /usr/lib/systemd/system/cf-postgres.service
 /usr/lib/systemd/system/cf-runalerts.service
@@ -44,6 +45,7 @@
 /var/cfengine/ppkeys
 /var/cfengine/state
 /var/cfengine/bin/cf-hub
+/var/cfengine/bin/cf-reactor
 /var/cfengine/lib/php
 /var/cfengine/share/NovaBase
 /var/cfengine/share/GUI
