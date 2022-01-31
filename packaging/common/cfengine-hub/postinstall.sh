@@ -241,7 +241,7 @@ then
   fi
 fi
 
-for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-hub cf-net cf-check;
+for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-hub cf-reactor cf-net cf-check;
 do
   if [ -f $PREFIX/bin/$i -a -d /usr/local/sbin ]; then
     ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
@@ -997,6 +997,7 @@ if ! is_upgrade; then
     /bin/systemctl enable cf-monitord.service > /dev/null 2>&1
     /bin/systemctl enable cf-postgres.service > /dev/null 2>&1
     /bin/systemctl enable cf-hub.service > /dev/null 2>&1
+    /bin/systemctl enable cf-reactor.service > /dev/null 2>&1
     /bin/systemctl enable cfengine3.service > /dev/null 2>&1
     set -e
   else
