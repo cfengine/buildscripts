@@ -321,7 +321,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
     find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/tmp" -prune \) \
 	    -not \( -name "cf_robot.php" \) \
 	    -not \( -name "settings.ldap.php" \) \
-	    -type f -print0 | xargs -0 rm
+	    -type f -print0 | xargs -0 -r rm
   fi
   if [ -d $PREFIX/share/GUI -a "x${PKG_TYPE}" = "xrpm" ]; then
     # Make sure old files are not copied over together with new files later
@@ -333,7 +333,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
 fi
 
 if [ -d $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718 ]; then
-  rm $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718/*
+  rm $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718/* || true # if nothing there, fine
 fi
 
 true "Removing keys from files maintained by package manager"
