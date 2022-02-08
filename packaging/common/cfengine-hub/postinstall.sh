@@ -91,7 +91,7 @@ EOF
 )
 true "Done creating httpd/secrets.ini file"
 
-cp -r $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
+cp -r --remove-destination $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
 
 # If old files were moved aside during upgrade, we should move them back so that
 # rpm can do its cleanup procedures. But avoid overwriting new files with the
