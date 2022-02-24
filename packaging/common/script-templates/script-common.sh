@@ -100,7 +100,7 @@ wait_for_cf_postgres() {
 }
 
 safe_cp() {
-    # "safe" alternative to `cp`. Tries `cp -al` first, and if it fails - `cp -l`.
+    # "safe" alternative to `cp`. Tries `cp -al` first, and if it fails - `cp -a`.
     # Deletes partially-copied files if copy operation fails.
     # Args:
     #   * dir you're copying stuff from
@@ -120,13 +120,13 @@ safe_cp() {
         # Copy succeeded
         return 0
     fi
-    # Copy creating hardlinks failed, so remove partially-copied data and try simple copying
+    echo "Copy creating hardlinks failed, removing partially-copied data and trying simple copy"
     rm -rf "$to/$name"
     if cp -a "$from/$name" "$to"; then
         # Copy succeeded
         return 0
     fi
-    # Copy failed, so remove partially-copied data and abort
+    echo "Copy failed, so removing partially-copied data and aborting"
     rm -rf "$to/$name"
     return 1
 }
