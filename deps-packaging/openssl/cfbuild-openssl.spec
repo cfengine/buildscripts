@@ -69,7 +69,8 @@ fi
          --prefix=%{prefix} \
          $HACK_FLAGS   \
          $DEBUG_CFLAGS \
-         $LDFLAGS
+         $LDFLAGS \
+         --libdir=lib
 
 # Remove -O3 and -fomit-frame-pointer from debug builds
 if [ $BUILD_TYPE = "DEBUG" ]
@@ -144,8 +145,8 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/bin/openssl
 
 %dir %{prefix}/lib
-%{prefix}/lib/libssl.so.1.1
-%{prefix}/lib/libcrypto.so.1.1
+%{prefix}/lib/libssl.so.3
+%{prefix}/lib/libcrypto.so.3
 %{prefix}/ssl/openssl.cnf
 %{prefix}/ssl/ct_log_list.cnf
 %{prefix}/ssl/ct_log_list.cnf.dist
@@ -156,6 +157,7 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/include
 
 %dir %{prefix}/lib
+%{prefix}/lib/ossl-modules/legacy.so
 
 %{prefix}/lib/pkgconfig
 

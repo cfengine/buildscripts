@@ -38,7 +38,7 @@ else
 fi
 
 $CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm no-engine \
-    --prefix=$PREFIX  $LDFLAGS -lrt
+    --prefix=$PREFIX  $LDFLAGS -lrt --libdir=lib
 
 # Build
 
