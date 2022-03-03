@@ -788,6 +788,11 @@ else
   # restored to restrictive state after import ENT-2684
   chown cfpostgres $PREFIX/share/db/*.sql
   (cd /tmp && chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql")
+  # if superhub is enabled, run schema.sql on hub_0 to make any table definition changes
+  is_superhub=$($PREFIX/bin/psql cfdb -c 'select is_superhub()' --tuples-only | xargs)
+  if [ "$is_superhub" = "t" ]; then
+    (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfdb -c 'set schema \$\$hub_0\$\$' -f $PREFIX/share/db/schema.sql")
+  fi
 
   #create database for MISSION PORTAL
   (cd /tmp && su cfpostgres -c "$PREFIX/bin/psql cfmp" < $PREFIX/share/GUI/phpcfenginenova/pgschema.sql)
