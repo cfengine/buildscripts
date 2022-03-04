@@ -19,7 +19,6 @@
 /var/cfengine/bin/pg_resetwal
 /var/cfengine/bin/pg_restore
 /var/cfengine/bin/pg_rewind
-/var/cfengine/bin/pg_standby
 /var/cfengine/bin/pg_test_fsync
 /var/cfengine/bin/pg_test_timing
 /var/cfengine/bin/pg_upgrade
