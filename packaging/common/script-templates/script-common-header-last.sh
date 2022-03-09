@@ -30,9 +30,12 @@ case "`os_type`" in
         ;;
 esac
 
-INSTLOG=/var/log/CFEngine-Install.log
+INSTLOG="/var/log/CFEngine-Install-$(date '+%Y-%m-%d_%H:%M:%S_%Z').log"
 mkdir -p "$(dirname "$INSTLOG")"
 touch "$INSTLOG"
+rm -f /var/log/CFEngineHub-Install.log
+rm -f /var/log/CFEngine-Install.log
+ln -s "$INSTLOG" /var/log/CFEngine-Install.log
 chown root:$INSTLOGGROUP "$INSTLOG"
 chmod 600 "$INSTLOG"
 CONSOLE=7
