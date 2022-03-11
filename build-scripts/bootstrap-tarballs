@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/bash -x
 
 . `dirname "$0"`/functions
 . detect-environment
