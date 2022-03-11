@@ -60,24 +60,6 @@ sha256sum *.tar.gz > sha256sums.txt
 CKSUM=`sum sha256sums.txt | cut -d ' ' -f 1`
 mv sha256sums.txt sha256sums.$CKSUM.txt
 
-# the rest of the script is not really critical
-set +e
-
-# Get information about PRs among the used revisions.
-# These PRs will have to be notified of build progress.
-for repo in buildscripts core masterfiles enterprise nova mission-portal; do
-  rev_param_name="$(echo $repo | tr '[:lower:]-' '[:upper:]_')_REV"
-  revision="$(echo ${!rev_param_name})" || continue   # dereference
-
-  # remove "origin/" (if any)
-  revision="${revision##origin/}"
-  if expr "$revision" : "pull/" >/dev/null; then
-	repo_spec="cfengine/$repo"
-    pr_nr="$(echo $revision | cut -d/ -f2)"
-	get_GH_PR_info "$repo_spec" "$pr_nr" >> $BASEDIR/output/PRs
-  fi
-done
-
 (
 if test -f "$BASEDIR/mission-portal/public/scripts/package.json"; then
   cd $BASEDIR/mission-portal/public/scripts
@@ -114,3 +96,21 @@ if test -f "$BASEDIR/mission-portal/ldap/composer.json"; then
   php /usr/bin/composer.phar install
 fi
 )
+
+# the rest of the script is not really critical
+set +e
+
+# Get information about PRs among the used revisions.
+# These PRs will have to be notified of build progress.
+for repo in buildscripts core masterfiles enterprise nova mission-portal; do
+  rev_param_name="$(echo $repo | tr '[:lower:]-' '[:upper:]_')_REV"
+  revision="$(echo ${!rev_param_name})" || continue   # dereference
+
+  # remove "origin/" (if any)
+  revision="${revision##origin/}"
+  if expr "$revision" : "pull/" >/dev/null; then
+	repo_spec="cfengine/$repo"
+    pr_nr="$(echo $revision | cut -d/ -f2)"
+	get_GH_PR_info "$repo_spec" "$pr_nr" >> $BASEDIR/output/PRs
+  fi
+done
