@@ -6,6 +6,7 @@
 /var/cfengine/bin/initdb
 /var/cfengine/bin/oid2name
 /var/cfengine/bin/pg_archivecleanup
+/var/cfengine/bin/pg_amcheck
 /var/cfengine/bin/pg_basebackup
 /var/cfengine/bin/pg_verifybackup
 /var/cfengine/bin/pg_config
@@ -19,7 +20,6 @@
 /var/cfengine/bin/pg_resetwal
 /var/cfengine/bin/pg_restore
 /var/cfengine/bin/pg_rewind
-/var/cfengine/bin/pg_standby
 /var/cfengine/bin/pg_test_fsync
 /var/cfengine/bin/pg_test_timing
 /var/cfengine/bin/pg_upgrade
