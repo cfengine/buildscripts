@@ -329,7 +329,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
     mv $PREFIX/share/GUI $PREFIX/share/GUI_old
   fi
   # Remove empty dirs in httpd/htdocs
-  find $PREFIX/httpd/htdocs -depth -type d -exec rmdir {} \;
+  find $PREFIX/httpd/htdocs -depth -type d -empty -exec rmdir {} \;
 fi
 
 if [ -d $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718 ]; then
