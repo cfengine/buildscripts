@@ -368,7 +368,11 @@ init_postgres_dir()
   new_pgconfig_file="$1"
   pgconfig_type="$2"
 
-  rm -rf $PREFIX/state/pg/data
+  if test -e $PREFIX/state/pg/data; then
+    if ! rm -rf $PREFIX/state/pg/data; then
+      cf_console echo "Warning: $PREFIX/state/pg/data couldn't be deleted"
+    fi
+  fi
   mkdir -p $PREFIX/state/pg/data
   chown -R cfpostgres $PREFIX/state/pg
 
@@ -714,7 +718,7 @@ chown root:cfpostgres "$PREFIX/state" "$PREFIX/state/pg"
 chmod 0750 "$PREFIX/state" "$PREFIX/state/pg"
 
 test -z "$BACKUP_DIR" && BACKUP_DIR=$PREFIX/state/pg/backup
-if [ ! -d $PREFIX/state/pg/data ]; then
+if [ ! -f $PREFIX/state/pg/data/postgresql.conf ]; then
   new_pgconfig_file=`generate_new_postgres_conf`
   if [ `basename "$new_pgconfig_file"` = "postgresql.conf.cfengine" ]; then
     pgconfig_type="CFEngine recommended"
