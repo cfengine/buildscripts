@@ -90,8 +90,8 @@
 /var/cfengine/bin/postgres
 /var/cfengine/bin/postmaster
 /var/cfengine/bin/pg_test_timing
+/var/cfengine/bin/pg_standby
 /var/cfengine/bin/pg_archivecleanup
-/var/cfengine/bin/pg_amcheck
 /var/cfengine/bin/oid2name
 /var/cfengine/bin/pg_upgrade
 /var/cfengine/bin/pg_checksums
