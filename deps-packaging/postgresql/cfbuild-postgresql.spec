@@ -84,6 +84,7 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/bin/pg_resetwal
 %{prefix}/bin/pg_restore
 %{prefix}/bin/pg_rewind
+%{prefix}/bin/pg_standby
 %{prefix}/bin/pg_test_fsync
 %{prefix}/bin/pg_test_timing
 %{prefix}/bin/pg_upgrade
