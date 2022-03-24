@@ -6,7 +6,6 @@
 /var/cfengine/bin/initdb
 /var/cfengine/bin/oid2name
 /var/cfengine/bin/pg_archivecleanup
-/var/cfengine/bin/pg_amcheck
 /var/cfengine/bin/pg_basebackup
 /var/cfengine/bin/pg_verifybackup
 /var/cfengine/bin/pg_config

@@ -70,7 +70,6 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/bin/initdb
 %{prefix}/bin/oid2name
 %{prefix}/bin/pg_archivecleanup
-%{prefix}/bin/pg_amcheck
 %{prefix}/bin/pg_basebackup
 %{prefix}/bin/pg_verifybackup
 %{prefix}/bin/pg_config
