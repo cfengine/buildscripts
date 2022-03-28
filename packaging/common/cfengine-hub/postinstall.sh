@@ -1,10 +1,18 @@
 # (re)load SELinux policy if available and required before we start working with
 # our daemons and services below
 if [ `os_type` = "redhat" ] &&
-   command -v semodule >/dev/null &&
    [ -f "$PREFIX/selinux/cfengine-enterprise.pp" ];
 then
-  semodule -n -i "$PREFIX/selinux/cfengine-enterprise.pp"
+  if command -v /usr/sbin/selinuxenabled >/dev/null &&
+      /usr/sbin/selinuxenabled;
+  then
+    command -v semodule >/dev/null || cf_console echo "warning! selinuxenabled exists and returns 0 but semodule not found"
+    test -x /usr/sbin/load_policy  || cf_console echo "warning! selinuxenabled exists and returns 0 but load_policy not found"
+    test -x /usr/sbin/restorecon   || cf_console echo "warning! selinuxenabled exists and returns 0 but restorecon not found"
+  fi
+  if ! cf_console semodule -n -i "$PREFIX/selinux/cfengine-enterprise.pp"; then
+    cf_console echo "warning! semodule failed"
+  fi
   if /usr/sbin/selinuxenabled; then
     /usr/sbin/load_policy
     /usr/sbin/restorecon -R /var/cfengine
