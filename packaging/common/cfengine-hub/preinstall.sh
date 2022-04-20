@@ -171,33 +171,62 @@ filter_netstat_listen()
 # $PREFIX/httpd/bin/apachectl stop
 # If that does not work, we abort the installation.
 #
-HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
-if [ ! -z "$HTTPD_RUNNING" ];
-then
+ensure_apache_terminated() {
+  HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+  [ -z "$HTTPD_RUNNING" ] && return 0
   cf_console echo "There seems to be a server listening on either port 80 or 443"
   cf_console echo "Checking if it is part of CFEngine Enterprise"
-  if [ -x $PREFIX/httpd/bin/apachectl ];
+  if [ ! -x $PREFIX/httpd/bin/apachectl ];
   then
-    cf_console echo "Trying to shut down the process using apachectl from CFEngine Enterprise"
-    $PREFIX/httpd/bin/apachectl stop
-    HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
-    if [ ! -z "$HTTPD_RUNNING" ];
-    then
-      sleep 5s
-      HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
-      if [ ! -z "$HTTPD_RUNNING" ];
-      then
-        cf_console echo "Could not shutdown the process, aborting the installation"
-        exit 1
-      fi
-    fi
-  else
     cf_console echo "No apachectl found, aborting the installation!"
-    cf_console echo "Please kill the following processes before attempting a new installation"
-    fuser -n tcp 80
-    fuser -n tcp 443
-    exit 1
+    return 1
   fi
+  cf_console echo "Trying to shut down the process using apachectl from CFEngine Enterprise"
+  $PREFIX/httpd/bin/apachectl stop
+  HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+  [ -z "$HTTPD_RUNNING" ] && return 0
+  cf_console echo "Still running: $HTTPD_RUNNING, waiting 5 sec"
+  sleep 5s
+  HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+  [ -z "$HTTPD_RUNNING" ] && return 0
+  if ! command -v fuser >/dev/null; then
+    cf_console echo "fuser not available, can't kill!"
+    return 1
+  fi
+  cf_console echo "Still running: $HTTPD_RUNNING, killing with fuser -TERM"
+  fuser -k -TERM -n tcp 80
+  fuser -k -TERM -n tcp 443
+  HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+  [ -z "$HTTPD_RUNNING" ] && return 0
+  cf_console echo "Still running: $HTTPD_RUNNING, waiting 5 sec"
+  sleep 5s
+  HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+  [ -z "$HTTPD_RUNNING" ] && return 0
+  cf_console echo "Still running: $HTTPD_RUNNING, killing with fuser -KILL"
+  fuser -k -KILL -n tcp 80
+  fuser -k -KILL -n tcp 443
+  HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+  [ -z "$HTTPD_RUNNING" ] && return 0
+  cf_console echo "Still running: $HTTPD_RUNNING, waiting 5 sec"
+  sleep 5s
+  HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+  [ -z "$HTTPD_RUNNING" ] && return 0
+  cf_console echo "Still running: $HTTPD_RUNNING."
+  cf_console echo "Could not shutdown the process, aborting the installation"
+  return 1
+}
+
+if ! ensure_apache_terminated; then
+  cf_console echo "Please kill the following processes before attempting a new installation"
+  if command -v fuser >/dev/null; then
+    cf_console fuser -n tcp 80
+    cf_console fuser -n tcp 443
+  else
+    cf_console filter_netstat_listen ":80\s|:443\s"
+  fi
+  true "process tree saved in log file"
+  ps -efH
+  exit 1
 fi
 
 ensure_postgres_terminated() {
