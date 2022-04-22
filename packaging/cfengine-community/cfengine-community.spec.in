@@ -34,8 +34,8 @@ maintain systems.
 mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT%{prefix}/share/CoreBase
-cp -R $RPM_BUILD_ROOT%{prefix}/masterfiles $RPM_BUILD_ROOT%prefix/share/CoreBase/masterfiles
+mkdir -p $RPM_BUILD_ROOT%{prefix}/share/masterfiles
+cp -R $RPM_BUILD_ROOT%{prefix}/masterfiles/* $RPM_BUILD_ROOT%prefix/share/masterfiles
 rm -rf $RPM_BUILD_ROOT%{prefix}/masterfiles
 
 mkdir -p $RPM_BUILD_ROOT/etc/sysconfig
@@ -131,9 +131,9 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 %dir %prefix/share
 %prefix/share/doc
 
-# CoreBase
+# masterfiles
 %defattr(644,root,root,755)
-%prefix/share/CoreBase
+%prefix/share/masterfiles
 
 # Private directories
 %defattr(600,root,root,700)

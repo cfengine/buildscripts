@@ -33,7 +33,7 @@ install: build
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.la
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpromises.so
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/cfengine-enterprise.la
-	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/CoreBase
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/masterfiles
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/getfacl
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/curl

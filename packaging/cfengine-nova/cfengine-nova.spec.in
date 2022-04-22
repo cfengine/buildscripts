@@ -44,7 +44,7 @@ cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
-rm -rf $RPM_BUILD_ROOT%{prefix}/share/CoreBase
+rm -rf $RPM_BUILD_ROOT%{prefix}/share/masterfiles
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/curl

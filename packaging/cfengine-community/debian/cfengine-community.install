@@ -25,7 +25,7 @@
 /var/cfengine/lib/lib*.so.*
 /var/cfengine/lib/liblmdb.so
 /var/cfengine/share/doc
-/var/cfengine/share/CoreBase
+/var/cfengine/share/masterfiles
 /var/cfengine/inputs
 /var/cfengine/modules
 /var/cfengine/outputs

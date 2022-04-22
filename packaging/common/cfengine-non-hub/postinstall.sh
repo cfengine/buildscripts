@@ -16,7 +16,7 @@ if is_community; then
   # Copy the stock policy for the new installations
   #
   if ! [ -f $PREFIX/masterfiles/promises.cf ]; then
-    /bin/cp -R $PREFIX/share/CoreBase/masterfiles $PREFIX
+    /bin/cp -R $PREFIX/share/masterfiles $PREFIX
     #
     # Create promises_validated
     #

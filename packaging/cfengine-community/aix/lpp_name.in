@@ -17,7 +17,7 @@ cfengine.cfengine-community @@VERSION@@.0 01 N U en_US Cfengine Nova, Data Cente
 /var/cfengine/share/doc/examples 1277
 /var/cfengine/share/man 2
 /var/cfengine/share/man/man8 55
-/var/cfengine/share/CoreBase 118
+/var/cfengine/share/masterfiles 118
 /var/cfengine/lib 25042
 INSTWORK 384 384
 %
