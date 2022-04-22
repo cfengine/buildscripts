@@ -165,10 +165,41 @@ filter_netstat_listen()
   return 0
 }
 
+kill_apache_by_pidfile() {
+  sig="${1:-TERM}"
+  # CFEngine prior to 3.18.1, 3.15.5, 3.19.0 (ENT-7966) saved httpd.pid in:
+  # /var/cfengine/httpd/logs/httpd.pid
+  # (that's default value for Apache)
+  # Later versions of CFEngine have it in:
+  # /var/cfengine/httpd/httpd.pid
+  pidFile=$PREFIX/httpd/httpd.pid
+  if [ ! -f $pidFile ]; then
+    pidFile=$PREFIX/httpd/logs/httpd.pid
+    if [ ! -f $pidFile ]; then
+      true "no pidfile found"
+      return 1
+    fi
+  fi
+  pid="$(cat $pidfile)"
+  if [ ! -f "/proc/$pid/exe" ]; then
+    true "no exe file matching pid [$pid] in pidfile"
+    return 1
+  fi
+  exepath="$(readlink "/proc/$pid/exe")"
+  # test that exepath starts with $PREFIX
+  if [ "${exepath::${#PREFIX}}" != "$PREFIX" ]; then
+    true "pid [$pid] has exe [$exepath] outside of [$PREFIX]"
+    return 1
+  fi
+  kill -s $sig $pid
+  return 0
+}
+
 #
 # We check if there is a server listening on port 80 or port 443.
 # If one is found, then we try to shut it down by calling
 # $PREFIX/httpd/bin/apachectl stop
+# or by other means
 # If that does not work, we abort the installation.
 #
 ensure_apache_terminated() {
@@ -189,6 +220,24 @@ ensure_apache_terminated() {
   sleep 5s
   HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
   [ -z "$HTTPD_RUNNING" ] && return 0
+  cf_console echo "Still running: $HTTPD_RUNNING, killing by pidfile TERM"
+  # it may fail if pid file does not exist or points to a different process
+  if kill_apache_by_pidfile TERM; then
+    HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+    [ -z "$HTTPD_RUNNING" ] && return 0
+    cf_console echo "Still running: $HTTPD_RUNNING, waiting 5 sec"
+    sleep 5s
+    HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+    [ -z "$HTTPD_RUNNING" ] && return 0
+    cf_console echo "Still running: $HTTPD_RUNNING, killing by pidfile KILL"
+    kill_apache_by_pidfile KILL
+    HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+    [ -z "$HTTPD_RUNNING" ] && return 0
+    cf_console echo "Still running: $HTTPD_RUNNING, waiting 5 sec"
+    sleep 5s
+    HTTPD_RUNNING=`filter_netstat_listen ":80\s|:443\s"`
+    [ -z "$HTTPD_RUNNING" ] && return 0
+  fi
   if ! command -v fuser >/dev/null; then
     cf_console echo "fuser not available, can't kill!"
     return 1
