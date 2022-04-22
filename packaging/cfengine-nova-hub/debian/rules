@@ -65,9 +65,9 @@ install: build
 	mv $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/public/index.php.tmp $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/public/index.php
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/public/index.php.tmp
 
-# NovaBase
-	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase
-	cp -R $(CURDIR)/debian/tmp$(PREFIX)/masterfiles $(CURDIR)/debian/tmp$(PREFIX)/share/NovaBase/masterfiles
+# masterfiles
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/share/masterfiles
+	cp -R $(CURDIR)/debian/tmp$(PREFIX)/masterfiles $(CURDIR)/debian/tmp$(PREFIX)/share/masterfiles
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/masterfiles
 
 #Postgres

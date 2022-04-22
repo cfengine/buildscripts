@@ -104,9 +104,9 @@ mv $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php.tmp $RPM_BUILD_ROOT%prefix/
 rm -f $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php.tmp
 
 find $RPM_BUILD_ROOT%prefix/share/GUI -type f -exec sed -i 's/cfapi_log/syslog/' {} \;
-# NovaBase
-mkdir -p $RPM_BUILD_ROOT%prefix/share/NovaBase
-cp -R $RPM_BUILD_ROOT%prefix/masterfiles $RPM_BUILD_ROOT%prefix/share/NovaBase/masterfiles
+# masterfiles
+mkdir -p $RPM_BUILD_ROOT%prefix/share/masterfiles
+cp -R $RPM_BUILD_ROOT%prefix/masterfiles/* $RPM_BUILD_ROOT%prefix/share/masterfiles
 rm -rf $RPM_BUILD_ROOT%prefix/masterfiles
 
 
@@ -303,7 +303,7 @@ exit 0
 
 # Base policy
 %defattr(644,root,root,755)
-%prefix/share/NovaBase
+%prefix/share/masterfiles
 %defattr(755,root,root,755)
 %prefix/modules
 

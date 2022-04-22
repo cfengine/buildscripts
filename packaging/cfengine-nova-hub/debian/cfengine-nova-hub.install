@@ -47,7 +47,7 @@
 /var/cfengine/bin/cf-hub
 /var/cfengine/bin/cf-reactor
 /var/cfengine/lib/php
-/var/cfengine/share/NovaBase
+/var/cfengine/share/masterfiles
 /var/cfengine/share/GUI
 /var/cfengine/master_software_updates
 /var/cfengine/share/solaris_admin_files

@@ -49,7 +49,7 @@ if [ ! -f "$PREFIX/ppkeys/localhost.priv" ]; then
 fi
 
 if [ ! -f "$PREFIX/masterfiles/promises.cf" ]; then
-    /bin/cp -R "$PREFIX/share/NovaBase/masterfiles" "$PREFIX"
+    /bin/cp -R "$PREFIX/share/masterfiles" "$PREFIX"
     touch "$PREFIX/masterfiles/cf_promises_validated"
     find "$PREFIX/masterfiles" -type d -exec chmod 700 {} \;
     find "$PREFIX/masterfiles" -type f -exec chmod 600 {} \;
