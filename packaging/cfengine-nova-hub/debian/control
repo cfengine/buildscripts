@@ -2,7 +2,7 @@ Source: cfengine-nova-hub
 Section: utils
 Priority: extra
 Maintainer: CFEngine AS <contact@cfengine.com>
-Build-Depends: debhelper
+Build-Depends: debhelper, python3-pip
 Standards-Version: 3.8.4
 
 Package: cfengine-nova-hub
