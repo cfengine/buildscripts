@@ -84,6 +84,14 @@ install: build
 	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/phpcfenginenova/migrations/*.sql
 	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/db/*.sql
 
+# Make sure cfbs is available and in place
+	mkdir -p $(CURDIR)/debian/tmp/tmp/cfbs_root
+	pip3 install --root $(CURDIR)/debian/tmp/tmp/cfbs_root cfbs
+	mkdir $(CURDIR)/debian/tmp$(PREFIX)/lib/python
+	mv $(CURDIR)/debian/tmp/tmp/cfbs_root/usr/local/lib/python*/dist-packages/cfbs $(CURDIR)/debian/tmp$(PREFIX)/lib/python
+	mv $(CURDIR)/debian/tmp/tmp/cfbs_root/usr/local/bin/cfbs $(CURDIR)/debian/tmp$(PREFIX)/bin/
+	sed -i "/^from cfbs.*/i sys.path.append(\"$(PREFIX)/lib/python\")" $(CURDIR)/debian/tmp$(PREFIX)/bin/cfbs
+	rm -rf $(CURDIR)/debian/tmp/tmp/cfbs_root
 
 
 binary-indep: build install

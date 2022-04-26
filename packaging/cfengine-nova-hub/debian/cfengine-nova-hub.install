@@ -104,3 +104,5 @@
 /var/cfengine/share/doc/postgresql/extension/*
 /var/cfengine/ssl/openssl.cnf
 /var/cfengine/bin/openssl
+/var/cfengine/lib/python/*
+/var/cfengine/bin/cfbs
