@@ -65,6 +65,8 @@ case "$JOB" in
         # (while we need PHP7 minimum)
         mv /home/travis/.phpenv /home/travis/.phpenv.del || true
 
+        sudo apt-get -y install python3-pip
+
         for i in core nova enterprise mission-portal masterfiles
         do
             if [ -d $i ]
