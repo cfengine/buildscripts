@@ -282,7 +282,7 @@ exit 0
 %if %{?rhel}%{!?rhel:0} >= 7
 %dir %prefix/lib/python
 %prefix/lib/python/*
-%prefix/bin/cfbs
+%attr(755,root,root) %prefix/bin/cfbs
 %endif
 
 # Initscript, other configuration
