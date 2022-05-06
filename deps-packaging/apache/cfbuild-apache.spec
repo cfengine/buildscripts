@@ -32,7 +32,7 @@ CPPFLAGS=-I%{buildprefix}/include
     --with-ldap=%{prefix} \
     --with-apr=%{prefix} \
     --with-apr-util=%{prefix} \
-    --with-pcre=%{prefix} \
+    --with-pcre=%{prefix}/bin/pcre-config \
     --with-mpm=prefork \
     CPPFLAGS="$CPPFLAGS"
 
