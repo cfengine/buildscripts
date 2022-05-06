@@ -22,7 +22,7 @@ build-stamp:
 --with-ldap=$(PREFIX) \
 --with-apr=$(PREFIX) \
 --with-apr-util=$(PREFIX) \
---with-pcre=$(PREFIX) \
+--with-pcre=$(PREFIX)/bin/pcre-config \
 --with-mpm=prefork \
 CPPFLAGS="$(CPPFLAGS)"
 	make
