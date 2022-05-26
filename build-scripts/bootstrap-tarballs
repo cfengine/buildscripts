@@ -65,12 +65,6 @@ if test -f "$BASEDIR/mission-portal/public/scripts/package.json"; then
   cd $BASEDIR/mission-portal/public/scripts
   # install dependencies from npmjs
   npm i --prefix $BASEDIR/mission-portal/public/scripts/
-  # make a build of jquery-ui from sources
-  cd node_modules/jquery-ui
-  npm i --prefix $BASEDIR/mission-portal/public/scripts/node_modules/jquery-ui
-  nodejs node_modules/grunt-cli/bin/grunt sizer concat
-  cp -r ./themes/base/images/ ./dist/
-  rm -rf ./node_modules
 fi
 )
 
