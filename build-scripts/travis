@@ -103,12 +103,6 @@ case "$JOB" in
             cd mission-portal/public/scripts
             # install dependencies from npmjs
             npm i
-            # make a build of jquery-ui from sources
-            cd node_modules/jquery-ui
-            npm i
-            nodejs node_modules/grunt-cli/bin/grunt sizer concat
-            cp -r ./themes/base/images/ ./dist/
-            rm -rf ./node_modules
         fi
         )
 
