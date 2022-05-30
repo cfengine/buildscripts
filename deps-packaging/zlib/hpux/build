@@ -7,6 +7,13 @@ PREFIX=${BUILDPREFIX}
 TZ=${BUILD_ROOT}/cfbuild-zlib${PREFIX}
 TZD=${BUILD_ROOT}/cfbuild-zlib-devel${PREFIX}
 
+# Patch
+
+# 1.2.12 ONLY, fixed upstream. See:
+# https://github.com/madler/zlib/pull/607
+# https://github.com/madler/zlib/pull/608
+${PATCH} -p1 <Fix-CC-logic-in-configure-1.2.12.patch
+
 # Configure
 
 ./configure --prefix=${PREFIX}
