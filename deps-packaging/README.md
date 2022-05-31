@@ -31,7 +31,7 @@ Build dependencies:
 |  pthreads-w32    | 2-9-1   | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 |  zlib            | 1.2.11  | 1.2.11 | 1.2.11 |                          |
 
-* [zlib](http://www.zlib.net/) 1.2.11
+* [zlib](http://www.zlib.net/) 1.2.12
 * [OpenSSL](http://openssl.org/) 1.1.1l
 * [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/) 8.44
 * [LMDB](https://github.com/LMDB/lmdb/) 0.9.24
