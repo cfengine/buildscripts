@@ -12,7 +12,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	test -n "$(TRAVIS)" && patch -p1 < $(CURDIR)/Fix-CC-logic-in-configure-1.2.12.patch
+	test -z "$(TRAVIS)" || patch -p1 < $(CURDIR)/Fix-CC-logic-in-configure-1.2.12.patch
 
 	./configure --prefix=$(PREFIX)
 	make
