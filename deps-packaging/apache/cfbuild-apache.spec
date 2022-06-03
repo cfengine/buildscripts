@@ -1,4 +1,4 @@
-%define apache_version 2.4.51
+%define apache_version 2.4.53
 %global __os_install_post %{nil}
 
 Summary: CFEngine Build Automation -- apache
@@ -35,7 +35,7 @@ CPPFLAGS=-I%{buildprefix}/include
     --with-ldap=%{prefix} \
     --with-apr=%{prefix} \
     --with-apr-util=%{prefix} \
-    --with-pcre=%{prefix} \
+    --with-pcre=%{prefix}/bin/pcre-config \
     --with-mpm=prefork \
     CPPFLAGS="$CPPFLAGS"
 
