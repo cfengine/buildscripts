@@ -7,6 +7,7 @@ Version: %{version}
 Release: 1
 Source0: httpd-%{apache_version}.tar.gz
 Source1: httpd.conf
+Patch0:  apachectl.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -19,6 +20,8 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n httpd-%{apache_version}
+
+%patch0 -p0
 
 CPPFLAGS=-I%{buildprefix}/include
 
