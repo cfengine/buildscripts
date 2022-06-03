@@ -1,0 +1,73 @@
+--- support/apachectl.in.orig	2022-05-27 14:39:22.959774741 +0200
++++ support/apachectl.in	2022-05-27 14:42:10.799591574 +0200
+@@ -1,5 +1,14 @@
+ #!/bin/sh
+ #
++# This is CFEngine version of apachectl script, being more persistent when
++# killing httpd and more resillient when doing so. The only change is special
++# processing of "stop" inside "case $ACMD in". When asked to kill httpd
++# process, it not just sends a "kill" signal and happily quits, but first waits
++# for it to be gone (by checking `ps p` output), and if it's not gone - kills
++# the main httpd process and all its children (found via `pgrep --parent` or by
++# parsing `ps -eo ppid,pid` output) by sending `kill -9` singal to them. If
++# process(es) exist even after that - it gives up with an error message.
++#
+ # Licensed to the Apache Software Foundation (ASF) under one or more
+ # contributor license agreements.  See the NOTICE file distributed with
+ # this work for additional information regarding copyright ownership.
+@@ -18,6 +27,9 @@
+ #
+ # Apache control script designed to allow an easy command line interface
+ # to controlling Apache.  Written by Marc Slemko, 1997/08/23
++#
++# Modified by Northern.Tech to try harder in killing httpd process(es)
++# and wait for them to be gone before returning to caller.
+ # 
+ # The exit codes returned are:
+ #   XXX this doc is no longer correct now that the interesting
+@@ -77,9 +89,44 @@
+ fi
+ 
+ case $ACMD in
+-start|stop|restart|graceful|graceful-stop)
++start|restart|graceful|graceful-stop)
+     $HTTPD -k $ARGV
+     ERROR=$?
++    ;;
++stop)
++    # Added by CFEngine
++    PIDFILE='/var/cfengine/httpd/httpd.pid'
++    if [ ! -f "$PIDFILE" ] ; then
++        PIDFILE='/var/cfengine/httpd/logs/httpd.pid'
++    fi
++    if [ ! -f "$PIDFILE" ] ; then
++        echo PID file not found, nothing to stop
++        exit 2
++    fi
++    PID="$(cat "$PIDFILE")"
++    $HTTPD -k $ARGV
++    ERROR=$?
++    # wait for pid to terminate, up to 5 seconds
++    for _iteration in `seq 50`; do
++        ps p $PID >/dev/null || exit $ERROR
++        sleep 0.1
++    done
++    echo "process didn't finish gracefully, commencing murder"
++    # collect all child processes
++    if command -v pgrep >/dev/null; then
++        PIDS="$PID $(pgrep --parent $PID)"
++    else
++        PIDS="$PID $(ps -eo ppid,pid | awk "/ $PID /{print \$2}")"
++    fi
++    # send KILL signal to all of them
++    kill -9 $PIDS
++    # wait for them to terminate, up to 5 seconds
++    for _iteration in `seq 50`; do
++        ps p $PIDS >/dev/null || exit $ERROR
++        sleep 0.1
++    done
++    echo Failed to terminate processes
++    ps p $PIDS
+     ;;
+ startssl|sslstart|start-SSL)
+     echo The startssl option is no longer supported.
