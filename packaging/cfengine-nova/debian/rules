@@ -2,12 +2,6 @@
 
 PREFIX=$(BUILDPREFIX)
 
-ifeq (,$(filter expansion,$(DEB_BUILD_OPTIONS)))
-  EXCLUDE=-Ncfengine-nova-expansion
-else
-  EXCLUDE=
-endif
-
 BASEDIR=../..
 
 clean:
@@ -22,7 +16,7 @@ install: build
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	dh_installdirs $(EXCLUDE)
+	dh_installdirs
 
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
 	cp -a $(PREFIX)/* $(CURDIR)/debian/tmp$(PREFIX)
@@ -47,19 +41,19 @@ install: build
 binary-indep: build install
 
 binary-arch: build install
-	dh_testdir $(EXCLUDE)
-	dh_testroot $(EXCLUDE)
-	dh_install --sourcedir=debian/tmp $(EXCLUDE)
-	dh_link $(EXCLUDE)
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
 ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
 	dh_strip
 endif
-	dh_compress $(EXCLUDE)
-	dh_fixperms $(EXCLUDE) -X $(PREFIX)/inputs -X $(PREFIX)/outputs -X $(PREFIX)/ppkeys -X $(PREFIX)/modules
-	dh_installdeb $(EXCLUDE)
-	dh_gencontrol $(EXCLUDE)
-	dh_md5sums $(EXCLUDE)
-	dh_builddeb $(EXCLUDE)
+	dh_compress
+	dh_fixperms -X $(PREFIX)/inputs -X $(PREFIX)/outputs -X $(PREFIX)/ppkeys -X $(PREFIX)/modules
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
 
 binary: binary-indep binary-arch
 .PHONY: build clean binary-indep binary-arch binary install configure
