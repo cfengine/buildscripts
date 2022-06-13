@@ -6,3 +6,5 @@ PACKAGES_ppc64_aix_71
 PACKAGES_sparc64_solaris_10
 PACKAGES_sparc64_solaris_11
 PACKAGES_x86_64_solaris_10
+PACKAGES_arm_64_linux_ubuntu_22
+PACKAGES_HUB_arm_64_linux_ubuntu_22

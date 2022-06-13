@@ -43,6 +43,11 @@ checksum()
     esac
 
     test "$CHECKSUM" = "$ACTUAL_CHECKSUM"
+    result=$?
+    if test "$result" != "0"; then
+      echo "expected checksum $CHECKSUM but got $ACTUAL_CHECKSUM"
+    fi
+    return "$result"
 }
 
 
