@@ -77,6 +77,14 @@ fi
 )
 
 (
+if test -f "$BASEDIR/nova/api/http/composer.json"; then
+  cd $BASEDIR/nova/api/http
+  # install PHP dependencies from composer
+  php /usr/bin/composer.phar install --ignore-platform-reqs
+fi
+)
+
+(
 if test -f "$BASEDIR/mission-portal/public/themes/default/bootstrap/cfengine_theme.less"; then
   cd $BASEDIR/mission-portal/public/themes/default/bootstrap
   npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
