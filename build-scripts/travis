@@ -108,12 +108,20 @@ case "$JOB" in
         fi
         )
 
+        sudo apt-get -y install curl php php-curl php-zip php-mbstring php-xml php-gd composer
         (
         if test -f "mission-portal/composer.json"; then
-            sudo apt-get -y install curl php php-curl php-zip php-mbstring php-xml php-gd composer
             cd mission-portal
             # install PHP dependencies from composer
             composer install
+        fi
+        )
+
+        (
+        if test -f "nova/api/http/composer.json"; then
+            cd nova/api/http/
+            # install PHP dependencies from composer
+            composer install --ignore-platform-reqs
         fi
         )
 
