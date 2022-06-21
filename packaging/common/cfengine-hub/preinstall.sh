@@ -106,7 +106,7 @@ fi
 # hostname -f returns a valid name. If that is not the case then
 # we just abort the installation.
 #
-NAME=$(hostname -f)
+NAME=$(hostname -f) || true
 if [ -z "$NAME" ];
 then
   cf_console echo "hostname -f does not return a valid name, but this is a requirement for generating a"
