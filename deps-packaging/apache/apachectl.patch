@@ -15,17 +15,64 @@
  # Licensed to the Apache Software Foundation (ASF) under one or more
  # contributor license agreements.  See the NOTICE file distributed with
  # this work for additional information regarding copyright ownership.
-@@ -18,6 +27,9 @@
+@@ -18,19 +27,22 @@
  #
  # Apache control script designed to allow an easy command line interface
  # to controlling Apache.  Written by Marc Slemko, 1997/08/23
+-# 
 +#
 +# Modified by Northern.Tech to try harder in killing httpd process(es)
 +# and wait for them to be gone before returning to caller.
- # 
++#
  # The exit codes returned are:
  #   XXX this doc is no longer correct now that the interesting
-@@ -77,9 +89,44 @@
+ #   XXX functions are handled by httpd
+-#	0 - operation completed successfully
+-#	1 - 
+-#	2 - usage error
+-#	3 - httpd could not be started
+-#	4 - httpd could not be stopped
+-#	5 - httpd could not be started during a restart
+-#	6 - httpd could not be restarted during a restart
+-#	7 - httpd could not be restarted during a graceful restart
+-#	8 - configuration syntax error
++#       0 - operation completed successfully
++#       1 -
++#       2 - usage error
++#       3 - httpd could not be started
++#       4 - httpd could not be stopped
++#       5 - httpd could not be started during a restart
++#       6 - httpd could not be restarted during a restart
++#       7 - httpd could not be restarted during a graceful restart
++#       8 - configuration syntax error
+ #
+ # When multiple arguments are given, only the error from the _last_
+ # one is reported.  Run "apachectl help" for usage info
+@@ -40,7 +52,7 @@
+ #
+ # |||||||||||||||||||| START CONFIGURATION SECTION  ||||||||||||||||||||
+ # --------------------                              --------------------
+-# 
++#
+ # the path to your httpd binary, including options if necessary
+ HTTPD='@exp_sbindir@/@progname@'
+ #
+@@ -51,7 +63,7 @@
+ #
+ # a command that outputs a formatted text version of the HTML at the
+ # url given on the command line.  Designed for lynx, however other
+-# programs may work.  
++# programs may work.
+ LYNX="@LYNX_PATH@ -dump"
+ #
+ # the URL to your server's mod_status status page.  If you do not
+@@ -72,15 +84,50 @@
+ fi
+ 
+ ERROR=0
+-if [ "x$ARGV" = "x" ] ; then 
++if [ "x$ARGV" = "x" ] ; then
+     ARGV="-h"
  fi
  
  case $ACMD in
@@ -71,3 +118,9 @@
      ;;
  startssl|sslstart|start-SSL)
      echo The startssl option is no longer supported.
+     echo Please edit httpd.conf to include the SSL configuration settings
+@@ -103,4 +150,3 @@
+ esac
+ 
+ exit $ERROR
+-
