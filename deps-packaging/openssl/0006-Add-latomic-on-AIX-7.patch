@@ -1,0 +1,30 @@
+From a09dc9db92aa7f0217a8c094b953af4901a8b025 Mon Sep 17 00:00:00 2001
+From: Vratislav Podzimek <v.podzimek@mykolab.com>
+Date: Thu, 30 Jun 2022 14:16:46 +0200
+Subject: [PATCH] Add -latomic on AIX 7
+
+Provides __atomic_is_lock_free and __atomic_fetch_or_8.
+
+Signed-off-by: Vratislav Podzimek <v.podzimek@mykolab.com>
+---
+ Configurations/10-main.conf | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/Configurations/10-main.conf b/Configurations/10-main.conf
+index 66bc81dfb4..5fe6be8e94 100644
+--- a/Configurations/10-main.conf
++++ b/Configurations/10-main.conf
+@@ -1212,6 +1212,10 @@ my %targets = (
+         AR               => add("-X32"),
+         RANLIB           => add("-X32"),
+     },
++    "aix7-gcc" => {
++        inherit_from     => [ "aix-gcc" ],
++        ex_libs          => add(threads("-latomic")),
++    },
+     "aix64-gcc" => {
+         inherit_from     => [ "aix-common" ],
+         CC               => "gcc",
+-- 
+2.35.3
+

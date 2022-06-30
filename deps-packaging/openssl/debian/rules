@@ -36,7 +36,8 @@ build-stamp:
 	    --prefix=$(PREFIX) \
 	    $$HACK_FLAGS   \
 	    $$DEBUG_CFLAGS \
-	    $$LDFLAGS
+	    $$LDFLAGS \
+	    --libdir=lib
 
 	# Remove -O3 and -fomit-frame-pointer from debug and quick builds
 	if [ $$BUILD_TYPE = "DEBUG" ] ;\

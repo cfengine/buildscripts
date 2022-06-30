@@ -1,4 +1,4 @@
-%define php_version 8.0.19
+%define php_version 8.1.7
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php

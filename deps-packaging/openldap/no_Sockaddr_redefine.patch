@@ -5,7 +5,7 @@
  #endif
  
 +#ifndef _SOCKADDR_UNION_DEFINED
- typedef union Sockaddr Sockaddr;
+ union Sockaddr;
 +#define _SOCKADDR_UNION_DEFINED
 +#endif
  
