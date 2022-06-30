@@ -26,14 +26,14 @@ test -z "$ARTIFACTS_KEY" -o -z "$ARTIFACTS_SECRET" -o -z "$GITHUB_STATUS_TOKEN" 
 set -x
 
 # remove unwanted packages
-sudo apt-get purge apache* "postgresql*" redis*
+sudo apt-get -qq purge apache* "postgresql*" redis*
 # On Travis, hostname can be ridiculously long - let's truncate it
 sudo hostname localhost
 
 # Purge saved lists to avoid "Hash Sum mismatch" apt-get error on the next line
 sudo rm -rf /var/lib/apt/lists/*
-sudo apt-get update
-sudo apt-get install s3cmd
+sudo apt-get -qq update
+sudo apt-get -qq install s3cmd
 (
   # avoid showing secrets in log
   set +x
@@ -65,7 +65,7 @@ case "$JOB" in
         # (while we need PHP7 minimum)
         mv /home/travis/.phpenv /home/travis/.phpenv.del || true
 
-        sudo apt-get -y install python3-pip
+        sudo apt-get -qq -y install python3-pip
 
         for i in core nova enterprise mission-portal masterfiles
         do
@@ -101,14 +101,14 @@ case "$JOB" in
         (
         if test -f "mission-portal/public/scripts/package.json"; then
             # packages needed for installing Mission portal dependencies
-            sudo apt-get -y install npm
+            sudo apt-get -qq -y install npm
             cd mission-portal/public/scripts
             # install dependencies from npmjs
             npm i
         fi
         )
 
-        sudo apt-get -y install curl php php-curl php-zip php-mbstring php-xml php-gd composer
+        sudo apt-get -qq -y install curl php php-curl php-zip php-mbstring php-xml php-gd composer
         (
         if test -f "mission-portal/composer.json"; then
             cd mission-portal
@@ -127,7 +127,7 @@ case "$JOB" in
 
         (
         if test -f "mission-portal/public/themes/default/bootstrap/cfengine_theme.less"; then
-            sudo apt-get -y install npm
+            sudo apt-get -qq -y install npm
             cd mission-portal/public/themes/default/bootstrap
             npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
         fi
@@ -135,7 +135,7 @@ case "$JOB" in
 
         (
         if test -f "mission-portal/ldap/composer.json"; then
-            sudo apt-get -y install php-ldap
+            sudo apt-get -qq -y install php-ldap
             cd mission-portal/ldap
             # install PHP dependencies from composer
             composer install
@@ -143,20 +143,20 @@ case "$JOB" in
         )
 
         # packages needed for autogen
-        sudo apt-get install git autoconf automake m4 make bison flex \
+        sudo apt-get -qq install git autoconf automake m4 make bison flex \
             binutils libtool gcc g++ libc-dev libpam0g-dev python psmisc \
             libtokyocabinet-dev libssl-dev libpcre3-dev default-jre-headless
 
         NO_CONFIGURE=1 PROJECT=nova ./buildscripts/build-scripts/autogen
 
         # packages needed for building
-        sudo apt-get install bison flex binutils build-essential fakeroot ntp \
+        sudo apt-get -qq install bison flex binutils build-essential fakeroot ntp \
             dpkg-dev libpam0g-dev python debhelper pkg-config psmisc nfs-common
         # On Ubuntu Trusty, we need to remove these packages
         # otherwise apt fails miserably on next line
-        [ "$(lsb_release --release --short)" = "14.04" ] && sudo apt-get purge emacs emacs24
+        [ "$(lsb_release --release --short)" = "14.04" ] && sudo apt-get -qq purge emacs emacs24
         # remove unwanted dependencies
-        sudo apt-get purge libltdl-dev libltdl7 libtool
+        sudo apt-get -qq purge libltdl-dev libltdl7 libtool
 
         BUILD_TYPE=DEBUG; ESCAPETEST=yes;
         export BUILD_TYPE ESCAPETEST
