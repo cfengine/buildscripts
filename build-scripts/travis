@@ -164,7 +164,13 @@ case "$JOB" in
         # cleaning not needed, since Travis always gives us a clean VM
         # ./buildscripts/build-scripts/clean-buildmachine
         ./buildscripts/build-scripts/build-environment-check
-        ./buildscripts/build-scripts/install-dependencies
+        # To avoid overflowing Travis log size limit, don't print all output.
+        # But print one (last) line of the log every 30 seconds to see some progress.
+        # Note that if it's not enough - you can redirect stderr to build.log, too.
+        touch build.log
+        ( while sleep 30; do tail -n1 build.log; done ) &
+        ./buildscripts/build-scripts/install-dependencies >build.log
+        kill %1
         ./buildscripts/build-scripts/configure
         ./buildscripts/build-scripts/generate-source-tarballs
         ./buildscripts/build-scripts/compile
