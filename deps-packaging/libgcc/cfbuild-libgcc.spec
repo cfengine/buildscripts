@@ -24,6 +24,14 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT%{prefix}/lib
 
 cp  /opt/freeware/lib/gcc/powerpc-ibm-aix*.0.0/*/libgcc_s.a $RPM_BUILD_ROOT%{prefix}/lib/
+
+if [ "$(uname -v)" -eq 7 ]; then
+  # we need libatomic.a (only) on AIX 7
+  cp  /opt/freeware/lib/gcc/powerpc-ibm-aix*.0.0/*/libatomic.a $RPM_BUILD_ROOT%{prefix}/lib/
+  echo %{prefix}/lib/libatomic.a > libatomic-files
+else
+  echo > libatomic-files
+fi
 #cp  /opt/freeware/lib/gcc/powerpc-ibm-aix*.0.0/4.*/libstdc++.a $RPM_BUILD_ROOT%{prefix}/lib/
 
 %clean
@@ -35,7 +43,7 @@ rm -rf $RPM_BUILD_ROOT
 %preun
 
 
-%files
+%files -f libatomic-files
 %defattr(755,root,root)
 
 # Libs
