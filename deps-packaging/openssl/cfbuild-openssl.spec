@@ -5,6 +5,8 @@ Name: cfbuild-openssl
 Version: %{version}
 Release: 1
 Source0: openssl-%{openssl_version}.tar.gz
+Patch0: 0005-aix-config-pm.patch
+Patch1: 0006-Add-latomic-on-AIX-7.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -17,6 +19,9 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n openssl-%{openssl_version}
+
+%patch0 -p1
+%patch1 -p1
 
 %build
 
@@ -62,14 +67,21 @@ if [ x$SYS = "xAIX" ]; then
   # See https://www.ibm.com/developerworks/aix/library/au-gnu.html for
   # details.
   LDFLAGS="$LDFLAGS -Wl,-bexpfull"
+  # for some reason, Configure on AIX doesn't auto-detect target
+  if [ "$(uname -v)" -eq 7 ]; then
+    target=aix7-gcc
+  else
+    target=aix-gcc
+  fi
 fi
 
-./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
+$PERL ./Configure $target shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
          $DEBUG_CONFIG_FLAGS \
          --prefix=%{prefix} \
          $HACK_FLAGS   \
          $DEBUG_CFLAGS \
-         $LDFLAGS
+         $LDFLAGS \
+         --libdir=lib
 
 # Remove -O3 and -fomit-frame-pointer from debug builds
 if [ $BUILD_TYPE = "DEBUG" ]
@@ -144,8 +156,8 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/bin/openssl
 
 %dir %{prefix}/lib
-%{prefix}/lib/libssl.so.1.1
-%{prefix}/lib/libcrypto.so.1.1
+%{prefix}/lib/libssl.so.3
+%{prefix}/lib/libcrypto.so.3
 %{prefix}/ssl/openssl.cnf
 %{prefix}/ssl/ct_log_list.cnf
 %{prefix}/ssl/ct_log_list.cnf.dist
@@ -156,6 +168,7 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/include
 
 %dir %{prefix}/lib
+%{prefix}/lib/ossl-modules/legacy.so
 
 %{prefix}/lib/pkgconfig
 

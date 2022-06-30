@@ -12,12 +12,6 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Patch
 
-if [ "$(uname -p)" = "i386" ]
-then
-    $PATCH -p1 -i 0002-Revert-Fix-a-buffer-overflow-in-drbg_ctr_generate.patch
-    $PATCH -p1 -i 0003-Revert-AES-CTR-DRGB-performance-improvement.patch
-fi
-
 # Add dummy header files for features which are not compiled, but required
 mkdir -p ${BUILD_ROOT}/../include/openssl
 for f in idea srp; do
@@ -34,11 +28,11 @@ if [ "$(uname -p)" = "i386" ]
 then
     CONFIG="$PERL ./Configure solaris-x86-gcc"
 else
-    CONFIG="./config"
+    CONFIG="$PERL ./Configure solaris-sparcv9-gcc"
 fi
 
 $CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm no-engine \
-    --prefix=$PREFIX  $LDFLAGS -lrt
+    --prefix=$PREFIX  $LDFLAGS -lrt --libdir=lib
 
 # Build
 
@@ -66,4 +60,5 @@ rm -rf ${OSD}/lib/*.a
 mkdir -p ${OS}/lib
 mv ${OSD}/lib/libcrypto.so* ${OS}/lib
 mv ${OSD}/lib/libssl.so* ${OS}/lib
+mv ${OSD}/lib/ossl-modules ${OS}/lib/
 
