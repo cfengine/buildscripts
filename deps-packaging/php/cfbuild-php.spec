@@ -6,6 +6,7 @@ Version: %{version}
 Release: 1
 Source0: php-%{php_version}.tar.gz
 Source1: php.ini
+Patch0: openssl-eol.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -24,7 +25,7 @@ then
   patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
 fi
 
-patch -p1 < %{_topdir}/SOURCES/openssl-eol.patch
+%patch0 -p1
 
 ./configure --prefix=%{prefix}/httpd/php \
   --with-config-file-scan-dir=%{prefix}/httpd/php/lib \
