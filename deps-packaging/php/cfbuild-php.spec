@@ -24,6 +24,8 @@ then
   patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
 fi
 
+patch -p1 < %{_topdir}/SOURCES/openssl-eol.patch
+
 ./configure --prefix=%{prefix}/httpd/php \
   --with-config-file-scan-dir=%{prefix}/httpd/php/lib \
   --with-apxs2=%{prefix}/httpd/bin/apxs \
