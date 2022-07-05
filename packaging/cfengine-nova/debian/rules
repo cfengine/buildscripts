@@ -4,6 +4,12 @@ PREFIX=$(BUILDPREFIX)
 
 BASEDIR=../..
 
+ifeq ($(SYSTEM_SSL),1)
+  SSL_DEPENDS=libssl1.1
+else
+  SSL_DEPENDS=
+endif
+
 clean:
 	dh_testdir
 	dh_testroot
@@ -51,7 +57,7 @@ endif
 	dh_compress
 	dh_fixperms -X $(PREFIX)/inputs -X $(PREFIX)/outputs -X $(PREFIX)/ppkeys -X $(PREFIX)/modules
 	dh_installdeb
-	dh_gencontrol
+	dh_gencontrol -- -Vssl:Depends=$(SSL_DEPENDS)
 	dh_md5sums
 	dh_builddeb
 
