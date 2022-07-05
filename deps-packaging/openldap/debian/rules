@@ -26,7 +26,7 @@ build-stamp:
 	    --disable-backends \
 	    --with-tls=openssl \
 	    --without-gssapi \
-	    CPPFLAGS="$(CPPFLAGS) -I$(PREFIX)/include"
+	    CPPFLAGS="$(CPPFLAGS) -I$(PREFIX)/include:/usr/include"
 
 	make -C include
 	make -C libraries

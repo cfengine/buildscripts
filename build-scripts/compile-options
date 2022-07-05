@@ -60,6 +60,7 @@ if [ "$OS" = "rhel" ] && expr "$OS_VERSION" ">=" "8" >/dev/null
 then
   LDFLAGS="$LDFLAGS -L/usr/lib64"
 fi
+LDFLAGS="$LDFLAGS -L/usr/lib64"
 export LDFLAGS
 
 # For Debian builds, which do not automatically inherit build flags
@@ -90,7 +91,7 @@ then
 else
   # FIXME: Why do we need zlib?
   # ANSWER: Openssl uses it optionally, TODO DISABLE
-  var_append DEPS "zlib $EMBEDDED_DB openssl pcre"
+  var_append DEPS "$EMBEDDED_DB pcre"
 fi
 
 # libsasl needed for solaris

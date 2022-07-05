@@ -23,7 +23,7 @@ build-stamp:
 	./configure --with-sysroot=$(PREFIX) \
 				--host=$(DEB_HOST_GNU_TYPE) \
 				$(PTHREAD) \
-				--with-ssl=$(PREFIX) \
+				--with-ssl=/usr \
 				--with-zlib=$(PREFIX) \
 				--prefix=$(PREFIX) \
 				--disable-ldap \
