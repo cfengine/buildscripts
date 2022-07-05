@@ -10,6 +10,12 @@ else
   CC_OVERRIDE="CC=$(DEB_HOST_GNU_TYPE)-gcc -static-libgcc"
 endif
 
+ifeq ($(SYSTEM_SSL),1)
+  SSL_PREFIX=/usr
+else
+  SSL_PREFIX=$(PREFIX)
+endif
+
 clean:
 	dh_testdir
 	dh_testroot
@@ -23,7 +29,7 @@ build-stamp:
 	./configure --with-sysroot=$(PREFIX) \
 				--host=$(DEB_HOST_GNU_TYPE) \
 				$(PTHREAD) \
-				--with-ssl=$(PREFIX) \
+				--with-ssl=$(SSL_PREFIX) \
 				--with-zlib=$(PREFIX) \
 				--prefix=$(PREFIX) \
 				--disable-ldap \
