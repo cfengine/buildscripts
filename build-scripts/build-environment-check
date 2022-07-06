@@ -64,6 +64,7 @@ do
     fi
 done
 
+sudo apt-get install -y libssl-dev
 
 # Exit with the right exit code
 if [  $RET = 0  ]
