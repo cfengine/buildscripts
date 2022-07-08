@@ -1,5 +1,5 @@
-4 R I cfengine.cfengine-community {
-cfengine.cfengine-community @@VERSION@@.0 01 N U en_US Cfengine Nova, Data Center Automation
+4 R I cfengine-community {
+cfengine-community @@VERSION@@.0 01 N U en_US Cfengine Community, Data Center Automation
 [
 %
 /etc 2
@@ -7,7 +7,7 @@ cfengine.cfengine-community @@VERSION@@.0 01 N U en_US Cfengine Nova, Data Cente
 /etc/rc.d/init.d 1
 /usr 2
 /usr/lpp 2
-/usr/lpp/cfengine.cfengine-community 
+/usr/lpp/cfengine-community 
 /var 2
 /var/cfengine 6
 /var/cfengine/bin 6740

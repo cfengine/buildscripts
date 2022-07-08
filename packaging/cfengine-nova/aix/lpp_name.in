@@ -1,5 +1,5 @@
-4 R I cfengine.cfengine-nova {
-cfengine.cfengine-nova @@VERSION@@.0 01 N U en_US Cfengine Nova, Data Center Automation
+4 R I cfengine-nova {
+cfengine-nova @@VERSION@@.0 01 N U en_US Cfengine Nova, Data Center Automation
 [
 %
 /etc 2
@@ -7,7 +7,7 @@ cfengine.cfengine-nova @@VERSION@@.0 01 N U en_US Cfengine Nova, Data Center Aut
 /etc/rc.d/init.d 1
 /usr 2
 /usr/lpp 2
-/usr/lpp/cfengine.cfengine-nova 
+/usr/lpp/cfengine-nova 
 /var 2
 /var/cfengine 6
 /var/cfengine/bin 6740
