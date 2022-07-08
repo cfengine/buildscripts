@@ -53,7 +53,7 @@ rpm2cpio $BASEDIR/cfengine-nova/RPMS/*/*.rpm | /opt/freeware/bin/cpio -idv
 
 mkdir -p $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/etc/rc.d/init.d
 mkdir -p $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info
-mkdir -p $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/usr/lpp/cfengine.cfengine-nova/
+mkdir -p $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/usr/lpp/cfengine-nova/
 
 mkdir -p $LPPBASE/lppdir/bff
 
@@ -63,12 +63,12 @@ mkdir -p $LPPBASE/lppdir/out
 
 
 # Create install/remove scripts.
-PREINSTALL=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.pre_i
-POSTINSTALL=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.post_i
+PREINSTALL=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine-nova.pre_i
+POSTINSTALL=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine-nova.post_i
 # Note the reverse pre <-> post relationship on the AIX platform.
 # unpost_i is called before unpre_i.
-PREREMOVE=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.unpost_i
-POSTREMOVE=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.unpre_i
+PREREMOVE=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine-nova.unpost_i
+POSTREMOVE=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine-nova.unpre_i
 $P/../common/produce-script cfengine-nova preinstall bff > $PREINSTALL
 $P/../common/produce-script cfengine-nova postinstall bff > $POSTINSTALL
 $P/../common/produce-script cfengine-nova preremove bff > $PREREMOVE
@@ -76,11 +76,11 @@ $P/../common/produce-script cfengine-nova postremove bff > $POSTREMOVE
 
 # In addition AIX has pre_rm, which we will treat the same as preinstall.
 # See the actual scripts for more details on this
-PRE_RM=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.pre_rm
+PRE_RM=$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine-nova.pre_rm
 $P/../common/produce-script cfengine-nova preinstall bff > $PRE_RM
 
 # Create the info file
-env LD_LIBRARY_PATH="$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/lib" CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR="$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/lib" "$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/bin/cf-agent" -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine.cfengine-nova.copyright
+env LD_LIBRARY_PATH="$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/lib" CFENGINE_TEST_OVERRIDE_EXTENSION_LIBRARY_DIR="$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/lib" "$LPPBASE/lppdir/lpp/cfengine-nova-$VERSION$PREFIX/bin/cf-agent" -V > $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/.info/cfengine-nova.copyright
 
 # Detect build machine versions of important libraries so we can compare with
 # the install machine.
@@ -89,8 +89,8 @@ LIBC_VERSION=`lslpp -l bos.rte.libc | grep bos.rte.libc | head -n1 | sed -e 's/.
 
 #Create the lpp_name file
 cat >  $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/lpp_name << EOF; 
-4 R I cfengine.cfengine-nova {
-cfengine.cfengine-nova $VERSION 01 N U en_US Cfengine Nova, Data Center Automation
+4 R I cfengine-nova {
+cfengine-nova $VERSION 01 N U en_US Cfengine Nova, Data Center Automation
 [
 *prereq bos.rte.libpthreads $PTHREAD_VERSION
 *prereq bos.rte.libc $LIBC_VERSION
@@ -104,7 +104,7 @@ INSTWORK 70 70
 }
 EOF
 
-cp /usr/lpp/bos/liblpp.a  $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/usr/lpp/cfengine.cfengine-nova/
+cp /usr/lpp/bos/liblpp.a  $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/usr/lpp/cfengine-nova/
 
 # -hR needed as only -R will change the original files and folders but -h will changes the ownership of symlinks as well that are inside the lib directory
 sudo chown -hR root:system $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION
