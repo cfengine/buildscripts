@@ -1,4 +1,4 @@
-PKG="CFE@@PKG@@"
+PKG="@@PKG@@"
 NAME="CFEngine Community"
 @@ARCH@@="@@ARCH@@"
 VERSION="@@VERSION@@"
