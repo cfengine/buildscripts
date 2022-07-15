@@ -17,6 +17,7 @@ build-stamp:
 	test -d $(PREFIX) || ( sudo mkdir $(PREFIX) && sudo chmod 777 $(PREFIX) )
 	mkdir -p $(PREFIX)/include
 
+	GLOBAL_CONFIG_FLAGS=`cat config_flags_$$ROLE.txt` ;\
 	DEBUG_CONFIG_FLAGS= ;\
 	DEBUG_CFLAGS= ;\
 	if [ $$BUILD_TYPE = "DEBUG" ] ;\
@@ -31,13 +32,15 @@ build-stamp:
 	    HACK_FLAGS=-D_GNU_SOURCE  ;\
 	fi ;\
 	\
-	./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
+	./config $$GLOBAL_CONFIG_FLAGS \
 	    $$DEBUG_CONFIG_FLAGS \
 	    --prefix=$(PREFIX) \
 	    $$HACK_FLAGS   \
 	    $$DEBUG_CFLAGS \
 	    $$LDFLAGS \
 	    --libdir=lib
+
+	$$PERL configdata.pm --dump
 
 	# Remove -O3 and -fomit-frame-pointer from debug and quick builds
 	if [ $$BUILD_TYPE = "DEBUG" ] ;\

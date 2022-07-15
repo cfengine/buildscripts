@@ -75,13 +75,19 @@ if [ x$SYS = "xAIX" ]; then
   fi
 fi
 
-$PERL ./Configure $target shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
+# Note: as of now, config_flags_hub.txt and config_flags_agent.txt files are the same.
+# CFE-4042 is the ticket to further investigate what can be added to both of them.
+GLOBAL_CONFIG_FLAGS=$(<../../SOURCES/config_flags_$ROLE.txt)
+
+$PERL ./Configure $target $GLOBAL_CONFIG_FLAGS \
          $DEBUG_CONFIG_FLAGS \
          --prefix=%{prefix} \
          $HACK_FLAGS   \
          $DEBUG_CFLAGS \
          $LDFLAGS \
          --libdir=lib
+
+$PERL configdata.pm --dump
 
 # Remove -O3 and -fomit-frame-pointer from debug builds
 if [ $BUILD_TYPE = "DEBUG" ]
@@ -168,7 +174,6 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/include
 
 %dir %{prefix}/lib
-%{prefix}/lib/ossl-modules/legacy.so
 
 %{prefix}/lib/pkgconfig
 
