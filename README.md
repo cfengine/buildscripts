@@ -1,4 +1,52 @@
-## Prerequisites
+This repository contains the necessary tools to build and test cfengine packages for various platforms.
+
+## Example build of Community Agent
+
+A minimal example would be to build packages for cfengine community agent.
+This should be done in an isolated environment such as a dedicated host, virtual machine or linux container.
+
+Install necessary distribution packages. For example on debian/ubuntu:
+
+```
+apt update -y
+apt upgrade -y
+apt install -y git autoconf automake m4 make bison flex binutils libtool gcc g++ libc-dev libpam0g-dev python3 psmisc libtokyocabinet-dev libssl-dev libpcre3-dev default-jre-headless build-essential fakeroot ntp dpkg-dev debhelper pkg-config nfs-common sudo apt-utils wget libncurses5 rsync libexpat1-dev libexpat1 curl
+apt purge -y emacs emacs24 libltdl-dev libltdl7
+```
+
+Get the cfengine source code:
+
+```
+mkdir $HOME/cfengine
+cd $HOME/cfengine
+git clone --recursive --depth 1 https://github.com/cfengine/core
+git clone --depth 1 https://github.com/cfengine/buildscripts
+git clone --depth 1 https://github.com/cfengine/masterfiles
+```
+
+Set some environment variables:
+
+```
+export NO_CONFIGURE=1
+export PROJECT=community
+export BUILD_TYPE=DEBUG
+export EXPLICIT_ROLE=agent
+```
+
+Execute the build steps and see that packages are generated:
+
+```
+./buildscripts/build-scripts/autogen
+./buildscripts/build-scripts/clean-buildmachine
+./buildscripts/build-scripts/build-environment-check
+./buildscripts/build-scripts/install-dependencies
+./buildscripts/build-scripts/configure
+./buildscripts/build-scripts/compile
+./buildscripts/build-scripts/package
+ls -l cfengine-community/*.deb
+```
+
+## General Build Machine Prerequisites
 
 Due to sheer diversity of the environments, build machine is expected to provide
 strict minimum amount of software (don't forget --no-install-recommends on
