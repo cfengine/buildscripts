@@ -1,5 +1,5 @@
 4 R I cfengine-nova {
-cfengine-nova @@VERSION@@.0 01 N U en_US Cfengine Nova, Data Center Automation
+cfengine.cfengine-nova @@VERSION@@.0 01 N U en_US Cfengine Nova, Data Center Automation
 [
 %
 /etc 2

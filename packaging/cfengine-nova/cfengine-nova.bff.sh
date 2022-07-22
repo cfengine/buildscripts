@@ -1,6 +1,6 @@
 #!/usr/bin/ksh
 
-set -e
+set -ex
 
 export PATH=$PATH:/usr/local/bin
 VERSION=$1
@@ -90,7 +90,7 @@ LIBC_VERSION=`lslpp -l bos.rte.libc | grep bos.rte.libc | head -n1 | sed -e 's/.
 #Create the lpp_name file
 cat >  $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION/lpp_name << EOF; 
 4 R I cfengine-nova {
-cfengine-nova $VERSION 01 N U en_US Cfengine Nova, Data Center Automation
+cfengine.cfengine-nova $VERSION 01 N U en_US Cfengine Nova, Data Center Automation
 [
 *prereq bos.rte.libpthreads $PTHREAD_VERSION
 *prereq bos.rte.libc $LIBC_VERSION

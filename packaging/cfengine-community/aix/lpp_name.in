@@ -1,5 +1,5 @@
 4 R I cfengine-community {
-cfengine-community @@VERSION@@.0 01 N U en_US Cfengine Community, Data Center Automation
+cfengine.cfengine-community @@VERSION@@.0 01 N U en_US Cfengine Community, Data Center Automation
 [
 %
 /etc 2
