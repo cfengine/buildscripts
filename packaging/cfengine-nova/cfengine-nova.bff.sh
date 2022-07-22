@@ -114,3 +114,8 @@ cd $LPPBASE/lppdir/lpp/cfengine-nova-$VERSION
 
 # sometimes the following command needs to be done twice
 sudo -E mklpp || sudo -E mklpp
+
+# Remove extra 'cfengine.' from filename
+cd $HOME/lppdir/out/
+NEW_NAME="$(echo *.bff | sed 's/cfengine.cfengine/cfengine/')"
+sudo mv *.bff "$NEW_NAME"
