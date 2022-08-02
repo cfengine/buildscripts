@@ -89,11 +89,11 @@ exit 0
 %prefix/bin/cf-check
 %prefix/bin/cf-execd
 %prefix/bin/cf-key
-%prefix/bin/cf-secret
 %prefix/bin/cf-monitord
 %prefix/bin/cf-net
 %prefix/bin/cf-promises
 %prefix/bin/cf-runagent
+%prefix/bin/cf-secret
 %prefix/bin/cf-serverd
 %prefix/bin/cf-upgrade
 # Libraries

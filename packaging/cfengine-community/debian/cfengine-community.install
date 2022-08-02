@@ -14,11 +14,11 @@
 /var/cfengine/bin/cf-check
 /var/cfengine/bin/cf-execd
 /var/cfengine/bin/cf-key
-/var/cfengine/bin/cf-secret
 /var/cfengine/bin/cf-monitord
 /var/cfengine/bin/cf-net
 /var/cfengine/bin/cf-promises
 /var/cfengine/bin/cf-runagent
+/var/cfengine/bin/cf-secret
 /var/cfengine/bin/cf-serverd
 /var/cfengine/bin/cf-upgrade
 /var/cfengine/bin/getfacl
