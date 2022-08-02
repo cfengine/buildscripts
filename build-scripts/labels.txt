@@ -12,6 +12,8 @@ PACKAGES_HUB_x86_64_linux_ubuntu_16
 PACKAGES_HUB_x86_64_linux_ubuntu_18
 PACKAGES_HUB_x86_64_linux_ubuntu_20
 
+PACKAGES_HUB_arm_64_linux_ubuntu_22
+
 PACKAGES_x86_64_linux_debian_9
 PACKAGES_x86_64_linux_debian_10
 PACKAGES_x86_64_linux_debian_11
@@ -37,3 +39,4 @@ PACKAGES_ppc64_aix_71
 PACKAGES_sparc64_solaris_10
 PACKAGES_sparc64_solaris_11
 PACKAGES_x86_64_solaris_10
+PACKAGES_arm_64_linux_ubuntu_22
