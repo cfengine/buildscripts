@@ -26,7 +26,7 @@ if [ -f /usr/lib64/php5/extensions/cfmod.so ]; then
     rm -f /usr/lib64/php5/extensions/cfengine-enterprise-api.so
 fi
 
-for i in cf-agent cf-key cf-secret cf-promises cf-execd cf-serverd cf-monitord cf-net cf-check;
+for i in cf-agent cf-key cf-secret cf-promises cf-execd cf-serverd cf-monitord cf-net cf-check cf-support;
 do
     rm -f /usr/local/sbin/$i || true
 done
