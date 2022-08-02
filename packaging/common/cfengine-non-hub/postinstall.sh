@@ -40,7 +40,7 @@ if [ -f $PREFIX/bin/cf-twin ]; then
 fi
 
 mkdir -p /usr/local/sbin
-for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-net cf-check;
+for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-net cf-check cf-support;
 do
   if [ -f $PREFIX/bin/$i ]; then
     ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true

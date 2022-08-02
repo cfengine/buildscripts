@@ -80,6 +80,7 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 %prefix/bin/cf-runagent
 %prefix/bin/cf-secret
 %prefix/bin/cf-serverd
+%prefix/bin/cf-support
 %prefix/bin/cf-upgrade
 # Libraries
 %dir %prefix/lib

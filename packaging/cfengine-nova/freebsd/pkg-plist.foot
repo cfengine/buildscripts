@@ -24,3 +24,4 @@
 @unexec /bin/rm -f /var/cfengine/bin/cf-runagent > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-secret > /dev/null 2>&1
 @unexec /bin/rm -f /var/cfengine/bin/cf-serverd > /dev/null 2>&1
+@unexec /bin/rm -f /var/cfengine/bin/cf-support > /dev/null 2>&1

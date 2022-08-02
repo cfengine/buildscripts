@@ -20,6 +20,7 @@
 /var/cfengine/bin/cf-runagent
 /var/cfengine/bin/cf-secret
 /var/cfengine/bin/cf-serverd
+/var/cfengine/bin/cf-support
 /var/cfengine/bin/cf-upgrade
 /var/cfengine/bin/getfacl
 /var/cfengine/lib/lib*.so.*

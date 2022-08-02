@@ -143,6 +143,9 @@ sed -i "/^from cfbs.*/i sys.path.append(\"%prefix/lib/python\")" $RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT/tmp/cfbs_root
 %endif
 
+# Add cf-enterprise-support to share
+cp %{_basedir}/nova/misc/cf-support-nova-hub.sh $RPM_BUILD_ROOT%prefix/share/
+chmod 755 $RPM_BUILD_ROOT%prefix/share/cf-support-nova-hub.sh
 %clean
 #rm -rf $RPM_BUILD_ROOT
 
@@ -184,6 +187,7 @@ exit 0
 %prefix/bin/cf-runagent
 %prefix/bin/cf-secret
 %prefix/bin/cf-serverd
+%prefix/bin/cf-support
 # Nova-only binaries
 %prefix/bin/cf-hub
 %prefix/bin/cf-reactor
@@ -312,6 +316,7 @@ exit 0
 # Documentation
 %defattr(644,root,root,755)
 %dir %prefix/share
+%prefix/share/cf-support-nova-hub.sh
 %prefix/share/doc
 # Web interface
 %prefix/share/GUI

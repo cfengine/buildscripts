@@ -93,6 +93,9 @@ install: build
 	sed -i "/^from cfbs.*/i sys.path.append(\"$(PREFIX)/lib/python\")" $(CURDIR)/debian/tmp$(PREFIX)/bin/cfbs
 	rm -rf $(CURDIR)/debian/tmp/tmp/cfbs_root
 
+# cf-enterprise-support
+	cp $(BASEDIR)/nova/misc/cf-support-nova-hub.sh $(CURDIR)/debian/tmp$(PREFIX)/share/
+
 
 binary-indep: build install
 
