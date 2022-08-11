@@ -18,7 +18,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n pcre-%{pcre_version}
 
-./configure --prefix=%{prefix} --enable-unicode-properties --disable-cpp --enable-shared
+./configure --prefix=%{prefix} --enable-unicode-properties --disable-cpp --enable-shared --libdir=%{buildprefix}/lib
 
 %build
 
