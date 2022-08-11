@@ -42,6 +42,7 @@ SYS=`uname -s`
             --disable-backends \
             --with-tls=openssl \
             --without-gssapi \
+	    --libdir=%{buildprefix}/lib \
             CPPFLAGS="$CPPFLAGS"
 
 %build
