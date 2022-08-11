@@ -27,7 +27,7 @@ if [ -z $MAKE ]; then
   export MAKE=$MAKE_PATH
 fi
 
-./configure --prefix=%{prefix}
+./configure --prefix=%{prefix} --libdir=%{buildprefix}/lib
 $MAKE
 
 %install
