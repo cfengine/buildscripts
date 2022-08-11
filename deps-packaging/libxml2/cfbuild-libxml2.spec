@@ -27,6 +27,7 @@ then
     chmod a+x configure
 fi
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
+    --libdir=%{buildprefix}/lib \
     CPPFLAGS="-I%{prefix}/include" \
     LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
 
