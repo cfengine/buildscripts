@@ -4,7 +4,7 @@
 . detect-environment
 . compile-options
 
-if [ "xtrue" = "x$NO_ACCEPTANCE_TESTS" ]; then
+if [ "xtrue" = "x$NO_TESTS" ] || [ "xtrue" = "x$NO_ACCEPTANCE_TESTS" ]; then
   create-empty-test
   exit 0
 fi
