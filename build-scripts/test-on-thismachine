@@ -37,17 +37,16 @@ else
     fi
     for project in `projects_to_test`
     do
+        # for systems without the automake-1.15 that bootstrap uses in tarballs/artifacts,
+	# try autoreconf -i
+	if [ "$OS" = ubuntu ] && [ "${REL%.*}" -gt 21 ] ; then
+	    autoreconf -i $BASEDIR/$project
+        fi
         # Unfortunately VERBOSE env variable is being used by both
         # "testall" script and automake. As a result, setting VERBOSE=1
         # causes testall to pass "1" as an argument to cf-agent!
         # Workaround: VERBOSE=-I
-        # if failure, try autoreconf -i for systems without the automake-1.15 that bootstrap uses in tarballs/artifacts
-        rc=0
-        NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project VERBOSE=-I check || rc=1
-        if [ $rc -ne 0 ]; then
-          autoreconf -i $BASEDIR/$project
-          NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project VERBOSE=-I check
-        fi
+        NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project VERBOSE=-I check
     done
   elif [ "$TESTS" = unit ]
   then
