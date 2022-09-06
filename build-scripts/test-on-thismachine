@@ -41,7 +41,7 @@ else
         # "testall" script and automake. As a result, setting VERBOSE=1
         # causes testall to pass "1" as an argument to cf-agent!
         # Workarount: VERBOSE=-I
-        ls -l "$BASEDIR/$project/tests/unit/Makefile*"
+        ls -l "$BASEDIR/$project/tests/unit/Makefile*" || true
         NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project VERBOSE=-I check
     done
   elif [ "$TESTS" = unit ]
