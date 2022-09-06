@@ -42,6 +42,12 @@ else
         # causes testall to pass "1" as an argument to cf-agent!
         # Workarount: VERBOSE=-I
         ls -l $BASEDIR/$project/tests/unit/Makefile* || true
+        ls -l /usr/bin/python || true
+        if test -x /usr/bin/python; then
+          echo "/usr/bin/python exists and is executable"
+        else
+          echo "/usr/bin/python does not exist or is not executable"
+        fi
         NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project VERBOSE=-I check
     done
   elif [ "$TESTS" = unit ]
