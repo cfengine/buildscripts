@@ -85,6 +85,9 @@ install: build
 	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/db/*.sql
 
 
+# cf-enterprise-support
+	cp $(BASEDIR)/nova/misc/cf-support-nova-hub.sh $(CURDIR)/debian/tmp$(PREFIX)/share/
+
 
 binary-indep: build install
 

@@ -14,12 +14,13 @@
 /var/cfengine/bin/cf-check
 /var/cfengine/bin/cf-execd
 /var/cfengine/bin/cf-key
-/var/cfengine/bin/cf-secret
 /var/cfengine/bin/cf-monitord
 /var/cfengine/bin/cf-net
 /var/cfengine/bin/cf-promises
 /var/cfengine/bin/cf-runagent
+/var/cfengine/bin/cf-secret
 /var/cfengine/bin/cf-serverd
+/var/cfengine/bin/cf-support
 /var/cfengine/bin/runalerts.php
 /var/cfengine/bin/rsync
 /var/cfengine/bin/cfengine3-nova-hub-init-d.sh
@@ -47,6 +48,7 @@
 /var/cfengine/bin/cf-hub
 /var/cfengine/bin/cf-reactor
 /var/cfengine/lib/php
+/var/cfengine/share/cf-support-nova-hub.sh
 /var/cfengine/share/NovaBase
 /var/cfengine/share/GUI
 /var/cfengine/master_software_updates
