@@ -299,9 +299,9 @@ case "$PACKAGING" in
     pkgmk -o -r "`pwd`" -d "$BASEDIR/$PKG/pkg"
     if [ "$BUILD_TYPE" = "RELEASE" ]
     then
-      NAME="CFE$PKG-$VERSION.$RELEASE-solaris$OS_VERSION-$ARCH.pkg"
+      NAME="$PKG-$VERSION.$RELEASE-solaris$OS_VERSION-$ARCH.pkg"
     else
-      NAME="CFE$PKG-$VERSION-solaris$OS_VERSION-$ARCH.pkg"
+      NAME="$PKG-$VERSION-solaris$OS_VERSION-$ARCH.pkg"
     fi
     pkgtrans -o -s "$BASEDIR/$PKG/pkg" "$BASEDIR/$PKG/$NAME" "CFE$PKG"
     ;;
