@@ -1,16 +1,3 @@
---- include/ldap_pvt.h.orig	2021-06-09 13:25:02.701875533 +0200
-+++ include/ldap_pvt.h	2021-06-09 21:50:23.356663177 +0200
-@@ -185,7 +185,10 @@
- #define LDAP_IPADDRLEN	sizeof("IP=255.255.255.255:65336")
- #endif
- 
-+#ifndef _SOCKADDR_UNION_DEFINED
- typedef union Sockaddr Sockaddr;
-+#define _SOCKADDR_UNION_DEFINED
-+#endif
- 
- LDAP_F (void)
- ldap_pvt_sockaddrstr LDAP_P((
 --- include/ac/socket.h.orig	2021-06-09 21:08:51.197144446 +0200
 +++ include/ac/socket.h	2021-06-09 21:50:10.931819292 +0200
 @@ -234,6 +234,7 @@
