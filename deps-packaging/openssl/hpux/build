@@ -12,7 +12,7 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Configure
 
-$PERL ./Configure hpux-ia64-gcc shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
+$PERL ./Configure hpux-ia64-gcc $(<config_flags_$ROLE.txt) \
     $LDFLAGS --prefix=$PREFIX --libdir=lib
 
 # Build

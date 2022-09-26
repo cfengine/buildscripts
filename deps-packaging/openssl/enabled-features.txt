@@ -1,0 +1,69 @@
+To use this list:
+1. rebuild openssl
+2. look for "Enabled features:" in its output
+3. compare it with this list, sorted and cleared.
+
+To sort and clear this list:
+sort enabled-features.txt | sed '/^ /!d;s/ - .*$//'
+
+Explanation of options you can find at:
+https://github.com/openssl/openssl/blob/master/INSTALL.md
+
+
+
+These we need:
+    autoalginit - required for shared build
+    bulk - required to build any cyphers at all
+    deprecated - build with support for deprecated APIs
+    legacy - build the legacy provider (provides Blowfish which is used by the
+	CFEngine legacy protocol when encryption is enabled - required for
+	relevant unit tests)
+    pic - required for shared library
+    shared - build shared library, to be used by CFEngine
+    dh - required to initiate TLS connections
+    des - required, see https://tracker.mender.io/browse/CFE-4034
+
+Encryptions we use:
+    bf
+    tls
+    tls1
+    tls1-method
+    tls1_1
+    tls1_1-method
+    tls1_2
+    tls1_2-method
+    tls1_3
+
+These are nice to have:
+    autoerrinit - load human readable error strings
+    autoload-config - load system default openssl.cnf file.
+    err - compile in error strings
+
+These don't sound like something worth disabling:
+    pinshared - pin the shared libraries.
+    posix-io - use POSIX IO capabilities.
+    rdrand - use hardware RDRAND capabilities.
+    secure-memory
+    sse2 - use SSE2 instructions
+    static-engine - This only has an impact when not built "shared".
+    stdio - use something from stdio.h
+    threads - Build with support for multi-threaded applications.
+    ssl - enabled despite no-ssl flag
+
+These may be ok to disable:
+    cached-fetch - cache algorithms when they are fetched from a provider
+    makedepend - generate dependencies
+    multiblock - build support for writing multiple records in one go in libssl
+    nextprotoneg - Next Protocol Negotiation (NPN) TLS extension.
+
+These are required by our dependencies (and maybe by us, too):
+    cast - used by postgresql
+    cms - used by php
+    des - used by postgresql
+    dh - used by postgresql
+    ec - required by php, see https://github.com/php/php-src/issues/9064
+    md4 - used by rsync and php
+    ocsp - used by apache
+    rmd160 - used by php, see https://github.com/php/php-src/issues/8430
+    sock - used by curl?
+

@@ -31,6 +31,7 @@ mkdir -p %{_builddir}
     --with-zlib=%{prefix} \
     --disable-ldap \
     --disable-ldaps \
+    --disable-ntlm \
     --without-axtls \
     --without-cyassl \
     --without-egd-socket \
