@@ -10,6 +10,12 @@ PREFIX=$(BUILDPREFIX)
 #
 CPPFLAGS += -D_GNU_SOURCE
 
+ifeq ($(SYSTEM_SSL),1)
+  CPPFLAGS += -I$(PREFIX)/include:/usr/include
+else
+  CPPFLAGS += -I$(PREFIX)/include
+endif
+
 clean:
 	dh_testdir
 	dh_testroot
@@ -26,7 +32,7 @@ build-stamp:
 	    --disable-backends \
 	    --with-tls=openssl \
 	    --without-gssapi \
-	    CPPFLAGS="$(CPPFLAGS) -I$(PREFIX)/include"
+	    CPPFLAGS="$(CPPFLAGS)"
 
 	make -C include
 	make -C libraries

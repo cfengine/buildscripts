@@ -30,6 +30,25 @@ fi
 
 export PROJECT
 
+# Detect requirement to use system-provided OpenSSL library.
+# When running manually, you can just export this variable.
+# It's a flag: if it's set to 1 - then we use system OpenSSL.
+# Otherwise, we build it.
+if [ x"$SYSTEM_SSL" = x ]
+then
+    # We don't bundle OpenSSL on RHEL 8 (and newer in the future)
+    if [ "$OS" = "rhel" ] && expr "$OS_VERSION" ">=" "8" >/dev/null
+    then
+        SYSTEM_SSL=1
+    fi
+    # Detect using system ssl when running a Jenkins job
+    if expr x"$label" ":" ".*systemssl" >/dev/null
+    then
+        SYSTEM_SSL=1
+    fi
+fi
+export SYSTEM_SSL
+
 case "$OS_FAMILY" in
   aix)
     # This flag is needed because AIX defaults to producing .a shared libraries,
@@ -62,9 +81,8 @@ case "$OS_FAMILY" in
     ;;
 esac
 
-# We don't bundle OpenSSL on RHEL 8 (and newer in the future) so we need to pull
-# it from /usr/lib64.
-if [ "$OS" = "rhel" ] && expr "$OS_VERSION" ">=" "8" >/dev/null
+# When we don't bundle OpenSSL, then we need to pull it from /usr/lib64.
+if [ x"$SYSTEM_SSL" = x1 ]
 then
   LDFLAGS="$LDFLAGS -L/usr/lib64"
 fi
@@ -91,14 +109,13 @@ case "$OS_FAMILY" in
     solaris|aix)  var_append DEPS "libgcc" ;;
 esac
 
-# We don't bundle OpenSSL on RHEL 8 (and newer in the future)
-if [ "$OS" = "rhel" ] && expr "$OS_VERSION" ">=" "8" >/dev/null
+var_append DEPS "$EMBEDDED_DB pcre"
+
+if ! [ x"$SYSTEM_SSL" = x1 ]
 then
-  var_append DEPS "$EMBEDDED_DB pcre"
-else
   # FIXME: Why do we need zlib?
   # ANSWER: Openssl uses it optionally, TODO DISABLE
-  var_append DEPS "zlib $EMBEDDED_DB openssl pcre"
+  var_append DEPS "zlib openssl"
 fi
 
 # libsasl needed for solaris
