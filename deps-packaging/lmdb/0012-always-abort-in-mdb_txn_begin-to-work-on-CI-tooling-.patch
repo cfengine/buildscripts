@@ -1,0 +1,25 @@
+From 404173c20b103357d860f4758c69e2cf30ad5cf6 Mon Sep 17 00:00:00 2001
+From: Craig Comstock <craig.comstock@northern.tech>
+Date: Thu, 29 Sep 2022 15:07:15 -0500
+Subject: [PATCH] always abort in mdb_txn_begin() to work on CI tooling to
+ catch core dumps
+
+---
+ mdb.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/mdb.c b/mdb.c
+index 8cecdb2..632e74a 100644
+--- a/mdb.c
++++ b/mdb.c
+@@ -2825,6 +2825,7 @@ mdb_txn_renew(MDB_txn *txn)
+ int
+ mdb_txn_begin(MDB_env *env, MDB_txn *parent, unsigned int flags, MDB_txn **ret)
+ {
++	abort(); // for now, always abort here to prepare CI to catch core dumps and such. CFE-3807
+ 	MDB_txn *txn;
+ 	MDB_ntxn *ntxn;
+ 	int rc, size, tsize;
+-- 
+2.37.3
+
