@@ -10,8 +10,8 @@ Subject: [PATCH] always abort in mdb_txn_begin() to work on CI tooling to
 
 diff --git a/mdb.c b/mdb.c
 index 8cecdb2..632e74a 100644
---- a/mdb.c
-+++ b/mdb.c
+--- a/libraries/liblmdb/mdb.c
++++ b/libraries/liblmdb/mdb.c
 @@ -2825,6 +2825,7 @@ mdb_txn_renew(MDB_txn *txn)
  int
  mdb_txn_begin(MDB_env *env, MDB_txn *parent, unsigned int flags, MDB_txn **ret)
