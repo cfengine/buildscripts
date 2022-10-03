@@ -73,7 +73,7 @@ case "$TEST_MACHINE" in
 esac
 
 # Collect test results.
-INCLUDES='--include=test.* --include=summary.*'
+INCLUDES='--include=test.* --include=summary.* --include=core.log'
 # Note: Don't use sudo or "rsync -a", because we don't want root-owned files
 # to show up in the results.
 rsync -rv $INCLUDES --exclude="*" \
