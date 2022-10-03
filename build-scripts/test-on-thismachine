@@ -45,7 +45,7 @@ else
         NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project VERBOSE=-I check
         rc=$?
         if [ "$rc" -ne "0" ]; then
-          find "$BASEDIR/$project" -name 'core*' -type f >core.log
+          find "$BASEDIR/$project" -name 'core*' -type f | tee core.log
         fi
         exit $rc
     done
