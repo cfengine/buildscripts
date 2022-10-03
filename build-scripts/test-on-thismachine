@@ -41,7 +41,13 @@ else
         # "testall" script and automake. As a result, setting VERBOSE=1
         # causes testall to pass "1" as an argument to cf-agent!
         # Workarount: VERBOSE=-I
+        set +e # skip quick failure so we can analyze core dumps
         NETWORK_TESTS=0 $MAKE -C $BASEDIR/$project VERBOSE=-I check
+        rc=$?
+        if [ "$rc" -ne "0" ]; then
+          find "$BASEDIR/$project" -name 'core*' -type f
+        fi
+        exit $rc
     done
   elif [ "$TESTS" = unit ]
   then
