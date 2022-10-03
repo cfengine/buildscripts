@@ -54,7 +54,7 @@ for project in `projects_to_test`; do
   cf_core_files=$(find "$BASEDIR/$project" -name 'core*' -type f -exec file {} \; 2>/dev/null | grep "core file" | grep "cf-" | cut -d' ' -f1 | sed 's/:$//')
   for core_file in $cf_core_files; do
     execfn=$(file "$core_file" | sed 's/,/\n/g' | grep execfn | cut -d: -f2 | sed "s/[' ]//g")
-    exe=$(realpath "$execfn")"
+    exe="$(realpath "$execfn")"
     "$BASEDIR/$project"/libtool --mode=execute gdb --core="$core_file" -batch -ex bt
   done
 done
