@@ -27,7 +27,7 @@ set +e                                                   # errors are OK
 MYNAME=`basename $0`
 CACHE_HOST=jenkins_sftp_cache@build-artifacts-cache.cloud.cfengine.com
 REMOTE_CACHEDIR="buildscripts_cache"
-SSH_ARGS="-o GSSAPIAuthentication=no -o PreferredAuthentications=publickey"
+SSH_ARGS="-o GSSAPIAuthentication=no -o PreferredAuthentications=publickey -oKexAlgorithms=+diffie-hellman-group1-sha1 -oHostKeyAlgorithms=+ssh-dss,ssh-rsa -oPubkeyAcceptedKeyTypes=+ssh-rsa"
 
 
 sftp -b -  </dev/null  2>&1  \
