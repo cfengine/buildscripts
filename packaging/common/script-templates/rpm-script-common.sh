@@ -1,5 +1,6 @@
 #!/bin/sh
 
+set -x
 PREFIX=%prefix
 
 package_type()
