@@ -28,6 +28,10 @@ MYNAME=`basename $0`
 CACHE_HOST=jenkins_sftp_cache@build-artifacts-cache.cloud.cfengine.com
 REMOTE_CACHEDIR="buildscripts_cache"
 SSH_ARGS="-o GSSAPIAuthentication=no -o PreferredAuthentications=publickey"
+ssh_major_version=$(ssh -V 2>&1 | sed 's/OpenSSH_\([0-9]\+\).*$/\1/')
+if [ $ssh_major_version -gt 6 ]; then
+  SSH_ARGS="$SSH_ARGS -oPubkeyAcceptedKeyTypes=+ssh-rsa"
+fi
 
 
 sftp -b -  </dev/null  2>&1  \
