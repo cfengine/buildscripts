@@ -36,6 +36,7 @@ rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/python*
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib64
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/perl5
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share/perl5
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/bin/scalar
 
 %clean
 rm -rf $RPM_BUILD_ROOT
