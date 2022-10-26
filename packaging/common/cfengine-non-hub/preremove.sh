@@ -5,7 +5,7 @@ case `os_type` in
     #
     # Unregister CFEngine initscript on uninstallation.
     #
-    chkconfig --del cfengine3
+    test -x /sbin/chkconfig && chkconfig --del cfengine3
 
     #
     # systemd support
