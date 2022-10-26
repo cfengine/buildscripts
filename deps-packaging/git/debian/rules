@@ -27,6 +27,7 @@ install: build
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/perl*
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/python*
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/bin/scalar
 
 binary-indep: build install
 
