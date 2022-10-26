@@ -1,0 +1,21 @@
+From 78b8127be5921fe30c738c3176a2c0040838e1f6 Mon Sep 17 00:00:00 2001
+From: Aleksei Shpakovskii <alexey+github@shpakovsky.ru>
+Date: Wed, 26 Oct 2022 17:34:20 +0200
+Subject: [PATCH] Add LDSHARED to AIX
+
+---
+ configure | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/configure b/configure
+index fa4d5daab..f5e146a96 100755
+--- a/configure
++++ b/configure
+@@ -253,6 +253,7 @@ if test "$gcc" -eq 1 && ($cc -c $test.c) >> configure.log 2>&1; then
+             SHAREDLIB='libz.sl' ;;
+         esac ;;
+   AIX*)
++        LDSHARED=${LDSHARED-"$cc -shared"}
+         LDFLAGS="${LDFLAGS} -Wl,-brtl" ;;
+   Darwin* | darwin* | *-darwin*)
+         shared_ext='.dylib'

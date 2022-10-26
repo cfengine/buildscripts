@@ -3,6 +3,7 @@ Name: cfbuild-zlib
 Version: %{version}
 Release: 1
 Source0: zlib-1.2.13.tar.gz
+Patch0: AIX_LDSHARED.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -15,6 +16,8 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n zlib-1.2.13
+
+%patch0 -p1
 
 %build
 
