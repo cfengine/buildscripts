@@ -29,9 +29,11 @@ fi
 ./configure --prefix=%{prefix}
 
 $MAKE
-%if %{?with_testsuite:1}%{!?with_testsuite:0}
-$MAKE check
-%endif
+
+# $MAKE check doesn't work on AIX, see CFE-4092 for details
+# %if %{?with_testsuite:1}%{!?with_testsuite:0}
+# $MAKE check
+# %endif
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
