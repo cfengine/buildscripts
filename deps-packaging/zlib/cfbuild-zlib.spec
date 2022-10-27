@@ -21,7 +21,7 @@ mkdir -p %{_builddir}
 
 %build
 
-if [ -z $MAKE]; then
+if [ -z $MAKE ]; then
   MAKE_PATH=`which make`
   export MAKE=$MAKE_PATH
 fi
