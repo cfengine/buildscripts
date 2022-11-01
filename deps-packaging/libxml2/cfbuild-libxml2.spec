@@ -16,6 +16,9 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
+export PATH=/opt/freeware/bin:$PATH # to use newer version of tar on aix platform
+# Note that we can't change $PATH globally for all dependencies, since it breaks
+# openssl: `ar` in /opt/freeware/bin exhausts memory when making libcrypto_a.a
 %setup -q -n libxml2-%{libxml_version}
 
 SYS=`uname -s`
