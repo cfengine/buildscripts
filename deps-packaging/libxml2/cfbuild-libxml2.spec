@@ -1,10 +1,10 @@
-%define libxml_version 2.9.12
+%define libxml_version 2.9.14
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
 Version: %{version}
 Release: 1
-Source0: libxml2-%{libxml_version}.tar.gz
+Source0: libxml2-%{libxml_version}.tar.xz
 License: MIT
 Group: Other
 Url: http://example.com/
