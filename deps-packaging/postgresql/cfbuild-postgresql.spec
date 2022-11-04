@@ -1,10 +1,10 @@
-%define postgresql_version 14.3
+%define postgresql_version 15.1
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
 Version: %{version}
 Release: 1
-Source0: postgresql-%{postgresql_version}.tar.gz
+Source0: postgresql-%{postgresql_version}.tar.bz2
 Source1: postgresql.conf.cfengine.patch
 License: MIT
 Group: Other
