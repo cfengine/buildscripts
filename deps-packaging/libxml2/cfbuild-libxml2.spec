@@ -1,10 +1,10 @@
-%define libxml_version 2.9.12
+%define libxml_version 2.9.14
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
 Version: %{version}
 Release: 1
-Source0: libxml2-%{libxml_version}.tar.gz
+Source0: libxml2-%{libxml_version}.tar.xz
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -16,6 +16,9 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
+export PATH=/opt/freeware/bin:$PATH # to use newer version of tar on aix platform
+# Note that we can't change $PATH globally for all dependencies, since it breaks
+# openssl: `ar` in /opt/freeware/bin exhausts memory when making libcrypto_a.a
 %setup -q -n libxml2-%{libxml_version}
 
 SYS=`uname -s`
