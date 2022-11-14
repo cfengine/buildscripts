@@ -132,7 +132,6 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | CFEngine version                                                                 | 3.15.x | 3.18.x | master | Notes                    |
 | -------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                | -      | 3.8    | 3.8    |                          |
-| [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                     | 2.1.28 | 2.1.28 | 2.1.27 | Solaris Enterprise agent |
 | [libacl](http://download.savannah.gnu.org/releases/acl/)                         | 2.3.1  | 2.3.1  | 2.3.1  |                          |
 | [libattr](http://download.savannah.gnu.org/releases/attr/)                       | 2.5.1  | 2.5.1  | 2.5.1  |                          |
 | [libcurl](http://curl.haxx.se/download.html)                                     | 7.86.0 | 7.86.0 | 7.80.0 |                          |
@@ -145,6 +144,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [OpenSSL](http://openssl.org/)                                                   | 1.1.1q | 1.1.1q | 1.1.1l |                          |
 | [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | 8.45   | 8.45   |                          |
 | [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/)                         | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
+| [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                     | 2.1.28 | 2.1.28 | 2.1.27 | Solaris Enterprise agent |
 | [zlib](http://www.zlib.net/)                                                     | 1.2.13 | 1.2.13 | 1.2.11 |                          |
 | libgcc                                                                           |        |        |        | AIX and Solaris only     |
 
