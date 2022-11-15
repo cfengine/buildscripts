@@ -1,4 +1,7 @@
 
+echo LEX TOP OF preinstall.sh
+ls -lad /var/cfengine/httpd/htdocs/public || true
+
 if is_upgrade; then
     # This is nice to know to provide fixes for bugs in already released
     # package scripts.
@@ -306,6 +309,9 @@ fi
 #
 getent group cfpostgres && gpasswd --add cfapache cfpostgres
 
+echo LEX before htdocs backup
+ls -lad /var/cfengine/httpd/htdocs/public || true
+
 #
 # Backup htdocs
 #
@@ -367,6 +373,9 @@ if [ -d $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718 ]; then
   rm $PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-20170718/* || true # if nothing there, fine
 fi
 
+echo LEX after htdocs backup
+ls -lad /var/cfengine/httpd/htdocs/public || true
+
 # starting with 3.16, we no longer patch php/sql files
 if is_upgrade && egrep '^3\.([2-9]|1[012345])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null; then
   true "Removing keys from files maintained by package manager"
@@ -391,5 +400,8 @@ if is_upgrade && egrep '^3\.([2-9]|1[012345])\.' "$PREFIX/UPGRADED_FROM.txt" >/d
   done
   true "Done removing keys"
 fi
+
+echo LEX END OF preinstall.sh
+ls -lad /var/cfengine/httpd/htdocs/public || true
 
 exit 0

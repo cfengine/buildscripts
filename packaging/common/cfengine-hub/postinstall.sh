@@ -1,5 +1,9 @@
 # (re)load SELinux policy if available and required before we start working with
 # our daemons and services below
+
+echo LEX TOP OF postinstall
+ls -lad /var/cfengine/httpd/htdocs/public || true
+
 if [ `os_type` = "redhat" ] &&
    [ -f "$PREFIX/selinux/cfengine-enterprise.pp" ];
 then
@@ -99,17 +103,33 @@ EOF
 )
 true "Done creating httpd/secrets.ini file"
 
+echo LEX before copy
+ls -lad /var/cfengine/httpd/htdocs/public || true
+
+echo LEX copy src
+ls -la $PREFIX/share/GUI/ || true
+
 cp -r --remove-destination $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
+
+echo LEX after copy
+ls -lad /var/cfengine/httpd/htdocs/public || true
 
 # If old files were moved aside during upgrade, we should move them back so that
 # rpm can do its cleanup procedures. But avoid overwriting new files with the
 # old ones (hence cp -n).
 if [ -d $PREFIX/share/GUI_old ]; then
+    echo LEX copy2 src
+    ls -la $PREFIX/share/GUI_old/ || true
     cp -rn $PREFIX/share/GUI_old/* $PREFIX/share/GUI/
     rm -rf $PREFIX/share/GUI_old/
+    echo LEX after copy2
+    ls -lad /var/cfengine/httpd/htdocs/public || true
 fi
 
+
 mkdir -p $PREFIX/httpd/htdocs/public/tmp
+echo LEX after mkdir -p
+ls -lad /var/cfengine/httpd/htdocs/public || true
 mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
 chmod 755 $PREFIX/httpd
 chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs
@@ -843,6 +863,9 @@ EOF
 
 fi
 
+echo LEX between postgresql and apache
+ls -lad /var/cfengine/httpd/htdocs/public || true
+
 #
 # Apache related
 #
@@ -909,6 +932,9 @@ find $PREFIX/httpd/htdocs -type d -exec chmod g+x {} +
 # Restrict access to application source
 find $PREFIX/share/GUI -type f -exec chmod 0400 {} +
 
+echo LEX between apache and ldap
+ls -lad /var/cfengine/httpd/htdocs/public || true
+
 ##
 # Ldap config
 #
@@ -929,6 +955,9 @@ chmod 0550 -R $PREFIX/httpd/htdocs/public/scripts/node_modules
 # Start Apache server
 #
 $PREFIX/httpd/bin/apachectl start
+
+echo LEX apache started
+ls -lad /var/cfengine/httpd/htdocs/public || true
 
 #Mission portal
 #
