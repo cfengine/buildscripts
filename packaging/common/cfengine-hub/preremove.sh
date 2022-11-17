@@ -9,7 +9,7 @@ fi
 
 case "`os_type`" in
   redhat)
-    chkconfig --del cfengine3
+    test -x /sbin/chkconfig && chkconfig --del cfengine3
     ;;
   debian)
     update-rc.d -f cfengine3 remove

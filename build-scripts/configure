@@ -64,7 +64,7 @@ case "$WITH_SYSTEMD" in
 esac
 
 # RHEL 8 requires an SELinux policy
-if [ "x$OS" = "xrhel" ] && [ "x${VER:0:1}" = "x8" ]; then
+if [ "x$OS" = "xrhel" ] && [ "${VER%\.*}" -gt "7" ]; then
   var_append ARGS "--with-selinux-policy"
 fi
 
