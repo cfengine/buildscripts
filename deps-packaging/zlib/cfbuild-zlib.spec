@@ -2,7 +2,8 @@ Summary: CFEngine Build Automation -- zlib
 Name: cfbuild-zlib
 Version: %{version}
 Release: 1
-Source0: zlib-1.2.12.tar.gz
+Source0: zlib-1.2.13.tar.gz
+Patch0: AIX_LDSHARED.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -14,11 +15,13 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n zlib-1.2.12
+%setup -q -n zlib-1.2.13
+
+%patch0 -p1
 
 %build
 
-if [ -z $MAKE]; then
+if [ -z $MAKE ]; then
   MAKE_PATH=`which make`
   export MAKE=$MAKE_PATH
 fi
@@ -26,9 +29,11 @@ fi
 ./configure --prefix=%{prefix}
 
 $MAKE
-%if %{?with_testsuite:1}%{!?with_testsuite:0}
-$MAKE check
-%endif
+
+# $MAKE check doesn't work on AIX, see CFE-4092 for details
+# %if %{?with_testsuite:1}%{!?with_testsuite:0}
+# $MAKE check
+# %endif
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -60,7 +65,7 @@ CFEngine Build Automation -- zlib -- development files
 %dir %{prefix}/lib
 %{prefix}/lib/libz.so
 %{prefix}/lib/libz.so.1
-%{prefix}/lib/libz.so.1.2.12
+%{prefix}/lib/libz.so.1.2.13
 
 %files devel
 %defattr(-,root,root)
