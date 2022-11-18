@@ -152,15 +152,15 @@ if ! test -f "$DCPARAMS"; then
   mkdir -p "$(dirname "$DCPARAMS")"
 
   cat > "$DCPARAMS" <<EOHIPPUS
-ROOT="$DCWORKDIR/masterfiles_staging"
+ROOT="$DCWORKDIR/build/local_deploy/"
 GIT_URL="$DCWORKDIR/masterfiles.git"
-GIT_REFSPEC="master"
+GIT_REFSPEC="main"
 GIT_USERNAME=""
 GIT_PASSWORD=""
 GIT_WORKING_BRANCH="CF_WORKING_BRANCH"
 PKEY="$DCWORKDIR/userworkdir/admin/.ssh/id_rsa.pvt"
 SCRIPT_DIR="$PREFIX/httpd/htdocs/api/dc-scripts"
-VCS_TYPE="GIT"
+VCS_TYPE="GIT_CFBS"
 
 export PATH="\${PATH}:$PREFIX/bin"
 export PKEY
