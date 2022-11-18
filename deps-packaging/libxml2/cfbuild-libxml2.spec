@@ -1,4 +1,4 @@
-%define libxml_version 2.9.14
+%define libxml_version 2.10.3
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
