@@ -138,6 +138,9 @@
               <Component Id='libwinpthread_1.dll' Guid='9109f8e5-fc06-4102-b287-882e66f3864e' Win64='$(var.isWin64)'>
                 <File Id='libwinpthread_1.dll' Name='libwinpthread-1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libwinpthread-1.dll' />
               </Component>
+              <Component Id='msvcr100.dll' Guid='21B6F26B-22D6-4AE9-8241-DF05C7E27D26' Win64='$(var.isWin64)'>
+                <File Id='msvcr100.dll' Name='msvcr100.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\msvcr100.dll' />
+              </Component>
               <Component Id='libcrypto_3_x64.dll' Guid='BEC456CE-8CEF-4E4A-B15B-585D0D2AA205' Win64='$(var.isWin64)'>
                 <File Id='libcrypto_3_x64.dll' Name='libcrypto-3-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcrypto-3-x64.dll' />
               </Component>
@@ -199,6 +202,7 @@
             <ComponentRef Id='libpcre_1.dll' />
             <ComponentRef Id='pthreadGC2.dll' />
             <ComponentRef Id='libwinpthread_1.dll' />
+            <ComponentRef Id='msvcr100.dll' />
             <ComponentRef Id='libcrypto_3_x64.dll' />
             <ComponentRef Id='libssl_3_x64.dll' />
             <ComponentRef Id='libgnurx_0.dll' />
