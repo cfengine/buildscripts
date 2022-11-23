@@ -1,7 +1,7 @@
 From fddfe3b602cc95179e6cec6a48c320005fef91a8 Mon Sep 17 00:00:00 2001
 From: Craig Comstock <craig.comstock@northern.tech>
 Date: Tue, 27 Sep 2022 11:21:36 -0500
-Subject: [PATCH 11/14] Added assert in mdb_mutex_failed for rc != EINVAL
+Subject: [PATCH 11/15] Added assert in mdb_mutex_failed for rc != EINVAL
 
 Ticket: CFE-3807
 ---

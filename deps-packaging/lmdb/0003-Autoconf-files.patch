@@ -1,7 +1,7 @@
 From eabb22d22b7cbcd04ac38147af034354b401c3ce Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Wed, 18 Feb 2015 09:40:20 +0100
-Subject: [PATCH 03/14] Autoconf files.
+Subject: [PATCH 03/15] Autoconf files.
 
 ---
  libraries/liblmdb/Makefile     | 117 ---------------------------------

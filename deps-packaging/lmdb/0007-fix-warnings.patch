@@ -1,7 +1,7 @@
 From a4138b3cbec0f3c26e2d1cf23dde5f8d29a66b5b Mon Sep 17 00:00:00 2001
 From: Dimitrios Apostolou <dimitrios.apostolou@cfengine.com>
 Date: Fri, 13 Jan 2017 19:09:23 +0100
-Subject: [PATCH 07/14] fix warnings
+Subject: [PATCH 07/15] fix warnings
 
 ---
  libraries/liblmdb/lmmgr.c | 3 ++-

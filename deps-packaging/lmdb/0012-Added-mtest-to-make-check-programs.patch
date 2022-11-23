@@ -1,7 +1,7 @@
 From 625c4e6fb85ef200d7f208a38ae367926533f6fd Mon Sep 17 00:00:00 2001
 From: Craig Comstock <craig@unreasonablefarm.org>
 Date: Wed, 23 Nov 2022 14:14:33 -0600
-Subject: [PATCH 12/14] Added mtest* to make check programs
+Subject: [PATCH 12/15] Added mtest* to make check programs
 
 ---
  libraries/liblmdb/Makefile.am | 13 +++++++++++++

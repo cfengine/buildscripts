@@ -1,7 +1,7 @@
 From cb49d5038ef908b2f07f0a1780feb05fd7b32fda Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <v.podzimek@mykolab.com>
 Date: Wed, 4 Sep 2019 16:25:53 +0200
-Subject: [PATCH 02/14] Do not abort() if a user-define assert function is
+Subject: [PATCH 02/15] Do not abort() if a user-define assert function is
  called
 
 It's up to the user code to handle the problem. If it wants to

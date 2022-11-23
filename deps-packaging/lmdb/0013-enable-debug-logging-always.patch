@@ -1,7 +1,7 @@
 From e98434e9f769a64340666969e2bd9e42f8ad3845 Mon Sep 17 00:00:00 2001
 From: Craig Comstock <craig@unreasonablefarm.org>
 Date: Wed, 23 Nov 2022 14:14:46 -0600
-Subject: [PATCH 13/14] enable debug logging always
+Subject: [PATCH 13/15] enable debug logging always
 
 ---
  libraries/liblmdb/mdb.c | 3 ++-

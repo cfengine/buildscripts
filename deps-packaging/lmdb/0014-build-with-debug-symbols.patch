@@ -1,7 +1,7 @@
-From 79096358f9b82eae3cc74665962ffe864251559d Mon Sep 17 00:00:00 2001
+From c9d2c642b275314ef72374e5a37702d1b4aaa3c3 Mon Sep 17 00:00:00 2001
 From: Craig Comstock <craig@unreasonablefarm.org>
 Date: Wed, 23 Nov 2022 14:15:17 -0600
-Subject: [PATCH 14/14] build with debug symbols
+Subject: [PATCH 14/15] build with debug symbols
 
 ---
  libraries/liblmdb/configure.ac | 2 ++
