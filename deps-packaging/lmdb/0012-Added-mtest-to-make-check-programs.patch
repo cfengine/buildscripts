@@ -1,0 +1,41 @@
+From 625c4e6fb85ef200d7f208a38ae367926533f6fd Mon Sep 17 00:00:00 2001
+From: Craig Comstock <craig@unreasonablefarm.org>
+Date: Wed, 23 Nov 2022 14:14:33 -0600
+Subject: [PATCH 12/14] Added mtest* to make check programs
+
+---
+ libraries/liblmdb/Makefile.am | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/libraries/liblmdb/Makefile.am b/libraries/liblmdb/Makefile.am
+index 736a41d..437d8cc 100644
+--- a/libraries/liblmdb/Makefile.am
++++ b/libraries/liblmdb/Makefile.am
+@@ -5,11 +5,24 @@ liblmdb_la_SOURCES = mdb.c midl.c
+ liblmdb_la_LDFLAGS=-no-undefined -avoid-version
+ 
+ bin_PROGRAMS = mdb_stat mdb_copy mdb_dump mdb_load lmdump lmmgr
++check_PROGRAMS = mtest mtest2 mtest3 mtest4 mtest5
++# mtest6 had an error
++# mtest6.c:86:39: warning: implicit declaration of function ‘mdb_dkey’; did you mean ‘mdb_del’? [-Wimplicit-function-declaration]
++#    86 |                         key.mv_data,  mdb_dkey(&key, dkbuf),
++#       |                                       ^~~~~~~~
++#       |                                       mdb_del
++
+ mdb_stat_LDADD = liblmdb.la
+ mdb_copy_LDADD = liblmdb.la
+ mdb_dump_LDADD = liblmdb.la
+ mdb_load_LDADD = liblmdb.la
+ lmdump_LDADD = liblmdb.la
+ lmmgr_LDADD = liblmdb.la
++mtest_LDADD = liblmdb.la
++mtest2_LDADD = liblmdb.la
++mtest3_LDADD = liblmdb.la
++mtest4_LDADD = liblmdb.la
++mtest5_LDADD = liblmdb.la
++#mtest6_LDADD = liblmdb.la
+ 
+ include_HEADERS = lmdb.h
+-- 
+2.38.1
+

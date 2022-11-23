@@ -1,7 +1,7 @@
-From fefdda7ecf4f9815f06051fb43e03558ea446c71 Mon Sep 17 00:00:00 2001
+From 0c3cea849b3387c17ab95efecfafd6138fd3d886 Mon Sep 17 00:00:00 2001
 From: Ole Herman Schumacher Elgesem <ole@northern.tech>
 Date: Thu, 3 Oct 2019 22:40:27 +0200
-Subject: [PATCH 10/10] Updated generated autotools files
+Subject: [PATCH 10/14] Updated generated autotools files
 
 Signed-off-by: Ole Herman Schumacher Elgesem <ole@northern.tech>
 ---
@@ -1227,5 +1227,5 @@ index e077ce2..5dd41bf 100755
   ;;
      "libtool":C)
 -- 
-2.21.0 (Apple Git-122)
+2.38.1
 

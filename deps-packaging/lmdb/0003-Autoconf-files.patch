@@ -1,7 +1,7 @@
-From dd6f773c9e22922f239856ee2073ae1519ad80f2 Mon Sep 17 00:00:00 2001
+From eabb22d22b7cbcd04ac38147af034354b401c3ce Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Wed, 18 Feb 2015 09:40:20 +0100
-Subject: [PATCH 03/10] Autoconf files.
+Subject: [PATCH 03/14] Autoconf files.
 
 ---
  libraries/liblmdb/Makefile     | 117 ---------------------------------
@@ -204,10 +204,10 @@ index 0000000..3db2251
 +AC_CONFIG_FILES([Makefile])
 +AC_OUTPUT
 diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
-index fe95cd3..efeae67 100644
+index 7b166d7..912bf59 100644
 --- a/libraries/liblmdb/mdb.c
 +++ b/libraries/liblmdb/mdb.c
-@@ -228,6 +228,12 @@ typedef SSIZE_T	ssize_t;
+@@ -231,6 +231,12 @@ typedef SSIZE_T	ssize_t;
  	/** Features under development */
  #ifndef MDB_DEVEL
  #define MDB_DEVEL 0
@@ -221,5 +221,5 @@ index fe95cd3..efeae67 100644
  
  	/** Wrapper around __func__, which is a C99 feature */
 -- 
-2.21.0 (Apple Git-122)
+2.38.1
 
