@@ -112,7 +112,8 @@ fi
 mkdir -p $PREFIX/httpd/htdocs/public/tmp
 mv $PREFIX/httpd/htdocs/Apache-htaccess $PREFIX/httpd/htdocs/.htaccess
 chmod 755 $PREFIX/httpd
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs
+chown -R root:$MP_APACHE_USER $PREFIX/httpd/htdocs
+chmod -R ug=rX,o= $PREFIX/httpd/htdocs # 440 for files, 550 for dirs
 chmod a+rx $PREFIX/httpd/htdocs/api/dc-scripts/*.sh
 
 #
@@ -127,10 +128,11 @@ default distribution, please open a ticket in the CFEngine bug tracker."
 fi
 
 #these directories should be write able by apache
-chown root:$MP_APACHE_USER $PREFIX/httpd/logs
-chmod 775 $PREFIX/httpd/logs
-chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/public/tmp
-chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
+chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/logs
+chmod 750 $PREFIX/httpd/logs
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/public/tmp
+chown -R root:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
+chmod 770 $PREFIX/httpd/htdocs/api/static
 
 if [ -d "$PREFIX/httpd/htdocs/application/logs" ]; then
     mkdir -p "$PREFIX/httpd/logs/application/logs"
@@ -141,6 +143,7 @@ if [ ! -d "$PREFIX/httpd/logs/application" ]; then
     mkdir -p "$PREFIX/httpd/logs/application"
 fi
 chown $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/logs/application
+chmod 750 $PREFIX/httpd/logs/application
 
 #
 # VCS setup
@@ -853,23 +856,20 @@ mkdir -p $PREFIX/config
 find $PREFIX/httpd/htdocs/ -type f ! -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
 find $PREFIX/httpd/htdocs/ -type f ! -name '.htaccess' -exec chmod 0440 {} +
 
-# Scripts
-find $PREFIX/httpd/htdocs/public/scripts/ -type f -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/public/scripts/ -type f -exec chmod 0440 {} +
-
 # Tmp
-find $PREFIX/httpd/htdocs/public/tmp/ -type f -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/public/tmp/ -type f -exec chmod 0660 {} +
+chown -R $MP_APACHE_USER:$MP_APACHE_USER $PREFIX/httpd/htdocs/public/tmp/
+find $PREFIX/httpd/htdocs/public/tmp/ -type d -exec chmod 0770 {} +
+find $PREFIX/httpd/htdocs/public/tmp/ -type f -exec chmod 0440 {} +
 
 # logs (if any)
 if [ -d $PREFIX/httpd/htdocs/logs/ ]; then
-  find $PREFIX/httpd/htdocs/logs/ -type f -exec chown -R $MP_APACHE_USER:$MP_APACHE_USER {} +
-  find $PREFIX/httpd/htdocs/logs/ -type f -exec chmod 0640 {} +
+  find $PREFIX/httpd/htdocs/logs/ -type f -exec chown -R root:root {} +
+  find $PREFIX/httpd/htdocs/logs/ -type f -exec chmod 0600 {} +
 fi
 
 # application
-find $PREFIX/httpd/htdocs/application/ -type f -exec chown -R root:$MP_APACHE_USER {} +
-find $PREFIX/httpd/htdocs/application/ -type f -exec chmod 0440 {} +
+chown -R root:$MP_APACHE_USER $PREFIX/httpd/htdocs/application/
+chmod -R ug=rX,o= $PREFIX/httpd/htdocs/application/ # 440 for files, 550 for dirs
 
 # API dirs ENT-4250
 # Note that this will include the 'api' dir itself
@@ -887,13 +887,18 @@ find $PREFIX/httpd/htdocs/api/ -type f -name '*.sh' -exec chmod 0550 {} +
 # API static non htaccess
 find $PREFIX/httpd/htdocs/api/static -type f ! -name '.htaccess' -exec chown -R root:$MP_APACHE_USER {} +
 find $PREFIX/httpd/htdocs/api/static -type f ! -name '.htaccess' -exec chmod 0440 {} +
+find $PREFIX/httpd/htdocs/api/static -type f \( -name '.status' -o -name '.pid' -o -name '.abort' \) -exec chmod 0660 {} +
 
 chown root:$MP_APACHE_USER $PREFIX/httpd/htdocs/api/static
 chmod 0660 $PREFIX/httpd/htdocs/api/static
 
 # HTTPD logs
-find $PREFIX/httpd/logs/ -type f -exec chown -R $MP_APACHE_USER:$MP_APACHE_USER {} +
-find $PREFIX/httpd/logs/ -type f -exec chmod 0640 {} +
+find $PREFIX/httpd/logs/ -type f -exec chown root:root {} +
+find $PREFIX/httpd/logs/ -type f -exec chmod 0600 {} +
+
+# HTTPD application logs
+find $PREFIX/httpd/logs/application/ -type f -exec chown $MP_APACHE_USER:$MP_APACHE_USER {} +
+find $PREFIX/httpd/logs/application/ -type f -exec chmod 0600 {} +
 
 # SSL
 find $PREFIX/httpd/ssl/ -type f -exec chown -R root:root {} +
@@ -919,11 +924,11 @@ chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/ldap
 chmod 0700 -R $PREFIX/httpd/htdocs/ldap/config
 
 # changed permissions and owner of PHP and JS dependencies
-chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/vendor
-chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/public/scripts/node_modules
+chown root:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/vendor
+chown root:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/public/scripts/node_modules
 
-chmod 0550 -R $PREFIX/httpd/htdocs/vendor
-chmod 0550 -R $PREFIX/httpd/htdocs/public/scripts/node_modules
+chmod -R ug=rX,o= $PREFIX/httpd/htdocs/vendor # 440 for files, 550 for dirs
+chmod -R ug=rX,o= $PREFIX/httpd/htdocs/public/scripts/node_modules
 
 ##
 # Start Apache server
