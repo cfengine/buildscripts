@@ -26,7 +26,7 @@ build-stamp:
 
 	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
-		$(TARGET) $$(<config_flags_$$ROLE.txt) \
+		$(TARGET)  no-asm shared  no-idea no-rc5 no-ssl3 no-dtls no-srp no-engine \
 		--prefix=$(PREFIX) --libdir=lib
 	make CPPFLAGS=-DOPENSSLDIR="\"\\\"$(CFENGINE_DIR)/ssl\\\"\"" ### build_crypto build_ssl libcrypto.dll.a libssl.dll.a
 

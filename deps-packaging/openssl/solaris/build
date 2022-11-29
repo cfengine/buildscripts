@@ -31,7 +31,7 @@ else
     CONFIG="$PERL ./Configure solaris64-sparcv9-gcc"
 fi
 
-$CONFIG $(<config_flags_$ROLE.txt) \
+$CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm no-engine \
     --prefix=$PREFIX  $LDFLAGS -lrt --libdir=lib
 
 # Build
