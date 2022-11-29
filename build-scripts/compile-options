@@ -68,14 +68,6 @@ case "$OS_FAMILY" in
   mingw)
     LDFLAGS="-static-libgcc -L$BUILDPREFIX/lib"
     ;;
-  solaris)
-    LDFLAGS="-L$BUILDPREFIX/lib -Wl,-R$BUILDPREFIX/lib"
-    if [ "$(uname -p)" = "sparc" ]; then
-      # ensure 64bit builds on SPARC64
-      CFLAGS="-m64"
-      export CFLAGS
-    fi
-    ;;
   *)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,-R$BUILDPREFIX/lib"
     ;;

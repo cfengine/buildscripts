@@ -28,7 +28,7 @@ if [ "$(uname -p)" = "i386" ]
 then
     CONFIG="$PERL ./Configure solaris-x86-gcc"
 else
-    CONFIG="$PERL ./Configure solaris64-sparcv9-gcc"
+    CONFIG="$PERL ./Configure solaris-sparcv9-gcc"
 fi
 
 $CONFIG shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-asm no-engine \
