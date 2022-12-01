@@ -14,9 +14,14 @@ Obsoletes: cfengine3, cfengine-community
 Requires: coreutils gzip
 
 # we don't bundle OpenSSL on RHEL 8 (and newer in the future)
-%if %{?rhel}%{!?rhel:0} > 7
+%if %{?rhel}%{!?rhel:0} == 8
 Requires: libssl.so.1.1()(64bit) libssl.so.1.1(OPENSSL_1_1_0)(64bit) libssl.so.1.1(OPENSSL_1_1_1)(64bit)
 Requires: libcrypto.so.1.1()(64bit) libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)
+%endif
+
+%if %{?rhel}%{!?rhel:0} > 8
+Requires: libcrypto.so.3()(64bit) libcrypto.so.3(OPENSSL_3.0.0)(64bit) libcrypto.so.3(OPENSSL_3.0.1)(64bit)
+Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_3.0.0)(64bit)
 %endif
 
 AutoReqProv: no
