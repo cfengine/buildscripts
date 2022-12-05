@@ -19,7 +19,7 @@ index a7294d2ad1..ff3676d74e 100644
                                      threads("-D_MT")),
          lib_cppflags     => "-DL_ENDIAN",
 -        ex_libs          => add("-lws2_32 -lgdi32 -lcrypt32"),
-+        ex_libs          => add("-lws2_32 -lmsvcr120 -lgdi32 -lcrypt32"),
++        ex_libs          => add("-lws2_32 -lmsvcr110 -lgdi32 -lcrypt32"),
          thread_scheme    => "winthreads",
          dso_scheme       => "win32",
          shared_target    => "mingw-shared",
