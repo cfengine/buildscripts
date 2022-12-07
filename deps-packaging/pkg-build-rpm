@@ -103,6 +103,11 @@ case "$DEBUGSYM" in
     fatal "Unknown debugsym option: $DEBUGSYM";;
 esac
 
+
+if [ "$OS" = "rhel" ] && [ "$PKGNAME" = "git" ]; then
+  export RPM_BUILD_NCPUS=1
+fi
+
 # eval and double quoting is needed to separate args,
 # example cmd --define 'a b':
 #     - argv[1] = --define
