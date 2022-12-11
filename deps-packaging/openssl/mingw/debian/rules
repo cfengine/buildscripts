@@ -22,12 +22,11 @@ endif
 build: build-stamp
 build-stamp:
 	dh_testdir
-	patch -p1 -i 0004-Add-lmsvcr100-to-extra-libs-on-mingw-builds.patch
 
 	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
 		$(TARGET) $$(<config_flags_$$ROLE.txt) \
-		--prefix=$(PREFIX) --libdir=lib
+		--prefix=$(PREFIX) --libdir=lib -DOPENSSL_NO_LOCALE
 	make CPPFLAGS=-DOPENSSLDIR="\"\\\"$(CFENGINE_DIR)/ssl\\\"\"" ### build_crypto build_ssl libcrypto.dll.a libssl.dll.a
 
 	touch build-stamp
