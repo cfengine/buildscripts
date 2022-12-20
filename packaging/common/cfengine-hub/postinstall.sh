@@ -214,6 +214,10 @@ chmod -R 700 "$DCWORKDIR/notification_scripts"
 
 chown -R $MP_APACHE_USER:$MP_APACHE_USER "$DCWORKDIR"
 
+# Dir for build projects
+mkdir -p "$DCWORKDIR/build"
+chown -R root:$MP_APACHE_USER "$DCWORKDIR/build"
+
 if [ -f $PREFIX/bin/cf-twin ]; then
     /bin/rm $PREFIX/bin/cf-twin
 fi
