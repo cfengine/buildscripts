@@ -137,7 +137,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libcurl](http://curl.haxx.se/download.html)                                     | 7.86.0 | 7.86.0 | 7.86.0 |                          |
 | [libgnurx](http://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](http://ftp.gnu.org/gnu/libiconv/)                                     | 1.17   | 1.17   | 1.17   | Needed by libxml2        |
-| [libxml2](http://xmlsoft.org/sources/)                                           | 2.9.12 | 2.9.14 | 2.9.14 |                          |
+| [libxml2](http://xmlsoft.org/sources/)                                           | 2.9.12 | 2.9.14 | 2.10.3 |                          |
 | [libyaml](http://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                            | 0.9.29 | 0.9.29 | 0.9.29 |                          |
 | [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.4.58 | 2.6.3  | 2.6.3  | Enterprise agent only    |
