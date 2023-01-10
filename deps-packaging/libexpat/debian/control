@@ -1,0 +1,19 @@
+Source: cfbuild-libexpat
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-libexpat
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- libexpat
+ CFEngine Build Automation -- libexpat
+
+Package: cfbuild-libexpat-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- cfbuild-libexpat-devel
+ CFEngine Build Automation -- cfbuild-libexpat-devel
+

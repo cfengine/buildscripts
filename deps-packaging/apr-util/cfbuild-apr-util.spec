@@ -30,7 +30,7 @@ CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 
 SYS=`uname -s`
 
-./configure --prefix=%{prefix}  --with-apr=%{prefix} --with-ldap-lib=%{prefix}/lib --with-ldap \
+./configure --prefix=%{prefix}  --with-apr=%{prefix} --with-ldap-lib=%{prefix}/lib --with-ldap --with-expat=%{prefix} \
             CPPFLAGS="$CPPFLAGS"
 
 %build
