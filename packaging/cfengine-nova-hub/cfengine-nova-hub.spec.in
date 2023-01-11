@@ -322,6 +322,8 @@ exit 0
 # SELinux policy
 %dir %prefix/selinux
 %prefix/selinux/cfengine-enterprise.pp
+%prefix/selinux/cfengine-enterprise.te
+%prefix/selinux/cfengine-enterprise.fc
 %endif
 
 # Documentation
