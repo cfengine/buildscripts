@@ -17,6 +17,12 @@ Requires: coreutils gzip expat
 Requires(pre): /usr/sbin/useradd, /usr/sbin/userdel, /usr/bin/getent
 Requires(post): /usr/sbin/usermod, /bin/sed
 
+# we require selinux-policy package version that matches or exceeds our build system version
+# this guarantees that our compiled selinux policy will work.
+%if %{?rhel}%{!?rhel:0} >= 8
+Requires: selinux-policy >= @@SELINUX_POLICY_VERSION@@
+%endif
+
 # we don't bundle OpenSSL on RHEL 8 (and newer in the future)
 %if %{?rhel}%{!?rhel:0} > 7
 Requires: libssl.so.1.1()(64bit) libssl.so.1.1(OPENSSL_1_1_0)(64bit) libssl.so.1.1(OPENSSL_1_1_1)(64bit)
