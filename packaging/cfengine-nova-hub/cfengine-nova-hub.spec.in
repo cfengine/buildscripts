@@ -13,7 +13,8 @@ Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3 < @@VERSION@@, cf-community < @@VERSION@@
-Requires: coreutils gzip
+Requires: coreutils
+Recommends: gzip
 Requires(pre): /usr/sbin/useradd, /usr/sbin/userdel, /usr/bin/getent
 Requires(post): /usr/sbin/usermod, /bin/sed
 
