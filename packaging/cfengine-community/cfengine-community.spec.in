@@ -10,8 +10,12 @@ License: COSL
 Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
-Obsoletes: cfengine3
-Requires: coreutils gzip
+Obsoletes: cfengine3 < @@VERSION@@, cf-community < @@VERSION@@
+Requires: coreutils
+# "Recommends" is only supported on RHEL 8+
+%if %{?rhel}%{!?rhel:0} >= 8
+Recommends: gzip
+%endif
 
 AutoReqProv: no
 
