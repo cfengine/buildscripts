@@ -118,6 +118,8 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 # SELinux policy
 %dir %prefix/selinux
 %prefix/selinux/cfengine-enterprise.pp
+%prefix/selinux/cfengine-enterprise.te
+%prefix/selinux/cfengine-enterprise.fc
 %endif
 
 # Globally installed configs, scripts
