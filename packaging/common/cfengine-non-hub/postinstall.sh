@@ -1,7 +1,12 @@
 if [ -x /bin/systemctl ]; then
   # This is important in case any of the units have been replaced by the package
   # and we call them in the postinstall script.
-  /bin/systemctl daemon-reload
+  if ! /bin/systemctl daemon-reload; then
+    cf_console echo "warning! /bin/systemctl daemon-reload failed."
+    cf_console echo "systemd seems to be installed, but not working."
+    cf_console echo "Relevant parts of CFEngine installation will fail."
+    cf_console echo "Please fix systemd or use other ways to start CFEngine."
+  fi
 fi
 
 #
@@ -51,7 +56,9 @@ do
       if [ -f /usr/share/man/man8/$i.8.gz ]; then
         rm -f /usr/share/man/man8/$i.8.gz
       fi
-      $PREFIX/bin/$i -M > /usr/share/man/man8/$i.8 && gzip /usr/share/man/man8/$i.8
+      if $PREFIX/bin/$i -M > /usr/share/man/man8/$i.8; then
+        gzip /usr/share/man/man8/$i.8 || true
+      fi
       ;;
   esac
 done

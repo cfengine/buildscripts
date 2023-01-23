@@ -11,7 +11,8 @@ Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3 < @@VERSION@@, cf-community < @@VERSION@@
-Requires: coreutils gzip
+Requires: coreutils
+Recommends: gzip
 
 # we require selinux-policy package version that matches or exceeds our build system version
 # this guarantees that our compiled selinux policy will work.

@@ -11,7 +11,8 @@ Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3
-Requires: coreutils gzip
+Requires: coreutils
+Recommends: gzip
 
 AutoReqProv: no
 
