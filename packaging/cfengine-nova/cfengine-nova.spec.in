@@ -12,7 +12,10 @@ URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3 < @@VERSION@@, cf-community < @@VERSION@@
 Requires: coreutils
+# "Recommends" is only supported on RHEL 8+
+%if %{?rhel}%{!?rhel:0} >= 8
 Recommends: gzip
+%endif
 
 # we require selinux-policy package version that matches or exceeds our build system version
 # this guarantees that our compiled selinux policy will work.
