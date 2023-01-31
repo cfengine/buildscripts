@@ -10,11 +10,17 @@ License: COSL
 Group: Applications/System
 URL: http://cfengine.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
-Obsoletes: cfengine3
+Obsoletes: cfengine3 < @@VERSION@@, cf-community < @@VERSION@@
 Requires: coreutils
 # "Recommends" is only supported on RHEL 8+
 %if %{?rhel}%{!?rhel:0} >= 8
 Recommends: gzip
+%endif
+
+# we require selinux-policy package version that matches or exceeds our build system version
+# this guarantees that our compiled selinux policy will work.
+%if %{?rhel}%{!?rhel:0} >= 8
+Requires: selinux-policy >= @@SELINUX_POLICY_VERSION@@
 %endif
 
 AutoReqProv: no
@@ -112,6 +118,8 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 # SELinux policy
 %dir %prefix/selinux
 %prefix/selinux/cfengine-enterprise.pp
+%prefix/selinux/cfengine-enterprise.te
+%prefix/selinux/cfengine-enterprise.fc
 %endif
 
 # Globally installed configs, scripts
