@@ -5,7 +5,6 @@ Name: cfbuild-git
 Version: %{version}
 Release: 1
 Source0: git-%{git_version}.tar.gz
-Patch0:  gcc_deprecated_message.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -18,8 +17,6 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n git-%{git_version}
-
-%patch0 -p1
 
 ./configure --prefix=%{prefix} --with-openssl=%{prefix} --without-iconv --with-gitconfig=%{prefix}/config/gitconfig --with-gitattributes=%{prefix}/config/gitattributes --with-zlib=%{prefix} --with-curl=%{prefix}  --libexecdir=%{prefix}/lib --with-python=%{prefix}/bin/python
 
