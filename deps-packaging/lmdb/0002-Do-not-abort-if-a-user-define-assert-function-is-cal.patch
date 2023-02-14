@@ -1,7 +1,7 @@
-From bbd3b09e888615646b29ac98f9ca7aeb29123020 Mon Sep 17 00:00:00 2001
+From 0f0aaab0e8f8150df358a4934dec42cdac5abae2 Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <v.podzimek@mykolab.com>
 Date: Wed, 4 Sep 2019 16:25:53 +0200
-Subject: [PATCH 02/10] Do not abort() if a user-define assert function is
+Subject: [PATCH 02/12] Do not abort() if a user-define assert function is
  called
 
 It's up to the user code to handle the problem. If it wants to
@@ -11,10 +11,10 @@ abort(), it can do it itself, there's no point in enforcing it.
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
-index 692feaa..fe95cd3 100644
+index 8cecdb2..7b166d7 100644
 --- a/libraries/liblmdb/mdb.c
 +++ b/libraries/liblmdb/mdb.c
-@@ -1538,8 +1538,10 @@ mdb_assert_fail(MDB_env *env, const char *expr_txt,
+@@ -1541,8 +1541,10 @@ mdb_assert_fail(MDB_env *env, const char *expr_txt,
  		file, line, expr_txt, func);
  	if (env->me_assert_func)
  		env->me_assert_func(env, buf);
@@ -28,5 +28,5 @@ index 692feaa..fe95cd3 100644
  #else
  # define mdb_assert0(env, expr, expr_txt) ((void) 0)
 -- 
-2.21.0 (Apple Git-122)
+2.39.0
 

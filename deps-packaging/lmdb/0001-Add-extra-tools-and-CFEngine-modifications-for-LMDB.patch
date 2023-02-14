@@ -1,7 +1,7 @@
-From 28fa5bc5b3813994ccc9d5c3820ddd88bf1ed966 Mon Sep 17 00:00:00 2001
+From eed0ae779d60c0e94e1b7bbed10c7a7eed450163 Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Mon, 28 Jul 2014 11:28:38 +0200
-Subject: [PATCH 01/10] Add extra tools and CFEngine modifications for LMDB.
+Subject: [PATCH 01/12] Add extra tools and CFEngine modifications for LMDB.
 
 ---
  libraries/liblmdb/lmdump.c   | 128 ++++++++++++++++++++++
@@ -353,7 +353,7 @@ index 0000000..1137d8d
 +    return 1;
 +}
 diff --git a/libraries/liblmdb/mdb_copy.c b/libraries/liblmdb/mdb_copy.c
-index 1b89396..8f5ea76 100644
+index 9b75a30..1950e41 100644
 --- a/libraries/liblmdb/mdb_copy.c
 +++ b/libraries/liblmdb/mdb_copy.c
 @@ -32,7 +32,7 @@ int main(int argc,char * argv[])
@@ -366,5 +366,5 @@ index 1b89396..8f5ea76 100644
  
  	for (; argc > 1 && argv[1][0] == '-'; argc--, argv++) {
 -- 
-2.21.0 (Apple Git-122)
+2.39.0
 

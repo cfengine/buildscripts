@@ -1,0 +1,29 @@
+From 7aa7abd3240d3d19dbef0e37afa4d8562da47f06 Mon Sep 17 00:00:00 2001
+From: Craig Comstock <craig.comstock@northern.tech>
+Date: Tue, 14 Feb 2023 13:55:23 -0600
+Subject: [PATCH 12/12] Always assert to test release cfengine builds
+
+---
+ libraries/liblmdb/mdb.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
+index 27eb7a3..0c18e83 100644
+--- a/libraries/liblmdb/mdb.c
++++ b/libraries/liblmdb/mdb.c
+@@ -4970,6 +4970,12 @@ fail:
+ int ESECT
+ mdb_env_open(MDB_env *env, const char *path, unsigned int flags, mdb_mode_t mode)
+ {
++#ifdef NDEBUG
++  printf("NDEBUG defined\n");
++#else
++  printf("NDEBUG NOT defined\n");
++#endif
++assert(NULL); // always assert to test NDEBUG presence or not
+ 	int rc, excl = -1;
+ 	MDB_name fname;
+ 
+-- 
+2.39.0
+

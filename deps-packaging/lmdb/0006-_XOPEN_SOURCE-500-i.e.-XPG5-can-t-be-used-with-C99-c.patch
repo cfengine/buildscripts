@@ -1,7 +1,7 @@
-From 4388827eaf324901619315cabcae2c7846631277 Mon Sep 17 00:00:00 2001
+From 941d21d4f975668e1014a0ef57b4c1e726d13045 Mon Sep 17 00:00:00 2001
 From: Dimitrios Apostolou <dimitrios.apostolou@cfengine.com>
 Date: Fri, 13 Jan 2017 18:59:32 +0100
-Subject: [PATCH 06/10] _XOPEN_SOURCE 500, i.e. XPG5, can't be used with C99
+Subject: [PATCH 06/12] _XOPEN_SOURCE 500, i.e. XPG5, can't be used with C99
  compiler.
 
 It was useless anyway, srandom() and random() were not used anywhere.
@@ -22,5 +22,5 @@ index 0e3ee4b..9065468 100644
  #include <stdlib.h>
  #include <time.h>
 -- 
-2.21.0 (Apple Git-122)
+2.39.0
 

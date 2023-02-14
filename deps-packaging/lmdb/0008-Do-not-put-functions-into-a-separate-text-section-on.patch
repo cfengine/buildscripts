@@ -1,7 +1,7 @@
-From 38c3cf2a2b7fb572c7a75657971e1596355c928d Mon Sep 17 00:00:00 2001
+From 891fa26df19c0857c15772b515b33e177f02cdb9 Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <vratislav.podzimek@northern.tech>
 Date: Wed, 22 Aug 2018 16:47:04 +0200
-Subject: [PATCH 08/10] Do not put functions into a separate text section on
+Subject: [PATCH 08/12] Do not put functions into a separate text section on
  PPC64
 
 Somehow this breaks things horribly and such functions seem to
@@ -16,10 +16,10 @@ Signed-off-by: Vratislav Podzimek <v.podzimek@mykolab.com>
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
-index efeae67..f5f7ec5 100644
+index 912bf59..ab8e3b3 100644
 --- a/libraries/liblmdb/mdb.c
 +++ b/libraries/liblmdb/mdb.c
-@@ -197,8 +197,9 @@ typedef SSIZE_T	ssize_t;
+@@ -200,8 +200,9 @@ typedef SSIZE_T	ssize_t;
  # error "Two's complement, reasonably sized integer types, please"
  #endif
  
@@ -32,5 +32,5 @@ index efeae67..f5f7ec5 100644
  #  define	ESECT	__attribute__ ((section("__TEXT,text_env")))
  # else
 -- 
-2.21.0 (Apple Git-122)
+2.39.0
 

@@ -1,7 +1,7 @@
-From 9e9e283c2648b4014cecc62c9b5d80b0b8dbdaed Mon Sep 17 00:00:00 2001
+From 22d27acb75804fdd95302eae08db966953cc8ddb Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Mon, 9 Jan 2017 08:56:11 +0100
-Subject: [PATCH 05/10] Generated autoconf files.
+Subject: [PATCH 05/12] Generated autoconf files.
 
 ---
  libraries/liblmdb/Makefile.in             |   940 ++
@@ -73688,5 +73688,5 @@ index 0000000..f62bbae
 +# time-stamp-end: "; # UTC"
 +# End:
 -- 
-2.21.0 (Apple Git-122)
+2.39.0
 
