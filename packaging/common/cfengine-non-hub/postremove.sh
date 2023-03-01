@@ -18,7 +18,8 @@ fi
 # unload SELinux policy if not upgrading
 if ! is_upgrade; then
   if [ `os_type` = "redhat" ] &&
-     command -v semodule >/dev/null;
+     command -v semodule >/dev/null &&
+     semodule -l | grep cfengine-enterprise >/dev/null;
   then
     semodule -n -r cfengine-enterprise
     if /usr/sbin/selinuxenabled; then

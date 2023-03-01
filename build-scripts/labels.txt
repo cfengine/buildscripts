@@ -3,6 +3,7 @@
 PACKAGES_HUB_x86_64_linux_debian_9
 PACKAGES_HUB_x86_64_linux_debian_10
 PACKAGES_HUB_x86_64_linux_debian_11
+PACKAGES_HUB_arm_64_linux_debian_11
 
 PACKAGES_HUB_x86_64_linux_redhat_6
 PACKAGES_HUB_x86_64_linux_redhat_7
@@ -11,14 +12,13 @@ PACKAGES_HUB_x86_64_linux_redhat_8
 PACKAGES_HUB_x86_64_linux_ubuntu_16
 PACKAGES_HUB_x86_64_linux_ubuntu_18
 PACKAGES_HUB_x86_64_linux_ubuntu_20
-
+PACKAGES_HUB_x86_64_linux_ubuntu_22
 PACKAGES_HUB_arm_64_linux_ubuntu_22
 
 PACKAGES_x86_64_linux_debian_9
 PACKAGES_x86_64_linux_debian_10
 PACKAGES_x86_64_linux_debian_11
-PACKAGES_x86_64_linux_debian_10_systemssl
-PACKAGES_x86_64_linux_debian_11_systemssl
+PACKAGES_arm_64_linux_debian_11
 
 PACKAGES_x86_64_linux_redhat_6
 PACKAGES_x86_64_linux_redhat_7
@@ -31,6 +31,8 @@ PACKAGES_x86_64_linux_suse_15
 PACKAGES_x86_64_linux_ubuntu_16
 PACKAGES_x86_64_linux_ubuntu_18
 PACKAGES_x86_64_linux_ubuntu_20
+PACKAGES_x86_64_linux_ubuntu_22
+PACKAGES_arm_64_linux_ubuntu_22
 
 PACKAGES_i386_mingw
 PACKAGES_x86_64_mingw
@@ -41,4 +43,3 @@ PACKAGES_ppc64_aix_71
 PACKAGES_sparc64_solaris_10
 PACKAGES_sparc64_solaris_11
 PACKAGES_x86_64_solaris_10
-PACKAGES_arm_64_linux_ubuntu_22
