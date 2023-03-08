@@ -62,6 +62,9 @@ case "$TEST_MACHINE" in
                 echo "Error: Found processes left behind in the chroot. I'm killing them, but the build will fail, so clean up your mess!"
                 echo "Found PID $pid. Info from 'ps -ef'"
                 echo "--------------"
+                echo "ENT-9892 seems to be a case of postgres not shutting down, so check logs"
+                cat /var/cfengine/postgresql.log || true
+                cat /var/log/postgresql.log || true
                 ps -ef | grep $pid | grep -v grep
                 echo "--------------"
             )
