@@ -63,8 +63,10 @@ case "$TEST_MACHINE" in
                 echo "Found PID $pid. Info from 'ps -ef'"
                 echo "--------------"
                 echo "ENT-9892 seems to be a case of postgres not shutting down, so check logs"
-                cat /var/cfengine/postgresql.log || true
+                cat /var/cfengine/postgresql.log* || true
                 cat /var/log/postgresql.log || true
+                rm -rf /var/cfengine/postgresql.log* || true
+                rm -rf /var/log/postgresql.log || true
                 ps -ef | grep $pid | grep -v grep
                 echo "--------------"
             )
