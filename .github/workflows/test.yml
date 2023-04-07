@@ -9,7 +9,8 @@ jobs:
     steps:
     - name: get other repo PRs from description
       id: get_prs
-      env: GITHUB_CONTEXT: ${{ toJson(github) }}
+      env:
+        GITHUB_CONTEXT: ${{ toJson(github) }}
       run: |
         echo "GITHUB_CONTEXT is $GITHUB_CONTEXT"
         echo "body=${{github.event.pull_request.body}}"
