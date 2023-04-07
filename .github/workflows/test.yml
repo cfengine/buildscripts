@@ -7,17 +7,23 @@ jobs:
     name: multi-repo build
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: get other repo PRs from description
-      id: get_prs
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-        GITHUB_TOKEN: ${{ github.token }}
-      run: |
-        echo "pr_number=" $(gh pr view --json number -q .number || echo "")
-        echo "GITHUB_CONTEXT is $GITHUB_CONTEXT"
-        echo "body=${{github.event.pull_request.body}}"
-    - name: do build
-      run: |
-        echo "body is ${{steps.get_prs.outputs.body}}"
-        echo "pr_number is ${{steps.get_prs.outputs.pr_number}}"
+  - uses: actions/github-script@v6
+    id: get_issue_number
+    with:
+      script: |
+        if (context.issue.number) {
+          // Return issue number if present
+          return context.issue.number;
+        } else {
+          // Otherwise return issue number from commit
+          return (
+            await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              commit_sha: context.sha,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            })
+          ).data[0].number;
+        }
+      result-encoding: string
+  - name: Issue number
+    run: echo '${{steps.get_issue_number.outputs.result}}'
