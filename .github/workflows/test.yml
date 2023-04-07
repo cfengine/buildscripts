@@ -23,7 +23,6 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               })
-//            ).data[0].number;
 );
           }
         result-encoding: string
