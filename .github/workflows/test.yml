@@ -32,27 +32,27 @@ jobs:
           }
           return prs;
         result-encoding: json
-  - name: Checkout Enterprise
-    uses: actions/checkout@v3
-    with:
-      repository: cfengine/enterprise
-      path: enterprise
-      ref: ${{steps.get_together_prs.outputs.result["enterprise"] || "master"}}
-      ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_ENTERPRISE_REPO }}
-      ssh-known-hosts: github.com
-
-  - name: Checkout Nova
-    uses: actions/checkout@v3
-    with:
-      repository: cfengine/nova
-      path: nova
-      ref: ${{steps.get_together_prs.outputs.result["nova"] || "master"}}
-      ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_NOVA_REPO }}
-      ssh-known-hosts: github.com
-
-  - name: Checkout CFBS
-    uses: actions/checkout@v3
-    with:
-      repository: cfengine/cfbs
-      path: cfbs
-      ref: ${{steps.get_together_prs.outputs.result["cfbs"] || "master"}}
+    - name: Checkout Enterprise
+      uses: actions/checkout@v3
+      with:
+        repository: cfengine/enterprise
+        path: enterprise
+        ref: ${{steps.get_together_prs.outputs.result["enterprise"] || "master"}}
+        ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_ENTERPRISE_REPO }}
+        ssh-known-hosts: github.com
+  
+    - name: Checkout Nova
+      uses: actions/checkout@v3
+      with:
+        repository: cfengine/nova
+        path: nova
+        ref: ${{steps.get_together_prs.outputs.result["nova"] || "master"}}
+        ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_NOVA_REPO }}
+        ssh-known-hosts: github.com
+  
+    - name: Checkout CFBS
+      uses: actions/checkout@v3
+      with:
+        repository: cfengine/cfbs
+        path: cfbs
+        ref: ${{steps.get_together_prs.outputs.result["cfbs"] || "master"}}
