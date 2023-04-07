@@ -6,6 +6,7 @@ jobs:
   build:
     name: multi-repo build
     runs-on: ubuntu-latest
+    secrets: inherit
     steps:
     - uses: actions/github-script@v6
       id: get_together_prs
