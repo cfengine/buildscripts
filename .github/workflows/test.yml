@@ -11,8 +11,8 @@ jobs:
       id: get_together_prs
       with:
         script: |
-          const body = "";
-          result = {};
+          body = "";
+          prs = {};
           if (context.issue.body) {
             // Return issue body if present
             body = context.issue.body;
@@ -28,9 +28,9 @@ jobs:
           const regexp = /https:\/\/github.com\/cfengine\/([a-z]*)\/pull\/(\d*)/g;
           const matches = body.matchAll(regexp);
           for (const match of matches) {
-            result[match[1]] = match[2];
+            prs[match[1]] = match[2];
           }
-          return result;
+          return prs;
         result-encoding: json
     - name: Issue body
       run: echo '${{steps.get_together_prs.outputs.result}}'
