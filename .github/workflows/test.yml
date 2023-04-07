@@ -23,7 +23,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               })
-);
+          ).data[0];
           }
         result-encoding: string
     - name: Issue number
