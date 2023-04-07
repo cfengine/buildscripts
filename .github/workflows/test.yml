@@ -11,6 +11,7 @@ jobs:
       id: get_issue_number
       with:
         script: |
+          console.log(context)
           if (context.issue.number) {
             // Return issue number if present
             return context.issue.number;
