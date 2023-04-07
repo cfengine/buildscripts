@@ -12,8 +12,10 @@ jobs:
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
       run: |
+        echo "pr_number=" $(gh pr view --json number -q .number || echo "")
         echo "GITHUB_CONTEXT is $GITHUB_CONTEXT"
         echo "body=${{github.event.pull_request.body}}"
     - name: do build
       run: |
-        echo "${{steps.get_prs.outputs.body}}"
+        echo "body is ${{steps.get_prs.outputs.body}}"
+        echo "pr_number is ${{steps.get_prs.outputs.pr_number}}"
