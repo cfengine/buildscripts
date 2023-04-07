@@ -37,7 +37,7 @@ jobs:
       with:
         repository: cfengine/enterprise
         path: enterprise
-        ref: ${{fromJson(steps.get_together_prs.outputs.result)["enterprise"] || "master"}}
+        ref: ${{steps.get_together_prs.outputs.result.enterprise || "master"}}
         ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_ENTERPRISE_REPO }}
         ssh-known-hosts: github.com
   
@@ -46,7 +46,7 @@ jobs:
       with:
         repository: cfengine/nova
         path: nova
-        ref: ${{fromJson(steps.get_together_prs.outputs.result)["nova"] || "master"}}
+        ref: ${{steps.get_together_prs.outputs.result.nova || "master"}}
         ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_NOVA_REPO }}
         ssh-known-hosts: github.com
   
@@ -55,4 +55,4 @@ jobs:
       with:
         repository: cfengine/cfbs
         path: cfbs
-        ref: ${{fromJson(steps.get_together_prs.outputs.result)["cfbs"] || "master"}}
+        ref: ${{steps.get_together_prs.outputs.result.cfbs || "master"}}
