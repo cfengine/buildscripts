@@ -12,7 +12,7 @@ jobs:
       with:
         script: |
           const body = "";
-          const result = {};
+          result = {};
           if (context.issue.body) {
             // Return issue body if present
             body = context.issue.body;
