@@ -8,12 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/github-script@v6
-      id: get_issue_body
+      id: get_together_prs
       with:
         script: |
+          const body = "";
           if (context.issue.body) {
             // Return issue body if present
-            return context.issue.body;
+            body = context.issue.body;
           } else {
             // Otherwise return issue body from commit
             result =               await github.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -21,8 +22,15 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               });
-            return result.data[0].body;
+            body = result.data[0].body;
           }
-        result-encoding: string
-    - name: Issue number
-      run: echo '${{steps.get_issue_body.outputs.result}}'
+          const regexp = /https:\/\/github.com\/cfengine\/([a-z]*)\/pull\/(\d*)/g;
+          const matches = body.matchAll(regexp);
+          const result = {};
+          for (const match of matches) {
+            result[match[1]] = match[2];
+          }
+          return result;
+        result-encoding: json
+    - name: Issue body
+      run: echo '${{steps.get_together_prs.outputs.result}}'
