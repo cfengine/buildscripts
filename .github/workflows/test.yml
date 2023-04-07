@@ -17,13 +17,14 @@ jobs:
             return context.issue.number;
           } else {
             // Otherwise return issue number from commit
-            return (
+            console.log (
               await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 commit_sha: context.sha,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               })
           ).data[0];
+          return "debugit!";
           }
         result-encoding: string
     - name: Issue number
