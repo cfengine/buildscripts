@@ -1,12 +1,14 @@
 name: test multi-repo builds
 
 on: [pull_request, push]
+  secrets:
+    GH_ACTIONS_SSH_DEPLOY_KEY_NOVA_REPO:
+      required: true
 
 jobs:
   build:
     name: multi-repo build
     runs-on: ubuntu-latest
-    secrets: inherit
     steps:
     - uses: actions/github-script@v6
       id: get_together_prs
