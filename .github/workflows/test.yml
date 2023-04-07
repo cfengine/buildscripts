@@ -32,5 +32,8 @@ jobs:
           }
           return prs;
         result-encoding: json
-    - name: Issue body
-      run: echo '${{steps.get_together_prs.outputs.result}}'
+    - name: Build Together
+      env:
+        PRS: ${{steps.get_together_prs.outputs.result}}
+      run: |
+        echo "$PRS"
