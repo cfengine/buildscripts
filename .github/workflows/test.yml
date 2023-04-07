@@ -10,6 +10,7 @@ jobs:
     - name: get other repo PRs from description
       id: get_prs
       run: |
+        env
         echo "body=${{github.event.pull_request.body}}"
     - name: do build
       run: |
