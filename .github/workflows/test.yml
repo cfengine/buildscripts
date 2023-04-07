@@ -8,23 +8,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/github-script@v6
-      id: get_issue_number
+      id: get_issue_body
       with:
         script: |
-          console.log(context)
-          if (context.issue.number) {
-            // Return issue number if present
-            return context.issue.number;
+          if (context.issue.body) {
+            // Return issue body if present
+            return context.issue.body;
           } else {
-            // Otherwise return issue number from commit
+            // Otherwise return issue body from commit
             result =               await github.rest.repos.listPullRequestsAssociatedWithCommit({
                 commit_sha: context.sha,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               });
-            console.log(result);
-            return "debugit!";
+            return result.data[0].body;
           }
         result-encoding: string
     - name: Issue number
-      run: echo '${{steps.get_issue_number.outputs.result}}'
+      run: echo '${{steps.get_issue_body.outputs.result}}'
