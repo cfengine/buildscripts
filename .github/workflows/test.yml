@@ -7,23 +7,23 @@ jobs:
     name: multi-repo build
     runs-on: ubuntu-latest
     steps:
-  - uses: actions/github-script@v6
-    id: get_issue_number
-    with:
-      script: |
-        if (context.issue.number) {
-          // Return issue number if present
-          return context.issue.number;
-        } else {
-          // Otherwise return issue number from commit
-          return (
-            await github.rest.repos.listPullRequestsAssociatedWithCommit({
-              commit_sha: context.sha,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-            })
-          ).data[0].number;
-        }
-      result-encoding: string
-  - name: Issue number
-    run: echo '${{steps.get_issue_number.outputs.result}}'
+    - uses: actions/github-script@v6
+      id: get_issue_number
+      with:
+        script: |
+          if (context.issue.number) {
+            // Return issue number if present
+            return context.issue.number;
+          } else {
+            // Otherwise return issue number from commit
+            return (
+              await github.rest.repos.listPullRequestsAssociatedWithCommit({
+                commit_sha: context.sha,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              })
+            ).data[0].number;
+          }
+        result-encoding: string
+    - name: Issue number
+      run: echo '${{steps.get_issue_number.outputs.result}}'
