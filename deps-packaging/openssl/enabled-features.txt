@@ -21,7 +21,7 @@ These we need:
     pic - required for shared library
     shared - build shared library, to be used by CFEngine
     dh - required to initiate TLS connections
-    des - required, see https://tracker.mender.io/browse/CFE-4034
+    des - required, see https://northerntech.atlassian.net/browse/CFE-4034
 
 Encryptions we use:
     bf
@@ -66,4 +66,3 @@ These are required by our dependencies (and maybe by us, too):
     ocsp - used by apache
     rmd160 - used by php, see https://github.com/php/php-src/issues/8430
     sock - used by curl?
-
