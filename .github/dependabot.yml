@@ -1,8 +1,6 @@
 version: 2
 updates:
   - package-ecosystem: pip
-    commit-message:
-      prefix: "chore"
     directory: /packaging/cfengine-nova-hub/
     schedule:
       interval: "daily"
