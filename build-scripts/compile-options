@@ -100,7 +100,6 @@ EMBEDDED_DB="lmdb"
 ############### Fill in build dependencies in DEPS variable ################
 
 DEPS=
-[ $OS_FAMILY = linux ]  &&  var_append DEPS "lcov"
 [ $OS_FAMILY = mingw ]  &&  var_append DEPS "pthreads-w32 libgnurx"
 
 # libgcc_s.so is needed before we compile any other dependency
