@@ -119,14 +119,6 @@ avoid accidentally regenerating files transferred from buildslave:
 
 File `install-dependencies` and the relevant subdirectories in `deps-packaging` are the source of this information.
 
-### Build dependencies
-
-| CFEngine version | 3.18.x | 3.21.x | master |
-| ---------------- | ------ | ------ | ------ |
-| lcov             | 1.14   | 1.15   | 1.15   |
-| git              |        |        |        |
-| rsync            |        |        |        |
-
 ### Agent Dependencies
 
 | CFEngine version                                                                 | 3.18.x | 3.21.x | master | Notes                    |
