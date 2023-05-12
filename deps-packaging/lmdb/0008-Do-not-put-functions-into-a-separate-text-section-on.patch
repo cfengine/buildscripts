@@ -19,18 +19,18 @@ diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
 index efeae67..f5f7ec5 100644
 --- a/libraries/liblmdb/mdb.c
 +++ b/libraries/liblmdb/mdb.c
-@@ -197,8 +197,9 @@ typedef SSIZE_T	ssize_t;
- # error "Two's complement, reasonably sized integer types, please"
- #endif
- 
--#ifdef __GNUC__
--/** Put infrequently used env functions in separate section */
-+#if defined(__GNUC__) && !defined(__PPC64__)
-+/** Put infrequently used env functions in separate section
+@@ -204,8 +204,9 @@
+  *  section, and optimizes them for size */
+ #define ESECT __attribute__ ((cold))
+ #else
+-/* On older compilers, use a separate section */
+-# ifdef __GNUC__
++/* On older compilers, use a separate section
 + *  (break things horribly on PPC64 for unknown reasons) */
- # ifdef __APPLE__
- #  define	ESECT	__attribute__ ((section("__TEXT,text_env")))
- # else
++# if defined(__GNUC__) && !defined(__PPC64__)
+ #  ifdef __APPLE__
+ #   define      ESECT   __attribute__ ((section("__TEXT,text_env")))
+ #  else
 -- 
 2.21.0 (Apple Git-122)
 
