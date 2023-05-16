@@ -119,29 +119,21 @@ avoid accidentally regenerating files transferred from buildslave:
 
 File `install-dependencies` and the relevant subdirectories in `deps-packaging` are the source of this information.
 
-### Build dependencies
-
-| CFEngine version | 3.15.x | 3.18.x | master |
-| ---------------- | ------ | ------ | ------ |
-| lcov             | 1.14   | 1.15   | 1.15   |
-| git              |        |        |        |
-| rsync            |        |        |        |
-
 ### Agent Dependencies
 
-| CFEngine version                                                                 | 3.15.x | 3.18.x | master | Notes                    |
+| CFEngine version                                                                 | 3.18.x | 3.21.x | master | Notes                    |
 | -------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
-| [diffutils](https://ftpmirror.gnu.org/diffutils/)                                | -      | 3.8    | 3.8    |                          |
+| [diffutils](https://ftpmirror.gnu.org/diffutils/)                                | 3.9    | 3.9    | 3.9    |                          |
 | [libacl](http://download.savannah.gnu.org/releases/acl/)                         | 2.3.1  | 2.3.1  | 2.3.1  |                          |
 | [libattr](http://download.savannah.gnu.org/releases/attr/)                       | 2.5.1  | 2.5.1  | 2.5.1  |                          |
-| [libcurl](http://curl.haxx.se/download.html)                                     | 7.86.0 | 7.86.0 | 7.86.0 |                          |
+| [libcurl](http://curl.haxx.se/download.html)                                     | 8.0.1  | 8.0.1  | 8.0.1  |                          |
 | [libgnurx](http://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](http://ftp.gnu.org/gnu/libiconv/)                                     | 1.17   | 1.17   | 1.17   | Needed by libxml2        |
-| [libxml2](http://xmlsoft.org/sources/)                                           | 2.9.12 | 2.9.14 | 2.10.3 |                          |
+| [libxml2](http://xmlsoft.org/sources/)                                           | 2.11.2 | 2.11.2 | 2.11.1 |                          |
 | [libyaml](http://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
-| [LMDB](https://github.com/LMDB/lmdb/)                                            | 0.9.29 | 0.9.29 | 0.9.29 |                          |
-| [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.4.58 | 2.6.3  | 2.6.3  | Enterprise agent only    |
-| [OpenSSL](http://openssl.org/)                                                   | 1.1.1q | 1.1.1q | 3.0.7  |                          |
+| [LMDB](https://github.com/LMDB/lmdb/)                                            | 0.9.30 | 0.9.30 | 0.9.30 |                          |
+| [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.4  | 2.6.4  | 2.6.4  | Enterprise agent only    |
+| [OpenSSL](http://openssl.org/)                                                   | 1.1.1t | 3.0.8  | 3.1.0  |                          |
 | [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | 8.45   | 8.45   |                          |
 | [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/)                         | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 | [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                     | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
@@ -150,14 +142,15 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 
 ### Enterprise Hub dependencies:
 
-| CFEngine version                                    | 3.15.x | 3.18.x | master |
+| CFEngine version                                    | 3.18.x | 3.21.x | master |
 | --------------------------------------------------- | ------ | ------ | ------ |
-| [Apache](http://httpd.apache.org/)                  | 2.4.54 | 2.4.54 | 2.4.54 |
-| [APR](https://apr.apache.org/)                      | 1.7.0  | 1.7.0  | 1.7.0  |
-| [apr-util](https://apr.apache.org/)                 | 1.6.1  | 1.6.1  | 1.6.1  |
-| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.38.1 | 2.38.1 | 2.38.1 |
-| [PHP](http://php.net/)                              | 7.4.32 | 8.0.24 | 8.1.12 |
-| [PostgreSQL](http://www.postgresql.org/)            | 12.12  | 13.8   | 15.1   |
+| [Apache](http://httpd.apache.org/)                  | 2.4.57 | 2.4.55 | 2.4.57 |
+| [APR](https://apr.apache.org/)                      | 1.7.4  | 1.7.4  | 1.7.4  |
+| [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
+| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.40.1 | 2.40.1 | 2.40.1 |
+| [libexpat](https://libexpat.github.io/)             | -      | -      | 2.5.0  |
+| [PHP](http://php.net/)                              | 8.0.28 | 8.1.12 | 8.2.5  |
+| [PostgreSQL](http://www.postgresql.org/)            | 13.10  | 15.2   | 15.2   |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.2.7  | 3.2.7  | 3.2.7  |
 
 * [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
