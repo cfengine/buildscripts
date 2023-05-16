@@ -607,5 +607,14 @@ rm_if_empty()
     fi
 }
 
+tarcz()
+{
+    if func_which pigz;
+    then
+        tar -I pigz -c "$@"
+    else
+        tar -cz "$@"
+    fi
+}
 
 _IS_FUNCTIONS_SOURCED=yes

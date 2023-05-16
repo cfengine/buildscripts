@@ -195,7 +195,7 @@ case "$PACKAGING" in
         do
             test -d $dir && mv $dir "$LOCAL_PREFIX/share/etc"
         done
-        tar czvf "$TARBALL" "$LOCAL_DIR" > "$TARBALL.filelist"
+        tarcz -vf "$TARBALL" "$LOCAL_DIR" > "$TARBALL.filelist"
         # $OS_VERSION is 7.6, ${OS_VERSION%.*} is 7
         if [ -d "$P/coreos" -a "${OS_VERSION%.*}" = 7 ]
         then
@@ -212,13 +212,13 @@ case "$PACKAGING" in
             sudo losetup --detach "$LOOP_DEV"
             rmdir "$MOUNT_DIR"
             # create "nested" tarball containing only *.img file
-            tar czf "$P/coreos/cfengine3.img.tar.gz" --sparse -C "$(dirname "$IMAGE")" "$(basename "$IMAGE")"
+            tarcz -f "$P/coreos/cfengine3.img.tar.gz" --sparse -C "$(dirname "$IMAGE")" "$(basename "$IMAGE")"
             rm "$IMAGE"
             # create tarball containing everything
             NAME="$PKG-$VERSION-$safe_prefix$RPM_RELEASE.$ARCH.fs-img.pkg"
             TARBALL="$BASEDIR/$PKG/RPMS/$NAME.tar.gz"
             mv "$P/coreos" "$P/$NAME"
-            tar czvf "$TARBALL" -C "$P" "$NAME" > "$TARBALL.filelist"
+            tarcz -vf "$TARBALL" -C "$P" "$NAME" > "$TARBALL.filelist"
         fi
     fi
     ;;
@@ -272,7 +272,7 @@ case "$PACKAGING" in
     do
         test -d $dir && mv $dir "$LOCAL_PREFIX/share/etc"
     done
-    tar czvf "$TARBALL" "$LOCAL_DIR" > "$TARBALL.filelist"
+    tarcz -vf "$TARBALL" "$LOCAL_DIR" > "$TARBALL.filelist"
     ;;
 
   solaris)
