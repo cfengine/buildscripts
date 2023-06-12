@@ -86,7 +86,7 @@ install: build
 
 # Make sure cfbs is available and in place
 	mkdir -p $(CURDIR)/debian/tmp/tmp/cfbs_root
-	pip3 install --root $(CURDIR)/debian/tmp/tmp/cfbs_root cfbs==3.2.7
+	pip3 install --root $(CURDIR)/debian/tmp/tmp/cfbs_root cfbs==3.2.10
 	mkdir $(CURDIR)/debian/tmp$(PREFIX)/lib/python
 	mv $(CURDIR)/debian/tmp/tmp/cfbs_root/usr/local/lib/python*/dist-packages/cfbs $(CURDIR)/debian/tmp$(PREFIX)/lib/python
 	mv $(CURDIR)/debian/tmp/tmp/cfbs_root/usr/local/bin/cfbs $(CURDIR)/debian/tmp$(PREFIX)/bin/
