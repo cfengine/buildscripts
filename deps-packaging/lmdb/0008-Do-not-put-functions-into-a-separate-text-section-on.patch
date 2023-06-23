@@ -1,7 +1,7 @@
-From 38c3cf2a2b7fb572c7a75657971e1596355c928d Mon Sep 17 00:00:00 2001
+From 793b0faf0edc4e52927cc0857416958e778c217b Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <vratislav.podzimek@northern.tech>
 Date: Wed, 22 Aug 2018 16:47:04 +0200
-Subject: [PATCH 08/10] Do not put functions into a separate text section on
+Subject: [PATCH 08/13] Do not put functions into a separate text section on
  PPC64
 
 Somehow this breaks things horribly and such functions seem to
@@ -16,10 +16,10 @@ Signed-off-by: Vratislav Podzimek <v.podzimek@mykolab.com>
  1 file changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
-index efeae67..f5f7ec5 100644
+index 06a77299a..4ef334ce6 100644
 --- a/libraries/liblmdb/mdb.c
 +++ b/libraries/liblmdb/mdb.c
-@@ -204,8 +204,9 @@
+@@ -204,8 +204,9 @@ typedef SSIZE_T	ssize_t;
   *  section, and optimizes them for size */
  #define ESECT __attribute__ ((cold))
  #else
@@ -32,5 +32,5 @@ index efeae67..f5f7ec5 100644
  #   define      ESECT   __attribute__ ((section("__TEXT,text_env")))
  #  else
 -- 
-2.21.0 (Apple Git-122)
+2.25.1
 

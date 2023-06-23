@@ -3,8 +3,8 @@
 From the directory above buildscripts:
 
 ```
-$ git clone https://github.com/LMDB/lmdb.git
-$ cd lmdb
+$ git clone https://git.openldap.org/openldap/openldap.git
+$ cd openldap/libraries/liblmdb
 $ git fetch --all --tags
 ```
 
@@ -19,7 +19,7 @@ Apply our patches:
 
 ```
 $ cd libraries/liblmdb
-$ git am -3 ../../../buildscripts/deps-packaging/lmdb/00*
+$ git am -3 "$NTECH_ROOT/buildscripts/deps-packaging/lmdb/00*"
 ```
 
 If there were no conflicts - rejoice!

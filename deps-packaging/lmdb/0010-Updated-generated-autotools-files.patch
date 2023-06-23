@@ -1,7 +1,7 @@
-From fefdda7ecf4f9815f06051fb43e03558ea446c71 Mon Sep 17 00:00:00 2001
+From fab651394f50ebab126f898b9e3e1ff4a36a199d Mon Sep 17 00:00:00 2001
 From: Ole Herman Schumacher Elgesem <ole@northern.tech>
 Date: Thu, 3 Oct 2019 22:40:27 +0200
-Subject: [PATCH 10/10] Updated generated autotools files
+Subject: [PATCH 10/13] Updated generated autotools files
 
 Signed-off-by: Ole Herman Schumacher Elgesem <ole@northern.tech>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Ole Herman Schumacher Elgesem <ole@northern.tech>
  3 files changed, 303 insertions(+), 321 deletions(-)
 
 diff --git a/libraries/liblmdb/Makefile.in b/libraries/liblmdb/Makefile.in
-index b59f606..7ce566d 100644
+index b59f606e0..7ce566dfc 100644
 --- a/libraries/liblmdb/Makefile.in
 +++ b/libraries/liblmdb/Makefile.in
 @@ -1,7 +1,7 @@
@@ -367,7 +367,7 @@ index b59f606..7ce566d 100644
  	ctags-am dist dist-all dist-bzip2 dist-gzip dist-lzip \
  	dist-shar dist-tarZ dist-xz dist-zip distcheck distclean \
 diff --git a/libraries/liblmdb/aclocal.m4 b/libraries/liblmdb/aclocal.m4
-index f7ad092..64fc455 100644
+index f7ad092b7..64fc455da 100644
 --- a/libraries/liblmdb/aclocal.m4
 +++ b/libraries/liblmdb/aclocal.m4
 @@ -1,6 +1,6 @@
@@ -835,7 +835,7 @@ index f7ad092..64fc455 100644
  # This file is free software; the Free Software Foundation
  # gives unlimited permission to copy and/or distribute it,
 diff --git a/libraries/liblmdb/configure b/libraries/liblmdb/configure
-index e077ce2..5dd41bf 100755
+index e077ce201..5dd41bf74 100755
 --- a/libraries/liblmdb/configure
 +++ b/libraries/liblmdb/configure
 @@ -663,7 +663,6 @@ am__nodep
@@ -1227,5 +1227,5 @@ index e077ce2..5dd41bf 100755
   ;;
      "libtool":C)
 -- 
-2.21.0 (Apple Git-122)
+2.25.1
 

@@ -1,7 +1,7 @@
-From 9e9e283c2648b4014cecc62c9b5d80b0b8dbdaed Mon Sep 17 00:00:00 2001
+From 3aae871fee34dd4f2744218b6f0007188277fe3b Mon Sep 17 00:00:00 2001
 From: Kristian Amlie <kristian.amlie@cfengine.com>
 Date: Mon, 9 Jan 2017 08:56:11 +0100
-Subject: [PATCH 05/10] Generated autoconf files.
+Subject: [PATCH 05/13] Generated autoconf files.
 
 ---
  libraries/liblmdb/Makefile.in             |   940 ++
@@ -38,7 +38,7 @@ Subject: [PATCH 05/10] Generated autoconf files.
 
 diff --git a/libraries/liblmdb/Makefile.in b/libraries/liblmdb/Makefile.in
 new file mode 100644
-index 0000000..b59f606
+index 000000000..b59f606e0
 --- /dev/null
 +++ b/libraries/liblmdb/Makefile.in
 @@ -0,0 +1,940 @@
@@ -984,7 +984,7 @@ index 0000000..b59f606
 +.NOEXPORT:
 diff --git a/libraries/liblmdb/aclocal.m4 b/libraries/liblmdb/aclocal.m4
 new file mode 100644
-index 0000000..f7ad092
+index 000000000..f7ad092b7
 --- /dev/null
 +++ b/libraries/liblmdb/aclocal.m4
 @@ -0,0 +1,10200 @@
@@ -11190,7 +11190,7 @@ index 0000000..f7ad092
 +
 diff --git a/libraries/liblmdb/autom4te.cache/output.0 b/libraries/liblmdb/autom4te.cache/output.0
 new file mode 100644
-index 0000000..bd6a32c
+index 000000000..bd6a32cc5
 --- /dev/null
 +++ b/libraries/liblmdb/autom4te.cache/output.0
 @@ -0,0 +1,14204 @@
@@ -25400,7 +25400,7 @@ index 0000000..bd6a32c
 +
 diff --git a/libraries/liblmdb/autom4te.cache/output.1 b/libraries/liblmdb/autom4te.cache/output.1
 new file mode 100644
-index 0000000..22a8263
+index 000000000..22a826331
 --- /dev/null
 +++ b/libraries/liblmdb/autom4te.cache/output.1
 @@ -0,0 +1,14200 @@
@@ -39606,7 +39606,7 @@ index 0000000..22a8263
 +
 diff --git a/libraries/liblmdb/autom4te.cache/requests b/libraries/liblmdb/autom4te.cache/requests
 new file mode 100644
-index 0000000..7d202a4
+index 000000000..7d202a45e
 --- /dev/null
 +++ b/libraries/liblmdb/autom4te.cache/requests
 @@ -0,0 +1,300 @@
@@ -39912,7 +39912,7 @@ index 0000000..7d202a4
 +
 diff --git a/libraries/liblmdb/autom4te.cache/traces.0 b/libraries/liblmdb/autom4te.cache/traces.0
 new file mode 100644
-index 0000000..46dc422
+index 000000000..46dc4224f
 --- /dev/null
 +++ b/libraries/liblmdb/autom4te.cache/traces.0
 @@ -0,0 +1,2705 @@
@@ -42623,7 +42623,7 @@ index 0000000..46dc422
 +m4trace:configure.ac:54: -1- _LT_PROG_LTMAIN
 diff --git a/libraries/liblmdb/autom4te.cache/traces.1 b/libraries/liblmdb/autom4te.cache/traces.1
 new file mode 100644
-index 0000000..66754db
+index 000000000..66754db37
 --- /dev/null
 +++ b/libraries/liblmdb/autom4te.cache/traces.1
 @@ -0,0 +1,541 @@
@@ -43170,7 +43170,7 @@ index 0000000..66754db
 +m4trace:configure.ac:54: -1- AC_REQUIRE_AUX_FILE([ltmain.sh])
 diff --git a/libraries/liblmdb/compile b/libraries/liblmdb/compile
 new file mode 100755
-index 0000000..a85b723
+index 000000000..a85b723c7
 --- /dev/null
 +++ b/libraries/liblmdb/compile
 @@ -0,0 +1,347 @@
@@ -43523,7 +43523,7 @@ index 0000000..a85b723
 +# End:
 diff --git a/libraries/liblmdb/config.guess b/libraries/liblmdb/config.guess
 new file mode 100755
-index 0000000..1659250
+index 000000000..16592509d
 --- /dev/null
 +++ b/libraries/liblmdb/config.guess
 @@ -0,0 +1,1441 @@
@@ -44970,7 +44970,7 @@ index 0000000..1659250
 +# End:
 diff --git a/libraries/liblmdb/config.sub b/libraries/liblmdb/config.sub
 new file mode 100755
-index 0000000..1acc966
+index 000000000..1acc966a3
 --- /dev/null
 +++ b/libraries/liblmdb/config.sub
 @@ -0,0 +1,1813 @@
@@ -46789,7 +46789,7 @@ index 0000000..1acc966
 +# End:
 diff --git a/libraries/liblmdb/configure b/libraries/liblmdb/configure
 new file mode 100755
-index 0000000..e077ce2
+index 000000000..e077ce201
 --- /dev/null
 +++ b/libraries/liblmdb/configure
 @@ -0,0 +1,14200 @@
@@ -60995,7 +60995,7 @@ index 0000000..e077ce2
 +
 diff --git a/libraries/liblmdb/depcomp b/libraries/liblmdb/depcomp
 new file mode 100755
-index 0000000..fc98710
+index 000000000..fc98710e2
 --- /dev/null
 +++ b/libraries/liblmdb/depcomp
 @@ -0,0 +1,791 @@
@@ -61792,7 +61792,7 @@ index 0000000..fc98710
 +# End:
 diff --git a/libraries/liblmdb/install-sh b/libraries/liblmdb/install-sh
 new file mode 100755
-index 0000000..59990a1
+index 000000000..59990a104
 --- /dev/null
 +++ b/libraries/liblmdb/install-sh
 @@ -0,0 +1,508 @@
@@ -62306,7 +62306,7 @@ index 0000000..59990a1
 +# End:
 diff --git a/libraries/liblmdb/ltmain.sh b/libraries/liblmdb/ltmain.sh
 new file mode 100644
-index 0000000..147d758
+index 000000000..147d758ab
 --- /dev/null
 +++ b/libraries/liblmdb/ltmain.sh
 @@ -0,0 +1,11156 @@
@@ -73468,7 +73468,7 @@ index 0000000..147d758
 +# End:
 diff --git a/libraries/liblmdb/missing b/libraries/liblmdb/missing
 new file mode 100755
-index 0000000..f62bbae
+index 000000000..f62bbae30
 --- /dev/null
 +++ b/libraries/liblmdb/missing
 @@ -0,0 +1,215 @@
@@ -73688,5 +73688,5 @@ index 0000000..f62bbae
 +# time-stamp-end: "; # UTC"
 +# End:
 -- 
-2.21.0 (Apple Git-122)
+2.25.1
 

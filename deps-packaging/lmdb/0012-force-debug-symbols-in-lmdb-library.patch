@@ -1,0 +1,26 @@
+From be847ca8e764856bea01083bd770b8cff8db8789 Mon Sep 17 00:00:00 2001
+From: Craig Comstock <craig.comstock@northern.tech>
+Date: Fri, 23 Jun 2023 10:14:49 -0500
+Subject: [PATCH 12/13] force debug symbols in lmdb library
+
+---
+ libraries/liblmdb/configure.ac | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/libraries/liblmdb/configure.ac b/libraries/liblmdb/configure.ac
+index 2a5834b5b..aafed06f5 100644
+--- a/libraries/liblmdb/configure.ac
++++ b/libraries/liblmdb/configure.ac
+@@ -10,6 +10,9 @@ m4_ifdef([LT_INIT],
+   [AC_DISABLE_STATIC
+    AC_PROG_LIBTOOL])
+ 
++# force debug symbols here in lmdb
++CFLAGS="$CFLAGS -g3 -O0 $ENV_CFLAGS"
++
+ AC_ARG_WITH([pthread], [Path to pthread])
+ AS_IF([test -n "$with_pthread"],
+     [LDFLAGS+=" -L$with_pthread/lib"]
+-- 
+2.25.1
+
