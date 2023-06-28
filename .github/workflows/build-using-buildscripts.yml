@@ -54,7 +54,6 @@ jobs:
         with:
           path: nova
           repository: cfengine/nova
-          path: buildscripts
           ref: ${{steps.together.outputs.nova || github.base_ref || github.ref}}
           ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_NOVA_REPO }}
           ssh-known-hosts: github.com
