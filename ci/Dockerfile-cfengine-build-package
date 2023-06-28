@@ -1,0 +1,5 @@
+FROM ubuntu:20.04
+RUN apt-get update -y && apt-get install -y systemd wget sudo
+ADD setup-build-host.sh /
+RUN /setup-build-host.sh
+CMD [ "/lib/systemd/systemd" ]

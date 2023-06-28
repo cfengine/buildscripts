@@ -1,0 +1,109 @@
+name: Build and package
+
+on:
+  workflow_call:
+    secrets:
+      GH_ACTIONS_SSH_DEPLOY_KEY_ENTERPRISE_REPO:
+        required: true
+      GH_ACTIONS_SSH_DEPLOY_KEY_MISSION_PORTAL_REPO:
+        required: true
+      GH_ACTIONS_SSH_DEPLOY_KEY_NOVA_REPO:
+        required: true
+
+jobs:
+  build_using_buildscripts:
+    name: Build and package using buildscripts
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout Together Action
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/together-javascript-action
+          ref: v1.7
+          ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_TOGETHER_REPO }}
+          ssh-known-hosts: github.com
+      
+      - name: Action step
+        uses: ./
+        id: together
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Checkout Core
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/core
+          path: core
+          ref: ${{steps.together.outputs.core || github.base_ref || github.ref}}
+          submodules: recursive
+
+      - name: Checkout Masterfiles
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/masterfiles
+          path: masterfiles
+          ref: ${{steps.together.outputs.masterfiles || github.base_ref || github.ref}}
+
+      - name: Checkout Buildscripts (current repo)
+        uses: actions/checkout@v3
+        with:
+          path: buildscripts
+
+      - name: Checkout Nova
+        uses: actions/checkout@v3
+        with:
+          path: nova
+          repository: cfengine/nova
+          path: buildscripts
+          ref: ${{steps.together.outputs.nova || github.base_ref || github.ref}}
+          ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_NOVA_REPO }}
+          ssh-known-hosts: github.com
+
+      - name: Checkout Enterprise
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/enterprise
+          path: enterprise
+          ref: ${{steps.together.outputs.enterprise || github.base_ref || github.ref}}
+          submodules: recursive
+          ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_ENTERPRISE_REPO }}
+          ssh-known-hosts: github.com
+
+      - name: Checkout Mission Portal
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/mission-portal
+          path: mission-portal
+          ref: ${{steps.together.outputs.mission-portal || github.base_ref || github.ref}}
+          submodules: recursive
+          ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_MISSION_PORTAL_REPO }}
+          ssh-known-hosts: github.com
+
+      - name: get SHA of buildscripts/deps-packaging last commit
+        run: echo "DEPS_SHA=$(git log --pretty='format:%h' -1 -- .)" | tee -a ${GITHUB_ENV}
+        working-directory: buildscripts/deps-packaging
+
+      - name: get HOME dir
+        run: echo "HOME=$HOME" | tee -a ${GITHUB_ENV}
+
+      - name: Cache Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.HOME }}/.cache/
+          key: deps-${{ github.base_ref }}-${{ env.DEPS_SHA }}
+          restore-keys: |
+            deps-${{ github.base_ref }}
+            deps-master
+            deps
+
+      - name: Setup Build Host
+        run: buildscripts/ci/setup.sh
+
+      - name: Build and package
+        run: buildscripts/ci/build.sh
+
+      - name: Upload packages as Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: packages
+          path: packages
