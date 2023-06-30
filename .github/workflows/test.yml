@@ -13,5 +13,5 @@ jobs:
           php --version
           apt info php-cli
           #apt-cache search php
-          apt remove 'php8*'
+          sudo apt remove -y 'php8*'
           php --version
