@@ -8,8 +8,6 @@ jobs:
     steps:
       - name: test stuff
         run: |
-          cat /etc/apt/sources.list
-          for f in /etc/apt/sources.list.d/*; do
-            echo $f
-            cat $f
-          done
+          apt-get install -qy php7.4-cli
+          which php
+          php --version
