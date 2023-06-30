@@ -1,0 +1,10 @@
+name: test stuff
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: test stuff
+        run: cat /etc/apt/sources.list; ls -l /etc/apt/sources.list.d
