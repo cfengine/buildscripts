@@ -11,3 +11,4 @@ jobs:
           sudo apt-get install -qy php7.4-cli
           which php
           php --version
+          apt info php-cli
