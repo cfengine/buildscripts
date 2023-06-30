@@ -9,7 +9,7 @@ jobs:
       - name: test stuff
         run: |
           cat /etc/apt/sources.list
-          for f in /etc/apt/sources.list.d; do
+          for f in /etc/apt/sources.list.d/*; do
             echo $f
             cat $f
           done
