@@ -8,6 +8,6 @@ jobs:
     steps:
       - name: test stuff
         run: |
-          apt-get install -qy php7.4-cli
+          sudo apt-get install -qy php7.4-cli
           which php
           php --version
