@@ -12,3 +12,4 @@ jobs:
           which php
           php --version
           apt info php-cli
+          apt-cache search php
