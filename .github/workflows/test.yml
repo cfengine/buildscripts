@@ -15,3 +15,4 @@ jobs:
           #apt-cache search php
           sudo apt remove -y 'php8*'
           php --version
+          du -hs /var/lib/docker
