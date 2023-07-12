@@ -182,6 +182,7 @@
             <ComponentRef Id='cf_net.exe' />
             <ComponentRef Id='cf_promises.exe' />
             <ComponentRef Id='cf_runagent.exe' />
+            <ComponentRef Id='cf_secret.exe' />
             <ComponentRef Id='cf_serverd.exe' />
             <ComponentRef Id='cf_upgrade.exe' />
             <ComponentRef Id='mdb_copy.exe' />
