@@ -78,3 +78,43 @@ jobs:
           submodules: recursive
           ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_MISSION_PORTAL_REPO }}
           ssh-known-hosts: github.com
+
+      - name: get PACKAGE_SHA for package cache
+        run: echo "PACKAGE_SHA=$(mission-portal/ci/package-sha.sh)" | tee -a ${GITHUB_ENV}
+
+      - name: get SHA of buildscripts/deps-packaging last commit
+        run: echo "DEPS_SHA=$(git log --pretty='format:%h' -1 -- .)" | tee -a ${GITHUB_ENV}
+        working-directory: buildscripts/deps-packaging
+
+      - name: restore packages cache
+        uses: actions/cache/restore@v3
+        with:
+          path: packages
+          key: packages-${{ env.PACKAGE_SHA }}
+          restore-keys: |
+            packages-${{ env.PACKAGE_SHA }}
+
+      - name: Restore dependency cache
+        uses: actions/cache/restore@v3
+        with:
+          path: cache
+          key: deps-${{ github.base_ref }}-${{ env.DEPS_SHA }}
+          restore-keys: |
+            deps-${{ github.base_ref }}
+            deps-master
+            deps
+
+      - name: Build package in docker
+        run: test ! -f packages/cfe*deb && buildscripts/ci/docker.sh || true
+
+      - name: Save dependency cache
+        uses: actions/cache/save@v3
+        with:
+          path: cache
+          key: deps-${{ github.base_ref }}-${{ env.DEPS_SHA }}
+
+      - name: Save packages cache
+        uses: actions/cache/save@v3
+        with:
+          path: packages
+          key: packages-${{ env.PACKAGE_SHA }}
