@@ -1,2 +1,5 @@
 workdir*
 revision
+*.html
+ci/cache
+ci/packages
