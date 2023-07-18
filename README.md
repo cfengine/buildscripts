@@ -1,5 +1,9 @@
 This repository contains the necessary tools to build and test cfengine packages for various platforms.
 
+## Hardware requirements
+
+By experimentation I have found that building hub packages, which includes php dependency requires more than 1.6G of RAM/swap. 2.6G worked for me, less might work as well.
+
 ## Example build of Community Agent
 
 A minimal example would be to build packages for cfengine community agent.
