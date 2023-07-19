@@ -20,6 +20,6 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: check env
+        env:
+          craigs_secret: ${{ secrets.CRAIGS_SECRET }}
         run: env
-      - name: print secret
-        run: echo ${{ secrets.CRAIGS_SECRET }}
