@@ -5,6 +5,9 @@ on:
   # this includes opening and pushing more commits
   pull_request:
     branches: [ master, 3.21.x, 3.18.x ]
+    secrets:
+      CRAIGS_SECRET:
+        required: true
 
   push:
     secrets:
