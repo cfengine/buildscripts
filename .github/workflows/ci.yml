@@ -15,5 +15,3 @@ jobs:
     steps:
       - name: check env
         run: env
-    uses: ./.github/workflows/job-selenium-tests.yml
-    secrets: inherit
