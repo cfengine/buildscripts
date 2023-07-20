@@ -1,3 +1,5 @@
+check workflows for pull requests internal to repo
+
 This repository contains the necessary tools to build and test cfengine packages for various platforms.
 
 ## Example build of Community Agent
