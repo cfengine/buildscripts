@@ -28,12 +28,27 @@ for p in $projects
 do
     (cd $BASEDIR/$p && NO_CONFIGURE=1 ./autogen.sh) || false
 done
+# %h (abbreviated commit hash) is not deterministic for length on different systems
+# so far (up to Aug 2023) this didn't matter because one system (bootstrap-oslo-dc)
+# was responsible for doing this autogen work and all other systems used the result.
+# When we migrated from travis to github actions we needed things to be stable between
+# bootstrap-oslo-dc and other systems so will force a length of 7 and check that
+# the result is unique.
+export CORE_ABBREV=7 # adjust this up if need be
+git config --global --add core.abbrev $CORE_ABBREV
 
 for i in $GITSHAOF
 do
     if [ -d $BASEDIR/$i ] && [ ! -f $BASEDIR/$i/revision ]
     then
         R=$(cd $BASEDIR/$i && git log --pretty='format:%h' -1 -- .) || false
+        (
+            cd $BASEDIR/$i
+            if ! git show $R --oneline >/dev/null; then
+                echo "abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
+                exit 1
+            fi
+        )
         echo $R | tr -d '\n' > $BASEDIR/$i/revision
     fi
 done
