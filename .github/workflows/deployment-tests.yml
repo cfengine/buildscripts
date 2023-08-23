@@ -20,8 +20,8 @@ jobs:
       - name: Checkout Together Action
         uses: actions/checkout@v3
         with:
-          repository: cfengine/together-javascript-action
-          ref: main
+          repository: craigcomstock/together-javascript-action
+          ref: 2fdec415c4ff41975b8774432b055c5777d0282e
           ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_TOGETHER_REPO }}
           ssh-known-hosts: github.com
 
@@ -46,10 +46,11 @@ jobs:
           path: masterfiles
           ref: ${{steps.together.outputs.masterfiles || github.base_ref}}
 
-      - name: Checkout Buildscripts (current project)
+      - name: Checkout Buildscripts
         uses: actions/checkout@v3
         with:
           path: buildscripts
+          ref: ${{steps.together.outputs.buildscripts || github.base_ref}}
           fetch-depth: 20
 
       - name: Checkout Nova
