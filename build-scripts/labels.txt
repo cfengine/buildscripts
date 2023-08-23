@@ -38,4 +38,5 @@ PACKAGES_i386_mingw
 PACKAGES_x86_64_mingw
 
 PACKAGES_ia64_hpux_11.23
+PACKAGES_ppc64_aix_71
 PACKAGES_sparc64_solaris_11
