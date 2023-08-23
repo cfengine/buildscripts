@@ -1,4 +1,4 @@
-name: Build dependencies and CFEngine hub package
+name: Deployment tests for built package
 
 on:
   workflow_call:
@@ -13,8 +13,8 @@ on:
         required: true
 
 jobs:
-  build_cfengine_hub_package:
-    name: Build package and run selenium tests
+  deployment_tests:
+    name: Run simple deployment tests
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Together Action
@@ -113,6 +113,9 @@ jobs:
             if [ ! -f packages/cfe*deb ]; then
                 buildscripts/ci/docker-build-package.sh
             fi
+
+      - name: Run deployment tests
+        run: buildscripts/ci/docker-deployment-tests.sh
 
       - name: Save dependency cache
         uses: actions/cache/save@v3
