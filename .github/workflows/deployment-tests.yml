@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: craigcomstock/together-javascript-action
-          ref: 2fdec415c4ff41975b8774432b055c5777d0282e
+          ref: 7be6ea0e9e7a3db5ad6853aadafee6ba2bb66fc1
           ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_TOGETHER_REPO }}
           ssh-known-hosts: github.com
 
