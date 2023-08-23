@@ -49,6 +49,7 @@ jobs:
       - name: Checkout Buildscripts
         uses: actions/checkout@v3
         with:
+          repository: cfengine/buildscripts
           path: buildscripts
           ref: ${{steps.together.outputs.buildscripts || github.base_ref}}
           fetch-depth: 20
