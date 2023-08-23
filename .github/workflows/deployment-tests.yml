@@ -109,6 +109,7 @@ jobs:
             deps
 
       - name: Build package in docker
+        id: build_package
         env:
             GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE: ${{ secrets.GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE }}
         run: |
@@ -132,7 +133,7 @@ jobs:
           key: packages-${{ env.PACKAGE_SHA }}
 
       - name: Save artifacts
-        if: success() || failure()
+        if: ${{ success() || failure() && steps.build_package.conclusion != 'success' }}
         uses: actions/upload-artifact@v3
         with:
           name: artifacts
