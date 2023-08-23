@@ -20,8 +20,8 @@ jobs:
       - name: Checkout Together Action
         uses: actions/checkout@v3
         with:
-          repository: cfengine/together-javascript-action
-          ref: main
+          repository: craigcomstock/together-javascript-action
+          ref: 8379a8ca4425acd35c164d808031c91c2da2fb78
           ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_TOGETHER_REPO }}
           ssh-known-hosts: github.com
 
