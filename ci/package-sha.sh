@@ -10,7 +10,7 @@ CORE_SHA=$(git -C "${NTECH_ROOT}/core" log --pretty='format:%h' -1 -- .)
 echo "CORE_SHA: ${CORE_SHA}" >&2
 ENTERPRISE_SHA=$(git -C "${NTECH_ROOT}/enterprise" log --pretty='format:%h' -1 -- .)
 echo "ENTERPRISE_SHA: ${ENTERPRISE_SHA}" >&2
-NOVA_SHA=$(git -C "${NTECH_ROOT}/nova" log --pretty='format:%h' -1 -- .)
+NOVA_SHA=$("${NTECH_ROOT}/nova/ci/code-sha.sh")
 echo "NOVA_SHA: ${NOVA_SHA}" >&2
 MASTERFILES_SHA=$(git -C "${NTECH_ROOT}/masterfiles" log --pretty='format:%h' -1 -- .)
 echo "MASTERFILES_SHA: ${MASTERFILES_SHA}" >&2
