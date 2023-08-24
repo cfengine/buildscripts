@@ -7,7 +7,18 @@ export BUILD_TYPE=DEBUG
 export ESCAPETEST=yes
 export EXPLICIT_ROLE=hub
 export TEST_MACHINE=chroot
-# TODO maybe seed the cache? cp -R buildscripts/ci/cache ~/.cache
+
+set +x # hide secrets
+eval $(ssh-agent -s)
+if [ -z "$SECRET" ]; then
+  echo "Need sftp cache ssh secret key. Provide with SECRET env variable"
+  exit 1
+else
+  echo "$SECRET" | ssh-add -
+fi
+ssh-add -l
+set -x # stop hiding secrets
+
 time ./buildscripts/build-scripts/build-environment-check
 time ./buildscripts/build-scripts/install-dependencies
 time ./buildscripts/build-scripts/configure # 3 minutes locally
