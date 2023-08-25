@@ -1,4 +1,4 @@
-name: Build dependencies and CFEngine hub package
+name: Deployment tests for built package
 
 on:
   workflow_call:
@@ -13,15 +13,15 @@ on:
         required: true
 
 jobs:
-  build_cfengine_hub_package:
-    name: Build package and run selenium tests
+  deployment_tests:
+    name: Run simple deployment tests
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout Together Action
         uses: actions/checkout@v3
         with:
           repository: cfengine/together-javascript-action
-          ref: v1.7
+          ref: main
           ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_TOGETHER_REPO }}
           ssh-known-hosts: github.com
 
@@ -46,10 +46,12 @@ jobs:
           path: masterfiles
           ref: ${{steps.together.outputs.masterfiles || github.base_ref}}
 
-      - name: Checkout Buildscripts (current project)
+      - name: Checkout Buildscripts
         uses: actions/checkout@v3
         with:
+          repository: cfengine/buildscripts
           path: buildscripts
+          ref: ${{steps.together.outputs.buildscripts || github.base_ref}}
           fetch-depth: 20
 
       - name: Checkout Nova
@@ -107,12 +109,16 @@ jobs:
             deps
 
       - name: Build package in docker
+        id: build_package
         env:
             GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE: ${{ secrets.GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE }}
         run: |
             if [ ! -f packages/cfe*deb ]; then
                 buildscripts/ci/docker-build-package.sh
             fi
+
+      - name: Run deployment tests
+        run: buildscripts/ci/docker-deployment-tests.sh
 
       - name: Save dependency cache
         uses: actions/cache/save@v3
@@ -127,7 +133,7 @@ jobs:
           key: packages-${{ env.PACKAGE_SHA }}
 
       - name: Save artifacts
-        if: success() || failure()
+        if: ${{ success() || failure() && steps.build_package.conclusion != 'success' }}
         uses: actions/upload-artifact@v3
         with:
           name: artifacts
