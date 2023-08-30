@@ -18,7 +18,7 @@
 . `dirname "$0"`/../build-scripts/functions
 
 set -e
-#set -x                                                  # for debugging
+set -x                                                  # for debugging
 
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging         # for cache-sftp
 MYNAME=`basename $0`
@@ -140,6 +140,7 @@ listpkgfiles)
 
     if [ ! -d $pkg_cache_dir ] && [ $CACHE_IS_ONLY_LOCAL = no ]
     then
+        cd $BASEDIR
         mkdir -p $pkg_cache_dir
         cd $pkg_cache_dir
         cache-sftp getdir  $label/$pkgname
