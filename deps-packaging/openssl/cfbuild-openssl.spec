@@ -62,9 +62,13 @@ if [ x$SYS = "xAIX" ]; then
   # See https://www.ibm.com/developerworks/aix/library/au-gnu.html for
   # details.
   LDFLAGS="$LDFLAGS -Wl,-bexpfull"
+  # ./config doesn't properly detect aix-gcc on our systems, so be explicit and use ./Configure
+  CONFIG_COMMAND="$PERL ./Configure aix-gcc"
+else
+  CONFIG_COMMAND=./config
 fi
 
-./config shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
+$CONFIG_COMMAND shared  no-idea no-rc5 no-ssl3 no-dtls no-psk no-srp no-engine \
          $DEBUG_CONFIG_FLAGS \
          --prefix=%{prefix} \
          $HACK_FLAGS   \
