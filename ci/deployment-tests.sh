@@ -13,7 +13,10 @@ USER=${USER:-$(whoami)}
 
 if [ ! -d /var/cfengine ]; then
   # ci and local buildscripts should place built packages in $NTECH_ROOT/packages
-  sudo dpkg -i "$NTECH_ROOT"/packages/cfengine-nova-hub*deb
+  if ! sudo dpkg -i "$NTECH_ROOT"/packages/cfengine-nova-hub*deb; then
+    tail -20 /var/log/CFEngine-Install.log
+    exit 1
+  fi
 fi
 
 # now that cfengine is probably installed, run cf-support if there is an error
