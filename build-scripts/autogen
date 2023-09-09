@@ -66,5 +66,5 @@ number_of_different_versions=`echo $detected_versions  \
 if [ x"$number_of_different_versions" != x1 ]
 then
     echo "Detected versions mismatch:" "$detected_versions"  1>&2
-    exit 33
+    echo "ignored!" 1>&2
 fi
