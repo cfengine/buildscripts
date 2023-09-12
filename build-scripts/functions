@@ -93,9 +93,7 @@ export_variables ()
     case $UNAME_S in
         AIX)
             # We need to use GCC6 on new AIX 7 VMs (AIX 5 doesn't have the folder).
-            PATH="/opt/freeware/gcc6/bin/:$PATH"
-            # We need to use /opt/freeware/bin first, for e.g. wget and newer perl 5.34 on aix 7.1
-            PATH="/opt/freeware/bin:$PATH" ;;
+            PATH="/opt/freeware/gcc6/bin/:$PATH" ;;
         SunOS)
             # Currently we rely strongly on OpenCSW packages.
             PATH="/opt/csw/bin:/usr/xpg4/bin:$PATH"  ;;
