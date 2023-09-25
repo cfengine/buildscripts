@@ -429,25 +429,31 @@ init_postgres_dir()
     if [ -f "$BACKUP_DIR/data/postgresql.conf.modified" ]; then
       # User-modified file from the previous old version of CFEngine exists, try to use it.
       cp -a "$BACKUP_DIR/data/postgresql.conf.modified" "$PREFIX/state/pg/data/postgresql.conf"
-      (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
-      if [ $? = 0 ]; then
-        # Started successfully, stop it again, the migration requires it to be not running.
-        (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log stop")
+      # start subshell to disable error handling temporarily
+      (
+        set +e
+        (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
+        if [ $? = 0 ]; then
+          # Started successfully, stop it again, the migration requires it to be not running.
+          (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log stop")
 
-        # Copy over the new config as well, user should take at look at it.
-        cf_console echo "Installing the $pgconfig_type postgresql.conf file as $PREFIX/state/pg/data/postgresql.conf.new."
-        cf_console echo "Please review it and update $PREFIX/state/pg/data/postgresql.conf accordingly."
-        cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf.new"
-        chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf.new"
-      else
-        # Failed to start, move the old file aside and use the new one.
-        mv "$PREFIX/state/pg/data/postgresql.conf" "$PREFIX/state/pg/data/postgresql.conf.old"
-        cf_console echo "Warning: failed to use the old postgresql.conf file, using the $pgconfig_type one."
-        cf_console echo "Please review the $PREFIX/state/pg/data/postgresql.conf file and update it accordingly."
-        cf_console echo "The original file was saved as $PREFIX/state/pg/data/postgresql.conf.old"
-        cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf"
-        chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf"
-      fi
+          # Copy over the new config as well, user should take at look at it.
+          cf_console echo "Installing the $pgconfig_type postgresql.conf file as $PREFIX/state/pg/data/postgresql.conf.new."
+          cf_console echo "Please review it and update $PREFIX/state/pg/data/postgresql.conf accordingly."
+          cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf.new"
+          chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf.new"
+        else
+          # Failed to start, move the old file aside and use the new one.
+          mv "$PREFIX/state/pg/data/postgresql.conf" "$PREFIX/state/pg/data/postgresql.conf.old"
+          cf_console echo "Warning: failed to use the old postgresql.conf file, using the $pgconfig_type one."
+          cf_console echo "Please review the $PREFIX/state/pg/data/postgresql.conf file and update it accordingly."
+          cf_console echo "The original file was saved as $PREFIX/state/pg/data/postgresql.conf.old"
+          cf_console echo "last 10 lines of /var/log/postgresql.log for determining cause of failure"
+          cf_console tail -10 /var/log/postgresql.log
+          cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf"
+          chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf"
+        fi
+      )
     else
       # No user-modified file, just use the new recommended or default config (see generate_new_postgres_conf())
       cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf"
