@@ -437,6 +437,12 @@ init_postgres_dir()
           # Started successfully, stop it again, the migration requires it to be not running.
           (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log stop")
 
+          # Wait a while if we have to for the server to be stopped
+          if ! wait_for_cf_postgres_down; then
+            cf_console echo "Error: unable to shutdown postgresql server. Showing last of /var/log/postgresql.log for clues."
+            cf_console tail /var/log/postgresql.log
+            exit 1
+          fi
           # Copy over the new config as well, user should take at look at it.
           cf_console echo "Installing the $pgconfig_type postgresql.conf file as $PREFIX/state/pg/data/postgresql.conf.new."
           cf_console echo "Please review it and update $PREFIX/state/pg/data/postgresql.conf accordingly."
