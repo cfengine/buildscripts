@@ -690,6 +690,11 @@ do_migration() {
       exit 0 # exits only from (...)
     fi
     cf_console echo "Migration using pg_upgrade failed."
+    # here pg_upgrade probably said something like
+    # Consult the last few lines of "/var/cfengine/state/pg/data/pg_upgrade_output.d/20230913T150025.959/log/pg_upgrade_server.log" for the probable cause of the failure.
+    cf_console echo "Showing last lines of any related log files:"
+    _daysearch=$(date +%Y%m%d)
+    find "$PREFIX"/state/pg/data/pg_upgrade_output.d -name *.log | grep "$_daysearch" | xargs tail
     cf_console echo
     check_disk_space # will abort if low on disk space
     init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"
