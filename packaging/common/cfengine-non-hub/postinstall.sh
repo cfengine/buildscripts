@@ -142,11 +142,19 @@ systemctl restart cfengine3"
   fi
 fi
 
+restorecon_run=0
 if [ -f $PREFIX/policy_server.dat ]; then
   if ! [ -f "$PREFIX/UPGRADED_FROM.txt" ] || egrep '3\.([0-6]\.|7\.0)' "$PREFIX/UPGRADED_FROM.txt" > /dev/null; then
     # Versions <= 3.7.0 are unreliable in their daemon killing. Kill them one
     # more time now that we have upgraded.
     cf_console platform_service cfengine3 stop
+  fi
+
+  # Let's make sure all files and directories created above have correct SELinux labels.
+  # run this BEFORE we start services again to avoid race conditions in restorecon
+  if command -v restorecon >/dev/null; then
+    restorecon -iR /var/cfengine /opt/cfengine
+    restorecon_run=1
   fi
 
   if is_upgrade && [ -f "$PREFIX/UPGRADED_FROM_STATE.txt" ]; then
@@ -159,10 +167,11 @@ fi
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"
 
-# Let's make sure all files and directories created above have correct SELinux
-# labels.
-if command -v restorecon >/dev/null; then
-  restorecon -iR /var/cfengine /opt/cfengine
+if [ $restorecon_run = 0 ]; then
+  # if we didn't run restorecon above in the already bootstrapped/upgrade case then run it now
+  if command -v restorecon >/dev/null; then
+    restorecon -iR /var/cfengine /opt/cfengine
+  fi
 fi
 
 exit 0
