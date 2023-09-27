@@ -429,11 +429,24 @@ init_postgres_dir()
     if [ -f "$BACKUP_DIR/data/postgresql.conf.modified" ]; then
       # User-modified file from the previous old version of CFEngine exists, try to use it.
       cp -a "$BACKUP_DIR/data/postgresql.conf.modified" "$PREFIX/state/pg/data/postgresql.conf"
-      (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
-      if [ $? = 0 ]; then
+      failure=0
+      (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start") || failure=1
+      if [ $failure = 0 ]; then
+        wait_for_cf_postgres || failure=1
+      fi
+      if [ $failure = 0 ]; then
         # Started successfully, stop it again, the migration requires it to be not running.
-        (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log stop")
-
+        (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log stop") || failure=1
+        if [ $failure = 0 ]; then
+          wait_for_cfpostgres_down || failure=1
+        fi
+        if [ $failure != 0 ]; then
+          cf_console echo "Error: unable to shutdown postgresql server. Showing last of /var/log/postgresql.log for clues."
+          cf_console tail /var/log/postgresql.log
+          # this is a fatal error and so we exit instead of return
+          # steps after this init_postgres_dir() function should not continue if we can't start/stop the server
+          exit 1
+        fi
         # Copy over the new config as well, user should take at look at it.
         cf_console echo "Installing the $pgconfig_type postgresql.conf file as $PREFIX/state/pg/data/postgresql.conf.new."
         cf_console echo "Please review it and update $PREFIX/state/pg/data/postgresql.conf accordingly."
@@ -445,6 +458,8 @@ init_postgres_dir()
         cf_console echo "Warning: failed to use the old postgresql.conf file, using the $pgconfig_type one."
         cf_console echo "Please review the $PREFIX/state/pg/data/postgresql.conf file and update it accordingly."
         cf_console echo "The original file was saved as $PREFIX/state/pg/data/postgresql.conf.old"
+        cf_console echo "last 10 lines of /var/log/postgresql.log for determining cause of failure"
+        cf_console tail /var/log/postgresql.log
         cp -a "$new_pgconfig_file" "$PREFIX/state/pg/data/postgresql.conf"
         chown cfpostgres "$PREFIX/state/pg/data/postgresql.conf"
       fi
@@ -684,6 +699,11 @@ do_migration() {
       exit 0 # exits only from (...)
     fi
     cf_console echo "Migration using pg_upgrade failed."
+    # here pg_upgrade probably said something like
+    # Consult the last few lines of "/var/cfengine/state/pg/data/pg_upgrade_output.d/20230913T150025.959/log/pg_upgrade_server.log" for the probable cause of the failure.
+    cf_console echo "Showing last lines of any related log files:"
+    _daysearch=$(date +%Y%m%d)
+    find "$PREFIX"/state/pg/data/pg_upgrade_output.d -name *.log | grep "$_daysearch" | xargs tail
     cf_console echo
     check_disk_space # will abort if low on disk space
     init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"
