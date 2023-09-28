@@ -99,24 +99,6 @@ wait_for_cf_postgres() {
     $PREFIX/bin/psql cfsettings -c "SELECT 1;" >/dev/null 2>&1
 }
 
-wait_for_cf_postgres_down() {
-    # wait for CFEngine Postgresql service to be shutdown, up to 5 sec.
-    # Returns 0 if postgresql service is not running
-    # Returns non-0 otherwise (1 if exited by timeout)
-    for i in $(seq 1 5); do
-        true "checking if Postgresql is shutdown..."
-        if ! "$PREFIX"/bin/pg_isready >/dev/null 2>&1; then
-            true "Postgresql is shutdown, moving on"
-            return 0
-        fi
-        true "waiting 1 sec for Postgresql to shutdown..."
-        sleep 1
-    done
-    # Note: it is important that this is the last command of this function.
-    # Return code of `pg_isready` is the return code of whole function.
-    ! "$PREFIX"/bin/pg_isready >/dev/null 2>&1
-}
-
 safe_cp() {
     # "safe" alternative to `cp`. Tries `cp -al` first, and if it fails - `cp -a`.
     # Deletes partially-copied files if copy operation fails.
