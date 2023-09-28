@@ -424,7 +424,7 @@ init_postgres_dir()
         # Started successfully, stop it again, the migration requires it to be not running.
         (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log stop") || failure=1
         if [ $failure = 0 ]; then
-          wait_for_cfpostgres_down || failure=1
+          wait_for_cf_postgres_down || failure=1
         fi
         if [ $failure != 0 ]; then
           cf_console echo "Error: unable to shutdown postgresql server. Showing last of /var/log/postgresql.log for clues."
@@ -689,7 +689,7 @@ do_migration() {
     # Consult the last few lines of "/var/cfengine/state/pg/data/pg_upgrade_output.d/20230913T150025.959/log/pg_upgrade_server.log" for the probable cause of the failure.
     cf_console echo "Showing last lines of any related log files:"
     _daysearch=$(date +%Y%m%d)
-    find "$PREFIX"/state/pg/data/pg_upgrade_output.d -name *.log | grep "$_daysearch" | xargs tail
+    find "$PREFIX"/state/pg/data/pg_upgrade_output.d -name *.log | grep "$_daysearch" | cf_console xargs tail
     cf_console echo
     check_disk_space # will abort if low on disk space
     init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"

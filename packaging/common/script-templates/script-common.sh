@@ -82,12 +82,12 @@ restore_cfengine_state() {
 }
 
 wait_for_cf_postgres() {
-    # wait for CFEngine Postgresql service to be available, up to 5 sec.
+    # wait for CFEngine Postgresql service to be available, up to 60 sec.
     # Returns 0 is psql command succeeds,
     # Returns non-0 otherwise (1 if exited by timeout)
-    for i in $(seq 1 5); do
+    for i in $(seq 1 60); do
         true "checking if Postgresql is available..."
-        if $PREFIX/bin/psql cfsettings -c "SELECT 1;" >/dev/null 2>&1; then
+        if cd /tmp && su cfpostgres -c "$PREFIX/bin/psql -l" >/dev/null 2>&1; then
             true "Postgresql is available, moving on"
             return 0
         fi
@@ -96,16 +96,16 @@ wait_for_cf_postgres() {
     done
     # Note: it is important that this is the last command of this function.
     # Return code of `psql` is the return code of whole function.
-    $PREFIX/bin/psql cfsettings -c "SELECT 1;" >/dev/null 2>&1
+    cd /tmp && su cfpostgres -c "$PREFIX/bin/psql -l" >/dev/null 2>&1
 }
 
 wait_for_cf_postgres_down() {
-    # wait for CFEngine Postgresql service to be shutdown, up to 5 sec.
+    # wait for CFEngine Postgresql service to be shutdown, up to 60 sec.
     # Returns 0 if postgresql service is not running
     # Returns non-0 otherwise (1 if exited by timeout)
-    for i in $(seq 1 5); do
+    for i in $(seq 1 60); do
         true "checking if Postgresql is shutdown..."
-        if ! "$PREFIX"/bin/pg_isready >/dev/null 2>&1; then
+        if cd /tmp && ! su cfpostgres -c "$PREFIX/bin/psql -l" >/dev/null 2>&1; then
             true "Postgresql is shutdown, moving on"
             return 0
         fi
@@ -113,8 +113,8 @@ wait_for_cf_postgres_down() {
         sleep 1
     done
     # Note: it is important that this is the last command of this function.
-    # Return code of `pg_isready` is the return code of whole function.
-    ! "$PREFIX"/bin/pg_isready >/dev/null 2>&1
+    # Return code of `psql` is the return code of whole function.
+    cd /tmp && ! su cfpostgres -c "$PREFIX/bin/psql -l" >/dev/null 2>&1
 }
 
 safe_cp() {
