@@ -1088,6 +1088,14 @@ if ! [ -f "$PREFIX/UPGRADED_FROM.txt" ] || egrep '3\.([0-6]\.|7\.0)' "$PREFIX/UP
   cf_console platform_service cfengine3 stop
 fi
 
+# Let's make sure all files and directories created above have correct SELinux
+# labels. We do this while the database is stopped on purpose, restorecon caches its list of
+# files up-front and the database often adds/removes files as it starts up, especially pg_internal.init
+# files inside /var/cfengine/state/pg/data/base/<oid> directories. ENT-10429
+if command -v restorecon >/dev/null; then
+  restorecon -iR /var/cfengine /opt/cfengine
+fi
+
 if is_upgrade && [ -f "$PREFIX/UPGRADED_FROM_STATE.txt" ]; then
     cf_console restore_cfengine_state "$PREFIX/UPGRADED_FROM_STATE.txt"
     rm -f "$PREFIX/UPGRADED_FROM_STATE.txt"
@@ -1096,11 +1104,5 @@ else
 fi
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"
-
-# Let's make sure all files and directories created above have correct SELinux
-# labels.
-if command -v restorecon >/dev/null; then
-  restorecon -iR /var/cfengine /opt/cfengine
-fi
 
 exit 0
