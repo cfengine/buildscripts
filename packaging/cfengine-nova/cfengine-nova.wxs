@@ -56,7 +56,7 @@
             <Directory Id='dir_bin' Name='bin'>
     	      <Component Id='cf_execd.exe' Guid='563060F2-462E-4A3C-90A1-696D5E0713D2' Win64='$(var.isWin64)'>
                 <File Id='cf_execd.exe' Name='cf-execd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-execd.exe' />
-                <ServiceControl Id='cf_execd.exe' Name='CfengineNovaExec' Stop='uninstall' Remove='uninstall' Wait='yes' />
+                <ServiceControl Id='cf_execd.exe' Name='CfengineNovaExec' Stop='both' Remove='both' Wait='yes' />
                 <ServiceInstall Id='cf_execd.exe' Name='CfengineNovaExec' DisplayName='Cfengine Nova Executor' Type='ownProcess' Start='auto' ErrorControl='normal' Vital='yes' Description='The executor daemon is a scheduler and wrapper for execution of cf-agent. It collects the output of the agent and can email it to a specified address.' />
               </Component>
               <Component Id='cf_agent.exe' Guid='8CEA06F4-1133-4E98-9EEF-9C1D39DEFAA5' Win64='$(var.isWin64)'>
@@ -73,6 +73,7 @@
               </Component>
               <Component Id='cf_monitord.exe' Guid='F9E42EF0-960C-4DEC-87BB-FB0C53F18E7F' Win64='$(var.isWin64)'>
                 <File Id='cf_monitord.exe' Name='cf-monitord.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-monitord.exe' />
+                <ServiceControl Id='cf_monitord.exe' Name='CfengineNovaMonitor' Stop='both' Remove='both' Wait='yes' />
               </Component>
               <Component Id='cf_net.exe' Guid='E247749E-7C73-4E13-BF3F-315A19774635' Win64='$(var.isWin64)'>
                 <File Id='cf_net.exe' Name='cf-net.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-net.exe' />
@@ -86,6 +87,7 @@
               <Component Id='cf_serverd.exe' Guid='77B9C8CD-AB9F-480C-9141-4561D719334B' Win64='$(var.isWin64)'>
                 <Environment Id='Path' Name='Path' Value='[dir_bin]' Separator=';' Action='set' Part='last' System='yes' />
                 <File Id='cf_serverd.exe' Name='cf-serverd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-serverd.exe' />
+                <ServiceControl Id='cf_serverd.exe' Name='CfengineNovaServer' Stop='both' Remove='both' Wait='yes' />
               </Component>
               <Component Id='diff.exe' Guid='A343B6FD-A0E9-468A-8678-84647C609DC6' Win64='$(var.isWin64)'>
                 <File Id='diff.exe' Name='diff.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\diff.exe' />
