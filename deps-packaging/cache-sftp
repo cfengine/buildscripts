@@ -56,7 +56,7 @@ fi
 # script commands failed.
 sftp_stdin()
 {
-    # ssh -vvv $SSH_ARGS $CACHE_HOST hostname # for debugging ssh problems, will break the build at this point but give good information
+    ssh -vvv $SSH_ARGS $CACHE_HOST hostname # for debugging ssh problems, will break the build at this point but give good information
     if [ $SFTP_IS_OLD = 1 ]
     then
         # Remove leading dash from input script lines
