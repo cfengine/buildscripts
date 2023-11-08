@@ -1044,19 +1044,9 @@ if ! is_upgrade; then
   if [ -x /bin/systemctl ]; then
     # Reload systemd config to pick up newly installed units
     /bin/systemctl daemon-reload > /dev/null 2>&1
-    # Enable service units
-    # Enabling services is OK to fail (they can be masked, for example)
-    set +e
-    /bin/systemctl enable cf-apache.service > /dev/null 2>&1
-    /bin/systemctl enable cf-execd.service > /dev/null 2>&1
-    /bin/systemctl enable cf-serverd.service > /dev/null 2>&1
-    /bin/systemctl enable cf-runalerts.service > /dev/null 2>&1
-    /bin/systemctl enable cf-monitord.service > /dev/null 2>&1
-    /bin/systemctl enable cf-postgres.service > /dev/null 2>&1
-    /bin/systemctl enable cf-hub.service > /dev/null 2>&1
-    /bin/systemctl enable cf-reactor.service > /dev/null 2>&1
-    /bin/systemctl enable cfengine3.service > /dev/null 2>&1
-    set -e
+    # Enable cfengine3 service (starts all the other services)
+    # Enabling the service is OK to fail (can be masked, for example)
+    /bin/systemctl enable cfengine3.service > /dev/null 2>&1 || true
   else
     case "`os_type`" in
       redhat)
