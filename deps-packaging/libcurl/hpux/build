@@ -9,6 +9,8 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
 
 # Build
 
+# _LARGEFILE_SOURCE is required on hpux 11.23, see /usr/local/lib/gcc/ia64-hp-hpux11.23/4.2.3/include/stdio.h
+
 ./configure --prefix=$PREFIX \
     --with-sysroot=$PREFIX \
     --with-ssl=$PREFIX \
@@ -28,7 +30,7 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
     --without-polarssl \
     --without-winidn \
     --without-winssl \
-    CPPFLAGS="-DAF_LOCAL=AF_UNIX"
+    CPPFLAGS="-DAF_LOCAL=AF_UNIX -D_LARGEFILE_SOURCE"
 gmake
 
 # Test
