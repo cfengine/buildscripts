@@ -12,7 +12,7 @@ label=PACKAGES_HUB_x86_64_linux_ubuntu_20
 export JOB_BASE_NAME=label=$label
 
 
-docker build -t $name -f "${NTECH_ROOT}/buildscripts/ci/Dockerfile-$name" .
+docker build -t $name -f "${NTECH_ROOT}/buildscripts/ci/Dockerfile-$name" "${NTECH_ROOT}/buildscripts/ci"
 
 # add secret key to enable push up to sftp cache
 set +x # hide secrets

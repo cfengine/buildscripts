@@ -1,5 +1,5 @@
 FROM ubuntu:20.04
 RUN apt-get update -y && apt-get install -y systemd wget sudo
-ADD "${NTECH_ROOT}/buildscripts/ci/setup.sh" /
+ADD setup.sh /
 RUN /bin/bash -c '/setup.sh 2>&1 > setup.log'
 CMD [ "/lib/systemd/systemd" ]
