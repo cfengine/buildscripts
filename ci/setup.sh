@@ -7,10 +7,10 @@ PREFIX=/var/cfengine
 sudo rm -f /bin/rpm
 
 # Install dependencies
-sudo apt-get update -y
+sudo apt-get update -qy
 
 # install apt-utils so that debconf can configure installed packages
-sudo apt-get install apt-utils
+sudo apt-get install -qy apt-utils
 
 # git is needed for build-scripts/autogen to determine revision for such things as deps-packaging
 sudo apt-get install -qy git
@@ -25,7 +25,7 @@ sudo python2 get-pip.py
 sudo pip install psycopg2-binary
 
 # install composer and friends
-sudo apt-get -qq -y install curl php7.4-cli php7.4-curl php7.4-zip php7.4-mbstring php7.4-xml php7.4-gd composer php7.4-ldap
+sudo apt-get -qy install curl php7.4-cli php7.4-curl php7.4-zip php7.4-mbstring php7.4-xml php7.4-gd composer php7.4-ldap
 # packages needed for autogen
 sudo apt-get -qy install git autoconf automake m4 make bison flex \
  binutils libtool gcc g++ libc-dev libpam0g-dev python2 python3 psmisc
@@ -41,7 +41,7 @@ sudo apt-get -qq purge apache* "postgresql*" redis*
 
 # packages needed for installing Mission portal dependencies
 # remove any nodejs or node- packages currently in place
-sudo apt-get remove -y 'nodejs*' 'node-*'
+sudo apt-get remove -qy 'nodejs*' 'node-*'
 # replace with exact version we want
 wget -O - https://deb.nodesource.com/setup_12.x | sudo -E bash -
-sudo apt-get install -y nodejs
+sudo apt-get install -qy nodejs
