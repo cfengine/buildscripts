@@ -10,16 +10,16 @@ sudo rm -f /bin/rpm
 sudo apt-get update -y
 
 # install apt-utils so that debconf can configure installed packages
-sudo apt-get install apt-utils
+sudo apt-get install -y apt-utils
 
 # git is needed for build-scripts/autogen to determine revision for such things as deps-packaging
-sudo apt-get install -qy git
+sudo apt-get install -y git
 
 # python3-pip is needed for cfengine-nova-hub.deb packaging
-sudo apt-get install -qy python3 python3-pip
+sudo apt-get install -y python3 python3-pip
 
 # Install Python2 and psycopg2
-sudo apt-get -qy install python2
+sudo apt-get -y install python2
 wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O get-pip.py
 sudo python2 get-pip.py
 sudo pip install psycopg2-binary
@@ -27,13 +27,13 @@ sudo pip install psycopg2-binary
 # install composer and friends
 sudo apt-get -qq -y install curl php7.4-cli php7.4-curl php7.4-zip php7.4-mbstring php7.4-xml php7.4-gd composer php7.4-ldap
 # packages needed for autogen
-sudo apt-get -qy install git autoconf automake m4 make bison flex \
+sudo apt-get -y install git autoconf automake m4 make bison flex \
  binutils libtool gcc g++ libc-dev libpam0g-dev python2 python3 psmisc
 
 # packages needed for buildscripts
-sudo apt-get -qy install libncurses5 rsync
+sudo apt-get -y install libncurses5 rsync
 # packages needed for building 
-sudo apt-get -qy install bison flex binutils build-essential fakeroot ntp \
+sudo apt-get -y install bison flex binutils build-essential fakeroot ntp \
  dpkg-dev libpam0g-dev python2 python3 debhelper pkg-config psmisc nfs-common
 
 # remove unwanted packages
