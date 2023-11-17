@@ -9,6 +9,9 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
 
 # Build
 
+# autotools on hpux 11.23 with gcc 4.2.3 uses -std=gnu99 which excludes _LARGEFILE_SOURCE required for fseeko()
+# see https://www.gnu.org/software/libc/manual/html_node/Feature-Test-Macros.html for reference on _LARGEFILE_SOURCE
+
 ./configure --prefix=$PREFIX \
     --with-sysroot=$PREFIX \
     --with-ssl=$PREFIX \
@@ -28,7 +31,7 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
     --without-polarssl \
     --without-winidn \
     --without-winssl \
-    CPPFLAGS="-DAF_LOCAL=AF_UNIX"
+    CPPFLAGS="-DAF_LOCAL=AF_UNIX -D_LARGEFILE_SOURCE"
 gmake
 
 # Test

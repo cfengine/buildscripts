@@ -2,7 +2,7 @@ Summary: CFEngine Build Automation -- zlib
 Name: cfbuild-zlib
 Version: %{version}
 Release: 1
-Source0: zlib-1.2.13.tar.gz
+Source0: zlib-1.3.tar.gz
 Patch0: AIX_LDSHARED.patch
 License: MIT
 Group: Other
@@ -15,7 +15,7 @@ AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n zlib-1.2.13
+%setup -q -n zlib-1.3
 
 %patch0 -p1
 
@@ -65,7 +65,7 @@ CFEngine Build Automation -- zlib -- development files
 %dir %{prefix}/lib
 %{prefix}/lib/libz.so
 %{prefix}/lib/libz.so.1
-%{prefix}/lib/libz.so.1.2.13
+%{prefix}/lib/libz.so.1.3
 
 %files devel
 %defattr(-,root,root)
