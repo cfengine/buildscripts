@@ -16,7 +16,7 @@
         "lmdb":"6974",
         "openldap":"2551",
         "openssl":"2566",
-        "pcre":"2610",
+        "pcre2":"5832",
         "php":"3627",
         "postgresql":"301832",
         "pthreads-w32":"17517",

@@ -108,7 +108,7 @@ case "$OS_FAMILY" in
     solaris|aix)  var_append DEPS "libgcc" ;;
 esac
 
-var_append DEPS "$EMBEDDED_DB pcre"
+var_append DEPS "$EMBEDDED_DB pcre2"
 
 if ! [ x"$SYSTEM_SSL" = x1 ]
 then

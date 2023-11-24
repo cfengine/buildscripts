@@ -14,7 +14,7 @@ Install necessary distribution packages. For example on debian/ubuntu:
 ```
 apt update -y
 apt upgrade -y
-apt install -y git autoconf automake m4 make bison flex binutils libtool gcc g++ libc-dev libpam0g-dev python3 psmisc libtokyocabinet-dev libssl-dev libpcre3-dev default-jre-headless build-essential fakeroot ntp dpkg-dev debhelper pkg-config nfs-common sudo apt-utils wget libncurses5 rsync libexpat1-dev libexpat1 curl
+apt install -y git autoconf automake m4 make bison flex binutils libtool gcc g++ libc-dev libpam0g-dev python3 psmisc libtokyocabinet-dev libssl-dev libpcre2-dev default-jre-headless build-essential fakeroot ntp dpkg-dev debhelper pkg-config nfs-common sudo apt-utils wget libncurses5 rsync libexpat1-dev libexpat1 curl
 apt purge -y emacs emacs24 libltdl-dev libltdl7
 ```
 
@@ -138,7 +138,8 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [LMDB](https://github.com/LMDB/lmdb/)                                            | 0.9.30 | 0.9.30 | 0.9.30 |                          |
 | [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.4  | 2.6.4  | 2.6.4  | Enterprise agent only    |
 | [OpenSSL](http://openssl.org/)                                                   | 1.1.1t | 3.0.8  | 3.1.1  |                          |
-| [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | 8.45   | 8.45   |                          |
+| [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | 8.45   | -      |                          |
+| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                         | -      | -      | 10.42  |                          |
 | [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/)                         | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 | [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                     | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
 | [zlib](http://www.zlib.net/)                                                     | 1.2.13 | 1.2.13 | 1.2.13 |                          |

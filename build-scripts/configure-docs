@@ -6,6 +6,6 @@
 
 P=/var/cfengine
 
-ARGS="--prefix=$P --with-openssl=$P --with-pcre=$P --with-lmdb=$P --enable-docs=all"
+ARGS="--prefix=$P --with-openssl=$P --with-pcre2=$P --with-lmdb=$P --enable-docs=all"
 
 cd $BASEDIR/core && env $OPTS ./configure $ARGS

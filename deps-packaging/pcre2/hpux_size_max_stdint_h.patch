@@ -1,0 +1,26 @@
+--- ./src/pcre2.h.generic.orig	2022-12-12 18:10:40.000000000 +0100
++++ ./src/pcre2.h.generic	2023-12-08 12:50:07.739772696 +0100
+@@ -91,6 +91,10 @@
+ #include <stdlib.h>
+ #include <inttypes.h>
+ 
++/* HP-UX doesn't follow the C standard mentioned above and inttypes.h doesn't
++contain stdint.h */
++#include <stdint.h>
++
+ /* Allow for C++ users compiling this directly. */
+ 
+ #ifdef __cplusplus
+--- ./src/pcre2.h.in.orig	2022-08-10 17:23:01.000000000 +0200
++++ ./src/pcre2.h.in	2023-12-08 13:18:06.265424264 +0100
+@@ -91,6 +91,10 @@
+ #include <stdlib.h>
+ #include <inttypes.h>
+ 
++/* HP-UX doesn't follow the C standard mentioned above and inttypes.h doesn't
++contain stdint.h */
++#include <stdint.h>
++
+ /* Allow for C++ users compiling this directly. */
+ 
+ #ifdef __cplusplus

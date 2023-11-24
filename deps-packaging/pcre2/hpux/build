@@ -1,0 +1,52 @@
+#!/bin/sh -e
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+PC=${BUILD_ROOT}/cfbuild-pcre2${PREFIX}
+PCD=${BUILD_ROOT}/cfbuild-pcre2-devel${PREFIX}
+
+# Patch
+
+$PATCH -p0 < hpux_size_max_stdint_h.patch
+
+# Configure
+
+# HP-UX needs the .libs directory in the library search path because of a
+# bug in libtool: it will specify libpcre2-8.so.11 as the dependency of
+# libpcre2-posix.so.3, however when it links it tries to link to libpcre2-8.so.
+# Although they are the same library, the native ld is not happy with this,
+# and starts looking for the libpcre2-8.so.11 library on its own, which it won't
+# find, because it wasn't listed on the command line. Hence we need to
+# specify libtool's secret library stash: ".libs".
+LDFLAGS="$LDFLAGS -L${PWD}/.libs"
+
+./configure --prefix=${PREFIX} --enable-shared --disable-static
+
+# Build
+
+gmake
+
+# Test
+
+if [ "$TESTS" = all ]; then
+  gmake check
+fi
+
+# Install
+
+gmake install DESTDIR=${BUILD_ROOT}/cfbuild-pcre2-devel
+
+# Package
+
+rm -f ${PCD}/bin/pcre2grep
+rm -f ${PCD}/bin/pcre2test
+rm -f ${PCD}/lib/*.la
+rm -f ${PCD}/lib/libpcre2-posix.*
+rm -f ${PCD}/lib/pkgconfig/libpcre2-posix.pc
+rm -f ${PCD}/include/pcre2posix.h
+rm -rf ${PCD}/share
+
+mkdir -p ${PC}/lib
+mv ${PCD}/lib/*.so* ${PC}/lib

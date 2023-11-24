@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+PC=${BUILD_ROOT}/cfbuild-pcre2${PREFIX}
+PCD=${BUILD_ROOT}/cfbuild-pcre2-devel${PREFIX}
+
+# Configure
+
+./configure --prefix=${PREFIX} --enable-shared --disable-static
+
+# Build
+
+make
+
+# Test
+
+if [ "$TESTS" != no ]; then
+  make check
+fi
+
+# Install
+
+make install DESTDIR=${BUILD_ROOT}/cfbuild-pcre2-devel
+# Package
+
+rm -f ${PCD}/bin/pcre2grep
+rm -f ${PCD}/bin/pcre2test
+rm -f ${PCD}/lib/*.la
+rm -f ${PCD}/lib/libpcre2-posix.*
+rm -f ${PCD}/lib/pkgconfig/libpcre2-posix.pc
+rm -f ${PCD}/include/pcre2posix.h
+rm -rf ${PCD}/share
+
+mkdir -p ${PC}/lib
+mv ${PCD}/lib/*.so* ${PC}/lib
+
