@@ -11,21 +11,27 @@ COMPUTED_ROOT="$(readlink -e "$(dirname "$0")/../../")"
 NTECH_ROOT=${NTECH_ROOT:-$COMPUTED_ROOT}
 USER=${USER:-$(whoami)}
 
+# prepare artifacts dir
+sudo mkdir -p "${NTECH_ROOT}/artifacts"
+sudo chown "$USER" "${NTECH_ROOT}/artifacts"
+
+trap failure ERR
+function failure() {
+  cd "${NTECH_ROOT}/artifacts"
+  if command cf-support; then
+    sudo cf-support --yes > $$.cfsupportlog 2>&1 || cat $$.cfsupportlog
+  else
+    cp /var/log/CFEngine-Install* . # ${NTECH_ROOT}/artifacts cd previously
+  fi
+  rm $$.cfsupportlog
+}
+
 if [ ! -d /var/cfengine ]; then
   # ci and local buildscripts should place built packages in $NTECH_ROOT/packages
   sudo dpkg -i "$NTECH_ROOT"/packages/cfengine-nova-hub*deb
 fi
 
-# now that cfengine is probably installed, run cf-support if there is an error
-trap failure ERR
 
-function failure() {
-  sudo mkdir -p "${NTECH_ROOT}/artifacts"
-  sudo chown "$USER" "${NTECH_ROOT}/artifacts"
-  cd "${NTECH_ROOT}/artifacts"
-  sudo cf-support --yes > $$.cfsupportlog 2>&1 || cat $$.cfsupportlog
-  rm $$.cfsupportlog
-}
 
 AGENT_LOG="${NTECH_ROOT}/artifacts/agent.log"
 if [ -f "$AGENT_LOG" ]; then
