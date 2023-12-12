@@ -12,11 +12,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=$(PREFIX) --enable-unicode-properties --disable-cpp
+	./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) --enable-shared --disable-static
 	make
-ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	make check
-endif
 
 	touch build-stamp
 
@@ -28,12 +25,12 @@ install: build
 
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/pcregrep
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/pcretest
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpcre.a
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpcre.la
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpcreposix.a
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpcreposix.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/pcre2grep.exe
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/pcre2test.exe
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpcre2.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/libpcre2posix*.*
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/pkgconfig/libpcre2-posix.pc
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/include/pcre2posix.h
 # Do not merge those lines into single one -- any new file in share should trigger an error
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/man
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/doc

@@ -129,8 +129,8 @@
               <Component Id='libldap.dll' Guid='A49EA879-3D89-4FB0-9D53-3E35BE266DB1' Win64='$(var.isWin64)'>
                 <File Id='libldap.dll' Name='libldap.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libldap.dll' />
               </Component>
-              <Component Id='libpcre_1.dll' Guid='A32A88D5-6E60-4852-BE95-33FF52CD276D' Win64='$(var.isWin64)'>
-                <File Id='libpcre_1.dll' Name='libpcre-1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libpcre-1.dll' />
+              <Component Id='libpcre2_8_0.dll' Guid='A32A88D5-6E60-4852-BE95-33FF52CD276E' Win64='$(var.isWin64)'>
+                <File Id='libpcre2_8_0.dll' Name='libpcre2-8-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libpcre2-8-0.dll' />
               </Component>
               <Component Id='pthreadGC2.dll' Guid='C9A99E1A-8ECE-4EAF-96DA-12B6BC298BFD' Win64='$(var.isWin64)'>
                 <File Id='pthreadGC2.dll' Name='pthreadGC2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\pthreadGC2.dll' />
@@ -197,7 +197,7 @@
             <ComponentRef Id='cf.events.dll' />
             <ComponentRef Id='liblber.dll' />
             <ComponentRef Id='libldap.dll' />
-            <ComponentRef Id='libpcre_1.dll' />
+            <ComponentRef Id='libpcre2_8_0.dll' />
             <ComponentRef Id='pthreadGC2.dll' />
             <ComponentRef Id='libwinpthread_1.dll' />
             <ComponentRef Id='libcrypto_3_x64.dll' />

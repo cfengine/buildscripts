@@ -15,7 +15,7 @@ esac
 
 P=$BUILDPREFIX
 
-ARGS="--prefix=$P --libdir=$P/lib --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre=$P --with-init-script"
+ARGS="--prefix=$P --libdir=$P/lib --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre2=$P --with-init-script"
 
 if [ $EMBEDDED_DB = lmdb ]
 then
