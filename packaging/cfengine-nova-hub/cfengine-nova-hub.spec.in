@@ -373,6 +373,9 @@ exit 0
 
 %defattr(460,root,cfapache,570)
 %prefix/httpd/conf
+%config %prefix/httpd/conf/httpd.conf
+# Note: MPF policy must be aligned search for ENT-11096 or cfengine_mp_apache_config_ownership_perms
+%attr(400,root,root) %prefix/httpd/conf/httpd.conf
 %prefix/httpd/error
 %prefix/httpd/htdocs
 %prefix/httpd/icons
