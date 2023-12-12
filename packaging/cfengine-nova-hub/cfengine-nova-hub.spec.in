@@ -97,6 +97,7 @@ cp -R %{_basedir}/mission-portal $RPM_BUILD_ROOT%prefix/share/GUI
 
 rm -f $RPM_BUILD_ROOT%prefix/share/GUI/runalerts.php
 cp -v %{_basedir}/mission-portal/runalerts.php $RPM_BUILD_ROOT%prefix/bin/runalerts.php
+%verify(owner group mode maj min symlink) %prefix/bin/runalerts.php
 
 cp -vR %{_basedir}/mission-portal/Apache-htaccess $RPM_BUILD_ROOT%prefix/share/GUI/htaccess
 mkdir -p $RPM_BUILD_ROOT%prefix/share/GUI/api
