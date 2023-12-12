@@ -395,4 +395,7 @@ exit 0
 %dir %prefix/inputs
 %dir %prefix/state
 
+# Customizing verification
+%verify(owner group mode maj min symlink) /var/log/postgresql.log
+
 %changelog
