@@ -1,10 +1,8 @@
 name: Continuous Integration
 
-on:
-  # run this workflow on pull_request activity
-  # this includes opening and pushing more commits
-  push:
-    branches: [ master, 3.21.x, 3.18.x ]
+# Run this CI on all pushes to upstream
+# (including PRs fromm usptream to upstream)
+on: push
 
 jobs:
   build_cfengine_hub_package:
