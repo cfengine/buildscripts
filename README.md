@@ -1,3 +1,5 @@
+Dummy.
+
 This repository contains the necessary tools to build and test cfengine packages for various platforms.
 
 ## Hardware requirements
