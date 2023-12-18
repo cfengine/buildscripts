@@ -3,3 +3,4 @@ revision
 *.html
 ci/cache
 ci/packages
+.DS_Store
