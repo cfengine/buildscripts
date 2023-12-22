@@ -1,18 +1,18 @@
 Summary: CFEngine Build Automation -- autoconf
 Name: cfbuild-autoconf
-Version: 2.69
+Version: 2.71
 Release: 1
-Source0: autoconf-2.69.tar.gz
+Source0: autoconf-2.71.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
-BuildRoot: %{_topdir}/BUILD/%{name}-2.60-buildroot
+BuildRoot: %{_topdir}/BUILD/%{name}-2.71-buildroot
 
 AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n autoconf-2.60
+%setup -q -n autoconf-2.71
 
 ./configure --prefix=/usr
 

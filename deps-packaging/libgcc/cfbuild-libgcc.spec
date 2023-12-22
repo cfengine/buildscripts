@@ -2,7 +2,7 @@
 
 Summary: The CFEngine Configuration System
 Name: cfbuild-libgcc
-Version: 4.2.0
+Version: 4.2.4
 Release: 0
 Vendor: IBM
 License: Proprietary
