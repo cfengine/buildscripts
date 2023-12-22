@@ -133,7 +133,7 @@ jobs:
           key: packages-${{ env.PACKAGE_SHA }}
 
       - name: Save artifacts
-        if: ${{ success() || failure() && steps.build_package.conclusion != 'success' }}
+        if: success() || failure()
         uses: actions/upload-artifact@v3
         with:
           name: artifacts
