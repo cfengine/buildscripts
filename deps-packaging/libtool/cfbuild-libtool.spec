@@ -1,18 +1,18 @@
 Summary: CFEngine Build Automation -- libtool
 Name: cfbuild-libtool
-Version: 1.5.24
+Version: 1.5.26
 Release: 1
-Source0: libtool-1.5.24.tar.gz
+Source0: libtool-1.5.26.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
-BuildRoot: %{_topdir}/BUILD/%{name}-1.5.24-buildroot
+BuildRoot: %{_topdir}/BUILD/%{name}-1.5.26-buildroot
 
 AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n libtool-1.5.24
+%setup -q -n libtool-1.5.26
 
 ./configure --prefix=/usr
 

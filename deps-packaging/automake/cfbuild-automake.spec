@@ -1,18 +1,18 @@
 Summary: CFEngine Build Automation -- automake
 Name: cfbuild-automake
-Version: 1.10.1
+Version: 1.10.3
 Release: 1
-Source0: automake-1.10.1.tar.gz
+Source0: automake-1.10.3.tar.gz
 License: MIT
 Group: Other
 Url: http://example.com/
-BuildRoot: %{_topdir}/BUILD/%{name}-1.10.1-buildroot
+BuildRoot: %{_topdir}/BUILD/%{name}-1.10.3-buildroot
 
 AutoReqProv: no
 
 %prep
 mkdir -p %{_builddir}
-%setup -q -n automake-1.10.1
+%setup -q -n automake-1.10.3
 
 ./configure --prefix=/usr
 
