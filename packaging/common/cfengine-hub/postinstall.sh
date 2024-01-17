@@ -692,9 +692,10 @@ do_migration() {
       exit 0 # exits only from (...)
     fi
     cf_console echo "Migration using pg_upgrade failed."
-    # skip ubuntu-16 and debian-9 since there is an expected failure there
+    # skip ubuntu-16, debian-9 and debian-12 since there is an expected failure there
     # check for "/var/cfengine/state/pg/backup/bin/postgres" failed: cannot execute
     if { [ "$BUILT_ON_OS" = "debian" ] && [ "$BUILT_ON_OS_VERSION" = "9" ]; } || \
+       { [ "$BUILT_ON_OS" = "debian" ] && [ "$BUILT_ON_OS_VERSION" = "12" ]; } || \
        { [ "$BUILT_ON_OS" = "ubuntu" ] && [ "$BUILT_ON_OS_VERSION" = "16" ]; }; then
       true # no-op
     else
