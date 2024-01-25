@@ -65,6 +65,7 @@ bundle agent cfengine_build_host_setup
       "expat-devel";
       "gcc-c++";
       "gettext";
+      "libtool-ltdl" package_policy => "delete";
       "ncurses";
       "perl-Digest-MD5";
       "perl-Module-Load-Conditional";
@@ -109,7 +110,6 @@ bundle agent cfengine_build_host_setup
       "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
       "openssl-devel";
-      "libtool-ltdl" package_policy => "delete", comment => "maybe redhat/centos 7 as well?";
 
     redhat_9::
       "python3-psycopg2";
