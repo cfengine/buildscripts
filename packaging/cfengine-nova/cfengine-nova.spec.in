@@ -126,6 +126,10 @@ exit 0
 %prefix/bin/mdb_dump
 %prefix/bin/mdb_load
 
+# Python stuff (if any)
+%dir %prefix/lib/python
+%prefix/lib/python/*
+
 # diffutils
 %prefix/bin/diff
 %prefix/bin/sdiff

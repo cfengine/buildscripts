@@ -150,7 +150,7 @@ touch $RPM_BUILD_ROOT/var/log/postgresql.log
 # Make sure cfbs is available and in place
 mkdir -p $RPM_BUILD_ROOT/tmp/cfbs_root
 pip3 install --root $RPM_BUILD_ROOT/tmp/cfbs_root -r %{_basedir}/buildscripts/packaging/cfengine-nova-hub/requirements.txt
-mkdir $RPM_BUILD_ROOT%prefix/lib/python
+mkdir -p $RPM_BUILD_ROOT%{prefix}/lib/python
 mv $RPM_BUILD_ROOT/tmp/cfbs_root/usr/lib/python*/site-packages/cfbs $RPM_BUILD_ROOT%prefix/lib/python
 mv $RPM_BUILD_ROOT/tmp/cfbs_root/usr/bin/cfbs $RPM_BUILD_ROOT%prefix/bin/
 sed -i "/^from cfbs.*/i sys.path.append(\"%prefix/lib/python\")" $RPM_BUILD_ROOT%prefix/bin/cfbs
@@ -289,6 +289,7 @@ exit 0
 %prefix/lib/lib*.so*
 %prefix/lib/cfengine-enterprise.so
 %prefix/lib/cfengine-report-collect.so
+
 # PHP modules
 %prefix/lib/php
 #libs needed by apache ldapmodules
@@ -296,10 +297,10 @@ exit 0
 #libs of postgres
 %{prefix}/lib/postgresql/*
 
-# Python stuff (cfbs)
-%if %{?rhel}%{!?rhel:0} >= 7
+# Python stuff (bindings + cfbs)
 %dir %prefix/lib/python
 %prefix/lib/python/*
+%if %{?rhel}%{!?rhel:0} >= 7
 %attr(755,root,root) %prefix/bin/cfbs
 %endif
 

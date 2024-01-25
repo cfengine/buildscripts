@@ -23,6 +23,7 @@
 /var/cfengine/bin/cf-support
 /var/cfengine/bin/cf-upgrade
 /var/cfengine/lib/lib*.so.*
+/var/cfengine/lib/python/*
 /var/cfengine/lib/cfengine-enterprise.so
 /var/cfengine/lib/liblmdb.so
 /var/cfengine/share/doc
