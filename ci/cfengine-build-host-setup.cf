@@ -89,7 +89,6 @@ bundle agent cfengine_build_host_setup
       "epel-release";
       "ccache";
       "fakeroot";
-      "ShellCheck" comment => "for what purpose? and why not redhat_6? unused platform? also not rhel 8 and 9 so ???";
 
     redhat_7|centos_7|redhat_9::
       "python3-pip";
@@ -109,6 +108,7 @@ bundle agent cfengine_build_host_setup
       "perl";
       "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
+      "ShellCheck" comment => "only rhel-8 and rhel-9 have a new enough version to be useful. via epel-release https://packages.fedoraproject.org/pkgs/ShellCheck/ShellCheck/";
       "openssl-devel";
 
     redhat_9::
