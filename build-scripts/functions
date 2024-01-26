@@ -589,6 +589,8 @@ retry_wrapper()
             return 0
         else
             err_ret=$?
+            # in case say dpkg locks are held by automatic updates or something
+            ps -efl | grep -P '(apt|dpkg|yum|dnf|zypper|rpm|pkg)'
             maxtries=`expr $maxtries - 1`
 	    echo "* FAILURE $err_ret"
             echo "* Sleeping for:  $pause seconds"
