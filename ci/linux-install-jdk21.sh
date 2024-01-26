@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+set -e
 # install jdk "manually"
 # depending on os, might want to do something like `apt remove default-jre openjdk-*-jre-*`
 cd /opt
@@ -11,5 +13,5 @@ export PATH=\$PATH:\$JAVA_HOME/bin
 EOF
 sudo chown -R root:jenkins /opt/jdk-21.0.1
 sudo chmod -R g+rx /opt/jdk-21.0.1
-sudo update-alternatives --install /usr/bin/java java /opt/jdk-21.0.1/bin/java 1
+sudo update-alternatives --install /usr/bin/java java /opt/jdk-21.0.1/bin/java 9999
 cd -
