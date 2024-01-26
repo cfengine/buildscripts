@@ -136,6 +136,9 @@ bundle agent cfengine_build_host_setup
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
     redhat_8|centos_8::
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
+    ubuntu_20::
+      "have_python2_pip_and_psycopg2" expression => returnszero("/usr/local/bin/pip list psycopg2", "useshell")
+        comment => "the way we install pip in ubuntu-20 case it will be at /usr/local/bin/pip so this class will not be defined both if pip(2) is not installed AND if psycopg2 for python2 is not installed.";
 
   commands:
     !have_opt_jdk21.(debian_9|ubuntu_16)::
@@ -145,6 +148,8 @@ bundle agent cfengine_build_host_setup
     (redhat_8|centos_8).!have_fakeroot:: # special fakeroot, missing from _8 an d up?
       "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
         contain => in_shell;
+    ubuntu_20.!have_python2_pip_and_psycopg2::
+      "sh $(this.promise_dirname)/install-python2-pip-and-psycopg2.sh" contain => in_shell;
 
 
   classes:
