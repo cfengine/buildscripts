@@ -44,6 +44,8 @@ grep -i error: promises.log && exit 1
 
 # run three times to ensure all is done
 policy="$(dirname "$0")"/cfengine-build-host-setup.cf
+# just to be sure, make policy read/write for our user only to avoid errors when running
+chmod 600 "$policy"
 sudo /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
 grep -i error: promises.log && exit 1
 sudo /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
