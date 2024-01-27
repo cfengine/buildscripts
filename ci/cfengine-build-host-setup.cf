@@ -75,7 +75,6 @@ bundle agent cfengine_build_host_setup
 
     redhat_6|centos_6|redhat_7|centos_7::
       "gdb";
-      "java-11-openjdk" comment => "ok for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
       "ntp";
       "pkgconfig";
       "perl-IO-Compress";
@@ -91,6 +90,7 @@ bundle agent cfengine_build_host_setup
       "epel-release";
       "ccache";
       "fakeroot";
+      "java-11-openjdk" comment => "ok for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
 
     redhat_7|centos_7|redhat_9::
       "python3-pip";
@@ -132,7 +132,7 @@ bundle agent cfengine_build_host_setup
     any::
       "mingw_build_host" expression => fileexists("/etc/cfengine-mingw-build-host.flag");
       "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
-    debian_9|ubuntu_16::
+    debian_9|ubuntu_16|redhat_6|centos_6::
       "have_opt_jdk21" expression => fileexists("/opt/jdk-21.0.1");
     redhat_7|centos_7|redhat_8|centos_8|redhat_9::
       "have_development_tools" expression => returnszero("yum groups list installed | grep 'Development Tools' >/dev/null", "useshell"),
@@ -145,7 +145,7 @@ bundle agent cfengine_build_host_setup
       "have_python2_psycopg2" expression => returnszero("/usr/local/bin/pip list psycopg2", "useshell");
 
   commands:
-    !have_opt_jdk21.(debian_9|ubuntu_16)::
+    !have_opt_jdk21.(debian_9|ubuntu_16|redhat_6|centos_6)::
       "sh $(this.promise_dirname)/linux-install-jdk21.sh" contain => in_shell;
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9).!have_development_tools::
       "yum groups install -y 'Development Tools'" contain => in_shell;
