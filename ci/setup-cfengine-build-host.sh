@@ -25,7 +25,7 @@ fi
 # get masterfiles
 urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.4/misc/cfengine-masterfiles-3.21.4-1.pkg.tar.gz
 
-echo "a4b35ad85ec14dda49b93c1c91a93e09f4336d9ee88cd6a3b27d323c90a279ca	cfengine-masterfiles-3.21.4-1.pkg.tar.gz" | sha256sum --check -
+echo "a4b35ad85ec14dda49b93c1c91a93e09f4336d9ee88cd6a3b27d323c90a279ca  cfengine-masterfiles-3.21.4-1.pkg.tar.gz" | sha256sum --check -
 
 tar xf cfengine-masterfiles-3.21.4-1.pkg.tar.gz
 sudo cp -a masterfiles/* /var/cfengine/inputs/
