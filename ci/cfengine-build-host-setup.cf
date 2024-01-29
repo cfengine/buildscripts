@@ -177,9 +177,17 @@ bundle agent cfengine_build_host_setup
         delete => tidy;
       "/etc/apt/sources.list"
         content => "deb http://archive.debian.org/debian/ stretch main contrib non-free";
-    suse|opensuse|sles::
+    suse_15|opensuse_15|sles_15::
       "/home/jenkins/.rpmmacros"
         content => "%dist .suse15",
+        comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
+    suse_12|opensuse_12|sles_12::
+      "/home/jenkins/.rpmmacros"
+        content => "%dist .suse12",
+        comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
+    suse_11|opensuse_11|sles_11::
+      "/home/jenkins/.rpmmacros"
+        content => "%dist .suse11",
         comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
 
   commands:
