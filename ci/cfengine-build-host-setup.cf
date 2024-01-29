@@ -122,6 +122,10 @@ bundle agent cfengine_build_host_setup
       "pkg-config";
       "patch";
       "gdb";
+
+    suse_12|opensuse_12|sles_12::
+      "java-11-openjdk";
+    suse_15|opensuse_15|sles_15::
       "java-17-openjdk";
 
 
