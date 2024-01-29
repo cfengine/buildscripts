@@ -12,9 +12,19 @@ else
   exit 1
 fi
 if grep -i suse /etc/os-release; then
-  # todo check version of suse, 12 or 15
-  urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.4/agent/agent_suse15_x86_64/cfengine-nova-3.21.4-1.suse15.x86_64.rpm
-  sudo zypper install -y cfengine-nova-3.21.4-1.suse15.x86_64.rpm
+  # need to add our public key first otherwise zypper install fails
+  sudo rpm --import https://cfengine-package-repos.s3.amazonaws.com/pub/gpg.key
+  if grep 'VERSION.*12' /etc/os-release; then
+    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.4/agent/agent_suse12_x86_64/cfengine-nova-3.21.4-1.suse12.x86_64.rpm
+    sudo zypper install -y cfengine-nova-3.21.4-1.suse12.x86_64.rpm
+  elif grep 'VERSION.*15' /etc/os-release; then
+    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.4/agent/agent_suse15_x86_64/cfengine-nova-3.21.4-1.suse15.x86_64.rpm
+    sudo zypper install -y cfengine-nova-3.21.4-1.suse15.x86_64.rpm
+  else
+    echo "Unsupported suse version:"
+    grep VERSION /etc/os-release
+    exit 1
+  fi
 else
   urlget https://s3.amazonaws.com/cfengine.packages/quick-install-cfengine-enterprise.sh
   echo "c358ca0e0dce49e8784ff2352e7c94356332ded80f5ca3903b0b3dc8d6a10cf4  quick-install-cfengine-enterprise.sh" | sha256sum --check -
@@ -59,7 +69,7 @@ if command -v apt 2>/dev/null; then
 elif command -v yum 2>/dev/null; then
   sudo yum erase -y cfengine-nova
 elif command -v zypper 2>/dev/null; then
-  sudo zypper remove -n cfengine-nova
+  sudo zypper remove -y cfengine-nova
 else
   echo "No supported package manager to uninstall cfengine."
 fi
