@@ -14,5 +14,7 @@ sudo chown -R root:jenkins /opt/jdk-21.0.1
 sudo chmod -R g+rx /opt/jdk-21.0.1
 if command -v update-alternatives; then
   sudo update-alternatives --install /usr/bin/java java /opt/jdk-21.0.1/bin/java 9999
+else
+  sudo ln -s /opt/jdk-21.0.1/bin/java /usr/bin/java
 fi
 cd -
