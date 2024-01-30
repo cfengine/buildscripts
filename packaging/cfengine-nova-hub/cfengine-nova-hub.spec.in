@@ -38,7 +38,7 @@ Requires: libcrypto.so.3()(64bit) libcrypto.so.3(OPENSSL_3.0.0)(64bit) libcrypto
 Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_3.0.0)(64bit)
 %endif
 
-# cfbs/Build requires Python 3.5+
+# cfbs/Build requires Python 3.5+ (not available on RHEL 6)
 %if %{?rhel}%{!?rhel:0} == 7
 Requires: python3 >= 3.5
 %endif
@@ -146,6 +146,7 @@ cp %{_basedir}/nova/db/ootb_import.sql $RPM_BUILD_ROOT%prefix/share/db/
 mkdir -p $RPM_BUILD_ROOT/var/log/
 touch $RPM_BUILD_ROOT/var/log/postgresql.log
 
+# RHEL 6 doesn't have Python 3 so no cfbs there.
 %if %{?rhel}%{!?rhel:0} >= 7
 # Make sure cfbs is available and in place
 mkdir -p $RPM_BUILD_ROOT/tmp/cfbs_root
