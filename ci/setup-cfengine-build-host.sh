@@ -8,6 +8,19 @@ if [ -d /var/cfengine ]; then
   echo "Error: CFEngine already installed on this host. Will not proceed trying to setup build host with CFEngine temporary install."
   exit 1
 fi
+
+echo "First, install any distribution upgrades"
+if grep rhel /etc/os-release; then
+  sudo yum upgrade --assumeyes
+elif grep debian /etc/os-release; then
+  sudo apt upgrade --yes && sudo apt autoremove --yes
+elif grep suse /etc/os-release; then
+  zypper -n update
+else
+  echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
+  exit 1
+fi
+
 if command -v wget; then
   alias urlget=wget
 elif command -v curl; then
@@ -44,18 +57,6 @@ echo "a4b35ad85ec14dda49b93c1c91a93e09f4336d9ee88cd6a3b27d323c90a279ca  cfengine
 
 tar xf cfengine-masterfiles-3.21.4-1.pkg.tar.gz
 sudo cp -a masterfiles/* /var/cfengine/inputs/
-
-# how to get the URL for the module? See cfbs code
-# _MODULES_URL = "https://archive.build.cfengine.com/modules"
-# _MODULES_URL, name, commit + ".tar.gz"
-urlget https://archive.build.cfengine.com/modules/upgrade-all-packages/e3039050296ec20c7e44b3accba84c146cf6ef69.tar.gz
-echo "ca9801c956b1bf32deb3ea6c171e6e1c685288e941e3e9e9bf4d5746445babc2  e3039050296ec20c7e44b3accba84c146cf6ef69.tar.gz" | sha256sum --check -
-tar xf e3039050296ec20c7e44b3accba84c146cf6ef69.tar.gz
-
-# upgrade all packages
-sudo cp upgrade-all-packages/upgrade_all_packages.cf /var/cfengine/inputs/services/main.cf
-sudo /var/cfengine/bin/cf-agent -KIb upgrade_all_packages_policy | tee promises.log
-grep -i error: promises.log && exit 1
 
 # run three times to ensure all is done
 policy="$(dirname "$0")"/cfengine-build-host-setup.cf
