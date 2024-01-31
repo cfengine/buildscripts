@@ -114,6 +114,10 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 # diffutils
 %prefix/bin/diff
 
+# Python stuff (if any)
+%dir %prefix/lib/python
+%prefix/lib/python/*
+
 %if %{?rhel}%{!?rhel:0} > 7
 # SELinux policy
 %dir %prefix/selinux
