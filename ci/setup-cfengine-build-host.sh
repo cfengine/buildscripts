@@ -3,6 +3,11 @@ shopt -s expand_aliases
 # install needed packages and software for a build host
 set -e
 
+
+if [ -d /var/cfengine ]; then
+  echo "Error: CFEngine already installed on this host. Will not proceed trying to setup build host with CFEngine temporary install."
+  exit 1
+fi
 if command -v wget; then
   alias urlget=wget
 elif command -v curl; then
@@ -72,7 +77,10 @@ elif command -v zypper 2>/dev/null; then
   sudo zypper remove -y cfengine-nova
 else
   echo "No supported package manager to uninstall cfengine."
+  exit 1
 fi
+echo "Ensuring CFEngine fully uninstalled/cleaned up"
+sudo rm -rf /var/cfengine /opt/cfengine /var/log/CFE* /var/log/postgresql.log
 sudo pkill -9 cf-agent || true
 sudo pkill -9 cf-serverd || true
 sudo pkill -9 cf-monitord || true

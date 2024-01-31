@@ -98,16 +98,15 @@ bundle agent cfengine_build_host_setup
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
       "perl-ExtUtils-MakeMaker";
       "psmisc";
-      "python3" comment => "what does redhat_6 get?";
-      "tmux" comment => "why?! :O";
       "which";
 
     (redhat_8|centos_8).(yum_conf_ok.dnf_conf_ok)::
-      "python2";
-      "python2-psycopg2";
+      "python2-psycopg2" comment => "This will bring in python2";
 
     (redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
-      "perl";
+      "java-1.8.0-openjdk-headless" package_policy => "delete",
+        comment => "Installing Development Tools includes this jdk1.8 which we do not want.";
+      "java-17-openjdk";
       "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
       "openssl-devel";
@@ -143,8 +142,10 @@ bundle agent cfengine_build_host_setup
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
       "have_development_tools" expression => returnszero("yum groups list installed | grep 'Development Tools' >/dev/null", "useshell"),
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
-    (redhat_8|centos_8).(yum_conf_ok.dnf_conf_ok)::
+    redhat_8|centos_8::
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
+    redhat_8|centos_8|redhat_9::
+      "redhat_has_python3" expression => returnszero("command -v python3 >/dev/null", "useshell");
     ubuntu_20::
       "have_python2_pip" expression => fileexists("/usr/local/bin/pip");
     ubuntu_20.have_python2_pip::
@@ -158,6 +159,10 @@ bundle agent cfengine_build_host_setup
     (redhat_8|centos_8).!have_fakeroot:: # special fakeroot, missing from _8 an d up?
       "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
         contain => in_shell;
+    (redhat_8|centos_8|redhat_9).!redhat_has_python3::
+      "yum install -y python3" -> { "CFE-4313" }
+        contain => in_shell,
+        comment => "workaround for yum package_method trying to install python3-*.* which causes conflicts.";
     ubuntu_20.!have_python2_pip::
       "sh $(this.promise_dirname)/install-python2-pip.sh" contain => in_shell,
         comment => "pip(2) is required for psycopg2 for nova/tests/reporting.";
