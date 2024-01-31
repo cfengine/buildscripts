@@ -198,7 +198,7 @@ bundle agent cfengine_build_host_setup
     redhat_8|centos_8|redhat_9::
       "/etc/yum.conf" edit_line => set_variable_values(yum_conf),
         classes => if_ok("yum_conf_ok");
-      "/etc/dnf.conf" edit_line => set_variable_values(dnf_conf),
+      "/etc/dnf/dnf.conf" edit_line => set_variable_values(dnf_conf),
         classes => if_ok("dnf_conf_ok");
 
   commands:
