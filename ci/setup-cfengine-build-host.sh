@@ -10,6 +10,7 @@ fi
 
 function cleanup()
 {
+  set -ex
   if command -v apt 2>/dev/null; then
     sudo apt remove -y cfengine-nova || true
   elif command -v yum 2>/dev/null; then
@@ -38,7 +39,7 @@ echo "First, install any distribution upgrades"
 if grep rhel /etc/os-release; then
   sudo yum upgrade --assumeyes
 elif grep debian /etc/os-release; then
-  sudo apt upgrade --yes && sudo apt autoremove --yes
+  sudo DEBIAN_FRONTEND=noninteractive apt upgrade --yes && sudo DEBIAN_FRONTEND=noninteractive apt autoremove --yes
 elif grep suse /etc/os-release; then
   zypper -n update
 else
@@ -94,3 +95,4 @@ grep -i error: promises.log && exit 1
 sudo /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
 grep -i error: promises.log && exit 1
 
+exit 0
