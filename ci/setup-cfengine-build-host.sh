@@ -36,14 +36,21 @@ trap cleanup SIGTERM
 
 
 echo "First, install any distribution upgrades"
-if grep rhel /etc/os-release; then
+if [ -f /etc/os-release ]; then
+  if grep rhel /etc/os-release; then
+    sudo yum upgrade --assumeyes
+  elif grep debian /etc/os-release; then
+    sudo DEBIAN_FRONTEND=noninteractive apt upgrade --yes && sudo DEBIAN_FRONTEND=noninteractive apt autoremove --yes
+  elif grep suse /etc/os-release; then
+    zypper -n update
+  else
+    echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
+    exit 1
+  fi
+elif [ -f /etc/redhat-release ]; then
   sudo yum upgrade --assumeyes
-elif grep debian /etc/os-release; then
-  sudo DEBIAN_FRONTEND=noninteractive apt upgrade --yes && sudo DEBIAN_FRONTEND=noninteractive apt autoremove --yes
-elif grep suse /etc/os-release; then
-  zypper -n update
 else
-  echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
+  echo "No /etc/os-release or /etc/redhat-release so cant determine platform."
   exit 1
 fi
 
