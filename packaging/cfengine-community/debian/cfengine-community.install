@@ -25,6 +25,7 @@
 /var/cfengine/bin/getfacl
 /var/cfengine/lib/lib*.so.*
 /var/cfengine/lib/liblmdb.so
+/var/cfengine/lib/python/*
 /var/cfengine/share/doc
 /var/cfengine/share/CoreBase
 /var/cfengine/inputs
