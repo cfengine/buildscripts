@@ -1,13 +1,38 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
 # install needed packages and software for a build host
-set -e
-
+set -ex
 
 if [ -d /var/cfengine ]; then
   echo "Error: CFEngine already installed on this host. Will not proceed trying to setup build host with CFEngine temporary install."
   exit 1
 fi
+
+function cleanup()
+{
+  if command -v apt 2>/dev/null; then
+    sudo apt remove -y cfengine-nova || true
+  elif command -v yum 2>/dev/null; then
+    sudo yum erase -y cfengine-nova || true
+  elif command -v zypper 2>/dev/null; then
+    sudo zypper remove -y cfengine-nova || true
+  else
+    echo "No supported package manager to uninstall cfengine."
+    exit 1
+  fi
+  echo "Ensuring CFEngine fully uninstalled/cleaned up"
+  sudo rm -rf /var/cfengine /opt/cfengine /var/log/CFE* /var/log/postgresql.log || true
+  sudo pkill -9 cf-agent || true
+  sudo pkill -9 cf-serverd || true
+  sudo pkill -9 cf-monitord || true
+  sudo pkill -9 cf-execd || true
+}
+
+trap cleanup EXIT
+trap cleanup ERR
+trap cleanup SIGINT
+trap cleanup SIGTERM
+
 
 echo "First, install any distribution upgrades"
 if grep rhel /etc/os-release; then
@@ -69,20 +94,3 @@ grep -i error: promises.log && exit 1
 sudo /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
 grep -i error: promises.log && exit 1
 
-if command -v apt 2>/dev/null; then
-  sudo apt remove -y cfengine-nova
-  sudo rm -rf /var/cfengine /opt/cfengine /var/log/CFE*log
-elif command -v yum 2>/dev/null; then
-  sudo yum erase -y cfengine-nova
-elif command -v zypper 2>/dev/null; then
-  sudo zypper remove -y cfengine-nova
-else
-  echo "No supported package manager to uninstall cfengine."
-  exit 1
-fi
-echo "Ensuring CFEngine fully uninstalled/cleaned up"
-sudo rm -rf /var/cfengine /opt/cfengine /var/log/CFE* /var/log/postgresql.log
-sudo pkill -9 cf-agent || true
-sudo pkill -9 cf-serverd || true
-sudo pkill -9 cf-monitord || true
-sudo pkill -9 cf-execd || true
