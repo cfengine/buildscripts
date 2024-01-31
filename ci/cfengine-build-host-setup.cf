@@ -196,9 +196,9 @@ bundle agent cfengine_build_host_setup
         content => "%dist .suse11",
         comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
     redhat_8|centos_8|redhat_9::
-      "/etc/yum.conf" edit_line => set_variable_values(yum_conf)
+      "/etc/yum.conf" edit_line => set_variable_values(yum_conf),
         classes => if_ok("yum_conf_ok");
-      "/etc/dnf.conf" edit_line => set_variable_values(dnf_conf)
+      "/etc/dnf.conf" edit_line => set_variable_values(dnf_conf),
         classes => if_ok("dnf_conf_ok");
 
   commands:
