@@ -63,7 +63,7 @@ bundle agent cfengine_build_host_setup
       "make";
       "rpm-build";
 
-    redhat|centos::
+    (redhat|centos).(yum_conf_ok.dnf_conf_ok)::
       "expat-devel";
       "gcc-c++";
       "gettext";
@@ -73,7 +73,7 @@ bundle agent cfengine_build_host_setup
       "perl-Module-Load-Conditional";
       "wget";
 
-    redhat_6|centos_6|redhat_7|centos_7::
+    (redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok.dnf_conf_ok)::
       "gdb";
       "ntp";
       "pkgconfig";
@@ -86,33 +86,33 @@ bundle agent cfengine_build_host_setup
       "xfsprogs";
 
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
-    redhat_7|centos_7::
+    (redhat_7|centos_7).(yum_conf_ok.dnf_conf_ok)::
       "epel-release";
       "ccache";
       "fakeroot";
       "java-11-openjdk" comment => "ok for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
 
-    redhat_7|centos_7|redhat_9::
+    (redhat_7|centos_7|redhat_9).(yum_conf_ok.dnf_conf_ok)::
       "python3-pip";
 
-    redhat_7|centos_7|redhat_8|centos_8|redhat_9::
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
       "perl-ExtUtils-MakeMaker";
       "psmisc";
       "python3" comment => "what does redhat_6 get?";
       "tmux" comment => "why?! :O";
       "which";
 
-    redhat_8|centos_8::
+    (redhat_8|centos_8).(yum_conf_ok.dnf_conf_ok)::
       "python2";
       "python2-psycopg2";
 
-    redhat_8|centos_8|redhat_9::
+    (redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
       "perl";
       "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
       "openssl-devel";
 
-    redhat_9::
+    (redhat_9).(yum_conf_ok.dnf_conf_ok)::
       "python3-psycopg2";
 
     suse|opensuse|sles::
@@ -130,6 +130,9 @@ bundle agent cfengine_build_host_setup
 
   vars:
     "suse_users_and_groups" slist => { "daemon", "bin", "sys" };
+    redhat_8|centos_8|redhat_9::
+      "yum_conf[best]" string => "False";
+      "dnf_conf[best]" string => "False";
 
   classes:
     any::
@@ -137,10 +140,10 @@ bundle agent cfengine_build_host_setup
       "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
     debian_9|ubuntu_16|redhat_6|centos_6::
       "have_opt_jdk21" expression => fileexists("/opt/jdk-21.0.1");
-    redhat_7|centos_7|redhat_8|centos_8|redhat_9::
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
       "have_development_tools" expression => returnszero("yum groups list installed | grep 'Development Tools' >/dev/null", "useshell"),
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
-    redhat_8|centos_8::
+    (redhat_8|centos_8).(yum_conf_ok.dnf_conf_ok)::
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
     ubuntu_20::
       "have_python2_pip" expression => fileexists("/usr/local/bin/pip");
@@ -150,7 +153,7 @@ bundle agent cfengine_build_host_setup
   commands:
     !have_opt_jdk21.(debian_9|ubuntu_16|redhat_6|centos_6)::
       "sh $(this.promise_dirname)/linux-install-jdk21.sh" contain => in_shell;
-    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).!have_development_tools::
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(!have_development_tools).(yum_conf_ok.dnf_conf_ok)::
       "yum groups install -y 'Development Tools'" contain => in_shell;
     (redhat_8|centos_8).!have_fakeroot:: # special fakeroot, missing from _8 an d up?
       "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
@@ -192,10 +195,13 @@ bundle agent cfengine_build_host_setup
       "/home/jenkins/.rpmmacros"
         content => "%dist .suse11",
         comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
+    redhat_8|centos_8|redhat_9::
+      "/etc/yum.conf" edit_line => set_variable_values(yum_conf)
+        classes => if_ok("yum_conf_ok");
+      "/etc/dnf.conf" edit_line => set_variable_values(dnf_conf)
+        classes => if_ok("dnf_conf_ok");
 
   commands:
-    redhat_9::
-      "sudo yum --nobest -e 0 -d 0 -y update" contain => in_shell; # 2022-11-15 rhel-9 needed --nobest in order to complete update/upgrade
     redhat_8|redhat_9::
       "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell;
 # todo, need 2.7pip psycopg2-binary for ubuntu-20 as well?
