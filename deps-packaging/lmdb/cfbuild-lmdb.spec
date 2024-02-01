@@ -1,3 +1,4 @@
+%global debug_package %{nil}
 %define lmdb_version 0.9.31
 
 Summary: CFEngine Build Automation -- lmdb
@@ -56,7 +57,7 @@ if [ -z $MAKE ]; then
   export MAKE=$MAKE_PATH
 fi
 
-./configure --prefix=%{prefix} --libdir=%{buildprefix}/lib
+CFLAGS="-ggdb3" ./configure --prefix=%{prefix} --libdir=%{buildprefix}/lib
 $MAKE
 
 %install

@@ -108,6 +108,10 @@ if [ "$OS" = "rhel" ] && [ "$PKGNAME" = "git" ]; then
   export RPM_BUILD_NCPUS=1
 fi
 
+if [ "$PKGNAME" = "lmdb" ]; then
+  RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define '__strip /bin/true'"
+fi
+
 # eval and double quoting is needed to separate args,
 # example cmd --define 'a b':
 #     - argv[1] = --define
