@@ -29,7 +29,6 @@ function cleanup()
   sudo pkill -9 cf-execd || true
 }
 
-trap cleanup EXIT
 trap cleanup ERR
 trap cleanup SIGINT
 trap cleanup SIGTERM
@@ -102,4 +101,4 @@ grep -i error: promises.log && exit 1
 sudo /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
 grep -i error: promises.log && exit 1
 
-exit 0
+cleanup

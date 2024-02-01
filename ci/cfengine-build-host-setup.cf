@@ -70,6 +70,7 @@ bundle agent cfengine_build_host_setup
       "libtool-ltdl" package_policy => "delete";
       "ncurses";
       "perl-Digest-MD5";
+      "perl-IO-Compress" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov-1.16-1";
       "perl-Module-Load-Conditional";
       "wget";
 
