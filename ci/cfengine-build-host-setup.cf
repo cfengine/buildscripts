@@ -184,6 +184,9 @@ bundle agent cfengine_build_host_setup
       "have_$(suse_users_and_groups)_user" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/passwd >/dev/null", "useshell");
 
   files:
+    ubuntu_16|redhat_9::
+      "/etc/hosts"
+        edit_line => regex_replace("127.0.0.1 localhost localhost.localdomain","127.0.0.1 localhost.localdomain");
     debian_9::
       "/etc/apt/sources.list.d/*"
         delete => tidy;
