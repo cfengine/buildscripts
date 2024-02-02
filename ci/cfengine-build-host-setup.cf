@@ -151,6 +151,8 @@ bundle agent cfengine_build_host_setup
       "dnf_conf_ok" expression => returnszero("grep best=False /etc/dnf/dnf.conf", "useshell");
     redhat_8|centos_8::
       "have_perl_package_installed" expression => returnszero("rpm -q perl >/dev/null", "useshell");
+    redhat_9::
+      "have_python3_pip_package_installed" expression => returnszero("rpm -q python3-pip >/dev/null", "useshell");
     ubuntu_20::
       "have_python2_pip" expression => fileexists("/usr/local/bin/pip");
     ubuntu_20.have_python2_pip::
@@ -217,6 +219,8 @@ bundle agent cfengine_build_host_setup
     (redhat_8|centos_8).(!have_perl_package_installed).(yum_conf_ok.dnf_conf_ok)::
       "yum install -y perl" contain => in_shell,
         comment => "Apparently rhel-8 is a bit psychotic in that it has perl installed in /bin/perl in the base install but the perl package is not installed. Cant use package_method as perl would cause perl-*.* to be installed, e.g. every perl module which would certainly cause conflicts and nobest problems.";
+    redhat_9.!have_python3_pip_package_installed.(yum_conf_ok.dnf_conf_ok)::
+      "yum install -y python3-pip" contain => in_shell;
     redhat_8|centos_8|redhat_9::
       "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell;
 # todo, need 2.7pip psycopg2-binary for ubuntu-20 as well?
