@@ -129,6 +129,9 @@ bundle agent cfengine_build_host_setup
 
   vars:
     "suse_users_and_groups" slist => { "daemon", "bin", "sys" };
+    redhat_8|centos_8|redhat_9::
+      "yum_conf[best]" string => "False";
+      "dnf_conf[best]" string => "False";
 
   classes:
     any::
@@ -143,8 +146,6 @@ bundle agent cfengine_build_host_setup
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
     redhat_8|centos_8|redhat_9::
       "redhat_has_python3" expression => returnszero("command -v python3 >/dev/null", "useshell");
-      "yum_conf_ok" expression => returnszero("grep best=False /etc/yum.conf", "useshell");
-      "dnf_conf_ok" expression => returnszero("grep best=False /etc/dnf/dnf.conf", "useshell");
     ubuntu_20::
       "have_python2_pip" expression => fileexists("/usr/local/bin/pip");
     ubuntu_20.have_python2_pip::
@@ -162,10 +163,6 @@ bundle agent cfengine_build_host_setup
       "yum install -y python3" -> { "CFE-4313" }
         contain => in_shell,
         comment => "workaround for yum package_method trying to install python3-*.* which causes conflicts.";
-    (redhat_8|centos_8|redhat_9).!yum_conf_ok::
-      "sed -i '/best=True/s/True/False/' /etc/yum.conf" contain => in_shell;
-    (redhat_8|centos_8|redhat_9).!dnf_conf_ok::
-      "sed -i '/best=True/s/True/False/' /etc/dnf/dnf.conf" contain => in_shell;
     ubuntu_20.!have_python2_pip::
       "sh $(this.promise_dirname)/install-python2-pip.sh" contain => in_shell,
         comment => "pip(2) is required for psycopg2 for nova/tests/reporting.";
@@ -203,6 +200,11 @@ bundle agent cfengine_build_host_setup
       "/home/jenkins/.rpmmacros"
         content => "%dist .suse11",
         comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
+    redhat_8|centos_8|redhat_9::
+      "/etc/yum.conf" edit_line => set_variable_values(yum_conf),
+        classes => if_ok("yum_conf_ok");
+      "/etc/dnf/dnf.conf" edit_line => set_variable_values(dnf_conf),
+        classes => if_ok("dnf_conf_ok");
 
   commands:
     redhat_8|redhat_9::
