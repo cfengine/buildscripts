@@ -9,7 +9,7 @@ bundle agent cfengine_build_host_setup
     "assumptions" string => "The operating system has working repository lists and has been updated and upgraded recently.";
 
   packages:
-    debian_9|debian_10::
+    debian_9|debian_10|ubuntu_16::
       "python-psycopg2";
     debian_11|debian_12::
       "python3-psycopg2";
