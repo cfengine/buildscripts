@@ -1,4 +1,3 @@
-%global debug_package %{nil}
 %define lmdb_version 0.9.31
 
 Summary: CFEngine Build Automation -- lmdb
@@ -17,6 +16,13 @@ Patch0: mdb.patch
 
 %define prefix %{buildprefix}
 %define srcdir openldap-LMDB_%{lmdb_version}/libraries/liblmdb
+
+%if %{?with_debugsym}%{!?with_debugsym:0}
+%define debug_package %{nil}
+%define cflags CFLAGS="-ggdb3"
+%else
+%define cflags CFLAGS=""
+%endif
 
 %ifarch %ix86
 %define lbits %{nil}
@@ -57,7 +63,7 @@ if [ -z $MAKE ]; then
   export MAKE=$MAKE_PATH
 fi
 
-CFLAGS="-ggdb3" ./configure --prefix=%{prefix} --libdir=%{buildprefix}/lib
+%{cflags} ./configure --prefix=%{prefix} --libdir=%{buildprefix}/lib
 $MAKE
 
 %install

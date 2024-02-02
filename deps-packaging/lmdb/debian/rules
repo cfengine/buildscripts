@@ -26,7 +26,11 @@ build-stamp:
 	# following natural file order), then it will try to rebuild Makefile.in, which
 	# it can't without automake. Work around it by touching that file.
 	touch libraries/liblmdb/Makefile.in
+ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
 	cd libraries/liblmdb/ && sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
+else
+	cd libraries/liblmdb/ && env CFLAGS="-ggdb3" sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
+endif
 	touch build-stamp
 
 install: build
