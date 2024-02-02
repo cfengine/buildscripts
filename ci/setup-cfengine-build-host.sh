@@ -7,10 +7,14 @@ if [ "$(id -u)" != "0" ]; then
   exit 1
 fi
 
+ls -la /home/
+chown -R jenkins /home/jenkins
+
 if [ -d /var/cfengine ]; then
   echo "Error: CFEngine already installed on this host. Will not proceed trying to setup build host with CFEngine temporary install."
   exit 1
 fi
+
 
 function cleanup()
 {
@@ -27,10 +31,17 @@ function cleanup()
   fi
   echo "Ensuring CFEngine fully uninstalled/cleaned up"
   rm -rf /var/cfengine /opt/cfengine /var/log/CFE* /var/log/postgresql.log || true
-  pkill -9 cf-agent || true
-  pkill -9 cf-serverd || true
-  pkill -9 cf-monitord || true
-  pkill -9 cf-execd || true
+  if command -v pkill; then
+    pkill -9 cf-agent || true
+    pkill -9 cf-serverd || true
+    pkill -9 cf-monitord || true
+    pkill -9 cf-execd || true
+  else
+    echo "No pkill available. Maybe some cf procs left over?"
+    ps -efl | grep cf
+  fi
+  ls -l /home
+  chown -R jenkins /home/jenkins
 }
 
 trap cleanup ERR
