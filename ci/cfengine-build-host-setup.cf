@@ -115,6 +115,7 @@ bundle agent cfengine_build_host_setup
       "openssl-devel";
 
     (redhat_9).(yum_conf_ok.dnf_conf_ok)::
+      "perl-Sys-Hostname" comment => "Needed by __04_examples_outputs_check_outputs_cf";
       "python3-psycopg2";
 
     suse|opensuse|sles::
