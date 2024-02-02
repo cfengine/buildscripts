@@ -70,15 +70,16 @@ bundle agent cfengine_build_host_setup
       "libtool-ltdl" package_policy => "delete";
       "ncurses";
       "perl-Digest-MD5";
-      "perl-IO-Compress" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov-1.16-1";
       "perl-Module-Load-Conditional";
       "wget";
+
+    (redhat_6|centos_6).(yum_conf_ok.dnf_conf_ok)::
+      "perl-IO-Compress-Zlib" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
 
     (redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok.dnf_conf_ok)::
       "gdb";
       "ntp";
       "pkgconfig";
-      "perl-IO-Compress";
       "perl-JSON-PP";
       "perl-Data-Dumper";
       "perl-IPC-Cmd";
@@ -98,6 +99,7 @@ bundle agent cfengine_build_host_setup
 
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
       "perl-ExtUtils-MakeMaker";
+      "perl-IO-Compress" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
       "psmisc";
       "which";
 
