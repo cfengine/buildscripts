@@ -63,7 +63,7 @@ bundle agent cfengine_build_host_setup
       "make";
       "rpm-build";
 
-    (redhat|centos).(yum_conf_ok.dnf_conf_ok)::
+    (redhat|centos).(yum_dnf_conf_ok)::
       "expat-devel";
       "gcc-c++";
       "gettext";
@@ -73,10 +73,10 @@ bundle agent cfengine_build_host_setup
       "perl-Module-Load-Conditional";
       "wget";
 
-    (redhat_6|centos_6).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_6|centos_6).(yum_dnf_conf_ok)::
       "perl-IO-Compress-Zlib" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
 
-    (redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_6|centos_6|redhat_7|centos_7).(yum_dnf_conf_ok)::
       "gdb";
       "ntp";
       "pkgconfig";
@@ -88,25 +88,25 @@ bundle agent cfengine_build_host_setup
       "xfsprogs";
 
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
-    (redhat_7|centos_7).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_7|centos_7).(yum_dnf_conf_ok)::
       "epel-release";
       "ccache";
       "fakeroot";
       "java-11-openjdk" comment => "ok for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
 
-    (redhat_7|centos_7|redhat_9).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_7|centos_7|redhat_9).(yum_dnf_conf_ok)::
       "python3-pip";
 
-    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
       "perl-ExtUtils-MakeMaker";
       "perl-IO-Compress" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
       "psmisc";
       "which";
 
-    (redhat_8|centos_8).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_8|centos_8).(yum_dnf_conf_ok)::
       "python2-psycopg2" comment => "This will bring in python2";
 
-    (redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
       "java-1.8.0-openjdk-headless" package_policy => "delete",
         comment => "Installing Development Tools includes this jdk1.8 which we do not want.";
       "java-17-openjdk";
@@ -114,7 +114,7 @@ bundle agent cfengine_build_host_setup
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
       "openssl-devel";
 
-    (redhat_9).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_9).(yum_dnf_conf_ok)::
       "perl-Sys-Hostname" comment => "Needed by __04_examples_outputs_check_outputs_cf";
       "python3-psycopg2";
 
@@ -140,19 +140,24 @@ bundle agent cfengine_build_host_setup
       "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
     debian_9|ubuntu_16|redhat_6|centos_6::
       "have_opt_jdk21" expression => fileexists("/opt/jdk-21.0.1");
-    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
-      "have_development_tools" expression => returnszero("yum groups list installed | grep 'Development Tools' >/dev/null", "useshell"),
-        comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
+    redhat|centos::
+      "yum_conf_ok" expression => returnszero("grep best=False /etc/yum.conf", "useshell");
     redhat_8|centos_8::
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
     redhat_8|centos_8|redhat_9::
       "redhat_has_python3" expression => returnszero("command -v python3 >/dev/null", "useshell");
-      "yum_conf_ok" expression => returnszero("grep best=False /etc/yum.conf", "useshell");
       "dnf_conf_ok" expression => returnszero("grep best=False /etc/dnf/dnf.conf", "useshell");
-    redhat_8|centos_8::
+    redhat_8|centos_8|redhat_9::
       "have_perl_package_installed" expression => returnszero("rpm -q perl >/dev/null", "useshell");
     redhat_9::
       "have_python3_pip_package_installed" expression => returnszero("rpm -q python3-pip >/dev/null", "useshell");
+    (redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
+      "yum_dnf_conf_ok" expression => "any";
+    (redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok)::
+      "yum_dnf_conf_ok" expression => "any";
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
+      "have_development_tools" expression => returnszero("yum groups list installed | grep 'Development Tools' >/dev/null", "useshell"),
+        comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
     ubuntu_20::
       "have_python2_pip" expression => fileexists("/usr/local/bin/pip");
     ubuntu_20.have_python2_pip::
@@ -161,7 +166,7 @@ bundle agent cfengine_build_host_setup
   commands:
     !have_opt_jdk21.(debian_9|ubuntu_16|redhat_6|centos_6)::
       "sh $(this.promise_dirname)/linux-install-jdk21.sh" contain => in_shell;
-    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(!have_development_tools).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(!have_development_tools).(yum_dnf_conf_ok)::
       "yum groups install -y 'Development Tools'" contain => in_shell;
     (redhat_8|centos_8).!have_fakeroot:: # special fakeroot, missing from _8 an d up?
       "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
@@ -216,10 +221,10 @@ bundle agent cfengine_build_host_setup
         comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
 
   commands:
-    (redhat_8|centos_8).(!have_perl_package_installed).(yum_conf_ok.dnf_conf_ok)::
+    (redhat_8|centos_8|redhat_9).(!have_perl_package_installed).(yum_dnf_conf_ok)::
       "yum install -y perl" contain => in_shell,
-        comment => "Apparently rhel-8 is a bit psychotic in that it has perl installed in /bin/perl in the base install but the perl package is not installed. Cant use package_method as perl would cause perl-*.* to be installed, e.g. every perl module which would certainly cause conflicts and nobest problems.";
-    redhat_9.!have_python3_pip_package_installed.(yum_conf_ok.dnf_conf_ok)::
+        comment => "even though rhel8/9 come with /bin/perl perl >= 5.8.8 is needed by cfbuild-lcov-1.16-1.noarch. So the package must be installed.";
+    redhat_9.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
       "yum install -y python3-pip" contain => in_shell;
     redhat_8|centos_8|redhat_9::
       "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell;
