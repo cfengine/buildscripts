@@ -199,7 +199,7 @@ bundle agent cfengine_build_host_setup
     ubuntu::
       "have_localhost_hostname" expression => strcmp(execresult("${paths.hostname}", "noshell"), "localhost.localdomain");
     opensuse|suse|sles::
-      "have_$(suse_users_and_groups)_group" expression => returnszero("grep $(suse_users_and_groups) /etc/group >/dev/null", "useshell");
+      "have_$(suse_users_and_groups)_group" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/group >/dev/null", "useshell");
       "have_$(suse_users_and_groups)_user" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/passwd >/dev/null", "useshell");
 
   files:
