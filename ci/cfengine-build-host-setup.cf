@@ -140,8 +140,10 @@ bundle agent cfengine_build_host_setup
       "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
     debian_9|ubuntu_16|redhat_6|centos_6::
       "have_opt_jdk21" expression => fileexists("/opt/jdk-21.0.1");
-    redhat|centos::
+    (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
       "yum_conf_ok" expression => returnszero("grep best=False /etc/yum.conf", "useshell");
+    redhat_6|centos_6|redhat_7|centos_7::
+      "yum_conf_ok" expression => "any"; # rhel/centos-6 and 7 do not support --nobest or best property in yum.conf
     redhat_8|centos_8::
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
     redhat_8|centos_8|redhat_9::
