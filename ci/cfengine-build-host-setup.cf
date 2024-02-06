@@ -75,13 +75,12 @@ bundle agent cfengine_build_host_setup
 
     (redhat_6|centos_6).(yum_dnf_conf_ok)::
       "perl-IO-Compress-Zlib" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
+      "perl-JSON";
 
     (redhat_6|centos_6|redhat_7|centos_7).(yum_dnf_conf_ok)::
       "gdb";
       "ntp";
       "pkgconfig";
-      "perl-JSON-PP";
-      "perl-Data-Dumper";
       "perl-IPC-Cmd";
       "perl-devel";
       "python-psycopg2";
@@ -93,6 +92,8 @@ bundle agent cfengine_build_host_setup
       "ccache";
       "fakeroot";
       "java-11-openjdk" comment => "ok for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
+      "perl-JSON-PP";
+      "perl-Data-Dumper";
 
     (redhat_7|centos_7|redhat_9).(yum_dnf_conf_ok)::
       "python3-pip";
