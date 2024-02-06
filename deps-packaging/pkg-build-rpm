@@ -96,7 +96,7 @@ esac
 
 case "$DEBUGSYM" in
   yes)
-    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_debugsym 1'";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_debugsym 1' --define '__strip /bin/true'";;
   no)
     RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_debugsym 0'";;
   *)

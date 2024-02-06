@@ -150,8 +150,14 @@ do
     if [ x"$package_files" = x ]
     then
         # BUILD the packages
-        $BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING  \
-            $dep $tests $cross $optimize $debugsym $version
+        if [ "$dep" = "lmdb" ] && [ "$BUILD_TYPE" != "RELEASE" ]; then
+          # Always build LMDB with debug symbols in non-release builds
+          $BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING  \
+              $dep $tests $cross $optimize yes $version
+        else
+          $BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING  \
+              $dep $tests $cross $optimize $debugsym $version
+        fi
 
         package_files=`pkg-find-$DEP_PACKAGING $BASEDIR/$dep`
 
