@@ -23,6 +23,16 @@ bundle agent cfengine_build_host_setup
      !(debian_9|ubuntu_16).(debian|ubuntu)::
        "default-jre" comment => "on debian10+ and ubuntu18+ this will be jdk11, good enough for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
 
+    debian_9:: # hacks for an old platform
+      "libpython3.5-minimal=3.5.3-1+deb9u1";
+      "libpython3.5-stdlib=3.5.3-1+deb9u1";
+      "libelf1=0.168-1";
+      "libexpat1-dev";
+      "libexpat1=2.2.0-2+deb9u3";
+
+    debian.!debian_9:: # debian-9 quirks, see above
+      "libexpat1-dev";
+
     debian|ubuntu::
       "libltdl7" package_policy => "delete";
       "libltdl-dev" package_policy => "delete";
@@ -39,7 +49,6 @@ bundle agent cfengine_build_host_setup
       "gdb";
       "libncurses5" comment => "added for debian-10";
       "libncurses5-dev" comment => "added for debian-10";
-      "libexpat1-dev";
       "libmodule-load-conditional-perl";
       "libpam0g-dev";
       "ntp";
