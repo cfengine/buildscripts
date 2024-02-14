@@ -62,12 +62,12 @@ bundle agent cfengine_build_host_setup
       "rsync";
       "make";
       "rpm-build";
+      "libtool-ltdl" package_policy => "delete";
 
     (redhat|centos).(yum_dnf_conf_ok)::
       "expat-devel";
       "gcc-c++";
       "gettext";
-      "libtool-ltdl" package_policy => "delete";
       "ncurses";
       "perl-Module-Load-Conditional";
       "wget";
