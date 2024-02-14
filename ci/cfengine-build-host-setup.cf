@@ -1,0 +1,269 @@
+body file control
+{
+  inputs => { "$(sys.libdir)/stdlib.cf" };
+}
+
+bundle agent cfengine_build_host_setup
+{
+  meta:
+    "assumptions" string => "The operating system has working repository lists and has been updated and upgraded recently.";
+
+  packages:
+    debian_9|debian_10|ubuntu_16::
+      "python-psycopg2";
+    debian_11|debian_12::
+      "python3-psycopg2";
+    ubuntu_16::
+      "systemd-coredump" comment => "ubuntu_16 doesn't have systemd-coredump by default?";
+    ubuntu_20::
+      "autoconf" comment => "because on arm ubuntu-20 we need to reconfigure the debian-9 bootstrapped configure scripts.";
+      "shellcheck" comment => "not sure why only ubuntu-20 needed this.";
+    debian.(!debian_12.!ubuntu_22)::
+      "python" comment => "debian-12 has only python3";
+     !(debian_9|ubuntu_16).(debian|ubuntu)::
+       "default-jre" comment => "on debian10+ and ubuntu18+ this will be jdk11, good enough for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
+
+    debian|ubuntu::
+      "libltdl7" package_policy => "delete";
+      "libltdl-dev" package_policy => "delete";
+
+      "binutils";
+      "bison";
+      "build-essential";
+      "curl" comment => "added for debian-10";
+      "debhelper";
+      "dpkg-dev";
+      "expat";
+      "fakeroot";
+      "flex";
+      "gdb";
+      "libncurses5" comment => "added for debian-10";
+      "libncurses5-dev" comment => "added for debian-10";
+      "libexpat1-dev";
+      "libmodule-load-conditional-perl";
+      "libpam0g-dev";
+      "ntp";
+      "pkg-config";
+      "psmisc";
+      "python3-pip";
+      "rsync" comment => "added for debian-10";
+
+    ubuntu_16.mingw_build_host:: # for now, only ubu16 hosts mingw builds
+      "wine:i386";
+      "mingw-w64";
+    (debian_10|debian_11).systemssl_build_host::
+      "libssl-dev";
+
+# I attempted to arrange these packages in order of: generic (all versions) and then as if we gradually added them through time: rhel-6, 7, 8, 9...
+    suse|opensuse|sles|redhat|centos::
+      "gcc";
+      "ncurses-devel";
+      "pam-devel";
+      "rsync";
+      "make";
+      "rpm-build";
+
+    (redhat|centos).(yum_dnf_conf_ok)::
+      "expat-devel";
+      "gcc-c++";
+      "gettext";
+      "libtool-ltdl" package_policy => "delete";
+      "ncurses";
+      "perl-Module-Load-Conditional";
+      "wget";
+
+    (redhat_6|centos_6).(yum_dnf_conf_ok)::
+      "perl-IO-Compress-Zlib" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
+      "perl-JSON";
+# perl-Digest-MD5 and perl-Data-Dumper are included in perl for centos-6
+
+    (redhat_6|centos_6|redhat_7|centos_7).(yum_dnf_conf_ok)::
+      "gdb";
+      "ntp";
+      "pkgconfig";
+      "perl-IPC-Cmd";
+      "perl-devel";
+      "python-psycopg2";
+      "xfsprogs";
+
+# note that shellcheck, fakeroot and ccache require epel-release to be installed
+    (redhat_7|centos_7).(yum_dnf_conf_ok)::
+      "epel-release";
+      "ccache";
+      "fakeroot";
+      "java-11-openjdk" comment => "ok for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
+      "perl-JSON-PP";
+      "perl-Data-Dumper";
+      "perl-Digest-MD5";
+
+    (redhat_7|centos_7|redhat_9).(yum_dnf_conf_ok)::
+      "python3-pip";
+
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
+      "perl-ExtUtils-MakeMaker";
+      "perl-IO-Compress" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
+      "psmisc";
+      "which";
+
+    (redhat_8|centos_8).(yum_dnf_conf_ok)::
+      "python2-psycopg2" comment => "This will bring in python2";
+      "python3-rpm-macros" -> { "provides macro py3_shebang_fix needed in rhel-8 for /var/cfengine/bin/cfbs", "ENT-11338" }
+        comment => "There are several versions of python(x)-rpm-macros. We choose this one to get platform-python which is guaranteed to be installed in rhel-8.";
+      "platform-python-devel" -> { "cfbs shebang", "ENT-11338" }
+        comment => "py3_shebang_fix macro needs /usr/bin/pathfix.py from platform-python-devel package";
+
+    (redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
+      "java-1.8.0-openjdk-headless" package_policy => "delete",
+        comment => "Installing Development Tools includes this jdk1.8 which we do not want.";
+      "java-17-openjdk";
+      "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
+      "selinux-policy-devel" comment => "maybe add to _7 and _6?";
+      "openssl-devel";
+
+    (redhat_9).(yum_dnf_conf_ok)::
+      "perl-Sys-Hostname" comment => "Needed by __04_examples_outputs_check_outputs_cf";
+      "python3-psycopg2";
+
+    suse|opensuse|sles::
+      "binutils";
+      "pam";
+      "pkg-config";
+      "patch";
+      "gdb";
+
+    suse_12|opensuse_12|sles_12::
+      "java-11-openjdk";
+    suse_15|opensuse_15|sles_15::
+      "java-17-openjdk";
+
+
+  vars:
+    "suse_users_and_groups" slist => { "daemon", "bin", "sys" };
+
+  classes:
+    any::
+      "mingw_build_host" expression => fileexists("/etc/cfengine-mingw-build-host.flag");
+      "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
+    debian_9|ubuntu_16|redhat_6|centos_6::
+      "have_opt_jdk21" expression => fileexists("/opt/jdk-21.0.1");
+    (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
+      "yum_conf_ok" expression => returnszero("grep best=False /etc/yum.conf", "useshell");
+    redhat_6|centos_6|redhat_7|centos_7::
+      "yum_conf_ok" expression => "any"; # rhel/centos-6 and 7 do not support --nobest or best property in yum.conf
+    redhat_8|centos_8::
+      "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
+    redhat_8|centos_8|redhat_9::
+      "redhat_has_python3" expression => returnszero("command -v python3 >/dev/null", "useshell");
+      "dnf_conf_ok" expression => returnszero("grep best=False /etc/dnf/dnf.conf", "useshell");
+    redhat_8|centos_8|redhat_9::
+      "have_perl_package_installed" expression => returnszero("rpm -q perl >/dev/null", "useshell");
+    redhat_9::
+      "have_python3_pip_package_installed" expression => returnszero("rpm -q python3-pip >/dev/null", "useshell");
+    (redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
+      "yum_dnf_conf_ok" expression => "any";
+    (redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok)::
+      "yum_dnf_conf_ok" expression => "any";
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
+      "have_development_tools" expression => returnszero("yum groups list installed | grep 'Development Tools' >/dev/null", "useshell"),
+        comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
+    ubuntu_20::
+      "have_python2_pip" expression => fileexists("/usr/local/bin/pip");
+    ubuntu_20.have_python2_pip::
+      "have_python2_psycopg2" expression => returnszero("/usr/local/bin/pip list psycopg2", "useshell");
+
+  commands:
+    !have_opt_jdk21.(debian_9|ubuntu_16|redhat_6|centos_6)::
+      "sh $(this.promise_dirname)/linux-install-jdk21.sh" contain => in_shell;
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(!have_development_tools).(yum_dnf_conf_ok)::
+      "yum groups install -y 'Development Tools'" contain => in_shell;
+    (redhat_8|centos_8).!have_fakeroot:: # special fakeroot, missing from _8 an d up?
+      "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
+        contain => in_shell;
+    (redhat_8|centos_8|redhat_9).!redhat_has_python3::
+      "yum install -y python3" -> { "CFE-4313" }
+        contain => in_shell,
+        comment => "workaround for yum package_method trying to install python3-*.* which causes conflicts.";
+    (redhat_8|centos_8|redhat_9).!yum_conf_ok::
+      "sed -i '/best=True/s/True/False/' /etc/yum.conf" contain => in_shell;
+    (redhat_8|centos_8|redhat_9).!dnf_conf_ok::
+      "sed -i '/best=True/s/True/False/' /etc/dnf/dnf.conf" contain => in_shell;
+    ubuntu_20.!have_python2_pip::
+      "sh $(this.promise_dirname)/install-python2-pip.sh" contain => in_shell,
+        comment => "pip(2) is required for psycopg2 for nova/tests/reporting.";
+    ubuntu_20.!have_python2_psycopg2::
+      "pip install psycopg2-binary" contain => in_shell,
+        comment => "Here we install psycopg2 as root because nova/tests/reporting runs as root.";
+
+
+  classes:
+    debian_11::
+      "have_pip2" expression => fileexists("/usr/local/bin/pip");
+    ubuntu_16::
+      "have_i386_architecture" expression => strcmp(execresult("${paths.dpkg} --print-foreign-architectures", "noshell"), "i386");
+    ubuntu::
+      "have_localhost_hostname" expression => strcmp(execresult("${paths.hostname}", "noshell"), "localhost.localdomain");
+    opensuse|suse|sles::
+      "have_$(suse_users_and_groups)_group" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/group >/dev/null", "useshell");
+      "have_$(suse_users_and_groups)_user" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/passwd >/dev/null", "useshell");
+
+  files:
+    ubuntu_16|redhat_9::
+      "/etc/hosts"
+        edit_line => regex_replace("127.0.0.1 localhost localhost.localdomain","127.0.0.1 localhost.localdomain");
+    debian_9::
+      "/etc/apt/sources.list.d/*"
+        delete => tidy;
+      "/etc/apt/sources.list"
+        content => "deb http://archive.debian.org/debian/ stretch main contrib non-free";
+    suse_15|opensuse_15|sles_15::
+      "/home/jenkins/.rpmmacros"
+        content => "%dist .suse15",
+        comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
+    suse_12|opensuse_12|sles_12::
+      "/home/jenkins/.rpmmacros"
+        content => "%dist .suse12",
+        comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
+    suse_11|opensuse_11|sles_11::
+      "/home/jenkins/.rpmmacros"
+        content => "%dist .suse11",
+        comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
+
+  commands:
+    (redhat_8|centos_8|redhat_9).(!have_perl_package_installed).(yum_dnf_conf_ok)::
+      "yum install -y perl" contain => in_shell,
+        comment => "even though rhel8/9 come with /bin/perl perl >= 5.8.8 is needed by cfbuild-lcov-1.16-1.noarch. So the package must be installed.";
+    redhat_9.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
+      "yum install -y python3-pip" contain => in_shell;
+    redhat_8|centos_8|redhat_9::
+      "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell;
+# todo, need 2.7pip psycopg2-binary for ubuntu-20 as well?
+    debian_11.!have_pip2::
+      "wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O get-pip.py && python2 get-pip.py && pip install psycopg2-binary"
+        contain => in_shell;
+
+    ubuntu_16.!have_i386_architecture:: # mingw build host
+      "${paths.dpkg} --add-architecture i386";
+
+    ubuntu.!have_localhost_hostname::
+      "/usr/bin/hostnamectl set-hostname localhost.localdomain"
+        comment => "hack for aws ubuntu hosts having unique ip-n-n-n-n hostnames, we need localhost.localdomain";
+    !have_daemon_group.(suse|sles|opensuse)::
+      "groupadd -g 1 daemon" contain => in_shell;
+    !have_bin_group.(suse|sles|opensuse)::
+      "groupadd -g 2 bin" contain => in_shell;
+    !have_sys_group.(suse|sles|opensuse)::
+      "groupadd -g 3 sys" contain => in_shell;
+    !have_daemon_user.(suse|sles|opensuse)::
+      "useradd -u 1 daemon" contain => in_shell;
+    !have_bin_user.(suse|sles|opensuse)::
+      "useradd -u 2 bin" contain => in_shell;
+    !have_sys_user.(suse|sles|opensuse)::
+      "useradd -u 3 sys" contain => in_shell;
+
+# skip /etc/hosts change for now, seems kind of wrong and corrupts ip6 entries like `::1 ip6-ip6-loopback`
+# maybe the following is needed to silence such errors as:     ubuntu-16-mingw-j1: sudo: unable to resolve host localhost.localdomain
+#    ubuntu::
+#      "${paths.sed} -ri 's/localhost //' /etc/hosts";
+}
+# todo, maybe need
+# ubuntu16-mingw: echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
