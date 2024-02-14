@@ -107,6 +107,10 @@ bundle agent cfengine_build_host_setup
 
     (redhat_8|centos_8).(yum_dnf_conf_ok)::
       "python2-psycopg2" comment => "This will bring in python2";
+      "python3-rpm-macros" -> { "provides macro py3_shebang_fix needed in rhel-8 for /var/cfengine/bin/cfbs", "ENT-11338" }
+        comment => "There are several versions of python(x)-rpm-macros. We choose this one to get platform-python which is guaranteed to be installed in rhel-8.";
+      "platform-python-devel" -> { "cfbs shebang", "ENT-11338" }
+        comment => "py3_shebang_fix macro needs /usr/bin/pathfix.py from platform-python-devel package";
 
     (redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
       "java-1.8.0-openjdk-headless" package_policy => "delete",

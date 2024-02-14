@@ -43,8 +43,15 @@ Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_3.0.0)(64bit)
 Requires: python3 >= 3.5
 %endif
 # on RHEL 8 and newer, we can use weak dependencies
+# and we require python3-rpm-macros so that the shebang in cfbs can be fixed with platform-python path
 %if %{?rhel}%{!?rhel:0} > 7
 Recommends: python3 >= 3.5
+%endif
+
+# on rhel-8 only, we need python3-rpm-macros to fix the shebang in /var/cfengine/bin/cfbs
+%if %{?rhel}%{!?rhel:0} == 8
+BuildRequires: python3-rpm-macros
+BuildRequires: platform-python-devel
 %endif
 
 AutoReqProv: no
@@ -156,6 +163,10 @@ mv $RPM_BUILD_ROOT/tmp/cfbs_root/usr/lib/python*/site-packages/cfbs $RPM_BUILD_R
 mv $RPM_BUILD_ROOT/tmp/cfbs_root/usr/bin/cfbs $RPM_BUILD_ROOT%prefix/bin/
 sed -i "/^from cfbs.*/i sys.path.append(\"%prefix/lib/python\")" $RPM_BUILD_ROOT%prefix/bin/cfbs
 rm -rf $RPM_BUILD_ROOT/tmp/cfbs_root
+# only on rhel-8, which provides platform-python, do we need to fix the shebang in cfbs, this requires python3-rpm-macros and platform-python-devel packages to be installed on the build machine.
+%if %{?rhel}%{!?rhel:0} == 8
+%py3_shebang_fix $RPM_BUILD_ROOT%prefix/bin/cfbs
+%endif
 %endif
 
 # Add cf-enterprise-support to share
