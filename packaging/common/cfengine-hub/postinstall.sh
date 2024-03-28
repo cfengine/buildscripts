@@ -64,7 +64,7 @@ if [ ! -f "$PREFIX/ppkeys/localhost.priv" ]; then
 fi
 
 if [ ! -f "$PREFIX/masterfiles/promises.cf" ]; then
-    /bin/cp -R "$PREFIX/share/NovaBase/masterfiles" "$PREFIX"
+    /bin/cp --reflink=auto -R "$PREFIX/share/NovaBase/masterfiles" "$PREFIX"
     touch "$PREFIX/masterfiles/cf_promises_validated"
     find "$PREFIX/masterfiles" -type d -exec chmod 700 {} \;
     find "$PREFIX/masterfiles" -type f -exec chmod 600 {} \;
@@ -114,7 +114,7 @@ EOF
 )
 true "Done creating httpd/secrets.ini file"
 
-cp -r --remove-destination $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
+cp --reflink=auto -r --remove-destination $PREFIX/share/GUI/* $PREFIX/httpd/htdocs
 
 # If old files were moved aside during upgrade, we should move them back so that
 # rpm can do its cleanup procedures. But avoid overwriting new files with the
