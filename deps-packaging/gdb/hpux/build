@@ -1,0 +1,24 @@
+#!/bin/sh -e
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cf-gdb${PREFIX}
+
+# Build
+
+./configure --prefix=$PREFIX
+gmake
+
+# Test
+
+# Install
+
+mkdir -p $TT/bin
+gmake install prefix=${TT}
+
+# Package
+
+rm -rf $TT/share
+

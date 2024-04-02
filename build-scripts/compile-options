@@ -122,6 +122,11 @@ case "$OS_FAMILY" in
     solaris|hpux)  var_append DEPS "sasl2" ;;
 esac
 
+# Install gdb on HP-UX in DEBUG builds to aid in debugging
+if ["$BUILD_TYPE" = "DEBUG"] && ["$OS_FAMILY" = "hpux"]; then
+    var_append DEPS "cf-gdb"
+fi
+
 # iconv is needed for libxml2 on some platforms
 case "$OS_FAMILY" in
    aix|solaris)  var_append DEPS "libiconv" ;;
