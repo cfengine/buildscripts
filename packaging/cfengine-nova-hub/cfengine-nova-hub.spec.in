@@ -102,9 +102,6 @@ rm -f $RPM_BUILD_ROOT%{prefix}/lib/php/cfengine-enterprise-api.la
 
 cp -R %{_basedir}/mission-portal $RPM_BUILD_ROOT%prefix/share/GUI
 
-rm -f $RPM_BUILD_ROOT%prefix/share/GUI/runalerts.php
-cp -v %{_basedir}/mission-portal/runalerts.php $RPM_BUILD_ROOT%prefix/bin/runalerts.php
-
 cp -vR %{_basedir}/mission-portal/Apache-htaccess $RPM_BUILD_ROOT%prefix/share/GUI/htaccess
 mkdir -p $RPM_BUILD_ROOT%prefix/share/GUI/api
 cp -R %{_basedir}/nova/api/http/* $RPM_BUILD_ROOT%prefix/share/GUI/api
@@ -217,10 +214,9 @@ exit 0
 # Nova-only binaries
 %prefix/bin/cf-hub
 %prefix/bin/cf-reactor
-%prefix/bin/runalerts.php
+
 # Only verify owner group mode maj min symlink
 # Don't verify md5, size, mtime
-%verify(not md5 size mtime) %prefix/bin/runalerts.php
 #rsync
 %prefix/bin/rsync
 # init.d script enterprise part
@@ -334,7 +330,6 @@ exit 0
 /usr/lib/systemd/system/cf-reactor.service
 /usr/lib/systemd/system/cf-monitord.service
 /usr/lib/systemd/system/cf-postgres.service
-/usr/lib/systemd/system/cf-runalerts.service
 /usr/lib/systemd/system/cf-serverd.service
 
 %if %{?rhel}%{!?rhel:0} > 7

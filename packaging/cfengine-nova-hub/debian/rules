@@ -42,9 +42,6 @@ install: build
 # GUI, REST, KB
 	cp -R $(BASEDIR)/mission-portal $(CURDIR)/debian/tmp$(PREFIX)/share/GUI
 
-	rm -f $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/runalerts.php
-	cp -v $(BASEDIR)/mission-portal/runalerts.php $(CURDIR)/debian/tmp$(PREFIX)/bin/runalerts.php
-
 	mkdir $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api
 	cp -R $(BASEDIR)/nova/api/http/* $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api
 	chmod 700 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api/dc-scripts/*.sh

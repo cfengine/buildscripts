@@ -8,7 +8,6 @@
 /usr/lib/systemd/system/cf-reactor.service
 /usr/lib/systemd/system/cf-monitord.service
 /usr/lib/systemd/system/cf-postgres.service
-/usr/lib/systemd/system/cf-runalerts.service
 /usr/lib/systemd/system/cf-serverd.service
 /var/cfengine/bin/cf-agent
 /var/cfengine/bin/cf-check
@@ -21,7 +20,6 @@
 /var/cfengine/bin/cf-secret
 /var/cfengine/bin/cf-serverd
 /var/cfengine/bin/cf-support
-/var/cfengine/bin/runalerts.php
 /var/cfengine/bin/rsync
 /var/cfengine/bin/cfengine3-nova-hub-init-d.sh
 /var/cfengine/bin/git

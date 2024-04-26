@@ -395,4 +395,9 @@ if is_upgrade && egrep '^3\.([2-9]|1[012345])\.' "$PREFIX/UPGRADED_FROM.txt" >/d
   true "Done removing keys"
 fi
 
+# Since 3.24.0 runalerts is part of cf-reactor with no stamp files
+if is_upgrade && test -d "$PREFIX/httpd/php/runalerts-stamp"; then
+  rm -rf "$PREFIX/httpd/php/runalerts-stamp"
+fi
+
 exit 0
