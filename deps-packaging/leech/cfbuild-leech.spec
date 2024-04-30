@@ -1,4 +1,4 @@
-%define leech_version 0.1.8
+%define leech_version 0.1.9
 
 Summary: CFEngine Build Automation -- leech
 Name: cfbuild-leech
@@ -18,6 +18,8 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n leech-%{leech_version}
 
+# Touch this file, or else autoreconf is called for some reason
+touch config.h.in
 ./configure --prefix=%{prefix}
 
 %build

@@ -9,6 +9,8 @@ TTD=${BUILD_ROOT}/cfbuild-leech-devel${PREFIX}
 
 # Build
 
+# Touch this file, or else autoreconf is called for some reason
+touch config.h.in
 ./configure --prefix=$PREFIX
 gmake
 
