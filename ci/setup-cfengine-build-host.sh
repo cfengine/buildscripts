@@ -92,7 +92,7 @@ if grep -i suse /etc/os-release; then
   fi
 else
   urlget https://s3.amazonaws.com/cfengine.packages/quick-install-cfengine-enterprise.sh
-  echo "c358ca0e0dce49e8784ff2352e7c94356332ded80f5ca3903b0b3dc8d6a10cf4  quick-install-cfengine-enterprise.sh" | sha256sum --check -
+  echo "cc0f6376f9567b4f696b88880882c540e01b0f25a159a3171a7caa226fb3c4af  quick-install-cfengine-enterprise.sh" | sha256sum --check -
   chmod +x quick-install-cfengine-enterprise.sh
   bash ./quick-install-cfengine-enterprise.sh agent
 fi
