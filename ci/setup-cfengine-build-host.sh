@@ -92,7 +92,7 @@ if grep -i suse /etc/os-release; then
   fi
 else
   urlget https://s3.amazonaws.com/cfengine.packages/quick-install-cfengine-enterprise.sh
-  sha256sum --check quick-install-cfengine-enterprise.sh.sha256
+  sha256sum --check ./buildscripts/ci/quick-install-cfengine-enterprise.sh.sha256
   chmod +x quick-install-cfengine-enterprise.sh
   bash ./quick-install-cfengine-enterprise.sh agent
 fi
@@ -100,7 +100,7 @@ fi
 # get masterfiles
 urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.4/misc/cfengine-masterfiles-3.21.4-1.pkg.tar.gz
 
-sha256sum --check cfengine-masterfiles-3.21.4-1.pkg.tar.gz.sha256
+sha256sum --check ./buildscripts/ci/cfengine-masterfiles-3.21.4-1.pkg.tar.gz.sha256
 
 tar xf cfengine-masterfiles-3.21.4-1.pkg.tar.gz
 cp -a masterfiles/* /var/cfengine/inputs/
