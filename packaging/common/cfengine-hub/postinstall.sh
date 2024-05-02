@@ -1045,18 +1045,9 @@ fi
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart" || su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m fast")
 
-##
-# ENT-3921: Make bin/runalerts.php executable
-#
-chmod 755 $PREFIX/bin/runalerts.php
-
-# ENT-9711: Ensure $PREFIX/httpd/php/runalerts-stamp is created and has proper owner/permissions
 # Have to be careful here because httpd/php/bin wants to be root:root
-mkdir -p "$PREFIX/httpd/php/runalerts-stamp"
 chown root:$MP_APACHE_USER $PREFIX/httpd/php
-chown -R root:$MP_APACHE_USER $PREFIX/httpd/php/runalerts-stamp
 chmod g+rX "$PREFIX/httpd/php"
-chmod -R g+rX "$PREFIX/httpd/php/runalerts-stamp"
 
 #
 # Register CFEngine initscript, if not yet.
