@@ -1,4 +1,4 @@
-%define leech_version 0.1.15
+%define leech_version 0.1.16
 
 Summary: CFEngine Build Automation -- leech
 Name: cfbuild-leech
