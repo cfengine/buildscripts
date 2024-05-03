@@ -12,6 +12,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	# Touch this file, or else autoreconf is called for some reason
+	touch config.h.in
 	./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX)
 	make
 
