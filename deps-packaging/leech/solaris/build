@@ -30,4 +30,4 @@ $MAKE install prefix=${TTD}
 
 
 mkdir -p ${TT}/lib
-mv ${TTD}/lib/leech.so* ${TT}/lib
+mv ${TTD}/lib/*.so* ${TT}/lib
