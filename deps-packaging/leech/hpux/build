@@ -25,4 +25,4 @@ gmake install prefix=${TTD}
 # Package
 
 mkdir -p ${TT}/lib
-mv ${TTD}/lib/libyaml.so* ${TT}/lib
+mv ${TTD}/lib/*.so* ${TT}/lib
