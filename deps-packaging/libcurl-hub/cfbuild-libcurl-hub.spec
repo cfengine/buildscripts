@@ -1,4 +1,4 @@
-%define curl_version 8.5.0
+%define curl_version 8.7.1
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl-hub
