@@ -1,4 +1,4 @@
-%define php_version 8.2.12
+%define php_version 8.3.7
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -23,6 +23,14 @@ if expr "`cat /etc/redhat-release`" : '.* [5]\.'
 then
   patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
 fi
+
+%if %{?rhel}%{!?rhel:0} == 8
+CFLAGS="-fPIE"
+LDFLAGS="-pie"
+%else
+CFLAGS=""
+LDFLAGS=""
+%endif
 
 ./configure --prefix=%{prefix}/httpd/php \
   --with-config-file-scan-dir=%{prefix}/httpd/php/lib \
@@ -96,7 +104,7 @@ fi
   --without-tsrm-pth \
   --without-tsrm-st \
   --without-tsrm-pthreads \
-  CPPFLAGS="-I%{prefix}/include" LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib" PKG_CONFIG_PATH="%{prefix}/lib/pkgconfig"
+  CPPFLAGS="-I%{prefix}/include" LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib" PKG_CONFIG_PATH="%{prefix}/lib/pkgconfig" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
 
 %build
 
