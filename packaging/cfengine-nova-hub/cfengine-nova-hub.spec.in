@@ -266,7 +266,6 @@ exit 0
 %{prefix}/bin/pg_ctl
 %{prefix}/bin/pg_resetwal
 %{prefix}/bin/postgres
-%{prefix}/bin/postmaster
 %{prefix}/bin/pg_test_timing
 %{prefix}/bin/pg_archivecleanup
 %{prefix}/bin/pg_amcheck

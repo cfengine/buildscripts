@@ -1,4 +1,4 @@
-%define postgresql_version 15.5
+%define postgresql_version 16.3
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
@@ -23,7 +23,7 @@ mkdir -p %{_builddir}
 
 SYS=`uname -s`
 
-LD_LIBRARY_PATH=%{prefix}/lib CPPFLAGS=-I%{prefix}/include ./configure --prefix=%{prefix} --without-zlib --without-readline --with-openssl
+LD_LIBRARY_PATH=%{prefix}/lib CPPFLAGS=-I%{prefix}/include ./configure --prefix=%{prefix} --without-zlib --without-readline --with-openssl --without-icu
 
 if [ -z $MAKE ]; then
   MAKE_PATH=`which make`
@@ -91,7 +91,6 @@ CFEngine Build Automation -- postgresql -- dev files
 %{prefix}/bin/pg_waldump
 %{prefix}/bin/pgbench
 %{prefix}/bin/postgres
-%{prefix}/bin/postmaster
 %{prefix}/bin/psql
 %{prefix}/bin/reindexdb
 %{prefix}/bin/vacuumdb
