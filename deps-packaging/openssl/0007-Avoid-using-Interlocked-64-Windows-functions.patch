@@ -1,0 +1,192 @@
+From 03111c77b640febbfaefc9ab6519e85f8b595100 Mon Sep 17 00:00:00 2001
+From: Vratislav Podzimek <v.podzimek@mykolab.com>
+Date: Tue, 14 May 2024 13:23:40 +0200
+Subject: [PATCH] Avoid using Interlocked*64() Windows functions if not
+ available
+
+InterlockedAnd64() and others are not available on VS2010
+x86. There are already implementations of replacements for other
+functions, such as InterlockedOr64(). Apply the same approach to
+fix the errors.
+
+Inspired by openssl/openssl#24326.
+---
+ crypto/threads_win.c | 81 ++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 71 insertions(+), 10 deletions(-)
+
+diff --git a/crypto/threads_win.c b/crypto/threads_win.c
+index 8428869963..36d38aa919 100644
+--- a/crypto/threads_win.c
++++ b/crypto/threads_win.c
+@@ -23,7 +23,7 @@
+  * only VC++ 2008 or earlier x86 compilers.
+  */
+ 
+-#if (defined(_MSC_VER) && defined(_M_IX86) && _MSC_VER <= 1600)
++#if defined(_M_IX86)
+ # define NO_INTERLOCKEDOR64
+ #endif
+ 
+@@ -104,8 +104,15 @@ struct rcu_lock_st {
+     CRYPTO_CONDVAR *alloc_signal;
+     CRYPTO_MUTEX *prior_lock;
+     CRYPTO_CONDVAR *prior_signal;
++    CRYPTO_RWLOCK *rw_lock;
+ };
+ 
++static int CRYPTO_atomic_add64(uint64_t *val, uint64_t op, uint64_t *ret,
++                               CRYPTO_RWLOCK *lock);
++
++static int CRYPTO_atomic_and(uint64_t *val, uint64_t op, uint64_t *ret,
++                             CRYPTO_RWLOCK *lock);
++
+ /*
+  * Called on thread exit to free the pthread key
+  * associated with this thread, if any
+@@ -154,6 +161,7 @@ CRYPTO_RCU_LOCK *ossl_rcu_lock_new(int num_writers)
+         return NULL;
+ 
+     new->write_lock = ossl_crypto_mutex_new();
++    new->rw_lock = CRYPTO_THREAD_lock_new();
+     new->alloc_signal = ossl_crypto_condvar_new();
+     new->prior_signal = ossl_crypto_condvar_new();
+     new->alloc_lock = ossl_crypto_mutex_new();
+@@ -165,13 +173,15 @@ CRYPTO_RCU_LOCK *ossl_rcu_lock_new(int num_writers)
+         || new->prior_signal == NULL
+         || new->write_lock == NULL
+         || new->alloc_lock == NULL
+-        || new->prior_lock == NULL) {
++        || new->prior_lock == NULL
++        || new->rw_lock == NULL) {
+         OPENSSL_free(new->qp_group);
+         ossl_crypto_condvar_free(&new->alloc_signal);
+         ossl_crypto_condvar_free(&new->prior_signal);
+         ossl_crypto_mutex_free(&new->alloc_lock);
+         ossl_crypto_mutex_free(&new->prior_lock);
+         ossl_crypto_mutex_free(&new->write_lock);
++        CRYPTO_THREAD_lock_free(new->rw_lock);
+         OPENSSL_free(new);
+         new = NULL;
+     }
+@@ -187,20 +197,27 @@ void ossl_rcu_lock_free(CRYPTO_RCU_LOCK *lock)
+     ossl_crypto_mutex_free(&lock->alloc_lock);
+     ossl_crypto_mutex_free(&lock->prior_lock);
+     ossl_crypto_mutex_free(&lock->write_lock);
++    CRYPTO_THREAD_lock_free(lock->rw_lock);
+     OPENSSL_free(lock);
+ }
+ 
+ static inline struct rcu_qp *get_hold_current_qp(CRYPTO_RCU_LOCK *lock)
+ {
+     uint32_t qp_idx;
++    uint32_t tmp;
++    uint64_t tmp64;
+ 
+     /* get the current qp index */
+     for (;;) {
+-        qp_idx = InterlockedOr(&lock->reader_idx, 0);
+-        InterlockedAdd64(&lock->qp_group[qp_idx].users, VAL_READER);
+-        if (qp_idx == InterlockedOr(&lock->reader_idx, 0))
++        CRYPTO_atomic_load_int(&lock->reader_idx, (int *)&qp_idx,
++                               lock->rw_lock);
++        CRYPTO_atomic_add64(&lock->qp_group[qp_idx].users, VAL_READER, &tmp64,
++                            lock->rw_lock);
++        CRYPTO_atomic_load_int(&lock->reader_idx, (int *)&tmp, lock->rw_lock);
++        if (qp_idx == tmp)
+             break;
+-        InterlockedAdd64(&lock->qp_group[qp_idx].users, -VAL_READER);
++        CRYPTO_atomic_add64(&lock->qp_group[qp_idx].users, -VAL_READER, &tmp64,
++                            lock->rw_lock);
+     }
+ 
+     return &lock->qp_group[qp_idx];
+@@ -264,7 +281,9 @@ void ossl_rcu_read_unlock(CRYPTO_RCU_LOCK *lock)
+         if (data->thread_qps[i].lock == lock) {
+             data->thread_qps[i].depth--;
+             if (data->thread_qps[i].depth == 0) {
+-                ret = InterlockedAdd64(&data->thread_qps[i].qp->users, -VAL_READER);
++                CRYPTO_atomic_add64(&data->thread_qps[i].qp->users,
++                                    -VAL_READER, (uint64_t *)&ret,
++                                    lock->rw_lock);
+                 OPENSSL_assert(ret >= 0);
+                 data->thread_qps[i].qp = NULL;
+                 data->thread_qps[i].lock = NULL;
+@@ -279,6 +298,7 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock)
+     uint64_t new_id;
+     uint32_t current_idx;
+     uint32_t tmp;
++    uint64_t tmp64;
+ 
+     ossl_crypto_mutex_lock(lock->alloc_lock);
+     /*
+@@ -302,8 +322,10 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock)
+     lock->id_ctr++;
+ 
+     new_id = VAL_ID(new_id);
+-    InterlockedAnd64(&lock->qp_group[current_idx].users, ID_MASK);
+-    InterlockedAdd64(&lock->qp_group[current_idx].users, new_id);
++    CRYPTO_atomic_and(&lock->qp_group[current_idx].users, ID_MASK, &tmp64,
++                      lock->rw_lock);
++    CRYPTO_atomic_add64(&lock->qp_group[current_idx].users, new_id, &tmp64,
++                        lock->rw_lock);
+ 
+     /* update the reader index to be the prior qp */
+     tmp = lock->current_alloc_idx;
+@@ -338,7 +360,7 @@ void ossl_synchronize_rcu(CRYPTO_RCU_LOCK *lock)
+ 
+     /* wait for the reader count to reach zero */
+     do {
+-        count = InterlockedOr64(&qp->users, 0);
++        CRYPTO_atomic_load(&qp->users, &count, lock->rw_lock);
+     } while (READER_COUNT(count) != 0);
+ 
+     /* retire in order */
+@@ -566,6 +588,45 @@ int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b)
+     return (a == b);
+ }
+ 
++static int CRYPTO_atomic_add64(uint64_t *val, uint64_t op, uint64_t *ret,
++                               CRYPTO_RWLOCK *lock)
++{
++#if (defined(NO_INTERLOCKEDOR64))
++    if (lock == NULL || !CRYPTO_THREAD_write_lock(lock))
++        return 0;
++    *val += op;
++    *ret = *val;
++
++    if (!CRYPTO_THREAD_unlock(lock))
++        return 0;
++
++    return 1;
++#else
++    *ret = (uint64_t)InterlockedAdd64((LONG64 volatile *)val, (LONG64)op);
++    return 1;
++#endif
++}
++
++static int CRYPTO_atomic_and(uint64_t *val, uint64_t op, uint64_t *ret,
++                             CRYPTO_RWLOCK *lock)
++{
++#if (defined(NO_INTERLOCKEDOR64))
++    if (lock == NULL || !CRYPTO_THREAD_write_lock(lock))
++        return 0;
++    *val &= op;
++    *ret = *val;
++
++    if (!CRYPTO_THREAD_unlock(lock))
++        return 0;
++
++    return 1;
++#else
++    *ret = (uint64_t)InterlockedAnd64((LONG64 volatile *)val, (LONG64)op) & op;
++    return 1;
++#endif
++}
++
++
+ int CRYPTO_atomic_add(int *val, int amount, int *ret, CRYPTO_RWLOCK *lock)
+ {
+     *ret = (int)InterlockedExchangeAdd((long volatile *)val, (long)amount) + amount;
+-- 
+2.44.0
+

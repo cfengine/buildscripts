@@ -1,0 +1,60 @@
+From c762f970d1c390908def261001a9d2873014bbef Mon Sep 17 00:00:00 2001
+From: Vratislav Podzimek <v.podzimek@mykolab.com>
+Date: Tue, 14 May 2024 16:52:38 +0200
+Subject: [PATCH] Define _XOPEN_SOURCE_EXTENDED as 1
+
+Otherwise build on AIX 7 hits this beauty:
+
+```
+16:38:25 /usr/include/standards.h:88:28: error: operator '==' has no left operand
+16:38:25  #if (_XOPEN_SOURCE_EXTENDED==1)
+16:38:25                             ^~
+```
+---
+ apps/ocsp.c            | 2 +-
+ crypto/conf/conf_lib.c | 2 +-
+ crypto/conf/conf_sap.c | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/apps/ocsp.c b/apps/ocsp.c
+index 17313520cf..c306916dc5 100644
+--- a/apps/ocsp.c
++++ b/apps/ocsp.c
+@@ -11,7 +11,7 @@
+ 
+ #ifdef OPENSSL_SYS_VMS
+   /* So fd_set and friends get properly defined on OpenVMS */
+-# define _XOPEN_SOURCE_EXTENDED
++# define _XOPEN_SOURCE_EXTENDED 1
+ #endif
+ 
+ #include <stdio.h>
+diff --git a/crypto/conf/conf_lib.c b/crypto/conf/conf_lib.c
+index e82a07da57..0665644cde 100644
+--- a/crypto/conf/conf_lib.c
++++ b/crypto/conf/conf_lib.c
+@@ -7,7 +7,7 @@
+  * https://www.openssl.org/source/license.html
+  */
+ 
+-#define _XOPEN_SOURCE_EXTENDED   /* To get a definition of strdup() */
++#define _XOPEN_SOURCE_EXTENDED 1  /* To get a definition of strdup() */
+ 
+ #include "internal/e_os.h"
+ #include <stdio.h>
+diff --git a/crypto/conf/conf_sap.c b/crypto/conf/conf_sap.c
+index 15fd2f3f9d..d967a4cb5a 100644
+--- a/crypto/conf/conf_sap.c
++++ b/crypto/conf/conf_sap.c
+@@ -7,7 +7,7 @@
+  * https://www.openssl.org/source/license.html
+  */
+ 
+-#define _XOPEN_SOURCE_EXTENDED   /* To get a definition of strdup() */
++#define _XOPEN_SOURCE_EXTENDED 1   /* To get a definition of strdup() */
+ 
+ #include <stdio.h>
+ #include <openssl/crypto.h>
+-- 
+2.44.0
+
