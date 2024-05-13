@@ -1,4 +1,4 @@
-%define pcre2_version 10.42
+%define pcre2_version 10.43
 
 Summary: CFEngine Build Automation -- pcre2
 Name: cfbuild-pcre2
@@ -72,7 +72,7 @@ CFEngine Build Automation -- pcre2 -- development files
 %defattr(-,root,root)
 
 %dir %prefix/lib
-%prefix/lib/libpcre2-8.so.0.11.*
+%prefix/lib/libpcre2-8.so.0.*.*
 %prefix/lib/libpcre2-8.so.0
 %prefix/lib/libpcre2-8.so
 
