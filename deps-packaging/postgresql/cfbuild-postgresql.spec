@@ -23,7 +23,7 @@ mkdir -p %{_builddir}
 
 SYS=`uname -s`
 
-LD_LIBRARY_PATH=%{prefix}/lib CPPFLAGS=-I%{prefix}/include ./configure --prefix=%{prefix} --without-zlib --without-readline --with-openssl
+LD_LIBRARY_PATH=%{prefix}/lib CPPFLAGS=-I%{prefix}/include ./configure --prefix=%{prefix} --without-zlib --without-readline --with-openssl --with-icu
 
 if [ -z $MAKE ]; then
   MAKE_PATH=`which make`
