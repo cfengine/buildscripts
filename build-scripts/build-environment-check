@@ -21,7 +21,7 @@ case "$OS" in
         UNWANTED_DEPS="libtool-ltdl libtool-ltdl-devel"
         ;;
     debian|ubuntu)
-        DEP_LIST="dpkg-dev debhelper g++ libncurses5 pkg-config build-essential libpam0g-dev"
+        DEP_LIST="dpkg-dev debhelper g++ pkg-config build-essential libpam0g-dev"
         UNWANTED_DEPS="libltdl-dev libltdl7"
         ;;
 
