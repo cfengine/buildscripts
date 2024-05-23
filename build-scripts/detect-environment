@@ -116,12 +116,11 @@ detect_distribution()
       "Red Hat Enterprise Linux Server release "*)
         VER=${REL#Red Hat Enterprise Linux Server release }
         VER=${VER% \(*};
-        case "$VER" in
-          [0-9].[0-9]);;
-          *)
+        if ! echo "$VER" | egrep '^[0-9]+.[0-9]+$' > /dev/null
+        then
           echo "Unknown RHEL Server version: $VER"
-          exit 42;;
-        esac
+          exit 42
+        fi
 
         OS=rhel
         OS_VERSION="$VER"
@@ -130,12 +129,11 @@ detect_distribution()
       "Red Hat Enterprise Linux release "*)
         VER=${REL#Red Hat Enterprise Linux release }
         VER=${VER% \(*};
-        case "$VER" in
-          [0-9].[0-9]);;
-          *)
+        if ! echo "$VER" | egrep '^[0-9]+.[0-9]+$' > /dev/null
+        then
           echo "Unknown RHEL Server version: $VER"
-          exit 42;;
-        esac
+          exit 42
+        fi
 
         OS=rhel
         OS_VERSION="$VER"
