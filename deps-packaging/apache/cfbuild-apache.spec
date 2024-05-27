@@ -22,6 +22,7 @@ tar xf nghttp2-1.62.1.tar.bz2
 cd ./nghttp2-1.62.1
 ./configure
 make
+cd ../
 
 %prep
 mkdir -p %{_builddir}
