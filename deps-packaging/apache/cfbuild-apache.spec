@@ -17,6 +17,12 @@ AutoReqProv: no
 
 %define prefix %{buildprefix}
 
+wget https://github.com/nghttp2/nghttp2/releases/download/v1.62.1/nghttp2-1.62.1.tar.bz2
+tar xf nghttp2-1.62.1.tar.bz2
+cd ./nghttp2-1.62.1
+./configure
+make
+
 %prep
 mkdir -p %{_builddir}
 %setup -q -n httpd-%{apache_version}
@@ -30,6 +36,7 @@ CPPFLAGS=-I%{buildprefix}/include
     --prefix=%{prefix}/httpd \
     --enable-so \
     --enable-mods-shared="all ssl ldap authnz_ldap" \
+    --enable-http2 \
     --with-z=%{prefix} \
     --with-ssl=%{prefix} \
     --with-ldap=%{prefix} \

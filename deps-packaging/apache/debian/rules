@@ -3,6 +3,12 @@ PREFIX=$(BUILDPREFIX)
 
 CPPFLAGS=-I$(BUILDPREFIX)/include
 
+wget https://github.com/nghttp2/nghttp2/releases/download/v1.62.1/nghttp2-1.62.1.tar.bz2
+tar xf nghttp2-1.62.1.tar.bz2
+cd ./nghttp2-1.62.1
+./configure
+make
+
 clean:
 	dh_testdir
 	dh_testroot
@@ -18,6 +24,7 @@ build-stamp:
 --prefix=$(PREFIX)/httpd \
 --enable-so \
 --enable-mods-shared="all ssl ldap authnz_ldap" \
+--enable-http2 \
 --with-z=$(PREFIX) \
 --with-ssl=$(PREFIX) \
 --with-ldap=$(PREFIX) \
