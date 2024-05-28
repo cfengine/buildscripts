@@ -12,7 +12,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	LD_LIBRARY_PATH=$(PREFIX)/lib CPPFLAGS=-I$(PREFIX)/include ./configure --prefix=$(PREFIX) --without-zlib --without-readline --with-openssl
+	LD_LIBRARY_PATH=$(PREFIX)/lib CPPFLAGS=-I$(PREFIX)/include ./configure --prefix=$(PREFIX) --without-zlib --without-readline --with-openssl --without-icu
 # force generated-headers in src/backend because the headers are needed for other things and somehow dependencies don't work properly
 	make -C ./src/backend generated-headers
 	make

@@ -1,0 +1,35 @@
+From 42e5fcd12461434ea5d6e04742ea57d4a46ba48d Mon Sep 17 00:00:00 2001
+From: Vratislav Podzimek <v.podzimek@mykolab.com>
+Date: Wed, 15 May 2024 09:56:32 +0200
+Subject: [PATCH] Define _XOPEN_SOURCE as 600 on Solaris SPARC
+
+Otherwise it thinks we are compiling for older POSIX with C99
+which is a forbidden combination:
+
+```
+In file included from /opt/csw/lib/gcc/sparc-sun-solaris2.10/5.5.0/include-fixed/stdio.h:30:0,
+                 from crypto/asn1/a_time.c:19:
+/opt/csw/lib/gcc/sparc-sun-solaris2.10/5.5.0/include-fixed/sys/feature_tests.h:346:2: error: #error "Compiler or options invalid for pre-UNIX 03 X/Open applications 	and pre-2001 POSIX applications"
+ #error "Compiler or options invalid for pre-UNIX 03 X/Open applications \
+  ^
+```
+---
+ crypto/asn1/a_time.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/crypto/asn1/a_time.c b/crypto/asn1/a_time.c
+index 49548235ad..8cda70fee0 100644
+--- a/crypto/asn1/a_time.c
++++ b/crypto/asn1/a_time.c
+@@ -14,7 +14,7 @@
+  *      generalTime    GeneralizedTime }
+  */
+ 
+-#define _XOPEN_SOURCE            /* To get a definition of timezone */
++#define _XOPEN_SOURCE 600          /* To get a definition of timezone */
+ 
+ #include <stdio.h>
+ #include <time.h>
+-- 
+2.44.0
+

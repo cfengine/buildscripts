@@ -1,4 +1,4 @@
-%define openssl_version 3.1.4
+%define openssl_version 3.3.0
 
 Summary: CFEngine Build Automation -- openssl
 Name: cfbuild-openssl
@@ -6,6 +6,7 @@ Version: %{version}
 Release: 1
 Source0: openssl-%{openssl_version}.tar.gz
 Patch0: 0006-Add-latomic-on-AIX-7.patch
+Patch1: 0008-Define-_XOPEN_SOURCE_EXTENDED-as-1.patch
 License: MIT
 Group: Other
 Url: http://example.com/
@@ -20,6 +21,7 @@ mkdir -p %{_builddir}
 %setup -q -n openssl-%{openssl_version}
 
 %patch0 -p1
+%patch1 -p1
 
 %build
 
@@ -116,6 +118,7 @@ rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/CA.pl
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/tsget
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/openssl.cnf.dist
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/ssl/misc/tsget.pl
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/cmake/OpenSSL
 
 SYS=`uname -s`
 if [ x$SYS = "xAIX" ]; then

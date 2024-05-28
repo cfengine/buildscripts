@@ -70,6 +70,7 @@ install: build
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/libssl.a
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/libcrypto.a
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/cmake/OpenSSL
 
 binary-indep: build install
 

@@ -11,6 +11,7 @@ OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}
 export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Patch
+$PATCH -p1 < 0009-Define-_XOPEN_SOURCE-as-600-on-Solaris-SPARC.patch
 
 # Add dummy header files for features which are not compiled, but required
 mkdir -p ${BUILD_ROOT}/../include/openssl
@@ -56,6 +57,7 @@ rm -rf ${OSD}/bin
 rm -rf ${OSD}/ssl
 rm -rf ${OSD}/lib/fips*
 rm -rf ${OSD}/lib/*.a
+rm -rf ${OSD}/lib/cmake/OpenSSL
 
 mkdir -p ${OS}/lib
 mv ${OSD}/lib/libcrypto.so* ${OS}/lib

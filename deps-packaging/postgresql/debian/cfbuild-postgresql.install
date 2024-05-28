@@ -27,7 +27,6 @@
 /var/cfengine/bin/pg_waldump
 /var/cfengine/bin/pgbench
 /var/cfengine/bin/postgres
-/var/cfengine/bin/postmaster
 /var/cfengine/bin/psql
 /var/cfengine/bin/reindexdb
 /var/cfengine/bin/vacuumdb

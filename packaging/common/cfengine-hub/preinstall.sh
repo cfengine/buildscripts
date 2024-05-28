@@ -16,7 +16,7 @@ if is_upgrade; then
 fi
 
 # If upgrading from a version below 3.21 that has PostgreSQL, and the data dir exists.
-if is_upgrade && egrep '^3\.([6-9]|1[0-9]|20)\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+if is_upgrade && egrep '^3\.([6-9]|1[0-9]|2[0-3])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
   alias migrating_postgres='true'
 else
   alias migrating_postgres='false'

@@ -42,6 +42,7 @@ rm -rf ${OSD}/bin
 rm -rf ${OSD}/ssl
 rm -rf ${OSD}/lib/fips*
 rm -rf ${OSD}/lib/*.a
+rm -rf ${OSD}/lib/cmake/OpenSSL
 
 mkdir -p ${OS}/lib
 mv ${OSD}/lib/libcrypto.so* ${OS}/lib
