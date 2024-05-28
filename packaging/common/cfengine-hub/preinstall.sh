@@ -68,7 +68,7 @@ if migrating_postgres; then
     megabytes_need="$(du -sBM $PREFIX/state/pg/data | awk '{gsub(/[^0-9]/,"",$1);print $1}')"
     if [ "$megabytes_free" -le "$megabytes_need" ]; then
       cf_console echo "Not enough disk space to create DB backup:"
-      cf_console echo "${megabytes_free}M available in $BACKUP_DIR"
+      cf_console echo "${megabytes_free}M available in $BACKUP_DIR want at least ${megabytes_need}M free"
       cf_console echo "${megabytes_need}M used by $PREFIX/state/pg/data"
       cf_console echo "You have the following options:"
       cf_console echo "* Free up some disk space before upgrading"
