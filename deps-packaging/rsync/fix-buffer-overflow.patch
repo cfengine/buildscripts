@@ -1,0 +1,14 @@
+diff --git a/popt/poptparse.c b/popt/poptparse.c
+index e003a04a..dbef88cb 100644
+--- a/popt/poptparse.c
++++ b/popt/poptparse.c
+@@ -38,7 +38,8 @@ int poptDupArgv(int argc, const char **argv,
+     /*@-branchstate@*/
+     for (i = 0; i < argc; i++) {
+ 	argv2[i] = dst;
+-	dst += strlcpy(dst, argv[i], nb) + 1;
++	dst = stpcpy(dst, argv[i]);
++	dst++;	/* trailing NUL */
+     }
+     /*@=branchstate@*/
+     argv2[argc] = NULL;
