@@ -24,13 +24,16 @@ fi
 
 test -z "$BACKUP_DIR" && BACKUP_DIR=$PREFIX/state/pg/backup
 
-if migrating_postgres; then
-    if [ -d "$BACKUP_DIR" ] && [ -n "$(ls -A "$BACKUP_DIR")" ]; then
-    cf_console echo "Backup directory $BACKUP_DIR already exists and is not empty."
+if [ -d "$BACKUP_DIR" ] && [ -n "$(ls -A "$BACKUP_DIR")" ]; then
+    # If the backup directory exists and is not empty we don't want to proceed,
+    # that stale data can cause database migration problems.
+    cf_console echo "Backup directory $BACKUP_DIR exists and is not empty."
     cf_console echo 'Please remove it, clean it, or set a different directory by setting a BACKUP_DIR env variable, like this:'
     cf_console echo 'export BACKUP_DIR=/mnt/plenty-of-free-space'
     exit 1
-  fi
+fi
+
+if migrating_postgres; then
   mkdir -p "$BACKUP_DIR"
   # Try to check if free space on $BACKUP_DIR drive is not less than $PREFIX/state/pg/data contains
   if command -v df >/dev/null && command -v du >/dev/null && command -v awk >/dev/null; then
