@@ -43,6 +43,7 @@ LDFLAGS=""
   --with-zlib=%{prefix} \
   --with-libmbfl=%{prefix} \
   --enable-mbstring \
+  --enable-pcntl  \
   --enable-sockets \
   --disable-mbregex \
   --without-fpm-user \
