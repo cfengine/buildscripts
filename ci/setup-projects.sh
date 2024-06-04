@@ -22,7 +22,7 @@ fi
 if test -f "mission-portal/composer.json"; then
 	cd mission-portal
 	# install PHP dependencies from composer
-	composer install
+	composer install --no-dev
 fi
 )
 
@@ -30,7 +30,7 @@ fi
 if test -f "nova/api/http/composer.json"; then
 	cd nova/api/http/
 	# install PHP dependencies from composer
-	composer install --ignore-platform-reqs
+	composer install --ignore-platform-reqs --no-dev
 fi
 )
 
@@ -45,7 +45,7 @@ fi
 if test -f "mission-portal/ldap/composer.json"; then
 	cd mission-portal/ldap
 	# install PHP dependencies from composer
-	composer install
+	composer install --no-dev
 fi
 )
 
