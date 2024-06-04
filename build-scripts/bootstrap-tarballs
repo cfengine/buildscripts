@@ -72,7 +72,7 @@ fi
 if test -f "$BASEDIR/mission-portal/composer.json"; then
   cd $BASEDIR/mission-portal
   # install PHP dependencies from composer
-  php /usr/bin/composer.phar install
+  php /usr/bin/composer.phar install --no-dev
 fi
 )
 
@@ -80,7 +80,7 @@ fi
 if test -f "$BASEDIR/nova/api/http/composer.json"; then
   cd $BASEDIR/nova/api/http
   # install PHP dependencies from composer
-  php /usr/bin/composer.phar install --ignore-platform-reqs
+  php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs
 fi
 )
 
@@ -105,7 +105,7 @@ fi
 if test -f "$BASEDIR/mission-portal/ldap/composer.json"; then
   cd $BASEDIR/mission-portal/ldap
   # install PHP dependencies from composer
-  php /usr/bin/composer.phar install
+  php /usr/bin/composer.phar install --no-dev
 fi
 )
 
