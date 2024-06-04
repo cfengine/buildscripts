@@ -40,5 +40,5 @@ sudo apt-get -qq purge apache* "postgresql*" redis*
 # remove any nodejs or node- packages currently in place
 sudo apt-get remove -qy 'nodejs*' 'node-*'
 # replace with exact version we want
-wget -O - https://deb.nodesource.com/setup_12.x | sudo -E bash -
+wget -O - https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -qy nodejs
