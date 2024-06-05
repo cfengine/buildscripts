@@ -16,6 +16,8 @@ PACKAGES_HUB_x86_64_linux_ubuntu_18
 PACKAGES_HUB_x86_64_linux_ubuntu_20
 PACKAGES_HUB_x86_64_linux_ubuntu_22
 PACKAGES_HUB_arm_64_linux_ubuntu_22
+PACKAGES_HUB_x86_64_linux_ubuntu_24
+PACKAGES_HUB_arm_64_linux_ubuntu_24
 
 PACKAGES_x86_64_linux_debian_9
 PACKAGES_x86_64_linux_debian_10
@@ -37,6 +39,8 @@ PACKAGES_x86_64_linux_ubuntu_18
 PACKAGES_x86_64_linux_ubuntu_20
 PACKAGES_x86_64_linux_ubuntu_22
 PACKAGES_arm_64_linux_ubuntu_22
+PACKAGES_x86_64_linux_ubuntu_24
+PACKAGES_arm_64_linux_ubuntu_24
 
 PACKAGES_i386_mingw
 PACKAGES_x86_64_mingw
