@@ -1,7 +1,7 @@
 name: Continuous Integration
 
 # Run this CI on all pushes to upstream
-# (including PRs fromm usptream to upstream)
+# (including PRs from usptream to upstream)
 on: push
 
 jobs:
