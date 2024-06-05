@@ -109,6 +109,8 @@ chmod 700 $RPM_BUILD_ROOT%prefix/share/GUI/api/dc-scripts/*.sh
 cp -R %{_basedir}/nova/api/http/.htaccess $RPM_BUILD_ROOT%prefix/share/GUI/api
 cp -R %{_basedir}/enterprise/misc/solaris_admin_files $RPM_BUILD_ROOT%prefix/share
 rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/tests
+rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/api/tests
+rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/ldap/tests
 rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/application/controllers/testing.php
 rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/unittest_index.php
 rm -rf $RPM_BUILD_ROOT%prefix/share/GUI/unit_test.php

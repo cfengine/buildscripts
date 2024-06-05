@@ -48,6 +48,8 @@ install: build
 	cp -R $(BASEDIR)/nova/api/http/.htaccess $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api
 	cp -R $(BASEDIR)/enterprise/misc/solaris_admin_files $(CURDIR)/debian/tmp$(PREFIX)/share/solaris_admin_files
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/tests
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/api/tests
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/ldap/tests
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/application/controllers/testing.php
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/unittest_index.php
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/unit_test.php
