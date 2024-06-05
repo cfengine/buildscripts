@@ -1,0 +1,27 @@
+A buffer overflow in rsync 3.3.0 was detected after adding Ubuntu 24.04 to our
+build system. The command triggering the buffer overflow happened in the
+federated reporting script when pulling changes from a feeder hub onto the super
+hub. I modified this script to echo the exact command that was run so that I
+could reproduce it with the GNU debugger. The backtrace revealed that the line
+'poptparse.c:38' produced the buffer overflow. However, the buffer overflow did
+not happen in the rsync master branch. Thus, I hand-picked the relevant changes
+between the master branch and the 3.3.0 release tag.
+
+Neither rsync nor popt mentions anything about buffer overflow. However, popt
+seems to have fixed it, and rsync has updated popt in their master branch. Thus,
+we will not need this patch in the upcoming release of rsync.
+
+diff --git a/popt/poptparse.c b/popt/poptparse.c
+index e003a04a..dbef88cb 100644
+--- a/popt/poptparse.c
++++ b/popt/poptparse.c
+@@ -38,7 +38,8 @@ int poptDupArgv(int argc, const char **argv,
+     /*@-branchstate@*/
+     for (i = 0; i < argc; i++) {
+ 	argv2[i] = dst;
+-	dst += strlcpy(dst, argv[i], nb) + 1;
++	dst = stpcpy(dst, argv[i]);
++	dst++;	/* trailing NUL */
+     }
+     /*@=branchstate@*/
+     argv2[argc] = NULL;
