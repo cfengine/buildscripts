@@ -16,7 +16,7 @@ function error()
 }
 function cleanup()
 {
-  rm "$error_log"
+  rm -rf "$error_log"
 }
 trap error ERR
 trap cleanup EXIT
