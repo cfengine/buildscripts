@@ -18,23 +18,20 @@ sudo apt-get install -qy git
 # python3-pip is needed for cfengine-nova-hub.deb packaging
 sudo apt-get install -qy python3 python3-pip
 
-# Install Python2 and psycopg2
-sudo apt-get -qy install python2
-wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O get-pip.py
-sudo python2 get-pip.py
-sudo pip install psycopg2-binary
+# Install psycopg2
+apt-get -y install python3-psycopg2
 
 # install composer and friends
 sudo apt-get -qy install curl php7.4-cli php7.4-curl php7.4-zip php7.4-mbstring php7.4-xml php7.4-gd composer php7.4-ldap
 # packages needed for autogen
 sudo apt-get -qy install git autoconf automake m4 make bison flex \
- binutils libtool gcc g++ libc-dev libpam0g-dev python2 python3 psmisc
+ binutils libtool gcc g++ libc-dev libpam0g-dev python3 psmisc
 
 # packages needed for buildscripts
 sudo apt-get -qy install libncurses5 rsync
 # packages needed for building 
 sudo apt-get -qy install bison flex binutils build-essential fakeroot ntp \
- dpkg-dev libpam0g-dev python2 python3 debhelper pkg-config psmisc nfs-common
+ dpkg-dev libpam0g-dev python3 debhelper pkg-config psmisc nfs-common
 
 # remove unwanted packages
 sudo apt-get -qq purge apache* "postgresql*" redis*
@@ -43,5 +40,5 @@ sudo apt-get -qq purge apache* "postgresql*" redis*
 # remove any nodejs or node- packages currently in place
 sudo apt-get remove -qy 'nodejs*' 'node-*'
 # replace with exact version we want
-wget -O - https://deb.nodesource.com/setup_12.x | sudo -E bash -
+wget -O - https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -qy nodejs
