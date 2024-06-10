@@ -44,6 +44,7 @@ LDFLAGS=""
   --with-libmbfl=%{prefix} \
   --enable-mbstring \
   --enable-pcntl  \
+  --enable-maintainer-zts  \
   --enable-sockets \
   --disable-mbregex \
   --without-fpm-user \
