@@ -53,6 +53,13 @@ case "$TEST_MACHINE" in
                 continue
             fi
 
+            # gpg-agent sometimes is spawned on Ubuntu 24 during our tests.
+            # This happens only in chroot. Ignore that.
+            if grep "Ubuntu 24" /etc/os-release && ps -o command --pid "$pid" | grep "gpg-agent --homedir /etc/apt/sources.list.d/.gnupg-temp --use-standard-socket --daemon"
+            then
+                continue
+            fi
+
             # Leaving processes behind is an error. It should never happen.
             return_code=1
             (
