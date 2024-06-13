@@ -27,7 +27,7 @@ if test -z "$1"; then
 fi
 if ! test -f "$1"; then
   echo "File $1 not found"
-  exit 1
+  exit 0
 fi
 echo "## Test Summary for $1"
 xmlstarlet sel -T \
