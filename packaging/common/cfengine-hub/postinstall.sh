@@ -332,7 +332,7 @@ if [ ! -f $CFENGINE_MP_CERT ]; then
   # Build configuration with reasonable default subjectAltName entries
   rm -f "$CFENGINE_MP_SSLCONF"
   test -f "$OPENSSL_CNF" && cat "$OPENSSL_CNF" > $CFENGINE_MP_SSLCONF
-  CFENGINE_LOCALIP=$(for i in $(hostname -i; hostname -I); do echo $i; done | sed '/::1/d' | sed '/127.0.0.1/d' | sort -u | xargs -n1 printf "IP:%s\n" | paste -sd "," -)
+  CFENGINE_LOCALIP=$(for i in $(hostname -I); do echo $i; done | sort -u | xargs -n1 printf "IP:%s\n" | paste -sd "," -)
   printf "[SAN]\nsubjectAltName=DNS:$CFENGINE_LOCALHOST,DNS:localhost,IP:127.0.0.1,$CFENGINE_LOCALIP" >> $CFENGINE_MP_SSLCONF
 
   # Generate CRT
