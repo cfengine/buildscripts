@@ -518,7 +518,7 @@ check_disk_space() {
 #   and then importing it into new one
 
 migrate_db_using_pg_upgrade() {
-   su cfpostgres -c "$PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data"
+   su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data"
 }
 
 migrate_db_using_pipe() {
