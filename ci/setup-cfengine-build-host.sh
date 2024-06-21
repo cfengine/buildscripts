@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
+
+# TODO get latest LTS dynamically
+CFE_VERSION=3.21.5
+
 # install needed packages and software for a build host
 set -ex
 if [ "$(id -u)" != "0" ]; then
@@ -80,11 +84,11 @@ if grep -i suse /etc/os-release; then
   # need to add our public key first otherwise zypper install fails
   rpm --import https://cfengine-package-repos.s3.amazonaws.com/pub/gpg.key
   if grep 'VERSION.*12' /etc/os-release; then
-    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.4/agent/agent_suse12_x86_64/cfengine-nova-3.21.4-1.suse12.x86_64.rpm
-    zypper install -y cfengine-nova-3.21.4-1.suse12.x86_64.rpm
+    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-"$CFE_VERSION"/agent/agent_suse12_x86_64/cfengine-nova-"$CFE_VERSION"-1.suse12.x86_64.rpm
+    zypper install -y cfengine-nova-"$CFE_VERSION"-1.suse12.x86_64.rpm
   elif grep 'VERSION.*15' /etc/os-release; then
-    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.4/agent/agent_suse15_x86_64/cfengine-nova-3.21.4-1.suse15.x86_64.rpm
-    zypper install -y cfengine-nova-3.21.4-1.suse15.x86_64.rpm
+    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-"$CFE_VERSION"/agent/agent_suse15_x86_64/cfengine-nova-"$CFE_VERSION"-1.suse15.x86_64.rpm
+    zypper install -y cfengine-nova-"$CFE_VERSION"-1.suse15.x86_64.rpm
   else
     echo "Unsupported suse version:"
     grep VERSION /etc/os-release
@@ -98,11 +102,11 @@ else
 fi
 
 # get masterfiles
-urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.4/misc/cfengine-masterfiles-3.21.4-1.pkg.tar.gz
+urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-"$CFE_VERSION"/misc/cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz
 
-sha256sum --check ./buildscripts/ci/cfengine-masterfiles-3.21.4-1.pkg.tar.gz.sha256
+sha256sum --check ./buildscripts/ci/cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz.sha256
 
-tar xf cfengine-masterfiles-3.21.4-1.pkg.tar.gz
+tar xf cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz
 cp -a masterfiles/* /var/cfengine/inputs/
 
 # run three times to ensure all is done
