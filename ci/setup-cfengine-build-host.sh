@@ -53,7 +53,10 @@ trap cleanup SIGINT
 trap cleanup SIGTERM
 
 
-echo "First, install any distribution upgrades"
+echo "Using buildscripts commit:"
+git log -1
+
+echo "Install any distribution upgrades"
 if [ -f /etc/os-release ]; then
   if grep rhel /etc/os-release; then
     yum upgrade --assumeyes
@@ -96,6 +99,12 @@ if grep -i suse /etc/os-release; then
   fi
 else
   urlget https://s3.amazonaws.com/cfengine.packages/quick-install-cfengine-enterprise.sh
+  # log sha256 checksum expected and actuall for debugging purposes
+  echo "Expected quick install checksum: "
+  cat ./buildscripts/ci/quick-install-cfengine-enterprise.sh.sha256
+  echo "Actual quick install checksum: "
+  sha256sum quick-install-cfengine-enterprise.sh
+
   sha256sum --check ./buildscripts/ci/quick-install-cfengine-enterprise.sh.sha256
   chmod +x quick-install-cfengine-enterprise.sh
   bash ./quick-install-cfengine-enterprise.sh agent
