@@ -54,7 +54,7 @@ trap cleanup SIGTERM
 
 
 echo "Using buildscripts commit:"
-git log -1
+git -C buildscripts log -1
 
 echo "Install any distribution upgrades"
 if [ -f /etc/os-release ]; then
