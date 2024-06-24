@@ -2,7 +2,7 @@
 shopt -s expand_aliases
 
 # TODO get latest LTS dynamically
-CFE_VERSION=3.21.5
+CFE_VERSION=3.21.4
 
 # install needed packages and software for a build host
 set -ex
@@ -107,6 +107,7 @@ else
 
   sha256sum --check ./buildscripts/ci/quick-install-cfengine-enterprise.sh.sha256
   chmod +x quick-install-cfengine-enterprise.sh
+  export CFEngine_Enterprise_Package_Version="$CFE_VERSION"
   bash ./quick-install-cfengine-enterprise.sh agent
 fi
 
