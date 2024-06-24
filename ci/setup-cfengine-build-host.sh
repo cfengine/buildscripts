@@ -54,7 +54,10 @@ trap cleanup SIGTERM
 
 
 echo "Using buildscripts commit:"
-git -C buildscripts rev-parse HEAD
+# we have very old platforms with old git that doesn't understand -C option so cd/cd .. it is
+cd buildscripts
+git rev-parse HEAD
+cd ..
 
 echo "Install any distribution upgrades"
 if [ -f /etc/os-release ]; then
