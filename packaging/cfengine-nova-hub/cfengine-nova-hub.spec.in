@@ -69,6 +69,13 @@ mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
+# ENT-11901
+# For el9+ we started seeing issues from other packages not expecting init scripts
+%if %{?rhel}%{!?rhel:0} >= 9
+rm -f $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
+rm -f $RPM_BUILD_ROOT/etc/init.d/cfengine3
+rm -f $RPM_BUILD_ROOT/etc/profile.d/cfengine.sh
+%endif
 # Remove useless stuff
 
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
@@ -314,9 +321,13 @@ exit 0
 
 # Initscript, other configuration
 %defattr(755,root,root,755)
+# ENT-11901
+# For el9+ we started seeing issues from other packages not expecting init scripts
+%if %{?rhel}%{!?rhel:0} < 9
 /etc/init.d/cfengine3
 /etc/profile.d/cfengine.sh
 %attr(644,root,root) /etc/sysconfig/cfengine3
+%endif
 
 # Systemd units
 %defattr(644,root,root,755)
