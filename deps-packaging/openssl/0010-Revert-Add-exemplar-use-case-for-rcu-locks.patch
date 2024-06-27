@@ -1,4 +1,4 @@
-From d96d4af76f3f906dfad0349f40dff2fa3af7b50e Mon Sep 17 00:00:00 2001
+From d38b67cc6230a97c34f898181b32425e3a8b12ad Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <v.podzimek@mykolab.com>
 Date: Fri, 24 May 2024 10:32:07 +0200
 Subject: [PATCH] Revert "Add exemplar use case for rcu locks" and "plug
@@ -6,12 +6,14 @@ Subject: [PATCH] Revert "Add exemplar use case for rcu locks" and "plug
 
 This reverts commit 504e72fc1a1432d5266bd6e8909648c49884a36c.
 This reverts commit 707b54bee2abbfe94a80361ab97cf77e1e4746bb.
+
+(cherry picked from commit d96d4af76f3f906dfad0349f40dff2fa3af7b50e)
 ---
- crypto/conf/conf_mod.c | 135 ++++++++++++++---------------------------
- 1 file changed, 46 insertions(+), 89 deletions(-)
+ crypto/conf/conf_mod.c | 137 ++++++++++++++---------------------------
+ 1 file changed, 46 insertions(+), 91 deletions(-)
 
 diff --git a/crypto/conf/conf_mod.c b/crypto/conf/conf_mod.c
-index 7efb982054..4f339f4175 100644
+index a19575af37..4f339f4175 100644
 --- a/crypto/conf/conf_mod.c
 +++ b/crypto/conf/conf_mod.c
 @@ -11,7 +11,6 @@
@@ -79,7 +81,7 @@ index 7efb982054..4f339f4175 100644
      if ((tmod = OPENSSL_zalloc(sizeof(*tmod))) == NULL)
          goto err;
  
-@@ -356,23 +348,18 @@ static CONF_MODULE *module_add(DSO *dso, const char *name,
+@@ -356,24 +348,18 @@ static CONF_MODULE *module_add(DSO *dso, const char *name,
      if (tmod->name == NULL)
          goto err;
  
@@ -97,6 +99,7 @@ index 7efb982054..4f339f4175 100644
  
   err:
 -    ossl_rcu_write_unlock(module_list_lock);
+-    sk_CONF_MODULE_free(new_modules);
 +    CRYPTO_THREAD_unlock(module_list_lock);
      if (tmod != NULL) {
          OPENSSL_free(tmod->name);
@@ -106,7 +109,7 @@ index 7efb982054..4f339f4175 100644
      return NULL;
  }
  
-@@ -387,8 +374,6 @@ static CONF_MODULE *module_find(const char *name)
+@@ -388,8 +374,6 @@ static CONF_MODULE *module_find(const char *name)
      CONF_MODULE *tmod;
      int i, nchar;
      char *p;
@@ -115,7 +118,7 @@ index 7efb982054..4f339f4175 100644
      p = strrchr(name, '.');
  
      if (p)
-@@ -399,18 +384,18 @@ static CONF_MODULE *module_find(const char *name)
+@@ -400,18 +384,18 @@ static CONF_MODULE *module_find(const char *name)
      if (!RUN_ONCE(&init_module_list_lock, do_init_module_list_lock))
          return NULL;
  
@@ -140,7 +143,7 @@ index 7efb982054..4f339f4175 100644
      return NULL;
  }
  
-@@ -421,8 +406,6 @@ static int module_init(CONF_MODULE *pmod, const char *name, const char *value,
+@@ -422,8 +406,6 @@ static int module_init(CONF_MODULE *pmod, const char *name, const char *value,
      int ret = 1;
      int init_called = 0;
      CONF_IMODULE *imod = NULL;
@@ -149,7 +152,7 @@ index 7efb982054..4f339f4175 100644
  
      /* Otherwise add initialized module to list */
      imod = OPENSSL_malloc(sizeof(*imod));
-@@ -449,33 +432,27 @@ static int module_init(CONF_MODULE *pmod, const char *name, const char *value,
+@@ -450,34 +432,27 @@ static int module_init(CONF_MODULE *pmod, const char *name, const char *value,
      if (!RUN_ONCE(&init_module_list_lock, do_init_module_list_lock))
          goto err;
  
@@ -179,6 +182,7 @@ index 7efb982054..4f339f4175 100644
  
 -    if (!sk_CONF_IMODULE_push(new_modules, imod)) {
 -        ossl_rcu_write_unlock(module_list_lock);
+-        sk_CONF_IMODULE_free(new_modules);
 +    if (!sk_CONF_IMODULE_push(initialized_modules, imod)) {
 +        CRYPTO_THREAD_unlock(module_list_lock);
          ERR_raise(ERR_LIB_CONF, ERR_R_CRYPTO_LIB);
@@ -195,7 +199,7 @@ index 7efb982054..4f339f4175 100644
      return ret;
  
   err:
-@@ -505,46 +482,30 @@ void CONF_modules_unload(int all)
+@@ -507,46 +482,30 @@ void CONF_modules_unload(int all)
  {
      int i;
      CONF_MODULE *md;
@@ -251,7 +255,7 @@ index 7efb982054..4f339f4175 100644
  }
  
  /* unload a single module */
-@@ -560,27 +521,23 @@ static void module_free(CONF_MODULE *md)
+@@ -562,27 +521,23 @@ static void module_free(CONF_MODULE *md)
  static int conf_modules_finish_int(void)
  {
      CONF_IMODULE *imod;
@@ -288,5 +292,5 @@ index 7efb982054..4f339f4175 100644
      return 1;
  }
 -- 
-2.44.0
+2.45.0
 

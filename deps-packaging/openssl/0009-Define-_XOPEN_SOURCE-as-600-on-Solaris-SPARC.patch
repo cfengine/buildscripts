@@ -1,7 +1,7 @@
-From 42e5fcd12461434ea5d6e04742ea57d4a46ba48d Mon Sep 17 00:00:00 2001
+From e3e0351ddb85e4d07055bbe8646e7438a1f7f81e Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <v.podzimek@mykolab.com>
 Date: Wed, 15 May 2024 09:56:32 +0200
-Subject: [PATCH] Define _XOPEN_SOURCE as 600 on Solaris SPARC
+Subject: [PATCH 3/4] Define _XOPEN_SOURCE as 600 on Solaris SPARC
 
 Otherwise it thinks we are compiling for older POSIX with C99
 which is a forbidden combination:
@@ -13,23 +13,25 @@ In file included from /opt/csw/lib/gcc/sparc-sun-solaris2.10/5.5.0/include-fixed
  #error "Compiler or options invalid for pre-UNIX 03 X/Open applications \
   ^
 ```
+
+(cherry picked from commit 42e5fcd12461434ea5d6e04742ea57d4a46ba48d)
 ---
- crypto/asn1/a_time.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ crypto/asn1/a_time.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/crypto/asn1/a_time.c b/crypto/asn1/a_time.c
-index 49548235ad..8cda70fee0 100644
+index 96ee63d310..8cda70fee0 100644
 --- a/crypto/asn1/a_time.c
 +++ b/crypto/asn1/a_time.c
-@@ -14,7 +14,7 @@
+@@ -14,6 +14,8 @@
   *      generalTime    GeneralizedTime }
   */
  
--#define _XOPEN_SOURCE            /* To get a definition of timezone */
 +#define _XOPEN_SOURCE 600          /* To get a definition of timezone */
- 
++
  #include <stdio.h>
  #include <time.h>
+ #include "crypto/asn1.h"
 -- 
-2.44.0
+2.45.0
 

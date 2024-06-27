@@ -1,7 +1,7 @@
-From 03111c77b640febbfaefc9ab6519e85f8b595100 Mon Sep 17 00:00:00 2001
+From 8beeee8bc3350641e33979df4579eeba7319802c Mon Sep 17 00:00:00 2001
 From: Vratislav Podzimek <v.podzimek@mykolab.com>
 Date: Tue, 14 May 2024 13:23:40 +0200
-Subject: [PATCH] Avoid using Interlocked*64() Windows functions if not
+Subject: [PATCH 1/4] Avoid using Interlocked*64() Windows functions if not
  available
 
 InterlockedAnd64() and others are not available on VS2010
@@ -10,12 +10,14 @@ functions, such as InterlockedOr64(). Apply the same approach to
 fix the errors.
 
 Inspired by openssl/openssl#24326.
+
+(cherry picked from commit 03111c77b640febbfaefc9ab6519e85f8b595100)
 ---
  crypto/threads_win.c | 81 ++++++++++++++++++++++++++++++++++++++------
  1 file changed, 71 insertions(+), 10 deletions(-)
 
 diff --git a/crypto/threads_win.c b/crypto/threads_win.c
-index 8428869963..36d38aa919 100644
+index 64354dc42f..62b63a4aad 100644
 --- a/crypto/threads_win.c
 +++ b/crypto/threads_win.c
 @@ -23,7 +23,7 @@
@@ -51,7 +53,7 @@ index 8428869963..36d38aa919 100644
      new->alloc_signal = ossl_crypto_condvar_new();
      new->prior_signal = ossl_crypto_condvar_new();
      new->alloc_lock = ossl_crypto_mutex_new();
-@@ -165,13 +173,15 @@ CRYPTO_RCU_LOCK *ossl_rcu_lock_new(int num_writers)
+@@ -164,13 +172,15 @@ CRYPTO_RCU_LOCK *ossl_rcu_lock_new(int num_writers)
          || new->prior_signal == NULL
          || new->write_lock == NULL
          || new->alloc_lock == NULL
@@ -68,7 +70,7 @@ index 8428869963..36d38aa919 100644
          OPENSSL_free(new);
          new = NULL;
      }
-@@ -187,20 +197,27 @@ void ossl_rcu_lock_free(CRYPTO_RCU_LOCK *lock)
+@@ -186,20 +196,27 @@ void ossl_rcu_lock_free(CRYPTO_RCU_LOCK *lock)
      ossl_crypto_mutex_free(&lock->alloc_lock);
      ossl_crypto_mutex_free(&lock->prior_lock);
      ossl_crypto_mutex_free(&lock->write_lock);
@@ -76,7 +78,7 @@ index 8428869963..36d38aa919 100644
      OPENSSL_free(lock);
  }
  
- static inline struct rcu_qp *get_hold_current_qp(CRYPTO_RCU_LOCK *lock)
+ static ossl_inline struct rcu_qp *get_hold_current_qp(CRYPTO_RCU_LOCK *lock)
  {
      uint32_t qp_idx;
 +    uint32_t tmp;
@@ -100,7 +102,7 @@ index 8428869963..36d38aa919 100644
      }
  
      return &lock->qp_group[qp_idx];
-@@ -264,7 +281,9 @@ void ossl_rcu_read_unlock(CRYPTO_RCU_LOCK *lock)
+@@ -263,7 +280,9 @@ void ossl_rcu_read_unlock(CRYPTO_RCU_LOCK *lock)
          if (data->thread_qps[i].lock == lock) {
              data->thread_qps[i].depth--;
              if (data->thread_qps[i].depth == 0) {
@@ -111,7 +113,7 @@ index 8428869963..36d38aa919 100644
                  OPENSSL_assert(ret >= 0);
                  data->thread_qps[i].qp = NULL;
                  data->thread_qps[i].lock = NULL;
-@@ -279,6 +298,7 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock)
+@@ -278,6 +297,7 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock)
      uint64_t new_id;
      uint32_t current_idx;
      uint32_t tmp;
@@ -119,7 +121,7 @@ index 8428869963..36d38aa919 100644
  
      ossl_crypto_mutex_lock(lock->alloc_lock);
      /*
-@@ -302,8 +322,10 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock)
+@@ -301,8 +321,10 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock)
      lock->id_ctr++;
  
      new_id = VAL_ID(new_id);
@@ -132,7 +134,7 @@ index 8428869963..36d38aa919 100644
  
      /* update the reader index to be the prior qp */
      tmp = lock->current_alloc_idx;
-@@ -338,7 +360,7 @@ void ossl_synchronize_rcu(CRYPTO_RCU_LOCK *lock)
+@@ -337,7 +359,7 @@ void ossl_synchronize_rcu(CRYPTO_RCU_LOCK *lock)
  
      /* wait for the reader count to reach zero */
      do {
@@ -141,7 +143,7 @@ index 8428869963..36d38aa919 100644
      } while (READER_COUNT(count) != 0);
  
      /* retire in order */
-@@ -566,6 +588,45 @@ int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b)
+@@ -565,6 +587,45 @@ int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b)
      return (a == b);
  }
  
@@ -188,5 +190,5 @@ index 8428869963..36d38aa919 100644
  {
      *ret = (int)InterlockedExchangeAdd((long volatile *)val, (long)amount) + amount;
 -- 
-2.44.0
+2.45.0
 
