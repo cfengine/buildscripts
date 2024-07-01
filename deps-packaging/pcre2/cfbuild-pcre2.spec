@@ -1,4 +1,4 @@
-%define pcre2_version 10.43
+%define pcre2_version 10.44
 
 Summary: CFEngine Build Automation -- pcre2
 Name: cfbuild-pcre2
