@@ -518,7 +518,7 @@ check_disk_space() {
 #   and then importing it into new one
 
 migrate_db_using_pg_upgrade() {
-   su cfpostgres -c "$PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data"
+   su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $PREFIX/bin/pg_upgrade --old-bindir=$BACKUP_DIR/bin --new-bindir=$PREFIX/bin --old-datadir=$BACKUP_DIR/data --new-datadir=$PREFIX/state/pg/data"
 }
 
 migrate_db_using_pipe() {
@@ -704,19 +704,11 @@ do_migration() {
       exit 0 # exits only from (...)
     fi
     cf_console echo "Migration using pg_upgrade failed."
-    # skip ubuntu-16, debian-9 and debian-12 since there is an expected failure there
-    # check for "/var/cfengine/state/pg/backup/bin/postgres" failed: cannot execute
-    if { [ "$BUILT_ON_OS" = "debian" ] && [ "$BUILT_ON_OS_VERSION" = "9" ]; } || \
-       { [ "$BUILT_ON_OS" = "debian" ] && [ "$BUILT_ON_OS_VERSION" = "12" ]; } || \
-       { [ "$BUILT_ON_OS" = "ubuntu" ] && [ "$BUILT_ON_OS_VERSION" = "16" ]; }; then
-      true # no-op
-    else
-      # here pg_upgrade probably said something like
-      # Consult the last few lines of "/var/cfengine/state/pg/data/pg_upgrade_output.d/20230913T150025.959/log/pg_upgrade_server.log" for the probable cause of the failure.
-      cf_console echo "Showing last lines of any related log files:"
-      _daysearch=$(date +%Y%m%d)
-      find "$PREFIX"/state/pg/data/pg_upgrade_output.d -name '*.log' | grep "$_daysearch" | cf_console xargs tail
-    fi
+    # here pg_upgrade probably said something like
+    # Consult the last few lines of "/var/cfengine/state/pg/data/pg_upgrade_output.d/20230913T150025.959/log/pg_upgrade_server.log" for the probable cause of the failure.
+    cf_console echo "Showing last lines of any related log files:"
+    _daysearch=$(date +%Y%m%d)
+    find "$PREFIX"/state/pg/data/pg_upgrade_output.d -name '*.log' | grep "$_daysearch" | cf_console xargs tail
     cf_console echo
     check_disk_space # will abort if low on disk space
     init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"
