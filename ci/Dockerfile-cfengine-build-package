@@ -1,5 +1,10 @@
 FROM ubuntu:20.04
+RUN cat /etc/resolv.conf
+RUN bash -c 'echo "test" >/dev/tcp/archive.ubuntu.com/80'
 RUN apt-get update -y && apt-get install -y systemd wget sudo
+# some ways of debugging update problems below, uncomment to try, see ENT-11871 for archive.ubuntu.com flakes
+#RUN apt-get update -y -o Debug::Acquire::http=true
+#RUN apt-get install -y -o Debug::Acquire::http=true systemd wget sudo
 ADD setup.sh /
 RUN /bin/bash -c '/setup.sh 2>&1 > setup.log'
 CMD [ "/lib/systemd/systemd" ]
