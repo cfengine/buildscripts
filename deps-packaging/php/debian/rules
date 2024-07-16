@@ -20,10 +20,12 @@ build-stamp:
 --with-ldap=$(PREFIX) \
 --with-pdo-pgsql=$(PREFIX) \
 --with-iconv \
+--with-gd=$(PREFIX) \
 --with-zlib=$(PREFIX) \
 --with-libmbfl=$(PREFIX) \
 --enable-mbstring \
 --enable-sockets \
+--enable-gd \
 --disable-mbregex \
 --without-fpm-user \
 --without-fpm-group \

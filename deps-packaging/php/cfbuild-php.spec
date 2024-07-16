@@ -40,10 +40,12 @@ LDFLAGS=""
   --with-ldap=%{prefix} \
   --with-pdo-pgsql=%{prefix} \
   --with-iconv \
+  --with-gd=%{prefix} \
   --with-zlib=%{prefix} \
   --with-libmbfl=%{prefix} \
   --enable-mbstring \
   --enable-sockets \
+  --enable-gd \
   --disable-mbregex \
   --without-fpm-user \
   --without-fpm-group \
