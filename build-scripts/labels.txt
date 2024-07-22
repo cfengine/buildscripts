@@ -1,7 +1,5 @@
 # which labels to run jenkins jobs on
 
-PACKAGES_HUB_x86_64_linux_debian_9
-PACKAGES_HUB_x86_64_linux_debian_10
 PACKAGES_HUB_x86_64_linux_debian_11
 PACKAGES_HUB_arm_64_linux_debian_11
 PACKAGES_HUB_x86_64_linux_debian_12
@@ -11,15 +9,12 @@ PACKAGES_HUB_x86_64_linux_redhat_7
 PACKAGES_HUB_x86_64_linux_redhat_8
 PACKAGES_HUB_x86_64_linux_redhat_9
 
-PACKAGES_HUB_x86_64_linux_ubuntu_18
 PACKAGES_HUB_x86_64_linux_ubuntu_20
 PACKAGES_HUB_x86_64_linux_ubuntu_22
 PACKAGES_HUB_arm_64_linux_ubuntu_22
 PACKAGES_HUB_x86_64_linux_ubuntu_24
 PACKAGES_HUB_arm_64_linux_ubuntu_24
 
-PACKAGES_x86_64_linux_debian_9
-PACKAGES_x86_64_linux_debian_10
 PACKAGES_x86_64_linux_debian_11
 PACKAGES_arm_64_linux_debian_11
 PACKAGES_x86_64_linux_debian_12
@@ -33,15 +28,12 @@ PACKAGES_x86_64_linux_redhat_9
 PACKAGES_x86_64_linux_suse_12
 PACKAGES_x86_64_linux_suse_15
 
-PACKAGES_x86_64_linux_ubuntu_16
-PACKAGES_x86_64_linux_ubuntu_18
 PACKAGES_x86_64_linux_ubuntu_20
 PACKAGES_x86_64_linux_ubuntu_22
 PACKAGES_arm_64_linux_ubuntu_22
 PACKAGES_x86_64_linux_ubuntu_24
 PACKAGES_arm_64_linux_ubuntu_24
 
-PACKAGES_i386_mingw
 PACKAGES_x86_64_mingw
 
 PACKAGES_ia64_hpux_11.23
