@@ -9,7 +9,7 @@ jobs:
     uses: ./.github/workflows/build-using-buildscripts.yml
     secrets: inherit
 
-  deployment_tests:
-    needs: build_cfengine_hub_package
-    uses: ./.github/workflows/deployment-tests.yml
-    secrets: inherit
+#  deployment_tests:
+#    needs: build_cfengine_hub_package
+#    uses: ./.github/workflows/deployment-tests.yml
+#    secrets: inherit

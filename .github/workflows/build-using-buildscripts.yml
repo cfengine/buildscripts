@@ -15,7 +15,8 @@ on:
 jobs:
   build_cfengine_hub_package:
     name: Build package and run selenium tests
-    runs-on: ubuntu-20.04
+#    runs-on: ubuntu-20.04
+    runs-on: linux-arm-2-core-ubuntu-22
     steps:
       - name: Checkout Together Action
         uses: actions/checkout@v3
