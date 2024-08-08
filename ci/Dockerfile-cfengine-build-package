@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 RUN cat /etc/resolv.conf
 RUN bash -c 'echo "test" >/dev/tcp/archive.ubuntu.com/80'
 RUN apt-get update -y && apt-get install -y systemd wget sudo
