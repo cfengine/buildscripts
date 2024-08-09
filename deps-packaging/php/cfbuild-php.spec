@@ -45,10 +45,7 @@ LDFLAGS=""
   --enable-mbstring \
   --enable-sockets \
   --disable-mbregex \
-  --without-fpm-user \
-  --without-fpm-group \
-  --without-fpm-systemd \
-  --without-fpm-acl \
+  --enable-fpm \
   --without-layout \
   --without-sqlite3 \
   --without-bz2 \
