@@ -94,6 +94,9 @@ install: build
 
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf
 	cp $(PREFIX)/httpd/conf/httpd.conf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/httpd.conf
+	mkdir -p $(PREFIX)/httpd/php/etc/php-fpm.d
+	cp $(CURDIR)/php-fpm.conf $(PREFIX)/httpd/php/etc
+	cp $(CURDIR)/www.conf $(PREFIX)/httpd/php/etc/php-fpm.d
 
 	INSTALL_ROOT=$(CURDIR)/debian/tmp CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" $(MAKE) install
 
