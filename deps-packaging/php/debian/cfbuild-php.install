@@ -3,3 +3,6 @@
 /var/cfengine/httpd/php/php
 /var/cfengine/httpd/modules/libphp.so
 /var/cfengine/httpd/php/lib/php.ini
+/var/cfengine/httpd/php/etc/php-fpm.conf.default
+/var/cfengine/httpd/php/etc/php-fpm.d/www.conf.default
+/var/cfengine/httpd/php/sbin/php-fpm

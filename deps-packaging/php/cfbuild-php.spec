@@ -166,6 +166,9 @@ CFEngine Build Automation -- php -- development files
 %prefix/httpd/php/bin
 %prefix/httpd/php/php
 %prefix/httpd/php/lib/php.ini
+%prefix/httpd/php/etc/php-fpm.conf.default
+%prefix/httpd/php/etc/php-fpm.d/www.conf.default
+%prefix/httpd/php/sbin/php-fpm
 
 %dir %prefix/httpd/modules
 %prefix/httpd/modules/libphp.so
