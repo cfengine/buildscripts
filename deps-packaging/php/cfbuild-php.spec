@@ -34,7 +34,7 @@ fi
   --with-iconv \
   --with-zlib=%{prefix} \
   --with-libmbfl=%{prefix} \
-  --enable-mbstring \
+  --enable-mbstring=shared,%{prefix} \
   --enable-sockets \
   --disable-mbregex \
   --without-fpm-user \
@@ -125,6 +125,7 @@ sed -ri 's/^(\s|;)phar.readonly = On/phar.readonly = Off/' ${RPM_BUILD_ROOT}%{pr
 
 echo "extension=curl.so" >> ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/curl.ini
 echo "extension=openssl.so" >>${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/openssl.ini
+echo "extension=mbstring.so" >>${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/mbstring.ini
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php/.channels
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/lib/php/.depdb

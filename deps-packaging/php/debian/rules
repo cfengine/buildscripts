@@ -12,6 +12,7 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	patch -p0 < $(CURDIR)/old-gcc-check-avx512-better.patch
 	./configure --prefix=$(PREFIX)/httpd/php \
 --with-config-file-scan-dir=$(PREFIX)/httpd/php/lib \
 --with-apxs2=$(PREFIX)/httpd/bin/apxs \
@@ -22,7 +23,7 @@ build-stamp:
 --with-iconv \
 --with-zlib=$(PREFIX) \
 --with-libmbfl=$(PREFIX) \
---enable-mbstring \
+--enable-mbstring=shared,$(PREFIX) \
 --enable-sockets \
 --disable-mbregex \
 --without-fpm-user \
@@ -116,6 +117,7 @@ install: build
 
 	echo "extension=curl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/curl.ini
 	echo "extension=openssl.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/openssl.ini
+	echo "extension=mbstring.so" >> $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/mbstring.ini
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf
 
