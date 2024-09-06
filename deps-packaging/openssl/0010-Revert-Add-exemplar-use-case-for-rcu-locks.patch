@@ -46,7 +46,7 @@ index a19575af37..4f339f4175 100644
  
  DEFINE_RUN_ONCE_STATIC(do_init_module_list_lock)
  {
--    module_list_lock = ossl_rcu_lock_new(1);
+-    module_list_lock = ossl_rcu_lock_new(1, NULL);
 +    module_list_lock = CRYPTO_THREAD_lock_new();
      if (module_list_lock == NULL) {
          ERR_raise(ERR_LIB_CONF, ERR_R_CRYPTO_LIB);
@@ -199,7 +199,7 @@ index a19575af37..4f339f4175 100644
      return ret;
  
   err:
-@@ -507,46 +482,30 @@ void CONF_modules_unload(int all)
+@@ -507,47 +482,31 @@ void CONF_modules_unload(int all)
  {
      int i;
      CONF_MODULE *md;
@@ -214,13 +214,14 @@ index a19575af37..4f339f4175 100644
 -
 -    old_modules = ossl_rcu_deref(&supported_modules);
 -    new_modules = sk_CONF_MODULE_dup(old_modules);
--    to_delete = sk_CONF_MODULE_new_null();
 -
 -    if (new_modules == NULL) {
 -        ossl_rcu_write_unlock(module_list_lock);
 +    if (!CRYPTO_THREAD_write_lock(module_list_lock))
          return;
 -    }
+ 
+-    to_delete = sk_CONF_MODULE_new_null();
  
      /* unload modules in reverse order */
 -    for (i = sk_CONF_MODULE_num(new_modules) - 1; i >= 0; i--) {
@@ -255,7 +256,7 @@ index a19575af37..4f339f4175 100644
  }
  
  /* unload a single module */
-@@ -562,27 +521,23 @@ static void module_free(CONF_MODULE *md)
+@@ -563,27 +522,23 @@ static void module_free(CONF_MODULE *md)
  static int conf_modules_finish_int(void)
  {
      CONF_IMODULE *imod;
