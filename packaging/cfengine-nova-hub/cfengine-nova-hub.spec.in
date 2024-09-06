@@ -263,8 +263,10 @@ exit 0
 %{prefix}/bin/pg_basebackup
 %{prefix}/bin/pgbench
 %{prefix}/bin/pg_checksums
+%{prefix}/bin/pg_combinebackup
 %{prefix}/bin/pg_config
 %{prefix}/bin/pg_controldata
+%{prefix}/bin/pg_createsubscriber
 %{prefix}/bin/pg_ctl
 %{prefix}/bin/pg_dump
 %{prefix}/bin/pg_dumpall
@@ -279,6 +281,7 @@ exit 0
 %{prefix}/bin/pg_upgrade
 %{prefix}/bin/pg_verifybackup
 %{prefix}/bin/pg_waldump
+%{prefix}/bin/pg_walsummary
 %{prefix}/bin/postgres
 %{prefix}/bin/psql
 %{prefix}/bin/reindexdb

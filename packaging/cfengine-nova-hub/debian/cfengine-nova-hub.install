@@ -77,8 +77,10 @@
 /var/cfengine/bin/pg_basebackup
 /var/cfengine/bin/pgbench
 /var/cfengine/bin/pg_checksums
+/var/cfengine/bin/pg_combinebackup
 /var/cfengine/bin/pg_config
 /var/cfengine/bin/pg_controldata
+/var/cfengine/bin/pg_createsubscriber
 /var/cfengine/bin/pg_ctl
 /var/cfengine/bin/pg_dump
 /var/cfengine/bin/pg_dumpall
@@ -93,6 +95,7 @@
 /var/cfengine/bin/pg_upgrade
 /var/cfengine/bin/pg_verifybackup
 /var/cfengine/bin/pg_waldump
+/var/cfengine/bin/pg_walsummary
 /var/cfengine/bin/postgres
 /var/cfengine/bin/psql
 /var/cfengine/bin/reindexdb
