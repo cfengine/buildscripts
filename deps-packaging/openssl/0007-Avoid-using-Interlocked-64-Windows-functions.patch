@@ -9,7 +9,7 @@ x86. There are already implementations of replacements for other
 functions, such as InterlockedOr64(). Apply the same approach to
 fix the errors.
 
-Inspired by openssl/openssl#24326.
+Inspired by https://github.com/openssl/openssl/pull/24326.
 
 (cherry picked from commit 03111c77b640febbfaefc9ab6519e85f8b595100)
 ---
@@ -17,7 +17,7 @@ Inspired by openssl/openssl#24326.
  1 file changed, 71 insertions(+), 10 deletions(-)
 
 diff --git a/crypto/threads_win.c b/crypto/threads_win.c
-index 64354dc42f..62b63a4aad 100644
+index bc430ef..30ca914 100644
 --- a/crypto/threads_win.c
 +++ b/crypto/threads_win.c
 @@ -23,7 +23,7 @@
@@ -29,7 +29,7 @@ index 64354dc42f..62b63a4aad 100644
  # define NO_INTERLOCKEDOR64
  #endif
  
-@@ -104,8 +104,15 @@ struct rcu_lock_st {
+@@ -103,8 +103,15 @@
      CRYPTO_CONDVAR *alloc_signal;
      CRYPTO_MUTEX *prior_lock;
      CRYPTO_CONDVAR *prior_signal;
@@ -42,18 +42,18 @@ index 64354dc42f..62b63a4aad 100644
 +static int CRYPTO_atomic_and(uint64_t *val, uint64_t op, uint64_t *ret,
 +                             CRYPTO_RWLOCK *lock);
 +
- /*
-  * Called on thread exit to free the pthread key
-  * associated with this thread, if any
-@@ -154,6 +161,7 @@ CRYPTO_RCU_LOCK *ossl_rcu_lock_new(int num_writers)
-         return NULL;
+ static struct rcu_qp *allocate_new_qp_group(struct rcu_lock_st *lock,
+                                             int count)
+ {
+@@ -133,6 +140,7 @@
  
+     new->ctx = ctx;
      new->write_lock = ossl_crypto_mutex_new();
 +    new->rw_lock = CRYPTO_THREAD_lock_new();
      new->alloc_signal = ossl_crypto_condvar_new();
      new->prior_signal = ossl_crypto_condvar_new();
      new->alloc_lock = ossl_crypto_mutex_new();
-@@ -164,13 +172,15 @@ CRYPTO_RCU_LOCK *ossl_rcu_lock_new(int num_writers)
+@@ -143,13 +151,15 @@
          || new->prior_signal == NULL
          || new->write_lock == NULL
          || new->alloc_lock == NULL
@@ -70,7 +70,7 @@ index 64354dc42f..62b63a4aad 100644
          OPENSSL_free(new);
          new = NULL;
      }
-@@ -186,20 +196,27 @@ void ossl_rcu_lock_free(CRYPTO_RCU_LOCK *lock)
+@@ -165,20 +175,27 @@
      ossl_crypto_mutex_free(&lock->alloc_lock);
      ossl_crypto_mutex_free(&lock->prior_lock);
      ossl_crypto_mutex_free(&lock->write_lock);
@@ -102,7 +102,7 @@ index 64354dc42f..62b63a4aad 100644
      }
  
      return &lock->qp_group[qp_idx];
-@@ -263,7 +280,9 @@ void ossl_rcu_read_unlock(CRYPTO_RCU_LOCK *lock)
+@@ -254,7 +271,9 @@
          if (data->thread_qps[i].lock == lock) {
              data->thread_qps[i].depth--;
              if (data->thread_qps[i].depth == 0) {
@@ -113,7 +113,7 @@ index 64354dc42f..62b63a4aad 100644
                  OPENSSL_assert(ret >= 0);
                  data->thread_qps[i].qp = NULL;
                  data->thread_qps[i].lock = NULL;
-@@ -278,6 +297,7 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock)
+@@ -269,6 +288,7 @@
      uint64_t new_id;
      uint32_t current_idx;
      uint32_t tmp;
@@ -121,7 +121,7 @@ index 64354dc42f..62b63a4aad 100644
  
      ossl_crypto_mutex_lock(lock->alloc_lock);
      /*
-@@ -301,8 +321,10 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock)
+@@ -292,8 +312,10 @@
      lock->id_ctr++;
  
      new_id = VAL_ID(new_id);
@@ -134,7 +134,7 @@ index 64354dc42f..62b63a4aad 100644
  
      /* update the reader index to be the prior qp */
      tmp = lock->current_alloc_idx;
-@@ -337,7 +359,7 @@ void ossl_synchronize_rcu(CRYPTO_RCU_LOCK *lock)
+@@ -328,7 +350,7 @@
  
      /* wait for the reader count to reach zero */
      do {
@@ -143,7 +143,7 @@ index 64354dc42f..62b63a4aad 100644
      } while (READER_COUNT(count) != 0);
  
      /* retire in order */
-@@ -565,6 +587,45 @@ int CRYPTO_THREAD_compare_id(CRYPTO_THREAD_ID a, CRYPTO_THREAD_ID b)
+@@ -556,6 +578,45 @@
      return (a == b);
  }
  
