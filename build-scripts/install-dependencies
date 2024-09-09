@@ -40,13 +40,20 @@ check_and_install_perl()
         && PERL="$HOME/perl-my/bin/perl"  \
             || PERL=`func_whereis perl`
 
+    PERL_OK=yes
     PERL_MINOR_VERSION=`$PERL -e 'print "$]"."\n"' | cut -d. -f2`
     if [ "$PERL_MINOR_VERSION" -lt 013004  ]
     then
         echo "$PERL version is $PERL_MINOR_VERSION," \
-             "too old, installing new one from source"
-
-        ### BUILD PERL
+             "too old"
+        PERL_OK="no"
+    fi
+    if ! perl -e 'use List::Util qw(pairs);'; then
+        echo "$PERL has List::Util that does not export pairs. Needs to be at least version 1.29 for OpenSSL version 3.3.2."
+        PERL_OK="no"
+    fi
+    if [ "$PERL_OK" != "yes" ]; then
+        echo "$PERL is too old or modules are missing, building new one from source..."
 
         # -fno-stack-protector: Ensure built perl will not depend on libssp.so
         if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1
