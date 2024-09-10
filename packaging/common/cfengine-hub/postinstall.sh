@@ -993,6 +993,13 @@ $PREFIX/httpd/bin/apachectl start
 #
 
 if ! is_upgrade; then
+  true "Bootstrapping configs and permissions"
+  # bootstrap to local IP, localhost causes troubles so get a real IP, doesn't matter which one this is a "temporary setup bootstrap"
+  $PREFIX/bin/cf-agent -IB $(hostname -I | cut -d' ' -f1)
+  $PREFIX/bin/cf-agent -KIf update.cf
+  $PREFIX/bin/cf-agent -KI
+  true "Done with initial localhost bootstrap. Come back later and do another bootstrap if needed to rebind to a different IP."
+
   true "Adding CFE_ROBOT user"
   ( set +x
     $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/public/index.php cli_tasks create_cfe_robot_user
