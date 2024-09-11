@@ -995,9 +995,14 @@ $PREFIX/httpd/bin/apachectl start
 if ! is_upgrade; then
   true "Bootstrapping configs and permissions"
   # bootstrap to local IP, localhost causes troubles so get a real IP, doesn't matter which one this is a "temporary setup bootstrap"
-  $PREFIX/bin/cf-agent -IB $(hostname -I | cut -d' ' -f1)
-  $PREFIX/bin/cf-agent -KIf update.cf
-  $PREFIX/bin/cf-agent -KI
+#  systemctl start cf-execd # for some reason bootstrap is not starting cf-execd
+#  journalctl -u cf-execd # debug how it went starting it
+  $PREFIX/bin/cf-agent -vB $(hostname -I | cut -d' ' -f1)
+#  systemctl start cf-serverd # for some reason bootstrap is not starting cf-serverd
+#  journalctl -u cf-serverd # debug starting cf-serverd
+  $PREFIX/bin/cf-agent -Kvf update.cf
+  $PREFIX/bin/cf-agent -Kv
+  $PREFIX/bin/cf-agent -Kv
   true "Done with initial localhost bootstrap. Come back later and do another bootstrap if needed to rebind to a different IP."
 
   true "Adding CFE_ROBOT user"

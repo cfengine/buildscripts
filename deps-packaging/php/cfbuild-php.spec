@@ -6,8 +6,6 @@ Version: %{version}
 Release: 1
 Source0: php-%{php_version}.tar.gz
 Source1: php.ini
-Source2: php-fpm.conf
-Source3: www.conf
 License: MIT
 Group: Other
 Url: http://example.com/
