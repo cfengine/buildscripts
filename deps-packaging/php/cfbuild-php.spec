@@ -113,9 +113,9 @@ make
 rm -rf ${RPM_BUILD_ROOT}
 mkdir -p ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
 cp %{prefix}/httpd/conf/httpd.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
-mkdir -p ${RPM_BUILD_ROOT}%{prefix}/httpd/php/etc/php-fpm.d
-cp ${RPM_BUILD_ROOT}/../../SOURCES/php-fpm.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/etc
-cp ${RPM_BUILD_ROOT}/../../SOURCES/www.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/etc/php-fpm.d
+#mkdir -p ${RPM_BUILD_ROOT}%{prefix}/httpd/php/etc/php-fpm.d
+#cp ${RPM_BUILD_ROOT}/../../SOURCES/php-fpm.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/etc
+#cp ${RPM_BUILD_ROOT}/../../SOURCES/www.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/etc/php-fpm.d
 
 INSTALL_ROOT=${RPM_BUILD_ROOT} make install
 
