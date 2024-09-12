@@ -79,9 +79,8 @@ check_and_install_perl()
         wget https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
         [ `func_sha256 perl-${PERL_VERSION}.tar.gz` != "${PERL_SHA256}" ]  \
             &&  fatal "perl checksum error"
-        gzip -dc perl-5.26.1.tar.gz | tar xf -
-        cd perl-5.26.1
-        $PATCH -p1 < $BASEDIR/buildscripts/build-scripts/perl-488307ffa6.patch
+        gzip -dc perl-${PERL_VERSION}.tar.gz | tar xf -
+        cd perl-${PERL_VERSION}
         ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE \
             $PERL_EXTRA_FLAGS $PERL_CFLAGS $PERL_LDFLAGS $PERL_LDDLFLAGS
         $MAKE
