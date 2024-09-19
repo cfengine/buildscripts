@@ -1,0 +1,33 @@
+#!/usr/xpg4/bin/sh -e
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-leech${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-leech-devel${PREFIX}
+
+# Patch
+# Solaris 8
+
+# Build
+
+# Touch this file, or else autoreconf is called for some reason
+touch config.h.in
+./configure --prefix=$PREFIX
+
+$MAKE
+
+# Test
+
+# Install
+
+mkdir -p $TTD/lib
+mkdir -p $TTD/include
+$MAKE install prefix=${TTD}
+
+# Package
+
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/*.so* ${TT}/lib
