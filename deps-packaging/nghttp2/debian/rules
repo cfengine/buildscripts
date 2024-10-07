@@ -1,0 +1,50 @@
+#!/usr/bin/make -f
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure --prefix=$(PREFIX)
+
+	make
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/libnghttp2.*a
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/doc/nghttp2/README.rst
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/man/man1/h2load.1
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/man/man1/nghttp*
+	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/share/nghttp2
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
