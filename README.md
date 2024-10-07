@@ -158,6 +158,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libexpat](https://libexpat.github.io/)             | -      | 2.6.3  | 2.6.3  |
 | [PHP](https://php.net/)                             | 8.3.13 | 8.3.13 | 8.3.15 |
 | [PostgreSQL](https://www.postgresql.org/)           | 15.8   | 16.4   | 17.2   |
+| [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.64.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.3.0  | 3.3.0  | 3.3.0  |
 
 * [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
