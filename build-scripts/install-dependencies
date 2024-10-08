@@ -40,13 +40,20 @@ check_and_install_perl()
         && PERL="$HOME/perl-my/bin/perl"  \
             || PERL=`func_whereis perl`
 
+    PERL_OK=yes
     PERL_MINOR_VERSION=`$PERL -e 'print "$]"."\n"' | cut -d. -f2`
     if [ "$PERL_MINOR_VERSION" -lt 013004  ]
     then
         echo "$PERL version is $PERL_MINOR_VERSION," \
-             "too old, installing new one from source"
-
-        ### BUILD PERL
+             "too old"
+        PERL_OK="no"
+    fi
+    if ! $PERL -e 'use List::Util qw(pairs);'; then
+        echo "$PERL has List::Util that does not export pairs. Needs to be at least version 1.29 for OpenSSL version 3.3.2."
+        PERL_OK="no"
+    fi
+    if [ "$PERL_OK" != "yes" ]; then
+        echo "$PERL is too old or modules are missing, building new one from source..."
 
         # -fno-stack-protector: Ensure built perl will not depend on libssp.so
         if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1
@@ -71,12 +78,13 @@ check_and_install_perl()
             PERL_EXTRA_FLAGS='-Ud_nexttoward'
         fi
 
-        wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
-        [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
+        PERL_VERSION=5.40.0
+        PERL_MD5=8da78b1f54b99e97954066d0aaad88bc
+        wget http://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
+        [ `func_md5 perl-${PERL_VERSION}.tar.gz` != "${PERL_MD5}" ]  \
             &&  fatal "perl checksum error"
-        gzip -dc perl-5.26.1.tar.gz | tar xf -
-        cd perl-5.26.1
-        $PATCH -p1 < $BASEDIR/buildscripts/build-scripts/perl-488307ffa6.patch
+        gzip -dc perl-${PERL_VERSION}.tar.gz | tar xf -
+        cd perl-${PERL_VERSION}
         ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE \
             $PERL_EXTRA_FLAGS $PERL_CFLAGS $PERL_LDFLAGS $PERL_LDDLFLAGS
         $MAKE
