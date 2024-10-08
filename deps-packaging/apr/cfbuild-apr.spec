@@ -1,4 +1,4 @@
-%define apr_version 1.7.4
+%define apr_version 1.7.5
 
 Summary: CFEngine Build Automation -- apr
 Name: cfbuild-apr
