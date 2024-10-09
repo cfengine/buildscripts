@@ -1,4 +1,4 @@
-%define curl_version 8.8.0
+%define curl_version 8.10.1
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
@@ -38,6 +38,7 @@ mkdir -p %{_builddir}
     --without-gnutls \
     --without-gssapi \
     --without-libidn \
+    --without-libpsl \
     --without-librtmp \
     --without-libssh2 \
     --without-nghttp2 \
