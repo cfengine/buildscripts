@@ -161,7 +161,3 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 * [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
-
-Other dependencies (**find out why they are needed!**)
-
-* autoconf 2.69
