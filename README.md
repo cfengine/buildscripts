@@ -130,14 +130,14 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                | 3.10   | 3.10   | 3.10   |                          |
 | [libacl](http://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
 | [libattr](http://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
-| [libcurl](http://curl.haxx.se/download.html)                                     | 8.9.1  | 8.8.0  | 8.8.0  |                          |
+| [libcurl](http://curl.haxx.se/download.html)                                     | 8.10.1 | 8.10.1 | 8.10.1 |                          |
 | [libgnurx](http://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](http://ftp.gnu.org/gnu/libiconv/)                                     | 1.17   | 1.17   | 1.17   | Needed by libxml2        |
-| [libxml2](http://xmlsoft.org/sources/)                                           | 2.13.3 | 2.13.1 | 2.13.1 |                          |
+| [libxml2](http://xmlsoft.org/sources/)                                           | 2.13.4 | 2.13.4 | 2.13.4 |                          |
 | [libyaml](http://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                            | 0.9.33 | 0.9.33 | 0.9.33 |                          |
 | [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.8  | 2.6.8  | 2.6.8  | Enterprise agent only    |
-| [OpenSSL](http://openssl.org/)                                                   | 3.0.14 | 3.3.1  | 3.3.1  |                          |
+| [OpenSSL](http://openssl.org/)                                                   | 3.0.15 | 3.3.2  | 3.3.2  |                          |
 | [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                         | -      | 10.44  | 10.44  |                          |
 | [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/)                         | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
@@ -149,19 +149,15 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
 | --------------------------------------------------- | ------ | ------ | ------ |
-| [Apache](http://httpd.apache.org/)                  | 2.4.62 | 2.4.59 | 2.4.59 |
-| [APR](https://apr.apache.org/)                      | 1.7.4  | 1.7.4  | 1.7.4  |
+| [Apache](http://httpd.apache.org/)                  | 2.4.62 | 2.4.62 | 2.4.62 |
+| [APR](https://apr.apache.org/)                      | 1.7.5  | 1.7.5  | 1.7.5  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
-| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.46.0 | 2.45.2 | 2.45.2 |
-| [libexpat](https://libexpat.github.io/)             | -      | 2.5.0  | 2.5.0  |
-| [PHP](http://php.net/)                              | 8.3.10 | 8.3.8  | 8.3.8  |
-| [PostgreSQL](http://www.postgresql.org/)            | 15.8   | 16.3   | 16.3   |
+| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.47.0 | 2.47.0 | 2.47.0 |
+| [libexpat](https://libexpat.github.io/)             | -      | 2.6.3  | 2.6.3  |
+| [PHP](http://php.net/)                              | 8.3.12 | 8.3.12 | 8.3.12 |
+| [PostgreSQL](http://www.postgresql.org/)            | 15.8   | 16.4   | 17.0   |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.3.0  | 3.3.0  | 3.3.0  |
 
 * [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
-
-Other dependencies (**find out why they are needed!**)
-
-* autoconf 2.69
