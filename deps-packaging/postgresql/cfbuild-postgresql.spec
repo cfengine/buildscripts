@@ -1,3 +1,6 @@
+%define postgresql_major_version 17
+%define postgresql_minor_version 0
+%define postgresql_version ${postgresql_major_version}.${postgresql_minor_version}
 %define postgresql_version 17.0
 
 Summary: CFEngine Build Automation -- postgresql
@@ -13,10 +16,14 @@ BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
 
-%define prefix %{buildprefix}
+# Build PostgreSQL in a major-version named dir so that binaries are linked to the specific major version.
+# This makes pg_upgrade work more easily.
+# In the past we simply used the main prefix: /var/cfengine by default and this caused trouble with symbols when using pg_upgrade because both old and new postgresql binaries linked to /var/cfengine/lib/libpq.so and similar.
+%define prefix %{buildprefix}/PostgreSQL/${postgresql_major_version}
 
 %prep
 mkdir -p %{_builddir}
+mkdir -p ${prefix} # maybe not needed?
 %setup -q -n postgresql-%{postgresql_version}
 
 %build

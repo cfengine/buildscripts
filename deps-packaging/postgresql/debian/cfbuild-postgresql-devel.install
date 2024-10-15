@@ -1,4 +1,0 @@
-/var/cfengine/include/*
-/var/cfengine/bin/ecpg
-/var/cfengine/lib/postgresql/pgxs/*
-/var/cfengine/lib/pkgconfig/*
