@@ -706,16 +706,25 @@ do_migration() {
     cd /tmp
     cf_console echo "Migrating database using pg_upgrade utility..."
     cf_console echo
-    if migrate_db_using_pg_upgrade && [ $DEBUG -lt 1 ]; then
+    _pg_upgrade_log="/tmp/cfengine_pg_upgrade.log"
+    migrate_db_using_pg_upgrade >"${_pg_upgrade_log}" 2>&1
+    rc=$?
+    if [ $rc -eq 0 ] && [ $DEBUG -lt 1 ]; then
       # Succeeded
+      cat "${_pg_upgrade_log}" # might as well see the details of how it worked
+      rm "${_pg_upgrade_log}" # clean up
       exit 0 # exits only from (...)
     fi
     cf_console echo "Migration using pg_upgrade failed."
-    # here pg_upgrade probably said something like
-    # Consult the last few lines of "/var/cfengine/state/pg/data/pg_upgrade_output.d/20230913T150025.959/log/pg_upgrade_server.log" for the probable cause of the failure.
-    cf_console echo "Showing last lines of any related log files:"
-    _daysearch=$(date +%Y%m%d)
-    find "$PREFIX"/state/pg/data/pg_upgrade_output.d -name '*.log' | grep "$_daysearch" | cf_console xargs tail
+    if [ $DEBUG -gt 0 ]; then
+      cat "${_pg_upgrade_log}"
+      rm "${_pg_upgrade_log}"
+      # pg_upgrade probably said something like
+      # Consult the last few lines of "/var/cfengine/state/pg/data/pg_upgrade_output.d/20230913T150025.959/log/pg_upgrade_server.log" for the probable cause of the failure.
+      cf_console echo "Showing last lines of any related log files:"
+      _daysearch=$(date +%Y%m%d)
+      find "$PREFIX"/state/pg/data/pg_upgrade_output.d -name '*.log' | grep "$_daysearch" | cf_console xargs tail
+    fi
     cf_console echo
     check_disk_space # will abort if low on disk space
     init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"
