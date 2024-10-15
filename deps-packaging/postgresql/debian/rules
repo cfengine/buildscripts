@@ -33,7 +33,7 @@ install: build
 	patch -d $(CURDIR)/debian/tmp$(BUILD_PREFIX)/share/postgresql/ -o postgresql.conf.cfengine < $(CURDIR)/postgresql.conf.cfengine.patch
 	patch $(CURDIR)/debian/tmp$(BUILD_PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/postgresql.conf.sample.patch
 	chmod --reference $(CURDIR)/debian/tmp$(BUILD_PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/debian/tmp$(BUILD_PREFIX)/share/postgresql/postgresql.conf.cfengine
-	chown --reference $(CURDIR)/debian/tmp$(BUILD_PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/debian/tmp$(PREFIX)/share/postgresql/postgresql.conf.cfengine
+	chown --reference $(CURDIR)/debian/tmp$(BUILD_PREFIX)/share/postgresql/postgresql.conf.sample $(CURDIR)/debian/tmp$(BUILD_PREFIX)/share/postgresql/postgresql.conf.cfengine
 	patch $(CURDIR)/debian/tmp$(BUILD_PREFIX)/share/postgresql/pg_hba.conf.sample $(CURDIR)/pg_hba.conf.sample.patch
 	rm -f $(CURDIR)/debian/tmp$(BUILD_PREFIX)/lib/*.a
 
