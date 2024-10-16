@@ -2,6 +2,7 @@
 /etc/default
 /etc/profile.d
 /usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cf-php-fpm.service
 /usr/lib/systemd/system/cf-apache.service
 /usr/lib/systemd/system/cf-execd.service
 /usr/lib/systemd/system/cf-hub.service
