@@ -14,6 +14,8 @@ if test -f "mission-portal/public/scripts/package.json"; then
 	cd mission-portal/public/scripts
 	# install dependencies from npmjs
 	npm i
+	# build react components
+	npm run build
 fi
 )
 
