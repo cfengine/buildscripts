@@ -63,8 +63,14 @@ mv sha256sums.txt sha256sums.$CKSUM.txt
 (
 if test -f "$BASEDIR/mission-portal/public/scripts/package.json"; then
   cd $BASEDIR/mission-portal/public/scripts
+  # display node & npm versions
+  npm --version
+  node --version
   # install dependencies from npmjs
   npm i --prefix $BASEDIR/mission-portal/public/scripts/
+  # build react components
+  npm run build --prefix $BASEDIR/mission-portal/public/scripts/
+
 fi
 )
 
