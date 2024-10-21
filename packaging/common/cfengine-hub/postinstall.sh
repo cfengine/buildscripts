@@ -700,9 +700,7 @@ do_migration() {
     cf_console echo "Migrating database using pg_upgrade utility..."
     cf_console echo
     _pg_upgrade_log="/tmp/cfengine_pg_upgrade.log"
-    migrate_db_using_pg_upgrade >"${_pg_upgrade_log}" 2>&1
-    rc=$?
-    if [ $rc -eq 0 ] && [ $DEBUG -lt 1 ]; then
+    if migrate_db_using_pg_upgrade >"${_pg_upgrade_log}" 2>&1 && [ $DEBUG -lt 1 ]; then
       # Succeeded
       cat "${_pg_upgrade_log}" # might as well see the details of how it worked
       rm "${_pg_upgrade_log}" # clean up
