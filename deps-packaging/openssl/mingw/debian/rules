@@ -23,8 +23,6 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p1 < 0007-Avoid-using-Interlocked-64-Windows-functions.patch
-
 	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
 		$(TARGET) $$(<config_flags_$$ROLE.txt) \
