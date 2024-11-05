@@ -105,6 +105,7 @@ install: build
 	# Reduce information leakage by default
 	sed -ri 's/^\s*expose_php\s*=.*/expose_php = Off/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
 
+	echo "no-op to test github use of sftp cache"
 	# Increase the php memory limit so that Mission Portal works with larger infrastructures without modification
 	sed -ri 's/^\s*memory_limit\s*=.*/memory_limit = 256M/g' $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/lib/php.ini
 
