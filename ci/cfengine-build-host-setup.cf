@@ -236,10 +236,6 @@ bundle agent cfengine_build_host_setup
       "yum install -y python3-pip" contain => in_shell;
     redhat_8|centos_8|redhat_9::
       "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell;
-# todo, need 2.7pip psycopg2-binary for ubuntu-20 as well?
-    debian_11.!have_pip2::
-      "wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O get-pip.py && python2 get-pip.py && pip install psycopg2-binary"
-        contain => in_shell;
 
     ubuntu_16.!have_i386_architecture:: # mingw build host
       "${paths.dpkg} --add-architecture i386";
