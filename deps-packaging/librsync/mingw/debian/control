@@ -1,0 +1,18 @@
+Source: cfbuild-librsync
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-librsync-mingw64
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- librsync -- mingw64
+ CFEngine Build Automation -- librsync -- mingw64
+
+Package: cfbuild-librsync-mingw64-devel
+Section: libdevel
+Architecture: any
+Description: CFEngine Build Automation -- librsync -- mingw64 -- development files
+ CFEngine Build Automation -- librsync -- mingw64 -- development files

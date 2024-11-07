@@ -1,0 +1,151 @@
+From a0685398fbafaff6e3071df134dece4620cf817d Mon Sep 17 00:00:00 2001
+From: Lars Erik Wik <lars.erik.wik@northern.tech>
+Date: Thu, 7 Nov 2024 14:18:38 +0100
+Subject: [PATCH 1/2] Added autotools build system
+
+Signed-off-by: Lars Erik Wik <lars.erik.wik@northern.tech>
+---
+ Makefile.am    | 39 +++++++++++++++++++++++++++++++++++++
+ bootstrap.sh   |  5 +++++
+ configure.ac   | 53 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ librsync.pc.in | 10 ++++++++++
+ 4 files changed, 107 insertions(+)
+ create mode 100644 Makefile.am
+ create mode 100755 bootstrap.sh
+ create mode 100644 configure.ac
+ create mode 100644 librsync.pc.in
+
+diff --git a/Makefile.am b/Makefile.am
+new file mode 100644
+index 0000000..ad07dc6
+--- /dev/null
++++ b/Makefile.am
+@@ -0,0 +1,39 @@
++ACLOCAL_AMFLAGS = -I m4
++
++AM_CPPFLAGS = -Isrc/blake2
++
++pkgconfigdir = $(libdir)/pkgconfig
++pkgconfig_DATA = librsync.pc
++
++include_HEADERS = src/librsync.h src/librsync_export.h
++lib_LTLIBRARIES = librsync.la
++
++librsync_la_SOURCES = \
++    src/base64.c \
++    src/buf.c src/buf.h \
++    src/checksum.c src/checksum.h \
++    src/command.c src/command.h \
++    src/delta.c \
++    src/emit.c src/emit.h \
++    src/fileutil.c \
++    src/hashtable.c src/hashtable.h \
++    src/hex.c \
++    src/job.c src/job.h \
++    src/mdfour.c src/mdfour.h \
++    src/mksum.c \
++    src/msg.c \
++    src/netint.c src/netint.h \
++    src/patch.c \
++    src/prototab.c src/prototab.h \
++    src/rabinkarp.c src/rabinkarp.h \
++    src/readsums.c \
++    src/rollsum.c src/rollsum.h \
++    src/scoop.c src/scoop.h \
++    src/stats.c \
++    src/sumset.c src/sumset.h \
++    src/trace.c src/trace.h \
++    src/tube.c \
++    src/util.c src/util.h \
++    src/version.c \
++    src/whole.c src/whole.h \
++    src/blake2/blake2b-ref.c src/blake2/blake2.h src/blake2/blake2-impl.h
+diff --git a/bootstrap.sh b/bootstrap.sh
+new file mode 100755
+index 0000000..93c7b50
+--- /dev/null
++++ b/bootstrap.sh
+@@ -0,0 +1,5 @@
++#!/bin/sh
++
++set -e
++echo "$0: Running autoreconf ..."
++autoreconf --force --install -I m4 || exit
+diff --git a/configure.ac b/configure.ac
+new file mode 100644
+index 0000000..2c15a6a
+--- /dev/null
++++ b/configure.ac
+@@ -0,0 +1,53 @@
++# Copyright (C) 2024 Lars Erik Wik <lars.erik.wik@northern.tech>
++#
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU Lesser General Public License as published by
++# the Free Software Foundation; either version 2.1 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU Lesser General Public License for more details.
++#
++# You should have received a copy of the GNU Lesser General Public License
++# along with this program; if not, write to the Free Software
++# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++
++#                                               -*- Autoconf -*-
++# Process this file with autoconf to produce a configure script.
++
++AC_PREREQ([2.63])
++AC_INIT([librsync], [2.3.5], [https://github.com/librsync/librsync/issues])
++AC_CONFIG_SRCDIR([src/librsync.h])
++AC_CONFIG_HEADERS([src/config.h:config.hin])
++AC_CONFIG_MACRO_DIR([m4])
++
++# Checks for programs.
++AC_PROG_CC
++AC_PROG_INSTALL
++AM_PROG_AR
++
++LT_INIT
++AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
++
++# Checks for libraries.
++
++# Checks for header files.
++AC_CHECK_HEADERS([fcntl.h inttypes.h stdint.h sys/file.h unistd.h])
++
++# Checks for typedefs, structures, and compiler characteristics.
++AC_CHECK_HEADER_STDBOOL
++AC_C_INLINE
++AC_TYPE_SIZE_T
++AC_TYPE_SSIZE_T
++AC_TYPE_UINT16_T
++AC_TYPE_UINT32_T
++AC_TYPE_UINT64_T
++AC_TYPE_UINT8_T
++
++# Checks for library functions.
++AC_CHECK_FUNCS([memmove memset socket strchr strerror])
++
++AC_CONFIG_FILES([librsync.pc Makefile])
++AC_OUTPUT
+diff --git a/librsync.pc.in b/librsync.pc.in
+new file mode 100644
+index 0000000..831fcfc
+--- /dev/null
++++ b/librsync.pc.in
+@@ -0,0 +1,10 @@
++prefix=@prefix@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
++
++Name: librsync
++Description: A library for calculating and applying network deltas
++Version: @PACKAGE_VERSION@
++Libs: -L${libdir} -lrsync
++Cflags: -I${includedir}
+-- 
+2.43.0
+

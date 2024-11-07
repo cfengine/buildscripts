@@ -129,6 +129,7 @@ esac
 
 var_append DEPS "libxml2 libyaml"
 var_append DEPS "diffutils"
+var_append DEPS "librsync"
 
 # LDAP functions in the agent
 # and LDAP authentication functionality in Mission Portal
