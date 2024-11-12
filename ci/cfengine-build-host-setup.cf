@@ -11,7 +11,7 @@ bundle agent cfengine_build_host_setup
   packages:
     debian_9|debian_10|ubuntu_16::
       "python-psycopg2";
-    debian_11|debian_12::
+    debian_11|debian_12|ubuntu_20|ubuntu_22|ubuntu_24::
       "python3-psycopg2";
     ubuntu_16::
       "systemd-coredump" comment => "ubuntu_16 doesn't have systemd-coredump by default?";
@@ -187,12 +187,6 @@ bundle agent cfengine_build_host_setup
       "sed -i '/best=True/s/True/False/' /etc/yum.conf" contain => in_shell;
     (redhat_8|centos_8|redhat_9).!dnf_conf_ok::
       "sed -i '/best=True/s/True/False/' /etc/dnf/dnf.conf" contain => in_shell;
-    ubuntu_20.!have_python2_pip::
-      "sh $(this.promise_dirname)/install-python2-pip.sh" contain => in_shell,
-        comment => "pip(2) is required for psycopg2 for nova/tests/reporting.";
-    ubuntu_20.!have_python2_psycopg2::
-      "pip install psycopg2-binary" contain => in_shell,
-        comment => "Here we install psycopg2 as root because nova/tests/reporting runs as root.";
 
 
   classes:
