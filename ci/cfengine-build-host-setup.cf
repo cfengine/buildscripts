@@ -9,10 +9,6 @@ bundle agent cfengine_build_host_setup
     "assumptions" string => "The operating system has working repository lists and has been updated and upgraded recently.";
 
   packages:
-    debian_9|debian_10|ubuntu_16::
-      "python-psycopg2";
-    debian_11|debian_12|ubuntu_20|ubuntu_22|ubuntu_24::
-      "python3-psycopg2";
     ubuntu_16::
       "systemd-coredump" comment => "ubuntu_16 doesn't have systemd-coredump by default?";
     ubuntu_20::
@@ -46,6 +42,7 @@ bundle agent cfengine_build_host_setup
       "pkg-config";
       "psmisc";
       "python3-pip";
+      "python3-psycopg2";
       "rsync" comment => "added for debian-10";
 
     ubuntu_16.mingw_build_host:: # for now, only ubu16 hosts mingw builds
@@ -84,10 +81,9 @@ bundle agent cfengine_build_host_setup
       "perl-IPC-Cmd";
       "perl-devel";
       "xfsprogs";
-
     (redhat_6|centos_6).(yum_dnf_conf_ok)::
       "python-psycopg2" comment => "centos-6 provides python2 and psycopg2 for python2 as a package";
-    (redhat_7|centos_7).(yum_dnf_conf_ok)::
+    !(redhat_6|centos_6).(yum_dnf_conf_ok)::
       "python3-psycopg2";
 
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
@@ -110,7 +106,6 @@ bundle agent cfengine_build_host_setup
       "which";
 
     (redhat_8|centos_8).(yum_dnf_conf_ok)::
-      "python2-psycopg2" comment => "This will bring in python2";
       "python3-rpm-macros" -> { "provides macro py3_shebang_fix needed in rhel-8 for /var/cfengine/bin/cfbs", "ENT-11338" }
         comment => "There are several versions of python(x)-rpm-macros. We choose this one to get platform-python which is guaranteed to be installed in rhel-8.";
       "platform-python-devel" -> { "cfbs shebang", "ENT-11338" }
@@ -126,7 +121,6 @@ bundle agent cfengine_build_host_setup
 
     (redhat_9).(yum_dnf_conf_ok)::
       "perl-Sys-Hostname" comment => "Needed by __04_examples_outputs_check_outputs_cf";
-      "python3-psycopg2";
 
     suse|opensuse|sles::
       "binutils";
@@ -163,17 +157,13 @@ bundle agent cfengine_build_host_setup
       "have_perl_package_installed" expression => returnszero("rpm -q perl >/dev/null", "useshell");
     redhat_9::
       "have_python3_pip_package_installed" expression => returnszero("rpm -q python3-pip >/dev/null", "useshell");
-    (redhat_8|centos_8|redhat_9).(yum_conf_ok.dnf_conf_ok)::
+    !(redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok.dnf_conf_ok)::
       "yum_dnf_conf_ok" expression => "any";
     (redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok)::
       "yum_dnf_conf_ok" expression => "any";
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
       "have_development_tools" expression => returnszero("yum groups list installed | grep 'Development Tools' >/dev/null", "useshell"),
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
-    ubuntu_20::
-      "have_python2_pip" expression => fileexists("/usr/local/bin/pip");
-    ubuntu_20.have_python2_pip::
-      "have_python2_psycopg2" expression => returnszero("/usr/local/bin/pip list psycopg2", "useshell");
 
   commands:
     !have_opt_jdk21.(debian_9|ubuntu_16|redhat_6|centos_6)::
