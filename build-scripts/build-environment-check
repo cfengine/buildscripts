@@ -64,6 +64,14 @@ do
     fi
 done
 
+if [ "$PROJECT" = "nova" ]; then
+    . "$BASEDIR"/nova/tests/reporting/find-python.sh # to get PYTHON as the tests do
+    if ! $PYTHON -m pip list | grep psycopg2; then
+        echo "nova/tests/reporting needs psycopg2 module installed for python: $PYTHON"
+        RET=1
+    fi
+fi
+
 
 # Exit with the right exit code
 if [  $RET = 0  ]
