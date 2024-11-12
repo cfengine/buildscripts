@@ -83,8 +83,12 @@ bundle agent cfengine_build_host_setup
       "pkgconfig";
       "perl-IPC-Cmd";
       "perl-devel";
-      "python-psycopg2";
       "xfsprogs";
+
+    (redhat_6|centos_6).(yum_dnf_conf_ok)::
+      "python-psycopg2" comment => "centos-6 provides python2 and psycopg2 for python2 as a package";
+    (redhat_7|centos_7).(yum_dnf_conf_ok)::
+      "python3-psycopg2";
 
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
     (redhat_7|centos_7).(yum_dnf_conf_ok)::
