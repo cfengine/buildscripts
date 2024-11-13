@@ -189,15 +189,16 @@ bundle agent cfengine_build_host_setup
     ubuntu_16::
       "have_i386_architecture" expression => strcmp(execresult("${paths.dpkg} --print-foreign-architectures", "noshell"), "i386");
     ubuntu::
-      "have_localhost_hostname" expression => strcmp(execresult("${paths.hostname}", "noshell"), "localhost.localdomain");
+      "have_localhost_localdomain_hostname" expression => strcmp(execresult("${paths.hostname} -f", "useshell"), "localhost.localdomain");
     opensuse|suse|sles::
       "have_$(suse_users_and_groups)_group" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/group >/dev/null", "useshell");
       "have_$(suse_users_and_groups)_user" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/passwd >/dev/null", "useshell");
 
   files:
-    ubuntu_16|redhat_9::
-      "/etc/hosts"
-        edit_line => regex_replace("127.0.0.1 localhost localhost.localdomain","127.0.0.1 localhost.localdomain");
+    ubuntu_16|ubuntu_18|redhat_9::
+      "/etc/hosts" -> { "ENT-12437" }
+        edit_line => regex_replace("127.0.0.1 localhost localhost.localdomain","127.0.0.1 localhost.localdomain"),
+        comment => "In order for some check_outputs peers related tests to work, hostname -f must match sys.fqhost so remove localhost and leave localhost.localdomain";
     debian_9::
       "/etc/apt/sources.list.d/*"
         delete => tidy;
@@ -228,7 +229,7 @@ bundle agent cfengine_build_host_setup
     ubuntu_16.!have_i386_architecture:: # mingw build host
       "${paths.dpkg} --add-architecture i386";
 
-    ubuntu.!have_localhost_hostname::
+    ubuntu.!have_localhost_localdomain_hostname::
       "/usr/bin/hostnamectl set-hostname localhost.localdomain"
         comment => "hack for aws ubuntu hosts having unique ip-n-n-n-n hostnames, we need localhost.localdomain";
     !have_daemon_group.(suse|sles|opensuse)::
