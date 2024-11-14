@@ -17,7 +17,7 @@
 
 case "$OS" in
     rhel|centos)
-        DEP_LIST="gcc-c++ ncurses ncurses-devel pkgconfig rpm-build pam-devel"
+        DEP_LIST="gcc-c++ ncurses ncurses-devel pkgconfig rpm-build-libs pam-devel"
         UNWANTED_DEPS="libtool-ltdl libtool-ltdl-devel"
         ;;
     debian|ubuntu)
