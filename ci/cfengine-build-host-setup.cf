@@ -61,7 +61,7 @@ bundle agent cfengine_build_host_setup
       "pam-devel";
       "rsync";
       "make";
-      "rpm-build";
+      "rpm-build-libs" handle => "rpm_build_libs_installed";
       "libtool-ltdl" package_policy => "delete";
 
     (redhat|centos).(yum_dnf_conf_ok)::
@@ -233,11 +233,8 @@ bundle agent cfengine_build_host_setup
     redhat_9.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
       "yum install -y python3-pip" contain => in_shell;
     redhat_8|centos_8|redhat_9|centos_9::
-      "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell;
-# todo, need 2.7pip psycopg2-binary for ubuntu-20 as well?
-    debian_11.!have_pip2::
-      "wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O get-pip.py && python2 get-pip.py && pip install psycopg2-binary"
-        contain => in_shell;
+      "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell,
+        depends_on => { "rpm_build_libs_installed" };
 
     ubuntu_16.!have_i386_architecture:: # mingw build host
       "${paths.dpkg} --add-architecture i386";
