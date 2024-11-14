@@ -232,7 +232,7 @@ bundle agent cfengine_build_host_setup
         comment => "even though rhel8/9 come with /bin/perl perl >= 5.8.8 is needed by cfbuild-lcov-1.16-1.noarch. So the package must be installed.";
     redhat_9.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
       "yum install -y python3-pip" contain => in_shell;
-    redhat_8|centos_8|redhat_9::
+    redhat_8|centos_8|redhat_9|centos_9::
       "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell;
 # todo, need 2.7pip psycopg2-binary for ubuntu-20 as well?
     debian_11.!have_pip2::
