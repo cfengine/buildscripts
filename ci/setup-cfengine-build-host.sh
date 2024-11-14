@@ -130,9 +130,9 @@ policy="$(dirname "$0")"/cfengine-build-host-setup.cf
 chmod 600 "$policy"
 /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
 grep -i error: promises.log && exit 1
-/var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
+/var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a promises.log
 grep -i error: promises.log && exit 1
-/var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
+/var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a promises.log
 grep -i error: promises.log && exit 1
 
 cleanup
