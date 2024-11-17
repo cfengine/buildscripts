@@ -20,8 +20,8 @@ bundle agent cfengine_build_host_setup
       "shellcheck" comment => "not sure why only ubuntu-20 needed this.";
     debian.(!debian_12.!ubuntu_22)::
       "python" comment => "debian-12 has only python3";
-     !(debian_9|ubuntu_16).(debian|ubuntu)::
-       "default-jre" comment => "on debian10+ and ubuntu18+ this will be jdk11, good enough for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
+    !(debian_9|ubuntu_16).(debian|ubuntu)::
+      "default-jre" comment => "on debian10+ and ubuntu18+ this will be jdk11, good enough for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
 
     debian|ubuntu::
       "libltdl7" package_policy => "delete";
