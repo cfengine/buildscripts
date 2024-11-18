@@ -21,7 +21,7 @@ function failure() {
   if command cf-support; then
     sudo cf-support --yes > $$.cfsupportlog 2>&1 || cat $$.cfsupportlog
   else
-    cp /var/log/CFEngine-Install* . # ${NTECH_ROOT}/artifacts cd previously
+    tar cf "${NTECH_ROOT}/artifacts/CFEngine-Install.logs.tgz /var/log/CFEngine-Install*"
   fi
   rm $$.cfsupportlog
 }
