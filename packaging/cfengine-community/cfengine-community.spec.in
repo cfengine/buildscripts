@@ -62,6 +62,11 @@ rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/curl
 rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 
+%if %{?rhel}%{!?rhel:0} >= 9
+rm -f $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
+rm -f $RPM_BUILD_ROOT/etc/init.d/cfengine3
+rm -f $RPM_BUILD_ROOT/etc/profile.d/cfengine3.sh
+%endif
 
 %clean
 #rm -rf $RPM_BUILD_ROOT
@@ -123,9 +128,13 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 %endif
 
 # Globally installed configs, scripts
+%if %{?rhel}%{!?rhel:0} < 9
 %attr(644,root,root) /etc/sysconfig/cfengine3
 %attr(755,root,root) /etc/profile.d/cfengine3.sh
+# ENT-11901
+# For el9+ we started seeing issues from other packages not expecting init scripts
 %attr(755,root,root) /etc/init.d/cfengine3
+%endif
 
 # Systemd units
 %defattr(644,root,root,755)
