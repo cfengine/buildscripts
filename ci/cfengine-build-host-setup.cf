@@ -20,8 +20,8 @@ bundle agent cfengine_build_host_setup
       "shellcheck" comment => "not sure why only ubuntu-20 needed this.";
     debian.(!debian_12.!ubuntu_22)::
       "python" comment => "debian-12 has only python3";
-     !(debian_9|ubuntu_16).(debian|ubuntu)::
-       "default-jre" comment => "on debian10+ and ubuntu18+ this will be jdk11, good enough for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
+    !(debian_9|ubuntu_16).(debian|ubuntu)::
+      "default-jre" comment => "on debian10+ and ubuntu18+ this will be jdk11, good enough for jenkins 2.426.1 https://www.jenkins.io/doc/book/platform-information/support-policy-java/index.html";
 
     debian|ubuntu::
       "libltdl7" package_policy => "delete";
@@ -61,7 +61,6 @@ bundle agent cfengine_build_host_setup
       "pam-devel";
       "rsync";
       "make";
-      "rpm-build";
       "libtool-ltdl" package_policy => "delete";
 
     (redhat|centos).(yum_dnf_conf_ok)::
@@ -72,7 +71,13 @@ bundle agent cfengine_build_host_setup
       "perl-Module-Load-Conditional";
       "wget";
 
+    !(redhat_6|centos_6).(yum_dnf_conf_ok)::
+      "rpm-build-libs" handle => "rpm_build_installed";
+      "python3-psycopg2";
+
     (redhat_6|centos_6).(yum_dnf_conf_ok)::
+      "rpm-build" handle => "rpm_build_installed";
+      "python-psycopg2" comment => "centos-6 provides python2 and psycopg2 for python2 as a package";
       "perl-IO-Compress-Zlib" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
       "perl-JSON";
 # perl-Digest-MD5 and perl-Data-Dumper are included in perl for centos-6
@@ -87,7 +92,9 @@ bundle agent cfengine_build_host_setup
 
     (redhat_6|centos_6).(yum_dnf_conf_ok)::
       "python-psycopg2" comment => "centos-6 provides python2 and psycopg2 for python2 as a package";
-    (redhat_7|centos_7).(yum_dnf_conf_ok)::
+    (redhat_6|centos_6).(yum_dnf_conf_ok)::
+      "python-psycopg2" comment => "centos-6 provides python2 and psycopg2 for python2 as a package";
+    !(redhat_6|centos_6).(yum_dnf_conf_ok)::
       "python3-psycopg2";
 
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
@@ -232,12 +239,9 @@ bundle agent cfengine_build_host_setup
         comment => "even though rhel8/9 come with /bin/perl perl >= 5.8.8 is needed by cfbuild-lcov-1.16-1.noarch. So the package must be installed.";
     redhat_9.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
       "yum install -y python3-pip" contain => in_shell;
-    redhat_8|centos_8|redhat_9::
-      "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell;
-# todo, need 2.7pip psycopg2-binary for ubuntu-20 as well?
-    debian_11.!have_pip2::
-      "wget https://bootstrap.pypa.io/pip/2.7/get-pip.py -O get-pip.py && python2 get-pip.py && pip install psycopg2-binary"
-        contain => in_shell;
+    redhat_8|centos_8|redhat_9|centos_9::
+      "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell,
+        depends_on => { "rpm_build_installed" };
 
     ubuntu_16.!have_i386_architecture:: # mingw build host
       "${paths.dpkg} --add-architecture i386";
