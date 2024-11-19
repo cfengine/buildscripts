@@ -136,10 +136,11 @@ bundle agent cfengine_build_host_setup
 
     suse|opensuse|sles::
       "binutils";
-      "pam";
-      "pkg-config";
-      "patch";
       "gdb";
+      "pam";
+      "patch";
+      "pkg-config";
+      "rpm-build";
 
     suse_12|opensuse_12|sles_12::
       "java-11-openjdk";
