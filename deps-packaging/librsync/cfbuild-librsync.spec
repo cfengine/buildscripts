@@ -57,17 +57,12 @@ rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/librsync.la
 
 %build
 
-if [ -z $MAKE ]; then
-  MAKE_PATH=`which MAKE`
-  export MAKE=$MAKE_PATH
-fi
-
-$MAKE
+make
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-$MAKE install DESTDIR=${RPM_BUILD_ROOT}
+make install DESTDIR=${RPM_BUILD_ROOT}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
