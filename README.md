@@ -137,7 +137,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libyaml](http://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                            | 0.9.33 | 0.9.33 | 0.9.33 |                          |
 | [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.8  | 2.6.8  | 2.6.8  | Enterprise agent only    |
-| [OpenSSL](http://openssl.org/)                                                   | 3.0.15 | 3.3.2  | 3.3.2  |                          |
+| [OpenSSL](http://openssl.org/)                                                   | 3.0.15 | 3.4.0  | 3.4.0  |                          |
 | [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                         | -      | 10.44  | 10.44  |                          |
 | [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/)                         | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
@@ -154,7 +154,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.47.0 | 2.47.0 | 2.47.0 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.6.3  | 2.6.3  |
-| [PHP](http://php.net/)                              | 8.3.12 | 8.3.12 | 8.3.12 |
+| [PHP](http://php.net/)                              | 8.3.13 | 8.3.13 | 8.3.13 |
 | [PostgreSQL](http://www.postgresql.org/)            | 15.8   | 16.4   | 17.0   |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.3.0  | 3.3.0  | 3.3.0  |
 
