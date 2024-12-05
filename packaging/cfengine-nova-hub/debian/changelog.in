@@ -2,5 +2,5 @@ cfengine-nova-hub (@@VERSION@@) unstable; urgency=low
 
   * New release.
 
- -- CFEngine AS <contact@cfengine.com>  Sat, 16 Jul 2011 14:14:57 +0200
+ -- CFEngine AS <contact@cfengine.com>  Wed, 4 Dec 2024 15:24:01 +0100
 
