@@ -1,14 +1,14 @@
-From 2d0371e9d9ed775ef41aec487c54df793931af4b Mon Sep 17 00:00:00 2001
+From 796b497683cabb27953a560c11da97577709bfd7 Mon Sep 17 00:00:00 2001
 From: Lars Erik Wik <lars.erik.wik@northern.tech>
 Date: Thu, 7 Nov 2024 14:18:38 +0100
 Subject: [PATCH 1/2] Added autotools build system
 
 Signed-off-by: Lars Erik Wik <lars.erik.wik@northern.tech>
 ---
- Makefile.am  | 36 ++++++++++++++++++++++++++++++++++
+ Makefile.am  | 36 +++++++++++++++++++++++++++++++++++
  bootstrap.sh |  5 +++++
- configure.ac | 55 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 96 insertions(+)
+ configure.ac | 53 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 94 insertions(+)
  create mode 100644 Makefile.am
  create mode 100755 bootstrap.sh
  create mode 100644 configure.ac
@@ -68,10 +68,10 @@ index 0000000..93c7b50
 +autoreconf --force --install -I m4 || exit
 diff --git a/configure.ac b/configure.ac
 new file mode 100644
-index 0000000..ef8f7dc
+index 0000000..6694030
 --- /dev/null
 +++ b/configure.ac
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,53 @@
 +# Copyright (C) 2024 Lars Erik Wik <lars.erik.wik@northern.tech>
 +#
 +# This program is free software; you can redistribute it and/or modify
@@ -121,8 +121,6 @@ index 0000000..ef8f7dc
 +AC_TYPE_UINT8_T
 +
 +# Checks for library functions.
-+AC_FUNC_MALLOC
-+AC_FUNC_REALLOC
 +AC_CHECK_FUNCS([memmove memset socket strchr strerror])
 +
 +AC_CONFIG_FILES([Makefile])
