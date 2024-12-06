@@ -92,5 +92,6 @@ CFEngine Build Automation -- librsync -- development files
 
 %dir %{prefix}/lib
 %{prefix}/lib/*.la
+%{prefix}/lib/pkgconfig
 
 %changelog

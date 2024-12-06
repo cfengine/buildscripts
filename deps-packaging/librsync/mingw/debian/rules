@@ -60,8 +60,7 @@ install: build
 
 	make install DESTDIR=$(CURDIR)/debian/tmp
 
-	# rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/librsync.a
-	# rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/librsync.la
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/librsync.la
 
 binary-indep: build install
 

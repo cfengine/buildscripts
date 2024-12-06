@@ -1,27 +1,32 @@
-From 796b497683cabb27953a560c11da97577709bfd7 Mon Sep 17 00:00:00 2001
+From a0685398fbafaff6e3071df134dece4620cf817d Mon Sep 17 00:00:00 2001
 From: Lars Erik Wik <lars.erik.wik@northern.tech>
 Date: Thu, 7 Nov 2024 14:18:38 +0100
 Subject: [PATCH 1/2] Added autotools build system
 
 Signed-off-by: Lars Erik Wik <lars.erik.wik@northern.tech>
 ---
- Makefile.am  | 36 +++++++++++++++++++++++++++++++++++
- bootstrap.sh |  5 +++++
- configure.ac | 53 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 94 insertions(+)
+ Makefile.am    | 39 +++++++++++++++++++++++++++++++++++++
+ bootstrap.sh   |  5 +++++
+ configure.ac   | 53 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ librsync.pc.in | 10 ++++++++++
+ 4 files changed, 107 insertions(+)
  create mode 100644 Makefile.am
  create mode 100755 bootstrap.sh
  create mode 100644 configure.ac
+ create mode 100644 librsync.pc.in
 
 diff --git a/Makefile.am b/Makefile.am
 new file mode 100644
-index 0000000..ceb9dae
+index 0000000..ad07dc6
 --- /dev/null
 +++ b/Makefile.am
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,39 @@
 +ACLOCAL_AMFLAGS = -I m4
 +
 +AM_CPPFLAGS = -Isrc/blake2
++
++pkgconfigdir = $(libdir)/pkgconfig
++pkgconfig_DATA = librsync.pc
 +
 +include_HEADERS = src/librsync.h src/librsync_export.h
 +lib_LTLIBRARIES = librsync.la
@@ -68,7 +73,7 @@ index 0000000..93c7b50
 +autoreconf --force --install -I m4 || exit
 diff --git a/configure.ac b/configure.ac
 new file mode 100644
-index 0000000..6694030
+index 0000000..2c15a6a
 --- /dev/null
 +++ b/configure.ac
 @@ -0,0 +1,53 @@
@@ -123,8 +128,24 @@ index 0000000..6694030
 +# Checks for library functions.
 +AC_CHECK_FUNCS([memmove memset socket strchr strerror])
 +
-+AC_CONFIG_FILES([Makefile])
++AC_CONFIG_FILES([librsync.pc Makefile])
 +AC_OUTPUT
+diff --git a/librsync.pc.in b/librsync.pc.in
+new file mode 100644
+index 0000000..831fcfc
+--- /dev/null
++++ b/librsync.pc.in
+@@ -0,0 +1,10 @@
++prefix=@prefix@
++exec_prefix=${prefix}
++libdir=${exec_prefix}/lib
++includedir=${prefix}/include
++
++Name: librsync
++Description: A library for calculating and applying network deltas
++Version: @PACKAGE_VERSION@
++Libs: -L${libdir} -lrsync
++Cflags: -I${includedir}
 -- 
 2.43.0
 
