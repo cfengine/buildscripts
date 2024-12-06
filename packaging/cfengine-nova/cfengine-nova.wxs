@@ -153,6 +153,9 @@
               <Component Id='libyaml_0_2.dll' Guid='6f6ff21a-168a-11e5-b6dc-0021ccb95c52' Win64='$(var.isWin64)'>
                 <File Id='libyaml_0_2.dll' Name='libyaml-0-2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libyaml-0-2.dll' />
               </Component>
+              <Component Id='librsync_0.dll' Guid='B5300346-FF77-40BD-B1E9-8C2FEBFADF47' Win64='$(var.isWin64)'>
+                <File Id='librsync_0.dll' Name='librsync-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\librsync-0.dll' />
+              </Component>
               <Component Id='zlib1.dll' Guid='ea2e067f-5580-4167-86ba-ec89e560be80' Win64='$(var.isWin64)'>
                 <File Id='zlib1.dll' Name='zlib1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\zlib1.dll' />
               </Component>
@@ -205,6 +208,7 @@
             <ComponentRef Id='libgnurx_0.dll' />
             <ComponentRef Id='liblmdb.dll' />
             <ComponentRef Id='libyaml_0_2.dll' />
+            <ComponentRef Id='librsync_0.dll' />
             <ComponentRef Id='zlib1.dll' />
 	    <ComponentRef Id='libxml2.dll' />
 	    <ComponentRef Id='libcurl_4.dll' />
