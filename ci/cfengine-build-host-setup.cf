@@ -50,6 +50,8 @@ bundle agent cfengine_build_host_setup
       "mingw-w64";
     (debian_10|debian_11).systemssl_build_host::
       "libssl-dev";
+    debian.bootstrap_pr_host::
+      "librsync-dev"; # bootstrap_pr host needs this to run configure and make dist
 
 # I attempted to arrange these packages in order of: generic (all versions) and then as if we gradually added them through time: rhel-6, 7, 8, 9...
     suse|opensuse|sles|redhat|centos::
@@ -144,6 +146,7 @@ bundle agent cfengine_build_host_setup
     any::
       "mingw_build_host" expression => fileexists("/etc/cfengine-mingw-build-host.flag");
       "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
+      "bootstrap_pr_host" expression => fileexists("/etc/cfengine-bootstrap-pr-host.flag");
     debian_9|ubuntu_16|redhat_6|centos_6::
       "have_opt_jdk21" expression => fileexists("/opt/jdk-21.0.1");
     (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
