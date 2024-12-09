@@ -308,6 +308,11 @@ mkdir -p $CFENGINE_MP_DEFAULT_KEY_LOCATION
 mkdir -p $CFENGINE_MP_DEFAULT_CSR_LOCATION
 mkdir -p $CFENGINE_MP_DEFAULT_CERT_LINK_LOCATION
 mkdir -p $CFENGINE_MP_DEFAULT_SSLCONF_LOCATION
+CFENGINE_SHORTNAME=$(hostname -s | tr '[:upper:]' '[:lower:]')
+if [ $(echo -n "$CFENGINE_SHORTNAME" | wc -m) -gt 64 ]; then
+  cf_console echo "Short hostname, $CFENGINE_SHORTNAME, is longer than 64 bytes so cannot be used for a self-signed cert CN."
+  exit 1
+fi
 CFENGINE_LOCALHOST=$(hostname -f | tr '[:upper:]' '[:lower:]')
 CFENGINE_SSL_KEY_SIZE="4096"
 CFENGINE_SSL_DAYS_VALID="3650"
@@ -327,7 +332,7 @@ if [ ! -f $CFENGINE_MP_CERT ]; then
   ${CFENGINE_OPENSSL} rsa -passin pass:x -in ${CFENGINE_MP_PASS_KEY} -out ${CFENGINE_MP_KEY}
 
   # Generate a CSR in ${CFENGINE_MP_CSR} with key ${CFENGINE_MP_KEY}
-  ${CFENGINE_OPENSSL} req -utf8 -sha256 -nodes -new -subj "/CN=$CFENGINE_LOCALHOST" -key ${CFENGINE_MP_KEY} -out ${CFENGINE_MP_CSR} ${OPENSSL_CNF}
+  ${CFENGINE_OPENSSL} req -utf8 -sha256 -nodes -new -subj "/CN=$CFENGINE_SHORTNAME" -key ${CFENGINE_MP_KEY} -out ${CFENGINE_MP_CSR} ${OPENSSL_CNF}
 
   # Build configuration with reasonable default subjectAltName entries
   rm -f "$CFENGINE_MP_SSLCONF"
