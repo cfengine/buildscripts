@@ -196,30 +196,6 @@ case "$PACKAGING" in
             test -d $dir && mv $dir "$LOCAL_PREFIX/share/etc"
         done
         tar czvf "$TARBALL" "$LOCAL_DIR" > "$TARBALL.filelist"
-        # $OS_VERSION is 7.6, ${OS_VERSION%.*} is 7
-        if [ -d "$P/coreos" -a "${OS_VERSION%.*}" = 7 ]
-        then
-            # Create filesystem image
-            IMAGE="$P/coreos/cfengine3.img"
-            dd if=/dev/zero of="$IMAGE" bs=1M count=1 seek=102399  # create a 100GiB big sparse file
-            "$(func_whereis mkfs.xfs)" -L CFENGINE "$IMAGE"
-            LOOP_DEV="$(sudo losetup --show -f "$IMAGE")"
-            MOUNT_DIR=cfengine.img
-            mkdir "$MOUNT_DIR"
-            sudo mount "$LOOP_DEV" "$MOUNT_DIR"
-            sudo cp -pr "$LOCAL_PREFIX"/* "$MOUNT_DIR"
-            sudo umount "$LOOP_DEV"
-            sudo losetup --detach "$LOOP_DEV"
-            rmdir "$MOUNT_DIR"
-            # create "nested" tarball containing only *.img file
-            tar czf "$P/coreos/cfengine3.img.tar.gz" --sparse -C "$(dirname "$IMAGE")" "$(basename "$IMAGE")"
-            rm "$IMAGE"
-            # create tarball containing everything
-            NAME="$PKG-$VERSION-$safe_prefix$RPM_RELEASE.$ARCH.fs-img.pkg"
-            TARBALL="$BASEDIR/$PKG/RPMS/$NAME.tar.gz"
-            mv "$P/coreos" "$P/$NAME"
-            tar czvf "$TARBALL" -C "$P" "$NAME" > "$TARBALL.filelist"
-        fi
     fi
     ;;
 
