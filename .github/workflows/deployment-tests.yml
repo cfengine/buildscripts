@@ -134,9 +134,8 @@ jobs:
 
       - name: Save artifacts
         if: success() || failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: artifacts
+          name: deployment-test-artifacts
           path: |
             artifacts
-            packages
