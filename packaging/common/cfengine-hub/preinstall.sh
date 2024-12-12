@@ -105,9 +105,10 @@ if [ "`package_type`" = "rpm" ]; then
 fi
 
 #
+# If an existing cert is not in place then:
 # Before starting the installation process we need to check that
-# hostname -f returns a valid name. If that is not the case then
-# we just abort the installation.
+# hostname -f returns a valid name and hostname -s is shorter
+# than 64 characters. If not we abort the installation.
 #
 NAME=$(hostname -f) || true
 if [ -z "$NAME" ];
@@ -117,6 +118,18 @@ then
   cf_console echo "Please make sure that hostname -f returns a valid name (Add an entry to /etc/hosts or "
   cf_console echo "fix the name resolution)."
   exit 1
+fi
+
+CFENGINE_MP_DEFAULT_CERT_LOCATION="$PREFIX/httpd/ssl/certs"
+CFENGINE_LOCALHOST=$(hostname -f | tr '[:upper:]' '[:lower:]')
+CFENGINE_MP_CERT=$CFENGINE_MP_DEFAULT_CERT_LOCATION/$CFENGINE_LOCALHOST.cert
+if [ ! -f "$CFENGINE_MP_CERT" ]; then
+  CFENGINE_SHORTNAME=$(hostname -s | tr '[:upper:]' '[:lower:]')
+  if [ $(echo -n "$CFENGINE_SHORTNAME" | wc -m) -gt 64 ]; then
+    cf_console echo "hostname -s returned '$CFENGINE_SHORTNAME' which is longer than 64 characters and cannot be used to generate a self-signed cert common name (CN)."
+    cf_console echo "Please make sure that hostname -s returns a name less than 64 characters long."
+    exit 1
+  fi
 fi
 
 #stop the remaining services on upgrade
