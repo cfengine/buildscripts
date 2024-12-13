@@ -1,0 +1,81 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	for i in 00*.patch; do patch -p1 < $$i; done
+
+	# Set correct file permissions after patching files into existence.
+	chmod +x ar-lib compile config.guess config.sub configure depcomp \
+	    install-sh libtool ltmain.sh missing
+
+	# Make sure timestamps are correct after patching files into existence
+	touch -t 0001010100 configure.ac
+	touch -t 0001010100 Makefile.am
+	touch -t 0001010100 m4/lt~obsolete.m4
+	touch -t 0001010100 m4/ltversion.m4
+	touch -t 0001010100 m4/ltsugar.m4
+	touch -t 0001010100 m4/ltoptions.m4
+	touch -t 0001010100 m4/libtool.m4
+
+	touch -t 0001010101 aclocal.m4
+	touch -t 0001010101 config.guess
+	touch -t 0001010101 config.sub
+	touch -t 0001010101 ltmain.sh
+	touch -t 0001010101 Makefile.in
+	touch -t 0001010101 install-sh
+	touch -t 0001010101 missing
+	touch -t 0001010101 depcomp
+	touch -t 0001010101 config.hin
+
+	touch -t 0001010102 configure
+	touch -t 0001010102 libtool
+	touch -t 0001010102 compile
+	touch -t 0001010102 ar-lib
+
+	./configure LDFLAGS="-Wl,-no-undefined" CPPFLAGS="-Drsync_EXPORTS=1" --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) \
+	    --enable-shared \
+	    --disable-static
+	# This line makes libtool stop complaining about:
+	# error: can't build x86_64-w64-mingw32 shared library unless -no-undefined is specified
+	sed -i.bak -e "s/\(allow_undefined=\)yes/\1no/" libtool
+	make
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	make install DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/librsync.la
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
