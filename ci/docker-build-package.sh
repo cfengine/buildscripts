@@ -8,7 +8,7 @@ COMPUTED_ROOT="$(readlink -e "$(dirname "$0")/../../")"
 NTECH_ROOT=${NTECH_ROOT:-$COMPUTED_ROOT}
 
 name=cfengine-build-package
-label=PACKAGES_HUB_x86_64_linux_ubuntu_20
+label=PACKAGES_HUB_x86_64_linux_ubuntu_22
 export JOB_BASE_NAME=label=$label
 
 

@@ -1,10 +1,13 @@
-# setup build host on ubuntu 20
+# setup build host on ubuntu 22
 set -ex
 PREFIX=/var/cfengine
 
 # Github Actions provides machines with various packages installed,
 # what confuses our build system into thinking that it's an RPM distro.
 sudo rm -f /bin/rpm
+
+# silence noise from debconf about frontends, Dialog, Readline
+export DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
 sudo apt-get update -qy
@@ -22,7 +25,7 @@ sudo apt-get install -qy python3 python3-pip
 apt-get -y install python3-psycopg2
 
 # install composer and friends
-sudo apt-get -qy install curl php7.4-cli php7.4-curl php7.4-zip php7.4-mbstring php7.4-xml php7.4-gd composer php7.4-ldap
+sudo --preserve-env apt-get -y install curl php-cli php-curl php-zip php-mbstring php-xml php-gd composer php-ldap
 # packages needed for autogen
 sudo apt-get -qy install git autoconf automake m4 make bison flex \
  binutils libtool gcc g++ libc-dev libpam0g-dev python3 psmisc
