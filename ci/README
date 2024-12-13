@@ -5,7 +5,7 @@ Currently a full build with no dependencies cached takes around 53 minutes with 
 
 Two options: containerize build or "normal" machine (such as virtual machine or actual hardware).
 
-The build is designed for ubuntu-20.04 but could be adjusted in various shell scripts for other platforms. (TODO: do this!)
+The build is designed for ubuntu-22.04 but could be adjusted in various shell scripts for other platforms. (TODO: do this!)
 
 # containerized build
 ./clean.sh # cleans any leftover docker bits
@@ -16,7 +16,7 @@ See /data/buildscripts/ci/build.sh for required environment variables and steps 
 
 # virtual or real machine
 
-For virtual machine such as with vagrant, at $NTECH_ROOT (aka top-level directory containing all CFEngine repositories), init an ubuntu-20.04 vagrant machine so it has access to all your repositories.
+For virtual machine such as with vagrant, at $NTECH_ROOT (aka top-level directory containing all CFEngine repositories), init an ubuntu-22.04 vagrant machine so it has access to all your repositories.
 
 vagrant init ubuntu/focal64
 vagrant ssh
