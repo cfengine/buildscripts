@@ -64,10 +64,6 @@ build-stamp:
 --without-pdo-firebird \
 --without-pdo-mysql \
 --without-pdo-oci \
---without-pdo-oci \
---without-pdo-oci \
---without-pdo-odbc \
---without-pdo-odbc \
 --without-pdo-odbc \
 --without-pdo-sqlite \
 --without-pgsql \
@@ -79,7 +75,6 @@ build-stamp:
 --without-tidy \
 --without-xmlrpc \
 --without-xsl \
---without-pear \
 --without-pear \
 --without-tsrm-pth \
 --without-tsrm-st \
