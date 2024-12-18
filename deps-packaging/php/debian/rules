@@ -21,7 +21,6 @@ build-stamp:
 --with-pdo-pgsql=$(PREFIX) \
 --with-iconv \
 --with-zlib=$(PREFIX) \
---with-libmbfl=$(PREFIX) \
 --enable-mbstring \
 --enable-sockets \
 --disable-mbregex \
@@ -73,12 +72,8 @@ build-stamp:
 --without-mm \
 --without-snmp \
 --without-tidy \
---without-xmlrpc \
 --without-xsl \
 --without-pear \
---without-tsrm-pth \
---without-tsrm-st \
---without-tsrm-pthreads \
 CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" PKG_CONFIG_PATH="/$(PREFIX)/lib/pkgconfig"
 	make
 
