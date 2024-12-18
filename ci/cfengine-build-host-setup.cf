@@ -44,6 +44,7 @@ bundle agent cfengine_build_host_setup
       "python3-pip";
       "python3-psycopg2";
       "rsync" comment => "added for debian-10";
+      "systemd-coredump" comment => "added step to jenkins testing-pr job to query for coredumps on failures";
 
     ubuntu_16.mingw_build_host:: # for now, only ubu16 hosts mingw builds
       "wine:i386";
