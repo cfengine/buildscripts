@@ -56,9 +56,17 @@ trap cleanup SIGTERM
 echo "Using buildscripts commit:"
 # we have very old platforms with old git that doesn't understand -C option so cd/cd .. it is
 cd buildscripts
-# buildscripts is owned by jenkins so in order to run rev-parse command as root (this script is run with sudo) we must make it safe
-git config --global --add safe.directory /home/jenkins/buildscripts
-git rev-parse HEAD
+# buildscripts is owned by jenkins so in order to run rev-parse command as root (this script is run with sudo) we must make it safe if git is used
+if [ -d /home/jenkins/buildscripts/.git ]; then
+  if command -v git >/dev/null; then
+    git config --global --add safe.directory /home/jenkins/buildscripts
+    # show what version of buildscripts we are using
+    git rev-parse HEAD
+  else
+    echo "buildscripts/.git is present but git is not installed"
+    exit 1
+  fi
+fi
 cd ..
 
 echo "Install any distribution upgrades"
