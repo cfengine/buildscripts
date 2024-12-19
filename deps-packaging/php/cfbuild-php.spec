@@ -1,4 +1,4 @@
-%define php_version 8.3.13
+%define php_version 8.3.15
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -84,10 +84,6 @@ LDFLAGS=""
   --without-pdo-firebird \
   --without-pdo-mysql \
   --without-pdo-oci \
-  --without-pdo-oci \
-  --without-pdo-oci \
-  --without-pdo-odbc \
-  --without-pdo-odbc \
   --without-pdo-odbc \
   --without-pdo-sqlite \
   --without-pgsql \
@@ -99,7 +95,6 @@ LDFLAGS=""
   --without-tidy \
   --without-xmlrpc \
   --without-xsl \
-  --without-pear \
   --without-pear \
   --without-tsrm-pth \
   --without-tsrm-st \
