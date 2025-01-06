@@ -52,6 +52,7 @@ bundle agent cfengine_build_host_setup
     (debian_10|debian_11).systemssl_build_host::
       "libssl-dev";
     debian.bootstrap_pr_host::
+      "php-curl"; # Required by tecnickcom/tcpdf 6.8.0
       "librsync-dev"; # bootstrap_pr host needs this to run configure and make dist
 
 # I attempted to arrange these packages in order of: generic (all versions) and then as if we gradually added them through time: rhel-6, 7, 8, 9...
