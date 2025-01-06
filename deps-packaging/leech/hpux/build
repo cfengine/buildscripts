@@ -1,0 +1,25 @@
+#!/bin/sh -e
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-leech${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-leech-devel${PREFIX}
+
+# Build
+./configure --prefix=$PREFIX
+gmake
+
+# Test
+
+# Install
+
+mkdir -p $TTD/lib
+mkdir -p $TTD/include
+gmake install prefix=${TTD}
+
+# Package
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/*.so* ${TT}/lib

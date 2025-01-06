@@ -144,6 +144,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                     | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
 | [zlib](http://www.zlib.net/)                                                     | 1.3.1  | 1.3.1  | 1.3.1  |                          |
 | [librsync](https://github.com/librsync/librsync/releases)                        |        |        | 2.3.4  |                          |
+| [leech](https://github.com/larsewi/leech/releases)                               |        |        | 0.1.21 |                          |
 | libgcc                                                                           |        |        |        | AIX and Solaris only     |
 
 ### Enterprise Hub dependencies:
