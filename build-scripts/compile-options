@@ -137,6 +137,10 @@ case "$PROJECT" in
     nova)  var_append DEPS "openldap"
 esac
 
+case "$PROJECT" in
+    nova)  var_append DEPS "leech"
+esac
+
 # libacl & libattr - not for the exotics (linux only?)
 case "$OS_FAMILY" in
   hpux|aix|solaris|freebsd|mingw)       ;;

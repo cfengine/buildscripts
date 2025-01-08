@@ -1,0 +1,48 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure LDFLAGS="-Wl,-no-undefined" --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) \
+	    --enable-shared \
+	    --disable-static
+	make
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	make install DESTDIR=$(CURDIR)/debian/tmp
+
+	rm -f $(CURDIR)/debian/tmp$(PREFIX)/lib/leech.la
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

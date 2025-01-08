@@ -156,6 +156,9 @@
               <Component Id='librsync_0.dll' Guid='B5300346-FF77-40BD-B1E9-8C2FEBFADF47' Win64='$(var.isWin64)'>
                 <File Id='librsync_0.dll' Name='librsync-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\librsync-0.dll' />
               </Component>
+              <Component Id='libleech_0.dll' Guid='A302A048-76D4-45CF-BC68-BB9837015C9A' Win64='$(var.isWin64)'>
+                <File Id='libleech_0.dll' Name='libleech-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libleech-0.dll' />
+              </Component>
               <Component Id='zlib1.dll' Guid='ea2e067f-5580-4167-86ba-ec89e560be80' Win64='$(var.isWin64)'>
                 <File Id='zlib1.dll' Name='zlib1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\zlib1.dll' />
               </Component>

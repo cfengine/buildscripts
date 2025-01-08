@@ -41,6 +41,10 @@ case "$DEPS" in
     *)          var_append ARGS "--without-librsync" ;;
 esac
 case "$DEPS" in
+    *leech*)    var_append ARGS "--with-leech=$P" ;;
+    *)          var_append ARGS "--without-leech" ;;
+esac
+case "$DEPS" in
     *postgresql*) var_append ARGS "--with-postgresql=$P --without-mysql" ;;
     *)            var_append ARGS "--without-sql" ;;
 esac
