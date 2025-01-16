@@ -142,11 +142,16 @@ case "$PACKAGING" in
         fi
     fi
 
-    # determine policy-version for rhel systems so we can require what we build with
+    # determine the system-provided versions of dependencies we build against so we can Require them later in our RPM spec files.
     if [ "$OS" = "rhel" ]; then
         SELINUX_POLICY_VERSION=$(rpm -q --qf '%{VERSION}\n' selinux-policy)
         if [ -z "$SELINUX_POLICY_VERSION" ]; then
             echo "error: unable to determine selinux-policy package version"
+            exit 1
+        fi
+        OPENSSL_VERSION=$(rpm -q --provides openssl-libs | grep OPENSSL_ | sed 's/^.*_\([0-9.]*\).*$/\1/' | sort -n | tail -1)
+        if [ -z "$OPENSSL_VERSION" ]; then
+            echo "error: unable to determine openssl package version"
             exit 1
         fi
     fi
@@ -155,6 +160,7 @@ case "$PACKAGING" in
         -e "s/@@VERSION@@/$RPM_VERSION/g" \
         -e "s/@@RELEASE@@/$safe_prefix$RPM_RELEASE/g" \
         -e "s/@@SELINUX_POLICY_VERSION@@/$SELINUX_POLICY_VERSION/g" \
+        -e "s/@@OPENSSL_VERSION@@/$OPENSSL_VERSION/g" \
         -e "/^%pre\$/r $PREINSTALL" \
         -e "/^%post\$/r $POSTINSTALL" \
         -e "/^%preun\$/r $PREREMOVE" \
