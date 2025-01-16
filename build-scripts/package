@@ -136,12 +136,18 @@ case "$PACKAGING" in
             echo "error: unable to determine selinux-policy package version"
             exit 1
         fi
+        OPENSSL_VERSION=$(rpm -q --qf '%{VERSION}\n' openssl | sed  's/\([0-9]*.[0-9]*.\)[0-9]*/\10/')
+        if [ -z "$OPENSSL_VERSION" ]; then
+            echo "error: unable to determine openssl package version"
+            exit 1
+        fi
     fi
 
     sed \
         -e "s/@@VERSION@@/$RPM_VERSION/g" \
         -e "s/@@RELEASE@@/$safe_prefix$RPM_RELEASE/g" \
         -e "s/@@SELINUX_POLICY_VERSION@@/$SELINUX_POLICY_VERSION/g" \
+        -e "s/@@OPENSSL_VERSION@@/$OPENSSL_VERSION/g" \
         -e "/^%pre\$/r $PREINSTALL" \
         -e "/^%post\$/r $POSTINSTALL" \
         -e "/^%preun\$/r $PREREMOVE" \
