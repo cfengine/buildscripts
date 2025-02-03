@@ -10,6 +10,6 @@ BUILDMACHINE="$1"
 mkdir -p $BASEDIR/../../../output/${SCHEDULER}/${BUILD_NUMBER}
 rsync -avr --delete "$BUILDMACHINE:build/output/*" \
       $BASEDIR/../../../output/${SCHEDULER}/${BUILD_NUMBER} \
-      >rsync.log
+      >/tmp/rsync.log
 
 ssh "$BUILDMACHINE" "rm -rf build/output"
