@@ -8,7 +8,7 @@ Source0: rsync-%{rsync_version}.tar.gz
 Patch0: fix-buffer-overflow.patch
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no

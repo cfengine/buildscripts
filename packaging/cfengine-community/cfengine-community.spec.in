@@ -8,7 +8,7 @@ Release: @@RELEASE@@%{?dist}
 Vendor: Northern.tech AS
 License: COSL
 Group: Applications/System
-URL: http://cfengine.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3 < @@VERSION@@, cf-community < @@VERSION@@
 Requires: coreutils

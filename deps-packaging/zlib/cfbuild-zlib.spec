@@ -6,7 +6,7 @@ Source0: zlib-1.3.1.tar.gz
 Patch0: AIX_LDSHARED.patch
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no

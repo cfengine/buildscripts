@@ -9,7 +9,7 @@ Patch0: 0006-Add-latomic-on-AIX-7.patch
 Patch1: 0008-Define-_XOPEN_SOURCE_EXTENDED-as-1.patch
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
