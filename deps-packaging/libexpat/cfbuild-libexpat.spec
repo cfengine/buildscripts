@@ -7,7 +7,7 @@ Release: 1
 Source0: expat-%{expat_version}.tar.xz
 License: MIT
 Group: Other
-Url: https://libexpat.github.io/
+Url: https://libexpat.github.io
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no

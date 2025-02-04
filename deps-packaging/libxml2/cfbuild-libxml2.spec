@@ -7,7 +7,7 @@ Release: 1
 Source0: libxml2-%{libxml_version}.tar.xz
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
