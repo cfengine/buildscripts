@@ -130,18 +130,18 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.10   | 3.10   | 3.10   |                          |
 | [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
 | [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
-| [libcurl](https://curl.haxx.se/download.html)                                     | 8.10.1 | 8.10.1 | 8.11.1 |                          |
+| [libcurl](https://curl.se/download.html)                                          | 8.10.1 | 8.10.1 | 8.11.1 |                          |
 | [libgnurx](https://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.17   | 1.17   | 1.17   | Needed by libxml2        |
-| [libxml2](https://xmlsoft.org/sources/)                                           | 2.13.4 | 2.13.4 | 2.13.5 |                          |
+| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.13.4 | 2.13.4 | 2.13.5 |                          |
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.33 | 0.9.33 | 0.9.33 |                          |
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.8  | 2.6.8  | 2.6.9  | Enterprise agent only    |
 | [OpenSSL](https://openssl.org/)                                                   | 3.0.15 | 3.4.0  | 3.4.0  |                          |
-| [PCRE](https://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | -      | -      |                          |
+| [PCRE](https://www.pcre.org/)                                                     | 8.45   | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.44  | 10.44  |                          |
-| [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/)                          | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
-| [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                      | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
+| [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
+| [SASL2](https://www.cyrusimap.org/sasl/)                                          | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
 | [zlib](https://www.zlib.net/)                                                     | 1.3.1  | 1.3.1  | 1.3.1  |                          |
 | [librsync](https://github.com/librsync/librsync/releases)                         |        |        | 2.3.4  |                          |
 | [leech](https://github.com/larsewi/leech/releases)                                |        |        | 0.1.21 |                          |
