@@ -25,11 +25,11 @@
    <?endif?>
 
    <Product Id='*' Name='CFEngine Nova' Language='1033'
-            Version='$(var.CfVersion)' Manufacturer='CFEngine AS' UpgradeCode='B883FBCC-6F05-4AFA-98FA-CAF09BF464EA' >
+            Version='$(var.CfVersion)' Manufacturer='Northern.tech AS' UpgradeCode='B883FBCC-6F05-4AFA-98FA-CAF09BF464EA' >
 
       <Package Description='CFEngine Nova' Platform='$(var.CfArch)'
                Comments='This package contains CFEngine Nova'
-               Manufacturer='CFEngine AS' InstallerVersion='200' Compressed='yes' />
+               Manufacturer='Northern.tech AS' InstallerVersion='200' Compressed='yes' />
 
 	  <Media Id='1' Cabinet='cfnova.cab' EmbedCab='yes' />
 
