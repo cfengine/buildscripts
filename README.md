@@ -125,41 +125,41 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 
 ### Agent Dependencies
 
-| CFEngine version                                                                 | 3.21.x | 3.24.x | master | Notes                    |
-| -------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
-| [diffutils](https://ftpmirror.gnu.org/diffutils/)                                | 3.10   | 3.10   | 3.10   |                          |
-| [libacl](http://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
-| [libattr](http://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
-| [libcurl](http://curl.haxx.se/download.html)                                     | 8.10.1 | 8.10.1 | 8.11.1 |                          |
-| [libgnurx](http://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
-| [libiconv](http://ftp.gnu.org/gnu/libiconv/)                                     | 1.17   | 1.17   | 1.17   | Needed by libxml2        |
-| [libxml2](http://xmlsoft.org/sources/)                                           | 2.13.4 | 2.13.4 | 2.13.5 |                          |
-| [libyaml](http://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
-| [LMDB](https://github.com/LMDB/lmdb/)                                            | 0.9.33 | 0.9.33 | 0.9.33 |                          |
-| [OpenLDAP](http://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.8  | 2.6.8  | 2.6.9  | Enterprise agent only    |
-| [OpenSSL](http://openssl.org/)                                                   | 3.0.15 | 3.4.0  | 3.4.0  |                          |
-| [PCRE](http://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | -      | -      |                          |
-| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                         | -      | 10.44  | 10.44  |                          |
-| [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/)                         | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
-| [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                     | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
-| [zlib](http://www.zlib.net/)                                                     | 1.3.1  | 1.3.1  | 1.3.1  |                          |
-| [librsync](https://github.com/librsync/librsync/releases)                        |        |        | 2.3.4  |                          |
-| [leech](https://github.com/larsewi/leech/releases)                               |        |        | 0.1.21 |                          |
-| libgcc                                                                           |        |        |        | AIX and Solaris only     |
+| CFEngine version                                                                  | 3.21.x | 3.24.x | master | Notes                    |
+| --------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
+| [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.10   | 3.10   | 3.10   |                          |
+| [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
+| [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
+| [libcurl](https://curl.haxx.se/download.html)                                     | 8.10.1 | 8.10.1 | 8.11.1 |                          |
+| [libgnurx](https://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
+| [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.17   | 1.17   | 1.17   | Needed by libxml2        |
+| [libxml2](https://xmlsoft.org/sources/)                                           | 2.13.4 | 2.13.4 | 2.13.5 |                          |
+| [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
+| [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.33 | 0.9.33 | 0.9.33 |                          |
+| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.8  | 2.6.8  | 2.6.9  | Enterprise agent only    |
+| [OpenSSL](https://openssl.org/)                                                   | 3.0.15 | 3.4.0  | 3.4.0  |                          |
+| [PCRE](https://ftp.csx.cam.ac.uk/pub/software/programming/pcre/)                  | 8.45   | -      | -      |                          |
+| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.44  | 10.44  |                          |
+| [pthreads-w32](ftp://sourceware.org/pub/pthreads-win32/)                          | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
+| [SASL2](https://cyrusimap.org/mediawiki/index.php/Downloads)                      | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
+| [zlib](https://www.zlib.net/)                                                     | 1.3.1  | 1.3.1  | 1.3.1  |                          |
+| [librsync](https://github.com/librsync/librsync/releases)                         |        |        | 2.3.4  |                          |
+| [leech](https://github.com/larsewi/leech/releases)                                |        |        | 0.1.21 |                          |
+| libgcc                                                                            |        |        |        | AIX and Solaris only     |
 
 ### Enterprise Hub dependencies:
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
 | --------------------------------------------------- | ------ | ------ | ------ |
-| [Apache](http://httpd.apache.org/)                  | 2.4.62 | 2.4.62 | 2.4.62 |
+| [Apache](https://httpd.apache.org/)                 | 2.4.62 | 2.4.62 | 2.4.62 |
 | [APR](https://apr.apache.org/)                      | 1.7.5  | 1.7.5  | 1.7.5  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.47.0 | 2.47.0 | 2.47.1 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.6.3  | 2.6.3  |
-| [PHP](http://php.net/)                              | 8.3.13 | 8.3.13 | 8.3.15 |
-| [PostgreSQL](http://www.postgresql.org/)            | 15.8   | 16.4   | 17.2   |
+| [PHP](https://php.net/)                             | 8.3.13 | 8.3.13 | 8.3.15 |
+| [PostgreSQL](https://www.postgresql.org/)           | 15.8   | 16.4   | 17.2   |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.3.0  | 3.3.0  | 3.3.0  |
 
-* [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
+* [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
