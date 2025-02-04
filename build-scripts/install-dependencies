@@ -79,9 +79,9 @@ check_and_install_perl()
         fi
 
         PERL_VERSION=5.40.0
-        PERL_MD5=8da78b1f54b99e97954066d0aaad88bc
+        PERL_SHA256=c740348f357396327a9795d3e8323bafd0fe8a5c7835fc1cbaba0cc8dfe7161f
         wget http://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
-        [ `func_md5 perl-${PERL_VERSION}.tar.gz` != "${PERL_MD5}" ]  \
+        [ `func_sha256 perl-${PERL_VERSION}.tar.gz` != "${PERL_SHA256}" ]  \
             &&  fatal "perl checksum error"
         gzip -dc perl-${PERL_VERSION}.tar.gz | tar xf -
         cd perl-${PERL_VERSION}
