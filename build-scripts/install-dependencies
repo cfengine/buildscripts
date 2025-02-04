@@ -71,8 +71,8 @@ check_and_install_perl()
             PERL_EXTRA_FLAGS='-Ud_nexttoward'
         fi
 
-        PERL_VERSION=5.40.0
-        PERL_SHA256=c740348f357396327a9795d3e8323bafd0fe8a5c7835fc1cbaba0cc8dfe7161f
+        PERL_VERSION=5.41.8
+        PERL_SHA256=2b13022a1b3e4648ffbdc51812e6b83cd7990095771989a236ec4edb2a55604e
         wget https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
         [ `func_sha256 perl-${PERL_VERSION}.tar.gz` != "${PERL_SHA256}" ]  \
             &&  fatal "perl checksum error"
