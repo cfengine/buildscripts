@@ -7,7 +7,7 @@ Release: 1
 Source0: librsync-%{librsync_version}.tar.gz
 License: LGPL
 Group: Other
-Url: http://librsync.sourcefrog.net
+Url: https://librsync.sourcefrog.net
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
