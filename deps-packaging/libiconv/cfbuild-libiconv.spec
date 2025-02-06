@@ -5,7 +5,7 @@ Release: 1
 Source0: libiconv-1.17.tar.gz
 License: MIT
 Group: Other
-Url: http://www.gnu.org/software/libiconv/
+Url: https://www.gnu.org/software/libiconv/
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
