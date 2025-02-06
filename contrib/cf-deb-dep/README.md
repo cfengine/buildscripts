@@ -39,4 +39,4 @@ haven't been sanity-checked), albeit you need to make -k in order to
 get all packages, rather than stopping on the first error.
 
 For details related to contents of the *.ctl files,
-see [Debian Control](http://www.debian.org/doc/debian-policy/ch-controlfields.html)
+see [Debian Control](https://www.debian.org/doc/debian-policy/ch-controlfields.html)

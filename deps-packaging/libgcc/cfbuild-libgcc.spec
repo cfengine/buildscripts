@@ -7,7 +7,7 @@ Release: 0
 Vendor: IBM
 License: Proprietary
 Group: Applications/System
-URL: http://ibm.com/
+URL: https://ibm.com/
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 
 
