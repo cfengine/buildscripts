@@ -8,7 +8,7 @@ Source0: git-%{git_version}.tar.gz
 Patch0: clar-stop-passing-timezone-to-gettimeofday.patch
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no

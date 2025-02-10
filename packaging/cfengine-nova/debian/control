@@ -1,7 +1,7 @@
 Source: cfengine-nova
 Section: utils
 Priority: extra
-Maintainer: CFEngine AS <contact@cfengine.com>
+Maintainer: Northern.tech AS <contact@cfengine.com>
 Build-Depends: debhelper
 Standards-Version: 3.8.4
 
