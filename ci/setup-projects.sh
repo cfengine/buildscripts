@@ -13,9 +13,11 @@ set -ex
 if test -f "mission-portal/public/scripts/package.json"; then
 	cd mission-portal/public/scripts
 	# install dependencies from npmjs
-	npm i
+	npm ci
 	# build react components
 	npm run build
+	# remove the packages specified in devDependencies
+	npm prune --omit=dev
 fi
 )
 
