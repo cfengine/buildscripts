@@ -1,0 +1,25 @@
+FROM debian:12-slim AS build
+RUN apt update -y && apt upgrade -y
+# cfengine dependencies
+# CFEngine requires the ps command for processes promises
+# CFEngine requires python for package promises package modules
+# install ed to fix debian to conform better to standard: https://pubs.opengroup.org/onlinepubs/9799919799/utilities/ed.html
+RUN apt install -y procps python3-minimal ed
+COPY hub.deb /
+# Only --unpack here to skip configuration which includes bringing up the database and webserver which might need to be reconfigured to use a higher port
+# Using https_port 8443 and http_port 8080 in "developer" mode with docker requires the internal webserver to use the same ports as we don't support a mix
+RUN dpkg --unpack hub.deb
+COPY docker-hub-def.json /var/cfengine/share/NovaBase/masterfiles/def.json
+COPY docker-hub-finish-install-and-bootstrap.sh /
+CMD [ "sleep infinity" ]
+
+# RUN setup, assume that docker run includes the --hostname option for setting a nice hostname to be used internally
+# must be setup BEFORE doing --configure step as we generate self-signed certs, bootstrap CF_ROBOT user, etc
+#FROM debian:12-slim AS run
+#RUN dpkg --configure cfengine-nova-hub
+#RUN 'cf-agent -IB $(hostname -i)'
+#RUN cf-agent -KIf update.cf
+#RUN cf-agent -KI
+#RUN cf-agent -KI
+#RUN cf-agent -KI
+#CMD [ "sleep infinity" ]

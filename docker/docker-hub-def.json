@@ -1,0 +1,45 @@
+{
+  "variables": {
+    "cfe_internal_hub_vars.https_port": {
+      "value": "8443"
+    },
+    "cfe_internal_hub_vars.http_port": {
+      "value": "8080"
+    }
+  },
+  "classes": {
+    "client_initiated_reporting_enabled": [ "any" ],
+    "default:mpf_disable_mission_portal_docroot_sync_from_share_gui": {
+      "regular_expressions": [
+        "any"
+      ]
+    },
+    "mpf_augments_control_enabled": [
+      "any"
+    ],
+    "cfengine_mp_fr_dependencies_auto_install": [
+      "any"
+    ]
+  },
+  "vars": {
+    "acl": [
+      "0.0.0.0/0",
+      "::/0"
+    ],
+    "default_data_select_host_monitoring_include": [
+      ".*"
+    ],
+    "default_data_select_policy_hub_monitoring_include": [
+      ".*"
+    ],
+    "control_executor_splaytime": "1",
+    "control_executor_schedule": [
+      "any"
+    ],
+    "control_hub_hub_schedule": [
+      "any"
+    ],
+    "mpf_access_rules_collect_calls_admit_ips": [ "0.0.0.0/0" ],
+    "control_hub_exclude_hosts": [ "0.0.0.0/0" ]
+  }
+}
