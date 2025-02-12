@@ -6,5 +6,5 @@ RUN apt update -y && apt upgrade -y
 # install ed to fix debian to conform better to standard: https://pubs.opengroup.org/onlinepubs/9799919799/utilities/ed.html
 RUN apt install -y procps python3-minimal ed
 COPY client.deb /
-RUN dpkg client.deb
+RUN dpkg -i client.deb
 CMD [ "sleep infinity" ]
