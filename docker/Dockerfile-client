@@ -8,15 +8,3 @@ RUN apt install -y procps python3-minimal ed
 COPY client.deb /
 RUN dpkg client.deb
 CMD [ "sleep infinity" ]
-
-# coordinate where the hub is somehow? would be done via docker compose eventually when we use that image
-# RUN setup, assume that docker run includes the --hostname option for setting a nice hostname to be used internally
-# must be setup BEFORE doing --configure step as we generate self-signed certs, bootstrap CF_ROBOT user, etc
-#FROM debian:12-slim AS run
-#RUN dpkg --configure cfengine-nova-hub
-#RUN 'cf-agent -IB $(hostname -i)'
-#RUN cf-agent -KIf update.cf
-#RUN cf-agent -KI
-#RUN cf-agent -KI
-#RUN cf-agent -KI
-#CMD [ "sleep infinity" ]
