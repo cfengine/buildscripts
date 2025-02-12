@@ -210,7 +210,7 @@ bundle agent cfengine_build_host_setup
       "/etc/apt/sources.list.d/*"
         delete => tidy;
       "/etc/apt/sources.list"
-        content => "deb https://archive.debian.org/debian/ stretch main contrib non-free";
+        content => "deb http://archive.debian.org/debian/ stretch main contrib non-free";
     suse_15|opensuse_15|sles_15::
       "/home/jenkins/.rpmmacros"
         content => "%dist .suse15",
