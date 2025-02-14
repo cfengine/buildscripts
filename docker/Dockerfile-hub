@@ -12,6 +12,10 @@ COPY hub.deb /
 # Using https_port 8443 and http_port 8080 in "developer" mode with docker requires the internal webserver to use the same ports as we don't support a mix
 RUN dpkg --unpack hub.deb
 
+# TODO: make optional: use my local development copy of masterfiles, easy to replace
+RUN rm -rf /var/cfengine/share/NovaBase/masterfiles
+# build shell script builds masterfiles to /tmp/masterfiles from $HOME/cfe/masterfiles
+COPY masterfiles-build/ /var/cfengine/share/NovaBase/masterfiles/
 # copy def.json to where dpkg --configure scripts copy it from
 COPY def.json /var/cfengine/share/NovaBase/masterfiles/def.json
 

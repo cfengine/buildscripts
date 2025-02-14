@@ -10,6 +10,13 @@ docker stop hub || true
 docker rm hub || true
 docker rmi $image:$tag || true
 
+# TODO, make optional, use local masterfiles since it is easy to replace in the container
+cwd=$(pwd)
+rm -rf masterfiles-build
+cd $HOME/cfe/masterfiles
+./configure --prefix=${cwd}/masterfiles-build
+make install
+cd -
 docker build --tag $image:$tag -f Dockerfile-hub .
 
 docker run -h hub -d -p 8443:8443 -p 5308:5308 -p 8080:8080 --name hub $image:$tag sleep infinity
