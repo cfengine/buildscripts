@@ -149,6 +149,8 @@ bundle agent cfengine_build_host_setup
       "mingw_build_host" expression => fileexists("/etc/cfengine-mingw-build-host.flag");
       "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
       "bootstrap_pr_host" expression => fileexists("/etc/cfengine-bootstrap-pr-host.flag");
+    linux::
+      "have_coredumpctl" expression => returnszero("command -v coredumpctl", "useshell");
     debian_9|ubuntu_16|redhat_6|centos_6::
       "have_opt_jdk21" expression => fileexists("/opt/jdk-21.0.1");
     (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
@@ -173,6 +175,10 @@ bundle agent cfengine_build_host_setup
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
 
   commands:
+    have_coredumpctl::
+      "sysctl kernel.core_pattern='|/usr/lib/systemd/systemd-coredump %p %u %g %s %t %e'" -> { "ENT-12669" }
+        comment => "Ensure that core_pattern is proper for systemd-coredump if coredumpctl is present.",
+        contain => in_shell;
     !have_opt_jdk21.(debian_9|ubuntu_16|redhat_6|centos_6)::
       "sh $(this.promise_dirname)/linux-install-jdk21.sh" contain => in_shell;
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(!have_development_tools).(yum_dnf_conf_ok)::
@@ -202,6 +208,13 @@ bundle agent cfengine_build_host_setup
       "have_$(suse_users_and_groups)_user" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/passwd >/dev/null", "useshell");
 
   files:
+    linux::
+      "/etc/security/limits.conf"
+        edit_line => lines_present("
+root - core unlimited
+* - core unlimited
+");
+
     ubuntu_16|ubuntu_18|redhat_9::
       "/etc/hosts" -> { "ENT-12437" }
         edit_line => regex_replace("127.0.0.1 localhost localhost.localdomain","127.0.0.1 localhost.localdomain"),
