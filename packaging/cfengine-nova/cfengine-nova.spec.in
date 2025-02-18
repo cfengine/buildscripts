@@ -29,9 +29,11 @@ Requires: libssl.so.1.1()(64bit) libssl.so.1.1(OPENSSL_1_1_0)(64bit) libssl.so.1
 Requires: libcrypto.so.1.1()(64bit) libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)
 %endif
 
+# libcurl will end up depending on the specific version we build with so list that as a requirement.
+# OPENSSL_VERSION is determined in build-scripts/package script in this same project.
 %if %{?rhel}%{!?rhel:0} > 8
-Requires: libcrypto.so.3()(64bit) libcrypto.so.3(OPENSSL_3.0.0)(64bit) libcrypto.so.3(OPENSSL_3.0.1)(64bit)
-Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_3.0.0)(64bit)
+Requires: libcrypto.so.3()(64bit) libcrypto.so.3(OPENSSL_@@OPENSSL_VERSION@@)(64bit)
+Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_@@OPENSSL_VERSION@@)(64bit)
 %endif
 
 AutoReqProv: no
