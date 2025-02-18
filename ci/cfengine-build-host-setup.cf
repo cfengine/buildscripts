@@ -46,7 +46,7 @@ bundle agent cfengine_build_host_setup
       "rsync" comment => "added for debian-10";
       "systemd-coredump" comment => "added step to jenkins testing-pr job to query for coredumps on failures";
 
-    ubuntu_16.mingw_build_host:: # for now, only ubu16 hosts mingw builds
+    mingw_build_host::
       "wine:i386";
       "mingw-w64";
     (debian_10|debian_11).systemssl_build_host::
@@ -247,7 +247,7 @@ root - core unlimited
       "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell,
         depends_on => { "rpm_build_installed" };
 
-    ubuntu_16.!have_i386_architecture:: # mingw build host
+    mingw_build_host.!have_i386_architecture::
       "${paths.dpkg} --add-architecture i386";
 
     ubuntu.!have_localhost_localdomain_hostname::
