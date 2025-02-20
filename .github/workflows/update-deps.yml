@@ -1,0 +1,57 @@
+name: Update dependencies
+
+on:
+  schedule:
+    # Run every Monday at 7am UTC
+    - cron: "0 07 * * */5"
+  push:
+    branches: [update-deps]
+  workflow_dispatch:
+
+jobs:
+  update_dependencies:
+    name: Update dependencies
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checks-out repository
+          uses: actions/checkout@v4
+        - name: Set up Python 3.12
+          uses: actions/setup-python@v5
+          with:
+            python-version: "3.12"
+        - name: Install dependencies
+          run: |
+            python -m pip install --upgrade pip
+            python -m pip install requests
+        - name: Run update script
+          run: python3 .github/workflows/update-deps.py --debug --update=major
+        - name: Check if there are changes
+          run: |
+            git diff --exit-code || touch git_diff_exists
+            if [ -f git_diff_exists ]; then echo "Changes need to be committed"; else echo "No changes to commit"; fi
+        - name: Commit changes
+          if: hashFiles('git_diff_exists') != ''
+          run: |
+            git config user.name 'GitHub'
+            git config user.email '<noreply@github.com>'
+            shopt -s globstar
+            git add deps-packaging/.
+            git commit -F /tmp/commit-message.txt
+        - id: commit-message-from-file
+          name: Parse commit message from file into variable
+          if: hashFiles('git_diff_exists') != ''
+          run: |
+            body=$(cat /tmp/commit-message.txt)
+            body="${body//$'\n'/'%0A'}"
+            echo ::set-output name=body::$body
+        - name: Create Pull Request
+          if: hashFiles('git_diff_exists') != ''
+          uses: cfengine/create-pull-request@v6
+          with:
+            title: Updated dependencies
+            body: ${{ steps.commit-message-from-file.outputs.body }}
+            reviewers: |
+              olehermanse
+              larsewi
+              craigcomstock
+            branch: update-dependencies-action
