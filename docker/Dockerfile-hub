@@ -15,7 +15,7 @@ RUN dpkg --unpack hub.deb
 # TODO: make optional: use my local development copy of masterfiles, easy to replace
 RUN rm -rf /var/cfengine/share/NovaBase/masterfiles
 # build shell script builds masterfiles to /tmp/masterfiles from $HOME/cfe/masterfiles
-COPY masterfiles-build/ /var/cfengine/share/NovaBase/masterfiles/
+COPY mpf-build/ /var/cfengine/share/NovaBase/masterfiles/
 # copy def.json to where dpkg --configure scripts copy it from
 COPY def.json /var/cfengine/share/NovaBase/masterfiles/def.json
 
