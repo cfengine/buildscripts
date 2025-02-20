@@ -377,6 +377,9 @@ exit 0
 
 # No-one should need access to anything under share/GUI
 %defattr(400,root,root,400)
+# We can change these configuration files as part of masterfiles policy so need to mark as configs
+%config(noreplace) %prefix/share/GUI/application/config/config.php
+%config(noreplace) %prefix/share/GUI/api/modules/inventory/config/config.php
 %prefix/share/GUI
 
 # Base policy
