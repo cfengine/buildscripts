@@ -24,10 +24,7 @@ build-stamp:
 --enable-mbstring \
 --enable-sockets \
 --disable-mbregex \
---without-fpm-user \
---without-fpm-group \
---without-fpm-systemd \
---without-fpm-acl \
+--enable-fpm \
 --without-layout \
 --without-sqlite3 \
 --without-bz2 \
@@ -86,7 +83,9 @@ install: build
 	dh_installdirs
 
 	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/etc
 	cp $(PREFIX)/httpd/conf/httpd.conf $(CURDIR)/debian/tmp$(PREFIX)/httpd/conf/httpd.conf
+	cp $(CURDIR)/php-fpm.conf $(CURDIR)/debian/tmp$(PREFIX)/httpd/php/etc/
 
 	INSTALL_ROOT=$(CURDIR)/debian/tmp CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="$(PREFIX)/lib" $(MAKE) install
 

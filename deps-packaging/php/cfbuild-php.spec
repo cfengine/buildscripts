@@ -6,6 +6,7 @@ Version: %{version}
 Release: 1
 Source0: php-%{php_version}.tar.gz
 Source1: php.ini
+Source2: php-fpm.conf
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -45,10 +46,7 @@ LDFLAGS=""
   --enable-mbstring \
   --enable-sockets \
   --disable-mbregex \
-  --without-fpm-user \
-  --without-fpm-group \
-  --without-fpm-systemd \
-  --without-fpm-acl \
+  --enable-fpm \
   --without-layout \
   --without-sqlite3 \
   --without-bz2 \
@@ -108,7 +106,9 @@ make
 %install
 rm -rf ${RPM_BUILD_ROOT}
 mkdir -p ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
+mkdir -p ${RPM_BUILD_ROOT}%{prefix}/httpd/php/etc
 cp %{prefix}/httpd/conf/httpd.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/conf
+cp ${RPM_BUILD_ROOT}/../../SOURCES/php-fpm.conf ${RPM_BUILD_ROOT}%{prefix}/httpd/php/etc
 
 INSTALL_ROOT=${RPM_BUILD_ROOT} make install
 
@@ -163,7 +163,8 @@ CFEngine Build Automation -- php -- development files
 %prefix/httpd/php/lib
 %prefix/httpd/php/bin
 %prefix/httpd/php/php
-%prefix/httpd/php/lib/php.ini
+%prefix/httpd/php/etc
+%prefix/httpd/php/sbin
 
 %dir %prefix/httpd/modules
 %prefix/httpd/modules/libphp.so
