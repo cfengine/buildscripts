@@ -16,8 +16,8 @@ docker rmi $image:$tag || true
 # TODO, make optional, use local masterfiles since it is easy to replace in the container
 cwd=$(pwd)
 rm -rf mpf-build
-cd $HOME/cfe/mpf-ent-12653
-rm cfengine-masterfiles*tar.gz
+cd $HOME/cfe/masterfiles
+rm -f cfengine-masterfiles*tar.gz
 ./autogen.sh
 make dist
 tar xf cfengine-masterfiles*tar.gz
