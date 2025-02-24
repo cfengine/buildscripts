@@ -54,6 +54,7 @@ bundle agent cfengine_build_host_setup
     debian.bootstrap_pr_host::
       "php-curl"; # Required by tecnickcom/tcpdf 6.8.0
       "librsync-dev"; # bootstrap_pr host needs this to run configure and make dist
+      "autoconf-archive" comment => "Required to resolve the AX_PTHREAD macro";
 
 # I attempted to arrange these packages in order of: generic (all versions) and then as if we gradually added them through time: rhel-6, 7, 8, 9...
     suse|opensuse|sles|redhat|centos::
