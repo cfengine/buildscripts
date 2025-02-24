@@ -338,6 +338,7 @@ exit 0
 # Systemd units
 %defattr(644,root,root,755)
 /usr/lib/systemd/system/cfengine3.service
+/usr/lib/systemd/system/cf-php-fpm.service
 /usr/lib/systemd/system/cf-apache.service
 /usr/lib/systemd/system/cf-execd.service
 /usr/lib/systemd/system/cf-hub.service
@@ -411,10 +412,12 @@ exit 0
 %prefix/httpd/modules
 %prefix/httpd/php/lib
 %prefix/httpd/php/php
+%prefix/httpd/php/etc
 %config(noreplace) %prefix/httpd/php/lib/php.ini
 
 %defattr(755,root,root,755)
 %prefix/httpd/php/bin
+%prefix/httpd/php/sbin
 
 # Software upgrade delivery area
 %dir %prefix/master_software_updates

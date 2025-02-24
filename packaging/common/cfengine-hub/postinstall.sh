@@ -87,7 +87,7 @@ fi
 #Copy necessary Files and permissions
 #
 cp "$PREFIX/lib/php"/*.ini "$PREFIX/httpd/php/lib"
-EXTENSIONS_DIR="$(ls -d -1 "$PREFIX/httpd/php/lib/php/extensions/no-debug-non-zts-"*|tail -1)"
+EXTENSIONS_DIR="$(ls -d -1 "$PREFIX/httpd/php/lib/php/extensions/no-debug-zts-"*|tail -1)"
 cp "$PREFIX/lib/php"/*.so "$EXTENSIONS_DIR"
 
 #
@@ -997,8 +997,11 @@ chmod -R ug=rX,o= $PREFIX/httpd/htdocs/vendor # 440 for files, 550 for dirs
 chmod -R ug=rX,o= $PREFIX/httpd/htdocs/public/scripts/node_modules
 
 ##
-# Start Apache server
+# Start Apache server (and php-fpm if present)
 #
+if [ -f $PREFIX/httpd/php/sbin/php-fpm ]; then
+  $PREFIX/httpd/php/sbin/php-fpm
+fi
 $PREFIX/httpd/bin/apachectl start
 
 #Mission portal
@@ -1040,6 +1043,10 @@ su $MP_APACHE_USER -c "$PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/public/ind
 
 # Shut down Apache and Postgres again, because we may need them to start through
 # systemd later.
+FPM_PID_FILE=$PREFIX/httpd/php-fpm.pid
+if [ -f "$PHP_FPM_PID_FILE" ]; then
+  kill -9 $(cat "$PHP_FPM_PID_FILE")
+fi
 $PREFIX/httpd/bin/apachectl stop
 
 # The above sometimes fails to stop the httpd processes properly. Let's make
