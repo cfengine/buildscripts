@@ -27,7 +27,7 @@ jobs:
             python -m pip install --upgrade pip
             python -m pip install requests
         - name: Run update script
-          run: python3 .github/workflows/update-deps.py --debug --update=major
+          run: python3 .github/workflows/update-deps.py --debug --update=minor
         - name: Check if there are changes
           run: |
             git diff --exit-code || touch git_diff_exists
