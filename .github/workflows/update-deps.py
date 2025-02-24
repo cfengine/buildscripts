@@ -7,6 +7,7 @@ import argparse
 import requests
 import urllib.request
 import logging as log
+from itertools import batched
 
 DEPS_PACKAGING = "deps-packaging"
 
@@ -24,6 +25,15 @@ def parse_args():
         choices=["major", "minor", "patch"],
         help="whether to do major, minor or patch updates",
     )
+    parser.add_argument(
+        "--skip",
+        nargs=2,
+        action="extend",
+        default=[],
+        metavar=("PACKAGE", "VERSION"),
+        help="skip updates for specific version of a package (e.g., --skip librsync 2.3.4)"
+    )
+
     return parser.parse_args()
 
 
@@ -81,13 +91,27 @@ def get_available_versions(proj_id):
 
 
 def select_new_version(
+    package_name,
     update_type,
+    skip_versions,
     old_version,
     available_versions,
 ):
+    assert len(skip_versions) % 2 == 0 # Is guaranteed by the argument parser
+
     old_split = old_version.replace("-", ".").replace("_", ".").split(".")
     for new_version in available_versions:
         new_split = new_version.replace("-", ".").replace("_", ".").split(".")
+
+        do_skip = False
+        for skip_package, skip_version in batched(skip_versions, 2):
+            skip_split = skip_version.replace("-", ".").replace("_", ".").split(".")
+            if (skip_package == package_name) and (skip_split == new_split):
+                do_skip = True
+        if do_skip:
+            log.info(f"Skipping version {new_version} for package {package_name}")
+            continue
+
         if update_type == "major":
             return new_version
         if update_type == "minor" and old_split[:1] == new_split[:1]:
@@ -168,7 +192,7 @@ def main():
             exit(1)
 
         available_versions = get_available_versions(proj_id)
-        new_version = select_new_version(args.update, old_version, available_versions)
+        new_version = select_new_version(pkg_name, args.update, args.skip, old_version, available_versions)
         if not new_version:
             log.error(f"Could not find a suitable new version for package {pkg_name}")
             exit(1)
