@@ -69,6 +69,14 @@ rm -f $RPM_BUILD_ROOT%{prefix}/bin/curl
 rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 
 
+# Remove enterprise systemd units
+rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-apache.service
+rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-php-fpm.service
+rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-hub.service
+rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-reactor.service
+rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-postgres.service
+
+
 %clean
 #rm -rf $RPM_BUILD_ROOT
 
@@ -155,13 +163,8 @@ exit 0
 # Systemd units
 %defattr(644,root,root,755)
 /usr/lib/systemd/system/cfengine3.service
-/usr/lib/systemd/system/cf-apache.service
 /usr/lib/systemd/system/cf-execd.service
-/usr/lib/systemd/system/cf-hub.service
-/usr/lib/systemd/system/cf-reactor.service
 /usr/lib/systemd/system/cf-monitord.service
-/usr/lib/systemd/system/cf-postgres.service
-/usr/lib/systemd/system/cf-runalerts.service
 /usr/lib/systemd/system/cf-serverd.service
 
 # Documentation
