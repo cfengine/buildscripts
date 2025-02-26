@@ -54,8 +54,8 @@ cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
 # ENT-11901
-# For el9+ we started seeing issues from other packages not expecting init scripts
-%if %{?rhel}%{!?rhel:0} >= 9
+# For el9+ and suse-15+ we started seeing issues from other packages not expecting init scripts
+%if %{?rhel}%{!?rhel:0} >= 9 || %{?suse_version}%{!?suse_version:0} >= 1500
 rm -f $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
 rm -f $RPM_BUILD_ROOT/etc/profile.d/cfengine.sh
 rm -f $RPM_BUILD_ROOT/etc/init.d/cfengine3
@@ -154,7 +154,7 @@ exit 0
 # Globally installed configs, scripts
 # ENT-11901
 # For el9+ we started seeing issues from other packages not expecting init scripts
-%if %{?rhel}%{!?rhel:0} < 9
+%if %{?rhel}%{!?rhel:0} < 9 && %{?suse_version}%{!?suse_version:0} < 1500
 %attr(755,root,root) /etc/init.d/cfengine3
 %attr(644,root,root) /etc/sysconfig/cfengine3
 %attr(755,root,root) /etc/profile.d/cfengine.sh
