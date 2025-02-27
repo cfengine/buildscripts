@@ -212,6 +212,7 @@
             <ComponentRef Id='liblmdb.dll' />
             <ComponentRef Id='libyaml_0_2.dll' />
             <ComponentRef Id='librsync_0.dll' />
+            <ComponentRef Id='libleech_0.dll' />
             <ComponentRef Id='zlib1.dll' />
 	    <ComponentRef Id='libxml2.dll' />
 	    <ComponentRef Id='libcurl_4.dll' />
