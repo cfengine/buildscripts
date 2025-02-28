@@ -8,7 +8,7 @@ Source0: postgresql-%{postgresql_version}.tar.bz2
 Source1: postgresql.conf.cfengine.patch
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no

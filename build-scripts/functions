@@ -522,21 +522,6 @@ mktempdir ()
     $my_mktemp -d $1
 }
 
-# Print the md5sum of $1 or stdin. See:
-# http://www-01.ibm.com/support/docview.wss?uid=swg21496703
-func_md5 ()
-{
-    if func_which md5sum >/dev/null
-    then
-        md5sum "$@" | cut -d ' ' -f 1
-    else
-        case "$UNAME_S" in
-            SunOS)  digest -a md5 "$@"  ;;
-            AIX)    csum -h MD5 "$@"  | cut -d ' ' -f 1 ;;
-            *)      fatal "Can't find command for computing MD5"  ;;
-        esac
-    fi
-}
 
 # Print the sha256sum of $1 or stdin.
 func_sha256 ()
