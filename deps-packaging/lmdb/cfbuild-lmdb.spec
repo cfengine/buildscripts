@@ -7,7 +7,7 @@ Release: 1
 Source0: openldap-LMDB_%{lmdb_version}.tar.gz
 License: OpenLDAP
 Group: Other
-Url: https://symas.com/mdb
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
