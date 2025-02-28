@@ -1,7 +1,6 @@
 /var/cfengine/httpd/php/bin
 /var/cfengine/httpd/php/lib
 /var/cfengine/httpd/php/php
-/var/cfengine/httpd/modules/libphp.so
 /var/cfengine/httpd/php/lib/php.ini
 /var/cfengine/httpd/php/etc/php-fpm.conf
 /var/cfengine/httpd/php/sbin/php-fpm
