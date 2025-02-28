@@ -7,7 +7,7 @@ Release: 0
 Vendor: IBM
 License: Proprietary
 Group: Applications/System
-Url: https://ibm.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 
 
