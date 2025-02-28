@@ -8,7 +8,7 @@ Source: attr-%{attr_version}.tar.gz
 Patch0: no_fancy_gcc.patch
 License: MIT
 Group: Other
-Url: http://example.com
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no

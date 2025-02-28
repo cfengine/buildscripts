@@ -33,8 +33,6 @@ case "$OS" in
 esac
 
 
-# Fakeroot is here: http://dl.atrpms.net/el5-$1/atrpms/stable/fakeroot-1.6.4-15.1.el5.$1.rpm
-#          It is needed by the debian buildslaves for their packaging scripts
 case "$OS-$OS_VERSION" in
     rhel-6*|centos-6*)
         DEP_LIST="$DEP_LIST rpm-build"

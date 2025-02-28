@@ -10,7 +10,7 @@ Source1: httpd.conf
 Patch0:  apachectl.patch
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
