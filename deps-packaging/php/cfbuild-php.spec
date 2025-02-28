@@ -8,7 +8,7 @@ Source0: php-%{php_version}.tar.gz
 Source1: php.ini
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no

@@ -7,7 +7,7 @@ Release: 1
 Source0: apr-util-%{apr_version}.tar.gz
 License: MIT
 Group: Other
-Url: http://example.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
