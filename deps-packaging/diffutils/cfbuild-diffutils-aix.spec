@@ -7,7 +7,7 @@ Release: 1
 Source0: diffutils-%{diffutils_version}.tar.xz
 License: GPL3
 Group: Other
-Url: https://www.gnu.org/software/diffutils/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
