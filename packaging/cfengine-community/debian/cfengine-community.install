@@ -1,11 +1,7 @@
 /etc/init.d/cfengine3
 /usr/lib/systemd/system/cfengine3.service
-/usr/lib/systemd/system/cf-apache.service
 /usr/lib/systemd/system/cf-execd.service
-/usr/lib/systemd/system/cf-hub.service
-/usr/lib/systemd/system/cf-reactor.service
 /usr/lib/systemd/system/cf-monitord.service
-/usr/lib/systemd/system/cf-postgres.service
 /usr/lib/systemd/system/cf-serverd.service
 /etc/default/cfengine3
 /etc/profile.d/cfengine3.sh
