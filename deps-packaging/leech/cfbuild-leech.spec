@@ -7,7 +7,7 @@ Release: 1
 Source0: leech-%{leech_version}.tar.gz
 License: LGPL
 Group: Other
-Url: https://github.com/larsewi/leech
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/BUILD/%{name}-%{version}-%{release}-buildroot
 
 AutoReqProv: no
