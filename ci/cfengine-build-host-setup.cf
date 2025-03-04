@@ -223,6 +223,8 @@ root - core unlimited
     debian_9::
       "/etc/apt/sources.list.d/*"
         delete => tidy;
+      # Note: apt-transport-https is not available on Debian 9, so we cannot use
+      #       HTTPS here yet.
       "/etc/apt/sources.list"
         content => "deb http://archive.debian.org/debian/ stretch main contrib non-free";
     suse_15|opensuse_15|sles_15::
