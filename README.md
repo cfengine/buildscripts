@@ -123,7 +123,7 @@ avoid accidentally regenerating files transferred from buildslave:
 
 For LTS branches, https://github.com/cfengine/buildscripts?tab=readme-ov-file#dependencies is the source of truth for latest versions and is based on information in `build-scripts/install-dependencies` and relevant subdirectories in `deps-packaging`.
 
-* [MinGW-w64](http://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
+* [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
   * Requires change of buildslaves (autobuild)
 

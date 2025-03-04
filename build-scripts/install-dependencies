@@ -71,8 +71,13 @@ check_and_install_perl()
             PERL_EXTRA_FLAGS='-Ud_nexttoward'
         fi
 
-        wget http://www.cpan.org/src/5.0/perl-5.26.1.tar.gz
-        [ `func_md5 perl-5.26.1.tar.gz` != "a7e5c531ee1719c53ec086656582ea86" ]  \
+        # NOTE: Only use evenly numbered minor versions of perl
+        #       odd numbers, i.e. 5.41.x, will fail with a big unstable warning
+        #       from the perl dev team - they are only intended for development
+        PERL_VERSION=5.40.1
+        PERL_SHA256=02f8c45bb379ed0c3de7514fad48c714fd46be8f0b536bfd5320050165a1ee26
+        wget https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
+        [ `func_sha256 perl-${PERL_VERSION}.tar.gz` != "${PERL_SHA256}" ]  \
             &&  fatal "perl checksum error"
         gzip -dc perl-5.26.1.tar.gz | tar xf -
         cd perl-5.26.1

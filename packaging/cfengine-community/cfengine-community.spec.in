@@ -5,10 +5,10 @@ Name: cfengine-community
 Version: @@VERSION@@
 # {?dist} adds a dot-separated OS codename (like .el6 or .fc30)
 Release: @@RELEASE@@%{?dist}
-Vendor: CFEngine AS
+Vendor: Northern.tech AS
 License: COSL
 Group: Applications/System
-URL: http://cfengine.com/
+Url: https://cfengine.com
 BuildRoot: %{_topdir}/%{name}-%{version}-%{release}-buildroot
 Obsoletes: cfengine3 < @@VERSION@@, cf-community < @@VERSION@@
 Requires: coreutils
