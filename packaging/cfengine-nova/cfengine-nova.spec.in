@@ -75,6 +75,7 @@ rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-php-fpm.service
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-hub.service
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-reactor.service
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-postgres.service
+rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-runalerts.service
 
 
 %clean
