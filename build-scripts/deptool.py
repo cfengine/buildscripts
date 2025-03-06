@@ -31,16 +31,16 @@ class GitRepo:
         checkout_branch=None,
         checkout_tag=None,
     ):
-        """Clones a remore repo to a directory (or freshens it if it's already
+        """Clones a remote repo to a directory (or freshens it if it's already
         checked out), configures it and optionally checks out a requested branch
         Args:
             dirname - name of directory in local filesystem where to clone the repo
             repo_name - name of repository (like 'core' or 'masterfiles')
             upstream_name - name of original owner of the repo (usually 'cfengine')
-                We will pull from git@github.com:/upstream_name/repo_name
+                We will pull from github.com/upstream_name/repo_name
             my_name - name of github user where we will push and create PR from
                 (usually 'cf-bottom')
-                We will push to git@github.com:/my_name/repo_name
+                We will push to github.com/my_name/repo_name
             checkout_branch - optional name of branch to checkout. If not provided,
                 a branch from previous work might be left checked out
             checkout_tag - same for tag.
@@ -68,7 +68,7 @@ class GitRepo:
 
     def run_command(self, *command, **kwargs):
         """Runs a git command against git repo.
-        Syntaxically this function tries to be as close to subprocess.run
+        Syntactically this function tries to be as close to subprocess.run
         as possible, just adding 'git' with some extra parameters in the beginning
         """
         git_command = [
@@ -161,8 +161,8 @@ def pretty(data):
     return json.dumps(data, indent=2)
 
 
-class UpdateChecker:
-    """Class responsible for doing dependency updates
+class DepsReader:
+    """
     Currently it's working only with cfengine/buildscripts repo, as described at
     https://github.com/mendersoftware/infra/blob/master/files/buildcache/release-scripts/RELEASE_PROCESS.org#minor-dependencies-update
     """
@@ -172,19 +172,28 @@ class UpdateChecker:
         ## self.github = github
         self.username = username
 
-    def get_deps_list(self, branch="master"):
-        """Get list of dependencies for given branch.
-        Assumes proper branch checked out by `self.buildscripts` repo.
-        Returns a list, like this: ["lcov", "pthreads-w32", "libgnurx"]
+        # prepare repo
+        REPO_OWNER = "cfengine"
+        REPO_NAME = "buildscripts"
+        local_path = "../../buildscriptscopy/" + REPO_NAME
+        self.buildscripts_repo = GitRepo(
+            local_path, REPO_NAME, REPO_OWNER, self.username, "master"
+        )
+
+    def deps_list(self, branch="master"):
+        """Returns a list of dependencies for given branch, for example: `["lcov", "pthreads-w32", "libgnurx"]`.
+        Assumes the proper branch is checked out by `self.buildscripts_repo`.
         """
         # TODO: get value of $EMBEDDED_DB from file
         embedded_db = "lmdb"
         if branch == "3.7.x":
-            options_file = self.buildscripts.get_file(
+            options_file = self.buildscripts_repo.get_file(
                 "build-scripts/install-dependencies"
             )
         else:
-            options_file = self.buildscripts.get_file("build-scripts/compile-options")
+            options_file = self.buildscripts_repo.get_file(
+                "build-scripts/compile-options"
+            )
         options_lines = options_file.splitlines()
         if branch == "3.7.x":
             filtered_lines = (
@@ -235,47 +244,42 @@ class UpdateChecker:
         return (version, separator)
 
     def get_current_version(self, dep):
-        """Get current version of dependency dep"""
-        # Note: this function partially duplicates next one.
-        # It is done on purpose, since that one does some extra stuff.
+        """Returns the current version of dependency `dep`."""
         dist_file_path = "deps-packaging/{}/distfiles".format(dep)
-        dist_file = self.buildscripts.get_file(dist_file_path)
+        dist_file = self.buildscripts_repo.get_file(dist_file_path)
         dist_file = dist_file.strip()
         old_filename = re.sub(".* ", "", dist_file)
         (old_version, separator) = self.extract_version_from_filename(dep, old_filename)
         return old_version
 
-    def collect_deps(self, branch):
-        """List used dependencies for a branch, returns a dict like this:
-        {"dep1": "version", "dep2": "version",...}
+    def deps_versions(self, branch):
+        """Returns a dictionary of dependencies and versions for a branch:
+        ```
+        {
+            "dep1": "version",
+            "dep2": "version",
+            ...
+        }
+        ```
         """
         deps_versions = {}
-        deps_list = self.get_deps_list(branch)
+        deps_list = self.deps_list(branch)
         for dep in deps_list:
             deps_versions[dep] = self.get_current_version(dep)
         return deps_versions
 
-    def update_deps_version(self, branches):
-        # prepare repo
-        repo_name = "buildscripts"
-        upstream_name = "cfengine"
-        local_path = "../../buildscriptscopy/" + repo_name
-        self.buildscripts = GitRepo(
-            local_path, repo_name, upstream_name, self.username, "master"
-        )
+    def deps_table(self, branches):
+        """Returns a 2D dictionary of dependencies and versions from all branches: `deps_table[dep][branch] = version`, as well as a dictionary of widths of each column (branch)."""
 
-        branches = branches.split(",")
-
-        # fetch versions from all branches
         deps_table = {}
-        # deps_table is a 2d dict: deps_table[dep][branch]=version
         branch_column_widths = {}
+
         for branch in branches:
             branch_column_widths[branch] = len(branch)
-            self.buildscripts.checkout(branch)
-            self.buildscripts.run_command("pull")
-            deps_versions = self.collect_deps(branch)
-            # deps_versions is a dict: deps_versions[dep]=version
+            self.buildscripts_repo.checkout(branch)
+            self.buildscripts_repo.run_command("pull")
+            deps_versions = self.deps_versions(branch)
+
             for dep in deps_versions:
                 if not dep in deps_table:
                     deps_table[dep] = collections.defaultdict(lambda: "-")
@@ -284,10 +288,15 @@ class UpdateChecker:
                     branch_column_widths[branch], len(deps_versions[dep])
                 )
 
+        return deps_table, branch_column_widths
+
+    def update_deps_table(self, branches):
+        deps_table, branch_column_widths = self.deps_table(branches)
+
         # patch the readme
-        self.buildscripts.checkout("master")
-        self.readme_file_path = "README.md"
-        readme_file = self.buildscripts.get_file(self.readme_file_path)
+        self.buildscripts_repo.checkout("master")
+        readme_file_path = "README.md"
+        readme_file = self.buildscripts_repo.get_file(readme_file_path)
         readme_lines = readme_file.split("\n")
         has_notes = False  # flag to say that we're in a table that has "Notes" column
         in_hub = False  # flag that we're in Hub section
@@ -385,14 +394,14 @@ class UpdateChecker:
 
         ## timestamp = re.sub("[^0-9-]", "_", str(datetime.datetime.today()))
         ## new_branchname = "deptables-{}".format(timestamp)
-        ## self.buildscripts.checkout(new_branchname, new=True)
+        ## self.buildscripts_repo.checkout(new_branchname, new=True)
         readme_file = "\n".join(readme_lines)
-        ## self.buildscripts.put_file(self.readme_file_path, readme_file)
-        self.buildscripts.put_file("READMEbottomnew.md", readme_file)
-        ## self.buildscripts.commit("Update dependency tables")
-        ## self.buildscripts.push(new_branchname)
+        ## self.buildscripts_repo.put_file(readme_file_path, readme_file)
+        self.buildscripts_repo.put_file("READMEbottomnew.md", readme_file)
+        ## self.buildscripts_repo.commit("Update dependency tables")
+        ## self.buildscripts_repo.push(new_branchname)
         ## pr_text = self.github.create_pr(
-        ##     target_repo="{}/{}".format(upstream_name, repo_name),
+        ##     target_repo="{}/{}".format(upstream_name, self.buildscripts_repo.repo_name),
         ##     target_branch="master",
         ##     source_user=self.username,
         ##     source_branch=new_branchname,
@@ -402,10 +411,10 @@ class UpdateChecker:
 
 
 def bot_tom_depstable():
-    branches = "3.21.x,3.24.x,master"
+    branches = ["3.21.x", "3.24.x", "master"]
 
-    uc = UpdateChecker("cfengine")
-    uc.update_deps_version(branches)
+    uc = DepsReader("cfengine")
+    uc.update_deps_table(branches)
 
 
 def main():
