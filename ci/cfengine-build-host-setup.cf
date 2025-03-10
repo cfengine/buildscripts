@@ -177,7 +177,7 @@ bundle agent cfengine_build_host_setup
 
   commands:
     have_coredumpctl::
-      "sysctl kernel.core_pattern='|/usr/lib/systemd/systemd-coredump %p %u %g %s %t %e'" -> { "ENT-12669" }
+      "sysctl kernel.core_pattern='|/lib/systemd/systemd-coredump %p %u %g %s %t %e'" -> { "ENT-12669" }
         comment => "Ensure that core_pattern is proper for systemd-coredump if coredumpctl is present.",
         contain => in_shell;
     !have_opt_jdk21.(debian_9|ubuntu_16|redhat_6|centos_6)::
