@@ -33,12 +33,17 @@ def parse_args():
         metavar=("PACKAGE", "VERSION"),
         help="skip updates for specific version of a package (e.g., --skip librsync 2.3.4)"
     )
+    parser.add_argument(
+        "--root",
+        default=".",
+        help="specify build scripts root directory"
+    )
 
     return parser.parse_args()
 
 
-def determine_old_version(pkg_name):
-    distfile = os.path.join(DEPS_PACKAGING, pkg_name, "distfiles")
+def determine_old_version(root, pkg_name):
+    distfile = os.path.join(root, DEPS_PACKAGING, pkg_name, "distfiles")
     with open(distfile, "r") as f:
         data = f.read().strip().split()
     filename = data[-1]
@@ -141,22 +146,22 @@ def replace_string_in_file(filename, old, new):
         f.write(contents.replace(old, new))
 
 
-def update_version_numbers(pkg_name, old_version, new_version):
+def update_version_numbers(root, pkg_name, old_version, new_version):
     filenames = [
-        os.path.join(DEPS_PACKAGING, pkg_name, f"cfbuild-{pkg_name}.spec"),
-        os.path.join(DEPS_PACKAGING, pkg_name, f"cfbuild-{pkg_name}-aix.spec"),
-        os.path.join(DEPS_PACKAGING, pkg_name, "distfiles"),
-        os.path.join(DEPS_PACKAGING, pkg_name, "source"),
+        os.path.join(root, DEPS_PACKAGING, pkg_name, f"cfbuild-{pkg_name}.spec"),
+        os.path.join(root, DEPS_PACKAGING, pkg_name, f"cfbuild-{pkg_name}-aix.spec"),
+        os.path.join(root, DEPS_PACKAGING, pkg_name, "distfiles"),
+        os.path.join(root, DEPS_PACKAGING, pkg_name, "source"),
     ]
     for filename in filenames:
         replace_string_in_file(filename, old_version, new_version)
 
 
-def update_distfiles_digest(pkg_name):
-    with open(os.path.join(DEPS_PACKAGING, pkg_name, "source"), "r") as f:
+def update_distfiles_digest(root, pkg_name):
+    with open(os.path.join(root, DEPS_PACKAGING, pkg_name, "source"), "r") as f:
         source = f.read().strip()
 
-    filename = os.path.join(DEPS_PACKAGING, pkg_name, "distfiles")
+    filename = os.path.join(root, DEPS_PACKAGING, pkg_name, "distfiles")
     with open(filename, "r") as f:
         content = f.read().strip().split()
     old_digest = content[0]
@@ -174,13 +179,13 @@ def update_distfiles_digest(pkg_name):
     replace_string_in_file(filename, old_digest, new_digest)
 
 
-def update_deps(bump, skip):
-    with open(os.path.join(DEPS_PACKAGING, "release-monitoring.json"), "r") as f:
+def update_deps(root, bump, skip):
+    with open(os.path.join(root, DEPS_PACKAGING, "release-monitoring.json"), "r") as f:
         release_monitoring = json.load(f)
 
     commit_message = ["Updated dependencies\n\n"]
     for pkg_name, proj_id in release_monitoring.items():
-        old_version = determine_old_version(pkg_name)
+        old_version = determine_old_version(root, pkg_name)
         if not old_version:
             log.error(f"Failed to determine old version of package {pkg_name}")
             exit(1)
@@ -204,8 +209,8 @@ def update_deps(bump, skip):
             continue
         log.info(f"Updating {pkg_name} from version {old_version} to {new_version}...")
 
-        update_version_numbers(pkg_name, old_version, new_version)
-        update_distfiles_digest(pkg_name)
+        update_version_numbers(root, pkg_name, old_version, new_version)
+        update_distfiles_digest(root, pkg_name)
 
         commit_message.append(f"- Updated dependency '{pkg_name}' from version {old_version} to {new_version}\n")
 
@@ -220,7 +225,7 @@ def main():
         format="[%(filename)s:%(lineno)d][%(levelname)s]: %(message)s", level=loglevel
     )
 
-    update_deps(args.bump, args.skip)
+    update_deps(args.root, args.bump, args.skip)
 
 
 if __name__ == "__main__":
