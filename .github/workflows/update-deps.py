@@ -174,13 +174,7 @@ def update_distfiles_digest(pkg_name):
     replace_string_in_file(filename, old_digest, new_digest)
 
 
-def main():
-    args = parse_args()
-    loglevel = "DEBUG" if args.debug else "INFO"
-    log.basicConfig(
-        format="[%(filename)s:%(lineno)d][%(levelname)s]: %(message)s", level=loglevel
-    )
-
+def update_deps(update, skip):
     with open(os.path.join(DEPS_PACKAGING, "release-monitoring.json"), "r") as f:
         release_monitoring = json.load(f)
 
@@ -192,7 +186,7 @@ def main():
             exit(1)
 
         available_versions = get_available_versions(proj_id)
-        new_version = select_new_version(pkg_name, args.update, args.skip, old_version, available_versions)
+        new_version = select_new_version(pkg_name, update, skip, old_version, available_versions)
         if not new_version:
             log.error(f"Could not find a suitable new version for package {pkg_name}")
             exit(1)
@@ -217,6 +211,17 @@ def main():
 
     with open("/tmp/commit-message.txt", "w") as f:
         f.writelines(commit_message)
+
+
+def main():
+    args = parse_args()
+    loglevel = "DEBUG" if args.debug else "INFO"
+    log.basicConfig(
+        format="[%(filename)s:%(lineno)d][%(levelname)s]: %(message)s", level=loglevel
+    )
+
+    update_deps(args.update, args.skip)
+
 
 if __name__ == "__main__":
     main()
