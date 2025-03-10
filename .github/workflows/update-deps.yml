@@ -28,30 +28,12 @@ jobs:
             python -m pip install requests
         - name: Run update script
           run: python3 .github/workflows/update-deps.py --debug --bump=major
-        - name: Check if there are changes
-          run: |
-            git diff --exit-code || touch git_diff_exists
-            if [ -f git_diff_exists ]; then echo "Changes need to be committed"; else echo "No changes to commit"; fi
-        - name: Commit changes
-          if: hashFiles('git_diff_exists') != ''
-          run: |
-            git config user.name 'GitHub'
-            git config user.email '<noreply@github.com>'
-            git add -u
-            git commit -F /tmp/commit-message.txt
-        - id: commit-message-from-file
-          name: Parse commit message from file into variable
-          if: hashFiles('git_diff_exists') != ''
-          run: |
-            body=$(cat /tmp/commit-message.txt)
-            body="${body//$'\n'/'%0A'}"
-            echo ::set-output name=body::$body
         - name: Create Pull Request
-          if: hashFiles('git_diff_exists') != ''
+          if: hashFiles('/tmp/create-pr') != ''
           uses: cfengine/create-pull-request@v6
           with:
             title: Updated dependencies
-            body: ${{ steps.commit-message-from-file.outputs.body }}
+            body: Automated dependency updates
             reviewers: |
               olehermanse
               larsewi

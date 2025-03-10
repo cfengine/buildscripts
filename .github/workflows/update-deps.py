@@ -8,8 +8,22 @@ import requests
 import urllib.request
 import logging as log
 from itertools import batched
+import subprocess
 
 DEPS_PACKAGING = "deps-packaging"
+
+
+def git_commit(root, msg):
+    cmd = [ "git", "add", "-u" ]
+    log.debug(f"Running command: {" ".join(cmd)}")
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        return False
+
+    cmd = [ "git", "-C", root, "commit", "--author=GitHub <noreply@github.com>", f"--message={msg}" ]
+    log.debug(f"Running command: {" ".join(cmd)}")
+    result = subprocess.run(cmd)
+    return result.returncode == 0
 
 
 def parse_args():
@@ -183,7 +197,6 @@ def update_deps(root, bump, skip):
     with open(os.path.join(root, DEPS_PACKAGING, "release-monitoring.json"), "r") as f:
         release_monitoring = json.load(f)
 
-    commit_message = ["Updated dependencies\n\n"]
     for pkg_name, proj_id in release_monitoring.items():
         old_version = determine_old_version(root, pkg_name)
         if not old_version:
@@ -212,10 +225,12 @@ def update_deps(root, bump, skip):
         update_version_numbers(root, pkg_name, old_version, new_version)
         update_distfiles_digest(root, pkg_name)
 
-        commit_message.append(f"- Updated dependency '{pkg_name}' from version {old_version} to {new_version}\n")
-
-    with open("/tmp/commit-message.txt", "w") as f:
-        f.writelines(commit_message)
+        if git_commit(root, f"Updated dependency '{pkg_name}' from version {old_version} to {new_version}"):
+            with open("/tmp/create-pr", "w"):
+                pass
+        else:
+            log.error(f"Failed to commit changes after updating package '{pkg_name}'")
+            exit(1)
 
 
 def main():
