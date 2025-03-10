@@ -20,10 +20,10 @@ def parse_args():
         help="enable debug log messages",
     )
     parser.add_argument(
-        "--update",
+        "--bump",
         default="minor",
         choices=["major", "minor", "patch"],
-        help="whether to do major, minor or patch updates",
+        help="whether to bump version major, minor or patch",
     )
     parser.add_argument(
         "--skip",
@@ -92,7 +92,7 @@ def get_available_versions(proj_id):
 
 def select_new_version(
     package_name,
-    update_type,
+    bump_version,
     skip_versions,
     old_version,
     available_versions,
@@ -112,11 +112,11 @@ def select_new_version(
             log.info(f"Skipping version {new_version} for package {package_name}")
             continue
 
-        if update_type == "major":
+        if bump_version == "major":
             return new_version
-        if update_type == "minor" and old_split[:1] == new_split[:1]:
+        if bump_version == "minor" and old_split[:1] == new_split[:1]:
             return new_version
-        if update_type == "patch" and old_split[:2] == new_split[:2]:
+        if bump_version == "patch" and old_split[:2] == new_split[:2]:
             return new_version
     return None  # Didn't find a suitable version
 
@@ -174,7 +174,7 @@ def update_distfiles_digest(pkg_name):
     replace_string_in_file(filename, old_digest, new_digest)
 
 
-def update_deps(update, skip):
+def update_deps(bump, skip):
     with open(os.path.join(DEPS_PACKAGING, "release-monitoring.json"), "r") as f:
         release_monitoring = json.load(f)
 
@@ -186,7 +186,7 @@ def update_deps(update, skip):
             exit(1)
 
         available_versions = get_available_versions(proj_id)
-        new_version = select_new_version(pkg_name, update, skip, old_version, available_versions)
+        new_version = select_new_version(pkg_name, bump, skip, old_version, available_versions)
         if not new_version:
             log.error(f"Could not find a suitable new version for package {pkg_name}")
             exit(1)
@@ -220,7 +220,7 @@ def main():
         format="[%(filename)s:%(lineno)d][%(levelname)s]: %(message)s", level=loglevel
     )
 
-    update_deps(args.update, args.skip)
+    update_deps(args.bump, args.skip)
 
 
 if __name__ == "__main__":
