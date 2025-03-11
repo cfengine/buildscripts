@@ -29,7 +29,17 @@ def run_command(root: str, cmd: list):
 
 
 def git_commit(root, msg):
-    return run_command(root, [ "git", "add", "-u" ]) and run_command(root, [ "git", "-C", root, "commit", "--author=GitHub <noreply@github.com>", f"--message={msg}" ])
+    return run_command(root, ["git", "add", "-u"]) and run_command(
+        root,
+        [
+            "git",
+            "-C",
+            root,
+            "commit",
+            "--author=GitHub <noreply@github.com>",
+            f"--message={msg}",
+        ],
+    )
 
 
 def parse_args():
@@ -51,12 +61,10 @@ def parse_args():
         action="extend",
         default=[],
         metavar=("PACKAGE", "VERSION"),
-        help="skip updates for specific version of a package (e.g., --skip librsync 2.3.4)"
+        help="skip updates for specific version of a package (e.g., --skip librsync 2.3.4)",
     )
     parser.add_argument(
-        "--root",
-        default=".",
-        help="specify build scripts root directory"
+        "--root", default=".", help="specify build scripts root directory"
     )
 
     return parser.parse_args()
@@ -122,7 +130,7 @@ def select_new_version(
     old_version,
     available_versions,
 ):
-    assert len(skip_versions) % 2 == 0 # Is guaranteed by the argument parser
+    assert len(skip_versions) % 2 == 0  # Is guaranteed by the argument parser
 
     old_split = old_version.replace("-", ".").replace("_", ".").split(".")
     for new_version in available_versions:
@@ -210,7 +218,9 @@ def update_deps(root, bump, skip):
             exit(1)
 
         available_versions = get_available_versions(proj_id)
-        new_version = select_new_version(pkg_name, bump, skip, old_version, available_versions)
+        new_version = select_new_version(
+            pkg_name, bump, skip, old_version, available_versions
+        )
         if not new_version:
             log.error(f"Could not find a suitable new version for package {pkg_name}")
             exit(1)
@@ -231,7 +241,10 @@ def update_deps(root, bump, skip):
         update_version_numbers(root, pkg_name, old_version, new_version)
         update_distfiles_digest(root, pkg_name)
 
-        if not git_commit(root, f"Updated dependency '{pkg_name}' from version {old_version} to {new_version}"):
+        if not git_commit(
+            root,
+            f"Updated dependency '{pkg_name}' from version {old_version} to {new_version}",
+        ):
             log.error(f"Failed to commit changes after updating package '{pkg_name}'")
             exit(1)
 
