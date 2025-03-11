@@ -138,6 +138,12 @@ def select_new_version(
             log.info(f"Skipping version {new_version} for package {package_name}")
             continue
 
+        if package_name == "php" and bump_version == "minor":
+            """For php, a bump in what is normally considered the minor version,
+            can contain breaking changes. So for minor package updates, we will
+            only bump the last number."""
+            bump_version = "patch"
+
         if bump_version == "major":
             return new_version
         if bump_version == "minor" and old_split[:1] == new_split[:1]:
