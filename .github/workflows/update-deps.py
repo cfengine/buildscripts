@@ -231,10 +231,7 @@ def update_deps(root, bump, skip):
         update_version_numbers(root, pkg_name, old_version, new_version)
         update_distfiles_digest(root, pkg_name)
 
-        if git_commit(root, f"Updated dependency '{pkg_name}' from version {old_version} to {new_version}"):
-            with open("/tmp/create-pr", "w"):
-                pass
-        else:
+        if not git_commit(root, f"Updated dependency '{pkg_name}' from version {old_version} to {new_version}"):
             log.error(f"Failed to commit changes after updating package '{pkg_name}'")
             exit(1)
 
