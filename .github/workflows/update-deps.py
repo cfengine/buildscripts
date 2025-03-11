@@ -13,30 +13,23 @@ import subprocess
 DEPS_PACKAGING = "deps-packaging"
 
 
-def run_command(root: str, cmd: list):
-    curdir = os.getcwd()
-    os.chdir(root)
-
+def run_command(cmd: list):
     try:
-        log.debug(f"Running command '{" ".join(cmd)}' from directory '{root}'")
+        log.debug(f"Running command '{" ".join(cmd)}'")
         subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError:
         log.error(f"Command '{" ".join(cmd)}' failed")
         return False
-    finally:
-        os.chdir(curdir)
     return True
 
 
 def git_commit(root, msg):
-    return run_command(root, ["git", "add", "-u"]) and run_command(
-        root,
+    return run_command(["git", "-C", root, "add", "-u"]) and run_command(
         [
             "git",
             "-C",
             root,
             "commit",
-            "--author=GitHub <noreply@github.com>",
             f"--message={msg}",
         ],
     )
