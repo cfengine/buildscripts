@@ -32,8 +32,13 @@ jobs:
             git config user.email '<noreply@github.com>'
         - name: Run update script
           run: python3 .github/workflows/update-deps.py --debug --bump=major
+        - name: Check if commits were made
+          run: |
+            if [[ $(git log --oneline -1 --author="GitHub") ]]; then
+              echo "COMMIT_MADE=true" >> $GITHUB_ENV
+            fi
         - name: Create Pull Request
-          if: hashFiles('/tmp/create-pr') != ''
+          if: env.COMMIT_MADE == 'true'
           uses: cfengine/create-pull-request@v6
           with:
             title: Updated dependencies
