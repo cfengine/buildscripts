@@ -1,3 +1,4 @@
+import argparse
 import collections
 import json
 import logging as log
@@ -5,6 +6,16 @@ import os
 import re
 import subprocess
 import sys
+
+
+def write_json_file(filepath, data):
+    with open(filepath, "w") as file:
+        json.dump(data, file)
+
+
+def is_whitespace(s: str):
+    """Returns whether `s` contains only whitespace (`True` also for the empty string)"""
+    return len(s) == 0 or s.isspace()
 
 
 class GitException(Exception):
@@ -30,6 +41,7 @@ class GitRepo:
         my_name,
         checkout_branch=None,
         checkout_tag=None,
+        log_info=True,
     ):
         """Clones a remote repo to a directory (or freshens it if it's already
         checked out), configures it and optionally checks out a requested branch
@@ -51,6 +63,23 @@ class GitRepo:
 
         upstream_url = "https://github.com/{}/{}.git".format(upstream_name, repo_name)
         origin_url = "https://github.com/{}/{}.git".format(my_name, repo_name)
+
+        # set up a logger to intercept command output to logging.INFO instead of displaying it
+        if log_info:
+            LOGGING_LEVEL = log.INFO
+        else:
+            LOGGING_LEVEL = log.WARNING
+        self.run_logger = log.getLogger("output_run_to_logging")
+        # do not duplicate logs with the root logger:
+        self.run_logger.propagate = False
+        self.run_logger.setLevel(LOGGING_LEVEL)
+        handler = log.StreamHandler()
+        # do not terminate logs with a newline, as the output already has newlines:
+        handler.terminator = ""
+        handler.setLevel(LOGGING_LEVEL)
+        log_format = log.Formatter("%(asctime)s %(levelname)s: %(message)s")
+        handler.setFormatter(log_format)
+        self.run_logger.addHandler(handler)
 
         if not os.path.exists(dirname):
             self.run_command("clone", "--no-checkout", origin_url, dirname)
@@ -96,7 +125,17 @@ class GitRepo:
             del git_command[1]
         kwargs["universal_newlines"] = True
         log.debug("running command: {}".format(" ".join(git_command)))
-        return subprocess.run(git_command, **kwargs)
+
+        # run the command, passing the output to logging.INFO instead of displaying
+        kwargs["stdout"] = subprocess.PIPE
+        kwargs["stderr"] = subprocess.PIPE
+        result = subprocess.run(git_command, **kwargs)
+        if not is_whitespace(result.stdout):
+            self.run_logger.info(result.stdout)
+        if not is_whitespace(result.stderr):
+            self.run_logger.info(result.stderr)
+
+        return result
 
     def checkout(self, branch=None, tag=None, remote="upstream", new=False):
         """Checkout given branch or tag, optionally creating branch.
@@ -168,7 +207,7 @@ class DepsReader:
     """
 
     ## def __init__(self, github, username):
-    def __init__(self, username):
+    def __init__(self, username="cfengine", log_info=True):
         ## self.github = github
         self.username = username
 
@@ -177,7 +216,12 @@ class DepsReader:
         REPO_NAME = "buildscripts"
         local_path = "../../buildscriptscopy/" + REPO_NAME
         self.buildscripts_repo = GitRepo(
-            local_path, REPO_NAME, REPO_OWNER, self.username, "master"
+            local_path,
+            REPO_NAME,
+            REPO_OWNER,
+            self.username,
+            "master",
+            log_info=log_info,
         )
 
     def deps_list(self, branch="master"):
@@ -197,7 +241,7 @@ class DepsReader:
         options_lines = options_file.splitlines()
         if branch == "3.7.x":
             filtered_lines = (
-                x for x in options_lines if re.match('\s*DEPS=".*\\$DEPS', x)
+                x for x in options_lines if re.match(r'\s*DEPS=".*\$DEPS', x)
             )
             only_deps = (re.sub("\\$?DEPS", "", x) for x in filtered_lines)
             only_deps = (re.sub('[=";]', "", x) for x in only_deps)
@@ -239,7 +283,7 @@ class DepsReader:
             version = re.search("w32-([0-9-]*)-rel", filename).group(1)
             separator = "-"
         else:
-            version = re.search("[-_]([0-9.]*)[\.-]", filename).group(1)
+            version = re.search(r"[-_]([0-9.]*)[\.-]", filename).group(1)
             separator = "."
         return (version, separator)
 
@@ -290,7 +334,10 @@ class DepsReader:
 
         return deps_table, branch_column_widths
 
-    def update_deps_table(self, branches):
+    def updated_deps_markdown_table(self, branches):
+        updated_hub_table_lines = []
+        updated_agent_table_lines = []
+
         deps_table, branch_column_widths = self.deps_table(branches)
 
         # patch the readme
@@ -351,7 +398,7 @@ class DepsReader:
                 # \[([a-z0-9-]*)\] will match [PHP]
                 # \((.*?)\) will match (http://php.net/)
                 match = re.match(
-                    "\| \[([a-z0-9-]*)\]\((.*?)\) ", line, flags=re.IGNORECASE
+                    r"\| \[([a-z0-9-]*)\]\((.*?)\) ", line, flags=re.IGNORECASE
                 )
                 if match:
                     dep_title = match.group(1)
@@ -368,7 +415,7 @@ class DepsReader:
                     )
                     deps_table[dep] = collections.defaultdict(lambda: "-")
                 if has_notes:
-                    note = re.search("\| ([^|]*) \|$", line)
+                    note = re.search(r"\| ([^|]*) \|$", line)
                     if not note:
                         log.warning("didn't find note in line [%s]", line)
                         note = ""
@@ -391,13 +438,24 @@ class DepsReader:
                     + " |"
                 )
             readme_lines[i] = line
+            if in_hub:
+                updated_hub_table_lines.append(line)
+            else:
+                updated_agent_table_lines.append(line)
 
+        updated_readme = "\n".join(readme_lines)
+        updated_hub_table = "\n".join(updated_hub_table_lines)
+        updated_agent_table = "\n".join(updated_agent_table_lines)
+
+        return updated_readme, updated_agent_table, updated_hub_table
+
+    def patch_readme(self, updated_readme):
         ## timestamp = re.sub("[^0-9-]", "_", str(datetime.datetime.today()))
         ## new_branchname = "deptables-{}".format(timestamp)
         ## self.buildscripts_repo.checkout(new_branchname, new=True)
-        readme_file = "\n".join(readme_lines)
-        ## self.buildscripts_repo.put_file(readme_file_path, readme_file)
-        self.buildscripts_repo.put_file("READMEbottomnew.md", readme_file)
+        ## self.buildscripts_repo.put_file(readme_file_path, updated_readme_file)
+        TARGET_README_PATH = "READMEnew.md"
+        self.buildscripts_repo.put_file(TARGET_README_PATH, updated_readme)
         ## self.buildscripts_repo.commit("Update dependency tables")
         ## self.buildscripts_repo.push(new_branchname)
         ## pr_text = self.github.create_pr(
@@ -409,16 +467,101 @@ class DepsReader:
         ##     text="",
         ## )
 
+    def write_cdx_sbom(self, cdx_sbom_path, branches):
+        deps_data, _ = self.deps_table(branches)
+        cdx_sbom_data = deps_table_as_cdx(deps_data)
+        write_json_file(cdx_sbom_path, cdx_sbom_data)
 
-def bot_tom_depstable():
-    branches = ["3.21.x", "3.24.x", "master"]
+    def write_deps_json(self, json_path, branches):
+        deps_data, _ = self.deps_table(branches)
+        write_json_file(json_path, deps_data)
 
-    uc = DepsReader("cfengine")
-    uc.update_deps_table(branches)
+
+def deps_table_as_cdx(deps_table):
+    # TODO
+    return {}
+
+
+def deps_table_as_markdown(deps_table):
+    # TODO
+    return ""
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="CFEngine dependencies enumeration tool"
+    )
+    parser.add_argument(
+        "branches", nargs="*", help="List of branches to process", default=["master"]
+    )
+    parser.add_argument(
+        "--to-cdx-sbom",
+        help="Output to a CycloneDX SBOM file with an optionally specified path",
+        nargs="?",
+        const="sbom.cdx.json",
+        default=None,
+        dest="cdx_sbom_path",
+    )
+    parser.add_argument(
+        "--to-json",
+        help="Output to a JSON file with an optionally specified path",
+        nargs="?",
+        const="deps.json",
+        default=None,
+        dest="json_path",
+    )
+    parser.add_argument(
+        "--compare",
+        action="store_true",
+        help="Compare branches in pairs instead of processing each branch individually",
+    )
+    parser.add_argument(
+        "--skip-unchanged",
+        action="store_true",
+        help="Skip dependencies with all versions identical when using --compare",
+    )
+    parser.add_argument(
+        "--patch",
+        action="store_true",
+        help="Modify the README with updated dependency tables in addition to displaying them",
+    )
+    parser.add_argument(
+        "--no-info",
+        action="store_true",
+        help="Disable informational messages",
+    )
+
+    return parser.parse_args()
 
 
 def main():
-    bot_tom_depstable()
+    args = parse_args()
+
+    dr = DepsReader(log_info=not args.no_info)
+
+    if args.cdx_sbom_path:
+        dr.write_cdx_sbom(args.cdx_sbom_path, args.branches)
+
+    if args.json_path:
+        dr.write_deps_json(args.json_path, args.branches)
+
+    updated_readme, updated_agent_table, updated_hub_table = (
+        dr.updated_deps_markdown_table(args.branches)
+    )
+
+    if args.compare:
+        # TODO
+        if args.skip_unchanged:
+            pass
+        pass
+    else:
+        print("### Agent Dependencies:\n")
+        print(updated_agent_table)
+        print("\n### Enterprise Hub dependencies:\n")
+        print(updated_hub_table)
+
+    if args.patch:
+        dr.patch_readme(updated_readme)
 
 
 if __name__ == "__main__":
