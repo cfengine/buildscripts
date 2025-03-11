@@ -8,8 +8,31 @@ import requests
 import urllib.request
 import logging as log
 from itertools import batched
+import subprocess
 
 DEPS_PACKAGING = "deps-packaging"
+
+
+def run_command(cmd: list):
+    try:
+        log.debug(f"Running command '{" ".join(cmd)}'")
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError:
+        log.error(f"Command '{" ".join(cmd)}' failed")
+        return False
+    return True
+
+
+def git_commit(root, msg):
+    return run_command(["git", "-C", root, "add", "-u"]) and run_command(
+        [
+            "git",
+            "-C",
+            root,
+            "commit",
+            f"--message={msg}",
+        ],
+    )
 
 
 def parse_args():
@@ -20,10 +43,10 @@ def parse_args():
         help="enable debug log messages",
     )
     parser.add_argument(
-        "--update",
+        "--bump",
         default="minor",
         choices=["major", "minor", "patch"],
-        help="whether to do major, minor or patch updates",
+        help="whether to bump version major, minor or patch",
     )
     parser.add_argument(
         "--skip",
@@ -31,14 +54,17 @@ def parse_args():
         action="extend",
         default=[],
         metavar=("PACKAGE", "VERSION"),
-        help="skip updates for specific version of a package (e.g., --skip librsync 2.3.4)"
+        help="skip updates for specific version of a package (e.g., --skip librsync 2.3.4)",
+    )
+    parser.add_argument(
+        "--root", default=".", help="specify build scripts root directory"
     )
 
     return parser.parse_args()
 
 
-def determine_old_version(pkg_name):
-    distfile = os.path.join(DEPS_PACKAGING, pkg_name, "distfiles")
+def determine_old_version(root, pkg_name):
+    distfile = os.path.join(root, DEPS_PACKAGING, pkg_name, "distfiles")
     with open(distfile, "r") as f:
         data = f.read().strip().split()
     filename = data[-1]
@@ -92,12 +118,12 @@ def get_available_versions(proj_id):
 
 def select_new_version(
     package_name,
-    update_type,
+    bump_version,
     skip_versions,
     old_version,
     available_versions,
 ):
-    assert len(skip_versions) % 2 == 0 # Is guaranteed by the argument parser
+    assert len(skip_versions) % 2 == 0  # Is guaranteed by the argument parser
 
     old_split = old_version.replace("-", ".").replace("_", ".").split(".")
     for new_version in available_versions:
@@ -112,11 +138,11 @@ def select_new_version(
             log.info(f"Skipping version {new_version} for package {package_name}")
             continue
 
-        if update_type == "major":
+        if bump_version == "major":
             return new_version
-        if update_type == "minor" and old_split[:1] == new_split[:1]:
+        if bump_version == "minor" and old_split[:1] == new_split[:1]:
             return new_version
-        if update_type == "patch" and old_split[:2] == new_split[:2]:
+        if bump_version == "patch" and old_split[:2] == new_split[:2]:
             return new_version
     return None  # Didn't find a suitable version
 
@@ -141,22 +167,22 @@ def replace_string_in_file(filename, old, new):
         f.write(contents.replace(old, new))
 
 
-def update_version_numbers(pkg_name, old_version, new_version):
+def update_version_numbers(root, pkg_name, old_version, new_version):
     filenames = [
-        os.path.join(DEPS_PACKAGING, pkg_name, f"cfbuild-{pkg_name}.spec"),
-        os.path.join(DEPS_PACKAGING, pkg_name, f"cfbuild-{pkg_name}-aix.spec"),
-        os.path.join(DEPS_PACKAGING, pkg_name, "distfiles"),
-        os.path.join(DEPS_PACKAGING, pkg_name, "source"),
+        os.path.join(root, DEPS_PACKAGING, pkg_name, f"cfbuild-{pkg_name}.spec"),
+        os.path.join(root, DEPS_PACKAGING, pkg_name, f"cfbuild-{pkg_name}-aix.spec"),
+        os.path.join(root, DEPS_PACKAGING, pkg_name, "distfiles"),
+        os.path.join(root, DEPS_PACKAGING, pkg_name, "source"),
     ]
     for filename in filenames:
         replace_string_in_file(filename, old_version, new_version)
 
 
-def update_distfiles_digest(pkg_name):
-    with open(os.path.join(DEPS_PACKAGING, pkg_name, "source"), "r") as f:
+def update_distfiles_digest(root, pkg_name):
+    with open(os.path.join(root, DEPS_PACKAGING, pkg_name, "source"), "r") as f:
         source = f.read().strip()
 
-    filename = os.path.join(DEPS_PACKAGING, pkg_name, "distfiles")
+    filename = os.path.join(root, DEPS_PACKAGING, pkg_name, "distfiles")
     with open(filename, "r") as f:
         content = f.read().strip().split()
     old_digest = content[0]
@@ -174,25 +200,20 @@ def update_distfiles_digest(pkg_name):
     replace_string_in_file(filename, old_digest, new_digest)
 
 
-def main():
-    args = parse_args()
-    loglevel = "DEBUG" if args.debug else "INFO"
-    log.basicConfig(
-        format="[%(filename)s:%(lineno)d][%(levelname)s]: %(message)s", level=loglevel
-    )
-
-    with open(os.path.join(DEPS_PACKAGING, "release-monitoring.json"), "r") as f:
+def update_deps(root, bump, skip):
+    with open(os.path.join(root, DEPS_PACKAGING, "release-monitoring.json"), "r") as f:
         release_monitoring = json.load(f)
 
-    commit_message = ["Updated dependencies\n\n"]
     for pkg_name, proj_id in release_monitoring.items():
-        old_version = determine_old_version(pkg_name)
+        old_version = determine_old_version(root, pkg_name)
         if not old_version:
             log.error(f"Failed to determine old version of package {pkg_name}")
             exit(1)
 
         available_versions = get_available_versions(proj_id)
-        new_version = select_new_version(pkg_name, args.update, args.skip, old_version, available_versions)
+        new_version = select_new_version(
+            pkg_name, bump, skip, old_version, available_versions
+        )
         if not new_version:
             log.error(f"Could not find a suitable new version for package {pkg_name}")
             exit(1)
@@ -210,13 +231,26 @@ def main():
             continue
         log.info(f"Updating {pkg_name} from version {old_version} to {new_version}...")
 
-        update_version_numbers(pkg_name, old_version, new_version)
-        update_distfiles_digest(pkg_name)
+        update_version_numbers(root, pkg_name, old_version, new_version)
+        update_distfiles_digest(root, pkg_name)
 
-        commit_message.append(f"- Updated dependency '{pkg_name}' from version {old_version} to {new_version}\n")
+        if not git_commit(
+            root,
+            f"Updated dependency '{pkg_name}' from version {old_version} to {new_version}",
+        ):
+            log.error(f"Failed to commit changes after updating package '{pkg_name}'")
+            exit(1)
 
-    with open("/tmp/commit-message.txt", "w") as f:
-        f.writelines(commit_message)
+
+def main():
+    args = parse_args()
+    loglevel = "DEBUG" if args.debug else "INFO"
+    log.basicConfig(
+        format="[%(filename)s:%(lineno)d][%(levelname)s]: %(message)s", level=loglevel
+    )
+
+    update_deps(args.root, args.bump, args.skip)
+
 
 if __name__ == "__main__":
     main()
