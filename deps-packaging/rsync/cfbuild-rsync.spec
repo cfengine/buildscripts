@@ -5,7 +5,6 @@ Name: cfbuild-rsync
 Version: %{version}
 Release: 1
 Source0: rsync-%{rsync_version}.tar.gz
-Patch0: fix-buffer-overflow.patch
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -18,8 +17,6 @@ AutoReqProv: no
 %prep
 mkdir -p %{_builddir}
 %setup -q -n rsync-%{rsync_version}
-
-%patch0 -p1
 
 # liblz4, libxxhash, libzstd, and libssl give rsync extra compression
 # algorithms, extra checksum algorithms, and allow use of openssl's crypto lib
