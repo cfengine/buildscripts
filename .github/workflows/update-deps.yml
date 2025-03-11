@@ -41,10 +41,10 @@ jobs:
           if: env.COMMIT_MADE == 'true'
           uses: cfengine/create-pull-request@v6
           with:
-            title: Updated dependencies
+            title: Updated dependencies (3.24)
             body: Automated dependency updates
             reviewers: |
               olehermanse
               larsewi
               craigcomstock
-            branch: update-dependencies-action
+            branch: update-dependencies-action-3.24.x
