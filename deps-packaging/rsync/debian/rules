@@ -12,8 +12,6 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p1 < $(CURDIR)/fix-buffer-overflow.patch
-
 	# liblz4, libxxhash, libzstd, and libssl give rsync extra compression
 	# algorithms, extra checksum algorithms, and allow use of openssl's crypto
 	# lib for (potentially) faster MD4/MD5 checksums.
