@@ -210,7 +210,7 @@ case "$PACKAGING" in
 
     rm -rf "$BASEDIR/$PKG/pkg"
     mkdir -p "$BASEDIR/$PKG/pkg"
-    cp -a "$P"/* "$BASEDIR/$PKG/pkg"
+    cp -a "$P"/. "$BASEDIR/$PKG/pkg"
 
     if [ "$BUILD_TYPE" = "RELEASE" ]
     then

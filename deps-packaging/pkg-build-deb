@@ -64,10 +64,11 @@ echo "$SRCFILES" | while read srcfile opts; do
     mkdir -p "$TD"
     $UNCOMPRESS $srcfile | tar -C $TD -xf -
     mv $TD/*/* $PKGDIR
+    mv $TD/*/.* $PKGDIR || true # Move also dotfiles if they exist (but don't error if they don't)
     rm -r "$TD"
   fi
 done
-cp -a $P/* $PKGDIR
+cp -a $P/. $PKGDIR
 
 # Prepare options
 
