@@ -225,7 +225,7 @@ class DepsReader:
         )
 
     def deps_list(self, branch="master"):
-        """Returns a list of dependencies for given branch, for example: `["lcov", "pthreads-w32", "libgnurx"]`.
+        """Returns a sorted list of dependencies for given branch, for example: `["lcov", "libgnurx", "pthreads-w32"]`.
         Assumes the proper branch is checked out by `self.buildscripts_repo`.
         """
         # TODO: get value of $EMBEDDED_DB from file
@@ -262,6 +262,7 @@ class DepsReader:
         )
         # now only_deps looks like this: ["lcov", "pthreads-w32", "libgnurx"]
         log.debug(pretty(only_deps))
+        only_deps = sorted(only_deps)
         return only_deps
 
     def extract_version_from_filename(self, dep, filename):
@@ -335,12 +336,12 @@ class DepsReader:
         return deps_table, branch_column_widths
 
     def updated_deps_markdown_table(self, branches):
+        """Code from bot-tom's `depstable` that processes the README table directly, returning the updated README. The updated README will not contain dependencies that were not in the README beforehand, and will not automatically remove dependencies that no longer exist."""
         updated_hub_table_lines = []
         updated_agent_table_lines = []
 
         deps_table, branch_column_widths = self.deps_table(branches)
 
-        # patch the readme
         self.buildscripts_repo.checkout("master")
         readme_file_path = "README.md"
         readme_file = self.buildscripts_repo.get_file(readme_file_path)
@@ -476,15 +477,116 @@ class DepsReader:
         deps_data, _ = self.deps_table(branches)
         write_json_file(json_path, deps_data)
 
+    def comparison_md_table(self, branches, skip_unchanged=False):
+        """Column headers of B branches are always bolded. Row headers are never bolded."""
+        deps_data, _ = self.deps_table(branches)
+
+        # all dependencies, sorted by branch-existence, then name, in Python 3.7+
+        all_deps = deps_data.keys()
+
+        compared_deps_data = collections.OrderedDict()
+
+        for dep in all_deps:
+            c_dep_data = collections.OrderedDict()
+            bolded_in_row = 0
+
+            # iterate over branches in non-overlapping pairs, and skipping the last odd branch
+            for branch_A, branch_B in list(zip(branches, branches[1:]))[::2]:
+                version_A = deps_data[dep][branch_A]
+                version_B = deps_data[dep][branch_B]
+
+                branch_B_bolded = "**" + branch_B + "**"
+                c_dep_data[branch_A] = version_A
+                c_dep_data[branch_B_bolded] = version_B
+
+                if version_A != version_B:
+                    bolded_in_row += 1
+                    c_dep_data[branch_B_bolded] = "**" + version_B + "**"
+            if len(branches) % 2 == 1:
+                c_dep_data[branches[-1]] = deps_data[dep][branches[-1]]
+
+            if bolded_in_row > 0 or not skip_unchanged:
+                compared_deps_data[dep] = c_dep_data
+
+        md_table = dict_2d_as_markdown_table(
+            compared_deps_data, header_cell="CFEngine version"
+        )
+        return md_table
+
 
 def deps_table_as_cdx(deps_table):
     # TODO
     return {}
 
 
-def deps_table_as_markdown(deps_table):
-    # TODO
-    return ""
+def dict_2d_as_markdown_table(
+    nested_dict,
+    header_cell="",
+):
+    """Input `nested_dict` is assumed to be of the form `nested_dict[row][column] = cell`."""
+    column_separator = " | "
+    row_left_separator = "| "
+    row_right_separator = " |\n"
+
+    # TODO argument to provide a map[row_name] so that row names can be e.g. links and not just names
+    row_names = nested_dict.keys()
+    header_column_width = max(
+        len(header_cell), max(len(row_name) for row_name in row_names)
+    )
+
+    # this assumes that the ordered dictionary's first value has all the inner keys
+    column_names = list(nested_dict[list(nested_dict.keys())[0]].keys())
+    header_row = [header_cell] + column_names
+
+    column_widths = [header_column_width] + [
+        max(
+            [len(str(nested_dict[row][column_name])) for row in nested_dict]
+            + [len(column_name)]
+        )
+        for column_name in column_names
+    ]
+
+    header_row_markdown = (
+        row_left_separator
+        + column_separator.join(
+            [
+                "{:<{}}".format(column_header, column_width)
+                for column_header, column_width in zip(header_row, column_widths)
+            ]
+        )
+        + row_right_separator
+    )
+    table_string = header_row_markdown
+
+    separator_row_markdown = (
+        row_left_separator
+        + column_separator.join(["-" * column_width for column_width in column_widths])
+        + row_right_separator
+    )
+    table_string += separator_row_markdown
+
+    table_string += (
+        row_right_separator.join(
+            [
+                row_left_separator
+                + column_separator.join(
+                    [
+                        "{:<{}}".format(
+                            nested_dict.get(row, {}).get(column_header, row_name),
+                            column_width,
+                        )
+                        for column_header, column_width in zip(
+                            header_row, column_widths
+                        )
+                    ]
+                )
+                for row_name, row in zip(row_names, nested_dict)
+            ]
+        )
+        + row_right_separator
+    )
+
+    return table_string
 
 
 def parse_args():
@@ -513,7 +615,7 @@ def parse_args():
     parser.add_argument(
         "--compare",
         action="store_true",
-        help="Compare branches in pairs instead of processing each branch individually",
+        help="Compare branches in pairs instead of processing each branch individually for the displayed Markdown table",
     )
     parser.add_argument(
         "--skip-unchanged",
@@ -537,6 +639,9 @@ def parse_args():
 def main():
     args = parse_args()
 
+    if args.compare and len(args.branches) % 2 == 1:
+        log.warning("comparing with an odd number of versions")
+
     dr = DepsReader(log_info=not args.no_info)
 
     if args.cdx_sbom_path:
@@ -545,15 +650,14 @@ def main():
     if args.json_path:
         dr.write_deps_json(args.json_path, args.branches)
 
-    updated_readme, updated_agent_table, updated_hub_table = (
-        dr.updated_deps_markdown_table(args.branches)
-    )
+    if args.patch or not args.compare:
+        updated_readme, updated_agent_table, updated_hub_table = (
+            dr.updated_deps_markdown_table(args.branches)
+        )
 
     if args.compare:
-        # TODO
-        if args.skip_unchanged:
-            pass
-        pass
+        comparison_table = dr.comparison_md_table(args.branches, args.skip_unchanged)
+        print(comparison_table)
     else:
         print("### Agent Dependencies:\n")
         print(updated_agent_table)
