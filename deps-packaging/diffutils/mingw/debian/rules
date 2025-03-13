@@ -11,9 +11,6 @@ clean:
 build: build-stamp
 build-stamp:
 	dh_testdir
-	pwd
-	ls -l
-	patch -p1 < 01-mingw-signals.patch
 
 	patch -p1 < 0001-Adjusted-configure-script-for-cross-compiling-with-m.patch
 
