@@ -11,8 +11,9 @@ OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}
 export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Patch
-$PATCH -p1 < 0001-Don-t-use-__ATOMIC_ACQ_REL-on-older-compilers.patch
-$PATCH -p1 < 0002-Cleanup-atomic-fallbacks-in-threads_pthread.c.patch
+$PATCH -p1 < 0001-Rework-and-simplify-RCU-code.patch
+$PATCH -p1 < 0002-Don-t-use-__ATOMIC_ACQ_REL-on-older-compilers.patch
+$PATCH -p1 < 0003-Cleanup-atomic-fallbacks-in-threads_pthread.c.patch
 
 # Configure
 

@@ -1,7 +1,7 @@
-From a15d165ca3c5b9298cc2a524a4926b4f0dc0c900 Mon Sep 17 00:00:00 2001
+From 7d7459aafce22c722279025b6633181e9080eb62 Mon Sep 17 00:00:00 2001
 From: Bernd Edlinger <bernd.edlinger@hotmail.de>
 Date: Tue, 18 Feb 2025 12:37:42 +0100
-Subject: [PATCH 2/2] Cleanup atomic fallbacks in threads_pthread.c
+Subject: [PATCH 3/3] Cleanup atomic fallbacks in threads_pthread.c
 
 the unused atomic stub functions make clang issue
 unused function warnings -Wunused-function
@@ -16,7 +16,7 @@ Reviewed-by: Neil Horman <nhorman@openssl.org>
  1 file changed, 78 deletions(-)
 
 diff --git a/crypto/threads_pthread.c b/crypto/threads_pthread.c
-index 7cc0ecde08..06afc50b77 100644
+index 4a2ff73b78..e97c91d952 100644
 --- a/crypto/threads_pthread.c
 +++ b/crypto/threads_pthread.c
 @@ -127,13 +127,8 @@ static inline void *apple_atomic_load_n_pvoid(void **p,

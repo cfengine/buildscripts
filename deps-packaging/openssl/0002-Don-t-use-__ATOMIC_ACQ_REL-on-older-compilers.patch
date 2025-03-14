@@ -1,0 +1,163 @@
+From 6b17994e717b0b95c5c4996ebee00f49b966d6a3 Mon Sep 17 00:00:00 2001
+From: Neil Horman <nhorman@openssl.org>
+Date: Thu, 13 Feb 2025 15:52:16 -0500
+Subject: [PATCH 2/3] Don't use __ATOMIC_ACQ_REL on older compilers
+
+Older compilers don't always support __ATOMIC_ACQ_REL, use a lock where
+they don't
+
+Reviewed-by: Tomas Mraz <tomas@openssl.org>
+Reviewed-by: Bernd Edlinger <bernd.edlinger@hotmail.de>
+(Merged from https://github.com/openssl/openssl/pull/26747)
+
+(cherry picked from commit 7d284560a0624206356d46a948ab3a0b6f670c0e)
+---
+ crypto/threads_pthread.c | 50 ++++++----------------------------------
+ crypto/threads_win.c     | 12 ++++++++--
+ 2 files changed, 17 insertions(+), 45 deletions(-)
+
+diff --git a/crypto/threads_pthread.c b/crypto/threads_pthread.c
+index 68e2305493..4a2ff73b78 100644
+--- a/crypto/threads_pthread.c
++++ b/crypto/threads_pthread.c
+@@ -90,7 +90,6 @@ __tsan_mutex_post_lock((x), 0, 0)
+  * fallback function names.
+  */
+ typedef void *pvoid;
+-typedef struct rcu_cb_item *prcu_cb_item;
+ 
+ # if defined(__GNUC__) && defined(__ATOMIC_ACQUIRE) && !defined(BROKEN_CLANG_ATOMICS) \
+     && !defined(USE_ATOMIC_FALLBACKS)
+@@ -194,7 +193,6 @@ IMPL_fallback_atomic_store(pvoid)
+         return ret;                                                     \
+     }
+ IMPL_fallback_atomic_exchange_n(uint64_t)
+-IMPL_fallback_atomic_exchange_n(prcu_cb_item)
+ 
+ #  define ATOMIC_EXCHANGE_N(t, p, v, o) fallback_atomic_exchange_n_##t(p, v)
+ 
+@@ -469,13 +467,8 @@ void ossl_rcu_read_unlock(CRYPTO_RCU_LOCK *lock)
+              */
+             data->thread_qps[i].depth--;
+             if (data->thread_qps[i].depth == 0) {
+-<<<<<<< HEAD
+-                ret = ATOMIC_SUB_FETCH(&data->thread_qps[i].qp->users, VAL_READER,
+-                                       __ATOMIC_RELEASE);
+-=======
+                 ret = ATOMIC_SUB_FETCH(&data->thread_qps[i].qp->users,
+                                        (uint64_t)1, __ATOMIC_RELEASE);
+->>>>>>> 5949918f9a (Rework and simplify RCU code)
+                 OPENSSL_assert(ret != UINT64_MAX);
+                 data->thread_qps[i].qp = NULL;
+                 data->thread_qps[i].lock = NULL;
+@@ -496,12 +489,6 @@ void ossl_rcu_read_unlock(CRYPTO_RCU_LOCK *lock)
+  */
+ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock, uint32_t *curr_id)
+ {
+-<<<<<<< HEAD
+-    uint64_t new_id;
+-    uint64_t update;
+-    uint64_t ret;
+-=======
+->>>>>>> 5949918f9a (Rework and simplify RCU code)
+     uint32_t current_idx;
+ 
+     pthread_mutex_lock(&lock->alloc_lock);
+@@ -527,29 +514,6 @@ static struct rcu_qp *update_qp(CRYPTO_RCU_LOCK *lock, uint32_t *curr_id)
+     *curr_id = lock->id_ctr;
+     lock->id_ctr++;
+ 
+-<<<<<<< HEAD
+-    /*
+-     * Even though we are under a write side lock here
+-     * We need to use atomic instructions to ensure that the results
+-     * of this update are published to the read side prior to updating the
+-     * reader idx below
+-     */
+-try_again:
+-    ret = ATOMIC_LOAD_N(uint64_t, &lock->qp_group[current_idx].users, __ATOMIC_ACQUIRE);
+-    update = ret & ID_MASK;
+-    update |= new_id;
+-    if (!ATOMIC_COMPARE_EXCHANGE_N(uint64_t, &lock->qp_group[current_idx].users, &ret, update,
+-                                   __ATOMIC_ACQ_REL, __ATOMIC_RELAXED))
+-        goto try_again;
+-
+-    /*
+-     * Update the reader index to be the prior qp.
+-     * Note the use of __ATOMIC_RELEASE here is based on the corresponding use
+-     * of __ATOMIC_ACQUIRE in get_hold_current_qp, as we want any publication
+-     * of this value to be seen on the read side immediately after it happens
+-     */
+-=======
+->>>>>>> 5949918f9a (Rework and simplify RCU code)
+     ATOMIC_STORE_N(uint32_t, &lock->reader_idx, lock->current_alloc_idx,
+                    __ATOMIC_RELAXED);
+ 
+@@ -635,6 +599,10 @@ void ossl_synchronize_rcu(CRYPTO_RCU_LOCK *lock)
+     }
+ }
+ 
++/*
++ * Note: This call assumes its made under the protection of
++ * ossl_rcu_write_lock
++ */
+ int ossl_rcu_call(CRYPTO_RCU_LOCK *lock, rcu_cb_fn cb, void *data)
+ {
+     struct rcu_cb_item *new =
+@@ -645,13 +613,9 @@ int ossl_rcu_call(CRYPTO_RCU_LOCK *lock, rcu_cb_fn cb, void *data)
+ 
+     new->data = data;
+     new->fn = cb;
+-    /*
+-     * Use __ATOMIC_ACQ_REL here to indicate that any prior writes to this
+-     * list are visible to us prior to reading, and publish the new value
+-     * immediately
+-     */
+-    new->next = ATOMIC_EXCHANGE_N(prcu_cb_item, &lock->cb_items, new,
+-                                  __ATOMIC_ACQ_REL);
++
++    new->next = lock->cb_items;
++    lock->cb_items = new;
+ 
+     return 1;
+ }
+diff --git a/crypto/threads_win.c b/crypto/threads_win.c
+index 71823d21b0..b4208d2675 100644
+--- a/crypto/threads_win.c
++++ b/crypto/threads_win.c
+@@ -365,7 +365,10 @@ void ossl_synchronize_rcu(CRYPTO_RCU_LOCK *lock)
+     struct rcu_cb_item *cb_items, *tmpcb;
+ 
+     /* before we do anything else, lets grab the cb list */
+-    cb_items = InterlockedExchangePointer((void * volatile *)&lock->cb_items, NULL);
++    ossl_crypto_mutex_lock(lock->write_lock);
++    cb_items = lock->cb_items;
++    lock->cb_items = NULL;
++    ossl_crypto_mutex_unlock(lock->write_lock);
+ 
+     qp = update_qp(lock, &curr_id);
+ 
+@@ -398,6 +401,9 @@ void ossl_synchronize_rcu(CRYPTO_RCU_LOCK *lock)
+ 
+ }
+ 
++/*
++ * Note, must be called under the protection of ossl_rcu_write_lock
++ */
+ int ossl_rcu_call(CRYPTO_RCU_LOCK *lock, rcu_cb_fn cb, void *data)
+ {
+     struct rcu_cb_item *new;
+@@ -408,7 +414,9 @@ int ossl_rcu_call(CRYPTO_RCU_LOCK *lock, rcu_cb_fn cb, void *data)
+     new->data = data;
+     new->fn = cb;
+ 
+-    new->next = InterlockedExchangePointer((void * volatile *)&lock->cb_items, new);
++    new->next = lock->cb_items;
++    lock->cb_items = new;
++
+     return 1;
+ }
+ 
+-- 
+2.43.0
+
