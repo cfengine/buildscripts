@@ -8,6 +8,70 @@ import subprocess
 import sys
 
 
+HUMAN_NAME = {
+    "diffutils": "diffutils",
+    "libacl": "libacl",
+    "libattr": "libattr",
+    "libcurl": "libcurl",
+    "libgnurx": "libgnurx",
+    "libiconv": "libiconv",
+    "libxml2": "libxml2",
+    "libyaml": "LibYAML",
+    "lmdb": "LMDB",
+    "openldap": "OpenLDAP",
+    "openssl": "OpenSSL",
+    "pcre": "PCRE",
+    "pcre2": "PCRE2",
+    "pthreads-w32": "pthreads-w32",
+    "sasl2": "SASL2",
+    "zlib": "zlib",
+    "librsync": "librsync",
+    "leech": "leech",
+    "apache": "Apache",
+    "apr": "APR",
+    "apr-util": "apr-util",
+    "git": "Git",
+    "libexpat": "libexpat",
+    "php": "PHP",
+    "postgresql": "PostgreSQL",
+    "nghttp2": "nghttp2",
+    "rsync": "rsync",
+    "lcov": "LCOV",
+    "libcurl-hub": "libcurl-hub",
+}
+HOME_URL = {
+    "diffutils": "https://ftpmirror.gnu.org/diffutils/",
+    "libacl": "https://download.savannah.gnu.org/releases/acl/",
+    "libattr": "https://download.savannah.gnu.org/releases/attr",
+    "libcurl": "https://curl.se/download.html",
+    "libgnurx": "https://www.gnu.org/software/rx/rx.html",
+    "libiconv": "https://ftp.gnu.org/gnu/libiconv/",
+    "libxml2": "https://gitlab.gnome.org/GNOME/libxml2",
+    "libyaml": "https://pyyaml.org/wiki/LibYAML",
+    "lmdb": "https://github.com/LMDB/lmdb/",
+    "openldap": "https://www.openldap.org/software/download/OpenLDAP/openldap-release/",
+    "openssl": "https://openssl.org/",
+    "pcre": "https://www.pcre.org/",
+    "pcre2": "https://github.com/PCRE2Project/pcre2/releases/",
+    "pthreads-w32": "https://sourceware.org/pub/pthreads-win32/",
+    "sasl2": "https://www.cyrusimap.org/sasl/",
+    "zlib": "https://www.zlib.net/",
+    "librsync": "https://github.com/librsync/librsync/releases",
+    "leech": "https://github.com/larsewi/leech/releases",
+    "apache": "https://httpd.apache.org/",
+    "apr": "https://apr.apache.org/",
+    "apr-util": "https://apr.apache.org/",
+    "git": "https://www.kernel.org/pub/software/scm/git/",
+    "libexpat": "https://libexpat.github.io/",
+    "php": "https://php.net/",
+    "postgresql": "https://www.postgresql.org/",
+    "nghttp2": "https://nghttp2.org/",
+    "rsync": "https://download.samba.org/pub/rsync/",
+    "lcov": "https://github.com/linux-test-project/lcov/",
+    "libcurl-hub": "https://curl.se/download.html",
+}
+
+
 def write_json_file(filepath, data):
     with open(filepath, "w") as file:
         json.dump(data, file)
@@ -195,6 +259,13 @@ class GitRepo:
 
         self.run_command(*cmd)
 
+    def is_git_branch(self, ref):
+        try:
+            self.run_command("show-ref", "--verify", "refs/heads/" + ref)
+        except subprocess.CalledProcessError:
+            return False
+        return True
+
 
 def pretty(data):
     return json.dumps(data, indent=2)
@@ -322,7 +393,9 @@ class DepsReader:
         for branch in branches:
             branch_column_widths[branch] = len(branch)
             self.buildscripts_repo.checkout(branch)
-            self.buildscripts_repo.run_command("pull")
+            # also support checking out refs that are not necessarily branches, such as tags
+            if self.buildscripts_repo.is_git_branch(branch):
+                self.buildscripts_repo.run_command("pull")
             deps_versions = self.deps_versions(branch)
 
             for dep in deps_versions:
@@ -508,8 +581,25 @@ class DepsReader:
             if bolded_in_row > 0 or not skip_unchanged:
                 compared_deps_data[dep] = c_dep_data
 
+        for dep in all_deps:
+            if dep not in HUMAN_NAME:
+                log.warning(
+                    "Dependency " + dep + " is missing from the HUMAN_NAME dictionary"
+                )
+            if dep not in HOME_URL:
+                log.warning(
+                    "Dependency " + dep + " is missing from the HOME_URL dictionary"
+                )
+
+        deps_name_urllink_mapping = {
+            d: "[" + HUMAN_NAME.get(d, d) + "](" + HOME_URL.get(d, "0.0.0.0") + ")"
+            for d in all_deps
+        }
+
         md_table = dict_2d_as_markdown_table(
-            compared_deps_data, header_cell="CFEngine version"
+            compared_deps_data,
+            header_cell="CFEngine version",
+            row_name_mapping=deps_name_urllink_mapping,
         )
         return md_table
 
@@ -522,14 +612,17 @@ def deps_table_as_cdx(deps_table):
 def dict_2d_as_markdown_table(
     nested_dict,
     header_cell="",
+    row_name_mapping=None,
 ):
     """Input `nested_dict` is assumed to be of the form `nested_dict[row][column] = cell`."""
     column_separator = " | "
     row_left_separator = "| "
     row_right_separator = " |\n"
 
-    # TODO argument to provide a map[row_name] so that row names can be e.g. links and not just names
-    row_names = nested_dict.keys()
+    if row_name_mapping is None:
+        row_names = nested_dict.keys()
+    else:
+        row_names = list(map(lambda d: row_name_mapping[d], nested_dict.keys()))
     header_column_width = max(
         len(header_cell), max(len(row_name) for row_name in row_names)
     )
