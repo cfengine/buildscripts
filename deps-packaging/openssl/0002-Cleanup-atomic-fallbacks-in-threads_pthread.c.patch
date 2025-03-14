@@ -1,0 +1,143 @@
+From a15d165ca3c5b9298cc2a524a4926b4f0dc0c900 Mon Sep 17 00:00:00 2001
+From: Bernd Edlinger <bernd.edlinger@hotmail.de>
+Date: Tue, 18 Feb 2025 12:37:42 +0100
+Subject: [PATCH 2/2] Cleanup atomic fallbacks in threads_pthread.c
+
+the unused atomic stub functions make clang issue
+unused function warnings -Wunused-function
+
+Reviewed-by: Tomas Mraz <tomas@openssl.org>
+Reviewed-by: Neil Horman <nhorman@openssl.org>
+(Merged from https://github.com/openssl/openssl/pull/26815)
+
+(cherry picked from commit eacf14594dd93c971ff6480094bc23e63b87f628)
+---
+ crypto/threads_pthread.c | 78 ----------------------------------------
+ 1 file changed, 78 deletions(-)
+
+diff --git a/crypto/threads_pthread.c b/crypto/threads_pthread.c
+index 7cc0ecde08..06afc50b77 100644
+--- a/crypto/threads_pthread.c
++++ b/crypto/threads_pthread.c
+@@ -127,13 +127,8 @@ static inline void *apple_atomic_load_n_pvoid(void **p,
+ #  endif
+ #  define ATOMIC_STORE_N(t, p, v, o) __atomic_store_n(p, v, o)
+ #  define ATOMIC_STORE(t, p, v, o) __atomic_store(p, v, o)
+-#  define ATOMIC_EXCHANGE_N(t, p, v, o) __atomic_exchange_n(p, v, o)
+-#  define ATOMIC_COMPARE_EXCHANGE_N(t, p, e, d, s, f) __atomic_compare_exchange_n(p, e, d, 0, s, f)
+ #  define ATOMIC_ADD_FETCH(p, v, o) __atomic_add_fetch(p, v, o)
+-#  define ATOMIC_FETCH_ADD(p, v, o) __atomic_fetch_add(p, v, o)
+ #  define ATOMIC_SUB_FETCH(p, v, o) __atomic_sub_fetch(p, v, o)
+-#  define ATOMIC_AND_FETCH(p, m, o) __atomic_and_fetch(p, m, o)
+-#  define ATOMIC_OR_FETCH(p, m, o) __atomic_or_fetch(p, m, o)
+ # else
+ static pthread_mutex_t atomic_sim_lock = PTHREAD_MUTEX_INITIALIZER;
+ 
+@@ -165,7 +160,6 @@ IMPL_fallback_atomic_load_n(pvoid)
+         return ret;                                             \
+     }
+ IMPL_fallback_atomic_store_n(uint32_t)
+-IMPL_fallback_atomic_store_n(uint64_t)
+ 
+ #  define ATOMIC_STORE_N(t, p, v, o) fallback_atomic_store_n_##t(p, v)
+ 
+@@ -176,43 +170,10 @@ IMPL_fallback_atomic_store_n(uint64_t)
+         *p = *v;                                                \
+         pthread_mutex_unlock(&atomic_sim_lock);                 \
+     }
+-IMPL_fallback_atomic_store(uint64_t)
+ IMPL_fallback_atomic_store(pvoid)
+ 
+ #  define ATOMIC_STORE(t, p, v, o) fallback_atomic_store_##t(p, v)
+ 
+-#  define IMPL_fallback_atomic_exchange_n(t)                            \
+-    static ossl_inline t fallback_atomic_exchange_n_##t(t *p, t v)           \
+-    {                                                                   \
+-        t ret;                                                          \
+-                                                                        \
+-        pthread_mutex_lock(&atomic_sim_lock);                           \
+-        ret = *p;                                                       \
+-        *p = v;                                                         \
+-        pthread_mutex_unlock(&atomic_sim_lock);                         \
+-        return ret;                                                     \
+-    }
+-IMPL_fallback_atomic_exchange_n(uint64_t)
+-
+-#  define ATOMIC_EXCHANGE_N(t, p, v, o) fallback_atomic_exchange_n_##t(p, v)
+-
+-#  define IMPL_fallback_atomic_compare_exchange_n(t)                                  \
+-    static ossl_inline int fallback_atomic_compare_exchange_n_##t(t *p, t *e, t d, s, f) \
+-    {                                                                                 \
+-        int ret = 1;                                                                 \
+-        pthread_mutex_lock(&atomic_sim_lock);                                         \
+-        if (*p == *e)                                                                 \
+-            *p = d;                                                                    \
+-        else                                                                          \
+-            ret = 0;                                                                   \
+-        pthread_mutex_unlock(&atomic_sim_lock);                                       \
+-        return ret;                                                                   \
+-    }
+-
+-IMPL_fallback_atomic_exchange_n(uint64_t)
+-
+-#  define ATOMIC_COMPARE_EXCHANGE_N(t, p, e, d, s, f) fallback_atomic_compare_exchange_n_##t(p, e, d, s, f)
+-
+ /*
+  * The fallbacks that follow don't need any per type implementation, as
+  * they are designed for uint64_t only.  If there comes a time when multiple
+@@ -233,19 +194,6 @@ static ossl_inline uint64_t fallback_atomic_add_fetch(uint64_t *p, uint64_t v)
+ 
+ #  define ATOMIC_ADD_FETCH(p, v, o) fallback_atomic_add_fetch(p, v)
+ 
+-static ossl_inline uint64_t fallback_atomic_fetch_add(uint64_t *p, uint64_t v)
+-{
+-    uint64_t ret;
+-
+-    pthread_mutex_lock(&atomic_sim_lock);
+-    ret = *p;
+-    *p += v;
+-    pthread_mutex_unlock(&atomic_sim_lock);
+-    return ret;
+-}
+-
+-#  define ATOMIC_FETCH_ADD(p, v, o) fallback_atomic_fetch_add(p, v)
+-
+ static ossl_inline uint64_t fallback_atomic_sub_fetch(uint64_t *p, uint64_t v)
+ {
+     uint64_t ret;
+@@ -258,32 +206,6 @@ static ossl_inline uint64_t fallback_atomic_sub_fetch(uint64_t *p, uint64_t v)
+ }
+ 
+ #  define ATOMIC_SUB_FETCH(p, v, o) fallback_atomic_sub_fetch(p, v)
+-
+-static ossl_inline uint64_t fallback_atomic_and_fetch(uint64_t *p, uint64_t m)
+-{
+-    uint64_t ret;
+-
+-    pthread_mutex_lock(&atomic_sim_lock);
+-    *p &= m;
+-    ret = *p;
+-    pthread_mutex_unlock(&atomic_sim_lock);
+-    return ret;
+-}
+-
+-#  define ATOMIC_AND_FETCH(p, v, o) fallback_atomic_and_fetch(p, v)
+-
+-static ossl_inline uint64_t fallback_atomic_or_fetch(uint64_t *p, uint64_t m)
+-{
+-    uint64_t ret;
+-
+-    pthread_mutex_lock(&atomic_sim_lock);
+-    *p |= m;
+-    ret = *p;
+-    pthread_mutex_unlock(&atomic_sim_lock);
+-    return ret;
+-}
+-
+-#  define ATOMIC_OR_FETCH(p, v, o) fallback_atomic_or_fetch(p, v)
+ # endif
+ 
+ /*
+-- 
+2.43.0
+
