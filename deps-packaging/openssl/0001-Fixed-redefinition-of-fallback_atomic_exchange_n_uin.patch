@@ -1,0 +1,35 @@
+From a61f0cfbbb22019c24b6899b53677df9b7aaae17 Mon Sep 17 00:00:00 2001
+From: Lars Erik Wik <lars.erik.wik@northern.tech>
+Date: Fri, 14 Mar 2025 11:33:26 +0100
+Subject: [PATCH] Fixed redefinition of 'fallback_atomic_exchange_n_uint64_t'
+
+Platform:     HP-UX 11.23
+Arhcitecture: IA64
+
+```
+21:11:48 crypto/threads_pthread.c:214: error: redefinition of 'fallback_atomic_exchange_n_uint64_t'
+21:11:48 crypto/threads_pthread.c:196: error: previous definition of 'fallback_atomic_exchange_n_uint64_t' was here
+21:11:48 Makefile:14992: recipe for target 'crypto/libcrypto-lib-threads_pthread.o' failed
+```
+
+Signed-off-by: Lars Erik Wik <lars.erik.wik@northern.tech>
+---
+ crypto/threads_pthread.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/crypto/threads_pthread.c b/crypto/threads_pthread.c
+index c98e775a77..2836dc39ad 100644
+--- a/crypto/threads_pthread.c
++++ b/crypto/threads_pthread.c
+@@ -211,7 +211,7 @@ IMPL_fallback_atomic_exchange_n(prcu_cb_item)
+         return ret;                                                                   \
+     }
+ 
+-IMPL_fallback_atomic_exchange_n(uint64_t)
++IMPL_fallback_atomic_compare_exchange_n(uint64_t)
+ 
+ #  define ATOMIC_COMPARE_EXCHANGE_N(t, p, e, d, s, f) fallback_atomic_compare_exchange_n_##t(p, e, d, s, f)
+ 
+-- 
+2.43.0
+
