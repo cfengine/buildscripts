@@ -1,4 +1,4 @@
-%define php_version 8.3.15
+%define php_version 8.4.4
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -20,9 +20,9 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n php-%{php_version}
 
-if expr "`cat /etc/redhat-release`" : '.* [5]\.'
+if expr "`cat /etc/redhat-release`" : '.* [7]\.'
 then
-  patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
+  patch -p1 < %{_topdir}/SOURCES/0001-Disable-fancy-intrinsics-stuff.patch
 fi
 
 %if %{?rhel}%{!?rhel:0} == 8
@@ -63,9 +63,6 @@ LDFLAGS=""
   --without-gettext \
   --without-gmp \
   --without-mhash \
-  --without-imap \
-  --without-imap-ssl \
-  --without-oci8 \
   --without-odbcver \
   --without-adabas \
   --without-sapdb \
@@ -81,22 +78,16 @@ LDFLAGS=""
   --without-pdo-dblib \
   --without-pdo-firebird \
   --without-pdo-mysql \
-  --without-pdo-oci \
   --without-pdo-odbc \
   --without-pdo-sqlite \
   --without-pgsql \
-  --without-pspell \
   --without-libedit \
   --without-readline \
   --without-mm \
   --without-snmp \
   --without-tidy \
-  --without-xmlrpc \
   --without-xsl \
   --without-pear \
-  --without-tsrm-pth \
-  --without-tsrm-st \
-  --without-tsrm-pthreads \
   CPPFLAGS="-I%{prefix}/include" LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib" PKG_CONFIG_PATH="%{prefix}/lib/pkgconfig" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
 
 %build
