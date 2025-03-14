@@ -12,6 +12,7 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Patch
 $PATCH -p1 < 0001-Fixed-redefinition-of-fallback_atomic_exchange_n_uin.patch
+$PATCH -p1 < 0001-Don-t-use-__ATOMIC_ACQ_REL-on-older-compilers.patch
 
 # Configure
 
