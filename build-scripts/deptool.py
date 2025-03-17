@@ -278,14 +278,17 @@ class DepsReader:
     """
 
     ## def __init__(self, github, username):
-    def __init__(self, username="cfengine", log_info=True):
+    def __init__(self, username="cfengine", repo_path=None, log_info=True):
         ## self.github = github
         self.username = username
 
         # prepare repo
         REPO_OWNER = "cfengine"
         REPO_NAME = "buildscripts"
-        local_path = "../../buildscriptscopy/" + REPO_NAME
+        if repo_path:
+            local_path = repo_path
+        else:
+            local_path = "../../buildscriptscopy/" + REPO_NAME
         self.buildscripts_repo = GitRepo(
             local_path,
             REPO_NAME,
@@ -528,7 +531,7 @@ class DepsReader:
         ## new_branchname = "deptables-{}".format(timestamp)
         ## self.buildscripts_repo.checkout(new_branchname, new=True)
         ## self.buildscripts_repo.put_file(readme_file_path, updated_readme_file)
-        TARGET_README_PATH = "READMEnew.md"
+        TARGET_README_PATH = "README.md"
         self.buildscripts_repo.put_file(TARGET_README_PATH, updated_readme)
         ## self.buildscripts_repo.commit("Update dependency tables")
         ## self.buildscripts_repo.push(new_branchname)
@@ -725,6 +728,11 @@ def parse_args():
         action="store_true",
         help="Disable informational messages",
     )
+    parser.add_argument(
+        "--root",
+        help="Optionally specify buildscripts root directory path",
+        dest="repo_path",
+    )
 
     return parser.parse_args()
 
@@ -735,7 +743,7 @@ def main():
     if args.compare and len(args.branches) % 2 == 1:
         log.warning("comparing with an odd number of versions")
 
-    dr = DepsReader(log_info=not args.no_info)
+    dr = DepsReader(repo_path=args.repo_path, log_info=not args.no_info)
 
     if args.cdx_sbom_path:
         dr.write_cdx_sbom(args.cdx_sbom_path, args.branches)
