@@ -48,3 +48,4 @@ jobs:
               larsewi
               craigcomstock
             branch: update-dependencies-action
+            branch-suffix: timestamp
