@@ -243,7 +243,7 @@ fi
 #
 # We check if there is a server listening on port 9000.
 # If one is found and belongs to CFEngine,
-# then we try to shut it down using with fuser.
+# then we try to shut it down using fuser.
 # If that does not work, we abort the installation.
 #
 ensure_php_fpm_terminated() {
@@ -268,11 +268,11 @@ ensure_php_fpm_terminated() {
     fuser -k -TERM -n tcp 9000
         
     sleep 5s
-      PHP_FPM_FINAL_CHECK=$(filter_netstat_listen ":9000\\s")
-      if [ -n "$PHP_FPM_FINAL_CHECK" ]; then
-        cf_console echo "There is still a process listening on port 9000. Please kill it manually before retrying. Aborting."
-        return 1
-      fi
+    PHP_FPM_FINAL_CHECK=$(filter_netstat_listen ":9000\\s")
+    if [ -n "$PHP_FPM_FINAL_CHECK" ]; then
+      cf_console echo "There is still a process listening on port 9000. Please kill it manually before retrying. Aborting."
+      return 1
+    fi
   else
     cf_console echo "The PHP-FPM process is not from a previous CFEngine deployment"
     cf_console echo "This scenario is not supported, aborting installation"
