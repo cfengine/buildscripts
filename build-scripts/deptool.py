@@ -99,34 +99,24 @@ class GitRepo:
 
     def __init__(
         self,
-        dirname,
+        repo_path,
+        repo_owner,
         repo_name,
-        upstream_name,
-        my_name,
         checkout_branch=None,
         checkout_tag=None,
         log_info=True,
     ):
-        """Clones a remote repo to a directory (or freshens it if it's already
-        checked out), configures it and optionally checks out a requested branch
-        Args:
-            dirname - name of directory in local filesystem where to clone the repo
-            repo_name - name of repository (like 'core' or 'masterfiles')
-            upstream_name - name of original owner of the repo (usually 'cfengine')
-                We will pull from github.com/upstream_name/repo_name
-            my_name - name of github user where we will push and create PR from
-                (usually 'cf-bottom')
-                We will push to github.com/my_name/repo_name
-            checkout_branch - optional name of branch to checkout. If not provided,
-                a branch from previous work might be left checked out
-            checkout_tag - same for tag.
         """
-        self.dirname = dirname
-        self.repo_name = repo_name
-        self.username = my_name  # TODO: this should be github username of current user
+        Creates an instance of the class for a Git repository in a given path, cloning from GitHub if the path doesn't exist, then configures it and optionally checks out a requested branch or tag. Arguments:
+        * `repo_path`: local filesystem path of the Git repository, or of the GitHub repository to clone
+        * `repo_owner`: name of owner of the GitHub repository to clone
+        * `repo_name`: name of GitHub repository to clone
+        * `checkout_branch`: optional name of branch to checkout. If not provided, a branch from previous work might be left checked out
+        * `checkout_tag`: same as `checkout_branch` for tag.
+        """
+        self.repo_path = repo_path
 
-        upstream_url = "https://github.com/{}/{}.git".format(upstream_name, repo_name)
-        origin_url = "https://github.com/{}/{}.git".format(my_name, repo_name)
+        repo_url = "https://github.com/{}/{}.git".format(repo_owner, repo_name)
 
         # set up a logger to intercept command output to logging.INFO instead of displaying it
         if log_info:
@@ -145,33 +135,19 @@ class GitRepo:
         handler.setFormatter(log_format)
         self.run_logger.addHandler(handler)
 
-        if not os.path.exists(dirname):
-            self.run_command("clone", "--no-checkout", origin_url, dirname)
-        upstream_add_command_result = self.run_command(
-            "remote", "add", "upstream", upstream_url, check=False
-        )
-        if upstream_add_command_result.returncode != 0:
-            # Assume that we failed to add remote called 'upstream' because it was
-            # already added. In this case, we should succeed in setting its url.
-            self.run_command("remote", "set-url", "upstream", upstream_url)
+        if not os.path.exists(repo_path):
+            self.run_command("clone", "--no-checkout", repo_url, repo_path)
         if checkout_branch is not None:
             self.checkout(checkout_branch)
         if checkout_tag is not None:
             self.checkout(checkout_tag, tag=True)
 
     def run_command(self, *command, **kwargs):
-        """Runs a git command against git repo.
-        Syntactically this function tries to be as close to subprocess.run
-        as possible, just adding 'git' with some extra parameters in the beginning
-        """
+        """Runs a git command in the Git repository. Syntactically this function tries to be as close to `subprocess.run` as possible, just adding `"git"` with some extra parameters at the beginning."""
         git_command = [
             "git",
             "-C",
-            self.dirname,
-            "-c",
-            "push.default=simple",
-            "-c",
-            "checkout.defaultRemote=upstream",
+            self.repo_path,
             "-c",
             "advice.detachedHead=false",
         ]
@@ -184,7 +160,7 @@ class GitRepo:
             del kwargs["capture_output"]
         if command[0] == "clone":
             # we can't `cd` to target folder when it does not exist yet,
-            # so delete `-C self.dirname` arguments from git command line
+            # so delete `-C self.repo_path` arguments from git command line
             del git_command[1]
             del git_command[1]
         kwargs["universal_newlines"] = True
@@ -201,7 +177,7 @@ class GitRepo:
 
         return result
 
-    def checkout(self, branch=None, tag=None, remote="upstream", new=False):
+    def checkout(self, branch=None, tag=None, remote="origin", new=False):
         """Checkout given branch or tag, optionally creating branch.
         Note that it's an error to create-and-checkout branch which already exists.
         Also, it's not supported to create tags.
@@ -232,34 +208,26 @@ class GitRepo:
             self.run_command("reset", "--hard", "FETCH_HEAD")
         self.run_command("submodule", "update", "--init")
 
-    def get_file(self, path):
+    def get_file(self, relpath):
         """Returns contents of a file as a single string"""
-        with open(self.dirname + "/" + path) as f:
+        path = os.path.join(self.repo_path, relpath)
+        with open(path) as f:
             return f.read()
 
-    def put_file(self, path, data, add=True):
-        """Overwrites file with data, optionally running `git add {path}` afterwards"""
-        with open(self.dirname + "/" + path, "w") as f:
+    def put_file(self, relpath, data, add=True):
+        """Overwrites file with data, optionally running `git add {relpath}` afterwards"""
+        path = os.path.join(self.repo_path, relpath)
+        with open(path, "w") as f:
             f.write(data)
         if add:
-            self.run_command("add", path)
+            self.run_command("add", relpath)
 
     def commit(self, message):
         """Creates commit with message"""
         self.run_command("commit", "-m", message, "--allow-empty")
 
-    def push(self, ref=None, remote="origin", upstream=True):
-        """Pushes local branch or tag to remote repo, optionally also setting it as upstream"""
-        cmd = ["push"]
-        if upstream:
-            cmd.append("-u")
-        cmd.append(remote)
-        if ref is not None:
-            cmd.append(ref)
-
-        self.run_command(*cmd)
-
     def is_git_branch(self, ref):
+        """Returns whether `ref` is an existing branch in the Git repository."""
         try:
             self.run_command("show-ref", "--verify", "refs/heads/" + ref)
         except subprocess.CalledProcessError:
@@ -277,23 +245,16 @@ class DepsReader:
     https://github.com/mendersoftware/infra/blob/master/files/buildcache/release-scripts/RELEASE_PROCESS.org#minor-dependencies-update
     """
 
-    ## def __init__(self, github, username):
-    def __init__(self, username="cfengine", repo_path=None, log_info=True):
-        ## self.github = github
-        self.username = username
-
+    def __init__(self, repo_path=None, log_info=True):
         # prepare repo
         REPO_OWNER = "cfengine"
         REPO_NAME = "buildscripts"
-        if repo_path:
-            local_path = repo_path
-        else:
-            local_path = "../../buildscriptscopy/" + REPO_NAME
+        if repo_path is None:
+            repo_path = ".."
         self.buildscripts_repo = GitRepo(
-            local_path,
-            REPO_NAME,
+            repo_path,
             REPO_OWNER,
-            self.username,
+            REPO_NAME,
             "master",
             log_info=log_info,
         )
@@ -342,7 +303,7 @@ class DepsReader:
     def extract_version_from_filename(self, dep, filename):
         if dep == "openssl":
             # On different branches we use openssl from different sources
-            # (this will be cleaned up soon). When downloading from github,
+            # (this will be cleaned up soon). When downloading from GitHub,
             # filename is OpenSSL_1_1_1.tar.gz, where 1_1_1 is version.
             # When downloading from openssl website, filename for same version
             # is openssl-1.1.1.tar.gz, and version is 1.1.1.
@@ -419,8 +380,7 @@ class DepsReader:
         deps_table, branch_column_widths = self.deps_table(branches)
 
         self.buildscripts_repo.checkout("master")
-        readme_file_path = "README.md"
-        readme_file = self.buildscripts_repo.get_file(readme_file_path)
+        readme_file = self.buildscripts_repo.get_file("README.md")
         readme_lines = readme_file.split("\n")
         has_notes = False  # flag to say that we're in a table that has "Notes" column
         in_hub = False  # flag that we're in Hub section
@@ -527,22 +487,9 @@ class DepsReader:
         return updated_readme, updated_agent_table, updated_hub_table
 
     def patch_readme(self, updated_readme):
-        ## timestamp = re.sub("[^0-9-]", "_", str(datetime.datetime.today()))
-        ## new_branchname = "deptables-{}".format(timestamp)
-        ## self.buildscripts_repo.checkout(new_branchname, new=True)
-        ## self.buildscripts_repo.put_file(readme_file_path, updated_readme_file)
         TARGET_README_PATH = "README.md"
         self.buildscripts_repo.put_file(TARGET_README_PATH, updated_readme)
-        ## self.buildscripts_repo.commit("Update dependency tables")
-        ## self.buildscripts_repo.push(new_branchname)
-        ## pr_text = self.github.create_pr(
-        ##     target_repo="{}/{}".format(upstream_name, self.buildscripts_repo.repo_name),
-        ##     target_branch="master",
-        ##     source_user=self.username,
-        ##     source_branch=new_branchname,
-        ##     title="Update dependency tables",
-        ##     text="",
-        ## )
+        self.buildscripts_repo.commit("Update dependencies tables")
 
     def write_cdx_sbom(self, cdx_sbom_path, branches):
         deps_data, _ = self.deps_table(branches)
