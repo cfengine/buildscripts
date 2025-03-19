@@ -7,6 +7,7 @@ import re
 import subprocess
 import sys
 
+ACTIVE_BRANCHES = ["3.21.x", "3.24.x", "master"]
 
 HUMAN_NAME = {
     "diffutils": "diffutils",
@@ -223,8 +224,11 @@ class GitRepo:
             self.run_command("add", relpath)
 
     def commit(self, message):
-        """Creates commit with message"""
-        self.run_command("commit", "-m", message, "--allow-empty")
+        """Creates commit with message, if there are changes."""
+        status_result = self.run_command("status", "--porcelain")
+        is_empty = is_whitespace(status_result.stdout)
+        if not is_empty:
+            self.run_command("commit", "-m", message)
 
     def is_git_branch(self, ref):
         """Returns whether `ref` is an existing branch in the Git repository."""
@@ -637,7 +641,10 @@ def parse_args():
         description="CFEngine dependencies enumeration tool"
     )
     parser.add_argument(
-        "branches", nargs="*", help="List of branches to process", default=["master"]
+        "branches",
+        nargs="*",
+        help="List of branches to process",
+        default=ACTIVE_BRANCHES,
     )
     parser.add_argument(
         "--to-cdx-sbom",

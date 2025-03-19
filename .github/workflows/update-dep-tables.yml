@@ -1,0 +1,50 @@
+name: Update dependencies tables
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"  # Run every Monday at 7am UTC
+    #        | | | | |
+    #        | | | | day of the week (0–6) (Sunday to Saturday)
+    #        | | | month (1–12)
+    #        | | day of the month (1–31)
+    #        | hour (0–23)
+    #        minute (0–59)
+  workflow_dispatch:  # Enables manual trigger
+
+jobs:
+  update_dep_tables:
+    name: Update dependencies tables
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checks-out repository
+        uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+      - name: Set Git user
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Run deptool
+        run: python3 build-scripts/deptool.py --patch --root .
+      - name: Check if commits were made
+        run: |
+          if [[ $(git log --oneline -1 --author="github-actions[bot]") ]]; then
+            echo "COMMIT_MADE=true" >> $GITHUB_ENV
+          fi
+      - name: Create Pull Request
+        if: env.COMMIT_MADE == 'true'
+        uses: cfengine/create-pull-request@v6
+        with:
+          title: Update dependencies tables
+          body: Automated dependencies tables update using [the `update_dep_tables` workflow](https://github.com/cfengine/buildscripts/blob/master/.github/workflows/update-deps-tables.yml).
+          reviewers: |
+            olehermanse
+            larsewi
+            craigcomstock
+          branch: update-dependencies-tables
+          branch-suffix: timestamp
