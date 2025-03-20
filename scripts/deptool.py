@@ -194,7 +194,7 @@ class GitRepo:
                 "one of `branch`, `tag` arguments must be passed to `checkout` function"
             )
         if tag and new:
-            raise WrongArgumentsException("this is not the way to create tags")
+            raise WrongArgumentsException("Creating tags is not supported")
 
         if new:
             # just create new branch
@@ -318,14 +318,11 @@ class DepsReader:
             if not match:
                 match = re.search("_([0-9a-z_]*).tar", filename)
             version = match.group(1)
-            separator = "char"
         elif dep == "pthreads-w32":
             version = re.search("w32-([0-9-]*)-rel", filename).group(1)
-            separator = "-"
         else:
             version = re.search(r"[-_]([0-9.]*)[\.-]", filename).group(1)
-            separator = "."
-        return (version, separator)
+        return version
 
     def get_current_version(self, dep):
         """Returns the current version of dependency `dep`."""
@@ -333,7 +330,7 @@ class DepsReader:
         dist_file = self.buildscripts_repo.get_file(dist_file_path)
         dist_file = dist_file.strip()
         old_filename = re.sub(".* ", "", dist_file)
-        (old_version, separator) = self.extract_version_from_filename(dep, old_filename)
+        old_version = self.extract_version_from_filename(dep, old_filename)
         return old_version
 
     def deps_versions(self, branch):
@@ -352,10 +349,10 @@ class DepsReader:
             deps_versions[dep] = self.get_current_version(dep)
         return deps_versions
 
-    def deps_table(self, branches):
-        """Returns a 2D dictionary of dependencies and versions from all branches: `deps_table[dep][branch] = version`, as well as a dictionary of widths of each column (branch)."""
+    def deps_dict(self, branches):
+        """Returns a 2D dictionary of dependencies and versions from all branches: `deps_dict[dep][branch] = version`, as well as a dictionary of widths of each column (branch)."""
 
-        deps_table = {}
+        deps_dict = {}
         branch_column_widths = {}
 
         for branch in branches:
@@ -367,21 +364,21 @@ class DepsReader:
             deps_versions = self.deps_versions(branch)
 
             for dep in deps_versions:
-                if not dep in deps_table:
-                    deps_table[dep] = collections.defaultdict(lambda: "-")
-                deps_table[dep][branch] = deps_versions[dep]
+                if not dep in deps_dict:
+                    deps_dict[dep] = collections.defaultdict(lambda: "-")
+                deps_dict[dep][branch] = deps_versions[dep]
                 branch_column_widths[branch] = max(
                     branch_column_widths[branch], len(deps_versions[dep])
                 )
 
-        return deps_table, branch_column_widths
+        return deps_dict, branch_column_widths
 
     def updated_deps_markdown_table(self, branches):
         """Code from bot-tom's `depstable` that processes the README table directly, returning the updated README. The updated README will not contain dependencies that were not in the README beforehand, and will not automatically remove dependencies that no longer exist."""
         updated_hub_table_lines = []
         updated_agent_table_lines = []
 
-        deps_table, branch_column_widths = self.deps_table(branches)
+        deps_dict, branch_column_widths = self.deps_dict(branches)
 
         self.buildscripts_repo.checkout("master")
         readme_file = self.buildscripts_repo.get_file("README.md")
@@ -448,13 +445,13 @@ class DepsReader:
                 else:
                     log.warning("didn't find dep in line [%s]", line)
                     continue
-                if dep not in deps_table:
+                if dep not in deps_dict:
                     log.warning(
                         "unknown dependency in README: [%s] line [%s], will be EMPTY",
                         dep,
                         line,
                     )
-                    deps_table[dep] = collections.defaultdict(lambda: "-")
+                    deps_dict[dep] = collections.defaultdict(lambda: "-")
                 if has_notes:
                     note = re.search(r"\| ([^|]*) \|$", line)
                     if not note:
@@ -466,7 +463,7 @@ class DepsReader:
                     dep = re.sub("-hub$", "", dep)
                 row = (
                     ["[%s](%s)" % (dep_title, url)]
-                    + [deps_table[dep][branch] for branch in branches]
+                    + [deps_dict[dep][branch] for branch in branches]
                     + ([note] if has_notes else [])
                 )
                 line = (
@@ -496,17 +493,17 @@ class DepsReader:
         self.buildscripts_repo.commit("Update dependencies tables")
 
     def write_cdx_sbom(self, cdx_sbom_path, branches):
-        deps_data, _ = self.deps_table(branches)
-        cdx_sbom_data = deps_table_as_cdx(deps_data)
+        deps_data, _ = self.deps_dict(branches)
+        cdx_sbom_data = deps_dict_as_cdx(deps_data)
         write_json_file(cdx_sbom_path, cdx_sbom_data)
 
     def write_deps_json(self, json_path, branches):
-        deps_data, _ = self.deps_table(branches)
+        deps_data, _ = self.deps_dict(branches)
         write_json_file(json_path, deps_data)
 
     def comparison_md_table(self, branches, skip_unchanged=False):
         """Column headers of B branches are always bolded. Row headers are never bolded."""
-        deps_data, _ = self.deps_table(branches)
+        deps_data, _ = self.deps_dict(branches)
 
         # all dependencies, sorted by branch-existence, then name, in Python 3.7+
         all_deps = deps_data.keys()
@@ -546,7 +543,11 @@ class DepsReader:
                 )
 
         deps_name_urllink_mapping = {
-            d: "[" + HUMAN_NAME.get(d, d) + "](" + HOME_URL.get(d, "0.0.0.0") + ")"
+            d: (
+                "[" + HUMAN_NAME.get(d, d) + "](" + HOME_URL[d] + ")"
+                if d in HOME_URL
+                else HUMAN_NAME.get(d, d)
+            )
             for d in all_deps
         }
 
@@ -558,7 +559,8 @@ class DepsReader:
         return md_table
 
 
-def deps_table_as_cdx(deps_table):
+def deps_dict_as_cdx(deps_dict):
+    """Returns a dictionary containing the SBOM in the CycloneDX format."""
     # TODO
     return {}
 
@@ -724,5 +726,4 @@ def main():
 
 
 if __name__ == "__main__":
-    ret = main()
-    sys.exit(ret)
+    sys.exit(main())
