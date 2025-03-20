@@ -30,7 +30,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
       - name: Run deptool
-        run: python3 build-scripts/deptool.py --patch --root .
+        run: python3 scripts/deptool.py --patch --root .
       - name: Check if commits were made
         run: |
           if [[ $(git log --oneline -1 --author="github-actions[bot]") ]]; then
