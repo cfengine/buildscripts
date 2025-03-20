@@ -492,11 +492,6 @@ class DepsReader:
         self.buildscripts_repo.put_file(TARGET_README_PATH, updated_readme)
         self.buildscripts_repo.commit("Update dependencies tables")
 
-    def write_cdx_sbom(self, cdx_sbom_path, branches):
-        deps_data, _ = self.deps_dict(branches)
-        cdx_sbom_data = deps_dict_as_cdx(deps_data)
-        write_json_file(cdx_sbom_path, cdx_sbom_data)
-
     def write_deps_json(self, json_path, branches):
         deps_data, _ = self.deps_dict(branches)
         write_json_file(json_path, deps_data)
@@ -557,12 +552,6 @@ class DepsReader:
             row_name_mapping=deps_name_urllink_mapping,
         )
         return md_table
-
-
-def deps_dict_as_cdx(deps_dict):
-    """Returns a dictionary containing the SBOM in the CycloneDX format."""
-    # TODO
-    return {}
 
 
 def dict_2d_as_markdown_table(
@@ -649,14 +638,6 @@ def parse_args():
         default=ACTIVE_BRANCHES,
     )
     parser.add_argument(
-        "--to-cdx-sbom",
-        help="Output to a CycloneDX SBOM file with an optionally specified path",
-        nargs="?",
-        const="sbom.cdx.json",
-        default=None,
-        dest="cdx_sbom_path",
-    )
-    parser.add_argument(
         "--to-json",
         help="Output to a JSON file with an optionally specified path",
         nargs="?",
@@ -700,9 +681,6 @@ def main():
         log.warning("comparing with an odd number of versions")
 
     dr = DepsReader(repo_path=args.repo_path, log_info=not args.no_info)
-
-    if args.cdx_sbom_path:
-        dr.write_cdx_sbom(args.cdx_sbom_path, args.branches)
 
     if args.json_path:
         dr.write_deps_json(args.json_path, args.branches)
