@@ -1006,14 +1006,7 @@ $PREFIX/httpd/bin/apachectl start
 
 #Mission portal
 #
-
-if ! is_upgrade; then
-  true "Adding CFE_ROBOT user"
-  ( set +x
-    $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/public/index.php cli_tasks create_cfe_robot_user
-  )
-  true "Done adding user"
-else
+if is_upgrade; then
   true "Updating CFE_ROBOT password"
   ( set +x
     pwhash() {
