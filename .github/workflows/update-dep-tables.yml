@@ -1,14 +1,9 @@
 name: Update dependencies tables
 
 on:
-  schedule:
-    - cron: "0 7 * * 1"  # Run every Monday at 7am UTC
-    #        | | | | |
-    #        | | | | day of the week (0–6) (Sunday to Saturday)
-    #        | | | month (1–12)
-    #        | | day of the month (1–31)
-    #        | hour (0–23)
-    #        minute (0–59)
+  push:
+    branches:
+      - master
   workflow_dispatch:  # Enables manual trigger
 
 jobs:

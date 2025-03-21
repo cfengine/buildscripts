@@ -83,18 +83,6 @@ def is_whitespace(s: str):
     return len(s) == 0 or s.isspace()
 
 
-class GitException(Exception):
-    """Base class for all exceptions in this file"""
-
-    pass
-
-
-class WrongArgumentsException(GitException):
-    """Exception that is risen when incorrect arguments were passed"""
-
-    pass
-
-
 class GitRepo:
     """Class responsible for working with locally checked-out repository"""
 
@@ -103,17 +91,15 @@ class GitRepo:
         repo_path,
         repo_owner,
         repo_name,
-        checkout_branch=None,
-        checkout_tag=None,
+        checkout_ref=None,
         log_info=True,
     ):
         """
-        Creates an instance of the class for a Git repository in a given path, cloning from GitHub if the path doesn't exist, then configures it and optionally checks out a requested branch or tag. Arguments:
+        Creates an instance of the class for a Git repository in a given path, cloning from GitHub if the path doesn't exist, then configures it and optionally checks out a requested ref (branch or tag). Arguments:
         * `repo_path`: local filesystem path of the Git repository, or of the GitHub repository to clone
         * `repo_owner`: name of owner of the GitHub repository to clone
         * `repo_name`: name of GitHub repository to clone
-        * `checkout_branch`: optional name of branch to checkout. If not provided, a branch from previous work might be left checked out
-        * `checkout_tag`: same as `checkout_branch` for tag.
+        * `checkout_ref`: optional name of ref to checkout. If not provided, a ref from previous work might be left checked out.
         """
         self.repo_path = repo_path
 
@@ -138,10 +124,8 @@ class GitRepo:
 
         if not os.path.exists(repo_path):
             self.run_command("clone", "--no-checkout", repo_url, repo_path)
-        if checkout_branch is not None:
-            self.checkout(checkout_branch)
-        if checkout_tag is not None:
-            self.checkout(checkout_tag, tag=True)
+        if checkout_ref is not None:
+            self.checkout(checkout_ref)
 
     def run_command(self, *command, **kwargs):
         """Runs a git command in the Git repository. Syntactically this function tries to be as close to `subprocess.run` as possible, just adding `"git"` with some extra parameters at the beginning."""
@@ -178,33 +162,18 @@ class GitRepo:
 
         return result
 
-    def checkout(self, branch=None, tag=None, remote="origin", new=False):
-        """Checkout given branch or tag, optionally creating branch.
+    def checkout(self, ref, remote="origin", new=False):
+        """Checkout given ref (branch or tag), optionally creating the ref as a branch.
         Note that it's an error to create-and-checkout branch which already exists.
-        Also, it's not supported to create tags.
         """
-        # parse args
-        if not branch and not tag:
-            raise WrongArgumentsException(
-                "only one of `branch`, `tag` arguments can be passed to `checkout` function"
-            )
-        ref = branch or tag
-        if not ref:
-            raise WrongArgumentsException(
-                "one of `branch`, `tag` arguments must be passed to `checkout` function"
-            )
-        if tag and new:
-            raise WrongArgumentsException("Creating tags is not supported")
-
         if new:
-            # just create new branch
-            self.run_command("checkout", "-b", branch)
+            # create new branch
+            self.run_command("checkout", "-b", ref)
         else:
             # first, ensure that we're aware of target ref
             self.run_command("fetch", remote, ref)
-            # switch to the branch
-            if branch:
-                self.run_command("checkout", branch)
+            # switch to the ref
+            self.run_command("checkout", ref)
             # ensure we're on the tip of ref
             self.run_command("reset", "--hard", "FETCH_HEAD")
         self.run_command("submodule", "update", "--init")
@@ -263,13 +232,13 @@ class DepsReader:
             log_info=log_info,
         )
 
-    def deps_list(self, branch="master"):
-        """Returns a sorted list of dependencies for given branch, for example: `["lcov", "libgnurx", "pthreads-w32"]`.
-        Assumes the proper branch is checked out by `self.buildscripts_repo`.
+    def deps_list(self, ref="master"):
+        """Returns a sorted list of dependencies for given ref, for example: `["lcov", "libgnurx", "pthreads-w32"]`.
+        Assumes the proper ref is checked out by `self.buildscripts_repo`.
         """
         # TODO: get value of $EMBEDDED_DB from file
         embedded_db = "lmdb"
-        if branch == "3.7.x":
+        if ref == "3.7.x":
             options_file = self.buildscripts_repo.get_file(
                 "build-scripts/install-dependencies"
             )
@@ -278,7 +247,7 @@ class DepsReader:
                 "build-scripts/compile-options"
             )
         options_lines = options_file.splitlines()
-        if branch == "3.7.x":
+        if ref == "3.7.x":
             filtered_lines = (
                 x for x in options_lines if re.match(r'\s*DEPS=".*\$DEPS', x)
             )
@@ -333,8 +302,8 @@ class DepsReader:
         old_version = self.extract_version_from_filename(dep, old_filename)
         return old_version
 
-    def deps_versions(self, branch):
-        """Returns a dictionary of dependencies and versions for a branch:
+    def deps_versions(self, ref):
+        """Returns a dictionary of dependencies and versions for a ref:
         ```
         {
             "dep1": "version",
@@ -344,41 +313,41 @@ class DepsReader:
         ```
         """
         deps_versions = {}
-        deps_list = self.deps_list(branch)
+        deps_list = self.deps_list(ref)
         for dep in deps_list:
             deps_versions[dep] = self.get_current_version(dep)
         return deps_versions
 
-    def deps_dict(self, branches):
-        """Returns a 2D dictionary of dependencies and versions from all branches: `deps_dict[dep][branch] = version`, as well as a dictionary of widths of each column (branch)."""
+    def deps_dict(self, refs):
+        """Returns a 2D dictionary of dependencies and versions from all refs: `deps_dict[dep][ref] = version`, as well as a dictionary of widths of each column (ref)."""
 
         deps_dict = {}
-        branch_column_widths = {}
+        ref_column_widths = {}
 
-        for branch in branches:
-            branch_column_widths[branch] = len(branch)
-            self.buildscripts_repo.checkout(branch)
+        for ref in refs:
+            ref_column_widths[ref] = len(ref)
+            self.buildscripts_repo.checkout(ref)
             # also support checking out refs that are not necessarily branches, such as tags
-            if self.buildscripts_repo.is_git_branch(branch):
+            if self.buildscripts_repo.is_git_branch(ref):
                 self.buildscripts_repo.run_command("pull")
-            deps_versions = self.deps_versions(branch)
+            deps_versions = self.deps_versions(ref)
 
             for dep in deps_versions:
                 if not dep in deps_dict:
                     deps_dict[dep] = collections.defaultdict(lambda: "-")
-                deps_dict[dep][branch] = deps_versions[dep]
-                branch_column_widths[branch] = max(
-                    branch_column_widths[branch], len(deps_versions[dep])
+                deps_dict[dep][ref] = deps_versions[dep]
+                ref_column_widths[ref] = max(
+                    ref_column_widths[ref], len(deps_versions[dep])
                 )
 
-        return deps_dict, branch_column_widths
+        return deps_dict, ref_column_widths
 
-    def updated_deps_markdown_table(self, branches):
+    def updated_deps_markdown_table(self, refs):
         """Code from bot-tom's `depstable` that processes the README table directly, returning the updated README. The updated README will not contain dependencies that were not in the README beforehand, and will not automatically remove dependencies that no longer exist."""
         updated_hub_table_lines = []
         updated_agent_table_lines = []
 
-        deps_dict, branch_column_widths = self.deps_dict(branches)
+        deps_dict, ref_column_widths = self.deps_dict(refs)
 
         self.buildscripts_repo.checkout("master")
         readme_file = self.buildscripts_repo.get_file("README.md")
@@ -392,11 +361,11 @@ class DepsReader:
                 continue
             if line.startswith("| CFEngine version "):
                 has_notes = "Notes" in line
-                # Desired output row: ['CFEngine version', branches..., 'Notes']
+                # Desired output row: ['CFEngine version', refs..., 'Notes']
                 # Also note that list addition is concatenation: [1] + [2] == [1, 2]
                 row = (
                     ["CFEngine version"]
-                    + [branch for branch in branches]
+                    + [ref for ref in refs]
                     + (["Notes"] if has_notes else [])
                 )
                 # Width of source columns
@@ -405,13 +374,11 @@ class DepsReader:
                 # begins and ends with '|'. We're actually interested in widths
                 # of first column (with words "CFEngine version" in it) and,
                 # possibly, last ("Notes", which is now second-to-last).
-                # Between them are branch column widths, calculated earlier.
+                # Between them are ref column widths, calculated earlier.
                 # Also we substract 2 to remove column "padding".
                 column_widths = (
                     [column_widths[1] - 2]
-                    + [  # "CFEngine version"
-                        branch_column_widths[branch] for branch in branches
-                    ]
+                    + [ref_column_widths[ref] for ref in refs]  # "CFEngine version"
                     + (
                         [column_widths[-2] - 2] if has_notes else []
                     )  # "Notes", if exists
@@ -463,7 +430,7 @@ class DepsReader:
                     dep = re.sub("-hub$", "", dep)
                 row = (
                     ["[%s](%s)" % (dep_title, url)]
-                    + [deps_dict[dep][branch] for branch in branches]
+                    + [deps_dict[dep][ref] for ref in refs]
                     + ([note] if has_notes else [])
                 )
                 line = (
@@ -492,15 +459,15 @@ class DepsReader:
         self.buildscripts_repo.put_file(TARGET_README_PATH, updated_readme)
         self.buildscripts_repo.commit("Update dependencies tables")
 
-    def write_deps_json(self, json_path, branches):
-        deps_data, _ = self.deps_dict(branches)
+    def write_deps_json(self, json_path, refs):
+        deps_data, _ = self.deps_dict(refs)
         write_json_file(json_path, deps_data)
 
-    def comparison_md_table(self, branches, skip_unchanged=False):
-        """Column headers of B branches are always bolded. Row headers are never bolded."""
-        deps_data, _ = self.deps_dict(branches)
+    def comparison_md_table(self, refs, skip_unchanged=False):
+        """Column headers of B refs are always bolded. Row headers are never bolded."""
+        deps_data, _ = self.deps_dict(refs)
 
-        # all dependencies, sorted by branch-existence, then name, in Python 3.7+
+        # all dependencies, sorted by ref-existence, then name, in Python 3.7+
         all_deps = deps_data.keys()
 
         compared_deps_data = collections.OrderedDict()
@@ -509,20 +476,20 @@ class DepsReader:
             c_dep_data = collections.OrderedDict()
             bolded_in_row = 0
 
-            # iterate over branches in non-overlapping pairs, and skipping the last odd branch
-            for branch_A, branch_B in list(zip(branches, branches[1:]))[::2]:
-                version_A = deps_data[dep][branch_A]
-                version_B = deps_data[dep][branch_B]
+            # iterate over refs in non-overlapping pairs, and skipping the last odd ref
+            for ref_A, ref_B in list(zip(refs, refs[1:]))[::2]:
+                version_A = deps_data[dep][ref_A]
+                version_B = deps_data[dep][ref_B]
 
-                branch_B_bolded = "**" + branch_B + "**"
-                c_dep_data[branch_A] = version_A
-                c_dep_data[branch_B_bolded] = version_B
+                ref_B_bolded = "**" + ref_B + "**"
+                c_dep_data[ref_A] = version_A
+                c_dep_data[ref_B_bolded] = version_B
 
                 if version_A != version_B:
                     bolded_in_row += 1
-                    c_dep_data[branch_B_bolded] = "**" + version_B + "**"
-            if len(branches) % 2 == 1:
-                c_dep_data[branches[-1]] = deps_data[dep][branches[-1]]
+                    c_dep_data[ref_B_bolded] = "**" + version_B + "**"
+            if len(refs) % 2 == 1:
+                c_dep_data[refs[-1]] = deps_data[dep][refs[-1]]
 
             if bolded_in_row > 0 or not skip_unchanged:
                 compared_deps_data[dep] = c_dep_data
@@ -632,9 +599,9 @@ def parse_args():
         description="CFEngine dependencies enumeration tool"
     )
     parser.add_argument(
-        "branches",
+        "refs",
         nargs="*",
-        help="List of branches to process",
+        help="List of refs (branches or tags) to process, given as separate arguments",
         default=ACTIVE_BRANCHES,
     )
     parser.add_argument(
@@ -648,7 +615,7 @@ def parse_args():
     parser.add_argument(
         "--compare",
         action="store_true",
-        help="Compare branches in pairs instead of processing each branch individually for the displayed Markdown table",
+        help="Compare refs in pairs instead of processing each ref individually for the displayed Markdown table",
     )
     parser.add_argument(
         "--skip-unchanged",
@@ -677,21 +644,21 @@ def parse_args():
 def main():
     args = parse_args()
 
-    if args.compare and len(args.branches) % 2 == 1:
+    if args.compare and len(args.refs) % 2 == 1:
         log.warning("comparing with an odd number of versions")
 
     dr = DepsReader(repo_path=args.repo_path, log_info=not args.no_info)
 
     if args.json_path:
-        dr.write_deps_json(args.json_path, args.branches)
+        dr.write_deps_json(args.json_path, args.refs)
 
     if args.patch or not args.compare:
         updated_readme, updated_agent_table, updated_hub_table = (
-            dr.updated_deps_markdown_table(args.branches)
+            dr.updated_deps_markdown_table(args.refs)
         )
 
     if args.compare:
-        comparison_table = dr.comparison_md_table(args.branches, args.skip_unchanged)
+        comparison_table = dr.comparison_md_table(args.refs, args.skip_unchanged)
         print(comparison_table)
     else:
         print("### Agent Dependencies:\n")
