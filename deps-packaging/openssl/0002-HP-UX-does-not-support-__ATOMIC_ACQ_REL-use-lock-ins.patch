@@ -1,0 +1,35 @@
+From 79d7ad279543611ad342a58576a8428e7ede22d9 Mon Sep 17 00:00:00 2001
+From: Lars Erik Wik <lars.erik.wik@northern.tech>
+Date: Fri, 21 Mar 2025 15:08:25 +0100
+Subject: [PATCH 2/2] HP-UX does not support __ATOMIC_ACQ_REL, use lock instead
+
+Ticket: CFE-4510
+Signed-off-by: Lars Erik Wik <lars.erik.wik@northern.tech>
+---
+ crypto/threads_pthread.c | 10 +++-------
+ 1 file changed, 3 insertions(+), 7 deletions(-)
+
+diff --git a/crypto/threads_pthread.c b/crypto/threads_pthread.c
+index 2836dc39ad..1345dbeb46 100644
+--- a/crypto/threads_pthread.c
++++ b/crypto/threads_pthread.c
+@@ -664,13 +664,9 @@ int ossl_rcu_call(CRYPTO_RCU_LOCK *lock, rcu_cb_fn cb, void *data)
+ 
+     new->data = data;
+     new->fn = cb;
+-    /*
+-     * Use __ATOMIC_ACQ_REL here to indicate that any prior writes to this
+-     * list are visible to us prior to reading, and publish the new value
+-     * immediately
+-     */
+-    new->next = ATOMIC_EXCHANGE_N(prcu_cb_item, &lock->cb_items, new,
+-                                  __ATOMIC_ACQ_REL);
++
++    new->next = lock->cb_items;
++    lock->cb_items = new;
+ 
+     return 1;
+ }
+-- 
+2.43.0
+
