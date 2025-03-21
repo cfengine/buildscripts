@@ -1,4 +1,4 @@
-%define expat_version 2.6.3
+%define expat_version 2.7.0
 
 Summary: CFEngine Build Automation -- libexpat
 Name: cfbuild-libexpat
