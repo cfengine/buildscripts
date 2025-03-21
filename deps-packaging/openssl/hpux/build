@@ -13,6 +13,9 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Configure
 
+patch -p1 > 0001-Fixed-bad-function-declaration-in-pthreads-fallback-.patch
+patch -p1 > 0002-HP-UX-does-not-support-__ATOMIC_ACQ_REL-use-lock-ins.patch
+
 $PERL ./Configure hpux-ia64-gcc $(<config_flags_$ROLE.txt) \
     $LDFLAGS --prefix=$PREFIX --libdir=lib
 
