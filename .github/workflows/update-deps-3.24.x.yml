@@ -1,4 +1,4 @@
-name: Update dependencies
+name: Update dependencies 3.24.x
 
 on:
   schedule:
@@ -12,8 +12,8 @@ on:
   workflow_dispatch: # Enables manual trigger
 
 jobs:
-  update_dependencies:
-    name: Update dependencies
+  update_dependencies_3_24_x:
+    name: Update dependencies 3.24.x
     runs-on: ubuntu-latest
     steps:
         - name: Checks-out repository
