@@ -28,17 +28,18 @@ jobs:
           python -m pip install requests
       - name: Set Git user
         run: |
-          git config user.name 'GitHub'
-          git config user.email '<noreply@github.com>'
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Save commit hash before
+        run: |
+          echo "COMMIT_HASH_BEFORE=$(git log -1 --format=%H)">> $GITHUB_ENV
       - name: Run update script
         run: python3 .github/workflows/update-deps.py --debug --bump=major
-      - name: Check if commits were made
+      - name: Save commit hash after
         run: |
-          if [[ $(git log --oneline -1 --author="GitHub") ]]; then
-            echo "COMMIT_MADE=true" >> $GITHUB_ENV
-          fi
+          echo "COMMIT_HASH_AFTER=$(git log -1 --format=%H)">> $GITHUB_ENV
       - name: Create Pull Request
-        if: env.COMMIT_MADE == 'true'
+        if: env.COMMIT_HASH_BEFORE != env.COMMIT_HASH_AFTER
         uses: cfengine/create-pull-request@v6
         with:
           title: Updated dependencies
