@@ -1,8 +1,12 @@
 # deptool
 
-`deptool.py` is a script which can be used to enumerate dependencies of CFEngine. It supports printing to stdout in the Markdown table format, and printing to file in the JSON format (see `--to-json`). It can be used as a replacement for the [cf-bottom](https://github.com/cfengine/cf-bottom/) `depstable` command.
+`deptool.py` is a script which can be used to enumerate dependencies of CFEngine.
+It supports printing to stdout in the Markdown table format, and printing to file in the JSON format (see `--to-json`).
+It can be used as a replacement for the [cf-bottom](https://github.com/cfengine/cf-bottom/) `depstable` command.
 
-`deptool.py` works on a local buildscripts repository. By default, the repository is assumed to be current working directory (i.e. `.`). A custom path for the local repository can be specified using the `--root` argument. Running the script will modify the git state of the repository by checking out branches (and with `--patch`, also overwriting and git-adding `README.md`), so it might be preferable to [use a copy of the buildscripts repository](https://github.com/cfengine/buildscripts/tree/master/scripts#using-a-copy-of-the-repository).
+`deptool.py` works on a local buildscripts repository. By default, the repository is assumed to be current working directory (i.e. `.`).
+A custom path for the local repository can be specified using the `--root` argument.
+Running the script will modify the git state of the repository by checking out branches (and with `--patch`, also overwriting and git-adding `README.md`), so it might be preferable to [use a copy of the buildscripts repository](https://github.com/cfengine/buildscripts/tree/master/scripts#using-a-copy-of-the-repository).
 
 A custom list of versions to process can be specified ([given as space-separated command-line arguments](https://github.com/cfengine/buildscripts/tree/master/scripts#specifying-custom-versions-list)).
 
