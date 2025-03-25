@@ -1,14 +1,14 @@
-name: Update dependencies tables
+name: Update dependency tables
 
 on:
   push:
     branches:
       - master
-  workflow_dispatch:  # Enables manual trigger
+  workflow_dispatch: # Enables manual trigger
 
 jobs:
   update_dep_tables:
-    name: Update dependencies tables
+    name: Update dependency tables
     runs-on: ubuntu-24.04
     steps:
       - name: Checks-out repository
@@ -35,11 +35,11 @@ jobs:
         if: env.COMMIT_MADE == 'true'
         uses: cfengine/create-pull-request@v6
         with:
-          title: Update dependencies tables
-          body: Automated dependencies tables update using [the `update_dep_tables` workflow](https://github.com/cfengine/buildscripts/blob/master/.github/workflows/update-deps-tables.yml).
+          title: Update dependency tables
+          body: Automated dependency tables update using [the `update_dep_tables` workflow](https://github.com/cfengine/buildscripts/blob/master/.github/workflows/update-dep-tables.yml).
           reviewers: |
             olehermanse
             larsewi
             craigcomstock
-          branch: update-dependencies-tables
+          branch: update-dependency-tables
           branch-suffix: timestamp
