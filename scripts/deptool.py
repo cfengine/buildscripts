@@ -457,7 +457,7 @@ class DepsReader:
     def patch_readme(self, updated_readme):
         TARGET_README_PATH = "README.md"
         self.buildscripts_repo.put_file(TARGET_README_PATH, updated_readme)
-        self.buildscripts_repo.commit("Update dependency tables")
+        self.buildscripts_repo.commit("Updated Markdown dependency tables")
 
     def write_deps_json(self, json_path, refs):
         deps_data, _ = self.deps_dict(refs)
@@ -661,7 +661,7 @@ def main():
         comparison_table = dr.comparison_md_table(args.refs, args.skip_unchanged)
         print(comparison_table)
     else:
-        print("### Agent Dependencies\n")
+        print("### Agent dependencies\n")
         print(updated_agent_table)
         print("\n### Enterprise Hub dependencies\n")
         print(updated_hub_table)

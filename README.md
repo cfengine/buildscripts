@@ -59,8 +59,8 @@ Due to sheer diversity of the environments, build machine is expected to provide
 To access the build machine:
 
 - SSH server
-- Bundled one on Unixes
-- FreeSSHd on Windows
+  - Bundled one on Unixes
+  - FreeSSHd on Windows
 - 'build' account with SSH key installed
 
 To transfer files back and forth:
@@ -85,9 +85,9 @@ To build everything:
 To create packages:
 
 - Native packaging manager
-- rpm-build on RPM-based systems
-- dpkg-dev, debhelper, fakeroot
-- WiX on Windows
+  - rpm-build on RPM-based systems
+  - dpkg-dev, debhelper, fakeroot
+  - WiX on Windows
 
 To build MySQL library (yeah!):
 
