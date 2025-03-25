@@ -35,8 +35,8 @@ jobs:
         if: env.COMMIT_MADE == 'true'
         uses: cfengine/create-pull-request@v6
         with:
-          title: Update dependency tables
-          body: Automated dependency tables update using [the `update_dep_tables` workflow](https://github.com/cfengine/buildscripts/blob/master/.github/workflows/update-dep-tables.yml).
+          title: Updated markdown dependency tables
+          body: Automated updates to the README.md markdown dependency tables using [the `update_dep_tables` workflow](https://github.com/cfengine/buildscripts/blob/master/.github/workflows/update-dep-tables.yml).
           reviewers: |
             olehermanse
             larsewi
