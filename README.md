@@ -2,14 +2,16 @@ This repository contains the necessary tools to build and test cfengine packages
 
 ## Hardware requirements
 
-By experimentation I have found that building hub packages, which includes php dependency requires more than 1.6G of RAM/swap. 2.6G worked for me, less might work as well.
+By experimentation I have found that building hub packages, which includes php dependency requires more than 1.6G of RAM/swap.
+2.6G worked for me, less might work as well.
 
 ## Example build of Community Agent
 
 A minimal example would be to build packages for cfengine community agent.
 This should be done in an isolated environment such as a dedicated host, virtual machine or linux container.
 
-Install necessary distribution packages. For example on debian/ubuntu:
+Install necessary distribution packages.
+For example on debian/ubuntu:
 
 ```
 apt update -y
@@ -52,9 +54,7 @@ ls -l cfengine-community/*.deb
 
 ## General Build Machine Prerequisites
 
-Due to sheer diversity of the environments, build machine is expected to provide
-strict minimum amount of software (don't forget --no-install-recommends on
-dpkg-based systems):
+Due to sheer diversity of the environments, build machine is expected to provide strict minimum amount of software (don't forget `--no-install-recommends` on dpkg-based systems):
 
 To access the build machine:
 
@@ -98,8 +98,7 @@ To build libvirt:
 
 - pkg-config (pkg-config, pkgconfig)
 
-Anything else is either preprocessed on buildbot slave or built and installed
-during build.
+Anything else is either preprocessed on buildbot slave or built and installed during build.
 
 ## Documentation build pre-requisites
 
@@ -110,17 +109,13 @@ during build.
 
 ## Non-requisites
 
-Build machines should not contain the following items, which may interfere with
-build process:
+Build machines should not contain the following items, which may interfere with build process:
 
-- CFEngine itself, either in source or binary form (build machines are
-  short-living, so this is not a problem)
-- Development packages for anything beside libc to avoid picking them up
-  instead of bundled ones accidentally.
+- CFEngine itself, either in source or binary form (build machines are short-living, so this is not a problem)
+- Development packages for anything beside libc to avoid picking them up instead of bundled ones accidentally.
 - MySQL and PostgreSQL servers, clients and libraries
 
-The following packages should not be installed on build machines as well, to
-avoid accidentally regenerating files transferred from buildslave:
+The following packages should not be installed on build machines as well, to avoid accidentally regenerating files transferred from buildslave:
 
 - automake
 - autoconf
