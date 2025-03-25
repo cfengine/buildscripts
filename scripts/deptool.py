@@ -223,7 +223,7 @@ class DepsReader:
         REPO_OWNER = "cfengine"
         REPO_NAME = "buildscripts"
         if repo_path is None:
-            repo_path = ".."
+            repo_path = "."
         self.buildscripts_repo = GitRepo(
             repo_path,
             REPO_OWNER,
