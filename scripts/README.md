@@ -22,7 +22,7 @@ WARNING:root:didn't find dep in line [| libgcc                                  
 ### Agent Dependencies
 
 | CFEngine version                                                                  | 3.21.x | 3.24.x | master | Notes                    |
-| --------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
+| :-------------------------------------------------------------------------------- | :----- | :----- | :----- | :----------------------- |
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.10   | 3.10   | 3.10   |                          |
 | [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
 | [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
@@ -45,7 +45,7 @@ WARNING:root:didn't find dep in line [| libgcc                                  
 ### Enterprise Hub dependencies
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
-| --------------------------------------------------- | ------ | ------ | ------ |
+| :-------------------------------------------------- | :----- | :----- | :----- |
 | [Apache](https://httpd.apache.org/)                 | 2.4.62 | 2.4.62 | 2.4.62 |
 | [APR](https://apr.apache.org/)                      | 1.7.5  | 1.7.5  | 1.7.5  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
@@ -69,7 +69,7 @@ python deptool.py 3.21.6 3.24.x master
 ```
 $ python deptool.py 3.24.x master --compare --no-info
 | CFEngine version                                                                  | 3.24.x | **master** |
-| --------------------------------------------------------------------------------- | ------ | ---------- |
+| :-------------------------------------------------------------------------------- | :----- | :--------- |
 | [Apache](https://httpd.apache.org/)                                               | 2.4.62 | 2.4.62     |
 | [APR](https://apr.apache.org/)                                                    | 1.7.5  | 1.7.5      |
 | [apr-util](https://apr.apache.org/)                                               | 1.6.3  | 1.6.3      |
@@ -105,7 +105,7 @@ Rows which contain no dependency version changes can be omitted:
 ```
 $ python deptool.py --compare 3.21.5 3.21.6 3.24.0 3.24.1 --no-info --skip-unchanged
 | CFEngine version                                                                  | 3.21.5 | **3.21.6** | 3.24.0 | **3.24.1** |
-| --------------------------------------------------------------------------------- | ------ | ---------- | ------ | ---------- |
+| :-------------------------------------------------------------------------------- | :----- | :--------- | :----- | :--------- |
 | [Apache](https://httpd.apache.org/)                                               | 2.4.59 | **2.4.62** | 2.4.59 | **2.4.62** |
 | [APR](https://apr.apache.org/)                                                    | 1.7.4  | **1.7.5**  | 1.7.4  | **1.7.5**  |
 | [Git](https://www.kernel.org/pub/software/scm/git/)                               | 2.45.1 | **2.47.0** | 2.45.2 | **2.47.0** |
