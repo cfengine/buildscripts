@@ -4,11 +4,11 @@ on:
   schedule:
     - cron: "0 7 * * 1" # Run every Monday at 7am UTC
     #        | | | | |
-    #        | | | | day of the week (0–6) (Sunday to Saturday)
-    #        | | | month (1–12)
-    #        | | day of the month (1–31)
-    #        | hour (0–23)
-    #        minute (0–59)
+    #        | | | | day of the week (0-6) (Sunday to Saturday)
+    #        | | | month (1-12)
+    #        | | day of the month (1-31)
+    #        | hour (0-23)
+    #        minute (0-59)
   workflow_dispatch: # Enables manual trigger
 
 jobs:
@@ -16,36 +16,36 @@ jobs:
     name: Update dependencies
     runs-on: ubuntu-latest
     steps:
-        - name: Checks-out repository
-          uses: actions/checkout@v4
-        - name: Set up Python 3.12
-          uses: actions/setup-python@v5
-          with:
-            python-version: "3.12"
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            python -m pip install requests
-        - name: Set Git user
-          run: |
-            git config user.name 'GitHub'
-            git config user.email '<noreply@github.com>'
-        - name: Run update script
-          run: python3 .github/workflows/update-deps.py --debug --bump=major
-        - name: Check if commits were made
-          run: |
-            if [[ $(git log --oneline -1 --author="GitHub") ]]; then
-              echo "COMMIT_MADE=true" >> $GITHUB_ENV
-            fi
-        - name: Create Pull Request
-          if: env.COMMIT_MADE == 'true'
-          uses: cfengine/create-pull-request@v6
-          with:
-            title: Updated dependencies
-            body: Automated dependency updates
-            reviewers: |
-              olehermanse
-              larsewi
-              craigcomstock
-            branch: update-dependencies-action
-            branch-suffix: timestamp
+      - name: Checks-out repository
+        uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install requests
+      - name: Set Git user
+        run: |
+          git config user.name 'GitHub'
+          git config user.email '<noreply@github.com>'
+      - name: Run update script
+        run: python3 .github/workflows/update-deps.py --debug --bump=major
+      - name: Check if commits were made
+        run: |
+          if [[ $(git log --oneline -1 --author="GitHub") ]]; then
+            echo "COMMIT_MADE=true" >> $GITHUB_ENV
+          fi
+      - name: Create Pull Request
+        if: env.COMMIT_MADE == 'true'
+        uses: cfengine/create-pull-request@v6
+        with:
+          title: Updated dependencies
+          body: Automated dependency updates
+          reviewers: |
+            olehermanse
+            larsewi
+            craigcomstock
+          branch: update-dependencies-action
+          branch-suffix: timestamp
