@@ -129,7 +129,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 ### Agent Dependencies
 
 | CFEngine version                                                                  | 3.21.x | 3.24.x | master | Notes                    |
-| :-------------------------------------------------------------------------------- | :----- | :----- | :----- | :----------------------- |
+| --------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.10   | 3.11   | 3.11   |                          |
 | [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
 | [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
@@ -152,7 +152,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 ### Enterprise Hub dependencies
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
-| :-------------------------------------------------- | :----- | :----- | :----- |
+| --------------------------------------------------- | ------ | ------ | ------ |
 | [Apache](https://httpd.apache.org/)                 | 2.4.62 | 2.4.63 | 2.4.63 |
 | [APR](https://apr.apache.org/)                      | 1.7.5  | 1.7.5  | 1.7.5  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
