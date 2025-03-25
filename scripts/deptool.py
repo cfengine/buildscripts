@@ -394,7 +394,9 @@ class DepsReader:
                 )
             elif line.startswith("| :-"):
                 line = (
-                    "| " + (" | ".join(("-" * width for width in column_widths))) + " |"
+                    "| "
+                    + (" | ".join((":" + "-" * (width - 1) for width in column_widths)))
+                    + " |"
                 )
             else:
                 # Sample line:
@@ -457,7 +459,7 @@ class DepsReader:
     def patch_readme(self, updated_readme):
         TARGET_README_PATH = "README.md"
         self.buildscripts_repo.put_file(TARGET_README_PATH, updated_readme)
-        self.buildscripts_repo.commit("Updated Markdown dependency tables")
+        self.buildscripts_repo.commit("Update dependencies tables")
 
     def write_deps_json(self, json_path, refs):
         deps_data, _ = self.deps_dict(refs)
@@ -566,7 +568,7 @@ def dict_2d_as_markdown_table(
     separator_row_markdown = (
         row_left_separator
         + column_separator.join(
-            [":" + "-" * column_width - 1 for column_width in column_widths]
+            [":" + "-" * (column_width - 1) for column_width in column_widths]
         )
         + row_right_separator
     )
