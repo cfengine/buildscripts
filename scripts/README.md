@@ -17,7 +17,6 @@ See `python deptool.py -h` for more information on all available command-line ar
 ### Suppressing logs
 
 ```
-$ cd scripts
 $ python deptool.py --no-info
 WARNING:root:didn't find dep in line [| libgcc                                                                            |        |        |        | AIX and Solaris only     |]
 ### Agent Dependencies
@@ -126,5 +125,5 @@ $ python deptool.py --compare 3.21.5 3.21.6 3.24.0 3.24.1 --no-info --skip-uncha
 ## Using a copy of the repository
 
 ```
-python deptool.py --root ../../buildscripts-copy
+python deptool.py --root ../buildscripts-copy
 ```
