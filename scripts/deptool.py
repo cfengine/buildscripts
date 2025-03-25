@@ -392,7 +392,7 @@ class DepsReader:
                     )
                     + " |"
                 )
-            elif line.startswith("| --"):
+            elif line.startswith("| :-"):
                 line = (
                     "| " + (" | ".join(("-" * width for width in column_widths))) + " |"
                 )
@@ -565,7 +565,9 @@ def dict_2d_as_markdown_table(
 
     separator_row_markdown = (
         row_left_separator
-        + column_separator.join(["-" * column_width for column_width in column_widths])
+        + column_separator.join(
+            [":" + "-" * column_width - 1 for column_width in column_widths]
+        )
         + row_right_separator
     )
     table_string += separator_row_markdown
