@@ -20,7 +20,7 @@ See `python deptool.py -h` for more information on all available command-line ar
 $ cd scripts
 $ python deptool.py --no-info
 WARNING:root:didn't find dep in line [| libgcc                                                                            |        |        |        | AIX and Solaris only     |]
-### Agent Dependencies:
+### Agent Dependencies
 
 | CFEngine version                                                                  | 3.21.x | 3.24.x | master | Notes                    |
 | --------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
@@ -43,7 +43,7 @@ WARNING:root:didn't find dep in line [| libgcc                                  
 | [librsync](https://github.com/librsync/librsync/releases)                         | -      | -      | 2.3.4  |                          |
 | [leech](https://github.com/larsewi/leech/releases)                                | -      | -      | 0.1.24 |                          |
 
-### Enterprise Hub dependencies:
+### Enterprise Hub dependencies
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
 | --------------------------------------------------- | ------ | ------ | ------ |

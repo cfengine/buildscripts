@@ -661,9 +661,9 @@ def main():
         comparison_table = dr.comparison_md_table(args.refs, args.skip_unchanged)
         print(comparison_table)
     else:
-        print("### Agent Dependencies:\n")
+        print("### Agent Dependencies\n")
         print(updated_agent_table)
-        print("\n### Enterprise Hub dependencies:\n")
+        print("\n### Enterprise Hub dependencies\n")
         print(updated_hub_table)
 
     if args.patch:

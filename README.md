@@ -149,7 +149,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [leech](https://github.com/larsewi/leech/releases)                                |        |        | 0.1.21 |                          |
 | libgcc                                                                            |        |        |        | AIX and Solaris only     |
 
-### Enterprise Hub dependencies:
+### Enterprise Hub dependencies
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
 | --------------------------------------------------- | ------ | ------ | ------ |
