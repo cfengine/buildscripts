@@ -28,7 +28,7 @@ jobs:
         run: python3 scripts/deptool.py --patch --root .
       - name: Check if commits were made
         run: |
-          if [[ $(git log --oneline -1 --author="github-actions[bot]") ]]; then
+          if [[ $(git log --oneline -1 --author="github-actions\[bot\]") ]]; then
             echo "COMMIT_MADE=true" >> $GITHUB_ENV
           fi
       - name: Create Pull Request
