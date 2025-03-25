@@ -17,12 +17,12 @@ See `python deptool.py -h` for more information on all available command-line ar
 ### Suppressing logs
 
 ```
-$ python deptool.py --no-info
+$ python scripts/deptool.py --no-info
 WARNING:root:didn't find dep in line [| libgcc                                                                            |        |        |        | AIX and Solaris only     |]
 ### Agent Dependencies
 
 | CFEngine version                                                                  | 3.21.x | 3.24.x | master | Notes                    |
-| --------------------------------------------------------------------------------- | ------ | ------ | ------ | ------------------------ |
+| :-------------------------------------------------------------------------------- | :----- | :----- | :----- | :----------------------- |
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.10   | 3.10   | 3.10   |                          |
 | [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
 | [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
@@ -45,7 +45,7 @@ WARNING:root:didn't find dep in line [| libgcc                                  
 ### Enterprise Hub dependencies
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
-| --------------------------------------------------- | ------ | ------ | ------ |
+| :-------------------------------------------------- | :----- | :----- | :----- |
 | [Apache](https://httpd.apache.org/)                 | 2.4.62 | 2.4.62 | 2.4.62 |
 | [APR](https://apr.apache.org/)                      | 1.7.5  | 1.7.5  | 1.7.5  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
@@ -61,15 +61,15 @@ WARNING:root:didn't find dep in line [| libgcc                                  
 ### Specifying custom versions list
 
 ```
-python deptool.py 3.21.6 3.24.x master
+python scripts/deptool.py 3.21.6 3.24.x master
 ```
 
 ### Comparing versions
 
 ```
-$ python deptool.py 3.24.x master --compare --no-info
+$ python scripts/deptool.py 3.24.x master --compare --no-info
 | CFEngine version                                                                  | 3.24.x | **master** |
-| --------------------------------------------------------------------------------- | ------ | ---------- |
+| :-------------------------------------------------------------------------------- | :----- | :--------- |
 | [Apache](https://httpd.apache.org/)                                               | 2.4.62 | 2.4.62     |
 | [APR](https://apr.apache.org/)                                                    | 1.7.5  | 1.7.5      |
 | [apr-util](https://apr.apache.org/)                                               | 1.6.3  | 1.6.3      |
@@ -103,9 +103,9 @@ $ python deptool.py 3.24.x master --compare --no-info
 Rows which contain no dependency version changes can be omitted:
 
 ```
-$ python deptool.py --compare 3.21.5 3.21.6 3.24.0 3.24.1 --no-info --skip-unchanged
+$ python scripts/deptool.py --compare 3.21.5 3.21.6 3.24.0 3.24.1 --no-info --skip-unchanged
 | CFEngine version                                                                  | 3.21.5 | **3.21.6** | 3.24.0 | **3.24.1** |
-| --------------------------------------------------------------------------------- | ------ | ---------- | ------ | ---------- |
+| :-------------------------------------------------------------------------------- | :----- | :--------- | :----- | :--------- |
 | [Apache](https://httpd.apache.org/)                                               | 2.4.59 | **2.4.62** | 2.4.59 | **2.4.62** |
 | [APR](https://apr.apache.org/)                                                    | 1.7.4  | **1.7.5**  | 1.7.4  | **1.7.5**  |
 | [Git](https://www.kernel.org/pub/software/scm/git/)                               | 2.45.1 | **2.47.0** | 2.45.2 | **2.47.0** |
@@ -125,5 +125,5 @@ $ python deptool.py --compare 3.21.5 3.21.6 3.24.0 3.24.1 --no-info --skip-uncha
 ## Using a copy of the repository
 
 ```
-python deptool.py --root ../buildscripts-copy
+python scripts/deptool.py --root ../buildscripts-copy
 ```
