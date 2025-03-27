@@ -13,6 +13,11 @@ export LD_LIBRARY_PATH=$PREFIX/lib
 
 # Configure
 
+# These two patches are taken from master branch as of 2025-Mar-26 and should
+# be removed with upgrade past 3.4.1
+${PATCH} -p1 < 0001-Revert-rcu-Ensure-that-updates-to-the-ID-field-of-a-.patch
+${PATCH} -p1 < 0002-Don-t-use-__ATOMIC_ACQ_REL-on-older-compilers.patch
+
 $PERL ./Configure hpux-ia64-gcc $(<config_flags_$ROLE.txt) \
     $LDFLAGS --prefix=$PREFIX --libdir=lib
 
