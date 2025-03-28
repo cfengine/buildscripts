@@ -2,6 +2,13 @@ name: Build dependencies and CFEngine hub package
 
 on:
   workflow_call:
+    inputs:
+      additional_artifacts:
+        description: 'Additional files or directories to include in artifacts'
+        default: ''
+        required: false
+        type: string
+
     secrets:
       GH_ACTIONS_SSH_DEPLOY_KEY_ENTERPRISE_REPO:
         required: true
