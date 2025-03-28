@@ -46,9 +46,10 @@ jobs:
           path: masterfiles
           ref: ${{steps.together.outputs.masterfiles || github.base_ref}}
 
-      - name: Checkout Buildscripts (current project)
+      - name: Checkout Buildscripts
         uses: actions/checkout@v3
         with:
+          repository: cfengine/buildscripts
           path: buildscripts
           fetch-depth: 20
 
