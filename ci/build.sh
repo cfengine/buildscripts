@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # build cfengine hub package
+# $@ -- optional space separated paths to copy to artifacts
+
 set -ex
+
+additional_artifacts="$@"
 export PROJECT=nova
 export NO_CONFIGURE=1
 export BUILD_TYPE=DEBUG
@@ -30,9 +34,15 @@ time sudo rm -rf /var/cfengine
 time sudo rm -rf /opt/cfengine
 time ./buildscripts/build-scripts/install-dependencies
 time ./buildscripts/build-scripts/package
-sudo mkdir -p packages
-sudo cp cfengine-nova-hub/*.deb packages/ || true
-sudo cp cfengine-nova-hub/*.rpm packages/ || true
+
+sudo mkdir -p artifacts
+sudo cp cfengine-nova-hub/*.deb artifacts/ || true
+sudo cp cfengine-nova-hub/*.rpm artifacts/ || true
+
+for artifact_path in $additional_artifacts; do
+  sudo cp -r "$artifact_path" artifacts/ || true
+done
+
 
 # todo maybe save the cache cp -R ~/.cache buildscripts/ci/cache
 
