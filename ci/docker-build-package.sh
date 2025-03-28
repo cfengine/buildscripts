@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # run the build in a docker container
+# $@ -- additional artifact paths to save
+additional_artifacts="$@"
 set -ex
 
 # find the dir two levels up from here, home of all the repositories
@@ -49,7 +51,7 @@ docker exec -i $name bash -c "mkdir -p ~/.ssh"
 docker exec -i $name bash -c "echo $pubkey >> ~/.ssh/known_hosts"
 
 docker exec -i $name bash -c 'cd /data; ./buildscripts/ci/setup-projects.sh'
-docker exec -i $name bash -c 'cd /data; ./buildscripts/ci/build.sh'
+docker exec -i $name bash -c "cd /data; ./buildscripts/ci/build.sh ${additional_artifacts}"
 
 # save back cache and packages to host for handling by CI and such
 docker cp $name:/root/.cache/. "${NTECH_ROOT}/cache/"
