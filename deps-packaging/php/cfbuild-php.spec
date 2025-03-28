@@ -35,7 +35,7 @@ LDFLAGS=""
 
 ./configure --prefix=%{prefix}/httpd/php \
   --with-config-file-scan-dir=%{prefix}/httpd/php/lib \
-  --with-apxs2=%{prefix}/httpd/bin/apxs \
+  --without-apxs2 \
   --with-openssl=shared,%{prefix} \
   --with-curl=shared,%{prefix} \
   --with-ldap=%{prefix} \
@@ -166,8 +166,6 @@ CFEngine Build Automation -- php -- development files
 %prefix/httpd/php/etc
 %prefix/httpd/php/sbin
 
-%dir %prefix/httpd/modules
-%prefix/httpd/modules/libphp.so
 
 %files devel
 %defattr(-,root,root)
