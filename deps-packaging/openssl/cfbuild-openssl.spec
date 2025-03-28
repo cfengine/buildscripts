@@ -1,4 +1,4 @@
-%define openssl_version 3.4.0
+%define openssl_version 3.4.1
 
 Summary: CFEngine Build Automation -- openssl
 Name: cfbuild-openssl
@@ -22,6 +22,14 @@ mkdir -p %{_builddir}
 
 %patch0 -p1
 %patch1 -p1
+
+if expr "`cat /etc/redhat-release`" : '.* [6]\.'
+then
+  # These two patches are taken from master branch as of 2025-Mar-26 and
+  # should be removed with upgrade past 3.4.1
+  patch -p1 < %{_topdir}/SOURCES/0001-Revert-rcu-Ensure-that-updates-to-the-ID-field-of-a-.patch
+  patch -p1 < %{_topdir}/SOURCES/0002-Don-t-use-__ATOMIC_ACQ_REL-on-older-compilers.patch
+fi
 
 %build
 
