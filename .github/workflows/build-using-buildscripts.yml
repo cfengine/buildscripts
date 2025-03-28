@@ -111,7 +111,7 @@ jobs:
           GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE: ${{ secrets.GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE }}
         run: |
           if [ ! -f packages/cfe*deb ]; then
-              buildscripts/ci/docker-build-package.sh
+              buildscripts/ci/docker-build-package.sh ${INPUT_ADDITIONAL_ARTIFACTS}
           fi
 
       - name: Save dependency cache
