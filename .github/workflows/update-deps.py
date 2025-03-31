@@ -202,6 +202,7 @@ def update_distfiles_digest(root, pkg_name):
 
     if not os.path.exists(os.path.join("/tmp", tarball)):
         url = f"{source}/{tarball}"
+        log.debug(f"Fetching URL '{url}' for package {pkg_name}")
         urllib.request.urlretrieve(url, os.path.join("/tmp", tarball))
 
     sha = hashlib.sha256()
