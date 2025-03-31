@@ -181,6 +181,12 @@ def update_version_numbers(root, pkg_name, old_version, new_version):
         os.path.join(root, DEPS_PACKAGING, pkg_name, "source"),
     ]
     for filename in filenames:
+        if filename.endswith(os.path.join("libxml2", "source")):
+            # Special case for libxml2: The patch number is left out from the
+            # URL of the source file
+            old_version = ".".join(old_version.split(".")[:-1])
+            new_version = ".".join(new_version.split(".")[:-1])
+        log.debug(f"Replacing '{old_version}' with '{new_version}' in '{filename}'")
         replace_string_in_file(filename, old_version, new_version)
 
 
@@ -196,6 +202,7 @@ def update_distfiles_digest(root, pkg_name):
 
     if not os.path.exists(os.path.join("/tmp", tarball)):
         url = f"{source}/{tarball}"
+        log.debug(f"Fetching URL '{url}' for package {pkg_name}")
         urllib.request.urlretrieve(url, os.path.join("/tmp", tarball))
 
     sha = hashlib.sha256()
