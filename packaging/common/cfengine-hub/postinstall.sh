@@ -1108,6 +1108,11 @@ else
     cf_console platform_service cfengine3 start
 fi
 
+if ! is_upgrade; then
+  wait_for_cf_postgres || failure=1
+  cf_console echo "$("$PREFIX/bin/cf-hub" --new-setup-code)"
+fi
+
 rm -f "$PREFIX/UPGRADED_FROM.txt"
 
 exit 0
