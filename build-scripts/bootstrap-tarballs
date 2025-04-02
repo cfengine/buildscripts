@@ -1,40 +1,36 @@
 #!/bin/bash -x
 
+_dir=$(readlink -e "$(dirname "$0")")
+# refactored a few functions into single file scripts for easier development/debugging, see ENT-12741 and ENT-12595
+# Easier to add a path to a script than source a file of functions.
+export PATH="$_dir"/bin:$PATH
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
 . version
 
-get_GH_PR_info() {
-    # Args:
-    #   $1 - repo identifier ("project/repo")
-    #   $2 - PR identifier (the PR number)
-    # Env:
-    #   $GITHUB_STATUS_TOKEN - token for GitHub authentication
-    # Prints:
-    #   $REPO_ID $PR_ID $PR_STATUSES_URL
-    #   Where:
-    #     $PR_STATUSES_URL - GH API URL to set PR's statuses
-    # Returns:
-    #   0 - success, 1 - error
-    if [ -z "$1" ] || [ -z "$2" ] || [ -z "$GITHUB_STATUS_TOKEN" ]; then return 1; fi
-
-    if which jq > /dev/null; then
-        URL=$(curl -k -H "Authorization: token $GITHUB_STATUS_TOKEN" https://api.github.com/repos/$1/pulls/$2 |
-                  jq ".statuses_url" | tr -d '"')
-        status=$?
-    else
-        URL=$(curl -k -H "Authorization: token $GITHUB_STATUS_TOKEN" https://api.github.com/repos/$1/pulls/$2 |
-                  grep "statuses_url" | head -n1 | sed -r 's/\s+"statuses_url": "([^"]+)",/\1/')
-        status=$?
-    fi
-
-    echo "$1 $2 $URL"
-    return $status
-}
-
-
 mkdir -p $BASEDIR/output/tarballs
+
+# the first part of the script is not really critical
+set +e
+
+# Get information about PRs among the used revisions.
+# These PRs will have to be notified of build progress.
+for repo in buildscripts core masterfiles enterprise nova mission-portal; do
+  rev_param_name="$(echo $repo | tr '[:lower:]-' '[:upper:]_')_REV"
+  revision="$(echo ${!rev_param_name})" || continue   # dereference
+
+  # remove "origin/" (if any)
+  revision="${revision##origin/}"
+  if expr "$revision" : "pull/" >/dev/null; then
+	repo_spec="cfengine/$repo"
+    pr_nr="$(echo $revision | cut -d/ -f2)"
+	get-github-pull-request-info "$repo_spec" "$pr_nr" >> $BASEDIR/output/PRs
+  fi
+done
+
+# now script failures should fail the script
+set -e
 
 cd $BASEDIR/core
 rm cfengine-3.*.tar.gz || true
@@ -117,20 +113,3 @@ if test -f "$BASEDIR/mission-portal/ldap/composer.json"; then
 fi
 )
 
-# the rest of the script is not really critical
-set +e
-
-# Get information about PRs among the used revisions.
-# These PRs will have to be notified of build progress.
-for repo in buildscripts core masterfiles enterprise nova mission-portal; do
-  rev_param_name="$(echo $repo | tr '[:lower:]-' '[:upper:]_')_REV"
-  revision="$(echo ${!rev_param_name})" || continue   # dereference
-
-  # remove "origin/" (if any)
-  revision="${revision##origin/}"
-  if expr "$revision" : "pull/" >/dev/null; then
-	repo_spec="cfengine/$repo"
-    pr_nr="$(echo $revision | cut -d/ -f2)"
-	get_GH_PR_info "$repo_spec" "$pr_nr" >> $BASEDIR/output/PRs
-  fi
-done
