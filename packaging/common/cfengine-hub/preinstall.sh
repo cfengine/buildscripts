@@ -241,6 +241,51 @@ if migrating_postgres; then
 fi
 
 #
+# We check if there is a server listening on port 9000.
+# If one is found and belongs to CFEngine,
+# then we try to shut it down using fuser.
+# If that does not work, we abort the installation.
+#
+ensure_php_fpm_terminated() {
+  PHP_FPM_RUNNING=$(filter_netstat_listen ":9000\\s")
+  if [ -z "$PHP_FPM_RUNNING" ]; then
+    return 0;
+  fi
+
+  cf_console echo "There seems to be a server listening on port 9000."
+  
+  phpfpmpid=$(echo "$PHP_FPM_RUNNING" | sed -r -e '/pid=/!d' -e 's/.*pid=([0-9]+),.*/\1/' | tail -1)
+  phpfpmargs=$(ps -p "$phpfpmpid" -o args=)
+  
+  if echo "$phpfpmargs" | grep -q "cfengine"; then
+    cf_console echo "The PHP-FPM process belongs to a previous CFEngine deployment, shutting it down."
+    cf_console echo "Attempting to terminate the process using fuser."
+    if ! command -v fuser >/dev/null; then
+      cf_console echo "fuser not available, can't kill!"
+      return 1
+    fi
+
+    fuser -k -TERM -n tcp 9000
+        
+    sleep 5s
+    PHP_FPM_FINAL_CHECK=$(filter_netstat_listen ":9000\\s")
+    if [ -n "$PHP_FPM_FINAL_CHECK" ]; then
+      cf_console echo "There is still a process listening on port 9000. Please kill it manually before retrying. Aborting."
+      return 1
+    fi
+  else
+    cf_console echo "The PHP-FPM process is not from a previous CFEngine deployment"
+    cf_console echo "This scenario is not supported, aborting installation"
+    ps -p `fuser -n tcp 9000 2>/dev/null` -o args=
+    return 1
+  fi
+
+  return 0
+}
+
+ensure_php_fpm_terminated || exit 1
+
+#
 # We check if there is a server listening on port 80 or port 443.
 # If one is found, then we try to shut it down by calling
 # $PREFIX/httpd/bin/apachectl stop
