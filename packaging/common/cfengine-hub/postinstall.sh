@@ -1006,30 +1006,25 @@ $PREFIX/httpd/bin/apachectl start
 
 #Mission portal
 #
+true "Provisioning CFE_ROBOT user in the system"
+ ( set +x
+   pwhash() {
+       echo -n "$1" | "$PREFIX/bin/openssl" dgst -sha256 | awk '{print $2}'
+   }
+   CFE_ROBOT_PW="$(sed '/^cf_robot_password=/!d;s/.*=//' "$PREFIX/httpd/secrets.ini")"
+   test -n "$CFE_ROBOT_PW" || { echo "ERROR reading cf_robot_password from secrets.ini"; exit 1; }
+   CFE_ROBOT_PW_SALT=`pwgen 10`
+   CFE_ROBOT_PW_HASH=`pwhash "$CFE_ROBOT_PW_SALT$CFE_ROBOT_PW"`
+   # note that here we `echo "..." | psql` instead of `psql -c "..."` to avoid
+   # leaking secrets in `ps -ef` output.
+  echo "INSERT INTO users (username, password, salt, roles)
+        VALUES ('CFE_ROBOT', 'SHA=$CFE_ROBOT_PW_HASH', '$CFE_ROBOT_PW_SALT', '{cf_remoteagent}')
+        ON CONFLICT (username, external)
+        DO UPDATE 
+        SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT'" | "$PREFIX/bin/psql" cfsettings
+ )
+true "Successfully provisioned CFE_ROBOT user"
 
-if ! is_upgrade; then
-  true "Adding CFE_ROBOT user"
-  ( set +x
-    $PREFIX/httpd/php/bin/php $PREFIX/httpd/htdocs/public/index.php cli_tasks create_cfe_robot_user
-  )
-  true "Done adding user"
-else
-  true "Updating CFE_ROBOT password"
-  ( set +x
-    pwhash() {
-        echo -n "$1" | "$PREFIX/bin/openssl" dgst -sha256 | awk '{print $2}'
-    }
-    CFE_ROBOT_PW="$(sed '/^cf_robot_password=/!d;s/.*=//' "$PREFIX/httpd/secrets.ini")"
-    test -n "$CFE_ROBOT_PW" || { echo "ERROR reading cf_robot_password from secrets.ini"; exit 1; }
-    CFE_ROBOT_PW_SALT=`pwgen 10`
-    CFE_ROBOT_PW_HASH=`pwhash "$CFE_ROBOT_PW_SALT$CFE_ROBOT_PW"`
-
-    # note that here we `echo "..." | psql` instead of `psql -c "..."` to avoid
-    # leaking secrets in `ps -ef` output.
-   echo "UPDATE users SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT' WHERE username = 'CFE_ROBOT'" | "$PREFIX/bin/psql" cfsettings
-  )
-  true "Done updating password"
-fi
 
 true "Updating MP password"
 ( set +x
@@ -1111,6 +1106,11 @@ if is_upgrade && [ -f "$PREFIX/UPGRADED_FROM_STATE.txt" ]; then
     rm -f "$PREFIX/UPGRADED_FROM_STATE.txt"
 else
     cf_console platform_service cfengine3 start
+fi
+
+if ! is_upgrade; then
+  wait_for_cf_postgres || failure=1
+  cf_console echo "$("$PREFIX/bin/cf-hub" --new-setup-code)"
 fi
 
 rm -f "$PREFIX/UPGRADED_FROM.txt"
