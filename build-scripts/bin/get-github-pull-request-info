@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+echo "debug, craig, start of $0" >&2
+# Args:
+#   $1 - repo identifier ("project/repo")
+#   $2 - PR identifier (the PR number)
+# Env:
+#   $GITHUB_PR_TOKEN_PATH - path to token for read/write access to cfengine github pull requests (fine-grained)
+#       this path, if given via jenkins secret, should be hidden in logs in the web UI in jenkins
+# Prints:
+#   $REPO_ID $PR_ID $PR_STATUSES_URL
+#   Where:
+#     $PR_STATUSES_URL - GH API URL to set PR's statuses
+# Returns:
+#   0 - success, 1 - error
+( # hide commands for sure then revert to previous -/+x option
+  set +x
+  if [ -z "$1" ]; then echo "First argument, project, is required"; exit 1; fi
+  if [ -z "$2" ]; then echo "Second argument, pull request number, is required"; exit 1; fi
+  if [ -z "$GITHUB_PR_TOKEN_PATH" ]; then echo "Env var GITHUB_PR_TOKEN_PATH is required"; exit 1; fi
+  if [ ! -f "$GITHUB_PR_TOKEN_PATH" ]; then echo "GITHUB_PR_TOKEN_PATH file must exist"; exit 1; fi
+)
+
+json_out="$(mktemp)"
+echo "debug, sha256sum of pr token file..." >&2
+sha256sum "$GITHUB_PR_TOKEN_PATH" >&2
+
+# curl 7.88 ish supports --header @file but apparently 7.52 (on bootstrap vm (deb-9)) does not, so compose a script
+curl_script_file="$(mktemp)"
+chmod 600 "$curl_script_file"
+echo -n "curl --insecure --fail --header \"Authorization: Bearer " > "$curl_script_file"
+cat "$GITHUB_PR_TOKEN_PATH" | tr -d '\n' >> "$curl_script_file"
+echo "\" https://api.github.com/repos/$1/pulls/$2" >> "$curl_script_file"
+
+if ( # sub-shell to preserve original shell -/+x -/+e state
+  set +x # hide curl command below as it contains a secret! don't remove me!
+# uncomment the below to debug, warning: will reveal secrets in logs
+#  cat "$curl_script_file" >&2
+  bash "$curl_script_file" >"$json_out"
+); then
+  if which jq > /dev/null; then
+    URL=$(jq ".statuses_url" < "$json_out" | tr -d '"')
+    status=$?
+  else
+    URL=$(grep "statuses_url" "$json_out" | head -n1 | sed -r 's/\s+"statuses_url": "([^"]+)",/\1/')
+    status=$?
+  fi
+else
+  echo "Request failed. Response was $(cat "$json_out")" >&2
+  status=1
+fi
+
+# uncomment the below deletion of files for debugging
+rm "$curl_script_file"
+rm "$json_out"
+
+echo "$1 $2 $URL"
+exit $status
