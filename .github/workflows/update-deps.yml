@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        branch: [master, 3.24.x]
+        branch: [master, 3.24.x, 3.21.x]
     steps:
       - name: Checks-out repository
         uses: actions/checkout@v4
