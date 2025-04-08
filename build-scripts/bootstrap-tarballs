@@ -16,16 +16,17 @@ set +e
 
 # Get information about PRs among the used revisions.
 # These PRs will have to be notified of build progress.
-for repo in buildscripts core masterfiles enterprise nova mission-portal; do
+for repo_spec in cfengine/buildscripts cfengine/core cfengine/masterfiles cfengine/enterprise cfengine/nova cfengine/mission-portal NorthernTechHQ/libntech; do
+  # remove organization/ from start of repo_spec
+  repo="${repo_spec#*/}"
   rev_param_name="$(echo $repo | tr '[:lower:]-' '[:upper:]_')_REV"
   revision="$(echo ${!rev_param_name})" || continue   # dereference
 
   # remove "origin/" (if any)
   revision="${revision##origin/}"
   if expr "$revision" : "pull/" >/dev/null; then
-	repo_spec="cfengine/$repo"
     pr_nr="$(echo $revision | cut -d/ -f2)"
-	get-github-pull-request-info "$repo_spec" "$pr_nr" >> $BASEDIR/output/PRs
+    get-github-pull-request-info "$repo_spec" "$pr_nr" >> $BASEDIR/output/PRs
   fi
 done
 
