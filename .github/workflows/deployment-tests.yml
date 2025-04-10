@@ -90,13 +90,13 @@ jobs:
         run: echo "DEPS_SHA=$(git log --pretty='format:%h' -1 -- .)" | tee -a ${GITHUB_ENV}
         working-directory: buildscripts/deps-packaging
 
-      - name: restore packages cache
+      - name: restore artifacts cache
         uses: actions/cache/restore@v3
         with:
-          path: packages
-          key: packages-${{ env.PACKAGE_SHA }}
+          path: artifacts
+          key: artifacts-${{ env.PACKAGE_SHA }}
           restore-keys: |
-            packages-${{ env.PACKAGE_SHA }}
+            artifacts-${{ env.PACKAGE_SHA }}
 
       - name: Restore dependency cache
         uses: actions/cache/restore@v3
@@ -113,7 +113,7 @@ jobs:
         env:
           GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE: ${{ secrets.GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE }}
         run: |
-          if [ ! -f packages/cfe*deb ]; then
+          if [ ! -f artifacts/cfe*deb ]; then
               buildscripts/ci/docker-build-package.sh
           fi
 
@@ -126,11 +126,11 @@ jobs:
           path: cache
           key: deps-${{ github.base_ref }}-${{ env.DEPS_SHA }}
 
-      - name: Save packages cache
+      - name: Save artifacts cache
         uses: actions/cache/save@v3
         with:
-          path: packages
-          key: packages-${{ env.PACKAGE_SHA }}
+          path: artifacts
+          key: artifacts-${{ env.PACKAGE_SHA }}
 
       - name: Save artifacts
         if: success() || failure()

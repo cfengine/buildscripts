@@ -27,8 +27,8 @@ function failure() {
 }
 
 if [ ! -d /var/cfengine ]; then
-  # ci and local buildscripts should place built packages in $NTECH_ROOT/packages
-  sudo dpkg -i "$NTECH_ROOT"/packages/cfengine-nova-hub*deb
+  # ci and local buildscripts should place built packages in $NTECH_ROOT/artifacts
+  sudo dpkg -i "$NTECH_ROOT"/artifacts/cfengine-nova-hub*deb
 fi
 
 
