@@ -2,6 +2,7 @@
 
 `deptool.py` is a script which can be used to enumerate dependencies of CFEngine.
 It supports printing to stdout in the Markdown table format, and printing to file in the JSON format (see `--to-json`).
+It can also generate basic SBOMs in the CycloneDX JSON format (see [below](https://github.com/cfengine/buildscripts/tree/master/scripts#generating-cyclonedx-json-sboms) for usage instructions).
 It can be used as a replacement for the [cf-bottom](https://github.com/cfengine/cf-bottom/) `depstable` command.
 
 `deptool.py` works on a local buildscripts repository. By default, the repository is assumed to be current working directory (i.e. `.`).
@@ -122,8 +123,20 @@ $ python scripts/deptool.py --compare 3.21.5 3.21.6 3.24.0 3.24.1 --no-info --sk
 
 ```
 
-## Using a copy of the repository
+### Using a copy of the repository
 
 ```
 python scripts/deptool.py --root ../buildscripts-copy
+```
+
+### Generating CycloneDX JSON SBOMs
+
+```
+python deptool.py --to-cdx-sbom
+```
+
+A separate CycloneDX JSON SBOM is generated for each version. Optionally, a path template can be specified using `{}` as a substitute for the version:
+
+```
+python deptool.py --to-cdx-sbom my-sbom-{}.cdx.json
 ```

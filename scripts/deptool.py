@@ -311,7 +311,13 @@ class DepsReader:
             ...
         }
         ```
+        The ref is checked out during the execution of this function.
         """
+        self.buildscripts_repo.checkout(ref)
+        # also support checking out refs that are not necessarily branches, such as tags
+        if self.buildscripts_repo.is_git_branch(ref):
+            self.buildscripts_repo.run_command("pull")
+
         deps_versions = {}
         deps_list = self.deps_list(ref)
         for dep in deps_list:
@@ -326,10 +332,6 @@ class DepsReader:
 
         for ref in refs:
             ref_column_widths[ref] = len(ref)
-            self.buildscripts_repo.checkout(ref)
-            # also support checking out refs that are not necessarily branches, such as tags
-            if self.buildscripts_repo.is_git_branch(ref):
-                self.buildscripts_repo.run_command("pull")
             deps_versions = self.deps_versions(ref)
 
             for dep in deps_versions:
@@ -464,6 +466,58 @@ class DepsReader:
     def write_deps_json(self, json_path, refs):
         deps_data, _ = self.deps_dict(refs)
         write_json_file(json_path, deps_data)
+
+    def write_cdx_sboms(self, cdx_sbom_path_template, refs, fake_rpm=True):
+        for ref in refs:
+            cdx_dict = collections.OrderedDict()
+            cdx_dict["bomFormat"] = "CycloneDX"
+            cdx_dict["specVersion"] = "1.6"
+
+            metadata_dict = collections.OrderedDict()
+            application_bomref = "northerntech:cfengine"
+            metadata_dict["component"] = {
+                "type": "application",
+                "bom-ref": application_bomref,
+                "name": "CFEngine",
+                "version": ref,
+            }
+            cdx_dict["metadata"] = metadata_dict
+
+            components = []
+            deps_bomrefs = []
+            deps_versions = self.deps_versions(ref)
+            for dep_name, dep_version in deps_versions.items():
+                c_bomref = f"northerntech:{dep_name}"
+                component = {
+                    "type": "library",
+                    "bom-ref": c_bomref,
+                    "name": dep_name,
+                    "version": dep_version,
+                }
+                purl = "pkg:rpm/" + dep_name + "@" + dep_version
+                if fake_rpm:
+                    component["purl"] = purl
+                components.append(component)
+                deps_bomrefs.append(c_bomref)
+
+            cdx_dict["components"] = components
+
+            dependencies = [{"ref": application_bomref, "dependsOn": deps_bomrefs}]
+            cdx_dict["dependencies"] = dependencies
+
+            if "{}" in cdx_sbom_path_template:
+                cdx_sbom_path = cdx_sbom_path_template.replace("{}", ref)
+            else:
+                log.warning(
+                    "Substring {} not found in the CycloneDX SBOM path template, continuing using paths which might be unexpected"
+                )
+                if len(refs) == 1:
+                    cdx_sbom_path = cdx_sbom_path_template
+                else:
+                    cdx_sbom_path = (
+                        cdx_sbom_path_template[:-9] + "-" + ref + ".cdx.json"
+                    )
+            write_json_file(cdx_sbom_path, cdx_dict)
 
     def comparison_md_table(self, refs, skip_unchanged=False):
         """Column headers of B refs are always bolded. Row headers are never bolded."""
@@ -617,6 +671,14 @@ def parse_args():
         dest="json_path",
     )
     parser.add_argument(
+        "--to-cdx-sbom",
+        help="Output to a CycloneDX SBOM JSON file (or files, for multiple refs) with an optionally specified path template",
+        nargs="?",
+        const="sbom-{}.cdx.json",
+        default=None,
+        dest="cdx_sbom_path_template",
+    )
+    parser.add_argument(
         "--compare",
         action="store_true",
         help="Compare refs in pairs instead of processing each ref individually for the displayed Markdown table",
@@ -655,6 +717,9 @@ def main():
 
     if args.json_path:
         dr.write_deps_json(args.json_path, args.refs)
+
+    if args.cdx_sbom_path_template:
+        dr.write_cdx_sboms(args.cdx_sbom_path_template, args.refs)
 
     if args.patch or not args.compare:
         updated_readme, updated_agent_table, updated_hub_table = (
