@@ -56,6 +56,7 @@ docker exec -i $name bash -c "cd /data; ./buildscripts/ci/build.sh ${additional_
 # save back cache and artifacts to host for handling by CI and such
 docker cp $name:/root/.cache/. "${NTECH_ROOT}/cache/"
 docker exec $name find /data/artifacts
+docker exec $name ps -efl # to see what is running, once the artifacts dir changed while we tried to tar it up and copy it
 docker exec $name tar Ccf $(dirname /data/artifacts) - $(basename /data/artifacts) | tar Cxf "${NTECH_ROOT}/artifacts/" -
 
 rc=1 # if we find no packages, fail
