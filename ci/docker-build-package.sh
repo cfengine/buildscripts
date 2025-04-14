@@ -57,7 +57,7 @@ docker exec -i $name bash -c "cd /data; ./buildscripts/ci/build.sh ${additional_
 docker cp $name:/root/.cache/. "${NTECH_ROOT}/cache/"
 docker exec $name find /data/artifacts
 docker exec $name ps -efl # to see what is running, once the artifacts dir changed while we tried to tar it up and copy it
-docker exec $name tar Ccf $(dirname /data/artifacts) - $(basename /data/artifacts) | tar Cxf "${NTECH_ROOT}/artifacts/" -
+docker exec $name tar Ccf $(dirname /data) - $(basename /data/artifacts) | tar Cxf "${NTECH_ROOT}/artifacts/" -
 
 rc=1 # if we find no packages, fail
 for f in artifacts/*.deb; do
