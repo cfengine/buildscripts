@@ -27,8 +27,8 @@ jobs:
       - name: Checkout Together Action
         uses: actions/checkout@v3
         with:
-          repository: cfengine/together-javascript-action
-          ref: main
+          repository: craigcomstock/together-javascript-action
+          ref: 2025-04-15-tidy
           ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_TOGETHER_REPO }}
           ssh-known-hosts: github.com
 
@@ -36,7 +36,7 @@ jobs:
         uses: ./
         id: together
         with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
+          myToken: "craigs-token"
 
       - name: Checkout Core
         uses: actions/checkout@v3
