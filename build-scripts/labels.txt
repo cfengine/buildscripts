@@ -34,7 +34,6 @@ PACKAGES_arm_64_linux_ubuntu_22
 PACKAGES_x86_64_linux_ubuntu_24
 PACKAGES_arm_64_linux_ubuntu_24
 
-PACKAGES_i386_mingw
 PACKAGES_x86_64_mingw
 
 PACKAGES_ia64_hpux_11.23
