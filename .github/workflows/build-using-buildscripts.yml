@@ -36,7 +36,7 @@ jobs:
         uses: ./
         id: together
         with:
-          myToken: "craigs-token"
+          myToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout Core
         uses: actions/checkout@v3
