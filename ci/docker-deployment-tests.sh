@@ -21,8 +21,8 @@ if docker ps -a | grep $name; then
 fi
 docker run -d --privileged -v "${NTECH_ROOT}":/data --name $name $name || true
 
-if [ ! -d "${NTECH_ROOT}/packages" ]; then
-  echo "${NTECH_ROOT}/packages directory should exist and have a cfengine-nova-hub package there"
+if [ ! -d "${NTECH_ROOT}/artifacts" ]; then
+  echo "${NTECH_ROOT}/artifacts directory should exist and have a cfengine-nova-hub package there"
   exit 1
 fi
 docker exec -i $name bash -c 'cd /data; ./buildscripts/ci/deployment-tests.sh'

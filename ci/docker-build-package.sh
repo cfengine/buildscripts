@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # run the build in a docker container
+# $@ -- additional artifact paths to save
+additional_artifacts="$@"
 set -ex
 
 # find the dir two levels up from here, home of all the repositories
@@ -19,7 +21,7 @@ set +x # hide secrets
 if [ -n "$GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE" ]; then
   export SECRET="$GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE"
 else
-  if ! export SECRET="$(pass mystiko/developers/CFEngine/jenkins/sftp-cache.sec)"; then
+  if ! export SECRET="$(pass mystiko/developers/CFEngine/jenkins/jenkins_sftp_cache@github)"; then
     echo "The sftp cache ssh secret key must be provided, either with environment variable GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE or access to mystiko path developers/CFEngine/jenkins/sftp-cache.sec"
     exit 1
   fi
@@ -29,7 +31,7 @@ set -x # done hiding secrets
 docker run -d --env SECRET --env JOB_BASE_NAME --privileged -v "${NTECH_ROOT}":/data --name $name $name
 
 # copy local caches to docker container
-mkdir -p "${NTECH_ROOT}/packages"
+mkdir -p "${NTECH_ROOT}/artifacts"
 mkdir -p "${NTECH_ROOT}/cache"
 
 # setup host key trust
@@ -49,14 +51,14 @@ docker exec -i $name bash -c "mkdir -p ~/.ssh"
 docker exec -i $name bash -c "echo $pubkey >> ~/.ssh/known_hosts"
 
 docker exec -i $name bash -c 'cd /data; ./buildscripts/ci/setup-projects.sh'
-docker exec -i $name bash -c 'cd /data; ./buildscripts/ci/build.sh'
+docker exec -i $name bash -c "cd /data; ./buildscripts/ci/build.sh ${additional_artifacts}"
 
-# save back cache and packages to host for handling by CI and such
+# save back cache and artifacts to host for handling by CI and such
 docker cp $name:/root/.cache/. "${NTECH_ROOT}/cache/"
-docker cp $name:/data/packages/. "${NTECH_ROOT}/packages/"
+docker cp $name:/data/artifacts/. "${NTECH_ROOT}/artifacts/"
 
 rc=1 # if we find no packages, fail
-for f in packages/*.deb; do
+for f in artifacts/*.deb; do
   [ -f "$f" ] && rc=0
   break
 done
