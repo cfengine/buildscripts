@@ -12,7 +12,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) --without-python
+	# ENT-12744 note: --without-iconv is needed on ubuntu-16 build host, we can use win-iconv-mingw-w64-dev on ubuntu-20+ when we get there.
+	./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) --without-python --without-iconv
 	make
 
 	touch build-stamp
