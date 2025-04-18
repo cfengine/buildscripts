@@ -2,6 +2,13 @@ name: Build dependencies and CFEngine hub package
 
 on:
   workflow_call:
+    inputs:
+      additional_artifacts:
+        description: 'Additional files or directories to include in artifacts'
+        default: ''
+        required: false
+        type: string
+
     secrets:
       GH_ACTIONS_SSH_DEPLOY_KEY_ENTERPRISE_REPO:
         required: true
@@ -14,8 +21,8 @@ on:
 
 jobs:
   build_cfengine_hub_package:
-    name: Build package and run selenium tests
-    runs-on: ubuntu-20.04
+    name: Build package
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout Together Action
         uses: actions/checkout@v3
@@ -46,9 +53,10 @@ jobs:
           path: masterfiles
           ref: ${{steps.together.outputs.masterfiles || github.base_ref}}
 
-      - name: Checkout Buildscripts (current project)
+      - name: Checkout Buildscripts
         uses: actions/checkout@v3
         with:
+          repository: cfengine/buildscripts
           path: buildscripts
           fetch-depth: 20
 
@@ -88,13 +96,13 @@ jobs:
         run: echo "DEPS_SHA=$(git log --pretty='format:%h' -1 -- .)" | tee -a ${GITHUB_ENV}
         working-directory: buildscripts/deps-packaging
 
-      - name: restore packages cache
+      - name: restore artifacts cache
         uses: actions/cache/restore@v3
         with:
-          path: packages
-          key: packages-${{ env.PACKAGE_SHA }}
+          path: artifacts
+          key: artifacts-${{ env.PACKAGE_SHA }}
           restore-keys: |
-            packages-${{ env.PACKAGE_SHA }}
+            artifacts-${{ env.PACKAGE_SHA }}
 
       - name: Restore dependency cache
         uses: actions/cache/restore@v3
@@ -106,13 +114,22 @@ jobs:
             deps-master
             deps
 
+      - name: restore configured and built core and nova projects
+        uses: actions/cache/restore@v3
+        with:
+          path: build
+          key: build-${{ env.PACKAGE_SHA }}
+          restore-keys: |
+            build-${{ env.PACKAGE_SHA }}
+
+
       - name: Build package in docker
         env:
             GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE: ${{ secrets.GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE }}
         run: |
-            if [ ! -f packages/cfe*deb ]; then
-                buildscripts/ci/docker-build-package.sh
-            fi
+          if [ ! -f artifacts/cfe*deb ]; then
+              buildscripts/ci/docker-build-package.sh ${{ inputs.additional_artifacts }}
+          fi
 
       - name: Save dependency cache
         uses: actions/cache/save@v3
@@ -120,11 +137,13 @@ jobs:
           path: cache
           key: deps-${{ github.base_ref }}-${{ env.DEPS_SHA }}
 
-      - name: Save packages cache
+      - name: Save artifacts cache
         uses: actions/cache/save@v3
         with:
-          path: packages
-          key: packages-${{ env.PACKAGE_SHA }}
+          path: |
+              artifacts
+              packages
+          key: artifacts-${{ env.PACKAGE_SHA }}
 
       - name: Save artifacts
         if: success() || failure()
