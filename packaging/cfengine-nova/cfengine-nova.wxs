@@ -163,7 +163,7 @@
                 <File Id='zlib1.dll' Name='zlib1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\zlib1.dll' />
               </Component>
 	      <Component Id='libxml2.dll' Guid='7ae36f48-d2ad-417c-a01f-809b7613eccc' Win64='$(var.isWin64)'>
-                <File Id='libxml2.dll' Name='libxml2-2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libxml2-2.dll' />
+                <File Id='libxml2.dll' Name='libxml2-16.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libxml2-16.dll' />
               </Component>
 	      <Component Id='libcurl_4.dll' Guid='de435dd1-1fce-424a-b6a0-dc63192e2060' Win64='$(var.isWin64)'>
                 <File Id='libcurl_4.dll' Name='libcurl-4.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcurl-4.dll' />
