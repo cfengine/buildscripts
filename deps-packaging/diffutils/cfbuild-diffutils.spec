@@ -1,10 +1,11 @@
-%define diffutils_version 3.11
+%define diffutils_version 3.12
 
 Summary: CFEngine Build Automation -- diffutils
 Name: cfbuild-diffutils
 Version: %{version}
 Release: 1
 Source0: diffutils-%{diffutils_version}.tar.xz
+Patch0: 0001-Adjusted-configure-script-for-cross-compiling-with-m.patch
 License: GPL3
 Group: Other
 Url: https://cfengine.com
@@ -18,6 +19,8 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 export PATH=/opt/freeware/bin:$PATH # to use newer version of tar on aix platform
 %setup -q -n diffutils-%{diffutils_version}
+
+%patch0 -p1
 
 ./configure --prefix=%{prefix}
 
