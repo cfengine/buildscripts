@@ -15,6 +15,8 @@ build-stamp:
 	ls -l
 	patch -p1 < 01-mingw-signals.patch
 
+	patch -p1 < 0001-Adjusted-configure-script-for-cross-compiling-with-m.patch
+
 	./configure --host=\$(DEB_HOST_GNU_TYPE) --prefix=\$(PREFIX) LDFLAGS="-pthread"
 	make -C lib
 	make -C src
