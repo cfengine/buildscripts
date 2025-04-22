@@ -10,6 +10,8 @@ jobs:
   update_dep_tables:
     name: Update dependency tables
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - name: Checks-out repository
         uses: actions/checkout@v4
