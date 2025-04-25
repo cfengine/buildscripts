@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout Together Action
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cfengine/together-javascript-action
           ref: main
@@ -32,7 +32,7 @@ jobs:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Checkout Core
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cfengine/core
           path: core
@@ -40,14 +40,14 @@ jobs:
           submodules: recursive
 
       - name: Checkout Masterfiles
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cfengine/masterfiles
           path: masterfiles
           ref: ${{steps.together.outputs.masterfiles || github.base_ref}}
 
       - name: Checkout Buildscripts
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cfengine/buildscripts
           path: buildscripts
@@ -55,7 +55,7 @@ jobs:
           fetch-depth: 20
 
       - name: Checkout Nova
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cfengine/nova
           path: nova
@@ -64,7 +64,7 @@ jobs:
           ssh-known-hosts: github.com
 
       - name: Checkout Enterprise
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cfengine/enterprise
           path: enterprise
@@ -74,7 +74,7 @@ jobs:
           ssh-known-hosts: github.com
 
       - name: Checkout Mission Portal
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: cfengine/mission-portal
           path: mission-portal
