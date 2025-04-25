@@ -90,16 +90,6 @@ fi
 )
 
 (
-if test -f "$BASEDIR/mission-portal/vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php"; then
-  cd $BASEDIR/mission-portal
-  # Add Red Hat Text font to TCPDF library that we use in Mission Portal for PDF generation
-  php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Regular.ttf
-  php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Bold.ttf
-  php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Italic.ttf
-fi
-)
-
-(
 if test -f "$BASEDIR/mission-portal/public/themes/default/bootstrap/cfengine_theme.less"; then
   cd $BASEDIR/mission-portal/public/themes/default/bootstrap
   npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
