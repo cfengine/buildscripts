@@ -92,13 +92,6 @@ fi
 (
 if test -f "$BASEDIR/mission-portal/vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php"; then
   cd $BASEDIR/mission-portal
-  # The ability to use visibility modifiers on constants was added in PHP 7.1
-  # However, the default apt repository of the bootstrap host currently
-  # provides PHP 7.0. Thus, we need to remove the visibility modifiers from
-  # this file to avoid syntax errors. See ENT-12565. We can remove this line
-  # once the default apt repository provides a version >= 7.1
-  sed -i 's/protected const/const/g' ./vendor/tecnickcom/tcpdf/include/tcpdf_static.php
-
   # Add Red Hat Text font to TCPDF library that we use in Mission Portal for PDF generation
   php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Regular.ttf
   php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Bold.ttf
