@@ -1,0 +1,60 @@
+From 17acc166dc4819b2602553795e1ea11291c7a12d Mon Sep 17 00:00:00 2001
+From: Craig Comstock <craig.comstock@northern.tech>
+Date: Tue, 22 Apr 2025 11:41:02 -0500
+Subject: [PATCH] Adjusted configure script for cross-compiling with macro
+ strcasecmp.m4 fixed uptsream in gnulib
+
+diffutils issue: https://lists.gnu.org/archive/html/bug-diffutils/2025-04/msg00003.html
+gnulib fix: https://git.savannah.gnu.org/cgit/gnulib.git/commit/?id=d9083a4cc638cf9c7dfc3cc534a7c6b4debf50ab
+
+configure script adjusted manually
+
+Ticket: none
+Changelog: none
+---
+ configure | 18 ++++++------------
+ 1 file changed, 6 insertions(+), 12 deletions(-)
+
+diff --git a/configure b/configure
+index 26a74d5..0a25163 100755
+--- a/configure
++++ b/configure
+@@ -46249,12 +46249,9 @@ else case e in #(
+      esac
+      if test "$cross_compiling" = yes
+ then :
+-  { { printf '%s\n' "$as_me:${as_lineno-$LINENO}: error: in '$ac_pwd':" >&5
+-printf '%s\n' "$as_me: error: in '$ac_pwd':" >&2;}
+-as_fn_error $? "cannot run test program while cross compiling
+-See 'config.log' for more details" "$LINENO" 5; }
+-else case e in #(
+-  e) cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++  :
++else $as_nop
++  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+ 
+ #include <stdio.h>
+@@ -46277,16 +46274,13 @@ _ACEOF
+ if ac_fn_c_try_run "$LINENO"
+ then :
+   gl_cv_func_strcasecmp_works=yes
+-else case e in #(
+-  e) if test $? = 1; then
++else $as_nop
++  if test $? = 1; then
+           gl_cv_func_strcasecmp_works=no
+         fi
+-        ;;
+-esac
+ fi
+ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+-  conftest.$ac_objext conftest.beam conftest.$ac_ext ;;
+-esac
++  conftest.$ac_objext conftest.beam conftest.$ac_ext
+ fi
+ 
+      ;;
+-- 
+2.39.5
+
