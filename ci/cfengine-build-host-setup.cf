@@ -52,7 +52,6 @@ bundle agent cfengine_build_host_setup
     (debian_10|debian_11).systemssl_build_host::
       "libssl-dev";
     debian.bootstrap_pr_host::
-      "php-curl"; # Required by tecnickcom/tcpdf 6.8.0
       "librsync-dev"; # bootstrap_pr host needs this to run configure and make dist
       "autoconf-archive" comment => "Required to resolve the AX_PTHREAD macro";
 
