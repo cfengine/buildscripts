@@ -49,6 +49,19 @@ fi
 
 P="$BASEDIR/buildscripts/packaging/$PKG"
 
+(
+if [ "$PROJECT-$ROLE" = "nova-hub" ]; then
+  if test -f "$BASEDIR/mission-portal/vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php"; then
+    cd $BASEDIR/mission-portal
+    # Add Red Hat Text font to TCPDF library that we use in Mission Portal for PDF generation
+    $PREFIX/httpd/php/bin/php --version # diagnostic for ENT-12777, keep for future reference
+    $PREFIX/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Regular.ttf
+    $PREFIX/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Bold.ttf
+    $PREFIX/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Italic.ttf
+  fi
+fi
+)
+
 if [ "$BUILDPREFIX" != "/var/cfengine" ]
 then
     safe_prefix="$(echo "$BUILDPREFIX" | sed -e 's:/::g')"
