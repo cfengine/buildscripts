@@ -1,6 +1,7 @@
 #!/usr/bin/make -f
 
 PREFIX=$(BUILDPREFIX)
+CPPFLAGS="-I$(PREFIX)/include"
 
 clean:
 	dh_testdir
@@ -12,6 +13,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	[ $$OS = ubuntu ] && [ `echo $$OS_VERSION | cut -d. -f1` = 16 ] \
+	$(eval CPPFLAGS += "-mno-avx512f")
 	./configure --prefix=$(PREFIX)/httpd/php \
 --with-config-file-scan-dir=$(PREFIX)/httpd/php/lib \
 --with-apxs2=$(PREFIX)/httpd/bin/apxs \
@@ -84,7 +87,7 @@ build-stamp:
 --without-tsrm-pth \
 --without-tsrm-st \
 --without-tsrm-pthreads \
-CPPFLAGS="-I$(PREFIX)/include" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" PKG_CONFIG_PATH="/$(PREFIX)/lib/pkgconfig"
+CPPFLAGS="$(CPPFLAGS)" LD_LIBRARY_PATH="$(PREFIX)/lib" LD_RUN_PATH="/$(PREFIX)/lib" PKG_CONFIG_PATH="/$(PREFIX)/lib/pkgconfig"
 	make
 
 	touch build-stamp
