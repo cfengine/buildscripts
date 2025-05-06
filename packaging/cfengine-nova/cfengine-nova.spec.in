@@ -25,9 +25,13 @@ Requires: libssl.so.1.1()(64bit) libssl.so.1.1(OPENSSL_1_1_0)(64bit) libssl.so.1
 Requires: libcrypto.so.1.1()(64bit) libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)
 %endif
 
+# We build against systems with the latest available dependencies such as OpenSSL.
+# We use rpm -q --provides to determine the highest API present in OpenSSL and then use that as a Requires.
+# OPENSSL_VERSION is determined in build-scripts/package script.
+# This should ensure that when packages are installed with yum/dnf any required OpenSSL package upgrades will be performed or the installation will fail.
 %if %{?rhel}%{!?rhel:0} > 8
-Requires: libcrypto.so.3()(64bit) libcrypto.so.3(OPENSSL_3.0.0)(64bit) libcrypto.so.3(OPENSSL_3.0.1)(64bit)
-Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_3.0.0)(64bit)
+Requires: libcrypto.so.3()(64bit) libcrypto.so.3(OPENSSL_@@OPENSSL_VERSION@@)(64bit)
+Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_@@OPENSSL_VERSION@@)(64bit)
 %endif
 
 AutoReqProv: no
