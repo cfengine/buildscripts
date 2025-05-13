@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+      - 3.21.x
+      - 3.24.x
   workflow_dispatch: # Enables manual trigger
 
 jobs:
