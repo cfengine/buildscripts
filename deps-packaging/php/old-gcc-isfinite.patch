@@ -1,0 +1,30 @@
+--- configure.old	2018-04-24 10:10:05.000000000 -0500
++++ configure	2018-04-26 15:25:46.615652210 -0500
+@@ -94908,7 +94908,7 @@
+ ac_fn_c_check_decl "$LINENO" "isfinite" "ac_cv_have_decl_isfinite" "#include <math.h>
+ "
+ if test "x$ac_cv_have_decl_isfinite" = xyes; then :
+-  ac_have_decl=1
++  ac_have_decl=0
+ else
+   ac_have_decl=0
+ fi
+@@ -94919,7 +94919,7 @@
+ ac_fn_c_check_decl "$LINENO" "isnan" "ac_cv_have_decl_isnan" "#include <math.h>
+ "
+ if test "x$ac_cv_have_decl_isnan" = xyes; then :
+-  ac_have_decl=1
++  ac_have_decl=0
+ else
+   ac_have_decl=0
+ fi
+@@ -94930,7 +94930,7 @@
+ ac_fn_c_check_decl "$LINENO" "isinf" "ac_cv_have_decl_isinf" "#include <math.h>
+ "
+ if test "x$ac_cv_have_decl_isinf" = xyes; then :
+-  ac_have_decl=1
++  ac_have_decl=0
+ else
+   ac_have_decl=0
+ fi
+
