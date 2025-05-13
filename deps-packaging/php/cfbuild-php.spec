@@ -1,4 +1,4 @@
-%define php_version 8.4.6
+%define php_version 8.3.20
 
 Summary: CFEngine Build Automation -- php
 Name: cfbuild-php
@@ -19,9 +19,9 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n php-%{php_version}
 
-if expr "`cat /etc/redhat-release`" : '.* [7]\.'
+if expr "`cat /etc/redhat-release`" : '.* [5]\.'
 then
-  patch -p1 < %{_topdir}/SOURCES/0001-Disable-fancy-intrinsics-stuff.patch
+  patch -p0 < %{_topdir}/SOURCES/old-gcc-isfinite.patch
 fi
 
 ./configure --prefix=%{prefix}/httpd/php \
