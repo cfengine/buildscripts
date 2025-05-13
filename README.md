@@ -158,7 +158,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.49.0 | 2.49.0 | 2.49.0 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.1  | 2.7.1  |
-| [PHP](https://php.net/)                             | 8.3.20 | 8.3.20 | 8.4.6  |
+| [PHP](https://php.net/)                             | 8.3.21 | 8.3.21 | 8.4.6  |
 | [PostgreSQL](https://www.postgresql.org/)           | 15.12  | 16.8   | 17.4   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.65.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
