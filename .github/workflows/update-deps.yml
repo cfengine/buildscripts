@@ -1,0 +1,60 @@
+name: Update dependencies
+
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Run every Monday at 7am UTC
+    #        | | | | |
+    #        | | | | day of the week (0-6) (Sunday to Saturday)
+    #        | | | month (1-12)
+    #        | | day of the month (1-31)
+    #        | hour (0-23)
+    #        minute (0-59)
+  workflow_dispatch: # Enables manual trigger
+
+jobs:
+  update_dependencies:
+    name: Update dependencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      matrix:
+        branch: [master, 3.24.x, 3.21.x]
+    steps:
+      - name: Checks-out repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.branch }}
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install requests
+      - name: Set Git user
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Save commit hash before
+        run: |
+          echo "COMMIT_HASH_BEFORE=$(git log -1 --format=%H)">> $GITHUB_ENV
+      - name: Run update script
+        run: python3 .github/workflows/update-deps.py --debug --bump=${{ matrix.branch == 'master' && 'major' || 'minor' }}
+      - name: Save commit hash after
+        run: |
+          echo "COMMIT_HASH_AFTER=$(git log -1 --format=%H)">> $GITHUB_ENV
+      - name: Create Pull Request
+        if: env.COMMIT_HASH_BEFORE != env.COMMIT_HASH_AFTER
+        uses: cfengine/create-pull-request@v6
+        with:
+          title: "Updated dependencies (${{ matrix.branch }})"
+          body: "Automated dependency updates for the ${{ matrix.branch }} branch"
+          reviewers: |
+            olehermanse
+            larsewi
+            craigcomstock
+          branch: update-dependencies-action-${{ matrix.branch }}
+          branch-suffix: timestamp
