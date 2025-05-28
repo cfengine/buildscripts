@@ -4,8 +4,7 @@ on:
   push:
     branches:
       - master
-      - 3.21.x
-      - 3.24.x
+  workflow_call:
   workflow_dispatch: # Enables manual trigger
 
 jobs:
@@ -18,6 +17,8 @@ jobs:
     steps:
       - name: Checks-out repository
         uses: actions/checkout@v4
+        with:
+          ref: "master"
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
