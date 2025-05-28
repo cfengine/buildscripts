@@ -1,0 +1,13 @@
+name: Update dependency tables (3.21.x)
+
+on:
+  push:
+    branches:
+      - 3.21.x
+
+jobs:
+  update_dep_tables_3_21_x:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: cfengine/buildscripts/.github/workflows/update-dep-tables.yml@master
