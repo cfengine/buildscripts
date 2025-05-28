@@ -83,6 +83,7 @@ CFEngine Build Automation -- libcurl
 
 %dir %prefix/bin
 %prefix/bin/curl
+%prefix/bin/wcurl
 
 %dir %prefix/lib
 %prefix/lib/*.so*
@@ -100,9 +101,3 @@ CFEngine Build Automation -- libcurl
 %prefix/lib/pkgconfig
 
 %changelog
-
-
-
-
-
-
