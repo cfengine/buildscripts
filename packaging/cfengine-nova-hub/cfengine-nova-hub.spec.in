@@ -254,6 +254,7 @@ exit 0
 %prefix/bin/git-upload-archive
 %prefix/bin/git-upload-pack
 %prefix/bin/curl
+%prefix/bin/wcurl
 #postgresql binaries
 %{prefix}/bin/clusterdb
 %{prefix}/bin/createdb
