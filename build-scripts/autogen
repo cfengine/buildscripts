@@ -1,70 +1,85 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 
-. `dirname "$0"`/functions
+#
+# This script runs autogen.sh on each of the CFEngine repositories.
+# Please note that it does not run configure.
+#
+# The script expects the following repositories to exist side by side:
+# .
+# ├── buildscripts
+# ├── core
+# ├── enterprise
+# ├── nova
+# └── masterfiles
+#
+# The script can be run as follows:
+# ```
+# $ PROJECT=[nova|community] ./buildscripts/build-scripts/autogen
+# ```
+#
 
-GITSHAOF="core buildscripts buildscripts/deps-packaging"
+# Get the BASEDIR variable holding the path to where our repos are checked out
+. "$(dirname "$0")/functions"
 
+# Parse the required argument which should be set through the environment
+# variable PROJECT
 case "$PROJECT" in
   community)
     NOVA=no
     ;;
   nova)
     NOVA=yes
-    GITSHAOF="$GITSHAOF enterprise nova"
     ;;
   *)
-    echo "Unknown project: $PROJECT"
+    if [ -z "${PROJECT}" ]; then
+        echo "Error: Expected environment variable PROJECT=[community|nova]"
+    else
+        echo "Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
+    fi
+    echo "Usage: PROJECT=[community|nova] $0"
     exit 42;;
 esac
 
-if test "x$NOVA" = "xyes"
+# Determine which repositories should be included
+projects="core masterfiles"
+if test "$NOVA" = "yes"
 then
-    projects="core enterprise nova masterfiles"
-else
-    projects="core masterfiles"
+    projects="$projects enterprise nova"
 fi
 
-for p in $projects
+# Fail early by checking that the required repositories are present before
+# running the autogen.sh.
+for proj in $projects
 do
-    (cd $BASEDIR/$p && NO_CONFIGURE=1 ./autogen.sh) || false
-done
-# %h (abbreviated commit hash) is not deterministic for length on different systems
-# so far (up to Aug 2023) this didn't matter because one system (bootstrap-oslo-dc)
-# was responsible for doing this autogen work and all other systems used the result.
-# When we migrated from travis to github actions we needed things to be stable between
-# bootstrap-oslo-dc and other systems so will force a length of 7 and check that
-# the result is unique.
-export CORE_ABBREV=7 # adjust this up if need be
-git config --global --add core.abbrev $CORE_ABBREV
-
-for i in $GITSHAOF
-do
-    if [ -d $BASEDIR/$i ] && [ ! -f $BASEDIR/$i/revision ]
-    then
-        R=$(cd $BASEDIR/$i && git log --pretty='format:%h' -1 -- .) || false
-        (
-            cd $BASEDIR/$i
-            if ! git show $R --oneline >/dev/null; then
-                echo "abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
-                exit 1
-            fi
-        )
-        echo $R | tr -d '\n' > $BASEDIR/$i/revision
+    if [ ! -d "$BASEDIR/$proj" ]; then
+        echo "Error: Expected to find the '$proj' repository in '$BASEDIR', but it's not there"
+        exit 1
     fi
 done
 
+# Run autogen.sh on each repository
+for proj in $projects
+do
+    # autogen.sh is quite verbose, so only print the output in case of failure
+    echo "Running autogen.sh for project $proj..."
+    temp_output_file=$(mktemp)
+    if (cd "$BASEDIR/$proj" && NO_CONFIGURE=1 ./autogen.sh) > "$temp_output_file" 2>&1; then
+        rm -f "$temp_output_file"
+    else
+        exit_code=$? # Store exit code for later
+        echo "Error: failed to run autogen.sh ---"
+        echo "--- Start of Output ---"
+        cat "$temp_output_file"
+        rm -f "$temp_output_file"
+        echo "--- End of Output (Exit code: $exit_code) ---"
+        exit $exit_code
+    fi
+done
 
-detected_versions=`echo $projects  \
-    | xargs -n1  \
-    | sed "s|.*|$BASEDIR/&/CFVERSION|"  \
-    | xargs cat`
-number_of_different_versions=`echo $detected_versions  \
-    | tr ' ' '\n'  \
-    | sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/'  \
-    | uniq  |  wc -l`
+# Create revision files (containing the N first hex decimals from the last
+# commit of the current branch)
+./"$(dirname "$0")/revision-file"
 
-if [ x"$number_of_different_versions" != x1 ]
-then
-    echo "Detected versions mismatch:" "$detected_versions"  1>&2
-    exit 33
-fi
+# Compare versions between the CFEngine repositories to make sure they
+# match
+./"$(dirname "$0")/compare-versions"

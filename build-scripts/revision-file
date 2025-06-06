@@ -1,0 +1,79 @@
+#!/bin/sh -e
+
+#
+# This script called by the autogen script and generates a revision file for
+# each of the following directories:
+# ├── buildscripts
+# │   └── deps_packaging
+# ├── core
+# ├── enterprise
+# └── nova
+#
+# The revision contains the N first hexadecimals from the last commit on the
+# current branch.
+#
+# TODO: Explain what the revision files are used for. Why are there five?
+#
+# The script can be run as follows:
+# ```
+# $ PROJECT=[nova|community] ./buildscripts/build-scripts/autogen
+# ```
+#
+
+# Get the BASEDIR variable holding the path to where our repos are checked out
+. "$(dirname "$0")/functions"
+
+# Adjust this up in case of hash collisions
+CORE_ABBREV=7
+
+# Parse the required argument which should be set through the environment
+# variable PROJECT
+case "$PROJECT" in
+  community)
+    NOVA=no
+    ;;
+  nova)
+    NOVA=yes
+    ;;
+  *)
+    if [ -z "${PROJECT}" ]; then
+        echo "Error: Expected environment variable PROJECT=[community|nova]"
+    else
+        echo "Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
+    fi
+    echo "Usage: PROJECT=[community|nova] $0"
+    exit 42;;
+esac
+
+# Determine which repositories should be included
+_dirs="core buildscripts buildscripts/deps-packaging"
+if test "$NOVA" = "yes"
+then
+    _dirs="$_dirs enterprise nova"
+fi
+
+for _dir in $_dirs
+do
+    if [ -d "$BASEDIR/$_dir" ]; then
+        if [ ! -f "$BASEDIR/$_dir/revision" ]; then
+            echo "Creating revision file in $_dir"
+
+            # Get the revision hash
+            R=$(git -C "$BASEDIR/$_dir" log --abbrev=$CORE_ABBREV --pretty='format:%h' -1 -- .) || false
+
+            # Make sure there are no hash collisions
+            if ! git -C "$BASEDIR/$_dir" show "$R" --oneline >/dev/null; then
+                echo "abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
+                exit 1
+            fi
+
+            # Create the revision file
+            echo "$R" | tr -d '\n' > "$BASEDIR/$_dir/revision"
+        else
+            echo "Revision file already exists in $_dir"
+        fi
+    else
+        echo "Error: Expected to find the '$_dir' directory in '$BASEDIR', but it's not there"
+        exit 1
+    fi
+done

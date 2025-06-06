@@ -1,0 +1,66 @@
+#!/bin/sh -e
+
+#
+# This script is called by the autogen scrip and compares the versions between
+# the CFEngine repositories. The script exits with code 33 in case of version
+# mismatch.
+#
+# The script expects the following repositories to exist side by side:
+# .
+# ├── core
+# ├── enterprise
+# ├── nova
+# └── masterfiles
+#
+# The script can be run as follows:
+# ```
+# $ PROJECT=[nova|community] ./buildscripts/build-scripts/compare-versions
+# ```
+#
+
+# Get the BASEDIR variable holding the path to where our repos are checked out
+. "$(dirname "$0")/functions"
+
+# Parse the required argument which should be set through the environment
+# variable PROJECT
+case "$PROJECT" in
+  community)
+    NOVA=no
+    ;;
+  nova)
+    NOVA=yes
+    ;;
+  *)
+    if [ -z "${PROJECT}" ]; then
+        echo "Error: Expected environment variable PROJECT=[community|nova]"
+    else
+        echo "Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
+    fi
+    echo "Usage: PROJECT=[community|nova] $0"
+    exit 42;;
+esac
+
+# Determine which repositories to compare versions between
+projects="core masterfiles"
+if test "$NOVA" = "yes"
+then
+    projects="$projects enterprise nova"
+fi
+
+# Compare versions between projects (yes this code also compares each project to
+# themselves, however, in my opinion it reads better this way)
+for proj_i in $projects; do
+    for proj_j in $projects; do
+        # The CFVERSION file is read into the tr command which removes
+        # whitespace and the sed command extracts the major, minor & patch
+        # version number from the string.
+        version_i=$(< "$BASEDIR/$proj_i/CFVERSION" tr ' ' '\n'  \
+            | sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
+        version_j=$(< "$BASEDIR/$proj_j/CFVERSION" tr ' ' '\n'  \
+            | sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
+        if [ "$version_i" != "$version_j" ]; then
+            echo "Detected version mismatch: $proj_i $version_i != $proj_j $version_j"
+            exit 33
+        fi
+    done
+done
