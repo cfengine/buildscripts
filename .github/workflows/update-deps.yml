@@ -50,7 +50,7 @@ jobs:
           echo "COMMIT_HASH_AFTER=$(git log -1 --format=%H)">> $GITHUB_ENV
       - name: Create Pull Request
         if: env.COMMIT_HASH_BEFORE != env.COMMIT_HASH_AFTER
-        uses: cfengine/create-pull-request@v6
+        uses: cfengine/create-pull-request@v7
         with:
           title: "Updated dependencies (${{ matrix.branch }})"
           body: "Automated dependency updates for the ${{ matrix.branch }} branch"
@@ -58,5 +58,6 @@ jobs:
             olehermanse
             larsewi
             craigcomstock
+            aleksandrychev
           branch: update-dependencies-action-${{ matrix.branch }}
           branch-suffix: timestamp
