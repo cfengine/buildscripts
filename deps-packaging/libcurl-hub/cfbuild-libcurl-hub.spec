@@ -1,4 +1,4 @@
-%define curl_version 8.13.0
+%define curl_version 8.14.0
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl-hub
@@ -32,20 +32,13 @@ mkdir -p %{_builddir}
     --disable-ldap \
     --disable-ldaps \
     --disable-ntlm \
-    --without-axtls \
-    --without-cyassl \
-    --without-egd-socket \
     --without-gnutls \
     --without-gssapi \
-    --without-libidn \
     --without-libpsl \
     --without-librtmp \
     --without-libssh2 \
     --without-nghttp2 \
-    --without-nss \
-    --without-polarssl \
     --without-winidn \
-    --without-winssl \
     --prefix=%{prefix} \
     CPPFLAGS="-I%{prefix}/include" \
     LD_LIBRARY_PATH="%{prefix}/lib" \
@@ -83,6 +76,7 @@ CFEngine Build Automation -- libcurl
 
 %dir %prefix/bin
 %prefix/bin/curl
+%prefix/bin/wcurl
 
 %dir %prefix/lib
 %prefix/lib/*.so*
@@ -100,9 +94,3 @@ CFEngine Build Automation -- libcurl
 %prefix/lib/pkgconfig
 
 %changelog
-
-
-
-
-
-

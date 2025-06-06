@@ -60,6 +60,7 @@ rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/curl
+rm -f $RPM_BUILD_ROOT%{prefix}/bin/wcurl
 rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 
 # For el9+ and suse-15+ we started seeing issues from other packages not expecting init scripts
