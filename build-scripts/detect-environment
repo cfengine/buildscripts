@@ -13,8 +13,11 @@ then
     exit 100
 fi
 
-
-detect_labels()
+# Detects and sets the CROSS_TARGET environment variable based on patterns
+# in the label variable (see labels.txt), specifically for MinGW cross-
+# compilation targets. However, if CROSS_TARGET is already set in the
+# environment it will take precedence.
+detect_cross_target()
 {
   case "$label" in
     *_x86_64_mingw*)
@@ -26,6 +29,12 @@ detect_labels()
       export CROSS_TARGET
       ;;
   esac
+
+  if [ -n "$CROSS_TARGET" ]; then
+    echo "Detected cross target $CROSS_TARGET"
+  else
+    echo "No cross target detected"
+  fi
 }
 
 detect_os()
@@ -365,7 +374,7 @@ detect_cores()
 
 detect_environment()
 {
-  detect_labels
+  detect_cross_target
   detect_os
   detect_packaging
   detect_arch
