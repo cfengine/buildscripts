@@ -13,8 +13,11 @@ then
     exit 100
 fi
 
-
-detect_labels()
+# Detects and sets the CROSS_TARGET environment variable based on patterns
+# in the label variable, specifically for MinGW cross-compilation targets.
+# However, if CROSS_TARGET is already set in the environment it will take
+# precedence.
+detect_cross_target()
 {
   case "$label" in
     *_x86_64_mingw*)
@@ -26,6 +29,12 @@ detect_labels()
       export CROSS_TARGET
       ;;
   esac
+
+  if [ -n "$CROSS_TARGET" ]; then
+    echo "Detected cross target $CROSS_TARGET"
+  else
+    echo "No cross target detected"
+  fi
 }
 
 detect_os()
@@ -33,43 +42,51 @@ detect_os()
   case "$CROSS_TARGET" in
     '')
       case "$UNAME_S" in
-	Linux)
+	    Linux)
           OS_FAMILY=linux
-          detect_distribution;;
-	SunOS)
+          detect_distribution
+          ;;
+	    SunOS)
           OS_FAMILY=solaris
           OS=solaris
-          OS_VERSION=`echo $UNAME_R | sed -e 's/^5\.//'`
+          OS_VERSION=$(echo "$UNAME_R" | sed -e 's/^5\.//')
           ;;
-	AIX)
+	    AIX)
           OS_FAMILY=aix
-          OS_VERSION=`uname -v`.$UNAME_R
+          OS_VERSION=$(uname -v).$UNAME_R
           OS=aix
           unset LIBPATH
           ;;
-	Darwin)
+	    Darwin)
           OS_FAMILY=darwin
-          OS=darwin;;
-	FreeBSD)
+          OS=darwin
+          ;;
+	    FreeBSD)
           OS_FAMILY=freebsd
-          OS=freebsd;;
-	NetBSD)
+          OS=freebsd
+          ;;
+	    NetBSD)
           OS_FAMILY=netbsd
-          OS=netbsd;;
+          OS=netbsd
+          ;;
         HP-UX)
           OS_FAMILY=hpux
-          OS=hpux;;
-	*)
-	  echo "Unable to detect operating system: $UNAME_S"
-	  exit 42;;
+          OS=hpux
+          ;;
+	    *)
+	      echo "Unable to detect operating system: $UNAME_S"
+	      exit 42
+	      ;;
       esac
       ;;
     *-mingw)
       OS_FAMILY=mingw
-      OS=mingw;;
+      OS=mingw
+      ;;
     *)
       echo "Unknown cross-compilation target: $CROSS_TARGET"
-      exit 42;;
+      exit 42
+      ;;
   esac
 
   export OS OS_VERSION
@@ -82,7 +99,7 @@ detect_distribution()
     case "$REL" in
       "CentOS "*)
         VER="$(echo "$REL" | sed -e 's/^CentOS.* release \([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')"
-        if ! echo "$VER" | egrep '^[0-9]+\.[0-9]+$' > /dev/null
+        if ! echo "$VER" | grep -E '^[0-9]+\.[0-9]+$' > /dev/null
         then
           echo "Unknown CentOS version: $VER"
           exit 42
@@ -116,7 +133,7 @@ detect_distribution()
       "Red Hat Enterprise Linux Server release "*)
         VER=${REL#Red Hat Enterprise Linux Server release }
         VER=${VER% \(*};
-        if ! echo "$VER" | egrep '^[0-9]+.[0-9]+$' > /dev/null
+        if ! echo "$VER" | grep -E '^[0-9]+.[0-9]+$' > /dev/null
         then
           echo "Unknown RHEL Server version: $VER"
           exit 42
@@ -129,7 +146,7 @@ detect_distribution()
       "Red Hat Enterprise Linux release "*)
         VER=${REL#Red Hat Enterprise Linux release }
         VER=${VER% \(*};
-        if ! echo "$VER" | egrep '^[0-9]+.[0-9]+$' > /dev/null
+        if ! echo "$VER" | grep -E '^[0-9]+.[0-9]+$' > /dev/null
         then
           echo "Unknown RHEL Server version: $VER"
           exit 42
@@ -158,7 +175,7 @@ detect_distribution()
     OS_VERSION="$REL"
   elif [ -f /etc/debian_version ]; then
     REL=$(cat /etc/debian_version)
-    if ! echo "$REL" | egrep '^[0-9]+\.[0-9]+(\.[0-9]+)?$' > /dev/null
+    if ! echo "$REL" | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' > /dev/null
     then
       case "$REL" in
         wheezy*)
@@ -191,7 +208,7 @@ detect_distribution()
         MAJOR=$(grep '^VERSION' /etc/SuSE-release | awk '{print $3}')
         MINOR=$(grep '^PATCHLEVEL' /etc/SuSE-release | awk '{print $3}')
 
-        if [ -z "$MAJOR" -o -z "$MINOR" ]; then
+        if [ -z "$MAJOR" ] || [ -z "$MINOR" ]; then
           echo "Unable to detect version of SLES: $MAJOR.$MINOR"
         fi
 
@@ -270,9 +287,9 @@ detect_arch()
 {
   case "$DEP_PACKAGING" in
     deb)
-      ARCH=`dpkg --print-architecture`;;
+      ARCH=$(dpkg --print-architecture);;
     rpm)
-      ARCH=`rpm --eval '%{_arch}'`;;
+      ARCH=$(rpm --eval '%{_arch}');;
     solaris)
       case $UNAME_M in
         sun*)
@@ -313,7 +330,7 @@ detect_tools()
 {
     # We look for GNU Make because
     # various dependencies have various requirements
-    MAKE=`func_whereis gmake make`
+    MAKE=$(func_whereis gmake make)
 
     if $MAKE -v | grep GNU
     then
@@ -322,17 +339,17 @@ detect_tools()
         fatal "GNU Make not found"
     fi
 
-    if [ "x$OS" = "xaix" ] && [ "x$OS_VERSION" = "x5.3" ]; then
+    if [ "$OS" = "aix" ] && [ "$OS_VERSION" = "5.3" ]; then
         RPMBUILD_CMD=rpm
     else
         RPMBUILD_CMD=rpmbuild
     fi
     export RPMBUILD_CMD
 
-    FUSER=`func_whereis fuser`
+    FUSER=$(func_whereis fuser)
     export FUSER
 
-    PATCH=`func_whereis gpatch patch`
+    PATCH=$(func_whereis gpatch patch)
     export PATCH
 }
 
@@ -341,16 +358,16 @@ detect_cores()
   case "$OS_FAMILY" in
     aix)
       echo "Detected OS family is aix"
-      NUM_CORES="$(lscfg | grep proc | wc -l)";;
+      NUM_CORES="$(lscfg | grep -c proc)";;
     solaris)
       echo "Detected OS family is solaris"
       NUM_CORES="$(psrinfo |wc -l)";;
     linux)
       echo "Detected OS family is linux"
-      NUM_CORES="$(cat /proc/cpuinfo | grep '^processor' | wc -l)";;
+      NUM_CORES="$(> /proc/cpuinfo grep -c '^processor')";;
     hpux)
       echo "Detected OS family is hpux"
-      NUM_CORES="$(ioscan -k -C processor |grep processor | wc -l)";;
+      NUM_CORES="$(ioscan -k -C processor | grep -c processor)";;
     *)
       echo "Detected OS family is UNKNOWN, defaulting amount of CPU cores to 1"
       NUM_CORES=1;;
@@ -358,13 +375,14 @@ detect_cores()
 
   # Make number of jobs one higher than core count, to account for I/O, network, etc.
   echo "Detected amount of CPU cores is $NUM_CORES"
-  MAKEFLAGS="${MAKEFLAGS:--j$(($NUM_CORES + 1))}"
+  # +1 to keep CPUs busy even during I/O waits, for example.
+  MAKEFLAGS="${MAKEFLAGS:--j$((NUM_CORES + 1))}"
   export MAKEFLAGS
 }
 
 detect_environment()
 {
-  detect_labels
+  detect_cross_target
   detect_os
   detect_packaging
   detect_arch
