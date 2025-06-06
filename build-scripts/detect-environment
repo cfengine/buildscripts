@@ -42,43 +42,51 @@ detect_os()
   case "$CROSS_TARGET" in
     '')
       case "$UNAME_S" in
-	Linux)
+        Linux)
           OS_FAMILY=linux
-          detect_distribution;;
-	SunOS)
+          detect_distribution
+          ;;
+        SunOS)
           OS_FAMILY=solaris
           OS=solaris
           OS_VERSION=$(echo "$UNAME_R" | sed -e 's/^5\.//')
           ;;
-	AIX)
+        AIX)
           OS_FAMILY=aix
           OS_VERSION=$(uname -v).$UNAME_R
           OS=aix
           unset LIBPATH
           ;;
-	Darwin)
+        Darwin)
           OS_FAMILY=darwin
-          OS=darwin;;
-	FreeBSD)
+          OS=darwin
+          ;;
+        FreeBSD)
           OS_FAMILY=freebsd
-          OS=freebsd;;
-	NetBSD)
+          OS=freebsd
+          ;;
+        NetBSD)
           OS_FAMILY=netbsd
-          OS=netbsd;;
+          OS=netbsd
+          ;;
         HP-UX)
           OS_FAMILY=hpux
-          OS=hpux;;
-	*)
-	  echo "Unable to detect operating system: $UNAME_S"
-	  exit 42;;
+          OS=hpux
+          ;;
+        *)
+          echo "Unable to detect operating system: $UNAME_S"
+          exit 42
+          ;;
       esac
       ;;
     *-mingw)
       OS_FAMILY=mingw
-      OS=mingw;;
+      OS=mingw
+      ;;
     *)
       echo "Unknown cross-compilation target: $CROSS_TARGET"
-      exit 42;;
+      exit 42
+      ;;
   esac
 
   export OS OS_VERSION
