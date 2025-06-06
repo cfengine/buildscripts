@@ -58,5 +58,6 @@ jobs:
             olehermanse
             larsewi
             craigcomstock
+            aleksandrychev
           branch: update-dependencies-action-${{ matrix.branch }}
           branch-suffix: timestamp
