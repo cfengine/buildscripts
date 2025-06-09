@@ -9,8 +9,8 @@
 
 if [ "$_IS_FUNCTIONS_SOURCED" != yes ]
 then
-    echo 'FATAL: You must source "functions" script before "detect-environment"!'
-    exit 100
+  echo 'FATAL: You must source "functions" script before "detect-environment"!'
+  exit 100
 fi
 
 # Detects and sets the CROSS_TARGET environment variable based on patterns
