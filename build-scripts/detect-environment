@@ -197,24 +197,8 @@ detect_distribution()
     REL=$(cat /etc/debian_version)
     if ! echo "$REL" | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' > /dev/null
     then
-      case "$REL" in
-        wheezy*)
-          REL=7.0
-          ;;
-        jessie*)
-          REL=8.0
-          ;;
-        stretch*)
-          REL=9.0
-          ;;
-        buster*)
-          REL=10.0
-          ;;
-        *)
-          echo "Unable to detect version of Debian: $REL"
-          exit 42
-          ;;
-      esac
+      echo "Unable to detect version of Debian: $REL"
+      exit 42
     fi
 
     OS=debian
