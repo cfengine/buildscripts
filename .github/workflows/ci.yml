@@ -2,7 +2,7 @@ name: Continuous Integration
 
 # Run this CI on all pushes to upstream
 # (including PRs from upstream to upstream)
-on: push
+on: pull_request
 
 jobs:
   build_cfengine_hub_package:
