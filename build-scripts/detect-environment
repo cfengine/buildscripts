@@ -107,12 +107,18 @@ detect_os()
   export OS OS_VERSION
 }
 
+# The uname command does not reveal the specific distribution on Linux. Hence,
+# we'll need to parse it from different files located in the /etc/ directory.
+# Unfortunately, there is no standard across the existing distributions. Thus,
+# this is going to be a bit messy.
 detect_distribution()
 {
   if [ -f /etc/redhat-release ]; then
     REL=$(cat /etc/redhat-release)
     case "$REL" in
       "CentOS "*)
+        # Example output for CentOS:
+        # CentOS Linux release 7.6.1810 (Core)
         VER="$(echo "$REL" | sed -e 's/^CentOS.* release \([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')"
         if ! echo "$VER" | grep -E '^[0-9]+\.[0-9]+$' > /dev/null
         then
@@ -180,8 +186,29 @@ detect_distribution()
         ;;
     esac
   elif [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release; then
+    # This file was introduced by Linux Standard Base (LSB) which an attempt to
+    # standardize the Linux ecosystem. Unfortunately it was not adopted by many
+    # Linux distributions. Ubuntu dropped the support for LSB in 2015. However,
+    # the /etc/lsb-release file is still available as of Ubuntu 24.
+    #
+    # It might be naive to assume the file will continue to exist and that the
+    # existence of the file is only present in Ubuntu. Hence, if this breaks in
+    # the future, you'll know why.
+    #
+    # Example output of /etc/lsb-release:
+    #
+    # DISTRIB_ID=Ubuntu
+    # DISTRIB_RELEASE=24.04
+    # DISTRIB_CODENAME=noble
+    # DISTRIB_DESCRIPTION="Ubuntu 24.04.2 LTS"
+
+    # Get the line containing 'DISTRIB_RELEASE='
     REL=$(grep DISTRIB_RELEASE= /etc/lsb-release)
+
+    # Remove the 'DISTRIB_RELEASE=' part
     REL=${REL#DISTRIB_RELEASE=}
+
+    # Verify that we can find a valid version number
     case "$REL" in
       [0-9][0-9].[0-9][0-9])
         ;;
@@ -194,6 +221,11 @@ detect_distribution()
     OS=ubuntu
     OS_VERSION="$REL"
   elif [ -f /etc/debian_version ]; then
+    # This file contains only the version number.
+    #
+    # Example output of /etc/debian_version
+    # 12.11
+
     REL=$(cat /etc/debian_version)
     if ! echo "$REL" | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' > /dev/null
     then
@@ -233,6 +265,17 @@ detect_distribution()
   elif [ -f /etc/os-release ]; then
     # see https://en.opensuse.org/SDB:Find_openSUSE_version for rules of
     # parsing this file
+
+    # Example output for /etc/os-release:
+    #
+    # NAME="SLES"
+    # VERSION="12-SP5"
+    # VERSION_ID="12.5"
+    # PRETTY_NAME="SUSE Linux Enterprise Server 12 SP5"
+    # ID="sles"
+    # ANSI_COLOR="0;32"
+    # CPE_NAME="cpe:/o:suse:sles:12:sp5"
+
     os="$(sh -c ". /etc/os-release; echo \$ID")"
     ver="$(sh -c ". /etc/os-release; echo \$VERSION_ID")"
     if [ "$os" = "sles" ]; then
