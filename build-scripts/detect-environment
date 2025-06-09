@@ -119,72 +119,31 @@ detect_distribution()
       "CentOS "*)
         # Example output for CentOS:
         # CentOS Linux release 7.6.1810 (Core)
-        VER="$(echo "$REL" | sed -e 's/^CentOS.* release \([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')"
-        if ! echo "$VER" | grep -E '^[0-9]+\.[0-9]+$' > /dev/null
-        then
-          echo "Unknown CentOS version: $VER"
-          exit 42
-        fi
-
         OS=centos
-        OS_VERSION="$VER"
         ;;
-      "Red Hat Enterprise Linux AS release "*)
-        VER=${REL#Red Hat Enterprise Linux AS release }
-        case "$VER" in
-          [0-9]" "*)
-            MAJOR=${VER%% *}
-            ;;
-          *)
-            echo "Unknown RHEL AS major version: $VER"
-            exit 42
-            ;;
-        esac
-
-        case "$VER" in
-          *Update" "[0-9]")")
-            MINOR=${VER#*Update }
-            MINOR=${MINOR%\)};;
-          *)
-            echo "Unknnown RHEL AS minor version: $VER"
-            exit 42
-            ;;
-        esac
-
+      "Red Hat Enterprise Linux "*)
+        # Example output for RHEL:
+        # Red Hat Enterprise Linux release 8.10 (Ootpa)
         OS=rhel
-        OS_VERSION="$MAJOR.$MINOR"
         ;;
-      "Red Hat Enterprise Linux Server release "*)
-        VER=${REL#Red Hat Enterprise Linux Server release }
-        VER=${VER% \(*};
-        if ! echo "$VER" | grep -E '^[0-9]+.[0-9]+$' > /dev/null
-        then
-          echo "Unknown RHEL Server version: $VER"
-          exit 42
-        fi
-
-        OS=rhel
-        OS_VERSION="$VER"
-        ;;
-
-      "Red Hat Enterprise Linux release "*)
-        VER=${REL#Red Hat Enterprise Linux release }
-        VER=${VER% \(*};
-        if ! echo "$VER" | grep -E '^[0-9]+.[0-9]+$' > /dev/null
-        then
-          echo "Unknown RHEL Server version: $VER"
-          exit 42
-        fi
-
-        OS=rhel
-        OS_VERSION="$VER"
-        ;;
-
       *)
-        echo "Unknown RedHat-like distribution: $REL"
+        echo "Error: Could not determine Linux distro from /etc/redhat-release: $REL"
         exit 42
         ;;
     esac
+
+    # Common for all of these is that the version number starts just after the
+    # substring 'release '. Hence we reset the match (with \K) just after
+    # substring and extract the major and minor version.
+    version_string=$(echo "$REL" | grep -oP 'release \K\d+\.\d+')
+
+    # Make sure we actually found a match
+    if [ -z "$version_string" ]; then
+      echo "Error: Could not determine version number from /etc/redhat-release: $REL"
+      exit 42
+    fi
+    OS_VERSION=$version_string
+
   elif [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release; then
     # This file was introduced by Linux Standard Base (LSB) which an attempt to
     # standardize the Linux ecosystem. Unfortunately it was not adopted by many
