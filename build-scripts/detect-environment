@@ -37,10 +37,21 @@ detect_cross_target()
   fi
 }
 
+# This function exports operating system specific variables:
+#  - OS          usually contains a specific distribution (e.g. Debian)
+#  - OS_VERSION  operating system version (but is not always defined)
+#
+# Furthermore, the following variable is set, but it's not exported:
+#  - OS_FAMILY   usually contains the kernel name (e.g. Linux)
 detect_os()
 {
   case "$CROSS_TARGET" in
     '')
+      # The UNAME_S, UNAME_R and UNAME_V variables are set in the "functions"
+      # script from the command substitution of `uname -s`, `uname -r` and
+      # `uname -v` which outputs the kernel name, the kernel release and the
+      # kernel version respectively.
+
       case "$UNAME_S" in
         Linux)
           OS_FAMILY=linux
@@ -55,6 +66,10 @@ detect_os()
           OS_FAMILY=aix
           OS_VERSION=$(uname -v).$UNAME_R
           OS=aix
+          # LIBPATH on AIX serves the same function as LD_LIBRARY_PATH on
+          # Linux. However, Java also uses this environment variable, and it
+          # apparently messes with the library look-ups during packaging. This
+          # line definitely doesn't belong here. But I'll leave it for now.
           unset LIBPATH
           ;;
         Darwin)
