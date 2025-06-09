@@ -127,10 +127,12 @@ detect_distribution()
         VER=${REL#Red Hat Enterprise Linux AS release }
         case "$VER" in
           [0-9]" "*)
-            MAJOR=${VER%% *};;
+            MAJOR=${VER%% *}
+            ;;
           *)
             echo "Unknown RHEL AS major version: $VER"
-            exit 42;;
+            exit 42
+            ;;
         esac
 
         case "$VER" in
@@ -139,7 +141,8 @@ detect_distribution()
             MINOR=${MINOR%\)};;
           *)
             echo "Unknnown RHEL AS minor version: $VER"
-            exit 42;;
+            exit 42
+            ;;
         esac
 
         OS=rhel
@@ -173,7 +176,8 @@ detect_distribution()
 
       *)
         echo "Unknown RedHat-like distribution: $REL"
-        exit 42;;
+        exit 42
+        ;;
     esac
   elif [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release; then
     REL=$(grep DISTRIB_RELEASE= /etc/lsb-release)
@@ -183,7 +187,8 @@ detect_distribution()
         ;;
       *)
         echo "Unknown Ubuntu release: $REL"
-        exit 42;;
+        exit 42
+        ;;
     esac
 
     OS=ubuntu
@@ -207,7 +212,8 @@ detect_distribution()
           ;;
         *)
           echo "Unable to detect version of Debian: $REL"
-          exit 42;;
+          exit 42
+          ;;
       esac
     fi
 
@@ -237,7 +243,8 @@ detect_distribution()
         ;;
       *)
         echo "Unknown SUSE distribution: $REL"
-        exit 42;;
+        exit 42
+        ;;
     esac
   elif [ -f /etc/os-release ]; then
     # see https://en.opensuse.org/SDB:Find_openSUSE_version for rules of
