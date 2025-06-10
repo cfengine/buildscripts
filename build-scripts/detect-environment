@@ -254,9 +254,11 @@ detect_packaging()
 
   case "$OS" in
     aix)
-      PACKAGING=lpp;;
+      PACKAGING=lpp
+      ;;
     mingw)
-      PACKAGING=msi;;
+      PACKAGING=msi
+      ;;
     *)
       PACKAGING=$DEP_PACKAGING;;
   esac
