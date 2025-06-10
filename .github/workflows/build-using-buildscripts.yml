@@ -31,6 +31,18 @@ jobs:
         with:
           myToken: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Checkout Buildscripts
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/buildscripts
+          path: buildscripts
+          fetch-depth: 20
+
+      - name: Get base ref
+# we use on:push in ../ci.yml when calling this workflow and that event does not include github.base_ref so we must calculate it here in case
+        run: |
+          git rev-parse --abbrev-ref @{upstream}
+
       - name: Checkout Core
         uses: actions/checkout@v3
         with:
@@ -45,12 +57,6 @@ jobs:
           repository: cfengine/masterfiles
           path: masterfiles
           ref: ${{steps.together.outputs.masterfiles || github.base_ref}}
-
-      - name: Checkout Buildscripts (current project)
-        uses: actions/checkout@v3
-        with:
-          path: buildscripts
-          fetch-depth: 20
 
       - name: Checkout Nova
         uses: actions/checkout@v3
