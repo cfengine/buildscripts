@@ -331,6 +331,9 @@ detect_arch()
   export ARCH
 }
 
+# This function detects the path to various tools needed by the build system.
+# It's useful if the specified tool is not in PATH, or if the PATH resolution
+# picks up the wrong tool, or if e.g. gmake is preferred over make.
 detect_tools()
 {
     # We look for GNU Make because
@@ -347,9 +350,12 @@ detect_tools()
 
     export RPMBUILD_CMD=rpmbuild
 
+    # fuser displays the PIDs of processes using specified files or file
+    # systems. We use it to kill processes that can mess with the build process.
     FUSER=$(func_whereis fuser)
     export FUSER
 
+    # We use patch to apply patches to the dependencies.
     PATCH=$(func_whereis gpatch patch)
     export PATCH
 }
