@@ -365,20 +365,24 @@ detect_cores()
   case "$OS_FAMILY" in
     aix)
       echo "Detected OS family is aix"
-      NUM_CORES="$(lscfg | grep -c proc)";;
+      NUM_CORES="$(lscfg | grep -c proc)"
+      ;;
     solaris)
       echo "Detected OS family is solaris"
-      NUM_CORES="$(psrinfo |wc -l)";;
+      NUM_CORES="$(psrinfo |wc -l)"
+      ;;
     linux)
       echo "Detected OS family is linux"
       NUM_CORES="$(grep -c '^processor' /proc/cpuinfo)"
       ;;
     hpux)
       echo "Detected OS family is hpux"
-      NUM_CORES="$(ioscan -k -C processor | grep -c processor)";;
+      NUM_CORES="$(ioscan -k -C processor | grep -c processor)"
+      ;;
     *)
       echo "Detected OS family is UNKNOWN, defaulting amount of CPU cores to 1"
-      NUM_CORES=1;;
+      NUM_CORES=1
+      ;;
   esac
 
   # Make number of jobs one higher than core count, to account for I/O, network, etc.
