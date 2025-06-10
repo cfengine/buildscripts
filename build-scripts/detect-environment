@@ -417,7 +417,7 @@ detect_environment
 echo
 echo
 echo "==================== Current environment ========================"
-env
+env | grep -E "(label|CROSS_TARGET|UNAME|OS|DEP_PACKAGING|ARCH|MAKE|FUSER|PATCH|MAKEFLAGS)"
 echo "================================================================="
 echo
 echo
