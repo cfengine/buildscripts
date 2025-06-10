@@ -405,6 +405,9 @@ detect_environment()
   detect_cores
 }
 
+# The env before detecting environment (to be compared with env after)
+env | sort > "env_before"
+
 #
 # We need to detect the following pieces of data:
 #  - distribution
@@ -419,7 +422,12 @@ detect_environment
 echo
 echo
 echo "==================== Current environment ========================"
-env
+# Print only what changed in the environment after sourcing this script
+# - Lines staring with + are kept (these are things added to env)
+# - Lines staring with +++ is filtered out (removes the "new file" header)
+# - The + character is removed
+env | sort | diff -u env_before - | grep '^\+' | grep -v '^+++' | sed 's/+//'
+unlink env_before
 echo "================================================================="
 echo
 echo
