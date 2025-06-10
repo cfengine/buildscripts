@@ -341,7 +341,8 @@ detect_tools()
     then
         export MAKE
     else
-        fatal "GNU Make not found"
+        echo "Error: GNU Make not found"
+        exit 42
     fi
 
     export RPMBUILD_CMD=rpmbuild
