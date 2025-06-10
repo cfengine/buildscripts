@@ -344,13 +344,6 @@ detect_tools()
         fatal "GNU Make not found"
     fi
 
-    if [ "$OS" = "aix" ] && [ "$OS_VERSION" = "5.3" ]; then
-        RPMBUILD_CMD=rpm
-    else
-        RPMBUILD_CMD=rpmbuild
-    fi
-    export RPMBUILD_CMD
-
     FUSER=$(func_whereis fuser)
     export FUSER
 

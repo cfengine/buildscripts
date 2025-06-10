@@ -112,7 +112,7 @@ fi
 # example cmd --define 'a b':
 #     - argv[1] = --define
 #     - argv[2] = a b
-eval $RPMBUILD_CMD -bb \
+eval rpmbuild -bb \
   --define "'_topdir $BASEDIR/$PKGNAME'" \
   --define "'version $VERSION'" \
   --define "'buildprefix $BUILDPREFIX'" \
