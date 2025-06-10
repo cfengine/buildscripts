@@ -272,6 +272,9 @@ detect_packaging()
   export DEP_PACKAGING PACKAGING
 }
 
+# This function determines which architecture to build for based on the system
+# we're building on. Unless we are cross compiling, then it's determined by the
+# CROSS_TARGET variable.
 detect_arch()
 {
   case "$DEP_PACKAGING" in
@@ -307,6 +310,9 @@ detect_arch()
       ;;
   esac
 
+  # We need to determine the architecture based on the 'CROSS_TARGET' variable
+  # which is derived from the 'label' variable instead of the system that we
+  # are building on.
   case "$CROSS_TARGET" in
     '')
       ;;
