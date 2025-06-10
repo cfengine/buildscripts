@@ -1,6 +1,7 @@
 name: Continuous Integration
 
 on: pull_request
+permissions: read-all
 
 jobs:
   build_cfengine_hub_package:
