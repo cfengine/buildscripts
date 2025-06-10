@@ -62,6 +62,13 @@ case "$OS_FAMILY" in
     ;;
   hpux)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,+b$BUILDPREFIX/lib"
+
+    # Use ‘gcc’ when building things on HP-UX
+    #
+    # HP-UX ships with ‘cc’ which invokes the ‘HP-UX bundled C compiler’ which
+    # lacks some functionality we need to build things. Among the other things,
+    # it doesn’t know how to link ‘.so’ files directly and it doesn’t recognize
+    # them as valid input type.
     CC=gcc
     export CC
     ;;
