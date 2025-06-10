@@ -274,40 +274,52 @@ detect_arch()
 {
   case "$DEP_PACKAGING" in
     deb)
-      ARCH=$(dpkg --print-architecture);;
+      ARCH=$(dpkg --print-architecture)
+      ;;
     rpm)
-      ARCH=$(rpm --eval '%{_arch}');;
+      ARCH=$(rpm --eval '%{_arch}')
+      ;;
     solaris)
       case $UNAME_M in
         sun*)
-          ARCH=sparc;;
+          ARCH=sparc
+          ;;
         i86pc)
-          ARCH=i86pc;;
+          ARCH=i86pc
+          ;;
         *)
-          echo "Unknown Solaris architecture: $UNAME_M";;
-      esac;;
+          echo "Unknown Solaris architecture: $UNAME_M"
+          ;;
+      esac
+      ;;
 
     freebsd)
       ARCH=$UNAME_M
-      OS_VERSION=$UNAME_R ;;
+      OS_VERSION=$UNAME_R
+      ;;
     hpux)
       ARCH=$UNAME_M
-      OS_VERSION=$UNAME_R ;;
+      OS_VERSION=$UNAME_R
+      ;;
     *)
       echo "Unknown packaging system"
-      exit 42;;
+      exit 42
+      ;;
   esac
 
   case "$CROSS_TARGET" in
     '')
       ;;
     x86-*)
-      ARCH=x86;;
+      ARCH=x86
+      ;;
     x64-*)
-      ARCH=x64;;
+      ARCH=x64
+      ;;
     *)
       echo "Unknown cross-compilation target: $CROSS_TARGET"
-      exit 42;;
+      exit 42
+      ;;
   esac
 
   export ARCH
