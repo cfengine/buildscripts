@@ -360,6 +360,10 @@ detect_tools()
     export PATCH
 }
 
+# This function appends the -j/--jobs option to the MAKEFLAGS environment
+# variable based on the number of cores. However, the variable is overwritten in
+# the "install-dependencies" script. I created a ticket fix this (see
+# ENT-13041).
 detect_cores()
 {
   case "$OS_FAMILY" in
