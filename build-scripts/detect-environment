@@ -194,33 +194,6 @@ detect_distribution()
 
     OS=debian
     OS_VERSION="$REL"
-  elif [ -f /etc/SuSE-release ]; then
-    # This file is gone starting with suse 13 or something. This whole section
-    # can be removed when support for suse 12 and lower is dropped. I wish to
-    # see that day.
-    REL=$(head -n1 /etc/SuSE-release)
-    case "$REL" in
-      "SUSE Linux Enterprise Server "*)
-        MAJOR=$(grep '^VERSION' /etc/SuSE-release | awk '{print $3}')
-        MINOR=$(grep '^PATCHLEVEL' /etc/SuSE-release | awk '{print $3}')
-
-        if [ -z "$MAJOR" ] || [ -z "$MINOR" ]; then
-          echo "Unable to detect version of SLES: $MAJOR.$MINOR"
-        fi
-
-        OS=sles
-        OS_VERSION="$MAJOR.$MINOR"
-        ;;
-      "openSUSE "*)
-        VERSION=$(grep '^VERSION' /etc/SuSE-release | awk '{print $3}')
-        OS=opensuse
-        OS_VERSION="$VERSION"
-        ;;
-      *)
-        echo "Unknown SUSE distribution: $REL"
-        exit 42
-        ;;
-    esac
   elif [ -f /etc/os-release ]; then
     # see https://en.opensuse.org/SDB:Find_openSUSE_version for rules of
     # parsing this file
