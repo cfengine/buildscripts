@@ -1,11 +1,12 @@
 name: Continuous Integration
 
-# Run this CI on all pushes to upstream
-# (including PRs from upstream to upstream)
-on: push
+on: pull_request
+permissions: read-all
 
 jobs:
   build_cfengine_hub_package:
+    # this job only works when submitted from the cfengine organization aka upstream to upstream pull requests: ENT-13038
+    if: github.event.organization.login == 'cfengine'
     uses: ./.github/workflows/build-using-buildscripts.yml
     secrets: inherit
 
