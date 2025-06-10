@@ -79,6 +79,7 @@ detect_os()
         FreeBSD)
           OS_FAMILY=freebsd
           OS=freebsd
+          OS_VERSION=$UNAME_R
           ;;
         NetBSD)
           OS_FAMILY=netbsd
@@ -87,6 +88,7 @@ detect_os()
         HP-UX)
           OS_FAMILY=hpux
           OS=hpux
+          OS_VERSION=$UNAME_R
           ;;
         *)
           echo "Unable to detect operating system: $UNAME_S"
@@ -295,11 +297,9 @@ detect_arch()
 
     freebsd)
       ARCH=$UNAME_M
-      OS_VERSION=$UNAME_R
       ;;
     hpux)
       ARCH=$UNAME_M
-      OS_VERSION=$UNAME_R
       ;;
     *)
       echo "Unknown packaging system"
