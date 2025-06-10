@@ -232,6 +232,10 @@ detect_distribution()
   fi
 }
 
+# This function determines which dependency packaging scripts shall be used
+# based on the operating system and available packaging tools. E.g., if rpm is
+# detected, then the "pkg-build-rpm" script will be called from the
+# "install-dependencies" script.
 detect_packaging()
 {
   if [ -f /bin/rpm ]; then
