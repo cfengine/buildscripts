@@ -92,10 +92,6 @@ export LDFLAGS
 DEB_LDFLAGS_APPEND="$LDFLAGS"
 export DEB_LDFLAGS_APPEND
 
-# Embedded DB selection
-EMBEDDED_DB="lmdb"
-
-
 
 ############### Fill in build dependencies in DEPS variable ################
 
@@ -108,7 +104,7 @@ case "$OS_FAMILY" in
     solaris|aix)  var_append DEPS "libgcc" ;;
 esac
 
-var_append DEPS "$EMBEDDED_DB pcre2"
+var_append DEPS "lmdb pcre2"
 
 if ! [ "$SYSTEM_SSL" = 1 ]
 then
