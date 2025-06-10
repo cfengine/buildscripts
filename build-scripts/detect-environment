@@ -106,6 +106,7 @@ detect_os()
       ;;
   esac
 
+  echo "Detected OS $OS $OS_VERSION"
   export OS OS_VERSION
 }
 
@@ -269,6 +270,8 @@ detect_packaging()
       PACKAGING=$DEP_PACKAGING;;
   esac
 
+  echo "Detected dependency packaging $DEP_PACKAGING"
+  echo "Detected packaging $PACKAGING"
   export DEP_PACKAGING PACKAGING
 }
 
@@ -328,6 +331,7 @@ detect_arch()
       ;;
   esac
 
+  echo "Detected architecture $ARCH"
   export ARCH
 }
 
@@ -343,6 +347,7 @@ detect_tools()
     if $MAKE -v | grep GNU
     then
         export MAKE
+        echo "Detected make path $MAKE"
     else
         echo "Error: GNU Make not found"
         exit 42
@@ -354,10 +359,12 @@ detect_tools()
     # systems. We use it to kill processes that can mess with the build process.
     FUSER=$(func_whereis fuser)
     export FUSER
+    echo "Detected fuser path $FUSER"
 
     # We use patch to apply patches to the dependencies.
     PATCH=$(func_whereis gpatch patch)
     export PATCH
+    echo "Detected patch path $PATCH"
 }
 
 # This function appends the -j/--jobs option to the MAKEFLAGS environment
