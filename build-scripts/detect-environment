@@ -213,8 +213,8 @@ detect_distribution()
     if [ "$os" = "sles" ]; then
       OS=sles
       OS_VERSION="$ver"
-    fi
-    if expr "$os" : "opensuse" >/dev/null; then
+    elif expr "$os" : "opensuse" >/dev/null; then
+      # If the string begins with "opensuse", then strip the remaining part. It
       # can be "opensuse-leap" or "opensuse-tumbleweed"
       OS=opensuse
       OS_VERSION="$ver"
