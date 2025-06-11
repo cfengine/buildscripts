@@ -54,7 +54,7 @@ fi
 )
 
 # packages needed for autogen are installed in setup.sh
-NO_CONFIGURE=1 PROJECT=nova ./buildscripts/build-scripts/autogen
+PROJECT=nova ./buildscripts/build-scripts/autogen
 
 # remove unwanted dependencies
 sudo apt-get -qy purge libltdl-dev libltdl7 #libtool
