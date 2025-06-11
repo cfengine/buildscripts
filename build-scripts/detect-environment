@@ -362,7 +362,7 @@ detect_tools()
     # We use it to submit patches to the dependencies.
     PATCH=$(func_whereis gpatch patch)
     export PATCH
-    echo "Detected patch path $FUSER"
+    echo "Detected patch path $PATCH"
 }
 
 # This function appends the -j/--jobs option to the MAKEFLAGS environment
