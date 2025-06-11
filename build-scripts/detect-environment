@@ -382,7 +382,7 @@ detect_cores()
       ;;
     linux)
       echo "Detected OS family is linux"
-      NUM_CORES="$(> /proc/cpuinfo grep -c '^processor')"
+      NUM_CORES="$(grep -c '^processor' /proc/cpuinfo)"
       ;;
     hpux)
       echo "Detected OS family is hpux"
