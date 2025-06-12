@@ -133,13 +133,13 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.12   | 3.12   | 3.12   |                          |
 | [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
 | [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
-| [libcurl](https://curl.se/download.html)                                          | 8.13.0 | 8.13.0 | 8.14.1 |                          |
+| [libcurl](https://curl.se/download.html)                                          | 8.14.1 | 8.13.0 | 8.14.1 |                          |
 | [libgnurx](https://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.18   | 1.18   | 1.18   | Needed by libxml2        |
-| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.14.2 | 2.14.2 | 2.14.3 |                          |
+| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.14.3 | 2.14.2 | 2.14.3 |                          |
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.33 | 0.9.33 | 0.9.33 |                          |
-| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.9  | 2.6.9  | 2.6.10 | Enterprise agent only    |
+| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.10 | 2.6.9  | 2.6.10 | Enterprise agent only    |
 | [OpenSSL](https://openssl.org/)                                                   | 3.0.16 | 3.5.0  | 3.5.0  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | 8.45   | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.45  | 10.45  |                          |
@@ -154,12 +154,12 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
 | :-------------------------------------------------- | :----- | :----- | :----- |
 | [Apache](https://httpd.apache.org/)                 | 2.4.63 | 2.4.63 | 2.4.63 |
-| [APR](https://apr.apache.org/)                      | 1.7.5  | 1.7.5  | 1.7.6  |
+| [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.5  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.49.0 | 2.49.0 | 2.49.0 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.1  | 2.7.1  |
-| [PHP](https://php.net/)                             | 8.3.21 | 8.3.21 | 8.4.8  |
-| [PostgreSQL](https://www.postgresql.org/)           | 15.12  | 16.8   | 17.5   |
+| [PHP](https://php.net/)                             | 8.3.22 | 8.3.21 | 8.4.8  |
+| [PostgreSQL](https://www.postgresql.org/)           | 15.13  | 16.8   | 17.5   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.65.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
 
