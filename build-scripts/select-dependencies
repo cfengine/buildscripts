@@ -1,0 +1,96 @@
+
+# Arguments:
+#  * PROJECT
+#  * ROLE
+#  * OS_FAMILY
+#  * SYSTEM_SSL
+common_deps()
+{
+    # libgcc is needed to compile other dependencies
+    case "$OS_FAMILY" in
+        solaris|aix)  var_append DEPS "libgcc" ;;
+    esac
+
+    var_append DEPS "lmdb"
+    var_append DEPS "pcre2"
+
+    # We use system system SSL on RHEL >= 8
+    if ! [ "$SYSTEM_SSL" = 1 ]
+    then
+      # FIXME: Why do we need zlib?
+      # ANSWER: Openssl uses it optionally, TODO DISABLE
+      # TICKET: ENT-13049
+      var_append DEPS "zlib openssl"
+    fi
+
+    # libsasl needed for solaris
+    case "$OS_FAMILY" in
+        solaris|hpux)  var_append DEPS "sasl2" ;;
+    esac
+
+    # iconv is needed for libxml2 on some platforms
+    case "$OS_FAMILY" in
+       aix|solaris)  var_append DEPS "libiconv" ;;
+    esac
+    var_append DEPS "libxml2 libyaml"
+
+    # libacl & libattr - not for the exotics (linux only?)
+    case "$OS_FAMILY" in
+      hpux|aix|solaris|freebsd|mingw)       ;;
+      *)  var_append DEPS "libattr libacl"  ;;
+    esac
+}
+
+nova_deps()
+{
+    var_append DEPS "openldap"
+    var_append DEPS "leech"
+}
+
+agent_deps()
+{
+    var_append DEPS "libcurl"
+}
+
+hub_deps()
+{
+    var_append DEPS "libcurl-hub"
+    var_append DEPS "nghttp2"
+    var_append DEPS "libexpat"
+    var_append DEPS "apr apr-util"
+    var_append DEPS "apache"
+    var_append DEPS "git"
+    var_append DEPS "rsync"
+    var_append DEPS "postgresql"
+    var_append DEPS "php"
+}
+
+DEPS=
+
+common_deps
+
+case "$PROJECT" in
+    nova)
+        nova_deps
+        ;;
+    community)
+        # There are non community specific dependencies
+        ;;
+    *)
+        echo "$(basename $0): Error: Unexpected PROJECT '$PROJECT'"
+        exit 42
+        ;;
+esac
+
+case "$ROLE" in
+    agent)
+        agent_deps
+        ;;
+    hub)
+        hub_deps
+        ;;
+    *)
+        echo "$(basename $0): Error: Unexpected ROLE '$ROLE'"
+        exit 42
+        ;;
+esac
