@@ -344,6 +344,8 @@ detect_tools()
         fatal "GNU Make not found"
     fi
 
+    export RPMBUILD_CMD=rpmbuild
+
     FUSER=$(func_whereis fuser)
     export FUSER
 
