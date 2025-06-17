@@ -52,6 +52,13 @@ bundle agent cfengine_build_host_setup
       "librsync-dev"; # bootstrap_pr host needs this to run configure and make dist
       "autoconf-archive" comment => "Required to resolve the AX_PTHREAD macro";
 
+    debian.containers_host:: # in jenkins, CONTAINER labeled nodes are capable of running container builds like valgrind-check and static-check
+      "buildah";
+      "podman";
+      "jq";
+      "make";
+
+
 # I attempted to arrange these packages in order of: generic (all versions) and then as if we gradually added them through time: rhel-6, 7, 8, 9...
     suse|opensuse|sles|redhat|centos::
       "gcc";
@@ -140,6 +147,7 @@ bundle agent cfengine_build_host_setup
       "mingw_build_host" expression => fileexists("/etc/cfengine-mingw-build-host.flag");
       "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
       "bootstrap_pr_host" expression => fileexists("/etc/cfengine-bootstrap-pr-host.flag");
+      "containers_host" expression => fileexists("/etc/cfengine-containers-host.flag");
     linux::
       "have_coredumpctl" expression => returnszero("command -v coredumpctl", "useshell");
       "missing_opt_jdk21" expression => not(fileexists("/opt/jdk-21.0.1"));
@@ -235,6 +243,20 @@ root - core unlimited
       "/home/jenkins/.rpmmacros"
         content => "%dist .suse11",
         comment => "ensure %dist works in RPM .spec files - needed to add OS name/version to rpm filename";
+
+    debian.containers_host::
+      "/etc/sudoers.d/999-local"
+        comment => "NOPASSWD is needed for various tools related to container jobs",
+        content => "%wheel ALL=NOPASSWD: /usr/bin/lvm-cache-stats
+%wheel ALL=NOPASSWD: /usr/bin/podman
+%sudo ALL=NOPASSWD: /usr/bin/lvm-cache-stats
+%sudo ALL=NOPASSWD: /usr/bin/podman
+%sudo ALL=NOPASSWD: /usr/sbin/lvs
+%sudo ALL=NOPASSWD: /usr/bin/journalctl
+jenkins_builds ALL=NOPASSWD: /usr/bin/podman
+",
+        create => "true",
+        perms => mog("400", "root", "root");
 
   commands:
     (redhat_8|centos_8|redhat_9).(!have_perl_package_installed).(yum_dnf_conf_ok)::
