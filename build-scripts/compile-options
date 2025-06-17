@@ -8,10 +8,18 @@
 if [ -z "$PROJECT" ]
 then
     case x"$JOB_NAME" in
-        *-community-*)   PROJECT=community;;
-        *-enterprise-*)  PROJECT=nova;;
-        *-hub-*)         PROJECT=nova;;
-        *-agent-*)       PROJECT=nova;;
+        *-community-*)
+            PROJECT=community
+            ;;
+        *-enterprise-*)
+            PROJECT=nova
+            ;;
+        *-hub-*)
+            PROJECT=nova
+            ;;
+        *-agent-*)
+            PROJECT=nova
+            ;;
     esac
 fi
 
@@ -192,25 +200,51 @@ esac
 # and build according to the role specified by it.
 
 case "$EXPLICIT_ROLE" in
-    agent) ROLE=agent;;
-    hub)   ROLE=hub;;
+    agent)
+        ROLE=agent
+        ;;
+    hub)
+        ROLE=hub
+        ;;
     *)
         # Not running under Jenkins?
         if [ -z "$JENKINS_SERVER_COOKIE" ]
         then
             case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
-                community-*) ROLE=agent;;
+                community-*)
+                    ROLE=agent
+                    ;;
                 # We do not support 32 bits hubs anymore
-                nova-i386-*-*) ROLE=agent;;
-                nova-s390*-*-*) ROLE=agent;;
-                nova-*-centos-*) ROLE=hub;;
-                nova-*-debian-*) ROLE=hub;;
-                nova-*-opensuse-*) ROLE=hub;;
-                nova-*-rhel-*) ROLE=hub;;
-                nova-*-sles-*) ROLE=hub;;
-                nova-*-ubuntu-*) ROLE=hub;;
-                nova-*-mingw-*) ROLE=agent;;
-                nova-*) ROLE=agent;;
+                nova-i386-*-*)
+                    ROLE=agent
+                    ;;
+                nova-s390*-*-*)
+                    ROLE=agent
+                    ;;
+                nova-*-centos-*)
+                    ROLE=hub
+                    ;;
+                nova-*-debian-*)
+                    ROLE=hub
+                    ;;
+                nova-*-opensuse-*)
+                    ROLE=hub
+                    ;;
+                nova-*-rhel-*)
+                    ROLE=hub
+                    ;;
+                nova-*-sles-*)
+                    ROLE=hub
+                    ;;
+                nova-*-ubuntu-*)
+                    ROLE=hub
+                    ;;
+                nova-*-mingw-*)
+                    ROLE=agent
+                    ;;
+                nova-*)
+                    ROLE=agent
+                    ;;
                 *)
                     echo "Unknown project: $PROJECT"
                     exit 42
