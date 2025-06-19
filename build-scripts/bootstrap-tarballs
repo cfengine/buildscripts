@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 _dir=$(readlink -e "$(dirname "$0")")
 # refactored a few functions into single file scripts for easier development/debugging, see ENT-12741 and ENT-12595
@@ -66,22 +66,30 @@ cd "$BASEDIR"/core
 rm -f cfengine-3.*.tar.gz
 git rev-parse HEAD > "$BASEDIR"/output/core-commitID
 # Configure in order to run "make dist", deleted later.
-./configure -C
-make dist
+echo "$(basename "$0"): Debug: Running configure on core repository..."
+run_and_print_on_failure ./configure -C
+echo "$(basename "$0"): Debug: Running make dist on core repository..."
+run_and_print_on_failure make dist
 mv cfengine-3.*.tar.gz "$BASEDIR"/output/tarballs/
-make distclean
+echo "$(basename "$0"): Debug: Running make distclean on core repository..."
+run_and_print_on_failure make distclean
 
 # Build tarballs from masterfiles repository
 cd "$BASEDIR"/masterfiles
 rm -f cfengine-masterfiles*.tar.gz
 git rev-parse HEAD > "$BASEDIR"/output/masterfiles-commitID
 # Configure in order to run "make dist", deleted later.
-./configure
-make dist         # source tarball
-make tar-package  # package tarball (containing all files as if they were
-                  # installed under "prefix".)
+echo "$(basename "$0"): Debug: Running configure on masterfiles repository..."
+run_and_print_on_failure ./configure
+echo "$(basename "$0"): Debug: Running make dist on masterfiles repository..."
+run_and_print_on_failure make dist         # source tarball
+echo "$(basename "$0"): Debug: Running make tar-package on masterfiles repository..."
+run_and_print_on_failure make tar-package  # package tarball (containing all
+                                           # files as if they were installed
+                                           # under "prefix".)
 mv cfengine-masterfiles*.tar.gz "$BASEDIR"/output/tarballs/
-make distclean
+echo "$(basename "$0"): Debug: Running make distclean on masterfiles repository..."
+run_and_print_on_failure make distclean
 
 # Compute a checksum list that can be used to verify the integrity of the
 # tarballs
@@ -92,7 +100,7 @@ sha256sum -- *.tar.gz > sha256sums.txt
 CKSUM=$(sum sha256sums.txt | cut -d ' ' -f 1)
 mv sha256sums.txt sha256sums."$CKSUM".txt
 
-# Install javascript dependencies
+echo "$(basename "$0"): Debug: Installing javascript npm dependencies..."
 (
 if test -f "$BASEDIR"/mission-portal/public/scripts/package.json; then
   cd "$BASEDIR"/mission-portal/public/scripts
@@ -100,45 +108,45 @@ if test -f "$BASEDIR"/mission-portal/public/scripts/package.json; then
   npm --version
   node --version
   # install dependencies from npmjs
-  npm ci --prefix "$BASEDIR"/mission-portal/public/scripts/
+  run_and_print_on_failure npm ci --prefix "$BASEDIR"/mission-portal/public/scripts/
   # build react components
-  npm run build --prefix "$BASEDIR"/mission-portal/public/scripts/
+  run_and_print_on_failure npm run build --prefix "$BASEDIR"/mission-portal/public/scripts/
   # remove the packages specified in devDependencies
-  npm prune --omit=dev --prefix "$BASEDIR"/mission-portal/public/scripts/
+  run_and_print_on_failure npm prune --omit=dev --prefix "$BASEDIR"/mission-portal/public/scripts/
 fi
 )
 
-# Install PHP dependencies from the mission-portal repository
+echo "$(basename "$0"): Debug: Installing PHP composer dependencies from mission-portal repository..."
 (
 if test -f "$BASEDIR"/mission-portal/composer.json; then
   cd "$BASEDIR"/mission-portal
   # install PHP dependencies from composer
-  php /usr/bin/composer.phar install --no-dev
+  run_and_print_on_failure php /usr/bin/composer.phar install --no-dev
 fi
 )
 
-# Install PHP dependencies from the nova repository
+echo "$(basename "$0"): Debug: Installing PHP composer dependencies from nova repository..."
 (
 if test -f "$BASEDIR"/nova/api/http/composer.json; then
   cd "$BASEDIR"/nova/api/http
   # install PHP dependencies from composer
-  php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs
+  run_and_print_on_failure php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs
 fi
 )
 
-# Compile Mission Portal styles
+echo "$(basename "$0"): Debug: Compiling Mission Portal styles..."
 (
 if test -f "$BASEDIR"/mission-portal/public/themes/default/bootstrap/cfengine_theme.less; then
   cd "$BASEDIR"/mission-portal/public/themes/default/bootstrap
-  npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
+  run_and_print_on_failure npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
 fi
 )
 
-# Install LDAP API dependencies
+echo "$(basename "$0"): Debug: Installing LDAP API PHP composer dependencies..."
 (
 if test -f "$BASEDIR"/mission-portal/ldap/composer.json; then
   cd "$BASEDIR"/mission-portal/ldap
   # install PHP dependencies from composer
-  php /usr/bin/composer.phar install --no-dev
+  run_and_print_on_failure php /usr/bin/composer.phar install --no-dev
 fi
 )
