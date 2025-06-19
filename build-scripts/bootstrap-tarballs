@@ -61,6 +61,7 @@ done
 # now script failures should fail the script
 set -e
 
+# Build tarball from core repository
 cd $BASEDIR/core
 rm cfengine-3.*.tar.gz || true
 git rev-parse HEAD > $BASEDIR/output/core-commitID
@@ -70,13 +71,15 @@ make dist
 mv cfengine-3.*.tar.gz $BASEDIR/output/tarballs/
 make distclean
 
+# Build tarballs from masterfiles repository
 cd $BASEDIR/masterfiles
 rm cfengine-masterfiles*.tar.gz || true
 git rev-parse HEAD > $BASEDIR/output/masterfiles-commitID
 # Configure in order to run "make dist", deleted later.
 ./configure
-make dist                                               # source tarball
-make tar-package                                       # package tarball
+make dist         # source tarball
+make tar-package  # package tarball (containing all files as if they were
+                  # installed under "prefix".)
 mv cfengine-masterfiles*.tar.gz $BASEDIR/output/tarballs/
 make distclean
 
