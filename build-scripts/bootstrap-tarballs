@@ -85,6 +85,7 @@ sha256sum *.tar.gz > sha256sums.txt
 CKSUM=`sum sha256sums.txt | cut -d ' ' -f 1`
 mv sha256sums.txt sha256sums.$CKSUM.txt
 
+# Install javascript dependencies
 (
 if test -f "$BASEDIR/mission-portal/public/scripts/package.json"; then
   cd $BASEDIR/mission-portal/public/scripts
@@ -101,6 +102,7 @@ if test -f "$BASEDIR/mission-portal/public/scripts/package.json"; then
 fi
 )
 
+# Install PHP dependencies from the mission-portal repository
 (
 if test -f "$BASEDIR/mission-portal/composer.json"; then
   cd $BASEDIR/mission-portal
@@ -109,6 +111,7 @@ if test -f "$BASEDIR/mission-portal/composer.json"; then
 fi
 )
 
+# Install PHP dependencies from the nova repository
 (
 if test -f "$BASEDIR/nova/api/http/composer.json"; then
   cd $BASEDIR/nova/api/http
@@ -117,6 +120,7 @@ if test -f "$BASEDIR/nova/api/http/composer.json"; then
 fi
 )
 
+# Compile Mission Portal styles
 (
 if test -f "$BASEDIR/mission-portal/public/themes/default/bootstrap/cfengine_theme.less"; then
   cd $BASEDIR/mission-portal/public/themes/default/bootstrap
@@ -124,6 +128,7 @@ if test -f "$BASEDIR/mission-portal/public/themes/default/bootstrap/cfengine_the
 fi
 )
 
+# Install LDAP API dependencies
 (
 if test -f "$BASEDIR/mission-portal/ldap/composer.json"; then
   cd $BASEDIR/mission-portal/ldap
