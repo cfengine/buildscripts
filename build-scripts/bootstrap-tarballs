@@ -83,8 +83,12 @@ make tar-package  # package tarball (containing all files as if they were
 mv cfengine-masterfiles*.tar.gz $BASEDIR/output/tarballs/
 make distclean
 
+# Compute a checksum list that can be used to verify the integrity of the
+# tarballs
 cd $BASEDIR/output/tarballs
 sha256sum *.tar.gz > sha256sums.txt
+# Add the BSD (16-bit) checksum of the checksum list to it's filename. This way
+# you can verify the integrity of the checksum list itself.
 CKSUM=`sum sha256sums.txt | cut -d ' ' -f 1`
 mv sha256sums.txt sha256sums.$CKSUM.txt
 
