@@ -105,7 +105,6 @@ if test -f "$BASEDIR"/mission-portal/public/scripts/package.json; then
   npm run build --prefix "$BASEDIR"/mission-portal/public/scripts/
   # remove the packages specified in devDependencies
   npm prune --omit=dev --prefix "$BASEDIR"/mission-portal/public/scripts/
-
 fi
 )
 
