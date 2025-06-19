@@ -16,16 +16,44 @@ set +e
 
 # Get information about PRs among the used revisions.
 # These PRs will have to be notified of build progress.
+#
+# Variables such as MISSION_PORTAL_REV may be set by the CI (Jenkins) to build and test multiple PR's together.
+# The variables typically hold a branch name or a pull request ID.
+# PR IDs can also be preceded by 'pull' or 'origin/pull'.
+# E.g.:
+# - MISSION_PORTAL_REV=pull/1755
+# - MISSION_PORTAL_REV=origin/pull/1755
+# where the trailing number is the pull request ID.
+#
+# Furthermore, they can be suffixed by anything after a subsequent slash (/).
+# We usually use:
+# - ID alone
+# - pull/ID/head
+# - pull/ID/merge
+#
+# This loop fetches information about the PRs if the respective variable is set.
+#
 for repo_spec in cfengine/buildscripts cfengine/core cfengine/masterfiles cfengine/enterprise cfengine/nova cfengine/mission-portal NorthernTechHQ/libntech; do
   # remove organization/ from start of repo_spec
+  # E.g. 'cfengine/mission-portal' -> 'mission-portal'
   repo="${repo_spec#*/}"
+
+  # Convert to uppercase, swap hyphens with underscore and append '_REV'
+  # E.g. 'mission-portal' -> 'MISSION_PORTAL_REV'
   rev_param_name="$(echo $repo | tr '[:lower:]-' '[:upper:]_')_REV"
+
+  # Try to dereference the result from above and skip the rest of the loop
+  # unless the variable is defined.
   revision="$(echo ${!rev_param_name})" || continue   # dereference
 
   # remove "origin/" (if any)
   revision="${revision##origin/}"
+
+  # Check to see if the resolved variable starts with 'pull/'
   if expr "$revision" : "pull/" >/dev/null; then
+    # Extract the revision number. E.g. 'pull/1755' -> '1755'
     pr_nr="$(echo $revision | cut -d/ -f2)"
+
     get-github-pull-request-info "$repo_spec" "$pr_nr" >> $BASEDIR/output/PRs
   fi
 done
@@ -103,4 +131,3 @@ if test -f "$BASEDIR/mission-portal/ldap/composer.json"; then
   php /usr/bin/composer.phar install --no-dev
 fi
 )
-
