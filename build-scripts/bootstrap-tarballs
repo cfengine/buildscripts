@@ -63,7 +63,7 @@ set -e
 
 # Build tarball from core repository
 cd "$BASEDIR"/core
-rm cfengine-3.*.tar.gz || true
+rm -f cfengine-3.*.tar.gz
 git rev-parse HEAD > "$BASEDIR"/output/core-commitID
 # Configure in order to run "make dist", deleted later.
 ./configure -C
@@ -73,7 +73,7 @@ make distclean
 
 # Build tarballs from masterfiles repository
 cd "$BASEDIR"/masterfiles
-rm cfengine-masterfiles*.tar.gz || true
+rm -f cfengine-masterfiles*.tar.gz
 git rev-parse HEAD > "$BASEDIR"/output/masterfiles-commitID
 # Configure in order to run "make dist", deleted later.
 ./configure
