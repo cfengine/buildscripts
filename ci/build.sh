@@ -23,7 +23,6 @@ fi
 ssh-add -l
 set -x # stop hiding secrets
 
-time ./buildscripts/build-scripts/build-environment-check
 time ./buildscripts/build-scripts/install-dependencies
 time ./buildscripts/build-scripts/configure # 3 minutes locally
 time ./buildscripts/build-scripts/generate-source-tarballs # 1m49
