@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# This script removes previously compiled dependencies which are later packaged
+# into CFEngine. When you want to do a fresh build it can be nice to remove
+# them in advance.
+
+. "$(dirname "$0")"/../build-scripts/functions
+. "$(dirname "$0")"/../build-scripts/detect-environment
+. "$(dirname "$0")"/../build-scripts/compile-options
+
+set -ex
+for dep in $DEPS
+do
+    rm -rf "$dep"
+done
