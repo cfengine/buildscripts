@@ -32,9 +32,9 @@ case "$PROJECT" in
     ;;
   *)
     if [ -z "${PROJECT}" ]; then
-        echo "Error: Expected environment variable PROJECT=[community|nova]"
+        echo "$(basename "$0"): Error: Expected environment variable PROJECT=[community|nova]"
     else
-        echo "Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
+        echo "$(basename "$0"): Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
     fi
     echo "Usage: PROJECT=[community|nova] $0"
     exit 42;;
@@ -59,7 +59,7 @@ for proj_i in $projects; do
         version_j=$(< "$BASEDIR/$proj_j/CFVERSION" tr ' ' '\n'  \
             | sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
         if [ "$version_i" != "$version_j" ]; then
-            echo "Detected version mismatch: $proj_i $version_i != $proj_j $version_j"
+            echo "$(basename "$0"): Error: Detected version mismatch: $proj_i $version_i != $proj_j $version_j"
             exit 33
         fi
     done
