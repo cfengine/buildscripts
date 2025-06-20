@@ -1,10 +1,22 @@
 #!/bin/sh
 
-. `dirname "$0"`/functions
+# This script cleans a build machine by uninstalling cfbuild- prefixed packages
+# and by removing the contents of the PREFIX directory.
+#
+# Don't run this script on your dev machine!
+# You may accidentally delete something very important.
+
+. "$(dirname "$0")"/functions
 . detect-environment
 
 uninstall_cfbuild
 
+if [ -z "$PREFIX" ] || [ "$PREFIX" = "/" ]; then
+    echo "$(basename "$0"): Error: \$PREFIX is not defined, is empty, or is set to the root directory. Aborting to prevent accidental deletion."
+    exit 1
+fi
+
+echo "$(basename "$0"): Debug: Cleaning build host by deleting $PREFIX"
 case $OS in
     aix)
         sudo rm -rf "$PREFIX"/*
