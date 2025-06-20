@@ -596,5 +596,25 @@ rm_if_empty()
     fi
 }
 
+# Use this function on verbose commands to silence the output unless it returns
+# a non-zero exit code
+run_and_print_on_failure()
+{
+    local temp_output_file
+    temp_output_file=$(mktemp)
+    local exit_code=0
+    if "$@" > "$temp_output_file" 2>&1; then
+        : # NOOP
+    else
+        exit_code=$? # Store exit code for later
+        echo "Error: Failed to run:" "$@"
+        echo "--- Start of Output ---"
+        cat "$temp_output_file"
+        echo "--- End of Output (Error Code: $exit_code) ---"
+    fi
+
+    rm -f "$temp_output_file"
+    return $exit_code
+}
 
 _IS_FUNCTIONS_SOURCED=yes
