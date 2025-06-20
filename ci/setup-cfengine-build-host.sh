@@ -2,7 +2,7 @@
 shopt -s expand_aliases
 
 # TODO get latest LTS dynamically
-CFE_VERSION=3.24.2
+CFE_VERSION=3.26.0
 
 # install needed packages and software for a build host
 set -ex
