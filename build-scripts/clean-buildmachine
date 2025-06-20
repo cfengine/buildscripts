@@ -6,10 +6,10 @@
 uninstall_cfbuild
 
 case $OS in
-aix)
-sudo rm -rf "$PREFIX"/*
-;;
-*)
-sudo rm -rf "$PREFIX"
-;;
+    aix)
+        sudo rm -rf "$PREFIX"/*
+        ;;
+    *)
+        sudo rm -rf "$PREFIX"
+        ;;
 esac
