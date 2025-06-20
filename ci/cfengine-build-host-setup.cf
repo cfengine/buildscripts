@@ -155,6 +155,8 @@ bundle agent cfengine_build_host_setup
       "systemssl_build_host" expression => fileexists("/etc/cfengine-systemssl-build-host.flag");
       "bootstrap_pr_host" expression => fileexists("/etc/cfengine-bootstrap-pr-host.flag");
       "containers_host" expression => fileexists("/etc/cfengine-containers-host.flag");
+      "not_in_container" expression => not(fileexists("/etc/cfengine-in-container.flag")),
+        comment => "We use an explicit flag file that we control to avoid ambiguity about whether we are in a container or not.";
     linux::
       "have_coredumpctl" expression => returnszero("command -v coredumpctl", "useshell");
       "missing_opt_jdk21" expression => not(fileexists("/opt/jdk-21.0.1"));
@@ -180,7 +182,7 @@ bundle agent cfengine_build_host_setup
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
 
   commands:
-    have_coredumpctl::
+    have_coredumpctl.not_in_container::
       "sysctl kernel.core_pattern='|/lib/systemd/systemd-coredump %p %u %g %s %t %e'" -> { "ENT-12669" }
         comment => "Ensure that core_pattern is proper for systemd-coredump if coredumpctl is present.",
         contain => in_shell;
@@ -207,7 +209,7 @@ bundle agent cfengine_build_host_setup
     ubuntu_16::
       "have_i386_architecture" expression => strcmp(execresult("${paths.dpkg} --print-foreign-architectures", "noshell"), "i386");
     ubuntu::
-      "have_localhost_localdomain_hostname" expression => strcmp(execresult("${paths.hostname} -f", "useshell"), "localhost.localdomain");
+      "localhost_localdomain_hostname_missing" expression => not(strcmp(execresult("${paths.hostname} -f", "useshell"), "localhost.localdomain"));
     opensuse|suse|sles::
       "have_$(suse_users_and_groups)_group" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/group >/dev/null", "useshell");
       "have_$(suse_users_and_groups)_user" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/passwd >/dev/null", "useshell");
@@ -278,7 +280,7 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
     mingw_build_host.!have_i386_architecture::
       "${paths.dpkg} --add-architecture i386";
 
-    ubuntu.!have_localhost_localdomain_hostname::
+    ubuntu.not_in_container.localhost_localdomain_hostname_missing::
       "/usr/bin/hostnamectl set-hostname localhost.localdomain"
         comment => "hack for aws ubuntu hosts having unique ip-n-n-n-n hostnames, we need localhost.localdomain";
     !have_daemon_group.(suse|sles|opensuse)::
