@@ -29,7 +29,7 @@ case "$PKG_TYPE" in
 esac
 
 get_cfengine_state() {
-    if type systemctl >/dev/null 2>&1; then
+    if command -v systemctl >/dev/null 2>&1 && systemctl is-system-running; then
         systemctl list-units -l | sed -r -e '/^\s*(cf-[-a-z]+|cfengine3)\.service/!d' -e 's/\s*(cf-[-a-z]+|cfengine3)\.service.*/\1/'
     else
         platform_service cfengine3 status | awk '/is running/ { print $1 }'
@@ -39,7 +39,7 @@ get_cfengine_state() {
 restore_cfengine_state() {
     # $1 -- file where the state to restore is saved (see get_cfengine_state())
 
-    if type systemctl >/dev/null 2>&1; then
+    if command -v systemctl >/dev/null 2>&1 && systemctl is-system-running; then
         for service in `cat "$1"`; do
             definition=`systemctl cat "$service"` || continue
             # only try to start service that are defined/exist (some may be gone
