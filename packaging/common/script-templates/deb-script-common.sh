@@ -19,7 +19,7 @@ rc_d_path()
 
 platform_service()
 {
-  if [ -x /bin/systemctl ]; then
+  if [ -x /bin/systemctl ] && systemctl is-system-running; then
     /bin/systemctl "$2" "$1".service
   else
     /etc/init.d/"$1" "$2"
