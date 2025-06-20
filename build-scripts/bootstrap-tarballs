@@ -1,5 +1,33 @@
 #!/bin/bash
 
+# This script is supposed generate tarballs from the core & masterfiles
+# repositories. We also use these tarballs later in the build process to make
+# sure that they actually work.
+#
+# Currently this script does a lot more than bootstrap tarballs.
+# It also fetches pull request info and installs PHP and javascript dependencies.
+# The history behind this is that this script is run early in the bootstrap-pr job,
+# and these extra steps effectively saves compute time for subsequent hub builds.
+# Maybe we should rename it to only bootstrap (see ENT-13064).
+#
+# You will first need to run the autogen script. E.g.:
+#   PROJECT=community ./buildscripts/build-scripts/autogen
+# Then you can run it like this:
+#   BUILD_TYPE=DEBUG ./buildscripts/build-scripts/bootstrap-tarballs
+#
+# The script expects the following repositories to be side by side:
+# .
+# ├── buildscripts
+# ├── core
+# ├── enterprise
+# ├── nova
+# ├── mission-portal
+# ├── libntech
+# └── masterfiles
+#
+# ^ When building community you won't need enterprise, nova, mission-portal
+#
+
 _dir=$(readlink -e "$(dirname "$0")")
 # refactored a few functions into single file scripts for easier development/debugging, see ENT-12741 and ENT-12595
 # Easier to add a path to a script than source a file of functions.
