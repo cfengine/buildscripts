@@ -32,9 +32,9 @@ case "$PROJECT" in
     ;;
   *)
     if [ -z "${PROJECT}" ]; then
-        echo "Error: Expected environment variable PROJECT=[community|nova]"
+        echo "$(basename "$0"): Error: Expected environment variable PROJECT=[community|nova]"
     else
-        echo "Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
+        echo "$(basename "$0"): Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
     fi
     echo "Usage: PROJECT=[community|nova] $0"
     exit 42;;
@@ -52,7 +52,7 @@ fi
 for proj in $projects
 do
     if [ ! -d "$BASEDIR/$proj" ]; then
-        echo "Error: Expected to find the '$proj' repository in '$BASEDIR', but it's not there"
+        echo "$(basename "$0"): Error: Expected to find the '$proj' repository in '$BASEDIR', but it's not there"
         exit 1
     fi
 done
@@ -61,7 +61,7 @@ done
 for proj in $projects
 do
     # autogen.sh is quite verbose, so only print the output in case of failure
-    echo "Running autogen.sh for project $proj..."
+    echo "$(basename "$0"): Debug: Running autogen.sh for project $proj..."
     (
         cd "$BASEDIR/$proj"
         NO_CONFIGURE=1 run_and_print_on_failure ./autogen.sh
