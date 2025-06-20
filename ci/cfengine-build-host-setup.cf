@@ -30,8 +30,6 @@ bundle agent cfengine_build_host_setup
       "fakeroot";
       "flex";
       "gdb";
-      "libncurses5" comment => "added for debian-10";
-      "libncurses5-dev" comment => "added for debian-10";
       "libexpat1-dev";
       "libmodule-load-conditional-perl";
       "libpam0g-dev";
@@ -42,6 +40,15 @@ bundle agent cfengine_build_host_setup
       "python3-psycopg2";
       "rsync" comment => "added for debian-10";
       "systemd-coredump" comment => "added step to jenkins testing-pr job to query for coredumps on failures";
+
+    debian_10|ubuntu_20::
+      "libncurses5";
+      "libncurses5-dev";
+
+    (debian|ubuntu).!(debian_10|ubuntu_20)::
+      "libncurses6";
+      "libncurses-dev";
+
 
     mingw_build_host::
       "wine:i386";
