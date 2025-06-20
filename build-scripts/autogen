@@ -62,18 +62,10 @@ for proj in $projects
 do
     # autogen.sh is quite verbose, so only print the output in case of failure
     echo "Running autogen.sh for project $proj..."
-    temp_output_file=$(mktemp)
-    if (cd "$BASEDIR/$proj" && NO_CONFIGURE=1 ./autogen.sh) > "$temp_output_file" 2>&1; then
-        rm -f "$temp_output_file"
-    else
-        exit_code=$? # Store exit code for later
-        echo "Error: failed to run autogen.sh ---"
-        echo "--- Start of Output ---"
-        cat "$temp_output_file"
-        rm -f "$temp_output_file"
-        echo "--- End of Output (Exit code: $exit_code) ---"
-        exit $exit_code
-    fi
+    (
+        cd "$BASEDIR/$proj"
+        NO_CONFIGURE=1 run_and_print_on_failure ./autogen.sh
+    )
 done
 
 # Create revision files (containing the N first hex decimals from the last
