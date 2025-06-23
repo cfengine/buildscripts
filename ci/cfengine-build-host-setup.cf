@@ -45,7 +45,7 @@ bundle agent cfengine_build_host_setup
       "libncurses5";
       "libncurses5-dev";
 
-    (debian|ubuntu).!(debian_10|ubuntu_20)::
+    (debian|ubuntu).!(debian_9|debian_10|ubuntu_16|ubuntu_18|ubuntu_20)::
       "libncurses6";
       "libncurses-dev";
 

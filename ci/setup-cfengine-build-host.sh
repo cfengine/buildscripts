@@ -1,8 +1,37 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
 
-# TODO get latest LTS dynamically
+# Use the newest CFEngine version we can
 CFE_VERSION=3.26.0
+source /etc/os-release
+if [ "$ID" = "debian" ]; then
+  if [ "$VERSION_ID" -lt "9" ]; then
+    echo "Platform $ID $VERSION_ID is too old."
+    exit 9
+  fi
+  if [ "$VERSION_ID" -lt "11" ]; then
+    CFE_VERSION=3.21.7
+  fi
+fi
+if [ "$ID" = "redhat" ] || [ "$ID" = "centos" ]; then
+  if [ "$VERSION_ID" -lt "6" ]; then
+    echo "Platform $ID $VERSION_ID is too old."
+    exit 9
+  fi
+  if [ "$VERSION_ID" -lt "7" ]; then
+    CFE_VERSION=3.24.2
+  fi
+fi
+if [ "$ID" = "ubuntu" ]; then
+  _version=$(echo $VERSION_ID | cut -d. -f1)
+  if [ "$_version" -lt "16" ]; then
+    echo "Platform $ID $VERSION_ID is too old."
+    exit 9
+  fi
+  if [ "$_version" -lt "20" ]; then
+    CFE_VERSION=3.21.7
+  fi
+fi
 
 # install needed packages and software for a build host
 set -ex
