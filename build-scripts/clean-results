@@ -3,4 +3,30 @@
 . `dirname "$0"`/functions
 . version
 
-(cd "${BASEDIR}/../../../output/${SCHEDULER}" && find . -mindepth 1 -maxdepth 1 -type d -and -not -name '.*' -printf '%T@ %f\n' | sort -n | head -n-5 | awk '{print $2}' | xargs --no-run-if-empty rm -rf) || true
+# This script is designed to clean up old directories, specifically keeping the
+# five most recently modified ones.
+
+# `$SCHEDULER` is defined in the build-remote script and expands to
+# `$PROJECT-$BRANCH-localbuild`
+
+# The `find` command does the following:
+# `-mindepth 1`               it won't go into sub-subdirectories
+# `-maxdepth 1`               it won't list the current directory itself
+# `-type d`                   restrict the search to only directories
+# `-and -not -name '.*'`      exclude dot files (e.g. `.git`, `.cache`)
+# `-printf '%T@ %f\n'`        print last modification timestamp and filename
+#
+# Example output from above: `1678886400 dir_name_A`
+#
+# The `sort` command sorts the output numerically `-n` from oldest to newest
+#
+# The `head` removes the five newest directories `-n-5`
+#
+# The `awk` command extracts only the filename
+#
+# The `xargs` puts each line as the argument of `rm -rf` to remove the remaining
+# files
+
+(cd "${BASEDIR}/../../../output/${SCHEDULER}" && \
+ find . -mindepth 1 -maxdepth 1 -type d -and -not -name '.*' -printf '%T@ %f\n' | \
+ sort -n | head -n-5 | awk '{print $2}' | xargs --no-run-if-empty rm -rf) || true
