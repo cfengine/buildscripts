@@ -1,5 +1,21 @@
 #!/bin/sh
 
+# Usage: PROJECT=[nova|community] ROLE=[hub|agent] ./buildscripts/build-scripts/compile
+#
+# This script compiles and installs the CFEngine repositories into
+# '$BASEDIR/cfengine/dist'. You should first run the 'autogen' script, then
+# 'configure' script before running this script.
+#
+# The script expects the following repositories to exist side by side:
+# .
+# ├── buildscripts
+# ├── core
+# ├── enterprise
+# ├── nova
+# └── masterfiles
+#
+# ^ When building community you won't need enterprise and nova
+
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
