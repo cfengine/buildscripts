@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
@@ -16,19 +16,17 @@ case "$PROJECT" in
     exit 42;;
 esac
 
-$MAKE -C $BASEDIR/core -k
-$MAKE -C $BASEDIR/core install DESTDIR=$BASEDIR/cfengine/dist
+$MAKE -C "$BASEDIR"/core -k
+$MAKE -C "$BASEDIR"/core install DESTDIR="$BASEDIR"/cfengine/dist
 
-if test "x$NOVA" = "xyes"; then
-    $MAKE -C $BASEDIR/enterprise -k
-    $MAKE -C $BASEDIR/enterprise install DESTDIR=$BASEDIR/cfengine/dist
-    if test "x$ROLE" = "xhub"; then
-        $MAKE -C $BASEDIR/nova -k
-        $MAKE -C $BASEDIR/nova install DESTDIR=$BASEDIR/cfengine/dist
-        $MAKE -C $BASEDIR/masterfiles install DESTDIR=$BASEDIR/cfengine/dist
+if [ "$NOVA" = yes ]; then
+    $MAKE -C "$BASEDIR"/enterprise -k
+    $MAKE -C "$BASEDIR"/enterprise install DESTDIR="$BASEDIR"/cfengine/dist
+    if [ "$ROLE" = hub ]; then
+        $MAKE -C "$BASEDIR"/nova -k
+        $MAKE -C "$BASEDIR"/nova install DESTDIR="$BASEDIR"/cfengine/dist
+        $MAKE -C "$BASEDIR"/masterfiles install DESTDIR="$BASEDIR"/cfengine/dist
     fi
 else
-    $MAKE -C $BASEDIR/masterfiles install DESTDIR=$BASEDIR/cfengine/dist
+    $MAKE -C "$BASEDIR"/masterfiles install DESTDIR="$BASEDIR"/cfengine/dist
 fi
-
-
