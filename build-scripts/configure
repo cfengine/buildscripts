@@ -7,9 +7,15 @@
 . version
 
 case "$PROJECT" in
-    community)  NOVA=no   ;;
-    nova)       NOVA=yes  ;;
-    *) fatal "Unknown project: $PROJECT"  ;;
+    community)
+        NOVA=no
+        ;;
+    nova)
+        NOVA=yes
+        ;;
+    *)
+        fatal "Unknown project: $PROJECT"
+        ;;
 esac
 
 
@@ -34,20 +40,39 @@ for dep in ldap libxml2 libyaml librsync leech libacl libvirt libcurl; do
 done
 
 case "$DEPS" in
-    *pthreads-w32*)  var_append ARGS "--with-pthreads=$P" ;;
+    *pthreads-w32*)
+        var_append ARGS "--with-pthreads=$P"
+        ;;
 esac
+
 case "$DEPS" in
-    *postgresql*) var_append ARGS "--with-postgresql=$P --without-mysql" ;;
-    *)            var_append ARGS "--without-sql" ;;
+    *postgresql*)
+        var_append ARGS "--with-postgresql=$P --without-mysql"
+        ;;
+    *)
+        var_append ARGS "--without-sql"
+        ;;
 esac
+
 case "$ROLE" in
-    hub)   var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql=$P" ;;
-    agent) var_append ARGS "--without-cfmod --without-postgresql" ;;
-    *)     fatal "Unknown ROLE: $ROLE" ;;
+    hub)
+        var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql=$P"
+        ;;
+    agent)
+        var_append ARGS "--without-cfmod --without-postgresql"
+        ;;
+    *)
+        fatal "Unknown ROLE: $ROLE"
+        ;;
 esac
+
 case "$WITH_SYSTEMD" in
-  yes)  var_append ARGS "--with-systemd-service" ;;
-  *)    var_append ARGS "--without-systemd-service" ;;
+    yes)
+        var_append ARGS "--with-systemd-service"
+        ;;
+    *)
+        var_append ARGS "--without-systemd-service"
+        ;;
 esac
 
 # RHEL 8 requires an SELinux policy
@@ -57,45 +82,48 @@ fi
 
 # Cross-compiling Windows?
 case "$ARCH-${OS_FAMILY}" in
-  x86-mingw)  var_append ARGS "--host=i686-w64-mingw32"   ;;
-  x64-mingw)  var_append ARGS "--host=x86_64-w64-mingw32" ;;
+    x86-mingw)
+        var_append ARGS "--host=i686-w64-mingw32"
+        ;;
+    x64-mingw)
+        var_append ARGS "--host=x86_64-w64-mingw32"
+        ;;
 esac
 
 
 case "$BUILD_TYPE" in
-
-  RELEASE)
-    CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
-    ;;
-  DEBUG)
-    ARGS="$ARGS --enable-debug"
-    # Override the default "-g3 -O0" that comes with ./configure --enable-debug
-    # in order to reduce the size of the packages
-    CFLAGS="-g2 -O1 $CFLAGS"
-    ;;
-  CODE_COVERAGE)
-    ARGS="$ARGS --enable-debug"
-    # lcov is not found in Windows and other platforms
-    case "${OS}-${OS_VERSION}" in
-      mingw*)
+    RELEASE)
+        CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
+        ;;
+    DEBUG)
+        ARGS="$ARGS --enable-debug"
+        # Override the default "-g3 -O0" that comes with ./configure --enable-debug
+        # in order to reduce the size of the packages
+        CFLAGS="-g2 -O1 $CFLAGS"
+        ;;
+    CODE_COVERAGE)
+        ARGS="$ARGS --enable-debug"
+        # lcov is not found in Windows and other platforms
+        case "${OS}-${OS_VERSION}" in
+            mingw*)
+                ;;
+            hpux*)
+                ;;
+            solaris*)
+                ;;
+            rhel-4.*)
+                ;;
+            aix*)
+                ;;
+            *)
+                ARGS="$ARGS --enable-coverage"
+                ;;
+        esac
+        ;;
+    *)
+      echo "Unknown build type: $BUILD_TYPE"
+      exit 42
       ;;
-      hpux*)
-      ;;
-      solaris*)
-      ;;
-      rhel-4.*)
-      ;;
-      aix*)
-      ;;
-      *)
-      ARGS="$ARGS --enable-coverage"
-      ;;
-    esac
-    ;;
-  *)
-    echo "Unknown build type: $BUILD_TYPE"
-    exit 42
-    ;;
 esac
 
 if [ "x$OS" = "xsolaris" ]
