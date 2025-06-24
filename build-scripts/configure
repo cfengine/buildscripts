@@ -101,25 +101,6 @@ case "$BUILD_TYPE" in
         # in order to reduce the size of the packages
         CFLAGS="-g2 -O1 $CFLAGS"
         ;;
-    CODE_COVERAGE)
-        ARGS="$ARGS --enable-debug"
-        # lcov is not found in Windows and other platforms
-        case "${OS}-${OS_VERSION}" in
-            mingw*)
-                ;;
-            hpux*)
-                ;;
-            solaris*)
-                ;;
-            rhel-4.*)
-                ;;
-            aix*)
-                ;;
-            *)
-                ARGS="$ARGS --enable-coverage"
-                ;;
-        esac
-        ;;
     *)
       echo "Unknown build type: $BUILD_TYPE"
       exit 42
