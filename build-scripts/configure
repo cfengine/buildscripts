@@ -1,7 +1,7 @@
 #!/bin/sh -x
 
 
-. `dirname "$0"`/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 . version
@@ -76,7 +76,7 @@ case "$WITH_SYSTEMD" in
 esac
 
 # RHEL 8 requires an SELinux policy
-if [ "x$OS" = "xrhel" ] && [ "${OS_VERSION%\.*}" -gt "7" ]; then
+if [ "$OS" = "rhel" ] && [ "${OS_VERSION%\.*}" -gt "7" ]; then
   var_append ARGS "--with-selinux-policy"
 fi
 
@@ -107,21 +107,21 @@ case "$BUILD_TYPE" in
       ;;
 esac
 
-if [ "x$OS" = "xsolaris" ]
+if [ "$OS" = solaris ]
 then
     export PKG_CONFIG_PATH="$BUILDPREFIX/lib/pkgconfig"
 fi
 
 
-( cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+( cd "$BASEDIR"/core && env "$OPTS" CFLAGS="$CFLAGS" ./configure "$ARGS" )
 
-if [ "x$NOVA" = "xyes" ]
+if [ "$NOVA" = yes ]
 then
-    ( cd $BASEDIR/enterprise && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
-    if [ "x$ROLE" = "xhub" ]
+    ( cd "$BASEDIR"/enterprise && env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
+    if [ "$ROLE" = hub ]
     then
-        ( cd $BASEDIR/nova && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+        ( cd "$BASEDIR"/nova && env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
     fi
 fi
 
-( cd $BASEDIR/masterfiles && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+( cd "$BASEDIR"/masterfiles && env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
