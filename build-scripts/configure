@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 
 . "$(dirname "$0")"/functions
@@ -14,7 +14,7 @@ case "$PROJECT" in
         NOVA=yes
         ;;
     *)
-        fatal "Unknown project: $PROJECT"
+        fatal "$(basename "$0"): Unknown project: $PROJECT"
         ;;
 esac
 
@@ -57,7 +57,7 @@ case "$ROLE" in
         var_append ARGS "--without-cfmod --without-postgresql"
         ;;
     *)
-        fatal "Unknown ROLE: $ROLE"
+        fatal "$(basename "$0"): Unknown ROLE: $ROLE"
         ;;
 esac
 
@@ -97,8 +97,7 @@ case "$BUILD_TYPE" in
         CFLAGS="-g2 -O1 $CFLAGS"
         ;;
     *)
-      echo "Unknown build type: $BUILD_TYPE"
-      exit 42
+        fatal "$(basename "$0"): Unknown BUILD_TYPE '$BUILD_TYPE'"
       ;;
 esac
 
@@ -107,16 +106,19 @@ then
     export PKG_CONFIG_PATH="$BUILDPREFIX/lib/pkgconfig"
 fi
 
-
-( cd "$BASEDIR"/core && env "$OPTS" CFLAGS="$CFLAGS" ./configure "$ARGS" )
+log_debug running configure on core repo...
+( cd "$BASEDIR"/core && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
 
 if [ "$NOVA" = yes ]
 then
-    ( cd "$BASEDIR"/enterprise && env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
+    log_debug running configure on enterprise repo...
+    ( cd "$BASEDIR"/enterprise && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
     if [ "$ROLE" = hub ]
     then
-        ( cd "$BASEDIR"/nova && env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
+        log_debug running configure on nova repo...
+        ( cd "$BASEDIR"/nova && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
     fi
 fi
 
-( cd "$BASEDIR"/masterfiles && env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
+log_debug running configure on masterfiles repo...
+( cd "$BASEDIR"/masterfiles && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
