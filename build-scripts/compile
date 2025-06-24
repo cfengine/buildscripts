@@ -13,7 +13,8 @@ case "$PROJECT" in
         ;;
     *)
         echo "$(basename "$0"): Error: Unknown project '$PROJECT'"
-        exit 42;;
+        exit 42
+        ;;
 esac
 
 echo "$(basename "$0"): Debug: Running make in core repo..."
