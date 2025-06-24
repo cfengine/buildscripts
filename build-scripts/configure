@@ -21,45 +21,24 @@ if [ $EMBEDDED_DB = lmdb ]
 then
     var_append ARGS "--with-lmdb=$P"
 fi
+
+for dep in ldap libxml2 libyaml librsync leech libacl libvirt libcurl; do
+    case "$DEPS" in
+        *"$dep"*)
+            var_append ARGS "--with-$dep=$P"
+            ;;
+        *)
+            var_append ARGS "--without-$dep"
+            ;;
+    esac
+done
+
 case "$DEPS" in
     *pthreads-w32*)  var_append ARGS "--with-pthreads=$P" ;;
 esac
 case "$DEPS" in
-    *openldap*)  var_append ARGS "--with-ldap=$P" ;;
-    *)           var_append ARGS "--without-ldap" ;;
-esac
-case "$DEPS" in
-    *libxml2*)  var_append ARGS "--with-libxml2=$P" ;;
-    *)          var_append ARGS "--without-libxml2" ;;
-esac
-case "$DEPS" in
-    *libyaml*)  var_append ARGS "--with-libyaml=$P" ;;
-    *)          var_append ARGS "--without-libyaml" ;;
-esac
-case "$DEPS" in
-    *librsync*)  var_append ARGS "--with-librsync=$P" ;;
-    *)          var_append ARGS "--without-librsync" ;;
-esac
-case "$DEPS" in
-    *leech*)    var_append ARGS "--with-leech=$P" ;;
-    *)          var_append ARGS "--without-leech" ;;
-esac
-case "$DEPS" in
     *postgresql*) var_append ARGS "--with-postgresql=$P --without-mysql" ;;
     *)            var_append ARGS "--without-sql" ;;
-esac
-case "$DEPS" in
-    *libacl*)  var_append ARGS "--with-libacl=$P" ;;
-    *)         var_append ARGS "--without-libacl" ;;
-esac
-case "$DEPS" in
-    *libvirt*)  var_append ARGS "--with-libvirt=$P" ;;
-    *)          var_append ARGS "--without-libvirt" ;;
-esac
-# both libcurl or libcurl-hub are valid
-case "$DEPS" in
-    *libcurl*)  var_append ARGS "--with-libcurl=$P" ;;
-    *)          var_append ARGS "--without-libcurl" ;;
 esac
 case "$ROLE" in
     hub)   var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql=$P" ;;
