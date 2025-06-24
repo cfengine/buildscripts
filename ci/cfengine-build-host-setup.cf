@@ -61,9 +61,10 @@ bundle agent cfengine_build_host_setup
 
     debian.containers_host:: # in jenkins, CONTAINER labeled nodes are capable of running container builds like valgrind-check and static-check
       "buildah";
-      "podman";
       "jq";
       "make";
+      "parallel";
+      "podman";
 
 
 # I attempted to arrange these packages in order of: generic (all versions) and then as if we gradually added them through time: rhel-6, 7, 8, 9...
