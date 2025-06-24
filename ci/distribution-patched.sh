@@ -4,9 +4,12 @@ if grep CODENAME=stretch /etc/os-release; then
   echo "deb http://archive.debian.org/debian-archive/debian stretch main" >/etc/apt/sources.list
   echo "deb http://archive.debian.org/debian-archive/debian stretch-backports main" >>/etc/apt/sources.list
 fi
- if grep "CentOS Linux 7" /etc/os-release; then
-   sed -i 's/mirror.centos.org/vault.centos.org/;/^mirrorlist/d;s/^#baseurl/baseurl/' /etc/yum.repos.d/CentOS-Base.repo
- fi
+if [ -f /etc/centos-release ]; then
+  _version=$(cat /etc/centos-release | cut -d' ' -f3 | cut -d. -f1)
+  if [ "$_version" = "6" ] || [ "$_version" = "7" ]; then
+    sed -i 's/mirror.centos.org/vault.centos.org/;/^mirrorlist/d;s/^#baseurl/baseurl/' /etc/yum.repos.d/CentOS-Base.repo
+  fi
+fi
 if command -v yum; then
   yum -e 0 -d 0 -y update
   yum -e 0 -d 0 -y install git rsync
