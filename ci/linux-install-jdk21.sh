@@ -15,7 +15,7 @@ install_jdk() {
     sha=267b10b14b4e5fada19aca3be3b961ce4f81f1bd3ffcd070e90a5586106125eb
   fi
   wget --quiet "$baseurl$tarball"
-  echo "$sha" "$tarball" | sha256sum --check -
+  echo "$sha  $tarball" | sha256sum --check -
   tar xf "$tarball"
   tee /etc/profile.d/jdk.sh << EOF
 export JAVA_HOME="/opt/jdk-$version"

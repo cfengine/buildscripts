@@ -3,33 +3,40 @@ shopt -s expand_aliases
 
 # Use the newest CFEngine version we can
 CFE_VERSION=3.26.0
-source /etc/os-release
-if [ "$ID" = "debian" ]; then
-  if [ "$VERSION_ID" -lt "9" ]; then
-    echo "Platform $ID $VERSION_ID is too old."
-    exit 9
-  fi
-  if [ "$VERSION_ID" -lt "11" ]; then
-    CFE_VERSION=3.21.7
-  fi
-fi
-if [ "$ID" = "redhat" ] || [ "$ID" = "centos" ]; then
-  if [ "$VERSION_ID" -lt "6" ]; then
-    echo "Platform $ID $VERSION_ID is too old."
-    exit 9
-  fi
-  if [ "$VERSION_ID" -lt "7" ]; then
+if [ -f /etc/centos-release ]; then
+  _version=$(cat /etc/centos-release | cut -d' ' -f3 | cut -d. -f1)
+  if [ "$_version" = "6" ]; then
     CFE_VERSION=3.24.2
   fi
-fi
-if [ "$ID" = "ubuntu" ]; then
-  _version=$(echo $VERSION_ID | cut -d. -f1)
-  if [ "$_version" -lt "16" ]; then
-    echo "Platform $ID $VERSION_ID is too old."
-    exit 9
+elif [ -f /etc/os-release ]; then
+  source /etc/os-release
+  if [ "$ID" = "debian" ]; then
+    if [ "$VERSION_ID" -lt "9" ]; then
+      echo "Platform $ID $VERSION_ID is too old."
+      exit 9
+    fi
+    if [ "$VERSION_ID" -lt "11" ]; then
+      CFE_VERSION=3.21.7
+    fi
   fi
-  if [ "$_version" -lt "20" ]; then
-    CFE_VERSION=3.21.7
+  if [ "$ID" = "redhat" ] || [ "$ID" = "centos" ]; then
+    if [ "$VERSION_ID" -lt "6" ]; then
+      echo "Platform $ID $VERSION_ID is too old."
+      exit 9
+    fi
+    if [ "$VERSION_ID" -lt "7" ]; then
+      CFE_VERSION=3.24.2
+    fi
+  fi
+  if [ "$ID" = "ubuntu" ]; then
+    _version=$(echo $VERSION_ID | cut -d. -f1)
+    if [ "$_version" -lt "16" ]; then
+      echo "Platform $ID $VERSION_ID is too old."
+      exit 9
+    fi
+    if [ "$_version" -lt "20" ]; then
+      CFE_VERSION=3.21.7
+    fi
   fi
 fi
 
