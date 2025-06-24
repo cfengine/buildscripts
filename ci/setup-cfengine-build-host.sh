@@ -1,8 +1,37 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
 
-# TODO get latest LTS dynamically
-CFE_VERSION=3.24.2
+# Use the newest CFEngine version we can
+CFE_VERSION=3.26.0
+source /etc/os-release
+if [ "$ID" = "debian" ]; then
+  if [ "$VERSION_ID" -lt "9" ]; then
+    echo "Platform $ID $VERSION_ID is too old."
+    exit 9
+  fi
+  if [ "$VERSION_ID" -lt "11" ]; then
+    CFE_VERSION=3.21.7
+  fi
+fi
+if [ "$ID" = "redhat" ] || [ "$ID" = "centos" ]; then
+  if [ "$VERSION_ID" -lt "6" ]; then
+    echo "Platform $ID $VERSION_ID is too old."
+    exit 9
+  fi
+  if [ "$VERSION_ID" -lt "7" ]; then
+    CFE_VERSION=3.24.2
+  fi
+fi
+if [ "$ID" = "ubuntu" ]; then
+  _version=$(echo $VERSION_ID | cut -d. -f1)
+  if [ "$_version" -lt "16" ]; then
+    echo "Platform $ID $VERSION_ID is too old."
+    exit 9
+  fi
+  if [ "$_version" -lt "20" ]; then
+    CFE_VERSION=3.21.7
+  fi
+fi
 
 # install needed packages and software for a build host
 set -ex
@@ -12,18 +41,25 @@ if [ "$(id -u)" != "0" ]; then
 fi
 
 ls -la /home/
+if ! id -u jenkins; then
+  useradd jenkins -p jenkins
+fi
+mkdir -p /home/jenkins
 chown -R jenkins /home/jenkins
 
+echo "checking for CFEngine install..."
 if [ -d /var/cfengine ]; then
   echo "Error: CFEngine already installed on this host. Will not proceed trying to setup build host with CFEngine temporary install."
   exit 1
 fi
 
-
 function cleanup()
 {
   set -ex
   if command -v apt 2>/dev/null; then
+    # workaround for CFE-4544, remove scriptlets call systemctl even when systemctl is-system-running returns false
+    rm /bin/systemctl
+    ln -s /bin/echo /bin/systemctl
     apt remove -y cfengine-nova || true
   elif command -v yum 2>/dev/null; then
     yum erase -y cfengine-nova || true
@@ -34,7 +70,8 @@ function cleanup()
     exit 1
   fi
   echo "Ensuring CFEngine fully uninstalled/cleaned up"
-  rm -rf /var/cfengine /opt/cfengine /var/log/CFE* /var/log/postgresql.log || true
+# keep these logs around for debugging failed setup runs
+#  rm -rf /var/cfengine /opt/cfengine /var/log/CFE* /var/log/postgresql.log || true
   if command -v pkill; then
     pkill -9 cf-agent || true
     pkill -9 cf-serverd || true
