@@ -1,0 +1,30 @@
+diff -ruN httpd-2.4.63/server/log.c httpd-2.4.63-modified/server/log.c
+--- httpd-2.4.63/server/log.c	2024-06-21 16:31:54.000000000 +0200
++++ httpd-2.4.63-modified/server/log.c	2025-06-30 16:51:30.836217481 +0200
+@@ -21,6 +21,8 @@
+  *
+  */
+ 
++#define _GNU_SOURCE /* gettid() */
++
+ #include "apr.h"
+ #include "apr_general.h"        /* for signal stuff */
+ #include "apr_strings.h"
+@@ -1461,7 +1463,7 @@
+ 
+     memset(buf, ' ', LOG_BYTES_BUFFER_SIZE - 1);
+     buf[LOG_BYTES_BUFFER_SIZE - 1] = '\0';
+-    
++
+     chars = buf; /* start character dump here */
+     hex   = buf + BYTES_LOGGED_PER_LINE + 1; /* start hex dump here */
+     while (*off < len && this_time < BYTES_LOGGED_PER_LINE) {
+@@ -1533,7 +1535,7 @@
+     }
+ }
+ 
+-AP_DECLARE(void) ap_log_data_(const char *file, int line, 
++AP_DECLARE(void) ap_log_data_(const char *file, int line,
+                               int module_index, int level,
+                               const server_rec *s, const char *label,
+                               const void *data, apr_size_t len,
