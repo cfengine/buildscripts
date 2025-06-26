@@ -14,6 +14,10 @@ build-stamp:
 	dh_testdir
 
 	patch -p0 < $(CURDIR)/apachectl.patch
+
+	# Fixed implicit declaration of GNU extension gettid() (See ENT-13084)
+	patch -p1 < $(CURDIR)/fixed-implicit-decl-gettid.patch
+
 	./configure \
 --prefix=$(PREFIX)/httpd \
 --enable-so \
