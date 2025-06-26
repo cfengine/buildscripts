@@ -1,0 +1,11 @@
+diff -ruN httpd-2.4.63/server/log.c httpd-2.4.63-modified/server/log.c
+--- httpd-2.4.63/server/log.c	2024-06-21 16:31:54.000000000 +0200
++++ httpd-2.4.63-modified/server/log.c	2025-06-26 12:24:42.652916219 +0200
+@@ -39,6 +39,7 @@
+ #include <stdarg.h>
+ #endif
+ #if APR_HAVE_UNISTD_H
++#define _GNU_SOURCE // gettid() used below is a GNU extension
+ #include <unistd.h>
+ #endif
+ #if APR_HAVE_PROCESS_H
