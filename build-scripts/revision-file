@@ -37,9 +37,9 @@ case "$PROJECT" in
     ;;
   *)
     if [ -z "${PROJECT}" ]; then
-        echo "Error: Expected environment variable PROJECT=[community|nova]"
+        echo "$(basename "$0"): Error: Expected environment variable PROJECT=[community|nova]"
     else
-        echo "Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
+        echo "$(basename "$0"): Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
     fi
     echo "Usage: PROJECT=[community|nova] $0"
     exit 42;;
@@ -56,24 +56,24 @@ for _dir in $_dirs
 do
     if [ -d "$BASEDIR/$_dir" ]; then
         if [ ! -f "$BASEDIR/$_dir/revision" ]; then
-            echo "Creating revision file in $_dir"
+            echo "$(basename "$0"): Debug: Creating revision file in $_dir"
 
             # Get the revision hash
             R=$(git -C "$BASEDIR/$_dir" log --abbrev=$CORE_ABBREV --pretty='format:%h' -1 -- .) || false
 
             # Make sure there are no hash collisions
             if ! git -C "$BASEDIR/$_dir" show "$R" --oneline >/dev/null; then
-                echo "abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
+                echo "$(basename "$0"): Error: abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
                 exit 1
             fi
 
             # Create the revision file
             echo "$R" | tr -d '\n' > "$BASEDIR/$_dir/revision"
         else
-            echo "Revision file already exists in $_dir"
+            echo "$(basename "$0"): Debug: Revision file already exists in $_dir"
         fi
     else
-        echo "Error: Expected to find the '$_dir' directory in '$BASEDIR', but it's not there"
+        echo "$(basename "$0"): Error: Expected to find the '$_dir' directory in '$BASEDIR', but it's not there"
         exit 1
     fi
 done
