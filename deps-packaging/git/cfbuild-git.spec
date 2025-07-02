@@ -31,7 +31,7 @@ case "$OS" in
             # 15:05:28  #include <sys/random.h>
             # 15:05:28                         ^
             # 15:05:28 compilation terminated.
-            patch -p1 < %{_topdir}/SOURCES/fix_git_on_rhel7.patch
+            patch -p1 < %{_topdir}/SOURCES/fix_git_on_old_platforms.patch
         fi
         ;;
 esac
