@@ -23,6 +23,15 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
+	case "$(OS)-$(OS_VERSION)" in
+		ubuntu-16*)
+			patch -p1 < $(CURDIR)/fix_git_on_old_platforms.patch
+			;;
+		debian-9*)
+			patch -p1 < $(CURDIR)/fix_git_on_old_platforms.patch
+			;;
+	esac
+
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/perl*
