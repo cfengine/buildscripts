@@ -178,7 +178,7 @@ case "$PACKAGING" in
     #     - argv[2] = a b
     # Also note that $RPMBUILD_OPTIONS might have spaces
     # which must be preserved
-    eval "$RPMBUILD_CMD" -bb \
+    eval rpmbuild -bb \
       --define "'_topdir $BASEDIR/$PKG'" \
       --define "'buildprefix $BUILDPREFIX'" \
       --define "'_basedir $BASEDIR'" \
