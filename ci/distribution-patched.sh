@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 set -ex
-if grep CODENAME=stretch /etc/os-release; then
-  echo "deb http://archive.debian.org/debian-archive/debian stretch main" >/etc/apt/sources.list
-  echo "deb http://archive.debian.org/debian-archive/debian stretch-backports main" >>/etc/apt/sources.list
-fi
+for debian_release in stretch buster; do
+  if grep "CODENAME=$debian_release" /etc/os-release; then
+    echo "deb http://archive.debian.org/debian-archive/debian ${debian_release} main" >/etc/apt/sources.list
+    echo "deb http://archive.debian.org/debian-archive/debian ${debian_release}-backports main" >>/etc/apt/sources.list
+  fi
+done
 if [ -f /etc/centos-release ]; then
   _version=$(cat /etc/centos-release | cut -d' ' -f3 | cut -d. -f1)
   if [ "$_version" = "6" ] || [ "$_version" = "7" ]; then
