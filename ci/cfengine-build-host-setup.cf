@@ -41,11 +41,11 @@ bundle agent cfengine_build_host_setup
       "rsync" comment => "added for debian-10";
       "systemd-coredump" comment => "added step to jenkins testing-pr job to query for coredumps on failures";
 
-    debian_10|ubuntu_20::
+    ubuntu_20::
       "libncurses5";
       "libncurses5-dev";
 
-    (debian|ubuntu).!(debian_9|debian_10|ubuntu_16|ubuntu_18|ubuntu_20)::
+    (debian|ubuntu).!(debian_9|ubuntu_16|ubuntu_18|ubuntu_20)::
       "libncurses6";
       "libncurses-dev";
 
