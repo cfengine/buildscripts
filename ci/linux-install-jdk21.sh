@@ -9,7 +9,8 @@ install_jdk() {
   version=21.0.7
   if uname -m | grep aarch64; then
     tarball=jdk-21_linux-aarch64_bin.tar.gz
-    sha=47372cfa9244dc74ec783a1b287381502419b564fbd0b18abc8f2d6b19ac865e
+    # checksum from https://download.oracle.com/java/21/latest/jdk-21_linux-aarch64_bin.tar.gz.sha256
+    sha=708064ee3a1844245d83be483ff42cc9ca0c482886a98be7f889dff69ac77850
   else
     tarball=jdk-21_linux-x64_bin.tar.gz
     sha=267b10b14b4e5fada19aca3be3b961ce4f81f1bd3ffcd070e90a5586106125eb
