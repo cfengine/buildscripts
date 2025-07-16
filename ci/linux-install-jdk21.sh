@@ -13,7 +13,8 @@ install_jdk() {
     sha=708064ee3a1844245d83be483ff42cc9ca0c482886a98be7f889dff69ac77850
   else
     tarball=jdk-21_linux-x64_bin.tar.gz
-    sha=267b10b14b4e5fada19aca3be3b961ce4f81f1bd3ffcd070e90a5586106125eb
+    # checksum from https://download.oracle.com/java/24/latest/jdk-24_linux-x64_bin.tar.gz.sha256
+    sha=5f9f7c4ca2a6cef0f18a27465e1be81bddd8653218f450a329a2afc9bf2a1dd8
   fi
   wget --quiet "$baseurl$tarball"
   echo "$sha  $tarball" | sha256sum --check -
