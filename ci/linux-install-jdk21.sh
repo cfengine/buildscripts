@@ -5,16 +5,19 @@ install_jdk() {
   # install jdk "manually"
   # depending on os, might want to do something like `apt remove default-jre openjdk-*-jre-*`
   cd /opt
+  # in order to have a stable download we must use the latest-1 version as that is the most recent in the "archive"
   baseurl=https://download.oracle.com/java/21/archive/
-  version=21.0.8
+  major_version=21
+  baseurl="https://download.oracle.com/java/${major_version}/archive/"
+  version=21.0.7
   if uname -m | grep aarch64; then
     tarball=jdk-${version}_linux-aarch64_bin.tar.gz
-    # checksum from https://download.oracle.com/java/21/latest/jdk-21_linux-aarch64_bin.tar.gz.sha256
-    sha=708064ee3a1844245d83be483ff42cc9ca0c482886a98be7f889dff69ac77850
+    # checksum from https://download.oracle.com/java/${major_version}/archive/jdk-${version}_linux-aarch64_bin.tar.gz.sha256
+    sha=47372cfa9244dc74ec783a1b287381502419b564fbd0b18abc8f2d6b19ac865e
   else
     tarball=jdk-${version}_linux-x64_bin.tar.gz
-    # checksum from https://download.oracle.com/java/24/latest/jdk-24_linux-x64_bin.tar.gz.sha256
-    sha=5f9f7c4ca2a6cef0f18a27465e1be81bddd8653218f450a329a2afc9bf2a1dd8
+    # checksum from https://download.oracle.com/java/${major_version}/latest/jdk-${version}_linux-x64_bin.tar.gz.sha256
+    sha=267b10b14b4e5fada19aca3be3b961ce4f81f1bd3ffcd070e90a5586106125eb
   fi
   wget --quiet "$baseurl$tarball"
   echo "$sha  $tarball" | sha256sum --check -
