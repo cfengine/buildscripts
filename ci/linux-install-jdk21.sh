@@ -6,7 +6,7 @@ install_jdk() {
   # depending on os, might want to do something like `apt remove default-jre openjdk-*-jre-*`
   cd /opt
   baseurl=https://download.oracle.com/java/21/latest/
-  version=21.0.7
+  version=21.0.8
   if uname -m | grep aarch64; then
     tarball=jdk-21_linux-aarch64_bin.tar.gz
     # checksum from https://download.oracle.com/java/21/latest/jdk-21_linux-aarch64_bin.tar.gz.sha256
