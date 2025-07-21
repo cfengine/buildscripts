@@ -26,6 +26,13 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	# Fixes following issue on Windows build
+	# 15:44:06 url.c: In function 'zonefrom_url':
+	# 15:44:06 url.c:1802:18: error: implicit declaration of function 'if_nametoindex' [-Werror=implicit-function-declaration]
+	# 15:44:06        scopeidx = if_nametoindex(zoneid);
+	# 15:44:06                   ^
+	if [ "$(OS)" = mingw ]; then patch -p1 < "$(CURDIR)"/fix-curl-windows.patch; fi
+
 	./configure --with-sysroot=$(PREFIX) \
 				--host=$(DEB_HOST_GNU_TYPE) \
 				$(PTHREAD) \
@@ -54,7 +61,7 @@ build-stamp:
 				CPPFLAGS="-I$(PREFIX)/include" \
 
 	make
-	
+
 	touch build-stamp
 
 install: build
