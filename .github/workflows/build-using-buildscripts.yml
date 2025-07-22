@@ -4,8 +4,8 @@ on:
   workflow_call:
     inputs:
       additional_artifacts:
-        description: 'Additional files or directories to include in artifacts'
-        default: ''
+        description: "Additional files or directories to include in artifacts"
+        default: ""
         required: false
         type: string
 
@@ -122,7 +122,6 @@ jobs:
           restore-keys: |
             build-${{ env.PACKAGE_SHA }}
 
-
       - name: Build package in docker
         env:
           GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE: ${{ secrets.GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE }}
@@ -141,8 +140,8 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: |
-              artifacts
-              packages
+            artifacts
+            packages
           key: artifacts-${{ env.PACKAGE_SHA }}
 
       - name: Save artifacts
