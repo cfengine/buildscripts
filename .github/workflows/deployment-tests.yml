@@ -12,6 +12,9 @@ on:
       GH_ACTIONS_SSH_KEY_BUILD_ARTIFACTS_CACHE:
         required: true
 
+permissions:
+  contents: read
+
 jobs:
   deployment_tests:
     name: Run simple deployment tests
