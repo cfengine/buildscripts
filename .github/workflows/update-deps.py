@@ -59,6 +59,11 @@ def parse_args():
     parser.add_argument(
         "--root", default=".", help="specify build scripts root directory"
     )
+    parser.add_argument(
+        "--jdk21",
+        action="store_true",
+        help="update SDK 21 on build hosts (needed by Jenkins)",
+    )
 
     return parser.parse_args()
 
@@ -255,6 +260,87 @@ def update_deps(root, bump, skip):
             exit(1)
 
 
+def update_jdk21(root):
+    base_url = "https://download.oracle.com/java/21/archive/"
+
+    filename = os.path.join(root, "ci/linux-install-jdk21.sh")
+    with open(filename, "r") as f:
+        content = f.read()
+
+    old_version = re.search(
+        r"version=21\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", content
+    ).group()
+    _, minor, patch = old_version.split(".")
+    minor = int(minor)
+    patch = int(patch)
+    log.debug(f"Found version 21.{minor}.{patch} in '{filename}'")
+
+    # Let's try to increase the minor version number first
+    response = requests.head(base_url + f"jdk-21.{minor + 1}.0_linux-x64_bin.tar.gz")
+    while response.status_code == 200:
+        minor += 1
+        log.debug(f"Found more recent version 21.{minor}.0")
+
+        # Reset the patch version if there is a more recent minor version
+        patch = 0
+
+        time.sleep(1)  # Let's not DDOS them
+        response = requests.head(
+            base_url + f"jdk-21.{minor + 1}.0_linux-x64_bin.tar.gz"
+        )
+
+    # Now try to increase the patch version number
+    response = requests.head(
+        base_url + f"jdk-21.{minor}.{patch + 1}_linux-x64_bin.tar.gz"
+    )
+    while response.status_code == 200:
+        patch += 1
+        log.debug(f"Found more recent version 21.{minor}.{patch}")
+        time.sleep(1)  # Let's not DDOS them
+        response = requests.head(
+            base_url + f"jdk-21.{minor}.{patch + 1}_linux-x64_bin.tar.gz"
+        )
+
+    new_version = f"version=21.{minor}.{patch}"
+    if new_version == old_version:
+        log.debug(
+            f"Java Development Kit 21 is already the newest version ('{new_version}' == '{old_version}')"
+        )
+        return
+
+    # Find old SHAs
+    aarch64_old_sha, x64_old_sha = re.findall(r"sha=[0-9a-f]{64}", content)
+    log.debug(f"Found SHA '{aarch64_old_sha}' for aarch64 in '{filename}'")
+    log.debug(f"Found SHA '{x64_old_sha}' for x64 '{filename}'")
+
+    # Get new SHAs
+    url = base_url + f"jdk-21.{minor}.{patch}_linux-aarch64_bin.tar.gz.sha256"
+    aarch64_new_sha = f"sha={requests.get(url).text}"
+    log.debug(f"Fetched new SHA '{aarch64_new_sha}' for aarch64")
+    url = base_url + f"jdk-21.{minor}.{patch}_linux-x64_bin.tar.gz.sha256"
+    x64_new_sha = f"sha={requests.get(url).text}"
+    log.debug(f"Fetched new SHA '{x64_new_sha}' for x64")
+
+    # Replace version number and SHAs
+    log.debug(f"Replacing old version '{old_version}' with new version '{new_version}'")
+    content = content.replace(old_version, new_version, 1)
+    log.debug(f"Replacing old SHA '{aarch64_old_sha}' with new sha '{aarch64_new_sha}'")
+    content = content.replace(aarch64_old_sha, aarch64_new_sha, 1)
+    log.debug(f"Replacing old SHA '{x64_old_sha}' with new sha '{x64_new_sha}'")
+    content = content.replace(x64_old_sha, x64_new_sha, 1)
+
+    log.debug(f"Writing changes to file '{filename}'")
+    with open(filename, "w") as f:
+        f.write(content)
+
+    if not git_commit(
+        root,
+        f"Updated Java Development Kit to 21.{minor}.{patch}",
+    ):
+        log.error(f"Failed to commit changes after updating Java Development Kit")
+        exit(1)
+
+
 def main():
     args = parse_args()
     loglevel = "DEBUG" if args.debug else "INFO"
@@ -263,6 +349,8 @@ def main():
     )
 
     update_deps(args.root, args.bump, args.skip)
+    if args.jdk21:
+        update_jdk21(args.root)
 
 
 if __name__ == "__main__":
