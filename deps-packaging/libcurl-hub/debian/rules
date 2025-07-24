@@ -2,12 +2,6 @@
 
 PREFIX=$(BUILDPREFIX)
 
-ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
-  PTHREAD=
-else
-  PTHREAD=--with-pthread=$(PREFIX)
-endif
-
 clean:
 	dh_testdir
 	dh_testroot
@@ -20,27 +14,19 @@ build-stamp:
 
 	./configure --with-sysroot=$(PREFIX) \
 				--host=$(DEB_HOST_GNU_TYPE) \
-				$(PTHREAD) \
 				--with-ssl=$(PREFIX) \
 				--with-zlib=$(PREFIX) \
 				--prefix=$(PREFIX) \
 				--disable-ldap \
 				--disable-ldaps \
 				--disable-ntlm \
-				--without-axtls \
-				--without-cyassl \
-				--without-egd-socket \
 				--without-gnutls \
 				--without-gssapi \
-				--without-libidn \
 				--without-libpsl \
 				--without-librtmp \
 				--without-libssh2 \
 				--without-nghttp2 \
-				--without-nss \
-				--without-polarssl \
 				--without-winidn \
-				--without-winssl \
 				CPPFLAGS="-I$(PREFIX)/include" \
 
 	make

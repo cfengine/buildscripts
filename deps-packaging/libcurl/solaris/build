@@ -15,20 +15,13 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
     --with-zlib=$PREFIX \
     --disable-ldap \
     --disable-ldaps \
-    --without-axtls \
-    --without-cyassl \
-    --without-egd-socket \
     --without-gnutls \
     --without-gssapi \
-    --without-libidn \
     --without-libpsl \
     --without-librtmp \
     --without-libssh2 \
     --without-nghttp2 \
-    --without-nss \
-    --without-polarssl \
     --without-winidn \
-    --without-winssl \
     CPPFLAGS="-DAF_LOCAL=AF_UNIX"
 $MAKE
 
