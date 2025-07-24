@@ -45,7 +45,7 @@ usage() {
   echo "-d /var/cfengine, --workdir=/var/cfengine"
   echo "        Specify directory which will be CFEngine's workdir. Does not work for"
   echo "        Windows binaries."
-  echo "--release|--debug|--docs|--release-and-debug"
+  echo "--release|--debug|--release-and-debug"
   echo "        With or without debug symbols."
   echo "-v, --verbose"
   echo "        Whether or not to echo the log as the build progresses."
@@ -64,7 +64,7 @@ usage() {
 }
 
 opts() {
-  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,release,debug,docs,help,test-machine:,test-shell,no-tests -n build-remote -- "$@"`
+  OPTS=`getopt -o p:b:w:c:d:vht: --long project:,branch:,wix-machine:,cross-target:,workdir:,verbose,source:,role:,version:,release,debug,help,test-machine:,test-shell,no-tests -n build-remote -- "$@"`
 
   eval set -- "$OPTS"
   echo "$?"
@@ -75,7 +75,6 @@ opts() {
     exit 1
   fi
 
-  DOCS=no
   PROJECT=nova
   BRANCH=master
   BUILD_TYPE=DEBUG
@@ -111,9 +110,6 @@ opts() {
         shift;;
       --debug)
         BUILD_TYPE=DEBUG
-        shift;;
-      --docs)
-        DOCS=yes
         shift;;
       --source)
         SOURCE="$2"
@@ -161,7 +157,7 @@ opts() {
   REPOSITORY=$PROJECT-$BRANCH
   HOST=$1
 
-  export PROJECT BRANCH WIX_MACHINE CROSS_TARGET HOST BUILD_TYPE BUILD_NUMBER DOCS EXPLICIT_ROLE EXPLICIT_VERSION TEST_MACHINE TEST_SHELL PREFIX
+  export PROJECT BRANCH WIX_MACHINE CROSS_TARGET HOST BUILD_TYPE BUILD_NUMBER EXPLICIT_ROLE EXPLICIT_VERSION TEST_MACHINE TEST_SHELL PREFIX
 
   export SCHEDULER=$PROJECT-$BRANCH-localbuild
 }
@@ -279,12 +275,6 @@ checkout() {
   esac
 }
 
-build_docs() {
-  remote_script configure-docs
-  remote_script compile
-  remote_script upload-docs
-}
-
 build() {
   remote_script configure
   remote_script compile
@@ -318,12 +308,7 @@ common_build() {
   remote_script clean-buildmachine
   remote_script install-dependencies
 
-  case "$DOCS" in
-    yes)
-      build_docs;;
-    no)
-      build;;
-  esac
+  build
 }
 
 opts "$@"
