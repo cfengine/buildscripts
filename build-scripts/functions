@@ -617,4 +617,14 @@ run_and_print_on_failure()
     return $exit_code
 }
 
+log_debug()
+{
+    echo "$(basename "$0"): Debug:" "$@"
+}
+
+log_error()
+{
+    echo "$(basename "$0"): Error:" "$@" >&2
+}
+
 _IS_FUNCTIONS_SOURCED=yes
