@@ -619,12 +619,12 @@ run_and_print_on_failure()
 
 log_debug()
 {
-    echo "$(basename "$0"): Debug:" "$@"
+    echo "$(basename "$0"): debug:" "$@"
 }
 
 log_error()
 {
-    echo "$(basename "$0"): Error:" "$@" >&2
+    echo "$(basename "$0"): error:" "$@" >&2
 }
 
 _IS_FUNCTIONS_SOURCED=yes
