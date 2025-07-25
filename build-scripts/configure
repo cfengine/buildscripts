@@ -1,11 +1,32 @@
 #!/bin/sh
 
+#
+# This script runs configure on each of the CFEngine repositories.
+# It determines which configure options and compiler flags to use based on the dependencies found in compile-options script.
+#
+# The script expects the following repositories to exist side by side:
+# .
+# ├── buildscripts
+# ├── core
+# ├── enterprise
+# ├── nova
+# └── masterfiles
+#
+# ^ When building community you won't need enterprise, nova.
+#
+# The script can be run as follows:
+# ```
+# $ PROJECT=[nova|community] BUILD_TYPE=[DEBUG|RELEASE] EXPLICIT_ROLE=[hub|agent] ./buildscripts/build-scripts/configure
+# ```
+#
+
 
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 . version
 
+# Make sure the PROJECT variable is set correctly
 case "$PROJECT" in
     community)
         NOVA=no
@@ -91,6 +112,7 @@ case "$ARCH-${OS_FAMILY}" in
 esac
 
 
+# Select configure options and compiler flags based on BUILD_TYPE
 case "$BUILD_TYPE" in
     RELEASE)
         CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
@@ -108,6 +130,7 @@ esac
 
 if [ "$OS" = solaris ]
 then
+    # Otherwise, we pick wrong pkg-config file (from OS), with a lower version of libxml dependency than we would like to have.
     export PKG_CONFIG_PATH="$BUILDPREFIX/lib/pkgconfig"
 fi
 
