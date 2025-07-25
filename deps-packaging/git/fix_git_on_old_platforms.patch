@@ -1,0 +1,48 @@
+diff -ruN git-2.50.0/compat/posix.h git-2.50.0-modified/compat/posix.h
+--- git-2.50.0/compat/posix.h	2025-06-24 15:50:16.431161905 +0200
++++ git-2.50.0-modified/compat/posix.h	2025-06-24 15:56:12.823192406 +0200
+@@ -155,9 +155,9 @@
+ #ifdef HAVE_ARC4RANDOM_LIBBSD
+ #include <bsd/stdlib.h>
+ #endif
+-#ifdef HAVE_GETRANDOM
+-#include <sys/random.h>
+-#endif
++// #ifdef HAVE_GETRANDOM
++// #include <sys/random.h>
++// #endif
+ #ifdef NO_INTPTR_T
+ /*
+  * On I16LP32, ILP32 and LP64 "long" is the safe bet, however
+diff -ruN git-2.50.0/wrapper.c git-2.50.0-modified/wrapper.c
+--- git-2.50.0/wrapper.c	2025-06-16 07:42:57.000000000 +0200
++++ git-2.50.0-modified/wrapper.c	2025-06-24 15:56:09.560108133 +0200
+@@ -775,17 +775,17 @@
+ 	/* This function never returns an error. */
+ 	arc4random_buf(buf, len);
+ 	return 0;
+-#elif defined(HAVE_GETRANDOM)
+-	ssize_t res;
+-	char *p = buf;
+-	while (len) {
+-		res = getrandom(p, len, 0);
+-		if (res < 0)
+-			return -1;
+-		len -= res;
+-		p += res;
+-	}
+-	return 0;
++// #elif defined(HAVE_GETRANDOM)
++// 	ssize_t res;
++// 	char *p = buf;
++// 	while (len) {
++// 		res = getrandom(p, len, 0);
++// 		if (res < 0)
++// 			return -1;
++// 		len -= res;
++// 		p += res;
++// 	}
++// 	return 0;
+ #elif defined(HAVE_GETENTROPY)
+ 	int res;
+ 	char *p = buf;
