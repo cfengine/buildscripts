@@ -70,7 +70,9 @@ bundle agent cfengine_build_host_setup
 # I attempted to arrange these packages in order of: generic (all versions) and then as if we gradually added them through time: rhel-6, 7, 8, 9...
     suse|opensuse|sles|redhat|centos::
       "gcc";
-      "ncurses-devel";
+      "ncurses-devel"
+        if => not("sles_15"),
+        comment => "sles 15 requires a downgrade to install ncurses-devel as of July 25, 2025";
       "pam-devel";
       "rsync";
       "make";
@@ -274,6 +276,10 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
         perms => mog("400", "root", "root");
 
   commands:
+    sles_15::
+      "zypper --non-interactive install --allow-downgrade ncurses-devel"
+        comment => "Special case mentioned elsewhere in this policy. ncurses-devel requires a downgrade as of July 25 2025",
+        contain => in_shell;
     (redhat_8|centos_8|redhat_9).(!have_perl_package_installed).(yum_dnf_conf_ok)::
       "yum install -y perl" contain => in_shell,
         comment => "even though rhel8/9 come with /bin/perl perl >= 5.8.8 is needed by cfbuild-lcov-1.16-1.noarch. So the package must be installed.";
