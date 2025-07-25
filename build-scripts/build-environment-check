@@ -75,6 +75,6 @@ then
     exit 0
 else
     echo "$0: FAILURE buildslave is NOT correctly setup"
-    echo "You should edit the policy in autobuild to fix the issues"
+    echo "You should edit the policy at buildscripts/ci/cfengine-build-host-setup.cf to fix the issues"
     exit 1
 fi
