@@ -12,7 +12,6 @@
 # The rest are wanted only on the machine doing "autogen.sh",
 #     aka buildmaster, which is *different* from the buildslaves
 ### TODO add to the unwanted list:    bison byacc flex
-### TODO unfortunately autoconf is installed by autobuild policy
 
 
 case "$OS" in
