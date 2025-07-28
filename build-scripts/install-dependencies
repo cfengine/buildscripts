@@ -7,8 +7,6 @@
 # We use packaging scripts
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
 
-set -x
-
 # This should be already set from sourcing "functions" at the top, but
 # make sure, because we don't want build-artifacts-cache to have bogus
 # packages.
