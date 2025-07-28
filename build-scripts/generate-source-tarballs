@@ -22,19 +22,15 @@
 # ```
 #
 
-. `dirname "$0"`/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
-set -x
 
 
-cd core
-$MAKE V=1 dist
-cd ..
-
-cd masterfiles
-$MAKE V=1 dist
-cd ..
+for repo in core masterfiles; do
+    log_debug "Running target make dist in $repo repository..."
+    (cd $repo && run_and_print_on_failure "$MAKE" V=1 dist)
+done
 
 
 # Copy to the directory that's being uploaded to buildcache
