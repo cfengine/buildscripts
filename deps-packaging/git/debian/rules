@@ -13,6 +13,10 @@ build-stamp:
 	dh_testdir
 
 	./configure --prefix=$(PREFIX) --with-openssl=$(PREFIX) --without-iconv --with-gitconfig=$(PREFIX)/config/gitconfig --with-gitattributes=$(PREFIX)/config/gitattributes --with-zlib=$(PREFIX) --with-curl=$(PREFIX) --libexecdir=$(PREFIX)/lib
+
+	if expr "$(OS)-$(OS_VERSION)" : "ubuntu-16.*" ; then patch -p1 < $(CURDIR)/fix_git_on_old_platforms.patch ; fi
+	if expr "$(OS)-$(OS_VERSION)" : "debian-9.*"  ; then patch -p1 < $(CURDIR)/fix_git_on_old_platforms.patch ; fi
+
 	make CURL_LDFLAGS="-lcurl"
 
 	touch build-stamp

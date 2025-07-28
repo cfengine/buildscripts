@@ -1,4 +1,4 @@
-%define git_version 2.49.0
+%define git_version 2.50.1
 
 Summary: CFEngine Build Automation -- git
 Name: cfbuild-git
@@ -22,6 +22,20 @@ mkdir -p %{_builddir}
 
 %build
 
+case "$OS" in
+    rhel|centos)
+        if [ $(echo $OS_VERSION | cut -d. -f1) = 7 ]
+        then
+            # Fixes the following compilation error on rhel 7:
+            # 15:05:28 compat/posix.h:159:24: fatal error: sys/random.h: No such file or directory
+            # 15:05:28  #include <sys/random.h>
+            # 15:05:28                         ^
+            # 15:05:28 compilation terminated.
+            patch -p1 < %{_topdir}/SOURCES/fix_git_on_old_platforms.patch
+        fi
+        ;;
+esac
+
 make CURL_LDFLAGS="-lcurl"
 
 %install
@@ -36,6 +50,7 @@ rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/python*
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib64
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/perl5
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/share/perl5
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/share/bash-completion
 rm -rf ${RPM_BUILD_ROOT}%{prefix}/bin/scalar
 
 %clean
@@ -67,7 +82,3 @@ CFEngine Build Automation -- git
 %{prefix}/lib/git-core
 
 %changelog
-
-
-
-
