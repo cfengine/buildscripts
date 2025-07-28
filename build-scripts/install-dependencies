@@ -8,6 +8,8 @@
 PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
 
 # Not all dependencies support building in parallel.
+# TODO: Investigate if this is still the case or disable parallel jobs for only
+# the dependencies that not support it. (ENT-13041)
 MAKEFLAGS=-j1
 
 set -x
