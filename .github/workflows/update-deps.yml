@@ -44,7 +44,7 @@ jobs:
         run: |
           echo "COMMIT_HASH_BEFORE=$(git log -1 --format=%H)">> $GITHUB_ENV
       - name: Run update script
-        run: python3 /tmp/update-deps.py --debug --bump=${{ matrix.branch == 'master' && 'major' || 'minor' }} ${{ matrix.branch == 'master' && '--jdk21' }}
+        run: python3 /tmp/update-deps.py --debug --bump=${{ matrix.branch == 'master' && 'major' || 'minor' }} ${{ matrix.branch == 'master' && '--jdk21' || '' }}
       - name: Save commit hash after
         run: |
           echo "COMMIT_HASH_AFTER=$(git log -1 --format=%H)">> $GITHUB_ENV
