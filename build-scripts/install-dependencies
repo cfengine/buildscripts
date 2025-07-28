@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. `dirname "$0"`/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
@@ -17,7 +17,7 @@ set -e
 
 install_pkg_files()
 {
-    retry_wrapper  pkg-install-$DEP_PACKAGING  "$@"
+    retry_wrapper  "pkg-install-$DEP_PACKAGING"  "$@"
 }
 
 
@@ -33,12 +33,15 @@ install_pkg_files()
 # perl-Module-Load-Conditional for RHELs).
 check_and_install_perl()
 {
-    [ x"$PERL" = x ]  &&  [ -x "$HOME/perl-my/bin/perl" ]  \
+    # Unless $PERL us already set:
+    # - set it to $HOME/perl-my/bin/perl if it exists and is executable
+    # - otherwise look for it elsewhere
+    [ -z "$PERL" ]  &&  [ -x "$HOME/perl-my/bin/perl" ]  \
         && PERL="$HOME/perl-my/bin/perl"  \
-            || PERL=`func_whereis perl`
+        || PERL=$(func_whereis perl)
 
     PERL_OK=yes
-    PERL_MINOR_VERSION=`$PERL -e 'print "$]"."\n"' | cut -d. -f2`
+    PERL_MINOR_VERSION=$($PERL -e 'print "$]"."\n"' | cut -d. -f2)
     if [ "$PERL_MINOR_VERSION" -lt 013004  ]
     then
         echo "$PERL version is $PERL_MINOR_VERSION," \
@@ -61,13 +64,13 @@ check_and_install_perl()
         # Solaris 11 insists on having a dependency to libgcc_s.so which
         # resides in /opt/csw/lib. Unfortunately the following hack is not
         # working on other platforms so we have to hide it.
-        if [ $OS = solaris ] && [ $OS_VERSION = 11 ]
+        if [ "$OS" = solaris ] && [ "$OS_VERSION" = 11 ]
         then
             PERL_LDFLAGS='-Aldflags=-static-libgcc'
             PERL_LDDLFLAGS='-Alddlflags=-static-libgcc -Alddlflags=-shared'
         fi
 
-        if [ $OS = aix ] && [ $OS_VERSION != 5.3 ]
+        if [ "$OS" = aix ] && [ "$OS_VERSION" != 5.3 ]
         then
             # AIX says it provides the nexttoward() 128bit floating point API,
             # but it actually doesn't provide the function. So let's make sure
@@ -81,12 +84,12 @@ check_and_install_perl()
         PERL_VERSION=5.40.1
         PERL_SHA256=02f8c45bb379ed0c3de7514fad48c714fd46be8f0b536bfd5320050165a1ee26
         wget https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
-        [ `func_sha256 perl-${PERL_VERSION}.tar.gz` != "${PERL_SHA256}" ]  \
+        [ "$(func_sha256 perl-${PERL_VERSION}.tar.gz)" != "${PERL_SHA256}" ]  \
             &&  fatal "perl checksum error"
         gzip -dc perl-${PERL_VERSION}.tar.gz | tar xf -
         cd perl-${PERL_VERSION}
-        ./Configure -des -Dprefix=$HOME/perl-my -Dcc=gcc -Dmake=$MAKE \
-            $PERL_EXTRA_FLAGS $PERL_CFLAGS $PERL_LDFLAGS $PERL_LDDLFLAGS
+        ./Configure -des -Dprefix="$HOME"/perl-my -Dcc=gcc -Dmake="$MAKE" \
+            "$PERL_EXTRA_FLAGS" "$PERL_CFLAGS" "$PERL_LDFLAGS" "$PERL_LDDLFLAGS"
         $MAKE
         $MAKE install
         PERL=$HOME/perl-my/bin/perl
@@ -101,19 +104,19 @@ check_and_install_perl
 
 # non-gnu exotics don't support sed -i,
 # and only hub or deb packages use files mentioned below
-if [ "$BUILDPREFIX" != "/var/cfengine" -a \( "$DEP_PACKAGING" = "deb" -o "$ROLE" = hub \) ]
-then
-    # Apply necessary changes for alternate prefix
-    sed -i "s:/var/cfengine:$BUILDPREFIX:"  \
-        $BASEDIR/buildscripts/deps-packaging/*/debian/*.install  \
-        $BASEDIR/buildscripts/deps-packaging/*/mingw/debian/*.install \
-        $BASEDIR/buildscripts/deps-packaging/apache/httpd.conf
+if [ "$BUILDPREFIX" != /var/cfengine ]; then
+    if [ "$DEP_PACKAGING" = deb ] || [ "$ROLE" = hub ]; then
+        # Apply necessary changes for alternate prefix
+        sed -i "s:/var/cfengine:$BUILDPREFIX:" \
+            "$BASEDIR/buildscripts/deps-packaging/*/debian/*.install" \
+            "$BASEDIR/buildscripts/deps-packaging/*/mingw/debian/*.install" \
+            "$BASEDIR/buildscripts/deps-packaging/apache/httpd.conf"
+    fi
 fi
 
 # Override for manual testing
-if [ "x$1" != x ]
-then
-    DEPS="$@"
+if [ -n "$1" ]; then
+    DEPS="$*"
 fi
 
 
@@ -144,7 +147,7 @@ do
         cross=native;;
     esac
 
-    revision=$(cat $BASEDIR/buildscripts/deps-packaging/revision)
+    revision=$(cat "$BASEDIR"/buildscripts/deps-packaging/revision)
     if [ "$BUILDPREFIX" != "/var/cfengine" ]
     then
         safe_prefix="+$(echo "$PREFIX" | sed 's:/::g')"
@@ -152,39 +155,44 @@ do
     version=0+$revision$versuffix$crossver$safe_prefix
 
     # FETCH dependency packages if needed
-    package_files=`pkg-cache listpkgfiles $dep-$version`
+    package_files=$(pkg-cache listpkgfiles "$dep-$version")
 
     # If package cache did not have the packages
-    if [ x"$package_files" = x ]
+    if [ -z "$package_files" ]
     then
         # BUILD the packages
         if [ "$dep" = "lmdb" ] && [ "$BUILD_TYPE" != "RELEASE" ]; then
           # Always build LMDB with debug symbols in non-release builds
-          $BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING  \
-              $dep $tests $cross $optimize yes $version
+          "$BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING"  \
+              "$dep" "$tests" "$cross" "$optimize" yes "$version"
         else
-          $BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING  \
-              $dep $tests $cross $optimize $debugsym $version
+          "$BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING"  \
+              "$dep" "$tests" "$cross" "$optimize" "$debugsym" "$version"
         fi
 
-        package_files=`pkg-find-$DEP_PACKAGING $BASEDIR/$dep`
+        package_files=$("pkg-find-$DEP_PACKAGING" "$BASEDIR/$dep")
 
-        [ x"$package_files" = x ]  &&  \
+        if [ -z "$package_files" ]; then
             fatal "Empty output dir after building dependency: $dep"
+        fi
 
         # CACHE the newly built package
-        pkg-cache putpkg $dep-$version $package_files
+        # shellcheck disable=SC2086
+        pkg-cache putpkg "$dep-$version" $package_files
 
         # CLEAN UP
+        # shellcheck disable=SC2086
         rm -f $package_files
 
         # Now the package should be in the local cache
-        package_files=`pkg-cache listpkgfiles $dep-$version`
-        [ x"$package_files" = x ]  &&  \
+        package_files=$(pkg-cache listpkgfiles "$dep-$version")
+        if [ -z "$package_files" ]; then
             fatal "Cache did not find package after putpkg"
+        fi
     fi
 
     # INSTALL the packages
+    # shellcheck disable=SC2086
     install_pkg_files  $package_files
 
     # keep 50 most recent packages to preserve disk space
