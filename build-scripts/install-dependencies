@@ -39,18 +39,17 @@ check_and_install_perl()
     PERL_OK=yes
     PERL_MINOR_VERSION=$($PERL -e 'print "$]"."\n"' | cut -d. -f2)
     if [ "$PERL_MINOR_VERSION" -lt 013004  ]; then
-        echo "$PERL version is $PERL_MINOR_VERSION," \
-             "too old"
+        log_debug "$PERL version is too old (minor version $PERL_MINOR_VERSION)"
         PERL_OK="no"
     fi
 
     if ! $PERL -e 'use List::Util qw(pairs);'; then
-        echo "$PERL has List::Util that does not export pairs. Needs to be at least version 1.29 for OpenSSL version 3.3.2."
+        log_debug $PERL has List::Util that does not export pairs. Needs to be at least version 1.29 for OpenSSL version 3.3.2.
         PERL_OK="no"
     fi
 
     if [ "$PERL_OK" != "yes" ]; then
-        echo "$PERL is too old or modules are missing, building new one from source..."
+        log_debug $PERL is too old or modules are missing, building new one from source...
 
         # -fno-stack-protector: Ensure built perl will not depend on libssp.so
         if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1; then
@@ -77,16 +76,26 @@ check_and_install_perl()
         #       from the perl dev team - they are only intended for development
         PERL_VERSION=5.40.1
         PERL_SHA256=02f8c45bb379ed0c3de7514fad48c714fd46be8f0b536bfd5320050165a1ee26
-        wget https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
+
+        log_debug Fetching perl tarball...
+        run_and_print_on_failure wget https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
         if [ "$(func_sha256 perl-${PERL_VERSION}.tar.gz)" != "${PERL_SHA256}" ]; then
             fatal "perl checksum error"
         fi
+
+        log_debug Extracting perl tarball...
         gzip -dc perl-${PERL_VERSION}.tar.gz | tar xf -
         cd perl-${PERL_VERSION}
-        ./Configure -des -Dprefix="$HOME"/perl-my -Dcc=gcc -Dmake="$MAKE" \
+
+        log_debug Running ./Configure on perl project...
+        run_and_print_on_failure ./Configure -des -Dprefix="$HOME"/perl-my -Dcc=gcc -Dmake="$MAKE" \
             "$PERL_EXTRA_FLAGS" "$PERL_CFLAGS" "$PERL_LDFLAGS" "$PERL_LDDLFLAGS"
-        $MAKE
-        $MAKE install
+
+        log_debug Running make on perl project...
+        run_and_print_on_failure $MAKE
+
+        log_debug Running make install on perl project...
+        run_and_print_on_failure $MAKE install
         PERL=$HOME/perl-my/bin/perl
     fi
 
@@ -111,6 +120,7 @@ fi
 
 # Override for manual testing
 if [ -n "$1" ]; then
+    log_debug "Overriding dependency list (manual testing)"
     DEPS="$*"
 fi
 
@@ -130,8 +140,7 @@ do
             tests=yes
             ;;
         *)
-            echo "Unknown build type: $BUILD_TYPE"
-            exit 42
+            fatal "Unknown build type: $BUILD_TYPE"
             ;;
     esac
 
@@ -146,6 +155,7 @@ do
             ;;
     esac
 
+    # Add $PREFIX to version of built dependencies so they get different package names and are distinguishable from each
     revision=$(cat "$BASEDIR"/buildscripts/deps-packaging/revision)
     if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
         safe_prefix="+$(echo "$PREFIX" | sed 's:/::g')"
@@ -157,9 +167,12 @@ do
 
     # If package cache did not have the packages
     if [ -z "$package_files" ]; then
+        log_debug Building package $dep...
         # BUILD the packages
         if [ "$dep" = "lmdb" ] && [ "$BUILD_TYPE" != "RELEASE" ]; then
-          # Always build LMDB with debug symbols in non-release builds
+          # Always build LMDB with debug symbols in non-release builds.
+          # The reason is an ongoing issue where we fail to open database transactions.
+          # See ENT-10777 for more info.
           "$BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING"  \
               "$dep" "$tests" "$cross" "$optimize" yes "$version"
         else
@@ -167,18 +180,20 @@ do
               "$dep" "$tests" "$cross" "$optimize" "$debugsym" "$version"
         fi
 
+        # Make sure package is there after building it
         package_files=$("pkg-find-$DEP_PACKAGING" "$BASEDIR/$dep")
-
         if [ -z "$package_files" ]; then
             fatal "Empty output dir after building dependency: $dep"
         fi
 
         # CACHE the newly built package
         # shellcheck disable=SC2086
+        log_debug Caching package $dep...
         pkg-cache putpkg "$dep-$version" $package_files
 
         # CLEAN UP
         # shellcheck disable=SC2086
+        log_debug Removing package files for $dep...
         rm -f $package_files
 
         # Now the package should be in the local cache
@@ -190,6 +205,7 @@ do
 
     # INSTALL the packages
     # shellcheck disable=SC2086
+    log_debug Installing package files for $dep...
     install_pkg_files $package_files
 
     # keep 50 most recent packages to preserve disk space
