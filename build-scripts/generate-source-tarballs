@@ -1,5 +1,27 @@
 #!/bin/sh
 
+#
+# This script tests that the "make dist" target works on the core and masterfiles repositories on different platforms.
+# THESE TARBALLS ARE NOT MEANT TO BE RELEASED!
+#
+# The tarballs that we release are built on a dedicated build host in the bootstrap-tarballs script.
+# This script, on the other hand, is meant to be run on all hosts to make sure that make dist works everywhere.
+# However, it's currently only used in our GitHub workflows and is not a part of the Jenkins PR pipeline (I think).
+#
+# The source tarballs a built into $OUTDIR (defined in the functions script).
+#
+# The script expects the following repositories to exist side by side:
+# .
+# ├── buildscripts
+# ├── core
+# └── masterfiles
+#
+# The script can be run as follows:
+# ```
+# $ ./buildscripts/build-scripts/generate-source-tarballs
+# ```
+#
+
 . `dirname "$0"`/functions
 . detect-environment
 . compile-options
