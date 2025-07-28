@@ -12,12 +12,10 @@ PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
 # packages.
 set -e
 
-
 install_pkg_files()
 {
-    retry_wrapper  "pkg-install-$DEP_PACKAGING"  "$@"
+    retry_wrapper "pkg-install-$DEP_PACKAGING" "$@"
 }
-
 
 # OpenSSL 1.1 requires Perl 5.10.0 and some modules existing only in 5.13.4 to
 # build and test properly, so we require 5.13.4 at least.  See NOTES.PERL in
@@ -40,36 +38,34 @@ check_and_install_perl()
 
     PERL_OK=yes
     PERL_MINOR_VERSION=$($PERL -e 'print "$]"."\n"' | cut -d. -f2)
-    if [ "$PERL_MINOR_VERSION" -lt 013004  ]
-    then
+    if [ "$PERL_MINOR_VERSION" -lt 013004  ]; then
         echo "$PERL version is $PERL_MINOR_VERSION," \
              "too old"
         PERL_OK="no"
     fi
+
     if ! $PERL -e 'use List::Util qw(pairs);'; then
         echo "$PERL has List::Util that does not export pairs. Needs to be at least version 1.29 for OpenSSL version 3.3.2."
         PERL_OK="no"
     fi
+
     if [ "$PERL_OK" != "yes" ]; then
         echo "$PERL is too old or modules are missing, building new one from source..."
 
         # -fno-stack-protector: Ensure built perl will not depend on libssp.so
-        if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1
-        then
+        if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1; then
             PERL_CFLAGS='-Accflags=-fno-stack-protector'
         fi
 
         # Solaris 11 insists on having a dependency to libgcc_s.so which
         # resides in /opt/csw/lib. Unfortunately the following hack is not
         # working on other platforms so we have to hide it.
-        if [ "$OS" = solaris ] && [ "$OS_VERSION" = 11 ]
-        then
+        if [ "$OS" = solaris ] && [ "$OS_VERSION" = 11 ]; then
             PERL_LDFLAGS='-Aldflags=-static-libgcc'
             PERL_LDDLFLAGS='-Alddlflags=-static-libgcc -Alddlflags=-shared'
         fi
 
-        if [ "$OS" = aix ] && [ "$OS_VERSION" != 5.3 ]
-        then
+        if [ "$OS" = aix ] && [ "$OS_VERSION" != 5.3 ]; then
             # AIX says it provides the nexttoward() 128bit floating point API,
             # but it actually doesn't provide the function. So let's make sure
             # the function is declared missing and not used.
@@ -82,8 +78,9 @@ check_and_install_perl()
         PERL_VERSION=5.40.1
         PERL_SHA256=02f8c45bb379ed0c3de7514fad48c714fd46be8f0b536bfd5320050165a1ee26
         wget https://www.cpan.org/src/5.0/perl-${PERL_VERSION}.tar.gz
-        [ "$(func_sha256 perl-${PERL_VERSION}.tar.gz)" != "${PERL_SHA256}" ]  \
-            &&  fatal "perl checksum error"
+        if [ "$(func_sha256 perl-${PERL_VERSION}.tar.gz)" != "${PERL_SHA256}" ]; then
+            fatal "perl checksum error"
+        fi
         gzip -dc perl-${PERL_VERSION}.tar.gz | tar xf -
         cd perl-${PERL_VERSION}
         ./Configure -des -Dprefix="$HOME"/perl-my -Dcc=gcc -Dmake="$MAKE" \
@@ -117,37 +114,40 @@ if [ -n "$1" ]; then
     DEPS="$*"
 fi
 
-
 for dep in $DEPS
 do
     case "$BUILD_TYPE" in
-    DEBUG|CODE_COVERAGE)
-        optimize=yes
-        debugsym=no
-        versuffix=+untested
-        tests=no;;
-    RELEASE)
-        optimize=yes
-        debugsym=no
-        versuffix=+release
-        tests=yes;;
-    *)
-        echo "Unknown build type: $BUILD_TYPE"
-        exit 42;;
+        DEBUG|CODE_COVERAGE)
+            optimize=yes
+            debugsym=no
+            versuffix=+untested
+            tests=no
+            ;;
+        RELEASE)
+            optimize=yes
+            debugsym=no
+            versuffix=+release
+            tests=yes
+            ;;
+        *)
+            echo "Unknown build type: $BUILD_TYPE"
+            exit 42
+            ;;
     esac
 
     case "$ARCH" in
-    x86|x64)
-        crossver=+mingw$ARCH
-        cross=$ARCH;;
-    *)
-        crossver=
-        cross=native;;
+        x86|x64)
+            crossver=+mingw$ARCH
+            cross=$ARCH
+            ;;
+        *)
+            crossver=
+            cross=native
+            ;;
     esac
 
     revision=$(cat "$BASEDIR"/buildscripts/deps-packaging/revision)
-    if [ "$BUILDPREFIX" != "/var/cfengine" ]
-    then
+    if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
         safe_prefix="+$(echo "$PREFIX" | sed 's:/::g')"
     fi
     version=0+$revision$versuffix$crossver$safe_prefix
@@ -156,8 +156,7 @@ do
     package_files=$(pkg-cache listpkgfiles "$dep-$version")
 
     # If package cache did not have the packages
-    if [ -z "$package_files" ]
-    then
+    if [ -z "$package_files" ]; then
         # BUILD the packages
         if [ "$dep" = "lmdb" ] && [ "$BUILD_TYPE" != "RELEASE" ]; then
           # Always build LMDB with debug symbols in non-release builds
@@ -191,7 +190,7 @@ do
 
     # INSTALL the packages
     # shellcheck disable=SC2086
-    install_pkg_files  $package_files
+    install_pkg_files $package_files
 
     # keep 50 most recent packages to preserve disk space
     pkg-cache keep_newest 50
