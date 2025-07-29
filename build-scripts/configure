@@ -15,12 +15,8 @@ esac
 
 P=$BUILDPREFIX
 
-ARGS="--prefix=$P --libdir=$P/lib --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre2=$P --with-librsync=$P --with-init-script"
+ARGS="--prefix=$P --libdir=$P/lib --with-workdir=$P --sysconfdir=/etc --with-lmdb=$P --with-openssl=$P --with-pcre2=$P --with-librsync=$P --with-init-script"
 
-if [ $EMBEDDED_DB = lmdb ]
-then
-    var_append ARGS "--with-lmdb=$P"
-fi
 case "$DEPS" in
     *pthreads-w32*)  var_append ARGS "--with-pthreads=$P" ;;
 esac
