@@ -13,7 +13,6 @@ export EXPLICIT_ROLE=hub
 
 #./buildscripts/build-scripts/autogen
 #./buildscripts/build-scripts/clean-buildmachine
-#./buildscripts/build-scripts/build-environment-check
 #./buildscripts/build-scripts/install-dependencies
 #./buildscripts/build-scripts/configure
 #./buildscripts/build-scripts/compile
