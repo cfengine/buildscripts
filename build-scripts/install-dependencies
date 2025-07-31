@@ -1,5 +1,25 @@
 #!/bin/sh
 
+#
+# This script installs the dependencies to be bundled with CFEngine.
+# The dependencies are built into you working directory.
+#
+# The script expects the following repositories to exist side by side:
+# .
+# ├── buildscripts
+# ├── core
+# ├── enterprise
+# ├── nova
+# └── masterfiles
+#
+# ^ When building community you won't need enterprise, nova.
+#
+# The script can be run as follows:
+# ```
+# $ PROJECT=[enterprise|community] EXPLICIT_ROLE=[hub|agent] BUILD_TYPE=[DEBUG|RELEASE] ./buildscripts/build-scripts/install-dependencies
+# ```
+#
+
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
