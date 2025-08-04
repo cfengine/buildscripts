@@ -130,18 +130,22 @@ then
 fi
 
 log_debug running configure on core repo...
-( cd "$BASEDIR"/core && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
+# shellcheck disable=SC2086
+( cd "$BASEDIR"/core && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
 
 if [ "$NOVA" = yes ]
 then
     log_debug running configure on enterprise repo...
-    ( cd "$BASEDIR"/enterprise && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
+    # shellcheck disable=SC2086
+    ( cd "$BASEDIR"/enterprise && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
     if [ "$ROLE" = hub ]
     then
         log_debug running configure on nova repo...
-        ( cd "$BASEDIR"/nova && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
+        # shellcheck disable=SC2086
+        ( cd "$BASEDIR"/nova && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
     fi
 fi
 
 log_debug running configure on masterfiles repo...
-( cd "$BASEDIR"/masterfiles && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure "$ARGS" )
+# shellcheck disable=SC2086
+( cd "$BASEDIR"/masterfiles && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
