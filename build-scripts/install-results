@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. "$(dirname "$0")"/functions
 . version
 
 LNK="$BASEDIR/../../../output/$SCHEDULER/current"
