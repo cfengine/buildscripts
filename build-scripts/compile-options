@@ -23,8 +23,8 @@ then
     esac
 fi
 
-# If still not set, then either we are running outside Jenkins, or this
-# is not a main "build" type job (it could be the bootstrap job).
+# If still not set, then either we are running outside Jenkins,
+# or this is not a main "build" type job (it could be the bootstrap job).
 # Do directory-based auto-detection.
 if [ -z "$PROJECT" ]
 then
@@ -59,13 +59,11 @@ export SYSTEM_SSL
 
 case "$OS_FAMILY" in
   aix)
-    # This flag is needed because AIX defaults to producing .a shared libraries,
-    # but we need it to make .so libraries. It doesn't work correctly when
-    # specified in the Makefile, so we specify it in the environment instead.
+    # This flag is needed because AIX defaults to producing .a shared libraries, but we need it to make .so libraries.
+    # It doesn't work correctly when specified in the Makefile, so we specify it in the environment instead.
     LDFLAGS="-Wl,-brtl"
 
-    # AIX needs default RPATH (libpath on AIX) specified as well, otherwise it
-    # won't find libc.
+    # AIX needs default RPATH (libpath on AIX) specified as well, otherwise it won't find libc.
     LDFLAGS="$LDFLAGS -L$BUILDPREFIX/lib -Wl,-blibpath:$BUILDPREFIX/lib:/usr/lib:/lib"
     ;;
   hpux)
@@ -73,10 +71,8 @@ case "$OS_FAMILY" in
 
     # Use ‘gcc’ when building things on HP-UX
     #
-    # HP-UX ships with ‘cc’ which invokes the ‘HP-UX bundled C compiler’ which
-    # lacks some functionality we need to build things. Among the other things,
-    # it doesn’t know how to link ‘.so’ files directly and it doesn’t recognize
-    # them as valid input type.
+    # HP-UX ships with ‘cc’ which invokes the ‘HP-UX bundled C compiler’ which lacks some functionality we need to build things.
+    # Among the other things, it doesn’t know how to link ‘.so’ files directly and it doesn’t recognize them as valid input type.
     CC=gcc
     export CC
     ;;
@@ -114,12 +110,11 @@ DEPS=
 
 # Windows specific dependencies
 if [ "$OS_FAMILY" = mingw ]; then
-    # Win32 does not support pthreads natively. The pthreads-w32 project provide
-    # solution to this problem.
+    # Win32 does not support pthreads natively.
+    # The pthreads-w32 project provides a solution to this problem.
     var_append DEPS "pthreads-w32"
 
-    # A port of the regex functionality from the glibc Library for use on
-    # Windows platforms
+    # A port of the regex functionality from the glibc Library for use on Windows platforms
     var_append DEPS "libgnurx"
 fi
 
@@ -127,8 +122,7 @@ fi
 case "$OS_FAMILY" in
     solaris|aix)
 
-        # libgcc_s.so is needed before we compile any other dependency
-        #             on some platforms!
+        # libgcc_s.so is needed before we compile any other dependency on some platforms!
         var_append DEPS "libgcc"
 
         # iconv is needed for libxml2 on some platforms
@@ -139,8 +133,8 @@ esac
 # We use system bundled SSL on RHEL >= 8
 if ! [ "$SYSTEM_SSL" = 1 ]
 then
-  # zlib is a compression library witch is a dependency of OpenSSL. However,
-  # can we remove it (CFE-4013)?
+  # zlib is a compression library witch is a dependency of OpenSSL.
+  # However, can we remove it (CFE-4013)?
   var_append DEPS "zlib"
 
   # Toolkit for TLS
@@ -150,8 +144,7 @@ fi
 # Solaris / HP-UX specific dependencies
 case "$OS_FAMILY" in
     solaris|hpux)
-        # Generic library that implements the Simple Authentication and Security
-        # Layer (SASL) framework
+        # Generic library that implements the Simple Authentication and Security Layer (SASL) framework
         var_append DEPS "sasl2"
         ;;
 esac
@@ -212,9 +205,9 @@ export ROLE
 case "$ROLE" in
     # HUB-ONLY dependencies
     hub)
-        # Note that we make a separate curl package for the hub. This is because
-        # the hub will include the curl binary, but we don't want that for the
-        # clients.
+        # Note that we make a separate curl package for the hub.
+        # This is because the hub will include the curl binary,
+        # but we don't want that for the clients.
         var_append DEPS "libcurl-hub"  # Provides API for performing network requests
         var_append DEPS "nghttp2"      # Provides implementation of the HTTP/2 protocol.
         var_append DEPS "libexpat"     # Provides stream-oriented XML parser
@@ -233,9 +226,8 @@ esac
 
 # Make sure init.d script and systemd service is used where needed.
 #
-# We install in all Linux platforms, because it does no harm on platforms
-# without systemd, and it has the advantage of working out of the box on
-# platforms that adopt systemd later.
+# We install in all Linux platforms, because it does no harm on platforms without systemd,
+# and it has the advantage of working out of the box on platforms that adopt systemd later.
 if [ "$OS_FAMILY" = linux ]; then
     WITH_SYSTEMD=yes
 else
