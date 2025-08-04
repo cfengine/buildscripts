@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # This script is executed after transferring back packages from the remote machine.
 # The script links the latest build directory into the one called current.
@@ -9,5 +9,6 @@
 . version
 
 LNK="$BASEDIR/../../../output/$SCHEDULER/current"
+log_debug "Creating soft link from $BUILD_NUMBER to $LNK"
 rm -f "$LNK"
 ln -fs "$BUILD_NUMBER" "$LNK"
