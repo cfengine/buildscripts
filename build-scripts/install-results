@@ -1,5 +1,10 @@
 #!/bin/sh -x
 
+# This script is executed after transferring back packages from the remote machine.
+# The script links the latest build directory into the one called current.
+#
+# NOTE: This script is not used in Jenkins.
+
 . "$(dirname "$0")"/functions
 . version
 
