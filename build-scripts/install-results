@@ -4,6 +4,5 @@
 . version
 
 LNK="$BASEDIR/../../../output/$SCHEDULER/current"
-TGT="$BASEDIR/../../../output/$SCHEDULER/$BUILD_NUMBER"
 rm -f "$LNK"
 ln -fs "$BUILD_NUMBER" "$LNK"
