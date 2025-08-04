@@ -304,7 +304,6 @@ common_build() {
 
   local_script autogen
   local_script transfer-to-buildmachine
-  remote_script build-environment-check
   remote_script clean-buildmachine
   remote_script install-dependencies
 
