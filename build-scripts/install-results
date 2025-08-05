@@ -1,9 +1,14 @@
-#!/bin/sh -x
+#!/bin/sh
 
-. `dirname "$0"`/functions
+# This script is executed after transferring back packages from the remote machine.
+# The script links the latest build directory into the one called current.
+#
+# NOTE: This script is not used in Jenkins.
+
+. "$(dirname "$0")"/functions
 . version
 
 LNK="$BASEDIR/../../../output/$SCHEDULER/current"
-TGT="$BASEDIR/../../../output/$SCHEDULER/$BUILD_NUMBER"
+log_debug "Creating soft link from $BUILD_NUMBER to $LNK"
 rm -f "$LNK"
 ln -fs "$BUILD_NUMBER" "$LNK"
