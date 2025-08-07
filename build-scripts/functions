@@ -601,7 +601,22 @@ rm_if_empty()
 run_and_print_on_failure()
 {
     local temp_output_file
-    temp_output_file=$(mktemp)
+    if command -v mktemp >/dev/null; then
+        temp_output_file=$(mktemp)
+    else
+        # AIX 7.1 does not have mktemp
+        while true; do
+          # shellcheck disable=SC2021
+          # ^^ legacy/POSIX requires square brackets
+          temp_output_file="$(LC_CTYPE=C tr -dc "[A-Z][a-z][0-9]" </dev/urandom | dd count=1 bs=8 2>/dev/null)"
+          if [ -f "$temp_output_file" ]; then
+            continue
+          fi
+          break;
+        done
+        touch "$temp_output_file"
+    fi
+
     local exit_code=0
     if "$@" > "$temp_output_file" 2>&1; then
         : # NOOP
