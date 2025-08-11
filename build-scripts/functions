@@ -415,7 +415,7 @@ mount_procfs()
 #     fatal "exiting with default error code"
 fatal()
 {
-    echo "FATAL ERROR: $1" >&2
+    echo "$(basename "$0"): FATAL ERROR: $1" >&2
     exit ${2-1}
 }
 
