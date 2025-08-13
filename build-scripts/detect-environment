@@ -143,19 +143,6 @@ detect_distribution()
         echo "Unknown RedHat-like distribution: $REL"
         exit 42;;
     esac
-  elif [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release; then
-    REL=$(grep DISTRIB_RELEASE= /etc/lsb-release)
-    REL=${REL#DISTRIB_RELEASE=}
-    case "$REL" in
-      [0-9].[0-9][0-9]|[0-9][0-9].[0-9][0-9])
-        ;;
-      *)
-        echo "Unknown Ubuntu release: $REL"
-        exit 42;;
-    esac
-
-    OS=ubuntu
-    OS_VERSION="$REL"
   elif [ -f /etc/debian_version ]; then
     REL=$(cat /etc/debian_version)
     if ! echo "$REL" | egrep '^[0-9]+\.[0-9]+(\.[0-9]+)?$' > /dev/null
