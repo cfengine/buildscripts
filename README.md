@@ -153,12 +153,12 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
 | :-------------------------------------------------- | :----- | :----- | :----- |
-| [Apache](https://httpd.apache.org/)                 | 2.4.64 | 2.4.65 | 2.4.64 |
+| [Apache](https://httpd.apache.org/)                 | 2.4.65 | 2.4.65 | 2.4.64 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.50.1 | 2.50.1 | 2.50.1 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.1  | 2.7.1  |
-| [PHP](https://php.net/)                             | 8.3.23 | 8.3.24 | 8.4.10 |
+| [PHP](https://php.net/)                             | 8.3.24 | 8.3.24 | 8.4.10 |
 | [PostgreSQL](https://www.postgresql.org/)           | 15.13  | 16.9   | 17.5   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.66.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
