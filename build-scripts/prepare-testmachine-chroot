@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
@@ -18,18 +18,18 @@ TRANSFER_SCRIPT=$BASEDIR/prepare-testmachine-chroot-transfer-script.rsync
 # Create the directory where the chroot environment is to be created.
 # Don't lose the trailing slash!
 CHROOT_ROOT=$HOME/testmachine-chroot/
-sudo mkdir -p $CHROOT_ROOT
+sudo mkdir -p "$CHROOT_ROOT"
 
 # Clean up previous chroot state by killing any processes that are using the CHROOT_ROOT directory.
-sudo $FUSER -k $CHROOT_ROOT || true
+sudo "$FUSER" -k "$CHROOT_ROOT" || true
 # Unmount the /proc filesystem if it was previously mounted inside the chroot.
-sudo umount ${CHROOT_ROOT}proc || true
+sudo umount "${CHROOT_ROOT}proc" || true
 
 # Tell rsync not to touch the BASEDIR and PREFIX directories
-echo "P $BASEDIR" > $TRANSFER_SCRIPT
-echo "P $PREFIX" >> $TRANSFER_SCRIPT
+echo "P $BASEDIR" > "$TRANSFER_SCRIPT"
+echo "P $PREFIX" >> "$TRANSFER_SCRIPT"
 # Generate the file-filter for rsync (see functions script)
-generate_chroot_transfer_script >> $TRANSFER_SCRIPT
+generate_chroot_transfer_script >> "$TRANSFER_SCRIPT"
 
 # Run a process in the background to print "Keep alive" every 60 seconds until the .keepalive-echo file exists.
 # This is to prevent the session from timing out on a remote machine.
@@ -41,7 +41,7 @@ RETURN_CODE=0
 # -D is for copying device files as well.
 # --delete to remove files in destination that are not present in source
 # --delete-excluded to remove excluded files in destination
-sudo rsync --filter=". $TRANSFER_SCRIPT" -Da --delete --delete-excluded / $CHROOT_ROOT || RETURN_CODE=$?
+sudo rsync --filter=". $TRANSFER_SCRIPT" -Da --delete --delete-excluded / "$CHROOT_ROOT" || RETURN_CODE=$?
 
 # Now we can stop the keep alive process
 rm .keepalive-echo
@@ -49,21 +49,21 @@ rm .keepalive-echo
 # Return code 24 means "some files vanished before they could be transferred",
 # which we don't care about, since a running system might experience this
 # without it being an error.
-if [ $RETURN_CODE -ne 0 -a $RETURN_CODE -ne 24 ]; then
+if [ $RETURN_CODE -ne 0 ] && [ $RETURN_CODE -ne 24 ]; then
     exit $RETURN_CODE
 fi
 
 # Create and set permissions for essential directories inside chroot
-sudo mkdir -p ${CHROOT_ROOT}tmp
-sudo chmod 1777 ${CHROOT_ROOT}tmp
-sudo mkdir -p ${CHROOT_ROOT}var/tmp
-sudo chmod 1777 ${CHROOT_ROOT}var/tmp
-sudo mkdir -p ${CHROOT_ROOT}run
-sudo mkdir -p ${CHROOT_ROOT}root
+sudo mkdir -p "${CHROOT_ROOT}tmp"
+sudo chmod 1777 "${CHROOT_ROOT}tmp"
+sudo mkdir -p "${CHROOT_ROOT}var/tmp"
+sudo chmod 1777 "${CHROOT_ROOT}var/tmp"
+sudo mkdir -p "${CHROOT_ROOT}run"
+sudo mkdir -p "${CHROOT_ROOT}root"
 
 # Safeguard to terminate operation if we have somehow ended up outside the
 # chroot, so we don't start running unsafe tests there.
-sudo touch ${CHROOT_ROOT}inside-chroot.txt
+sudo touch "${CHROOT_ROOT}inside-chroot.txt"
 
 # Trick in order to get a login command that starts out in the home dir instead of the root.
 # See the login command for chroot in test-on-testmachine
@@ -96,6 +96,7 @@ done | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
 unset IFS
 
 # Treat PATH specifically, and add to existing path.
+# shellcheck disable=SC2016
 printf 'PATH="%s:$PATH"\nexport PATH\n' "$PATH" | sudo sh -c "cat >> ${CHROOT_ROOT}run-in-home-dir.sh"
 
 # Note different quote style on Here document.
@@ -104,17 +105,17 @@ exec "$@"
 EOF
 
 # Make the run-in-home-dir.sh script executable
-sudo chmod ugo+x ${CHROOT_ROOT}run-in-home-dir.sh
+sudo chmod ugo+x "${CHROOT_ROOT}run-in-home-dir.sh"
 
 # Creates the /proc mount point inside the chroot.
 # This is done after the rsync because /proc is explicitly excluded in the filter rules.
 # The /proc filesystem is typically mounted, not copied.
-sudo mkdir -p ${CHROOT_ROOT}proc
+sudo mkdir -p "${CHROOT_ROOT}proc"
 
 # Create a dummy /dev/random & /dev/urandom.
 # For a fully functional chroot, these devices should be mounted.
-if [ ! -e ${CHROOT_ROOT}dev ]; then
-    sudo mkdir -p ${CHROOT_ROOT}dev
-    sudo dd if=/dev/urandom of=${CHROOT_ROOT}dev/urandom bs=1048576 count=10
-    sudo dd if=/dev/urandom of=${CHROOT_ROOT}dev/random bs=1048576 count=10
+if [ ! -e "${CHROOT_ROOT}dev" ]; then
+    sudo mkdir -p "${CHROOT_ROOT}dev"
+    sudo dd if=/dev/urandom of="${CHROOT_ROOT}dev/urandom bs=1048576 count=10"
+    sudo dd if=/dev/urandom of="${CHROOT_ROOT}dev/random bs=1048576 count=10"
 fi
