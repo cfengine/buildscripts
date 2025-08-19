@@ -159,7 +159,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.50.1 | 2.50.1 | 2.50.1 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.1  | 2.7.1  |
 | [PHP](https://php.net/)                             | 8.3.24 | 8.3.24 | 8.4.10 |
-| [PostgreSQL](https://www.postgresql.org/)           | 15.13  | 16.9   | 17.5   |
+| [PostgreSQL](https://www.postgresql.org/)           | 15.13  | 16.10  | 17.5   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.66.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
 
