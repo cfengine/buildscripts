@@ -54,12 +54,11 @@ if [ $RETURN_CODE -ne 0 ] && [ $RETURN_CODE -ne 24 ]; then
 fi
 
 # Create and set permissions for essential directories inside chroot
-sudo mkdir -p "${CHROOT_ROOT}tmp"
+for d in tmp var/tmp run root; do
+    sudo mkdir -p $d
+done
 sudo chmod 1777 "${CHROOT_ROOT}tmp"
-sudo mkdir -p "${CHROOT_ROOT}var/tmp"
 sudo chmod 1777 "${CHROOT_ROOT}var/tmp"
-sudo mkdir -p "${CHROOT_ROOT}run"
-sudo mkdir -p "${CHROOT_ROOT}root"
 
 # Safeguard to terminate operation if we have somehow ended up outside the
 # chroot, so we don't start running unsafe tests there.
