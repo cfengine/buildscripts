@@ -311,6 +311,10 @@ projects_to_test() {
   fi
 }
 
+# This function generates a set of file-filtering rules to be used with the rsync --filter option.
+# The filtering rules lists files or directories that should be included (+) and excluded (-) when creating a chroot environment.
+# The chroot command is used to change the root directory for a process in order to test it in an isolated environment.
+# The first rule that matches a file or directory takes precedence over any subsequent.
 generate_chroot_transfer_script()
 {
   # These rules are processed in a "first that matches" fashion.
