@@ -89,5 +89,5 @@ if [ ! -e ${CHROOT_ROOT}dev ]; then
     sudo dd if=/dev/urandom of=${CHROOT_ROOT}dev/random bs=1048576 count=10
 fi
 
-echo "$(basename "$0"): Look for me!"
-sudo tree "$CHROOT_ROOT"
+sudo sed -i 's/try_first_pass$/&	debug/' "$CHROOT_ROOT/etc/pam.d/common-password"
+sudo sed -i 's/try_first_pass$/&	debug/' "$CHROOT_ROOT/etc/pam.d/common-auth"
