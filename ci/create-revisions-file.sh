@@ -33,6 +33,22 @@ if [ -f pull-request-body ]; then
   done
 fi
 
+# figure out what our upstream branch (master, 3.24.x, etc) is from jenkins environment variables
+# PR_BASE - from jenkins ${pullRequest.base}
+# BRANCH_NAME - from jenkins, only usable for non-pull requests
+if [ -n "$PR_BASE" ]; then
+  _TMP="$PR_BASE"
+else
+  _TMP="$BRANCH_NAME"
+fi
+if [ "$(expr "$_TMP" : ".*.x")" = 0 ]; then
+  _DOCS_BRANCH="$_TMP"
+  _BRANCH="$_TMP".x
+else
+  _DOCS_BRANCH=${_TMP%.x} # % removes suffix of .x from _TMP
+  _BRANCH="$_TMP"
+fi
+
 for reponame in $REPOS; do
   if [ "$(expr "$reponame" : ".*/.*")" = 0 ]; then
     org=cfengine
@@ -43,17 +59,15 @@ for reponame in $REPOS; do
   fi
   varname="$(rev_env_name "$repo")"
 
-  # if <repo>_REV is empty the set a default from:
-  # PR_BASE - from jenkins ${pullRequest.base}
-  # BRANCH_NAME - from jenkins, only usable for non-pull requests
+  # if <repo>_REV is empty, set to the default of either _DOCS_BRANCH (documentation repo) or _BRANCH (all others)
   if [ -z "${!varname}" ]; then
     if [ "$varname" = "NT_DOCS_REV" ]; then
       declare "$varname"="main"
     else
-      if [ -n "$PR_BASE" ]; then
-        declare "$varname"="$PR_BASE"
+      if [ "$varname" = "DOCUMENTATION_REV" ]; then
+        declare "$varname"="$_DOCS_BRANCH"
       else
-        declare "$varname"="$BRANCH_NAME" # master, 3.24.x, etc
+        declare "$varname"="$_BRANCH"
       fi
     fi
   fi
