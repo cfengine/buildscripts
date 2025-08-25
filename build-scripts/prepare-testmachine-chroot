@@ -55,7 +55,7 @@ fi
 
 # Create and set permissions for essential directories inside chroot
 for d in tmp var/tmp run root; do
-    sudo mkdir -p $d
+    sudo mkdir -p "${CHROOT_ROOT}${d}"
 done
 sudo chmod 1777 "${CHROOT_ROOT}tmp"
 sudo chmod 1777 "${CHROOT_ROOT}var/tmp"
