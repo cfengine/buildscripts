@@ -42,8 +42,13 @@ else
   _TMP="$BRANCH_NAME"
 fi
 if [ "$(expr "$_TMP" : ".*.x")" = 0 ]; then
-  _DOCS_BRANCH="$_TMP"
-  _BRANCH="$_TMP".x
+  if [ "$_TMP" = "master" ]; then
+    _DOCS_BRANCH=master
+    _BRANCH=master
+  else
+    _DOCS_BRANCH="$_TMP"
+    _BRANCH="$_TMP".x
+  fi
 else
   _DOCS_BRANCH=${_TMP%.x} # % removes suffix of .x from _TMP
   _BRANCH="$_TMP"
