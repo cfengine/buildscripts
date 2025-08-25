@@ -1,4 +1,4 @@
-%define git_version 2.50.1
+%define git_version 2.51.0
 
 Summary: CFEngine Build Automation -- git
 Name: cfbuild-git
