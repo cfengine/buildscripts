@@ -123,8 +123,7 @@ case "$BUILD_TYPE" in
       ;;
 esac
 
-if [ "$OS" = solaris ]
-then
+if [ "$OS" = solaris ]; then
     # Otherwise, we pick wrong pkg-config file (from OS), with a lower version of libxml dependency than we would like to have.
     export PKG_CONFIG_PATH="$BUILDPREFIX/lib/pkgconfig"
 fi
@@ -133,13 +132,11 @@ log_debug running configure on core repo...
 # shellcheck disable=SC2086
 ( cd "$BASEDIR"/core && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
 
-if [ "$NOVA" = yes ]
-then
+if [ "$NOVA" = yes ]; then
     log_debug running configure on enterprise repo...
     # shellcheck disable=SC2086
     ( cd "$BASEDIR"/enterprise && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
-    if [ "$ROLE" = hub ]
-    then
+    if [ "$ROLE" = hub ]; then
         log_debug running configure on nova repo...
         # shellcheck disable=SC2086
         ( cd "$BASEDIR"/nova && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
