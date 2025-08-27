@@ -98,6 +98,13 @@ install: build
 # cf-enterprise-support
 	cp $(BASEDIR)/nova/misc/cf-support-nova-hub.sh $(CURDIR)/debian/tmp$(PREFIX)/share/
 
+execute_after_dh_fixperms:
+# No-one should need access to anything under share/GUI
+	chmod 400 -R $(CURDIR)/debian/tmp$(PREFIX)/share/
+	chmod 700 $(CURDIR)/debian/tmp$(PREFIX)/ppkeys/
+	chmod 700 $(CURDIR)/debian/tmp$(PREFIX)/outputs/
+	chmod 700 $(CURDIR)/debian/tmp$(PREFIX)/inputs/
+	chmod 700 $(CURDIR)/debian/tmp$(PREFIX)/state/
 
 binary-indep: build install
 
