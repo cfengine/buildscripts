@@ -148,6 +148,10 @@ if grep -i suse /etc/os-release; then
     zypper install -y cfengine-nova-"$CFE_VERSION"-1.suse12.x86_64.rpm
   elif grep 'VERSION.*15' /etc/os-release; then
     urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-"$CFE_VERSION"/agent/agent_suse15_x86_64/cfengine-nova-"$CFE_VERSION"-1.suse15.x86_64.rpm
+    zypper install -y psmisc # for fuser
+    zypper install -y procps # for ps
+    # only needed for autogen step alone: autoconf automake pkg-config
+    # remove nova from projects needed to be checked out :)
     zypper install -y cfengine-nova-"$CFE_VERSION"-1.suse15.x86_64.rpm
   else
     echo "Unsupported suse version:"
