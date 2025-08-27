@@ -1,139 +1,148 @@
-#!/bin/sh -x
+#!/bin/sh
+
+#
+# This script runs configure on each of the CFEngine repositories.
+# It determines which configure options and compiler flags to use based on the dependencies found in compile-options script.
+#
+# The script expects the following repositories to exist side by side:
+# .
+# ├── buildscripts
+# ├── core
+# ├── enterprise
+# ├── nova
+# └── masterfiles
+#
+# ^ When building community you won't need enterprise, nova.
+#
+# The script can be run as follows:
+# ```
+# $ PROJECT=[nova|community] BUILD_TYPE=[DEBUG|RELEASE] EXPLICIT_ROLE=[hub|agent] ./buildscripts/build-scripts/configure
+# ```
+#
 
 
-. `dirname "$0"`/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 . version
 
+# Make sure the PROJECT variable is set correctly
 case "$PROJECT" in
-    community)  NOVA=no   ;;
-    nova)       NOVA=yes  ;;
-    *) fatal "Unknown project: $PROJECT"  ;;
+    community)
+        NOVA=no
+        ;;
+    nova)
+        NOVA=yes
+        ;;
+    *)
+        fatal "Unknown project: $PROJECT"
+        ;;
 esac
 
 
 P=$BUILDPREFIX
 
-ARGS="--prefix=$P --libdir=$P/lib --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre2=$P --with-librsync=$P --with-init-script"
+ARGS="--prefix=$P --libdir=$P/lib --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre2=$P --with-librsync=$P --with-init-script --with-lmdb=$P"
 
-if [ $EMBEDDED_DB = lmdb ]
-then
-    var_append ARGS "--with-lmdb=$P"
-fi
+for dep in ldap libxml2 libyaml librsync leech libacl libvirt libcurl; do
+    case "$DEPS" in
+        *"$dep"*)
+            var_append ARGS "--with-$dep=$P"
+            ;;
+        *)
+            var_append ARGS "--without-$dep"
+            ;;
+    esac
+done
+
 case "$DEPS" in
-    *pthreads-w32*)  var_append ARGS "--with-pthreads=$P" ;;
+    *pthreads-w32*)
+        var_append ARGS "--with-pthreads=$P"
+        ;;
 esac
+
 case "$DEPS" in
-    *openldap*)  var_append ARGS "--with-ldap=$P" ;;
-    *)           var_append ARGS "--without-ldap" ;;
+    *postgresql*)
+        var_append ARGS "--with-postgresql=$P --without-mysql"
+        ;;
+    *)
+        var_append ARGS "--without-sql"
+        ;;
 esac
-case "$DEPS" in
-    *libxml2*)  var_append ARGS "--with-libxml2=$P" ;;
-    *)          var_append ARGS "--without-libxml2" ;;
-esac
-case "$DEPS" in
-    *libyaml*)  var_append ARGS "--with-libyaml=$P" ;;
-    *)          var_append ARGS "--without-libyaml" ;;
-esac
-case "$DEPS" in
-    *librsync*)  var_append ARGS "--with-librsync=$P" ;;
-    *)          var_append ARGS "--without-librsync" ;;
-esac
-case "$DEPS" in
-    *leech*)    var_append ARGS "--with-leech=$P" ;;
-    *)          var_append ARGS "--without-leech" ;;
-esac
-case "$DEPS" in
-    *postgresql*) var_append ARGS "--with-postgresql=$P --without-mysql" ;;
-    *)            var_append ARGS "--without-sql" ;;
-esac
-case "$DEPS" in
-    *libacl*)  var_append ARGS "--with-libacl=$P" ;;
-    *)         var_append ARGS "--without-libacl" ;;
-esac
-case "$DEPS" in
-    *libvirt*)  var_append ARGS "--with-libvirt=$P" ;;
-    *)          var_append ARGS "--without-libvirt" ;;
-esac
-# both libcurl or libcurl-hub are valid
-case "$DEPS" in
-    *libcurl*)  var_append ARGS "--with-libcurl=$P" ;;
-    *)          var_append ARGS "--without-libcurl" ;;
-esac
+
 case "$ROLE" in
-    hub)   var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql=$P" ;;
-    agent) var_append ARGS "--without-cfmod --without-postgresql" ;;
-    *)     fatal "Unknown ROLE: $ROLE" ;;
+    hub)
+        var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql=$P"
+        ;;
+    agent)
+        var_append ARGS "--without-cfmod --without-postgresql"
+        ;;
+    *)
+        fatal "Unknown ROLE: $ROLE"
+        ;;
 esac
+
 case "$WITH_SYSTEMD" in
-  yes)  var_append ARGS "--with-systemd-service" ;;
-  *)    var_append ARGS "--without-systemd-service" ;;
+    yes)
+        var_append ARGS "--with-systemd-service"
+        ;;
+    *)
+        var_append ARGS "--without-systemd-service"
+        ;;
 esac
 
 # RHEL 8 requires an SELinux policy
-if [ "x$OS" = "xrhel" ] && [ "${OS_VERSION%\.*}" -gt "7" ]; then
+if [ "$OS" = "rhel" ] && [ "${OS_VERSION%\.*}" -gt "7" ]; then
   var_append ARGS "--with-selinux-policy"
 fi
 
 # Cross-compiling Windows?
 case "$ARCH-${OS_FAMILY}" in
-  x86-mingw)  var_append ARGS "--host=i686-w64-mingw32"   ;;
-  x64-mingw)  var_append ARGS "--host=x86_64-w64-mingw32" ;;
+    x86-mingw)
+        var_append ARGS "--host=i686-w64-mingw32"
+        ;;
+    x64-mingw)
+        var_append ARGS "--host=x86_64-w64-mingw32"
+        ;;
 esac
 
 
+# Select configure options and compiler flags based on BUILD_TYPE
 case "$BUILD_TYPE" in
-
-  RELEASE)
-    CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
-    ;;
-  DEBUG)
-    ARGS="$ARGS --enable-debug"
-    # Override the default "-g3 -O0" that comes with ./configure --enable-debug
-    # in order to reduce the size of the packages
-    CFLAGS="-g2 -O1 $CFLAGS"
-    ;;
-  CODE_COVERAGE)
-    ARGS="$ARGS --enable-debug"
-    # lcov is not found in Windows and other platforms
-    case "${OS}-${OS_VERSION}" in
-      mingw*)
+    RELEASE)
+        CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
+        ;;
+    DEBUG)
+        ARGS="$ARGS --enable-debug"
+        # Override the default "-g3 -O0" that comes with ./configure --enable-debug
+        # in order to reduce the size of the packages
+        CFLAGS="-g2 -O1 $CFLAGS"
+        ;;
+    *)
+        fatal "Unknown BUILD_TYPE '$BUILD_TYPE'"
       ;;
-      hpux*)
-      ;;
-      solaris*)
-      ;;
-      rhel-4.*)
-      ;;
-      aix*)
-      ;;
-      *)
-      ARGS="$ARGS --enable-coverage"
-      ;;
-    esac
-    ;;
-  *)
-    echo "Unknown build type: $BUILD_TYPE"
-    exit 42
-    ;;
 esac
 
-if [ "x$OS" = "xsolaris" ]
-then
+if [ "$OS" = solaris ]; then
+    # Otherwise, we pick wrong pkg-config file (from OS), with a lower version of libxml dependency than we would like to have.
     export PKG_CONFIG_PATH="$BUILDPREFIX/lib/pkgconfig"
 fi
 
+log_debug running configure on core repo...
+# shellcheck disable=SC2086
+( cd "$BASEDIR"/core && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
 
-( cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
-
-if [ "x$NOVA" = "xyes" ]
-then
-    ( cd $BASEDIR/enterprise && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
-    if [ "x$ROLE" = "xhub" ]
-    then
-        ( cd $BASEDIR/nova && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+if [ "$NOVA" = yes ]; then
+    log_debug running configure on enterprise repo...
+    # shellcheck disable=SC2086
+    ( cd "$BASEDIR"/enterprise && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+    if [ "$ROLE" = hub ]; then
+        log_debug running configure on nova repo...
+        # shellcheck disable=SC2086
+        ( cd "$BASEDIR"/nova && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
     fi
 fi
 
-( cd $BASEDIR/masterfiles && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+log_debug running configure on masterfiles repo...
+# shellcheck disable=SC2086
+( cd "$BASEDIR"/masterfiles && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
