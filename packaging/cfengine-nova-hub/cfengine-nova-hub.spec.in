@@ -373,11 +373,14 @@ exit 0
 
 # ENT-2708, ENT-2846
 %defattr(600,root,root,700)
-%prefix/share/GUI/application/config/*.php
-%prefix/share/GUI/phpcfenginenova/*.sql
-%prefix/share/GUI/phpcfenginenova/migrations
-%prefix/share/GUI/phpcfenginenova/migrations/*.sql
 %prefix/share/db/*.sql
+
+# No-one should need access to anything under share/GUI
+%defattr(400,root,root,400)
+# We can change these configuration files as part of masterfiles policy so need to mark as configs
+%config(noreplace) %prefix/share/GUI/application/config/config.php
+%config(noreplace) %prefix/share/GUI/api/modules/inventory/config/config.php
+%prefix/share/GUI
 
 # Base policy
 %defattr(644,root,root,755)
