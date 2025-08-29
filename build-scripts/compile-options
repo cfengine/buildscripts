@@ -36,10 +36,18 @@ export PROJECT
 # Otherwise, we build it.
 if [ x"$SYSTEM_SSL" = x ]
 then
-    # We don't bundle OpenSSL on RHEL 8 (and newer in the future)
-    if [ "$OS" = "rhel" ] && expr "$OS_VERSION" ">=" "8" >/dev/null
+    # We don't bundle OpenSSL on some redhat-derived systems due to incompatability with libpam and our openssl.
+    _OS_MAJOR_VERSION="$(echo "$OS_VERSION" | cut -d. -f1)"
+    if [ "$OS" = "rhel" ] && expr "$_OS_MAJOR_VERSION" ">=" "8" >/dev/null
     then
         SYSTEM_SSL=1
+    fi
+    if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]
+    then
+        if expr "$_OS_MAJOR_VERSION" ">=" "15"
+        then
+            SYSTEM_SSL=1
+        fi
     fi
     # Detect using system ssl when running a Jenkins job
     if expr x"$label" ":" ".*systemssl" >/dev/null
