@@ -623,10 +623,15 @@ run_and_print_on_failure()
 
     local exit_code=0
     if "$@" > "$temp_output_file" 2>&1; then
-        : # NOOP
+        if grep -q "warn" "$temp_output_file"; then
+          log_debug "Found warnings in output from command:" "$@"
+          echo "--- Start of Warnings ---"
+          grep "warning:" "$temp_output_file"
+          echo "--- End of Warnings ---"
+        fi
     else
         exit_code=$? # Store exit code for later
-        echo "Error: Failed to run:" "$@"
+        log_error "Failed to run:" "$@"
         echo "--- Start of Output ---"
         cat "$temp_output_file"
         echo "--- End of Output (Error Code: $exit_code) ---"
