@@ -1,4 +1,4 @@
-# -*- mode:sh -*-
+#!/bin/sh
 
 # Calculate dependencies and build parameters according to the environment.
 # SOURCE this file, don't execute.

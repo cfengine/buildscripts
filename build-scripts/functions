@@ -1,4 +1,4 @@
-# -*- mode: sh -*-
+#!/bin/sh
 
 #
 # Always *source* (not execute) this script at the *top* of your

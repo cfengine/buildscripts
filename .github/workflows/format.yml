@@ -1,0 +1,44 @@
+name: Check formatting on sources
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-request: write
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt install shfmt
+      - name: Configure git user
+        run: |
+          git config user.name 'GitHub'
+          git config user.email '<noreply@github.com>'
+      - name: Format shell scripts
+        run: |
+          grep -Erl '^(#!/(bin|usr/bin)/(env )?(sh|bash))' build-scripts/ | while read -r file; do
+              if shfmt --diff --indent 4 "$file"; then
+                  echo "No formatting needed for file '$file'"
+              else
+                  echo "Formatting file '$file'..."
+                  shfmt --write --indent 4 "$file"
+                  git add "$file"
+                  git commit -m "$(basename "$file"): formatted script with shfmt"
+                  touch /tmp/create-pull-request
+              fi
+          done
+      - name: Create Pull Request
+        if: hashFiles('/tmp/create-pull-request') != ''
+        uses: cfengine/create-pull-request@v6
+        with:
+          title: Reformatted shell scripts using shfmt
+          reviewers: |
+            larsewi
+            craigcomstock
+          branch: formatting-action
