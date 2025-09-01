@@ -1,4 +1,4 @@
-# -*- mode:sh -*-
+#!/bin/sh
 
 #
 # Always *source* this file, not execute! Always after you first
