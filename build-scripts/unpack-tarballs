@@ -4,7 +4,6 @@
 . detect-environment
 . compile-options
 
-
 for file in "$BASEDIR"/output/tarballs/cfengine-3.*.tar.gz; do
     SOURCE_TARBALL="$file"
 done
@@ -14,14 +13,14 @@ fi
 
 for file in "$BASEDIR"/output/tarballs/cfengine-masterfiles*.tar.gz; do
     case "$file" in
-        *pkg.tar.gz)
-            # Don't match file ending with pkg.tar.gz
-            ;;
-        *)
-            # This is the file we want
-            MASTERFILES_TARBALL="$file"
-            break
-            ;;
+    *pkg.tar.gz)
+        # Don't match file ending with pkg.tar.gz
+        ;;
+    *)
+        # This is the file we want
+        MASTERFILES_TARBALL="$file"
+        break
+        ;;
     esac
 done
 if [ -z "$MASTERFILES_TARBALL" ]; then
@@ -44,8 +43,7 @@ if [ -e "$BASEDIR/core/" ] || [ -e "$BASEDIR/masterfiles/" ]; then
     exit 1
 fi
 
-if [ "$PROJECT" = community ]
-then
+if [ "$PROJECT" = community ]; then
     sudo rm -rf "$BASEDIR/enterprise" "$BASEDIR/nova" "$BASEDIR/mission-portal"
 fi
 
@@ -53,9 +51,9 @@ fi
 
 echo "UNPACKING SOURCE TARBALL AND SYMLINKING core"
 cd "$BASEDIR"
-gzip -dc "$SOURCE_TARBALL"  | tar -xf -
+gzip -dc "$SOURCE_TARBALL" | tar -xf -
 ln -s cfengine-3* core
 
 echo "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
-gzip -dc "$MASTERFILES_TARBALL"  | tar -xf -
+gzip -dc "$MASTERFILES_TARBALL" | tar -xf -
 ln -s cfengine-masterfiles-* masterfiles
