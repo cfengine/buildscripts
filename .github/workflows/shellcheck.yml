@@ -1,0 +1,26 @@
+name: shellcheck
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt install shellcheck
+      - name: Lint sources with shellcheck
+        run: |
+          # Recursively find all shell scripts in the build-scripts directory with a shebang
+          grep -Erl '^(#!/(bin|usr/bin)/(env )?(sh|bash))' build-scripts/ | while read -r file; do
+              shellcheck --external-sources --check-sourced --source-path=build-scripts "$file"
+          done
