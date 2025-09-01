@@ -1,12 +1,32 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
 
-SOURCE_TARBALL="$BASEDIR/output/tarballs/cfengine-3.*.tar.gz"
-MASTERFILES_TARBALL=`ls $BASEDIR/output/tarballs/cfengine-masterfiles*.tar.gz | grep -v 'pkg.tar.gz$'`
+for file in "$BASEDIR"/output/tarballs/cfengine-3.*.tar.gz; do
+    SOURCE_TARBALL="$file"
+done
+if [ -z "$SOURCE_TARBALL" ]; then
+    fatal "No matching CFEngine tarball found"
+fi
+
+for file in "$BASEDIR"/output/tarballs/cfengine-masterfiles*.tar.gz; do
+    case "$file" in
+        *pkg.tar.gz)
+            # Don't match file ending with pkg.tar.gz
+            ;;
+        *)
+            # This is the file we want
+            MASTERFILES_TARBALL="$file"
+            break
+            ;;
+    esac
+done
+if [ -z "$MASTERFILES_TARBALL" ]; then
+    fatal "No matching masterfiles tarball found"
+fi
 
 # DELETE the git-checked-out directories, they are tainted with
 # ./configure artifacts anyway.  The tarballs are unpacked and symlinked
@@ -24,7 +44,7 @@ if [ -e "$BASEDIR/core/" ] || [ -e "$BASEDIR/masterfiles/" ]; then
     exit 1
 fi
 
-if [ x$PROJECT = xcommunity ]
+if [ "$PROJECT" = community ]
 then
     sudo rm -rf "$BASEDIR/enterprise" "$BASEDIR/nova" "$BASEDIR/mission-portal"
 fi
@@ -32,10 +52,10 @@ fi
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
 echo "UNPACKING SOURCE TARBALL AND SYMLINKING core"
-cd $BASEDIR
-gzip -dc $SOURCE_TARBALL  | tar -xf -
+cd "$BASEDIR"
+gzip -dc "$SOURCE_TARBALL"  | tar -xf -
 ln -s cfengine-3* core
 
 echo "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
-gzip -dc $MASTERFILES_TARBALL  | tar -xf -
+gzip -dc "$MASTERFILES_TARBALL"  | tar -xf -
 ln -s cfengine-masterfiles-* masterfiles
