@@ -1,4 +1,4 @@
-# -*- mode: sh -*-
+#!/bin/sh
 
 #
 # Always *source* (not execute) this script at the *top* of your
@@ -23,6 +23,7 @@ try_exec() {
 broken_posix_shell()
 {
     unset foo
+    # shellcheck disable=SC3043
     local foo=1
     test "$foo" != "1"
 }
@@ -53,10 +54,10 @@ export_variables ()
     #
     # See more examples at https://en.wikipedia.org/wiki/Uname
     #
-    UNAME_S=`uname -s`  # Linux             SunOS        AIX           HP-UX    FreeBSD
-    UNAME_R=`uname -r`  # 4.4.0-59-generic  5.10         3             B.11.23  6.1-RELEASE-p15
-    UNAME_M=`uname -m`  # x86_64,i686       i86pc,sun4v  0001013AD400  ia64     i386,amd64
-    #        uname -p   # x86_64            i386,sparc   powerpc       ERROR
+    UNAME_S=$(uname -s)  # Linux             SunOS        AIX           HP-UX    FreeBSD
+    UNAME_R=$(uname -r)  # 4.4.0-59-generic  5.10         3             B.11.23  6.1-RELEASE-p15
+    UNAME_M=$(uname -m)  # x86_64,i686       i86pc,sun4v  0001013AD400  ia64     i386,amd64
+    #         uname -p   # x86_64            i386,sparc   powerpc       ERROR
     export UNAME_S UNAME_R UNAME_M
 
     #
@@ -66,15 +67,15 @@ export_variables ()
     then
         case "$0" in
             *buildscripts/build-remote) SCRIPTDIR="$0";;
-            /*) SCRIPTDIR=`dirname "$0"`;;
-            -*) SCRIPTDIR=`pwd`;; # if this script is sourced from a login shell, $0 is '-bash' or similar
-            *)  SCRIPTDIR=`pwd`/`dirname "$0"`;;
+            /*) SCRIPTDIR=$(dirname "$0");;
+            -*) SCRIPTDIR=$(pwd);; # if this script is sourced from a login shell, $0 is '-bash' or similar
+            *)  SCRIPTDIR=$(pwd)/$(dirname "$0");;
         esac
 
-        AUTOBUILD_PATH=`dirname "$SCRIPTDIR"`
+        AUTOBUILD_PATH=$(dirname "$SCRIPTDIR")
 
     fi
-    BASEDIR=`dirname "$AUTOBUILD_PATH"`
+    BASEDIR=$(dirname "$AUTOBUILD_PATH")
     export BASEDIR
 
 
@@ -149,43 +150,43 @@ grep_q()
 
 uninstall_rpms()
 {
-    PKGS=`rpm -qa --queryformat "%{Name}-%{Version}\n" | grep '^'$1 || true`
+    PKGS=$(rpm -qa --queryformat "%{Name}-%{Version}\n" | grep "^$1" || true)
     if [ -n "$PKGS" ]
     then
-        retry_wrapper  sudo rpm -e $PKGS
+        retry_wrapper  sudo rpm -e "$PKGS"
     fi
 }
 uninstall_debs()
 {
-    PKGS=`dpkg -l | tail -n+6 | awk '{print $2}' | grep '^'$1 || true`
+    PKGS=$(dpkg -l | tail -n+6 | awk '{print $2}' | grep "^$1" || true)
     if [ -n "$PKGS" ]
     then
-        retry_wrapper  sudo dpkg --purge $PKGS
+        retry_wrapper  sudo dpkg --purge "$PKGS"
     fi
 }
 uninstall_solaris_pkgs()
 {
-    PKGS=`pkginfo | awk '{print $2}' | grep '^'$1'$' || true`
+    PKGS=$(pkginfo | awk '{print $2}' | grep "^$1$" || true)
     if [ -n "$PKGS" ]
     then
-        retry_wrapper  sudo /usr/sbin/pkgrm -n $PKGS
+        retry_wrapper  sudo /usr/sbin/pkgrm -n "$PKGS"
     fi
 }
 uninstall_hpux_pkgs()
 {
-    PKGS=`swlist | awk '{print $1}' | grep '^'$1'$' || true`
+    PKGS=$(swlist | awk '{print $1}' | grep "^$1$" || true)
 
     for p in $PKGS
     do
-        sudo /usr/sbin/swremove $p
+        sudo /usr/sbin/swremove "$p"
     done
 }
 uninstall_freebsd_pkgs()
 {
-    PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
+    PKGS=$(pkg_info | awk '{print $1}' | grep "^$1" || true)
     if [ -n "$PKGS" ]
     then
-	retry_wrapper  sudo pkg_delete $PKGS
+	retry_wrapper  sudo pkg_delete "$PKGS"
     fi
 }
 
@@ -219,7 +220,7 @@ query_pkg()
 {
     case "$DEP_PACKAGING" in
         rpm) rpm  -qa --provides|grep_q "^$1 " ;;
-        deb) dpkg -s         $1 2>&1    |    grep_q '^Status: .*ok installed' ;;
+        deb) dpkg -s         "$1" 2>&1    |    grep_q '^Status: .*ok installed' ;;
         *)
             echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
             exit 1
@@ -291,7 +292,7 @@ remote_script_general() {
   ENVVARS="$ENVVARS TEST_MACHINE=$TEST_MACHINE"
   ENVVARS="$ENVVARS TEST_SHELL=$TEST_SHELL"
 
-  ( eval $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT" )
+  ( eval "$LOGIN_COMMAND" env "$ENVVARS" "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT" )
 }
 
 remote_script() {
@@ -300,10 +301,10 @@ remote_script() {
 }
 
 projects_to_test() {
-  if test "x$PROJECT" = "xcommunity"; then
+  if test "$PROJECT" = "community"; then
     echo "core masterfiles"
   else
-    if test "x$ROLE" = "xhub"; then
+    if test "$ROLE" = "hub"; then
       echo "core enterprise nova masterfiles"
     else
       echo "core enterprise masterfiles"
@@ -420,19 +421,19 @@ mount_procfs()
 fatal()
 {
     echo "$(basename "$0"): FATAL ERROR: $1" >&2
-    exit ${2-1}
+    exit "${2-1}"
 }
 
 log_info()
 {
-    echo "INFO: $@"  1>&2
+    echo "INFO:" "$@"  1>&2
 }
 
 # Append a space and string $2 to variable $1, for example:
 # func_append V "blah" is equivalent to  V="$V blah".
 var_append()
 {
-    eval $1=\$$1\\ \$2
+    eval "$1=\$$1"\\ \$2
 }
 
 # Return True if string $2 exists in variable $1.
@@ -492,38 +493,41 @@ func_whereis ()
 func_mktemp ()
 {
     # Only works as mktemp -d
-    [ x$1 != x-d ] && fatal "func_mktemp: error, first argument must be -d"
-    [ x$2  = x ]   && fatal "func_mktemp: requires two arguments"
+    [ "$1" != -d ] && fatal "func_mktemp: error, first argument must be -d"
+    [ "$2"  = "" ]   && fatal "func_mktemp: requires two arguments"
 
     # $RANDOM does not exist on Solaris 9 /bin/sh, use $$ as fallback
-    my_tmpdir=`echo $2 | sed 's/XX*/'${RANDOM-$$}/`
+    # shellcheck disable=SC3028
+    my_tmpdir=$(echo "$2" | sed 's/XX*/'${RANDOM-$$}/)
 
-    save_mktemp_umask=`umask`
+    save_mktemp_umask=$(umask)
     umask 0077
     # Set -e will cause this to fail if it already exists
     mkdir "$my_tmpdir"
-    umask $save_mktemp_umask
+    umask "$save_mktemp_umask"
 
-    [ -d "$my_tmpdir" ]      \
-        && echo "$my_tmpdir" \
-        || fatal "func_mktemp: failed creating temporary directory $my_tmpdir"
+    if [ -d "$my_tmpdir" ]; then
+        echo "$my_tmpdir"
+    else
+        fatal "func_mktemp: failed creating temporary directory $my_tmpdir"
+    fi
 }
 
 # mktempdir TEMPLATE
 # Example: mktempdir /tmp/dir.XXXXXX
 mktempdir ()
 {
-    [ x$1 = x ] && fatal "mktempdir: TEMPLATE directory argument missing"
+    [ "$1" = "" ] && fatal "mktempdir: TEMPLATE directory argument missing"
 
     # HP-UX has its own non-POSIX mktemp, so override it.
     # If not on HP-UX, search PATH for the 'mktemp' or 'gmktemp' command.
 
     [ "$UNAME_S" = HP-UX ]              \
         && my_mktemp=func_mktemp          \
-        || my_mktemp=`func_which mktemp gmktemp`  \
+        || my_mktemp=$(func_which mktemp gmktemp)  \
         || my_mktemp=func_mktemp
 
-    $my_mktemp -d $1
+    $my_mktemp -d "$1"
 }
 
 
@@ -549,7 +553,7 @@ func_decompress ()
         *.gz|*.tgz)  gzip  -dc "$@" ;;
         *.bz2)       bzip2 -dc "$@" ;;
 
-        *) fatal "Unknown compression for file: $@" ;;
+        *) fatal "Unknown compression for file:" "$@" ;;
     esac
 }
 
@@ -558,17 +562,17 @@ func_decompress ()
 # WARNING: do not pipe the output as stdout is altered!
 retry_wrapper()
 {
-    operation="$@"
+    operation="$*"
     [ "$operation" = "" ]  &&  fatal "retry_wrapper: no arguments"
 
     # SLEEP: which sleep program to use
     # maxtries: how many times to re try the execution
     # pause: number of seconds to pause after each try
-    SLEEP=`func_which sleep`
+    SLEEP=$(func_which sleep)
     maxtries=5
     pause=30
 
-    while [ $maxtries != 0 ]
+    while [ "$maxtries" != 0 ]
     do
         echo "* retry_wrapper:  $operation"
 
@@ -579,8 +583,9 @@ retry_wrapper()
         else
             err_ret=$?
             # in case say dpkg locks are held by automatic updates or something
+            # shellcheck disable=SC2009
             ps -efl | grep -P '(apt|dpkg|yum|dnf|zypper|rpm|pkg)'
-            maxtries=`expr $maxtries - 1`
+            maxtries=$((maxtries - 1))
 	    echo "* FAILURE $err_ret"
             echo "* Sleeping for:  $pause seconds"
             echo "* Retries left:  $maxtries"
@@ -588,7 +593,7 @@ retry_wrapper()
         fi
     done
 
-    return $err_ret
+    return "$err_ret"
 }
 
 rm_if_empty()
@@ -604,6 +609,7 @@ rm_if_empty()
 # a non-zero exit code
 run_and_print_on_failure()
 {
+    # shellcheck disable=SC3043
     local temp_output_file
     if command -v mktemp >/dev/null; then
         temp_output_file=$(mktemp)
@@ -621,6 +627,7 @@ run_and_print_on_failure()
         touch "$temp_output_file"
     fi
 
+    # shellcheck disable=SC3043
     local exit_code=0
     if "$@" > "$temp_output_file" 2>&1; then
         : # NOOP
