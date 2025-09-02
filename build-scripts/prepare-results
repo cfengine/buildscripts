@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 . version
@@ -10,31 +10,31 @@ set -x
 mkdir -p "$OUTDIR"
 
 for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
-    if [ -d $BASEDIR/$dir ]; then
+    if [ -d "$BASEDIR"/$dir ]; then
         case "$PACKAGING" in
         rpm)
-            cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
-            cp $BASEDIR/$dir/RPMS/*.pkg.tar.gz "$OUTDIR"
+            cp "$BASEDIR"/$dir/RPMS/*/*.rpm "$OUTDIR"
+            cp "$BASEDIR"/$dir/RPMS/*.pkg.tar.gz "$OUTDIR"
             ;;
         deb)
-            cp $BASEDIR/$dir/*.deb "$OUTDIR"
-            cp $BASEDIR/$dir/pkg/*.pkg.tar.gz "$OUTDIR"
+            cp "$BASEDIR"/$dir/*.deb "$OUTDIR"
+            cp "$BASEDIR"/$dir/pkg/*.pkg.tar.gz "$OUTDIR"
             ;;
         msi)
-            cp $BASEDIR/$dir/*.msi "$OUTDIR"
+            cp "$BASEDIR"/$dir/*.msi "$OUTDIR"
             ;;
         solaris)
-            cp $BASEDIR/$dir/*.pkg "$OUTDIR"
+            cp "$BASEDIR"/$dir/*.pkg "$OUTDIR"
             ;;
         freebsd)
             cp build/$dir/pkg/*.tbz "$OUTDIR"
             ;;
         hpux)
-            cp $BASEDIR/$dir/pkg/*.depot "$OUTDIR"
+            cp "$BASEDIR"/$dir/pkg/*.depot "$OUTDIR"
             ;;
         lpp)
-            cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
-            cp $HOME/lppdir/out/*.bff "$OUTDIR"
+            cp "$BASEDIR"/$dir/RPMS/*/*.rpm "$OUTDIR"
+            cp "$HOME"/lppdir/out/*.bff "$OUTDIR"
             ;;
         *)
             echo "Unknown packaging system: $PACKAGING"
@@ -46,9 +46,9 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
 done
 
 for project in $(projects_to_test); do
-    if [ -f $BASEDIR/$project/tests/acceptance/summary.log ]; then
-        cp $BASEDIR/$project/tests/acceptance/summary.log "$OUTDIR"/$project-summary.log
-        cp $BASEDIR/$project/tests/acceptance/test.log "$OUTDIR"/$project-test.log
-        cp $BASEDIR/$project/tests/acceptance/test.xml "$OUTDIR"/$project-test.xml
+    if [ -f "$BASEDIR"/"$project"/tests/acceptance/summary.log ]; then
+        cp "$BASEDIR"/"$project"/tests/acceptance/summary.log "$OUTDIR"/"$project"-summary.log
+        cp "$BASEDIR"/"$project"/tests/acceptance/test.log "$OUTDIR"/"$project"-test.log
+        cp "$BASEDIR"/"$project"/tests/acceptance/test.xml "$OUTDIR"/"$project"-test.xml
     fi
 done
