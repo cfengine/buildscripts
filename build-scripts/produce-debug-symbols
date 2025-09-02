@@ -1,10 +1,10 @@
 #!/bin/sh
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
-if [ $BUILD_TYPE != "RELEASE" ]; then
+if [ "$BUILD_TYPE" != "RELEASE" ]; then
     echo "Debug symbols not requested"
     exit 0
 else
@@ -12,9 +12,9 @@ else
 fi
 
 EXECUTABLES_DIR="$BASEDIR/cfengine/dist$PREFIX/bin"
-EXECUTABLES_LIST=$(ls $EXECUTABLES_DIR/cf-*)
+EXECUTABLES_LIST=$(ls "$EXECUTABLES_DIR"/cf-*)
 LIBRARIES_DIR="$BASEDIR/cfengine/dist$PREFIX/lib"
-LIBRARIES_LIST=$(ls $LIBRARIES_DIR/*.so*)
+LIBRARIES_LIST=$(ls "$LIBRARIES_DIR"/*.so*)
 DEBUG_SUFFIX=debug
 PAYLOAD_DIR=payload
 EXECUTABLES_PAYLOAD_DIR=$PAYLOAD_DIR/exe
@@ -59,45 +59,51 @@ for i in $LIBRARIES_LIST; do
 done
 
 # Write the installation script
-echo "Writing the installation script"
-echo "#!/bin/sh" >$PAYLOAD_DIR/install-ds.sh
-echo "# Install debug symbols for executables"
-echo "for i in \`ls exe/*.gz\`; do" >>$PAYLOAD_DIR/install-ds.sh
-echo "  gunzip \$i" >>$PAYLOAD_DIR/install-ds.sh
-echo "done" >>$PAYLOAD_DIR/install-ds.sh
-echo "mv exe/*.$DEBUG_SUFFIX $PREFIX/bin" >>$PAYLOAD_DIR/install-ds.sh
-echo "# Install debug symbols for libraries"
-echo "for i in \`ls lib/*.gz\`; do" >>$PAYLOAD_DIR/install-ds.sh
-echo "  gunzip \$i" >>$PAYLOAD_DIR/install-ds.sh
-echo "done" >>$PAYLOAD_DIR/install-ds.sh
-echo "mv lib/*.$DEBUG_SUFFIX $PREFIX/lib" >>$PAYLOAD_DIR/install-ds.sh
-echo "exit 0" >>$PAYLOAD_DIR/install-ds.sh
+log_debug "Writing the installation script"
+cat <<EOF >> $PAYLOAD_DIR/install-ds.sh
+#!/bin/sh
+# Install debug symbols for executables
+for i in \`ls exe/*.gz\`; do
+  gunzip \$i
+done
+mv exe/*.$DEBUG_SUFFIX $PREFIX/bin
+# Install debug symbols for libraries
+for i in \`ls lib/*.gz\`; do
+  gunzip \$i
+done
+mv lib/*.$DEBUG_SUFFIX $PREFIX/lib
+exit 0
+EOF
 
 # Write the decompression script
-echo "Writing the decompression script"
-echo "#!/bin/sh" >decompress-ds.sh
-echo "echo \"Installing debug symbols\"" >>decompress-ds.sh
-echo "TMPDIR=\`mktemp -d /tmp/ds.XXXXXX\`; export TMPDIR" >>decompress-ds.sh
-echo "ARCHIVE=\`awk '/^__ARCHIVE_BELOW__/ {print NR + 1; exit 0; }' \$0\`" >>decompress-ds.sh
-echo "tail -n+\$ARCHIVE \$0 | tar xzv -C \$TMPDIR" >>decompress-ds.sh
-echo "echo \"Installer ready - starting installation\""
-echo "CDIR=\`pwd\`" >>decompress-ds.sh
-echo "cd \$TMPDIR/$PAYLOAD_DIR" >>decompress-ds.sh
-echo "chmod 755 install-ds.sh" >>decompress-ds.sh
-echo "chmod 755 uninstall-ds.sh" >>decompress-ds.sh
-echo "./install-ds.sh" >>decompress-ds.sh
-echo "cd \$CDIR" >>decompress-ds.sh
+log_debug "Writing the decompression script"
+cat <<EOF >> decompress-ds.sh
+#!/bin/sh
+echo "Installing debug symbols"
+TMPDIR=\`mktemp -d /tmp/ds.XXXXXX\`; export TMPDIR
+ARCHIVE=\`awk '/^__ARCHIVE_BELOW__/ {print NR + 1; exit 0; }' \$0\`
+tail -n+\$ARCHIVE \$0 | tar xzv -C \$TMPDIR
+echo "Installer ready - starting installation"
+CDIR=\`pwd\`
+cd \$TMPDIR/$PAYLOAD_DIR
+chmod 755 install-ds.sh
+chmod 755 uninstall-ds.sh
+./install-ds.sh
+cd \$CDIR
 #echo "rm -rf \$TMPDIR"  >> decompress-ds.sh
-echo "exit 0" >>decompress-ds.sh
-echo "__ARCHIVE_BELOW__" >>decompress-ds.sh
+exit 0
+__ARCHIVE_BELOW__
+EOF
 
 # Write the uninstall script
-echo "Writing the uninstall script"
-echo "#!/bin/sh" >$PAYLOAD_DIR/uninstall-ds.sh
-echo "echo \"Uninstalling debug symbols\"" >>$PAYLOAD_DIR/uninstall-ds.sh
-echo "rm -f \"$PREFIX\"/bin/*.\$DEBUG_SUFFIX" >>$PAYLOAD_DIR/uninstall-ds.sh
-echo "rm -f \"$PREFIX\"/lib/*.\$DEBUG_SUFFIX" >>$PAYLOAD_DIR/uninstall-ds.sh
-echo "echo \"Done\"" >>$PAYLOAD_DIR/uninstall-ds.sh
+log_debug "Writing the uninstall script"
+cat <<EOF >> $PAYLOAD_DIR/uninstall-ds.sh
+#!/bin/sh
+echo "Uninstalling debug symbols"
+rm -f "$PREFIX"/bin/*.\$DEBUG_SUFFIX
+rm -f "$PREFIX"/lib/*.\$DEBUG_SUFFIX
+echo "Done"
+EOF
 
 # Now create the self extracting script
 echo "Creating the self extracting script"
@@ -105,7 +111,7 @@ tar cf payload.tar $PAYLOAD_DIR
 if [ -e "payload.tar" ]; then
     gzip payload.tar
     if [ -e "payload.tar.gz" ]; then
-        cat decompress-ds.sh payload.tar.gz >cfengine-ds-$OS-$OS_VERSION-$ARCH.bsx
+        cat decompress-ds.sh payload.tar.gz >cfengine-ds-"$OS"-"$OS_VERSION"-"$ARCH".bsx
     else
         echo "File not found"
         exit 1
@@ -114,7 +120,7 @@ if [ -e "payload.tar" ]; then
 fi
 # Put the script in a sensible place
 mkdir -p output/debug_symbols
-mv *.bsx output/debug_symbols
+mv -- *.bsx output/debug_symbols
 
 # Clean up after ourserlves
 rm -f decompress-ds.sh
