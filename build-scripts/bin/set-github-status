@@ -42,7 +42,7 @@ else
 fi
 
 function set_status() {
-set -ex
+    set -ex
     # Actually set status at GitHub
     # Args:
     #   $1 - repo identifier (organization/project)
@@ -50,47 +50,47 @@ set -ex
     # Env:
 
     if [ -z "$1" ]; then
-      echo "Missing repo identifier (organization/project) as first argument"
-      exit 1
+        echo "Missing repo identifier (organization/project) as first argument"
+        exit 1
     fi
     if [ -z "$2" ]; then
-      echo "Missing pull request API URL as second argument"
-      exit 1
+        echo "Missing pull request API URL as second argument"
+        exit 1
     fi
 
     # curl 7.88 ish supports --header @file but apparently 7.52 (on bootstrap vm (deb-9)) does not, so compose a script
     curl_script_file="$(mktemp)"
     chmod 600 "$curl_script_file"
-    echo -n "curl --fail --insecure -X POST --header \"Authorization: Bearer " > "$curl_script_file"
+    echo -n "curl --fail --insecure -X POST --header \"Authorization: Bearer " >"$curl_script_file"
     _dir=$(readlink -e "$(dirname "$0")")
-    "$_dir"/get-pr-token "$1" >> "$curl_script_file"
-    echo -n "\" $2 --data " >> "$curl_script_file"
+    "$_dir"/get-pr-token "$1" >>"$curl_script_file"
+    echo -n "\" $2 --data " >>"$curl_script_file"
 
     if [ -n "$JSON_file" ]; then
         (
-          set +x # hide secrets
-          echo "@$JSON_file" >> "$curl_script_file"
+            set +x # hide secrets
+            echo "@$JSON_file" >>"$curl_script_file"
         )
     else
         (
-          set +x # hide secrets
-          echo -n "@- <<EOF" >> "$curl_script_file"
-          echo -n "
+            set +x # hide secrets
+            echo -n "@- <<EOF" >>"$curl_script_file"
+            echo -n "
 {
   \"state\" : \"$state\",
   \"target_url\" : \"$job_url\",
   \"description\" : \"$description\",
   \"context\" : \"$job_spec\"
 }
-EOF" >> "$curl_script_file"
+EOF" >>"$curl_script_file"
         )
     fi
 
-# uncomment the below cat to see the curl_script_file location
-#    cat "$curl_script_file" >&2
+    # uncomment the below cat to see the curl_script_file location
+    #    cat "$curl_script_file" >&2
     bash "$curl_script_file"
 
-# uncomment the below file deletion to debug curl_script_file
+    # uncomment the below file deletion to debug curl_script_file
     rm "$curl_script_file"
     return $?
 }
@@ -101,4 +101,4 @@ while read -r line; do
     REPO_IDENTIFIER=$(echo "$line" | awk '{ print $1 };')
     STATUS_URL=$(echo "$line" | awk '{ print $3 };')
     set_status "$REPO_IDENTIFIER" "$STATUS_URL"
-done < "$PRs_file"
+done <"$PRs_file"
