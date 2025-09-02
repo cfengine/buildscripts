@@ -1,10 +1,10 @@
 #!/bin/sh -x
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
-if [ "xtrue" = "x$NO_TESTS" ] || [ "xtrue" = "x$NO_ACCEPTANCE_TESTS" ]; then
+if [ "true" = "$NO_TESTS" ] || [ "true" = "$NO_ACCEPTANCE_TESTS" ]; then
     create-empty-test
     exit 0
 fi
