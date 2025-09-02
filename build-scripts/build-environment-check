@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
@@ -45,17 +45,17 @@ DEP_LIST="$DEP_LIST rsync gcc make sudo wget"
 
 RET=0
 for unwanted in $UNWANTED_DEPS; do
-    if query_pkg $unwanted; then
-        echo "ERROR Found unwanted package:" $unwanted
+    if query_pkg "$unwanted"; then
+        echo "ERROR Found unwanted package: $unwanted"
         RET=1
     fi
 done
 
 for dep in $DEP_LIST; do
-    if query_pkg $dep; then
+    if query_pkg "$dep"; then
         true
     else
-        echo "ERROR Missing system package:" $dep
+        echo "ERROR Missing system package: $dep"
         RET=1
     fi
 done
