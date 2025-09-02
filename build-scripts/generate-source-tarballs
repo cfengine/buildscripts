@@ -26,19 +26,16 @@
 . detect-environment
 . compile-options
 
-
 for repo in core masterfiles; do
     log_debug "Running target make dist in $repo repository..."
     (cd $repo && run_and_print_on_failure "$MAKE" V=1 dist)
 done
-
 
 # Copy to the directory that's being uploaded to buildcache
 
 mkdir -p "$OUTDIR"
 cp core/*.tar.gz masterfiles/*.tar.gz "$OUTDIR"
 rm core/*.tar.gz masterfiles/*.tar.gz
-
 
 echo '
 The source tarballs here are generated in each and every
@@ -48,4 +45,4 @@ sure that "make dist" works everywhere.
 The release tarball is generated from the "bootstrap-*-community"
 jenkins jobs, running only on one buildslave. It should be located under
 the "output/tarballs" directory of that job.
-'    > "$OUTDIR"/TARBALLS.txt
+' >"$OUTDIR"/TARBALLS.txt
