@@ -1,13 +1,13 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . detect-environment
 . compile-options
 
 # Ensure hostname -f is working (required for some tests)
 # This check is limited to Linux only, since on exotics `hostname -f` sometimes
 # sets hostname to "-f", and tests mentioned above are not running there anyway.
-if [ "`uname -s`" = "Linux" ]; then
+if [ "$(uname -s)" = "Linux" ]; then
     hostname -f || echo "127.0.0.1 $(hostname).example.com $(hostname)" >>/etc/hosts
 fi
 
