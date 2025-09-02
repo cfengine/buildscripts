@@ -1,18 +1,18 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . detect-environment
 . compile-options
 
 if [ "xtrue" = "x$NO_TESTS" ] || [ "xtrue" = "x$NO_ACCEPTANCE_TESTS" ]; then
-  create-empty-test
-  exit 0
+    create-empty-test
+    exit 0
 fi
 
 if [ -n "$TEST_MACHINE" ]; then
-  local_script_general prepare-testmachine
-  local_script_general transfer-to-testmachine
-  local_script_general test-on-testmachine
+    local_script_general prepare-testmachine
+    local_script_general transfer-to-testmachine
+    local_script_general test-on-testmachine
 else
-  local_script_general test-on-thismachine
+    local_script_general test-on-thismachine
 fi
