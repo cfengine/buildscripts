@@ -26,15 +26,18 @@ sudo "$FUSER" -k "$CHROOT_ROOT" || true
 sudo umount "${CHROOT_ROOT}proc" || true
 
 # Tell rsync not to touch the BASEDIR and PREFIX directories
-echo "P $BASEDIR" > "$TRANSFER_SCRIPT"
-echo "P $PREFIX" >> "$TRANSFER_SCRIPT"
+echo "P $BASEDIR" >"$TRANSFER_SCRIPT"
+echo "P $PREFIX" >>"$TRANSFER_SCRIPT"
 # Generate the file-filter for rsync (see functions script)
-generate_chroot_transfer_script >> "$TRANSFER_SCRIPT"
+generate_chroot_transfer_script >>"$TRANSFER_SCRIPT"
 
 # Run a process in the background to print "Keep alive" every 60 seconds until the .keepalive-echo file exists.
 # This is to prevent the session from timing out on a remote machine.
 touch .keepalive-echo
-(while test -e .keepalive-echo; do sleep 60; echo Keep alive; done)&
+(while test -e .keepalive-echo; do
+    sleep 60
+    echo Keep alive
+done) &
 
 RETURN_CODE=0
 # Core file transfer command.
@@ -80,11 +83,9 @@ EOF
 # Split on newlines, not on spaces.
 IFS='
 '
-for entry in $(export)
-do
+for entry in $(export); do
     name=$(echo "$entry" | sed -e 's/^[^=]* //; s/^\([^=]*\)=.*/\1/')
-    if [ "$name" = "PATH" ]
-    then
+    if [ "$name" = "PATH" ]; then
         # Skip the PATH variable as it's handled below
         continue
     fi
