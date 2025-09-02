@@ -24,26 +24,26 @@
 # Parse the required argument which should be set through the environment
 # variable PROJECT
 case "$PROJECT" in
-  community)
+community)
     NOVA=no
     ;;
-  nova)
+nova)
     NOVA=yes
     ;;
-  *)
+*)
     if [ -z "${PROJECT}" ]; then
         echo "$(basename "$0"): Error: Expected environment variable PROJECT=[community|nova]"
     else
         echo "$(basename "$0"): Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
     fi
     echo "Usage: PROJECT=[community|nova] $0"
-    exit 42;;
+    exit 42
+    ;;
 esac
 
 # Determine which repositories to compare versions between
 projects="core masterfiles"
-if test "$NOVA" = "yes"
-then
+if test "$NOVA" = "yes"; then
     projects="$projects enterprise nova"
 fi
 
@@ -54,10 +54,10 @@ for proj_i in $projects; do
         # The CFVERSION file is read into the tr command which removes
         # whitespace and the sed command extracts the major, minor & patch
         # version number from the string.
-        version_i=$(< "$BASEDIR/$proj_i/CFVERSION" tr ' ' '\n'  \
-            | sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
-        version_j=$(< "$BASEDIR/$proj_j/CFVERSION" tr ' ' '\n'  \
-            | sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
+        version_i=$(<"$BASEDIR/$proj_i/CFVERSION" tr ' ' '\n' |
+            sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
+        version_j=$(<"$BASEDIR/$proj_j/CFVERSION" tr ' ' '\n' |
+            sed -e 's/\([0-9]*\.[0-9]*\.[0-9]*\).*/\1/')
         if [ "$version_i" != "$version_j" ]; then
             echo "$(basename "$0"): Error: Detected version mismatch: $proj_i $version_i != $proj_j $version_j"
             exit 33
