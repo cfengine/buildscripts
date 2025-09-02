@@ -4,22 +4,28 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch: # Enables manual trigger
 
 jobs:
-  check:
+  format-shell-scripts:
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-request: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: "master"
       - name: Install dependencies
         run: sudo apt install shfmt
       - name: Configure git user
         run: |
           git config user.name 'GitHub'
           git config user.email '<noreply@github.com>'
+      - name: Save commit hash before
+        run: echo "COMMIT_HASH_BEFORE=$(git log -1 --format=%H)">> $GITHUB_ENV
       - name: Format shell scripts
         run: |
           grep -Erl '^(#!/(bin|usr/bin)/(env )?(sh|bash))' build-scripts/ | while read -r file; do
@@ -30,15 +36,18 @@ jobs:
                   shfmt --write --indent 4 "$file"
                   git add "$file"
                   git commit -m "$(basename "$file"): formatted script with shfmt"
-                  touch /tmp/create-pull-request
               fi
           done
+      - name: Save commit hash after
+        run: echo "COMMIT_HASH_AFTER=$(git log -1 --format=%H)">> $GITHUB_ENV
       - name: Create Pull Request
-        if: hashFiles('/tmp/create-pull-request') != ''
+        if: env.COMMIT_HASH_BEFORE != env.COMMIT_HASH_AFTER
         uses: cfengine/create-pull-request@v6
         with:
-          title: Reformatted shell scripts using shfmt
+          title: Reformatted shell scripts
+          body: Reformatted shell scripts using `shfmt --write --indent 4 <FILENAME>`.
           reviewers: |
             larsewi
             craigcomstock
           branch: formatting-action
+          branch-suffix: timestamp
