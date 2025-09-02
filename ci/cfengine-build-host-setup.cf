@@ -122,6 +122,10 @@ bundle agent cfengine_build_host_setup
       "platform-python-devel" -> { "cfbs shebang", "ENT-11338" }
         comment => "py3_shebang_fix macro needs /usr/bin/pathfix.py from platform-python-devel package";
 
+    suse_15::
+        "openssl-devel" -> { "ENT-12528" }
+          comment => "like redhat, suse 15+ needs to build with system openssl.";
+
     (redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
       "java-1.8.0-openjdk-headless" package_policy => "delete",
         comment => "Installing Development Tools includes this jdk1.8 which we do not want.";
