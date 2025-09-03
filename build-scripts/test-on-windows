@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . detect-environment
 . compile-options
 . version
@@ -8,18 +8,17 @@
 
 #TESTDIR="\"c:\\Users\\jenkins\\tests\\acceptance\""
 
-execute_test()
-{
-$SSH "$1" cmd /c "cd $TESTDIR\\acceptance && sh -c \"export PATH=/usr/bin:\$PATH;./testall --bindir=/c/Users/jenkins/$DIRNAME/bin/\"" || true
+execute_test() {
+    $SSH "$1" cmd /c "cd $TESTDIR\\acceptance && sh -c \"export PATH=/usr/bin:\$PATH;./testall --bindir=/c/Users/jenkins/$DIRNAME/bin/\"" || true
 }
 
 get_testresult() {
- cd $BASEDIR/core/tests
+    cd $BASEDIR/core/tests
 
-  echo "cd $TESTDIR/acceptance
+    echo "cd $TESTDIR/acceptance
 get test.log" | $SFTP "$1"
 
-  echo "cd $TESTDIR/acceptance
+    echo "cd $TESTDIR/acceptance
 get test.xml" | $SFTP "$1"
 }
 
@@ -28,11 +27,11 @@ prepare_tests
 put $WIX_MACHINE
 
 case $ARCH in
-  x86)
+x86)
     execute_test $WIX_MACHINE
     try_run get_testresult $WIX_MACHINE
     ;;
-  x64)
+x64)
     execute_test $WIX_MACHINE
     try_run get_testresult $WIX_MACHINE
     ;;
