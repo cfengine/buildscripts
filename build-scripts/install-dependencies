@@ -32,8 +32,7 @@ PATH=$PATH:$BASEDIR/buildscripts/deps-packaging
 # packages.
 set -e
 
-install_pkg_files()
-{
+install_pkg_files() {
     retry_wrapper "pkg-install-$DEP_PACKAGING" "$@"
 }
 
@@ -47,18 +46,17 @@ install_pkg_files()
 # NOTE: openssl also needs Module::Load::Conditional, which we install in the
 # cloud-init script (package libmodule-load-conditional-perl for debians and
 # perl-Module-Load-Conditional for RHELs).
-check_and_install_perl()
-{
+check_and_install_perl() {
     # Unless $PERL us already set:
     # - set it to $HOME/perl-my/bin/perl if it exists and is executable
     # - otherwise look for it elsewhere
-    [ -z "$PERL" ]  &&  [ -x "$HOME/perl-my/bin/perl" ]  \
-        && PERL="$HOME/perl-my/bin/perl"  \
-        || PERL=$(func_whereis perl)
+    [ -z "$PERL" ] && [ -x "$HOME/perl-my/bin/perl" ] &&
+        PERL="$HOME/perl-my/bin/perl" ||
+        PERL=$(func_whereis perl)
 
     PERL_OK=yes
     PERL_MINOR_VERSION=$($PERL -e 'print "$]"."\n"' | cut -d. -f2)
-    if [ "$PERL_MINOR_VERSION" -lt 013004  ]; then
+    if [ "$PERL_MINOR_VERSION" -lt 013004 ]; then
         log_debug "$PERL version is too old (minor version $PERL_MINOR_VERSION)"
         PERL_OK="no"
     fi
@@ -72,7 +70,7 @@ check_and_install_perl()
         log_debug $PERL is too old or modules are missing, building new one from source...
 
         # -fno-stack-protector: Ensure built perl will not depend on libssp.so
-        if  echo | gcc -E -fno-stack-protector - >/dev/null 2>&1; then
+        if echo | gcc -E -fno-stack-protector - >/dev/null 2>&1; then
             PERL_CFLAGS='-Accflags=-fno-stack-protector'
         fi
 
@@ -122,8 +120,6 @@ check_and_install_perl()
     export PERL
 }
 
-
-
 check_and_install_perl
 
 # non-gnu exotics don't support sed -i,
@@ -144,35 +140,34 @@ if [ -n "$1" ]; then
     DEPS="$*"
 fi
 
-for dep in $DEPS
-do
+for dep in $DEPS; do
     case "$BUILD_TYPE" in
-        DEBUG|CODE_COVERAGE)
-            optimize=yes
-            debugsym=no
-            versuffix=+untested
-            tests=no
-            ;;
-        RELEASE)
-            optimize=yes
-            debugsym=no
-            versuffix=+release
-            tests=yes
-            ;;
-        *)
-            fatal "Unknown build type: $BUILD_TYPE"
-            ;;
+    DEBUG | CODE_COVERAGE)
+        optimize=yes
+        debugsym=no
+        versuffix=+untested
+        tests=no
+        ;;
+    RELEASE)
+        optimize=yes
+        debugsym=no
+        versuffix=+release
+        tests=yes
+        ;;
+    *)
+        fatal "Unknown build type: $BUILD_TYPE"
+        ;;
     esac
 
     case "$ARCH" in
-        x86|x64)
-            crossver=+mingw$ARCH
-            cross=$ARCH
-            ;;
-        *)
-            crossver=
-            cross=native
-            ;;
+    x86 | x64)
+        crossver=+mingw$ARCH
+        cross=$ARCH
+        ;;
+    *)
+        crossver=
+        cross=native
+        ;;
     esac
 
     # Add $PREFIX to version of built dependencies so they get different package names and are distinguishable from each
@@ -190,14 +185,14 @@ do
         log_debug Building package $dep...
         # BUILD the packages
         if [ "$dep" = "lmdb" ] && [ "$BUILD_TYPE" != "RELEASE" ]; then
-          # Always build LMDB with debug symbols in non-release builds.
-          # The reason is an ongoing issue where we fail to open database transactions.
-          # See ENT-10777 for more info.
-          "$BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING"  \
-              "$dep" "$tests" "$cross" "$optimize" yes "$version"
+            # Always build LMDB with debug symbols in non-release builds.
+            # The reason is an ongoing issue where we fail to open database transactions.
+            # See ENT-10777 for more info.
+            "$BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING" \
+                "$dep" "$tests" "$cross" "$optimize" yes "$version"
         else
-          "$BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING"  \
-              "$dep" "$tests" "$cross" "$optimize" "$debugsym" "$version"
+            "$BASEDIR/buildscripts/deps-packaging/pkg-build-$DEP_PACKAGING" \
+                "$dep" "$tests" "$cross" "$optimize" "$debugsym" "$version"
         fi
 
         # Make sure package is there after building it
