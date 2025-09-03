@@ -8,12 +8,27 @@
 #   $CFENGINE_PR_TOKEN_PATH - file path containing token associated with CFEngine github organization
 #   $NTHQ_PR_TOKEN_PATH     - file path containing token associated with NorthernTechHQ github organization
 ( # hide commands as they may contain secrets or paths to secrets
-  set +x
-  if [ -z "$1" ]; then echo "Need repository identifier as first argument"; exit 1; fi
-  if [ -z "$CFENGINE_PR_TOKEN_PATH" ]; then echo "Env var CFENGINE_PR_TOKEN_PATH is required"; exit 1; fi
-  if [ ! -f "$CFENGINE_PR_TOKEN_PATH" ]; then echo "CFENGINE_PR_TOKEN_PATH file must exist"; exit 1; fi
-  if [ -z "$NTHQ_PR_TOKEN_PATH" ]; then echo "Env var NTHQ_PR_TOKEN_PATH is required"; exit 1; fi
-  if [ ! -f "$NTHQ_PR_TOKEN_PATH" ]; then echo "NTHQ_PR_TOKEN_PATH file must exist"; exit 1; fi
+    set +x
+    if [ -z "$1" ]; then
+        echo "Need repository identifier as first argument"
+        exit 1
+    fi
+    if [ -z "$CFENGINE_PR_TOKEN_PATH" ]; then
+        echo "Env var CFENGINE_PR_TOKEN_PATH is required"
+        exit 1
+    fi
+    if [ ! -f "$CFENGINE_PR_TOKEN_PATH" ]; then
+        echo "CFENGINE_PR_TOKEN_PATH file must exist"
+        exit 1
+    fi
+    if [ -z "$NTHQ_PR_TOKEN_PATH" ]; then
+        echo "Env var NTHQ_PR_TOKEN_PATH is required"
+        exit 1
+    fi
+    if [ ! -f "$NTHQ_PR_TOKEN_PATH" ]; then
+        echo "NTHQ_PR_TOKEN_PATH file must exist"
+        exit 1
+    fi
 )
 # debug the following sha256sum commands to help determine if the tokens are correct in jenkins builds
 #echo "sha256sum of CFENGINE_PR_TOKEN_PATH..." >&2
@@ -21,10 +36,10 @@
 #echo "sha256sum of NTHQ_PR_TOKEN_PATH..." >&2
 #sha256sum "$NTHQ_PR_TOKEN_PATH" >&2
 if [ "${1%/*}" = "cfengine" ]; then
-  tr -d '\n' < "$CFENGINE_PR_TOKEN_PATH"
+    tr -d '\n' <"$CFENGINE_PR_TOKEN_PATH"
 elif [ "${1%/*}" = "NorthernTechHQ" ]; then
-  tr -d '\n' < "$NTHQ_PR_TOKEN_PATH"
+    tr -d '\n' <"$NTHQ_PR_TOKEN_PATH"
 else
-  echo "$0 doesn't know about tokens for organization ${1%/*}"
-  exit 1
+    echo "$0 doesn't know about tokens for organization ${1%/*}"
+    exit 1
 fi
