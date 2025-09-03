@@ -13,36 +13,42 @@
 #     $PR_STATUSES_URL - GH API URL to set PR's statuses
 # Returns:
 #   0 - success, 1 - error
-if [ -z "$1" ]; then echo "First argument, project, is required"; exit 1; fi
-if [ -z "$2" ]; then echo "Second argument, pull request number, is required"; exit 1; fi
+if [ -z "$1" ]; then
+    echo "First argument, project, is required"
+    exit 1
+fi
+if [ -z "$2" ]; then
+    echo "Second argument, pull request number, is required"
+    exit 1
+fi
 
 json_out="$(mktemp)"
 
 # curl 7.88 ish supports --header @file but apparently 7.52 (on bootstrap vm (deb-9)) does not, so compose a script
 curl_script_file="$(mktemp)"
 chmod 600 "$curl_script_file"
-echo -n "curl --insecure --fail --header \"Authorization: Bearer " > "$curl_script_file"
+echo -n "curl --insecure --fail --header \"Authorization: Bearer " >"$curl_script_file"
 
 _dir=$(readlink -e "$(dirname "$0")")
-"$_dir"/get-pr-token "$1" >> "$curl_script_file"
-echo "\" https://api.github.com/repos/$1/pulls/$2" >> "$curl_script_file"
+"$_dir"/get-pr-token "$1" >>"$curl_script_file"
+echo "\" https://api.github.com/repos/$1/pulls/$2" >>"$curl_script_file"
 
 if ( # sub-shell to preserve original shell -/+x -/+e state
-  set +x # hide curl command below as it contains a secret! don't remove me!
-# uncomment the below to debug, warning: will reveal secrets in logs
-#  cat "$curl_script_file" >&2
-  bash "$curl_script_file" >"$json_out"
+    set +x # hide curl command below as it contains a secret! don't remove me!
+    # uncomment the below to debug, warning: will reveal secrets in logs
+    #  cat "$curl_script_file" >&2
+    bash "$curl_script_file" >"$json_out"
 ); then
-  if command -v jq > /dev/null; then
-    URL=$(jq ".statuses_url" < "$json_out" | tr -d '"')
-    status=$?
-  else
-    URL=$(grep "statuses_url" "$json_out" | head -n1 | sed -r 's/\s+"statuses_url": "([^"]+)",/\1/')
-    status=$?
-  fi
+    if command -v jq >/dev/null; then
+        URL=$(jq ".statuses_url" <"$json_out" | tr -d '"')
+        status=$?
+    else
+        URL=$(grep "statuses_url" "$json_out" | head -n1 | sed -r 's/\s+"statuses_url": "([^"]+)",/\1/')
+        status=$?
+    fi
 else
-  echo "Request failed. Response was $(cat "$json_out")" >&2
-  status=1
+    echo "Request failed. Response was $(cat "$json_out")" >&2
+    status=1
 fi
 
 # uncomment the below deletion of files for debugging
