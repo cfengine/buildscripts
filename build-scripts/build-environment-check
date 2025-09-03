@@ -1,11 +1,10 @@
 #!/bin/sh
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . detect-environment
 . compile-options
 
 # WARNING we alter the buildslave: we remove UNWANTED_DEPS
-
 
 ### SYSTEM PACKAGE DEPENDENCIES ###
 # Libtool is unwanted because "libltdl" polutes our package dependencies.
@@ -14,64 +13,55 @@
 ### TODO add to the unwanted list:    bison byacc flex
 ### TODO unfortunately autoconf is installed by autobuild policy
 
-
 case "$OS" in
-    rhel|centos)
-        DEP_LIST="gcc-c++ ncurses ncurses-devel pkgconfig pam-devel"
-        UNWANTED_DEPS="libtool-ltdl libtool-ltdl-devel"
-        ;;
-    debian|ubuntu)
-        DEP_LIST="dpkg-dev debhelper g++ pkg-config build-essential libpam0g-dev"
-        UNWANTED_DEPS="libltdl-dev libltdl7"
-        ;;
+rhel | centos)
+    DEP_LIST="gcc-c++ ncurses ncurses-devel pkgconfig pam-devel"
+    UNWANTED_DEPS="libtool-ltdl libtool-ltdl-devel"
+    ;;
+debian | ubuntu)
+    DEP_LIST="dpkg-dev debhelper g++ pkg-config build-essential libpam0g-dev"
+    UNWANTED_DEPS="libltdl-dev libltdl7"
+    ;;
 
-    # SKIP IN UNKNOWN OS
-    *)
-        echo "$0: not implemented for OS $OS, skipping"
-        exit 0
-        ;;
+# SKIP IN UNKNOWN OS
+*)
+    echo "$0: not implemented for OS $OS, skipping"
+    exit 0
+    ;;
 esac
-
 
 case "$OS-$OS_VERSION" in
-    rhel-6*|centos-6*)
-        DEP_LIST="$DEP_LIST rpm-build"
-        ;;
-    rhel-* | centos-* )
-        DEP_LIST="$DEP_LIST rpm-build-libs"
-        ;;
-    *)                  DEP_LIST="$DEP_LIST fakeroot"    ;;
+rhel-6* | centos-6*)
+    DEP_LIST="$DEP_LIST rpm-build"
+    ;;
+rhel-* | centos-*)
+    DEP_LIST="$DEP_LIST rpm-build-libs"
+    ;;
+*) DEP_LIST="$DEP_LIST fakeroot" ;;
 esac
-
 
 DEP_LIST="$DEP_LIST rsync gcc make sudo wget"
 #UNWANTED_DEPS="$UNWANTED_DEPS libtool"    # TODO automake autoconf bison byacc flex
 
-
 RET=0
-for unwanted in $UNWANTED_DEPS
-do
-    if query_pkg $unwanted
-    then
+for unwanted in $UNWANTED_DEPS; do
+    if query_pkg $unwanted; then
         echo "ERROR Found unwanted package:" $unwanted
         RET=1
     fi
 done
 
-for dep in $DEP_LIST
-do
-    if query_pkg $dep
-    then true
+for dep in $DEP_LIST; do
+    if query_pkg $dep; then
+        true
     else
         echo "ERROR Missing system package:" $dep
         RET=1
     fi
 done
 
-
 # Exit with the right exit code
-if [  $RET = 0  ]
-then
+if [ $RET = 0 ]; then
     echo "$0: SUCCESS buildslave is correctly setup"
     exit 0
 else
