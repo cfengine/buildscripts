@@ -20,7 +20,6 @@
 # ```
 #
 
-
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
@@ -28,17 +27,16 @@
 
 # Make sure the PROJECT variable is set correctly
 case "$PROJECT" in
-    community)
-        NOVA=no
-        ;;
-    nova)
-        NOVA=yes
-        ;;
-    *)
-        fatal "Unknown project: $PROJECT"
-        ;;
+community)
+    NOVA=no
+    ;;
+nova)
+    NOVA=yes
+    ;;
+*)
+    fatal "Unknown project: $PROJECT"
+    ;;
 esac
-
 
 P=$BUILDPREFIX
 
@@ -46,81 +44,80 @@ ARGS="--prefix=$P --libdir=$P/lib --with-workdir=$P --sysconfdir=/etc --with-ope
 
 for dep in ldap libxml2 libyaml librsync leech libacl libvirt libcurl; do
     case "$DEPS" in
-        *"$dep"*)
-            var_append ARGS "--with-$dep=$P"
-            ;;
-        *)
-            var_append ARGS "--without-$dep"
-            ;;
+    *"$dep"*)
+        var_append ARGS "--with-$dep=$P"
+        ;;
+    *)
+        var_append ARGS "--without-$dep"
+        ;;
     esac
 done
 
 case "$DEPS" in
-    *pthreads-w32*)
-        var_append ARGS "--with-pthreads=$P"
-        ;;
+*pthreads-w32*)
+    var_append ARGS "--with-pthreads=$P"
+    ;;
 esac
 
 case "$DEPS" in
-    *postgresql*)
-        var_append ARGS "--with-postgresql=$P --without-mysql"
-        ;;
-    *)
-        var_append ARGS "--without-sql"
-        ;;
+*postgresql*)
+    var_append ARGS "--with-postgresql=$P --without-mysql"
+    ;;
+*)
+    var_append ARGS "--without-sql"
+    ;;
 esac
 
 case "$ROLE" in
-    hub)
-        var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql=$P"
-        ;;
-    agent)
-        var_append ARGS "--without-cfmod --without-postgresql"
-        ;;
-    *)
-        fatal "Unknown ROLE: $ROLE"
-        ;;
+hub)
+    var_append ARGS "--with-cfmod --with-enterprise-api --with-postgresql=$P"
+    ;;
+agent)
+    var_append ARGS "--without-cfmod --without-postgresql"
+    ;;
+*)
+    fatal "Unknown ROLE: $ROLE"
+    ;;
 esac
 
 case "$WITH_SYSTEMD" in
-    yes)
-        var_append ARGS "--with-systemd-service"
-        ;;
-    *)
-        var_append ARGS "--without-systemd-service"
-        ;;
+yes)
+    var_append ARGS "--with-systemd-service"
+    ;;
+*)
+    var_append ARGS "--without-systemd-service"
+    ;;
 esac
 
 # RHEL 8 requires an SELinux policy
 if [ "$OS" = "rhel" ] && [ "${OS_VERSION%\.*}" -gt "7" ]; then
-  var_append ARGS "--with-selinux-policy"
+    var_append ARGS "--with-selinux-policy"
 fi
 
 # Cross-compiling Windows?
 case "$ARCH-${OS_FAMILY}" in
-    x86-mingw)
-        var_append ARGS "--host=i686-w64-mingw32"
-        ;;
-    x64-mingw)
-        var_append ARGS "--host=x86_64-w64-mingw32"
-        ;;
+x86-mingw)
+    var_append ARGS "--host=i686-w64-mingw32"
+    ;;
+x64-mingw)
+    var_append ARGS "--host=x86_64-w64-mingw32"
+    ;;
 esac
-
 
 # Select configure options and compiler flags based on BUILD_TYPE
 case "$BUILD_TYPE" in
-    RELEASE)
-        CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
-        ;;
-    DEBUG)
-        ARGS="$ARGS --enable-debug"
-        # Override the default "-g3 -O0" that comes with ./configure --enable-debug
-        # in order to reduce the size of the packages
-        CFLAGS="-g2 -O1 $CFLAGS"
-        ;;
-    *)
-        fatal "Unknown BUILD_TYPE '$BUILD_TYPE'"
-      ;;
+RELEASE)
+    CFLAGS="-g2 -O2 -DNDEBUG  $CFLAGS"
+    ;;
+DEBUG)
+    ARGS="$ARGS --enable-debug"
+    # Override the default "-g3 -O0" that comes with ./configure --enable-debug
+    # in order to reduce the size of the packages
+    CFLAGS="-g2 -O1 $CFLAGS"
+    ;;
+*)
+    fatal "Unknown BUILD_TYPE '$BUILD_TYPE'"
+    ;;
 esac
 
 if [ "$OS" = solaris ]; then
@@ -130,19 +127,19 @@ fi
 
 log_debug running configure on core repo...
 # shellcheck disable=SC2086
-( cd "$BASEDIR"/core && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+(cd "$BASEDIR"/core && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS)
 
 if [ "$NOVA" = yes ]; then
     log_debug running configure on enterprise repo...
     # shellcheck disable=SC2086
-    ( cd "$BASEDIR"/enterprise && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+    (cd "$BASEDIR"/enterprise && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS)
     if [ "$ROLE" = hub ]; then
         log_debug running configure on nova repo...
         # shellcheck disable=SC2086
-        ( cd "$BASEDIR"/nova && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+        (cd "$BASEDIR"/nova && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS)
     fi
 fi
 
 log_debug running configure on masterfiles repo...
 # shellcheck disable=SC2086
-( cd "$BASEDIR"/masterfiles && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+(cd "$BASEDIR"/masterfiles && run_and_print_on_failure env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS)
