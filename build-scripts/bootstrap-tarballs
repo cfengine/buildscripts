@@ -62,28 +62,28 @@ set +e
 # This loop fetches information about the PRs if the respective variable is set.
 #
 for repo_spec in cfengine/buildscripts cfengine/core cfengine/masterfiles cfengine/enterprise cfengine/nova cfengine/mission-portal NorthernTechHQ/libntech; do
-  # remove organization/ from start of repo_spec
-  # E.g. 'cfengine/mission-portal' -> 'mission-portal'
-  repo="${repo_spec#*/}"
+    # remove organization/ from start of repo_spec
+    # E.g. 'cfengine/mission-portal' -> 'mission-portal'
+    repo="${repo_spec#*/}"
 
-  # Convert to uppercase, swap hyphens with underscore and append '_REV'
-  # E.g. 'mission-portal' -> 'MISSION_PORTAL_REV'
-  rev_param_name="$(echo "$repo" | tr '[:lower:]-' '[:upper:]_')_REV"
+    # Convert to uppercase, swap hyphens with underscore and append '_REV'
+    # E.g. 'mission-portal' -> 'MISSION_PORTAL_REV'
+    rev_param_name="$(echo "$repo" | tr '[:lower:]-' '[:upper:]_')_REV"
 
-  # Try to dereference the result from above and skip the rest of the loop
-  # unless the variable is defined.
-  revision="${!rev_param_name}" || continue
+    # Try to dereference the result from above and skip the rest of the loop
+    # unless the variable is defined.
+    revision="${!rev_param_name}" || continue
 
-  # remove "origin/" (if any)
-  revision="${revision##origin/}"
+    # remove "origin/" (if any)
+    revision="${revision##origin/}"
 
-  # Check to see if the resolved variable starts with 'pull/'
-  if expr "$revision" : "pull/" >/dev/null; then
-    # Extract the revision number. E.g. 'pull/1755' -> '1755'
-    pr_nr="$(echo "$revision" | cut -d/ -f2)"
+    # Check to see if the resolved variable starts with 'pull/'
+    if expr "$revision" : "pull/" >/dev/null; then
+        # Extract the revision number. E.g. 'pull/1755' -> '1755'
+        pr_nr="$(echo "$revision" | cut -d/ -f2)"
 
-    get-github-pull-request-info "$repo_spec" "$pr_nr" >> "$BASEDIR"/output/PRs
-  fi
+        get-github-pull-request-info "$repo_spec" "$pr_nr" >>"$BASEDIR"/output/PRs
+    fi
 done
 
 # now script failures should fail the script
@@ -92,7 +92,7 @@ set -e
 # Build tarball from core repository
 cd "$BASEDIR"/core
 rm -f cfengine-3.*.tar.gz
-git rev-parse HEAD > "$BASEDIR"/output/core-commitID
+git rev-parse HEAD >"$BASEDIR"/output/core-commitID
 # Configure in order to run "make dist", deleted later.
 echo "$(basename "$0"): Debug: Running configure on core repository..."
 run_and_print_on_failure ./configure -C
@@ -105,16 +105,16 @@ run_and_print_on_failure make distclean
 # Build tarballs from masterfiles repository
 cd "$BASEDIR"/masterfiles
 rm -f cfengine-masterfiles*.tar.gz
-git rev-parse HEAD > "$BASEDIR"/output/masterfiles-commitID
+git rev-parse HEAD >"$BASEDIR"/output/masterfiles-commitID
 # Configure in order to run "make dist", deleted later.
 echo "$(basename "$0"): Debug: Running configure on masterfiles repository..."
 run_and_print_on_failure ./configure
 echo "$(basename "$0"): Debug: Running make dist on masterfiles repository..."
-run_and_print_on_failure make dist         # source tarball
+run_and_print_on_failure make dist # source tarball
 echo "$(basename "$0"): Debug: Running make tar-package on masterfiles repository..."
-run_and_print_on_failure make tar-package  # package tarball (containing all
-                                           # files as if they were installed
-                                           # under "prefix".)
+run_and_print_on_failure make tar-package # package tarball (containing all
+# files as if they were installed
+# under "prefix".)
 mv cfengine-masterfiles*.tar.gz "$BASEDIR"/output/tarballs/
 echo "$(basename "$0"): Debug: Running make distclean on masterfiles repository..."
 run_and_print_on_failure make distclean
@@ -122,7 +122,7 @@ run_and_print_on_failure make distclean
 # Compute a checksum list that can be used to verify the integrity of the
 # tarballs
 cd "$BASEDIR"/output/tarballs
-sha256sum -- *.tar.gz > sha256sums.txt
+sha256sum -- *.tar.gz >sha256sums.txt
 # Add the BSD (16-bit) checksum of the checksum list to it's filename. This way
 # you can verify the integrity of the checksum list itself.
 CKSUM=$(sum sha256sums.txt | cut -d ' ' -f 1)
@@ -130,51 +130,51 @@ mv sha256sums.txt sha256sums."$CKSUM".txt
 
 echo "$(basename "$0"): Debug: Installing javascript npm dependencies..."
 (
-if test -f "$BASEDIR"/mission-portal/public/scripts/package.json; then
-  cd "$BASEDIR"/mission-portal/public/scripts
-  # display node & npm versions
-  npm --version
-  node --version
-  # install dependencies from npmjs
-  run_and_print_on_failure npm ci --prefix "$BASEDIR"/mission-portal/public/scripts/
-  # build react components
-  run_and_print_on_failure npm run build --prefix "$BASEDIR"/mission-portal/public/scripts/
-  # remove the packages specified in devDependencies
-  run_and_print_on_failure npm prune --omit=dev --prefix "$BASEDIR"/mission-portal/public/scripts/
-fi
+    if test -f "$BASEDIR"/mission-portal/public/scripts/package.json; then
+        cd "$BASEDIR"/mission-portal/public/scripts
+        # display node & npm versions
+        npm --version
+        node --version
+        # install dependencies from npmjs
+        run_and_print_on_failure npm ci --prefix "$BASEDIR"/mission-portal/public/scripts/
+        # build react components
+        run_and_print_on_failure npm run build --prefix "$BASEDIR"/mission-portal/public/scripts/
+        # remove the packages specified in devDependencies
+        run_and_print_on_failure npm prune --omit=dev --prefix "$BASEDIR"/mission-portal/public/scripts/
+    fi
 )
 
 echo "$(basename "$0"): Debug: Installing PHP composer dependencies from mission-portal repository..."
 (
-if test -f "$BASEDIR"/mission-portal/composer.json; then
-  cd "$BASEDIR"/mission-portal
-  # install PHP dependencies from composer
-  run_and_print_on_failure php /usr/bin/composer.phar install --no-dev
-fi
+    if test -f "$BASEDIR"/mission-portal/composer.json; then
+        cd "$BASEDIR"/mission-portal
+        # install PHP dependencies from composer
+        run_and_print_on_failure php /usr/bin/composer.phar install --no-dev
+    fi
 )
 
 echo "$(basename "$0"): Debug: Installing PHP composer dependencies from nova repository..."
 (
-if test -f "$BASEDIR"/nova/api/http/composer.json; then
-  cd "$BASEDIR"/nova/api/http
-  # install PHP dependencies from composer
-  run_and_print_on_failure php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs
-fi
+    if test -f "$BASEDIR"/nova/api/http/composer.json; then
+        cd "$BASEDIR"/nova/api/http
+        # install PHP dependencies from composer
+        run_and_print_on_failure php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs
+    fi
 )
 
 echo "$(basename "$0"): Debug: Compiling Mission Portal styles..."
 (
-if test -f "$BASEDIR"/mission-portal/public/themes/default/bootstrap/cfengine_theme.less; then
-  cd "$BASEDIR"/mission-portal/public/themes/default/bootstrap
-  run_and_print_on_failure npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
-fi
+    if test -f "$BASEDIR"/mission-portal/public/themes/default/bootstrap/cfengine_theme.less; then
+        cd "$BASEDIR"/mission-portal/public/themes/default/bootstrap
+        run_and_print_on_failure npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
+    fi
 )
 
 echo "$(basename "$0"): Debug: Installing LDAP API PHP composer dependencies..."
 (
-if test -f "$BASEDIR"/mission-portal/ldap/composer.json; then
-  cd "$BASEDIR"/mission-portal/ldap
-  # install PHP dependencies from composer
-  run_and_print_on_failure php /usr/bin/composer.phar install --no-dev
-fi
+    if test -f "$BASEDIR"/mission-portal/ldap/composer.json; then
+        cd "$BASEDIR"/mission-portal/ldap
+        # install PHP dependencies from composer
+        run_and_print_on_failure php /usr/bin/composer.phar install --no-dev
+    fi
 )
