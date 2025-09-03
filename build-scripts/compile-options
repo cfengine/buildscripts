@@ -182,60 +182,11 @@ hpux | aix | solaris | freebsd | mingw) ;;
     ;;
 esac
 
-# ROLE
-# We can autodetect if we are building a hub or an agent, but
-# that is suboptimal since the list might change at any time or
-# we might want to build an agent package for a platform that is a hub
-# or viceversa. By default we assume the old behavior but if the
-# environment variable EXPLICIT_ROLE is defined, then we change our behavior
-# and build according to the role specified by it.
-
 case "$EXPLICIT_ROLE" in
 agent) ROLE=agent ;;
 hub) ROLE=hub ;;
 *)
-    # Not running under Jenkins?
-    if [ -z "$JENKINS_SERVER_COOKIE" ]; then
-        case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
-        community-*) ROLE=agent ;;
-        # We do not support 32 bits hubs anymore
-        nova-i386-*-*) ROLE=agent ;;
-        nova-s390*-*-*) ROLE=agent ;;
-        nova-*-centos-*) ROLE=hub ;;
-        nova-*-debian-*) ROLE=hub ;;
-        nova-*-opensuse-*) ROLE=hub ;;
-        nova-*-rhel-*) ROLE=hub ;;
-        nova-*-sles-*) ROLE=hub ;;
-        nova-*-ubuntu-*) ROLE=hub ;;
-        nova-*-mingw-*) ROLE=agent ;;
-        nova-*) ROLE=agent ;;
-        *)
-            echo "Unknown project: $PROJECT"
-            exit 42
-            ;;
-        esac
-        echo "Autodetected $ROLE role based on missing Jenkins label and OS."
-
-    else # we are running under Jenkins
-
-        # The "label" variable is set in multi-matrix jobs;
-        # thus it is *not set* in the bootstrap job.
-        case x"$label" in
-        x)
-            echo "label is not set, assuming that this is not the main build job; Setting ROLE=agent."
-            ROLE=agent
-            ;;
-        *_HUB_*)
-            echo "Autodetected hub role based on '_HUB_' in Jenkins label."
-            ROLE=hub
-            ;;
-        *)
-            echo "Autodetected agent role based on missing '_HUB_' in Jenkins label."
-            ROLE=agent
-            ;;
-        esac
-    fi
-    ;;
+    log_error "Bad EXPLICIT_ROLE '$EXPLICIT_ROLE': defaulting to 'agent'"
 esac
 
 export ROLE
