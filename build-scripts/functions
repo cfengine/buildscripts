@@ -17,11 +17,10 @@
 # Detect and replace non-POSIX shell
 #
 try_exec() {
-    type "$1" > /dev/null 2>&1 && exec "$@"
+    type "$1" >/dev/null 2>&1 && exec "$@"
 }
 
-broken_posix_shell()
-{
+broken_posix_shell() {
     unset foo
     local foo=1
     test "$foo" != "1"
@@ -40,43 +39,38 @@ fi
 #
 set -e
 
-
-if [ "$_IS_FUNCTIONS_SOURCED" = yes ]
-then
+if [ "$_IS_FUNCTIONS_SOURCED" = yes ]; then
     echo 'FATAL: Why are you sourcing "functions" script twice?!?'
     exit 101
 fi
 
 # Preparatory step: export all variables needed
-export_variables ()
-{
+export_variables() {
     #
     # See more examples at https://en.wikipedia.org/wiki/Uname
     #
-    UNAME_S=`uname -s`  # Linux             SunOS        AIX           HP-UX    FreeBSD
-    UNAME_R=`uname -r`  # 4.4.0-59-generic  5.10         3             B.11.23  6.1-RELEASE-p15
-    UNAME_M=`uname -m`  # x86_64,i686       i86pc,sun4v  0001013AD400  ia64     i386,amd64
+    UNAME_S=$(uname -s) # Linux             SunOS        AIX           HP-UX    FreeBSD
+    UNAME_R=$(uname -r) # 4.4.0-59-generic  5.10         3             B.11.23  6.1-RELEASE-p15
+    UNAME_M=$(uname -m) # x86_64,i686       i86pc,sun4v  0001013AD400  ia64     i386,amd64
     #        uname -p   # x86_64            i386,sparc   powerpc       ERROR
     export UNAME_S UNAME_R UNAME_M
 
     #
     # BASEDIR: where all our repos have been checked out
     #
-    if [ -z "$AUTOBUILD_PATH" ]
-    then
+    if [ -z "$AUTOBUILD_PATH" ]; then
         case "$0" in
-            *buildscripts/build-remote) SCRIPTDIR="$0";;
-            /*) SCRIPTDIR=`dirname "$0"`;;
-            -*) SCRIPTDIR=`pwd`;; # if this script is sourced from a login shell, $0 is '-bash' or similar
-            *)  SCRIPTDIR=`pwd`/`dirname "$0"`;;
+        *buildscripts/build-remote) SCRIPTDIR="$0" ;;
+        /*) SCRIPTDIR=$(dirname "$0") ;;
+        -*) SCRIPTDIR=$(pwd) ;; # if this script is sourced from a login shell, $0 is '-bash' or similar
+        *) SCRIPTDIR=$(pwd)/$(dirname "$0") ;;
         esac
 
-        AUTOBUILD_PATH=`dirname "$SCRIPTDIR"`
+        AUTOBUILD_PATH=$(dirname "$SCRIPTDIR")
 
     fi
-    BASEDIR=`dirname "$AUTOBUILD_PATH"`
+    BASEDIR=$(dirname "$AUTOBUILD_PATH")
     export BASEDIR
-
 
     # BUILDPREFIX: which directory the packages will be installed to.
     BUILDPREFIX=${BUILDPREFIX:-/var/cfengine}
@@ -86,41 +80,40 @@ export_variables ()
     PREFIX="$BUILDPREFIX"
     export PREFIX
 
-
     # Set PATH according to the needs of each platform and build-type
     # TODO: remove the generic PATH setting completely,
     #       all should be under conditionals
     case $UNAME_S in
-        AIX)
-            # We need to use GCC6 on new AIX 7 VMs (AIX 5 doesn't have the folder).
-            PATH="/opt/freeware/gcc6/bin/:$PATH"
-            # We need to use /opt/freeware/bin first, for e.g. wget and newer perl 5.34 on aix 7.1
-            PATH="/opt/freeware/bin:$PATH" ;;
-        SunOS)
-            # Currently we rely strongly on OpenCSW packages.
-            PATH="/opt/csw/bin:/usr/xpg4/bin:$PATH"  ;;
+    AIX)
+        # We need to use GCC6 on new AIX 7 VMs (AIX 5 doesn't have the folder).
+        PATH="/opt/freeware/gcc6/bin/:$PATH"
+        # We need to use /opt/freeware/bin first, for e.g. wget and newer perl 5.34 on aix 7.1
+        PATH="/opt/freeware/bin:$PATH"
+        ;;
+    SunOS)
+        # Currently we rely strongly on OpenCSW packages.
+        PATH="/opt/csw/bin:/usr/xpg4/bin:$PATH"
+        ;;
 
-        HP-UX)  PATH="$PATH:/usr/contrib/bin"  ;;
-        *) ;;
+    HP-UX) PATH="$PATH:/usr/contrib/bin" ;;
+    *) ;;
     esac
 
     PATH="$PATH:/usr/local/bin:/usr/sbin:/usr/local/sbin"
     PATH="$PATH:$BASEDIR/buildscripts/build-scripts"
-    PATH="$PATH:$BUILDPREFIX/httpd/php/bin"                # TODO REMOVE
+    PATH="$PATH:$BUILDPREFIX/httpd/php/bin" # TODO REMOVE
     if [ -x /usr/lib64/ccache/gcc ]; then
-      PATH="/usr/lib64/ccache:$PATH"
+        PATH="/usr/lib64/ccache:$PATH"
     fi
     export PATH
 
     # /bin/sh in Solaris 11 behaves badly only when /usr/xpg4/bin is
     # first in path! In particular it uses a bad built-in "rm" instead
     # of /usr/bin/rm.
-    if [ "$UNAME_S" = "SunOS" ] && [ "$UNAME_R" = "5.11" ]
-    then
+    if [ "$UNAME_S" = "SunOS" ] && [ "$UNAME_R" = "5.11" ]; then
         ACCEPT_INFERIOR_RM_PROGRAM=yes
         export ACCEPT_INFERIOR_RM_PROGRAM
     fi
-
 
     # Final destination of generated buildscripts output
     OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
@@ -129,17 +122,13 @@ export_variables ()
 
 export_variables
 
-
 # For utilities in paths that we don't want in PATH.
 # Not exported, used exclusively by func_whereis()
 # TODO make it platform-dependent, add other platforms besides Solaris.
-SECONDARY_PATHS="/sbin /usr/sbin  /usr/sfw/bin"  #"/opt/csw/gnu /usr/ccs/bin"
+SECONDARY_PATHS="/sbin /usr/sbin  /usr/sfw/bin" #"/opt/csw/gnu /usr/ccs/bin"
 
-
-
-grep_q()
-{
-    grep "$@"  >/dev/null
+grep_q() {
+    grep "$@" >/dev/null
 }
 
 #
@@ -147,187 +136,172 @@ grep_q()
 # to have them as a separate script under deps-packaging directory.
 #
 
-uninstall_rpms()
-{
-    PKGS=`rpm -qa --queryformat "%{Name}-%{Version}\n" | grep '^'$1 || true`
-    if [ -n "$PKGS" ]
-    then
-        retry_wrapper  sudo rpm -e $PKGS
+uninstall_rpms() {
+    PKGS=$(rpm -qa --queryformat "%{Name}-%{Version}\n" | grep '^'$1 || true)
+    if [ -n "$PKGS" ]; then
+        retry_wrapper sudo rpm -e $PKGS
     fi
 }
-uninstall_debs()
-{
-    PKGS=`dpkg -l | tail -n+6 | awk '{print $2}' | grep '^'$1 || true`
-    if [ -n "$PKGS" ]
-    then
-        retry_wrapper  sudo dpkg --purge $PKGS
+uninstall_debs() {
+    PKGS=$(dpkg -l | tail -n+6 | awk '{print $2}' | grep '^'$1 || true)
+    if [ -n "$PKGS" ]; then
+        retry_wrapper sudo dpkg --purge $PKGS
     fi
 }
-uninstall_solaris_pkgs()
-{
-    PKGS=`pkginfo | awk '{print $2}' | grep '^'$1'$' || true`
-    if [ -n "$PKGS" ]
-    then
-        retry_wrapper  sudo /usr/sbin/pkgrm -n $PKGS
+uninstall_solaris_pkgs() {
+    PKGS=$(pkginfo | awk '{print $2}' | grep '^'$1'$' || true)
+    if [ -n "$PKGS" ]; then
+        retry_wrapper sudo /usr/sbin/pkgrm -n $PKGS
     fi
 }
-uninstall_hpux_pkgs()
-{
-    PKGS=`swlist | awk '{print $1}' | grep '^'$1'$' || true`
+uninstall_hpux_pkgs() {
+    PKGS=$(swlist | awk '{print $1}' | grep '^'$1'$' || true)
 
-    for p in $PKGS
-    do
+    for p in $PKGS; do
         sudo /usr/sbin/swremove $p
     done
 }
-uninstall_freebsd_pkgs()
-{
-    PKGS=`pkg_info | awk '{print $1}' | grep '^'$1 || true`
-    if [ -n "$PKGS" ]
-    then
-	retry_wrapper  sudo pkg_delete $PKGS
+uninstall_freebsd_pkgs() {
+    PKGS=$(pkg_info | awk '{print $1}' | grep '^'$1 || true)
+    if [ -n "$PKGS" ]; then
+        retry_wrapper sudo pkg_delete $PKGS
     fi
 }
 
-uninstall_cfbuild()
-{
-  case "$DEP_PACKAGING" in
-    rpm) uninstall_rpms 'cfbuild-.*';;
-    deb) uninstall_debs 'cfbuild-.*';;
-    solaris) uninstall_solaris_pkgs 'cfbuild-.*';;
-    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*';;
-    hpux) uninstall_hpux_pkgs 'cfbuild-.*';;
-    *)
-      echo "Unknown packaging system: $DEP_PACKAGING"
-      exit 1;;
-  esac
-}
-uninstall_cfbuild_devel()
-{
-  case "$DEP_PACKAGING" in
-    rpm) uninstall_rpms 'cfbuild-.*-devel';;
-    deb) uninstall_debs 'cfbuild-.*-devel';;
-    solaris) uninstall_solaris_pkgs 'cfbuild-.*-devel';;
-    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*-devel';;
-    hpux) uninstall_hpux_pkgs 'cfbuild-.*-devel';;
-    *)
-      echo "Unknown packaging system: $DEP_PACKAGING"
-      exit 42;;
-  esac
-}
-query_pkg()
-{
+uninstall_cfbuild() {
     case "$DEP_PACKAGING" in
-        rpm) rpm  -qa --provides|grep_q "^$1 " ;;
-        deb) dpkg -s         $1 2>&1    |    grep_q '^Status: .*ok installed' ;;
-        *)
-            echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
-            exit 1
+    rpm) uninstall_rpms 'cfbuild-.*' ;;
+    deb) uninstall_debs 'cfbuild-.*' ;;
+    solaris) uninstall_solaris_pkgs 'cfbuild-.*' ;;
+    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*' ;;
+    hpux) uninstall_hpux_pkgs 'cfbuild-.*' ;;
+    *)
+        echo "Unknown packaging system: $DEP_PACKAGING"
+        exit 1
+        ;;
+    esac
+}
+uninstall_cfbuild_devel() {
+    case "$DEP_PACKAGING" in
+    rpm) uninstall_rpms 'cfbuild-.*-devel' ;;
+    deb) uninstall_debs 'cfbuild-.*-devel' ;;
+    solaris) uninstall_solaris_pkgs 'cfbuild-.*-devel' ;;
+    freebsd) uninstall_freebsd_pkgs 'cfbuild-.*-devel' ;;
+    hpux) uninstall_hpux_pkgs 'cfbuild-.*-devel' ;;
+    *)
+        echo "Unknown packaging system: $DEP_PACKAGING"
+        exit 42
+        ;;
+    esac
+}
+query_pkg() {
+    case "$DEP_PACKAGING" in
+    rpm) rpm -qa --provides | grep_q "^$1 " ;;
+    deb) dpkg -s $1 2>&1 | grep_q '^Status: .*ok installed' ;;
+    *)
+        echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
+        exit 1
+        ;;
     esac
 }
 
-
-
 run() {
-  NAME="$1"
-  shift
-  echo "---> $NAME"
-  if "$@" >> "build-remote.log" 2>&1
-  then
-      :
-  else
-    echo "Failed. See the build-remote.log. Last lines are:"
-    tail build-remote.log
-    exit 1
-  fi
+    NAME="$1"
+    shift
+    echo "---> $NAME"
+    if "$@" >>"build-remote.log" 2>&1; then
+        :
+    else
+        echo "Failed. See the build-remote.log. Last lines are:"
+        tail build-remote.log
+        exit 1
+    fi
 }
 
 local_script_general() {
-  SCRIPT="$1"
-  "$BASEDIR/buildscripts/build-scripts/$SCRIPT" "$HOST"
+    SCRIPT="$1"
+    "$BASEDIR/buildscripts/build-scripts/$SCRIPT" "$HOST"
 }
 
 local_script() {
-  SCRIPT="$1"
-  run "$SCRIPT" "$BASEDIR/buildscripts/build-scripts/$SCRIPT" "$HOST"
+    SCRIPT="$1"
+    run "$SCRIPT" "$BASEDIR/buildscripts/build-scripts/$SCRIPT" "$HOST"
 }
 
 remote_script_general() {
-  SCRIPT="$1"
-  LOGIN_COMMAND="$2"
-  SCRIPT_BASEDIR="$3"
-  ENVVARS="PROJECT=$PROJECT"
-  if [ -n "$CROSS_TARGET" ]; then
-    ENVVARS="$ENVVARS CROSS_TARGET=$CROSS_TARGET"
-  fi
-  if [ -n "$WIX_MACHINE" ]; then
-    ENVVARS="$ENVVARS WIX_MACHINE=$WIX_MACHINE"
-  fi
-  if [ -n "$BUILD_TYPE" ]; then
-    ENVVARS="$ENVVARS BUILD_TYPE=$BUILD_TYPE"
-  fi
-  if [ -n "$BUILD_NUMBER" ]; then
-    ENVVARS="$ENVVARS BUILD_NUMBER=$BUILD_NUMBER"
-  fi
-  if [ -n "$PREFIX" ]; then
-    ENVVARS="$ENVVARS BUILDPREFIX=$PREFIX"
-  fi
-  if [ -n "$CC" ]; then
-    ENVVARS="$ENVVARS CC=$CC"
-  fi
-  if [ -n "$CPPFLAGS" ]; then
-    ENVVARS="$ENVVARS CPPFLAGS='$CPPFLAGS'"
-  fi
-  if [ -n "$CFLAGS" ]; then
-    ENVVARS="$ENVVARS CFLAGS='$CFLAGS'"
-  fi
-  if [ -n "$LDFLAGS" ]; then
-    ENVVARS="$ENVVARS LDFLAGS='$LDFLAGS'"
-  fi
+    SCRIPT="$1"
+    LOGIN_COMMAND="$2"
+    SCRIPT_BASEDIR="$3"
+    ENVVARS="PROJECT=$PROJECT"
+    if [ -n "$CROSS_TARGET" ]; then
+        ENVVARS="$ENVVARS CROSS_TARGET=$CROSS_TARGET"
+    fi
+    if [ -n "$WIX_MACHINE" ]; then
+        ENVVARS="$ENVVARS WIX_MACHINE=$WIX_MACHINE"
+    fi
+    if [ -n "$BUILD_TYPE" ]; then
+        ENVVARS="$ENVVARS BUILD_TYPE=$BUILD_TYPE"
+    fi
+    if [ -n "$BUILD_NUMBER" ]; then
+        ENVVARS="$ENVVARS BUILD_NUMBER=$BUILD_NUMBER"
+    fi
+    if [ -n "$PREFIX" ]; then
+        ENVVARS="$ENVVARS BUILDPREFIX=$PREFIX"
+    fi
+    if [ -n "$CC" ]; then
+        ENVVARS="$ENVVARS CC=$CC"
+    fi
+    if [ -n "$CPPFLAGS" ]; then
+        ENVVARS="$ENVVARS CPPFLAGS='$CPPFLAGS'"
+    fi
+    if [ -n "$CFLAGS" ]; then
+        ENVVARS="$ENVVARS CFLAGS='$CFLAGS'"
+    fi
+    if [ -n "$LDFLAGS" ]; then
+        ENVVARS="$ENVVARS LDFLAGS='$LDFLAGS'"
+    fi
 
-  ENVVARS="$ENVVARS BRANCH=$REPOSITORY"
-  ENVVARS="$ENVVARS EXPLICIT_ROLE=$EXPLICIT_ROLE"
-  ENVVARS="$ENVVARS EXPLICIT_VERSION=$EXPLICIT_VERSION"
-  ENVVARS="$ENVVARS TEST_MACHINE=$TEST_MACHINE"
-  ENVVARS="$ENVVARS TEST_SHELL=$TEST_SHELL"
+    ENVVARS="$ENVVARS BRANCH=$REPOSITORY"
+    ENVVARS="$ENVVARS EXPLICIT_ROLE=$EXPLICIT_ROLE"
+    ENVVARS="$ENVVARS EXPLICIT_VERSION=$EXPLICIT_VERSION"
+    ENVVARS="$ENVVARS TEST_MACHINE=$TEST_MACHINE"
+    ENVVARS="$ENVVARS TEST_SHELL=$TEST_SHELL"
 
-  ( eval $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT" )
+    (eval $LOGIN_COMMAND env $ENVVARS "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT")
 }
 
 remote_script() {
-  SCRIPT="$1"
-  run "$SCRIPT" remote_script_general "$SCRIPT" "ssh -o BatchMode=yes $HOST" build
+    SCRIPT="$1"
+    run "$SCRIPT" remote_script_general "$SCRIPT" "ssh -o BatchMode=yes $HOST" build
 }
 
 projects_to_test() {
-  if test "x$PROJECT" = "xcommunity"; then
-    echo "core masterfiles"
-  else
-    if test "x$ROLE" = "xhub"; then
-      echo "core enterprise nova masterfiles"
+    if test "x$PROJECT" = "xcommunity"; then
+        echo "core masterfiles"
     else
-      echo "core enterprise masterfiles"
+        if test "x$ROLE" = "xhub"; then
+            echo "core enterprise nova masterfiles"
+        else
+            echo "core enterprise masterfiles"
+        fi
     fi
-  fi
 }
 
 # This function generates a set of file-filtering rules to be used with the rsync --filter option.
 # The filtering rules lists files or directories that should be included (+) and excluded (-) when creating a chroot environment.
 # The chroot command is used to change the root directory for a process in order to test it in an isolated environment.
 # The first rule that matches a file or directory takes precedence over any subsequent.
-generate_chroot_transfer_script()
-{
-  # These rules are processed in a "first that matches" fashion.
+generate_chroot_transfer_script() {
+    # These rules are processed in a "first that matches" fashion.
 
-  # This should go before 'Cross platform', in order not to be overwritten by
-  # '+ /etc' rule below
-  if [ "$OS_FAMILY" = solaris ]
-  then
-    echo '- /etc/svc/volatile/.inetd.uds'
-  fi
+    # This should go before 'Cross platform', in order not to be overwritten by
+    # '+ /etc' rule below
+    if [ "$OS_FAMILY" = solaris ]; then
+        echo '- /etc/svc/volatile/.inetd.uds'
+    fi
 
-  ############# Cross platform #############
-  cat <<EOF
+    ############# Cross platform #############
+    cat <<EOF
 - */proc
 - $PREFIX
 + /bin
@@ -344,10 +318,10 @@ generate_chroot_transfer_script()
 + /var
 EOF
 
-  ########### Platform specific ############
-  case "$OS_FAMILY" in
+    ########### Platform specific ############
+    case "$OS_FAMILY" in
     aix)
-      cat <<EOF
+        cat <<EOF
 + /TT_DB
 + /audit
 + /lpp
@@ -356,9 +330,9 @@ EOF
 - /opt/*
 + /opt
 EOF
-      ;;
+        ;;
     solaris)
-      cat <<EOF
+        cat <<EOF
 - /.SUNWnative/usr/jdk
 - /.SUNWnative/usr/openwin
 - /.SUNWnative/usr/lib/AdobeReader
@@ -371,74 +345,67 @@ EOF
 + /system
 - /var/run/*
 EOF
-      ;;
-    linux|hpux)
-      cat <<EOF
+        ;;
+    linux | hpux)
+        cat <<EOF
 + /dev
 + /run/lock
 - /run/*
 + /run
 - /var/lib/lxcfs
 EOF
-      ;;
-  esac
+        ;;
+    esac
 
-  # Exclude everything else.
-  echo "- /*"
+    # Exclude everything else.
+    echo "- /*"
 }
 
 # One argument: Where to mount it.
-mount_procfs()
-{
-  case "$OS" in
+mount_procfs() {
+    case "$OS" in
     aix)
-      sudo mount -v namefs /proc "$1"
-      ;;
+        sudo mount -v namefs /proc "$1"
+        ;;
     solaris)
-      sudo mount -F proc proc "$1"
-      ;;
+        sudo mount -F proc proc "$1"
+        ;;
     hpux)
-      # No proc on HPUX.
-      true
-      ;;
+        # No proc on HPUX.
+        true
+        ;;
     *)
-      sudo mount -t proc proc "$1"
-      ;;
-  esac
+        sudo mount -t proc proc "$1"
+        ;;
+    esac
 }
-
 
 #
 # Generic utility and portability functions
 #
 
-
 # Exit with an error. If error code is not specified, just "exit 1".
 # Examples:
 #     fatal "install failed" 42
 #     fatal "exiting with default error code"
-fatal()
-{
+fatal() {
     echo "$(basename "$0"): FATAL ERROR: $1" >&2
     exit ${2-1}
 }
 
-log_info()
-{
-    echo "INFO: $@"  1>&2
+log_info() {
+    echo "INFO: $@" 1>&2
 }
 
 # Append a space and string $2 to variable $1, for example:
 # func_append V "blah" is equivalent to  V="$V blah".
-var_append()
-{
+var_append() {
     eval $1=\$$1\\ \$2
 }
 
 # Return True if string $2 exists in variable $1.
 # WARNING: $2 may not contain special characters like spaces etc.
-var_contains()
-{
+var_contains() {
     eval "case \$$1 in
         *\"$2\"*)  true  ;;
         *)         false ;;
@@ -448,12 +415,9 @@ var_contains()
 # Check that $1 command exists in PATH, and print its full path, else
 # return error.  If it has many arguments, continue to
 # check for $2 command, etc, before giving up.
-func_which ()
-{
-    while [ x"$1" != x ]
-    do
-        if command -v "$1"  2>/dev/null
-        then
+func_which() {
+    while [ x"$1" != x ]; do
+        if command -v "$1" 2>/dev/null; then
             return 0
         fi
         shift
@@ -463,20 +427,15 @@ func_which ()
 
 # Same as func_which, but search for $1 command in all possible paths,
 # not only PATH. If not found, search for $2, etc.
-func_whereis ()
-{
-    while [ x"$1" != x ]
-    do
+func_whereis() {
+    while [ x"$1" != x ]; do
         # First, search in PATH
-        if command -v "$1"  2>/dev/null
-        then
+        if command -v "$1" 2>/dev/null; then
             return 0
         # Second, search in SECONDARY_PATHS
         else
-            for p in $SECONDARY_PATHS
-            do
-                if command -v "$p/$1"  2>/dev/null
-                then
+            for p in $SECONDARY_PATHS; do
+                if command -v "$p/$1" 2>/dev/null; then
                     return 0
                 fi
             done
@@ -489,140 +448,128 @@ func_whereis ()
 }
 
 # Only works as mktemp -d /path/to/tmpdir.XXXX
-func_mktemp ()
-{
+func_mktemp() {
     # Only works as mktemp -d
     [ x$1 != x-d ] && fatal "func_mktemp: error, first argument must be -d"
-    [ x$2  = x ]   && fatal "func_mktemp: requires two arguments"
+    [ x$2 = x ] && fatal "func_mktemp: requires two arguments"
 
     # $RANDOM does not exist on Solaris 9 /bin/sh, use $$ as fallback
-    my_tmpdir=`echo $2 | sed 's/XX*/'${RANDOM-$$}/`
+    my_tmpdir=$(echo $2 | sed 's/XX*/'${RANDOM-$$}/)
 
-    save_mktemp_umask=`umask`
+    save_mktemp_umask=$(umask)
     umask 0077
     # Set -e will cause this to fail if it already exists
     mkdir "$my_tmpdir"
     umask $save_mktemp_umask
 
-    [ -d "$my_tmpdir" ]      \
-        && echo "$my_tmpdir" \
-        || fatal "func_mktemp: failed creating temporary directory $my_tmpdir"
+    [ -d "$my_tmpdir" ] &&
+        echo "$my_tmpdir" ||
+        fatal "func_mktemp: failed creating temporary directory $my_tmpdir"
 }
 
 # mktempdir TEMPLATE
 # Example: mktempdir /tmp/dir.XXXXXX
-mktempdir ()
-{
+mktempdir() {
     [ x$1 = x ] && fatal "mktempdir: TEMPLATE directory argument missing"
 
     # HP-UX has its own non-POSIX mktemp, so override it.
     # If not on HP-UX, search PATH for the 'mktemp' or 'gmktemp' command.
 
-    [ "$UNAME_S" = HP-UX ]              \
-        && my_mktemp=func_mktemp          \
-        || my_mktemp=`func_which mktemp gmktemp`  \
-        || my_mktemp=func_mktemp
+    [ "$UNAME_S" = HP-UX ] &&
+        my_mktemp=func_mktemp ||
+        my_mktemp=$(func_which mktemp gmktemp) ||
+        my_mktemp=func_mktemp
 
     $my_mktemp -d $1
 }
 
-
 # Print the sha256sum of $1 or stdin.
-func_sha256 ()
-{
-    if func_which sha256sum >/dev/null
-    then
+func_sha256() {
+    if func_which sha256sum >/dev/null; then
         sha256sum "$@" | cut -d ' ' -f 1
     else
         case "$UNAME_S" in
-            SunOS)  digest -a sha256 "$@"  ;;
-            AIX)    openssl dgst -sha256 "$@" | cut -d ' ' -f 2 ;;
-            *)      fatal "Can't find command for computing SHA-256"  ;;
+        SunOS) digest -a sha256 "$@" ;;
+        AIX) openssl dgst -sha256 "$@" | cut -d ' ' -f 2 ;;
+        *) fatal "Can't find command for computing SHA-256" ;;
         esac
     fi
 }
 
 # Decompresses $1 or stdin to stdout
-func_decompress ()
-{
+func_decompress() {
     case "$1" in
-        *.gz|*.tgz)  gzip  -dc "$@" ;;
-        *.bz2)       bzip2 -dc "$@" ;;
+    *.gz | *.tgz) gzip -dc "$@" ;;
+    *.bz2) bzip2 -dc "$@" ;;
 
-        *) fatal "Unknown compression for file: $@" ;;
+    *) fatal "Unknown compression for file: $@" ;;
     esac
 }
 
 # retry_wrapper: This function tries to execute the given command,
 #                retrying in case of failure.
 # WARNING: do not pipe the output as stdout is altered!
-retry_wrapper()
-{
+retry_wrapper() {
     operation="$@"
-    [ "$operation" = "" ]  &&  fatal "retry_wrapper: no arguments"
+    [ "$operation" = "" ] && fatal "retry_wrapper: no arguments"
 
     # SLEEP: which sleep program to use
     # maxtries: how many times to re try the execution
     # pause: number of seconds to pause after each try
-    SLEEP=`func_which sleep`
+    SLEEP=$(func_which sleep)
     maxtries=5
     pause=30
 
-    while [ $maxtries != 0 ]
-    do
+    while [ $maxtries != 0 ]; do
         echo "* retry_wrapper:  $operation"
 
-	if $operation
-        then
-	    echo "* SUCCESS"
+        if $operation; then
+            echo "* SUCCESS"
             return 0
         else
             err_ret=$?
             # in case say dpkg locks are held by automatic updates or something
             ps -efl | grep -P '(apt|dpkg|yum|dnf|zypper|rpm|pkg)'
-            maxtries=`expr $maxtries - 1`
-	    echo "* FAILURE $err_ret"
+            maxtries=$(expr $maxtries - 1)
+            echo "* FAILURE $err_ret"
             echo "* Sleeping for:  $pause seconds"
             echo "* Retries left:  $maxtries"
-	    $SLEEP $pause
+            $SLEEP $pause
         fi
     done
 
     return $err_ret
 }
 
-rm_if_empty()
-{
-    if [ -f "$1" ]  &&  [ ! -s "$1" ]
-    then
-        echo "Removing empty file: $1"  1>&2
+rm_if_empty() {
+    if [ -f "$1" ] && [ ! -s "$1" ]; then
+        echo "Removing empty file: $1" 1>&2
         rm -f "$1"
     fi
 }
 
 # Use this function on verbose commands to silence the output unless it returns
 # a non-zero exit code
-run_and_print_on_failure()
-{
+run_and_print_on_failure() {
     local temp_output_file
     if command -v mktemp >/dev/null; then
         temp_output_file=$(mktemp)
     else
         # AIX 7.1 does not have mktemp
         while true; do
-          # shellcheck disable=SC2021
-          # ^^ legacy/POSIX requires square brackets
-          temp_output_file="$(LC_CTYPE=C tr -dc "[A-Z][a-z][0-9]" </dev/urandom | dd count=1 bs=8 2>/dev/null)"
-          if [ -f "$temp_output_file" ]; then
-            continue
-          fi
-          break;
+            # shellcheck disable=SC2021
+            # ^^ legacy/POSIX requires square brackets
+            temp_output_file="$(LC_CTYPE=C tr -dc "[A-Z][a-z][0-9]" </dev/urandom | dd count=1 bs=8 2>/dev/null)"
+            if [ -f "$temp_output_file" ]; then
+                continue
+            fi
+            break
         done
         touch "$temp_output_file"
     fi
 
     local exit_code=0
-    if "$@" > "$temp_output_file" 2>&1; then
+    if "$@" >"$temp_output_file" 2>&1; then
         : # NOOP
     else
         exit_code=$? # Store exit code for later
@@ -636,13 +583,11 @@ run_and_print_on_failure()
     return $exit_code
 }
 
-log_debug()
-{
+log_debug() {
     echo "$(basename "$0"): debug:" "$@"
 }
 
-log_error()
-{
+log_error() {
     echo "$(basename "$0"): error:" "$@" >&2
 }
 
