@@ -1,16 +1,16 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . detect-environment
 . compile-options
 
 case "$TEST_MACHINE" in
-    chroot)
-        $BASEDIR/buildscripts/build-scripts/prepare-testmachine-chroot
-        ;;
-    *)
-        # Add VMs, etc here.
-        echo "Only chroot test machines are supported at the moment."
-        exit 1
-        ;;
+chroot)
+    $BASEDIR/buildscripts/build-scripts/prepare-testmachine-chroot
+    ;;
+*)
+    # Add VMs, etc here.
+    echo "Only chroot test machines are supported at the moment."
+    exit 1
+    ;;
 esac
