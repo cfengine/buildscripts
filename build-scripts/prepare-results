@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . detect-environment
 . compile-options
 . version
@@ -10,44 +10,45 @@ set -x
 mkdir -p "$OUTDIR"
 
 for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
-  if [ -d $BASEDIR/$dir ]; then
-    case "$PACKAGING" in
-      rpm)
-        cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
-        cp $BASEDIR/$dir/RPMS/*.pkg.tar.gz "$OUTDIR"
-        ;;
-      deb)
-        cp $BASEDIR/$dir/*.deb "$OUTDIR"
-        cp $BASEDIR/$dir/pkg/*.pkg.tar.gz "$OUTDIR"
-        ;;
-      msi)
-        cp $BASEDIR/$dir/*.msi "$OUTDIR"
-        ;;
-      solaris)
-        cp $BASEDIR/$dir/*.pkg "$OUTDIR"
-        ;;
-      freebsd)
-        cp build/$dir/pkg/*.tbz "$OUTDIR"
-        ;;
-      hpux)
-        cp $BASEDIR/$dir/pkg/*.depot "$OUTDIR"
-        ;;
-      lpp)
-        cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
-        cp $HOME/lppdir/out/*.bff "$OUTDIR"
-        ;;
-      *)
-        echo "Unknown packaging system: $PACKAGING"
-        exit 1;;
-    esac
-    #cp $BASEDIR/$dir/*.generic-pkg.tar.gz "$OUTDIR"
-  fi
+    if [ -d $BASEDIR/$dir ]; then
+        case "$PACKAGING" in
+        rpm)
+            cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
+            cp $BASEDIR/$dir/RPMS/*.pkg.tar.gz "$OUTDIR"
+            ;;
+        deb)
+            cp $BASEDIR/$dir/*.deb "$OUTDIR"
+            cp $BASEDIR/$dir/pkg/*.pkg.tar.gz "$OUTDIR"
+            ;;
+        msi)
+            cp $BASEDIR/$dir/*.msi "$OUTDIR"
+            ;;
+        solaris)
+            cp $BASEDIR/$dir/*.pkg "$OUTDIR"
+            ;;
+        freebsd)
+            cp build/$dir/pkg/*.tbz "$OUTDIR"
+            ;;
+        hpux)
+            cp $BASEDIR/$dir/pkg/*.depot "$OUTDIR"
+            ;;
+        lpp)
+            cp $BASEDIR/$dir/RPMS/*/*.rpm "$OUTDIR"
+            cp $HOME/lppdir/out/*.bff "$OUTDIR"
+            ;;
+        *)
+            echo "Unknown packaging system: $PACKAGING"
+            exit 1
+            ;;
+        esac
+        #cp $BASEDIR/$dir/*.generic-pkg.tar.gz "$OUTDIR"
+    fi
 done
 
-for project in `projects_to_test`; do
-  if [ -f $BASEDIR/$project/tests/acceptance/summary.log ]; then
-    cp $BASEDIR/$project/tests/acceptance/summary.log "$OUTDIR"/$project-summary.log
-    cp $BASEDIR/$project/tests/acceptance/test.log "$OUTDIR"/$project-test.log
-    cp $BASEDIR/$project/tests/acceptance/test.xml "$OUTDIR"/$project-test.xml
-  fi
+for project in $(projects_to_test); do
+    if [ -f $BASEDIR/$project/tests/acceptance/summary.log ]; then
+        cp $BASEDIR/$project/tests/acceptance/summary.log "$OUTDIR"/$project-summary.log
+        cp $BASEDIR/$project/tests/acceptance/test.log "$OUTDIR"/$project-test.log
+        cp $BASEDIR/$project/tests/acceptance/test.xml "$OUTDIR"/$project-test.xml
+    fi
 done
