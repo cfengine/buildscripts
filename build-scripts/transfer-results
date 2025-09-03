@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . version
 
 set -x
@@ -9,7 +9,7 @@ BUILDMACHINE="$1"
 
 mkdir -p $BASEDIR/../../../output/${SCHEDULER}/${BUILD_NUMBER}
 rsync -avr --delete "$BUILDMACHINE:build/output/*" \
-      $BASEDIR/../../../output/${SCHEDULER}/${BUILD_NUMBER} \
-      >/tmp/rsync.log
+    $BASEDIR/../../../output/${SCHEDULER}/${BUILD_NUMBER} \
+    >/tmp/rsync.log
 
 ssh "$BUILDMACHINE" "rm -rf build/output"
