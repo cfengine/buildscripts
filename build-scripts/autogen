@@ -24,33 +24,32 @@
 # Parse the required argument which should be set through the environment
 # variable PROJECT
 case "$PROJECT" in
-  community)
+community)
     NOVA=no
     ;;
-  nova)
+nova)
     NOVA=yes
     ;;
-  *)
+*)
     if [ -z "${PROJECT}" ]; then
         echo "$(basename "$0"): Error: Expected environment variable PROJECT=[community|nova]"
     else
         echo "$(basename "$0"): Error: Unknown project '$PROJECT', expected 'community' or 'nova'"
     fi
     echo "Usage: PROJECT=[community|nova] $0"
-    exit 42;;
+    exit 42
+    ;;
 esac
 
 # Determine which repositories should be included
 projects="core masterfiles"
-if test "$NOVA" = "yes"
-then
+if test "$NOVA" = "yes"; then
     projects="$projects enterprise nova"
 fi
 
 # Fail early by checking that the required repositories are present before
 # running the autogen.sh.
-for proj in $projects
-do
+for proj in $projects; do
     if [ ! -d "$BASEDIR/$proj" ]; then
         echo "$(basename "$0"): Error: Expected to find the '$proj' repository in '$BASEDIR', but it's not there"
         exit 1
@@ -58,8 +57,7 @@ do
 done
 
 # Run autogen.sh on each repository
-for proj in $projects
-do
+for proj in $projects; do
     # autogen.sh is quite verbose, so only print the output in case of failure
     echo "$(basename "$0"): Debug: Running autogen.sh for project $proj..."
     (
