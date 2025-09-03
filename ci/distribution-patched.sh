@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -ex
-for debian_release in stretch buster; do
+for debian_release in stretch buster bullseye; do
   if grep "CODENAME=$debian_release" /etc/os-release; then
     echo "deb http://archive.debian.org/debian-archive/debian ${debian_release} main" >/etc/apt/sources.list
     echo "deb http://archive.debian.org/debian-archive/debian ${debian_release}-backports main" >>/etc/apt/sources.list
