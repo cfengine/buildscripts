@@ -5,27 +5,24 @@
 
 # Autodect PROJECT if not set
 
-if [ x"$PROJECT" = x ]
-then
+if [ x"$PROJECT" = x ]; then
     case x"$JOB_NAME" in
-        *-community-*)   PROJECT=community;;
-        *-enterprise-*)  PROJECT=nova;;
-        *-hub-*)         PROJECT=nova;;
-        *-agent-*)       PROJECT=nova;;
+    *-community-*) PROJECT=community ;;
+    *-enterprise-*) PROJECT=nova ;;
+    *-hub-*) PROJECT=nova ;;
+    *-agent-*) PROJECT=nova ;;
     esac
 fi
 
 # If still not set, then either we are running outside Jenkins, or this
 # is not a main "build" type job (it could be the bootstrap job).
 # Do directory-based auto-detection.
-if [ x"$PROJECT" = x ]
-then
-   if [ -d $BASEDIR/nova ]
-   then
-       PROJECT=nova
-   else
-       PROJECT=community
-   fi
+if [ x"$PROJECT" = x ]; then
+    if [ -d $BASEDIR/nova ]; then
+        PROJECT=nova
+    else
+        PROJECT=community
+    fi
 fi
 
 export PROJECT
@@ -34,31 +31,26 @@ export PROJECT
 # When running manually, you can just export this variable.
 # It's a flag: if it's set to 1 - then we use system OpenSSL.
 # Otherwise, we build it.
-if [ x"$SYSTEM_SSL" = x ]
-then
+if [ x"$SYSTEM_SSL" = x ]; then
     # We don't bundle OpenSSL on some redhat-derived systems due to incompatability with libpam and our openssl.
     _OS_MAJOR_VERSION="$(echo "$OS_VERSION" | cut -d. -f1)"
-    if [ "$OS" = "rhel" ] && expr "$_OS_MAJOR_VERSION" ">=" "8" >/dev/null
-    then
+    if [ "$OS" = "rhel" ] && expr "$_OS_MAJOR_VERSION" ">=" "8" >/dev/null; then
         SYSTEM_SSL=1
     fi
-    if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]
-    then
-        if expr "$_OS_MAJOR_VERSION" ">=" "15"
-        then
+    if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]; then
+        if expr "$_OS_MAJOR_VERSION" ">=" "15"; then
             SYSTEM_SSL=1
         fi
     fi
     # Detect using system ssl when running a Jenkins job
-    if expr x"$label" ":" ".*systemssl" >/dev/null
-    then
+    if expr x"$label" ":" ".*systemssl" >/dev/null; then
         SYSTEM_SSL=1
     fi
 fi
 export SYSTEM_SSL
 
 case "$OS_FAMILY" in
-  aix)
+aix)
     # This flag is needed because AIX defaults to producing .a shared libraries,
     # but we need it to make .so libraries. It doesn't work correctly when
     # specified in the Makefile, so we specify it in the environment instead.
@@ -68,31 +60,30 @@ case "$OS_FAMILY" in
     # won't find libc.
     LDFLAGS="$LDFLAGS -L$BUILDPREFIX/lib -Wl,-blibpath:$BUILDPREFIX/lib:/usr/lib:/lib"
     ;;
-  hpux)
+hpux)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,+b$BUILDPREFIX/lib"
     CC=gcc
     export CC
     ;;
-  mingw)
+mingw)
     LDFLAGS="-static-libgcc -L$BUILDPREFIX/lib"
     ;;
-  solaris)
+solaris)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,-R$BUILDPREFIX/lib"
     if [ "$(uname -p)" = "sparc" ]; then
-      # ensure 64bit builds on SPARC64
-      CFLAGS="-m64"
-      export CFLAGS
+        # ensure 64bit builds on SPARC64
+        CFLAGS="-m64"
+        export CFLAGS
     fi
     ;;
-  *)
+*)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,-R$BUILDPREFIX/lib"
     ;;
 esac
 
 # When we don't bundle OpenSSL, then we need to pull it from /usr/lib64.
-if [ x"$SYSTEM_SSL" = x1 ]
-then
-  LDFLAGS="$LDFLAGS -L/usr/lib64"
+if [ x"$SYSTEM_SSL" = x1 ]; then
+    LDFLAGS="$LDFLAGS -L/usr/lib64"
 fi
 export LDFLAGS
 
@@ -103,36 +94,33 @@ export DEB_LDFLAGS_APPEND
 # Embedded DB selection
 EMBEDDED_DB="lmdb"
 
-
-
 ############### Fill in build dependencies in DEPS variable ################
 
 DEPS=
-[ $OS_FAMILY = mingw ]  &&  var_append DEPS "pthreads-w32 libgnurx"
+[ $OS_FAMILY = mingw ] && var_append DEPS "pthreads-w32 libgnurx"
 
 # libgcc_s.so is needed before we compile any other dependency
 #             on some platforms!
 case "$OS_FAMILY" in
-    solaris|aix)  var_append DEPS "libgcc" ;;
+solaris | aix) var_append DEPS "libgcc" ;;
 esac
 
 var_append DEPS "$EMBEDDED_DB pcre2"
 
-if ! [ x"$SYSTEM_SSL" = x1 ]
-then
-  # FIXME: Why do we need zlib?
-  # ANSWER: Openssl uses it optionally, TODO DISABLE
-  var_append DEPS "zlib openssl"
+if ! [ x"$SYSTEM_SSL" = x1 ]; then
+    # FIXME: Why do we need zlib?
+    # ANSWER: Openssl uses it optionally, TODO DISABLE
+    var_append DEPS "zlib openssl"
 fi
 
 # libsasl needed for solaris
 case "$OS_FAMILY" in
-    solaris|hpux)  var_append DEPS "sasl2" ;;
+solaris | hpux) var_append DEPS "sasl2" ;;
 esac
 
 # iconv is needed for libxml2 on some platforms
 case "$OS_FAMILY" in
-   aix|solaris)  var_append DEPS "libiconv" ;;
+aix | solaris) var_append DEPS "libiconv" ;;
 esac
 
 var_append DEPS "libxml2 libyaml"
@@ -142,17 +130,17 @@ var_append DEPS "librsync"
 # LDAP functions in the agent
 # and LDAP authentication functionality in Mission Portal
 case "$PROJECT" in
-    nova)  var_append DEPS "openldap"
+nova) var_append DEPS "openldap" ;;
 esac
 
 case "$PROJECT" in
-    nova)  var_append DEPS "leech"
+nova) var_append DEPS "leech" ;;
 esac
 
 # libacl & libattr - not for the exotics (linux only?)
 case "$OS_FAMILY" in
-  hpux|aix|solaris|freebsd|mingw)       ;;
-  *)  var_append DEPS "libattr libacl"  ;;
+hpux | aix | solaris | freebsd | mingw) ;;
+*) var_append DEPS "libattr libacl" ;;
 esac
 
 # ROLE
@@ -164,89 +152,84 @@ esac
 # and build according to the role specified by it.
 
 case "$EXPLICIT_ROLE" in
-    agent) ROLE=agent;;
-    hub)   ROLE=hub;;
-    *)
-        # Not running under Jenkins?
-        if [ x"$JENKINS_SERVER_COOKIE" = x ]
-        then
-            case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
-                community-*) ROLE=agent;;
-                # We do not support 32 bits hubs anymore
-                nova-i386-*-*) ROLE=agent;;
-                nova-s390*-*-*) ROLE=agent;;
-                nova-*-centos-*) ROLE=hub;;
-                nova-*-debian-*) ROLE=hub;;
-                nova-*-opensuse-*) ROLE=hub;;
-                nova-*-rhel-*) ROLE=hub;;
-                nova-*-sles-*) ROLE=hub;;
-                nova-*-ubuntu-*) ROLE=hub;;
-                nova-*-mingw-*) ROLE=agent;;
-                nova-*) ROLE=agent;;
-                *)
-                    echo "Unknown project: $PROJECT"
-                    exit 42
-                    ;;
-            esac
-            echo "Autodetected $ROLE role based on missing Jenkins label and OS."
+agent) ROLE=agent ;;
+hub) ROLE=hub ;;
+*)
+    # Not running under Jenkins?
+    if [ x"$JENKINS_SERVER_COOKIE" = x ]; then
+        case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
+        community-*) ROLE=agent ;;
+        # We do not support 32 bits hubs anymore
+        nova-i386-*-*) ROLE=agent ;;
+        nova-s390*-*-*) ROLE=agent ;;
+        nova-*-centos-*) ROLE=hub ;;
+        nova-*-debian-*) ROLE=hub ;;
+        nova-*-opensuse-*) ROLE=hub ;;
+        nova-*-rhel-*) ROLE=hub ;;
+        nova-*-sles-*) ROLE=hub ;;
+        nova-*-ubuntu-*) ROLE=hub ;;
+        nova-*-mingw-*) ROLE=agent ;;
+        nova-*) ROLE=agent ;;
+        *)
+            echo "Unknown project: $PROJECT"
+            exit 42
+            ;;
+        esac
+        echo "Autodetected $ROLE role based on missing Jenkins label and OS."
 
-        else    # we are running under Jenkins
+    else # we are running under Jenkins
 
-            # The "label" variable is set in multi-matrix jobs;
-            # thus it is *not set* in the bootstrap job.
-            case x"$label" in
-                x)
-                    echo "label is not set, assuming that this is not the main build job; Setting ROLE=agent."
-                    ROLE=agent
-                    ;;
-                *_HUB_*)
-                    echo "Autodetected hub role based on '_HUB_' in Jenkins label."
-                    ROLE=hub
-                    ;;
-                *)
-                    echo "Autodetected agent role based on missing '_HUB_' in Jenkins label."
-                    ROLE=agent
-                    ;;
-            esac
-        fi
-        ;;
+        # The "label" variable is set in multi-matrix jobs;
+        # thus it is *not set* in the bootstrap job.
+        case x"$label" in
+        x)
+            echo "label is not set, assuming that this is not the main build job; Setting ROLE=agent."
+            ROLE=agent
+            ;;
+        *_HUB_*)
+            echo "Autodetected hub role based on '_HUB_' in Jenkins label."
+            ROLE=hub
+            ;;
+        *)
+            echo "Autodetected agent role based on missing '_HUB_' in Jenkins label."
+            ROLE=agent
+            ;;
+        esac
+    fi
+    ;;
 esac
 
 export ROLE
 
-
 ## PHP modules
 
 case "$ROLE" in
-    # HUB-ONLY dependencies
-    hub)
-        var_append DEPS "libcurl-hub"
-        var_append DEPS "nghttp2 libexpat apr apr-util apache git rsync"
-        var_append DEPS "postgresql php"
-        ;;
-    # AGENT-ONLY dependencies
-    agent)
-        var_append DEPS "libcurl"
-        ;;
+# HUB-ONLY dependencies
+hub)
+    var_append DEPS "libcurl-hub"
+    var_append DEPS "nghttp2 libexpat apr apr-util apache git rsync"
+    var_append DEPS "postgresql php"
+    ;;
+# AGENT-ONLY dependencies
+agent)
+    var_append DEPS "libcurl"
+    ;;
 esac
-
 
 # systemd is not a build dependency, but should we generate
 # unit files for it?
 case "$OS_FAMILY" in
-  linux)  WITH_SYSTEMD=yes;;
-  *)      WITH_SYSTEMD=no;;
+linux) WITH_SYSTEMD=yes ;;
+*) WITH_SYSTEMD=no ;;
 esac
-
 
 case "$OS_FAMILY" in
-    mingw|freebsd)  TESTS=no  ;;
-    *)              TESTS=all ;;
+mingw | freebsd) TESTS=no ;;
+*) TESTS=all ;;
 esac
 export TESTS
-
 
 # Don't let existing LD_LIBRARY_PATH variables disturb the build.
 # Java sets this when Jenkins launches it.
 # PS! Solaris shell returns false if the var is already unset.
-unset LD_LIBRARY_PATH  ||  true
+unset LD_LIBRARY_PATH || true

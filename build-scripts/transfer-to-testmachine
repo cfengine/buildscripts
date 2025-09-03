@@ -1,20 +1,20 @@
 #!/bin/sh -x
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . detect-environment
 . compile-options
 
 case "$TEST_MACHINE" in
-    chroot)
-        # Don't lose the trailing slash!
-        TESTMACHINE_URI=$HOME/testmachine-chroot/
-        EXCLUDES="--exclude testmachine-chroot --exclude .git"
-        ;;
-    *)
-        # Add VMs, etc here.
-        echo "Only chroot test machines are supported at the moment."
-        exit 1
-        ;;
+chroot)
+    # Don't lose the trailing slash!
+    TESTMACHINE_URI=$HOME/testmachine-chroot/
+    EXCLUDES="--exclude testmachine-chroot --exclude .git"
+    ;;
+*)
+    # Add VMs, etc here.
+    echo "Only chroot test machines are supported at the moment."
+    exit 1
+    ;;
 esac
 
 # Filter out "./" parts in the BASEDIR name.
@@ -27,7 +27,10 @@ esac
 # (Google Cloud Jenkins plugin likes to create them)
 BASEDIR_NO_DOT="$(echo $BASEDIR | sed -e 's,/\./,/,g;s,/\.$,,')"
 touch .keepalive-echo
-(while test -e .keepalive-echo; do sleep 60; echo Keep alive; done)&
-sudo rsync -avR $EXCLUDES --delete --delete-excluded "$BASEDIR_NO_DOT/" $TESTMACHINE_URI  >/tmp/rsync.log
-sudo rsync -avR $EXCLUDES --delete --delete-excluded "$PREFIX/" $TESTMACHINE_URI    >>/tmp/rsync.log
+(while test -e .keepalive-echo; do
+    sleep 60
+    echo Keep alive
+done) &
+sudo rsync -avR $EXCLUDES --delete --delete-excluded "$BASEDIR_NO_DOT/" $TESTMACHINE_URI >/tmp/rsync.log
+sudo rsync -avR $EXCLUDES --delete --delete-excluded "$PREFIX/" $TESTMACHINE_URI >>/tmp/rsync.log
 rm .keepalive-echo

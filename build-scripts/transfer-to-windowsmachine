@@ -10,74 +10,72 @@ SEVENZIP="\"c:/program files/7-zip/7z\""
 HOMEPATH="\"c:\\Users\\jenkins\""
 
 if [ -z $JOB_NAME ]; then
-DIRNAME=build-$VERSION-$ARCH
-TESTDIR="\"c:\\Users\\jenkins\""
+    DIRNAME=build-$VERSION-$ARCH
+    TESTDIR="\"c:\\Users\\jenkins\""
 else
-DIRNAME=$(echo ${JOB_NAME} |sed 's/\(.*\)\/.*/\1/g')
-TESTDIR="\"c:\\Users\\jenkins\\$DIRNAME\\tests\""
+    DIRNAME=$(echo ${JOB_NAME} | sed 's/\(.*\)\/.*/\1/g')
+    TESTDIR="\"c:\\Users\\jenkins\\$DIRNAME\\tests\""
 fi
-\
-
 
 MAX_TRY=50
 try_run() {
-  for i in $(seq $MAX_TRY); do
-    if "$@"; then
-      return
-    fi
-  done
-  return 1
+    for i in $(seq $MAX_TRY); do
+        if "$@"; then
+            return
+        fi
+    done
+    return 1
 }
 
-prepare_bin()
-{
-PKGD=$BASEDIR/packaging/cfengine-nova/pkg
-P=$PKGD/$DIRNAME
-rm -rf $PKGD
-mkdir -p $P/bin
+prepare_bin() {
+    PKGD=$BASEDIR/packaging/cfengine-nova/pkg
+    P=$PKGD/$DIRNAME
+    rm -rf $PKGD
+    mkdir -p $P/bin
 
-cp -a "$PREFIX/bin"/* $P/bin
-cp -a "$BASEDIR/cfengine/dist$PREFIX/bin"/* $P/bin
+    cp -a "$PREFIX/bin"/* $P/bin
+    cp -a "$BASEDIR/cfengine/dist$PREFIX/bin"/* $P/bin
 
-case "$ARCH" in
-  x86) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll;;
-  x64) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.x86_64.dll $P/bin/cf.events.dll;;
-  *)
-    echo "Unknown architecture: $ARCH"
-    exit 1;;
-esac
+    case "$ARCH" in
+    x86) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll ;;
+    x64) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.x86_64.dll $P/bin/cf.events.dll ;;
+    *)
+        echo "Unknown architecture: $ARCH"
+        exit 1
+        ;;
+    esac
 
-cp $BASEDIR/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs $P
+    cp $BASEDIR/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs $P
 
-(cd $PKGD; zip -r $DIRNAME.zip $DIRNAME) || false
+    (
+        cd $PKGD
+        zip -r $DIRNAME.zip $DIRNAME
+    ) || false
 }
 
-prepare_tests()
-{
-TESTD=$BASEDIR/core/tests
-(cd $TESTD; zip -r tests.zip .) || false
+prepare_tests() {
+    TESTD=$BASEDIR/core/tests
+    (
+        cd $TESTD
+        zip -r tests.zip .
+    ) || false
 }
 
-
-pre_put()
-{
-$SSH "$1" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME tests" || :
+pre_put() {
+    $SSH "$1" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME tests" || :
 }
 
-put_zip()
-{
-echo "put $P.zip" | $SFTP "$1"
-echo "put $BASEDIR/core/tests/tests.zip" | $SFTP "$1"
+put_zip() {
+    echo "put $P.zip" | $SFTP "$1"
+    echo "put $BASEDIR/core/tests/tests.zip" | $SFTP "$1"
 }
 
-post_put()
-{
-$SSH "$1" cmd /c "cd $HOMEPATH && $SEVENZIP x -y $DIRNAME.zip && $SEVENZIP x -y tests.zip -o$TESTDIR -r"
+post_put() {
+    $SSH "$1" cmd /c "cd $HOMEPATH && $SEVENZIP x -y $DIRNAME.zip && $SEVENZIP x -y tests.zip -o$TESTDIR -r"
 }
 
-put()
-{
-try_run pre_put $1
-try_run put_zip $1
-try_run post_put $1
+put() {
+    try_run pre_put $1
+    try_run put_zip $1
+    try_run post_put $1
 }
