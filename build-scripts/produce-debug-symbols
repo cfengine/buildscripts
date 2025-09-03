@@ -1,21 +1,20 @@
 #!/bin/sh
 
-. `dirname "$0"`/functions
+. $(dirname "$0")/functions
 . detect-environment
 . compile-options
 
-if [ $BUILD_TYPE != "RELEASE" ];
-then
-    echo "Debug symbols not requested";
-    exit 0;
+if [ $BUILD_TYPE != "RELEASE" ]; then
+    echo "Debug symbols not requested"
+    exit 0
 else
     echo "Producing debug symbols"
 fi
 
 EXECUTABLES_DIR="$BASEDIR/cfengine/dist$PREFIX/bin"
-EXECUTABLES_LIST=`ls $EXECUTABLES_DIR/cf-*`
+EXECUTABLES_LIST=$(ls $EXECUTABLES_DIR/cf-*)
 LIBRARIES_DIR="$BASEDIR/cfengine/dist$PREFIX/lib"
-LIBRARIES_LIST=`ls $LIBRARIES_DIR/*.so*`
+LIBRARIES_LIST=$(ls $LIBRARIES_DIR/*.so*)
 DEBUG_SUFFIX=debug
 PAYLOAD_DIR=payload
 EXECUTABLES_PAYLOAD_DIR=$PAYLOAD_DIR/exe
@@ -37,8 +36,7 @@ mkdir $LIBRARIES_PAYLOAD_DIR
 # We put the debug symbols on the same folder as the executables.
 # This way debugging gets a little bit simpler.
 
-for i in $EXECUTABLES_LIST;
-do
+for i in $EXECUTABLES_LIST; do
     echo "Taking debug symbols from: $i and putting it into: $i.$DEBUG_SUFFIX"
     objcopy --only-keep-debug "$i" "$i.$DEBUG_SUFFIX"
     strip --strip-debug --strip-unneeded "$i"
@@ -50,57 +48,56 @@ done
 
 # We put the debug symbols for libraries on the same folder as the libraries.
 
-for i in $LIBRARIES_LIST;
-do
-	echo "Taking debug symbols from: $i and putting it into: $i.$DEBUG_SUFFIX"
+for i in $LIBRARIES_LIST; do
+    echo "Taking debug symbols from: $i and putting it into: $i.$DEBUG_SUFFIX"
     objcopy --only-keep-debug "$i" "$i.$DEBUG_SUFFIX"
-	strip --strip-debug --strip-unneeded "$i"
-	objcopy --add-gnu-debuglink="$i.$DEBUG_SUFFIX" "$i"
-	chmod -x "$i.$DEBUG_SUFFIX"
-	gzip "$i.$DEBUG_SUFFIX"
-	mv "$i.$DEBUG_SUFFIX.gz" $LIBRARIES_PAYLOAD_DIR
+    strip --strip-debug --strip-unneeded "$i"
+    objcopy --add-gnu-debuglink="$i.$DEBUG_SUFFIX" "$i"
+    chmod -x "$i.$DEBUG_SUFFIX"
+    gzip "$i.$DEBUG_SUFFIX"
+    mv "$i.$DEBUG_SUFFIX.gz" $LIBRARIES_PAYLOAD_DIR
 done
 
 # Write the installation script
 echo "Writing the installation script"
-echo "#!/bin/sh" > $PAYLOAD_DIR/install-ds.sh
+echo "#!/bin/sh" >$PAYLOAD_DIR/install-ds.sh
 echo "# Install debug symbols for executables"
-echo "for i in \`ls exe/*.gz\`; do" >> $PAYLOAD_DIR/install-ds.sh
-echo "  gunzip \$i" >> $PAYLOAD_DIR/install-ds.sh
-echo "done" >> $PAYLOAD_DIR/install-ds.sh
-echo "mv exe/*.$DEBUG_SUFFIX $PREFIX/bin" >> $PAYLOAD_DIR/install-ds.sh
+echo "for i in \`ls exe/*.gz\`; do" >>$PAYLOAD_DIR/install-ds.sh
+echo "  gunzip \$i" >>$PAYLOAD_DIR/install-ds.sh
+echo "done" >>$PAYLOAD_DIR/install-ds.sh
+echo "mv exe/*.$DEBUG_SUFFIX $PREFIX/bin" >>$PAYLOAD_DIR/install-ds.sh
 echo "# Install debug symbols for libraries"
-echo "for i in \`ls lib/*.gz\`; do" >> $PAYLOAD_DIR/install-ds.sh
-echo "  gunzip \$i" >> $PAYLOAD_DIR/install-ds.sh
-echo "done" >> $PAYLOAD_DIR/install-ds.sh
-echo "mv lib/*.$DEBUG_SUFFIX $PREFIX/lib" >> $PAYLOAD_DIR/install-ds.sh
-echo "exit 0" >> $PAYLOAD_DIR/install-ds.sh
+echo "for i in \`ls lib/*.gz\`; do" >>$PAYLOAD_DIR/install-ds.sh
+echo "  gunzip \$i" >>$PAYLOAD_DIR/install-ds.sh
+echo "done" >>$PAYLOAD_DIR/install-ds.sh
+echo "mv lib/*.$DEBUG_SUFFIX $PREFIX/lib" >>$PAYLOAD_DIR/install-ds.sh
+echo "exit 0" >>$PAYLOAD_DIR/install-ds.sh
 
 # Write the decompression script
 echo "Writing the decompression script"
-echo "#!/bin/sh" > decompress-ds.sh
-echo "echo \"Installing debug symbols\"" >> decompress-ds.sh
-echo "TMPDIR=\`mktemp -d /tmp/ds.XXXXXX\`; export TMPDIR"  >> decompress-ds.sh
-echo "ARCHIVE=\`awk '/^__ARCHIVE_BELOW__/ {print NR + 1; exit 0; }' \$0\`"  >> decompress-ds.sh
-echo "tail -n+\$ARCHIVE \$0 | tar xzv -C \$TMPDIR"  >> decompress-ds.sh
+echo "#!/bin/sh" >decompress-ds.sh
+echo "echo \"Installing debug symbols\"" >>decompress-ds.sh
+echo "TMPDIR=\`mktemp -d /tmp/ds.XXXXXX\`; export TMPDIR" >>decompress-ds.sh
+echo "ARCHIVE=\`awk '/^__ARCHIVE_BELOW__/ {print NR + 1; exit 0; }' \$0\`" >>decompress-ds.sh
+echo "tail -n+\$ARCHIVE \$0 | tar xzv -C \$TMPDIR" >>decompress-ds.sh
 echo "echo \"Installer ready - starting installation\""
-echo "CDIR=\`pwd\`"  >> decompress-ds.sh
-echo "cd \$TMPDIR/$PAYLOAD_DIR"  >> decompress-ds.sh
-echo "chmod 755 install-ds.sh" >> decompress-ds.sh
-echo "chmod 755 uninstall-ds.sh" >> decompress-ds.sh
-echo "./install-ds.sh"  >> decompress-ds.sh
-echo "cd \$CDIR"  >> decompress-ds.sh
+echo "CDIR=\`pwd\`" >>decompress-ds.sh
+echo "cd \$TMPDIR/$PAYLOAD_DIR" >>decompress-ds.sh
+echo "chmod 755 install-ds.sh" >>decompress-ds.sh
+echo "chmod 755 uninstall-ds.sh" >>decompress-ds.sh
+echo "./install-ds.sh" >>decompress-ds.sh
+echo "cd \$CDIR" >>decompress-ds.sh
 #echo "rm -rf \$TMPDIR"  >> decompress-ds.sh
-echo "exit 0"  >> decompress-ds.sh
-echo "__ARCHIVE_BELOW__" >> decompress-ds.sh
+echo "exit 0" >>decompress-ds.sh
+echo "__ARCHIVE_BELOW__" >>decompress-ds.sh
 
 # Write the uninstall script
 echo "Writing the uninstall script"
-echo "#!/bin/sh" > $PAYLOAD_DIR/uninstall-ds.sh
-echo "echo \"Uninstalling debug symbols\"" >> $PAYLOAD_DIR/uninstall-ds.sh
-echo "rm -f \"$PREFIX\"/bin/*.\$DEBUG_SUFFIX" >> $PAYLOAD_DIR/uninstall-ds.sh
-echo "rm -f \"$PREFIX\"/lib/*.\$DEBUG_SUFFIX" >> $PAYLOAD_DIR/uninstall-ds.sh
-echo "echo \"Done\"" >> $PAYLOAD_DIR/uninstall-ds.sh
+echo "#!/bin/sh" >$PAYLOAD_DIR/uninstall-ds.sh
+echo "echo \"Uninstalling debug symbols\"" >>$PAYLOAD_DIR/uninstall-ds.sh
+echo "rm -f \"$PREFIX\"/bin/*.\$DEBUG_SUFFIX" >>$PAYLOAD_DIR/uninstall-ds.sh
+echo "rm -f \"$PREFIX\"/lib/*.\$DEBUG_SUFFIX" >>$PAYLOAD_DIR/uninstall-ds.sh
+echo "echo \"Done\"" >>$PAYLOAD_DIR/uninstall-ds.sh
 
 # Now create the self extracting script
 echo "Creating the self extracting script"
@@ -108,7 +105,7 @@ tar cf payload.tar $PAYLOAD_DIR
 if [ -e "payload.tar" ]; then
     gzip payload.tar
     if [ -e "payload.tar.gz" ]; then
-        cat decompress-ds.sh payload.tar.gz > cfengine-ds-$OS-$OS_VERSION-$ARCH.bsx
+        cat decompress-ds.sh payload.tar.gz >cfengine-ds-$OS-$OS_VERSION-$ARCH.bsx
     else
         echo "File not found"
         exit 1
@@ -128,4 +125,3 @@ rm -rf $PAYLOAD_DIR
 echo "Debug symbols produced."
 
 exit 0
-
