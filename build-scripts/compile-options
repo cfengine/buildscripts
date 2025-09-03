@@ -65,6 +65,11 @@ aix)
     ;;
 hpux)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,+b$BUILDPREFIX/lib"
+
+    # Use ‘gcc’ when building things on HP-UX
+    #
+    # HP-UX ships with ‘cc’ which invokes the ‘HP-UX bundled C compiler’ which lacks some functionality we need to build things.
+    # Among the other things, it doesn’t know how to link ‘.so’ files directly and it doesn’t recognize them as valid input type.
     CC=gcc
     export CC
     ;;
@@ -94,59 +99,87 @@ export LDFLAGS
 DEB_LDFLAGS_APPEND="$LDFLAGS"
 export DEB_LDFLAGS_APPEND
 
-# Embedded DB selection
-EMBEDDED_DB="lmdb"
-
 ############### Fill in build dependencies in DEPS variable ################
 
 # shellcheck disable=SC2034
 # > DEPS appears unused. Verify use (or export if used externally).
 # This file is sourced by other scripts that uses it
 DEPS=
-[ "$OS_FAMILY" = mingw ] && var_append DEPS "pthreads-w32 libgnurx"
 
-# libgcc_s.so is needed before we compile any other dependency
-#             on some platforms!
+# Windows specific dependencies
+if [ "$OS_FAMILY" = mingw ]; then
+    # Win32 does not support pthreads natively.
+    # The pthreads-w32 project provide solution to this problem.
+    var_append DEPS "pthreads-w32"
+
+    # A port of the regex functionality from the glibc Library for use on Windows platforms
+    var_append DEPS "libgnurx"
+fi
+
+# AIX / Solaris specific dependencies
 case "$OS_FAMILY" in
-solaris | aix) var_append DEPS "libgcc" ;;
+solaris | aix)
+    # libgcc_s.so is needed before we compile any other dependency on some platforms!
+    var_append DEPS "libgcc"
+
+    # iconv is needed for libxml2 on some platforms
+    var_append DEPS "libiconv"
+    ;;
 esac
 
-var_append DEPS "$EMBEDDED_DB pcre2"
+var_append DEPS "lmdb pcre2"
 
+# We use system bundled SSL on RHEL >= 8
 if [ "$SYSTEM_SSL" != 1 ]; then
-    # FIXME: Why do we need zlib?
-    # ANSWER: Openssl uses it optionally, TODO DISABLE
-    var_append DEPS "zlib openssl"
+    # zlib is a compression library witch is a dependency of OpenSSL.
+    # However, can we remove it (CFE-4013)?
+    var_append DEPS "zlib"
+
+    # A toolkit for TLS
+    var_append DEPS "openssl"
 fi
 
 # libsasl needed for solaris
 case "$OS_FAMILY" in
-solaris | hpux) var_append DEPS "sasl2" ;;
+solaris | hpux)
+    # Generic library that implements the Simple Authentication and Security Layer (SASL) framework
+    var_append DEPS "sasl2"
+    ;;
 esac
 
-# iconv is needed for libxml2 on some platforms
-case "$OS_FAMILY" in
-aix | solaris) var_append DEPS "libiconv" ;;
-esac
+# Common dependencies
+var_append DEPS "libxml2"   # Library for parsing XML
+var_append DEPS "libyaml"   # Library for parsing YAML
+var_append DEPS "diffutils" # Library for comparing files
+var_append DEPS "librsync"  # Library for synchronization of files
+var_append DEPS "lmdb"      # Library for key-value store, used extensively by CFEngine components (cf-agent, etc)
+var_append DEPS "pcre2"     # Library for compiling/matching regex
 
-var_append DEPS "libxml2 libyaml"
-var_append DEPS "diffutils"
-var_append DEPS "librsync"
-
-# LDAP functions in the agent
-# and LDAP authentication functionality in Mission Portal
+# Enterprise only dependencies
 case "$PROJECT" in
-nova) var_append DEPS "openldap" ;;
+nova)
+    # openldap is used for storing accounts, passwords and group memberships
+    # - Agent has LDAP related policy functions
+    # - Mission Portal uses LDAP for authentication functionality
+    var_append DEPS "openldap"
+
+    # leech is used for efficient synchronization of tabular data.
+    # - cf-hub requests state changes from cf-serverd
+    # - state changes are recorded by cf-agent
+    var_append DEPS "leech"
+    ;;
 esac
 
-case "$PROJECT" in
-nova) var_append DEPS "leech" ;;
-esac
-
-# libacl & libattr - not for the exotics (linux only?)
+# Non-exotics dependencies
 case "$OS_FAMILY" in
 hpux | aix | solaris | freebsd | mingw) ;;
-*) var_append DEPS "libattr libacl" ;;
+*)
+    # Library for managing Extended Attributes (xattrs) on filesystems
+    var_append DEPS "libattr"
+
+    # POSIX Access Control Lists (ACLs) on filesystems
+    var_append DEPS "libacl"
+    ;;
 esac
 
 # ROLE
@@ -212,31 +245,46 @@ export ROLE
 case "$ROLE" in
 # HUB-ONLY dependencies
 hub)
-    var_append DEPS "libcurl-hub"
-    var_append DEPS "nghttp2 libexpat apr apr-util apache git rsync"
-    var_append DEPS "postgresql php"
+    # Note that we make a separate curl package for the hub.
+    # This is because the hub will include the curl binary, but we don't want that for the clients.
+    var_append DEPS "libcurl-hub"  # Provides API for performing network requests
+    var_append DEPS "nghttp2"      # Provides implementation of the HTTP/2 protocol
+    var_append DEPS "libexpat"     # Provides stream-oriented XML parser
+    var_append DEPS "apr apr-util" # Provides a common interface to underlying OS features (used by Apache)
+    var_append DEPS "apache"       # Provides HTTP server
+    var_append DEPS "git"          # Provides a version control system
+    var_append DEPS "rsync"        # Binary to efficiently synchronize files (used in federated reporting)
+    var_append DEPS "postgresql"   # Relational database
+    var_append DEPS "php"          # Scripting language for web development
     ;;
 # AGENT-ONLY dependencies
 agent)
-    var_append DEPS "libcurl"
+    var_append DEPS "libcurl" # Provides API for performing network requests
     ;;
 esac
 
-# systemd is not a build dependency, but should we generate
-# unit files for it?
-case "$OS_FAMILY" in
-linux) WITH_SYSTEMD=yes ;;
-*)
+# Make sure init.d script and systemd service is used where needed.
+#
+# We install in all Linux platforms, because it does no harm on platforms
+# without systemd, and it has the advantage of working out of the box on
+# platforms that adopt systemd later.
+if [ "$OS_FAMILY" = linux ]; then
+    WITH_SYSTEMD=yes
+else
     # shellcheck disable=SC2034
-    # > DEPS appears unused. Verify use (or export if used externally).
+    # > WITH_SYSTEMD appears unused. Verify use (or export if used externally).
     # This file is sourced by other scripts that uses it.
     WITH_SYSTEMD=no
-    ;;
-esac
+fi
 
+# Determine whether or not to run tests
 case "$OS_FAMILY" in
-mingw | freebsd) TESTS=no ;;
-*) TESTS=all ;;
+mingw | freebsd)
+    TESTS=no
+    ;;
+*)
+    TESTS=all
+    ;;
 esac
 export TESTS
 
