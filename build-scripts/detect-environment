@@ -7,34 +7,32 @@
 #   . detect-environment
 #
 
-if [ "$_IS_FUNCTIONS_SOURCED" != yes ]
-then
-  echo 'FATAL: You must source "functions" script before "detect-environment"!'
-  exit 100
+if [ "$_IS_FUNCTIONS_SOURCED" != yes ]; then
+    echo 'FATAL: You must source "functions" script before "detect-environment"!'
+    exit 100
 fi
 
 # Detects and sets the CROSS_TARGET environment variable based on patterns
 # in the label variable (see labels.txt), specifically for MinGW cross-
 # compilation targets. However, if CROSS_TARGET is already set in the
 # environment it will take precedence.
-detect_cross_target()
-{
-  case "$label" in
+detect_cross_target() {
+    case "$label" in
     *_x86_64_mingw*)
-      CROSS_TARGET=${CROSS_TARGET:-x64-mingw}
-      export CROSS_TARGET
-      ;;
+        CROSS_TARGET=${CROSS_TARGET:-x64-mingw}
+        export CROSS_TARGET
+        ;;
     *_i386_mingw*)
-      CROSS_TARGET=${CROSS_TARGET:-x86-mingw}
-      export CROSS_TARGET
-      ;;
-  esac
+        CROSS_TARGET=${CROSS_TARGET:-x86-mingw}
+        export CROSS_TARGET
+        ;;
+    esac
 
-  if [ -n "$CROSS_TARGET" ]; then
-    echo "Detected cross target $CROSS_TARGET"
-  else
-    echo "No cross target detected"
-  fi
+    if [ -n "$CROSS_TARGET" ]; then
+        echo "Detected cross target $CROSS_TARGET"
+    else
+        echo "No cross target detected"
+    fi
 }
 
 # This function exports operating system specific variables:
@@ -43,309 +41,302 @@ detect_cross_target()
 #
 # Furthermore, the following variable is set, but it's not exported:
 #  - OS_FAMILY   usually contains the kernel name (e.g. Linux)
-detect_os()
-{
-  case "$CROSS_TARGET" in
+detect_os() {
+    case "$CROSS_TARGET" in
     '')
-      # The UNAME_S, UNAME_R and UNAME_V variables are set in the "functions"
-      # script from the command substitution of `uname -s`, `uname -r` and
-      # `uname -v` which outputs the kernel name, the kernel release and the
-      # kernel version respectively.
+        # The UNAME_S, UNAME_R and UNAME_V variables are set in the "functions"
+        # script from the command substitution of `uname -s`, `uname -r` and
+        # `uname -v` which outputs the kernel name, the kernel release and the
+        # kernel version respectively.
 
-      case "$UNAME_S" in
+        case "$UNAME_S" in
         Linux)
-          OS_FAMILY=linux
-          detect_distribution
-          ;;
+            OS_FAMILY=linux
+            detect_distribution
+            ;;
         SunOS)
-          OS_FAMILY=solaris
-          OS=solaris
-          OS_VERSION=$(echo "$UNAME_R" | sed -e 's/^5\.//')
-          ;;
+            OS_FAMILY=solaris
+            OS=solaris
+            OS_VERSION=$(echo "$UNAME_R" | sed -e 's/^5\.//')
+            ;;
         AIX)
-          OS_FAMILY=aix
-          OS_VERSION=$(uname -v).$UNAME_R
-          OS=aix
-          # LIBPATH on AIX serves the same function as LD_LIBRARY_PATH on
-          # Linux. However, Java also uses this environment variable, and it
-          # apparently messes with the library look-ups during packaging. This
-          # line definitely doesn't belong here. But I'll leave it for now.
-          unset LIBPATH
-          ;;
+            OS_FAMILY=aix
+            OS_VERSION=$(uname -v).$UNAME_R
+            OS=aix
+            # LIBPATH on AIX serves the same function as LD_LIBRARY_PATH on
+            # Linux. However, Java also uses this environment variable, and it
+            # apparently messes with the library look-ups during packaging. This
+            # line definitely doesn't belong here. But I'll leave it for now.
+            unset LIBPATH
+            ;;
         Darwin)
-          OS_FAMILY=darwin
-          OS=darwin
-          ;;
+            OS_FAMILY=darwin
+            OS=darwin
+            ;;
         FreeBSD)
-          OS_FAMILY=freebsd
-          OS=freebsd
-          OS_VERSION=$UNAME_R
-          ;;
+            OS_FAMILY=freebsd
+            OS=freebsd
+            OS_VERSION=$UNAME_R
+            ;;
         NetBSD)
-          OS_FAMILY=netbsd
-          OS=netbsd
-          ;;
+            OS_FAMILY=netbsd
+            OS=netbsd
+            ;;
         HP-UX)
-          OS_FAMILY=hpux
-          OS=hpux
-          OS_VERSION=$UNAME_R
-          ;;
+            OS_FAMILY=hpux
+            OS=hpux
+            OS_VERSION=$UNAME_R
+            ;;
         *)
-          echo "Unable to detect operating system: $UNAME_S"
-          exit 42
-          ;;
-      esac
-      ;;
+            echo "Unable to detect operating system: $UNAME_S"
+            exit 42
+            ;;
+        esac
+        ;;
     *-mingw)
-      OS_FAMILY=mingw
-      OS=mingw
-      ;;
+        OS_FAMILY=mingw
+        OS=mingw
+        ;;
     *)
-      echo "Unknown cross-compilation target: $CROSS_TARGET"
-      exit 42
-      ;;
-  esac
+        echo "Unknown cross-compilation target: $CROSS_TARGET"
+        exit 42
+        ;;
+    esac
 
-  echo "Detected OS $OS $OS_VERSION"
-  export OS OS_VERSION
+    echo "Detected OS $OS $OS_VERSION"
+    export OS OS_VERSION
 }
 
 # The uname command does not reveal the specific distribution on Linux. Hence,
 # we'll need to parse it from different files located in the /etc/ directory.
 # Unfortunately, there is no standard across the existing distributions. Thus,
 # this is going to be a bit messy.
-detect_distribution()
-{
-  if [ -f /etc/redhat-release ]; then
-    REL=$(cat /etc/redhat-release)
-    case "$REL" in
-      "CentOS "*)
-        # Example output for CentOS:
-        # CentOS Linux release 7.6.1810 (Core)
-        OS=centos
-        ;;
-      "Red Hat Enterprise Linux "*)
-        # Example output for RHEL:
-        # Red Hat Enterprise Linux release 8.10 (Ootpa)
-        OS=rhel
-        ;;
-      *)
-        echo "Error: Could not determine Linux distro from /etc/redhat-release: $REL"
+detect_distribution() {
+    if [ -f /etc/redhat-release ]; then
+        REL=$(cat /etc/redhat-release)
+        case "$REL" in
+        "CentOS "*)
+            # Example output for CentOS:
+            # CentOS Linux release 7.6.1810 (Core)
+            OS=centos
+            ;;
+        "Red Hat Enterprise Linux "*)
+            # Example output for RHEL:
+            # Red Hat Enterprise Linux release 8.10 (Ootpa)
+            OS=rhel
+            ;;
+        *)
+            echo "Error: Could not determine Linux distro from /etc/redhat-release: $REL"
+            exit 42
+            ;;
+        esac
+
+        # Common for all of these is that the version number starts just after the
+        # substring 'release '. Hence we reset the match (with \K) just after
+        # substring and extract the major and minor version.
+        version_string=$(echo "$REL" | grep -oP 'release \K\d+\.\d+')
+
+        # Make sure we actually found a match
+        if [ -z "$version_string" ]; then
+            echo "Error: Could not determine version number from /etc/redhat-release: $REL"
+            exit 42
+        fi
+        OS_VERSION=$version_string
+
+    elif [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release; then
+        # This file was introduced by Linux Standard Base (LSB) which an attempt to
+        # standardize the Linux ecosystem. Unfortunately it was not adopted by many
+        # Linux distributions. Ubuntu dropped the support for LSB in 2015. However,
+        # the /etc/lsb-release file is still available as of Ubuntu 24.
+        #
+        # It might be naive to assume the file will continue to exist and that the
+        # existence of the file is only present in Ubuntu. Hence, if this breaks in
+        # the future, you'll know why.
+        #
+        # Example output of /etc/lsb-release:
+        #
+        # DISTRIB_ID=Ubuntu
+        # DISTRIB_RELEASE=24.04
+        # DISTRIB_CODENAME=noble
+        # DISTRIB_DESCRIPTION="Ubuntu 24.04.2 LTS"
+
+        # Get the line containing 'DISTRIB_RELEASE='
+        REL=$(grep DISTRIB_RELEASE= /etc/lsb-release)
+
+        # Remove the 'DISTRIB_RELEASE=' part
+        REL=${REL#DISTRIB_RELEASE=}
+
+        # Verify that we can find a valid version number
+        case "$REL" in
+        [0-9][0-9].[0-9][0-9]) ;;
+        *)
+            echo "Unknown Ubuntu release: $REL"
+            exit 42
+            ;;
+        esac
+
+        OS=ubuntu
+        OS_VERSION="$REL"
+    elif [ -f /etc/debian_version ]; then
+        # This file contains only the version number.
+        #
+        # Example output of /etc/debian_version
+        # 12.11
+
+        REL=$(cat /etc/debian_version)
+        if ! echo "$REL" | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' >/dev/null; then
+            echo "Unable to detect version of Debian: $REL"
+            exit 42
+        fi
+
+        OS=debian
+        OS_VERSION="$REL"
+    elif [ -f /etc/os-release ]; then
+        # see https://en.opensuse.org/SDB:Find_openSUSE_version for rules of
+        # parsing this file
+
+        # Example output for /etc/os-release:
+        #
+        # NAME="SLES"
+        # VERSION="12-SP5"
+        # VERSION_ID="12.5"
+        # PRETTY_NAME="SUSE Linux Enterprise Server 12 SP5"
+        # ID="sles"
+        # ANSI_COLOR="0;32"
+        # CPE_NAME="cpe:/o:suse:sles:12:sp5"
+
+        os="$(sh -c ". /etc/os-release; echo \$ID")"
+        ver="$(sh -c ". /etc/os-release; echo \$VERSION_ID")"
+        if [ "$os" = "sles" ]; then
+            OS=sles
+            OS_VERSION="$ver"
+        elif expr "$os" : "opensuse" >/dev/null; then
+            # If the string begins with "opensuse", then strip the remaining part. It
+            # can be "opensuse-leap" or "opensuse-tumbleweed"
+            OS=opensuse
+            OS_VERSION="$ver"
+        fi
+    fi
+
+    if [ -z "$OS" ]; then
+        echo "Failed to detect Linux distribution"
         exit 42
-        ;;
-    esac
-
-    # Common for all of these is that the version number starts just after the
-    # substring 'release '. Hence we reset the match (with \K) just after
-    # substring and extract the major and minor version.
-    version_string=$(echo "$REL" | grep -oP 'release \K\d+\.\d+')
-
-    # Make sure we actually found a match
-    if [ -z "$version_string" ]; then
-      echo "Error: Could not determine version number from /etc/redhat-release: $REL"
-      exit 42
     fi
-    OS_VERSION=$version_string
 
-  elif [ -f /etc/lsb-release ] && grep -q Ubuntu /etc/lsb-release; then
-    # This file was introduced by Linux Standard Base (LSB) which an attempt to
-    # standardize the Linux ecosystem. Unfortunately it was not adopted by many
-    # Linux distributions. Ubuntu dropped the support for LSB in 2015. However,
-    # the /etc/lsb-release file is still available as of Ubuntu 24.
-    #
-    # It might be naive to assume the file will continue to exist and that the
-    # existence of the file is only present in Ubuntu. Hence, if this breaks in
-    # the future, you'll know why.
-    #
-    # Example output of /etc/lsb-release:
-    #
-    # DISTRIB_ID=Ubuntu
-    # DISTRIB_RELEASE=24.04
-    # DISTRIB_CODENAME=noble
-    # DISTRIB_DESCRIPTION="Ubuntu 24.04.2 LTS"
-
-    # Get the line containing 'DISTRIB_RELEASE='
-    REL=$(grep DISTRIB_RELEASE= /etc/lsb-release)
-
-    # Remove the 'DISTRIB_RELEASE=' part
-    REL=${REL#DISTRIB_RELEASE=}
-
-    # Verify that we can find a valid version number
-    case "$REL" in
-      [0-9][0-9].[0-9][0-9])
-        ;;
-      *)
-        echo "Unknown Ubuntu release: $REL"
+    if [ -z "$OS_VERSION" ]; then
+        echo "Failed to detect Linux distribution version"
         exit 42
-        ;;
-    esac
-
-    OS=ubuntu
-    OS_VERSION="$REL"
-  elif [ -f /etc/debian_version ]; then
-    # This file contains only the version number.
-    #
-    # Example output of /etc/debian_version
-    # 12.11
-
-    REL=$(cat /etc/debian_version)
-    if ! echo "$REL" | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' > /dev/null
-    then
-      echo "Unable to detect version of Debian: $REL"
-      exit 42
     fi
-
-    OS=debian
-    OS_VERSION="$REL"
-  elif [ -f /etc/os-release ]; then
-    # see https://en.opensuse.org/SDB:Find_openSUSE_version for rules of
-    # parsing this file
-
-    # Example output for /etc/os-release:
-    #
-    # NAME="SLES"
-    # VERSION="12-SP5"
-    # VERSION_ID="12.5"
-    # PRETTY_NAME="SUSE Linux Enterprise Server 12 SP5"
-    # ID="sles"
-    # ANSI_COLOR="0;32"
-    # CPE_NAME="cpe:/o:suse:sles:12:sp5"
-
-    os="$(sh -c ". /etc/os-release; echo \$ID")"
-    ver="$(sh -c ". /etc/os-release; echo \$VERSION_ID")"
-    if [ "$os" = "sles" ]; then
-      OS=sles
-      OS_VERSION="$ver"
-    elif expr "$os" : "opensuse" >/dev/null; then
-      # If the string begins with "opensuse", then strip the remaining part. It
-      # can be "opensuse-leap" or "opensuse-tumbleweed"
-      OS=opensuse
-      OS_VERSION="$ver"
-    fi
-  fi
-
-  if [ -z "$OS" ]; then
-    echo "Failed to detect Linux distribution"
-    exit 42
-  fi
-
-  if [ -z "$OS_VERSION" ]; then
-    echo "Failed to detect Linux distribution version"
-    exit 42
-  fi
 }
 
 # This function determines which dependency packaging scripts shall be used
 # based on the operating system and available packaging tools. E.g., if rpm is
 # detected, then the "pkg-build-rpm" script will be called from the
 # "install-dependencies" script.
-detect_packaging()
-{
-  if [ -f /bin/rpm ]; then
-    DEP_PACKAGING=rpm
-  elif [ -f /usr/bin/dpkg ]; then
-    DEP_PACKAGING=deb
-  elif [ -f /usr/sbin/pkgadd ]; then
-    DEP_PACKAGING=solaris
-  elif [ -f /usr/sbin/pkg_add ]; then
-    case "$UNAME_S" in
-	  FreeBSD)
-	    DEP_PACKAGING=freebsd;;
-	esac
-  elif [ -f /usr/sbin/swinstall ]; then
-    DEP_PACKAGING=hpux
-  else
-    echo "Unknown packaging system"
-    exit 42
-  fi
+detect_packaging() {
+    if [ -f /bin/rpm ]; then
+        DEP_PACKAGING=rpm
+    elif [ -f /usr/bin/dpkg ]; then
+        DEP_PACKAGING=deb
+    elif [ -f /usr/sbin/pkgadd ]; then
+        DEP_PACKAGING=solaris
+    elif [ -f /usr/sbin/pkg_add ]; then
+        case "$UNAME_S" in
+        FreeBSD)
+            DEP_PACKAGING=freebsd
+            ;;
+        esac
+    elif [ -f /usr/sbin/swinstall ]; then
+        DEP_PACKAGING=hpux
+    else
+        echo "Unknown packaging system"
+        exit 42
+    fi
 
-  case "$OS" in
+    case "$OS" in
     aix)
-      PACKAGING=lpp
-      ;;
+        PACKAGING=lpp
+        ;;
     mingw)
-      PACKAGING=msi
-      ;;
+        PACKAGING=msi
+        ;;
     *)
-      PACKAGING=$DEP_PACKAGING;;
-  esac
+        PACKAGING=$DEP_PACKAGING
+        ;;
+    esac
 
-  echo "Detected dependency packaging $DEP_PACKAGING"
-  echo "Detected packaging $PACKAGING"
-  export DEP_PACKAGING PACKAGING
+    echo "Detected dependency packaging $DEP_PACKAGING"
+    echo "Detected packaging $PACKAGING"
+    export DEP_PACKAGING PACKAGING
 }
 
 # This function determines which architecture to build for based on the system
 # we're building on. Unless we are cross compiling, then it's determined by the
 # CROSS_TARGET variable.
-detect_arch()
-{
-  case "$DEP_PACKAGING" in
+detect_arch() {
+    case "$DEP_PACKAGING" in
     deb)
-      ARCH=$(dpkg --print-architecture)
-      ;;
+        ARCH=$(dpkg --print-architecture)
+        ;;
     rpm)
-      ARCH=$(rpm --eval '%{_arch}')
-      ;;
+        ARCH=$(rpm --eval '%{_arch}')
+        ;;
     solaris)
-      case $UNAME_M in
+        case $UNAME_M in
         sun*)
-          ARCH=sparc
-          ;;
+            ARCH=sparc
+            ;;
         i86pc)
-          ARCH=i86pc
-          ;;
+            ARCH=i86pc
+            ;;
         *)
-          echo "Unknown Solaris architecture: $UNAME_M"
-          ;;
-      esac
-      ;;
+            echo "Unknown Solaris architecture: $UNAME_M"
+            ;;
+        esac
+        ;;
 
     freebsd)
-      ARCH=$UNAME_M
-      ;;
+        ARCH=$UNAME_M
+        ;;
     hpux)
-      ARCH=$UNAME_M
-      ;;
+        ARCH=$UNAME_M
+        ;;
     *)
-      echo "Unknown packaging system"
-      exit 42
-      ;;
-  esac
+        echo "Unknown packaging system"
+        exit 42
+        ;;
+    esac
 
-  # We need to determine the architecture based on the 'CROSS_TARGET' variable
-  # which is derived from the 'label' variable instead of the system that we
-  # are building on.
-  case "$CROSS_TARGET" in
-    '')
-      ;;
+    # We need to determine the architecture based on the 'CROSS_TARGET' variable
+    # which is derived from the 'label' variable instead of the system that we
+    # are building on.
+    case "$CROSS_TARGET" in
+    '') ;;
     x86-*)
-      ARCH=x86
-      ;;
+        ARCH=x86
+        ;;
     x64-*)
-      ARCH=x64
-      ;;
+        ARCH=x64
+        ;;
     *)
-      echo "Unknown cross-compilation target: $CROSS_TARGET"
-      exit 42
-      ;;
-  esac
+        echo "Unknown cross-compilation target: $CROSS_TARGET"
+        exit 42
+        ;;
+    esac
 
-  echo "Detected architecture $ARCH"
-  export ARCH
+    echo "Detected architecture $ARCH"
+    export ARCH
 }
 
 # This function detects the path to various tools needed by the build system.
 # It's useful if the specified tool is not in PATH, or if the PATH resolution
 # picks up the wrong tool, or if e.g. gmake is preferred over make.
-detect_tools()
-{
+detect_tools() {
     # We look for GNU Make because
     # various dependencies have various requirements
     MAKE=$(func_whereis gmake make)
 
-    if $MAKE -v | grep GNU
-    then
+    if $MAKE -v | grep GNU; then
         export MAKE
         echo "Detected make path $MAKE"
     else
@@ -371,49 +362,47 @@ detect_tools()
 # variable based on the number of cores. However, the variable is overwritten in
 # the "install-dependencies" script. I created a ticket fix this (see
 # ENT-13041).
-detect_cores()
-{
-  case "$OS_FAMILY" in
+detect_cores() {
+    case "$OS_FAMILY" in
     aix)
-      echo "Detected OS family is aix"
-      NUM_CORES="$(lscfg | grep -c proc)"
-      ;;
+        echo "Detected OS family is aix"
+        NUM_CORES="$(lscfg | grep -c proc)"
+        ;;
     solaris)
-      echo "Detected OS family is solaris"
-      NUM_CORES="$(psrinfo |wc -l)"
-      ;;
+        echo "Detected OS family is solaris"
+        NUM_CORES="$(psrinfo | wc -l)"
+        ;;
     linux)
-      echo "Detected OS family is linux"
-      NUM_CORES="$(grep -c '^processor' /proc/cpuinfo)"
-      ;;
+        echo "Detected OS family is linux"
+        NUM_CORES="$(grep -c '^processor' /proc/cpuinfo)"
+        ;;
     hpux)
-      echo "Detected OS family is hpux"
-      NUM_CORES="$(ioscan -k -C processor | grep -c processor)"
-      ;;
+        echo "Detected OS family is hpux"
+        NUM_CORES="$(ioscan -k -C processor | grep -c processor)"
+        ;;
     *)
-      echo "Detected OS family is UNKNOWN, defaulting amount of CPU cores to 1"
-      NUM_CORES=1
-      ;;
-  esac
+        echo "Detected OS family is UNKNOWN, defaulting amount of CPU cores to 1"
+        NUM_CORES=1
+        ;;
+    esac
 
-  # Make number of jobs one higher than core count, to account for I/O, network, etc.
-  echo "Detected amount of CPU cores is $NUM_CORES"
-  MAKEFLAGS="${MAKEFLAGS:--j$((NUM_CORES + 1))}"
-  export MAKEFLAGS
+    # Make number of jobs one higher than core count, to account for I/O, network, etc.
+    echo "Detected amount of CPU cores is $NUM_CORES"
+    MAKEFLAGS="${MAKEFLAGS:--j$((NUM_CORES + 1))}"
+    export MAKEFLAGS
 }
 
-detect_environment()
-{
-  detect_cross_target
-  detect_os
-  detect_packaging
-  detect_arch
-  detect_tools
-  detect_cores
+detect_environment() {
+    detect_cross_target
+    detect_os
+    detect_packaging
+    detect_arch
+    detect_tools
+    detect_cores
 }
 
 # The env before detecting environment (to be compared with env after)
-env | sort > "env_before"
+env | sort >"env_before"
 
 #
 # We need to detect the following pieces of data:
