@@ -9,17 +9,17 @@ SFTP="sftp -o BatchMode=yes -o StrictHostKeyChecking=no"
 SEVENZIP="\"c:/program files/7-zip/7z\""
 HOMEPATH="\"c:\\Users\\jenkins\""
 
-if [ -z $JOB_NAME ]; then
+if [ -z "$JOB_NAME" ]; then
     DIRNAME=build-$VERSION-$ARCH
     TESTDIR="\"c:\\Users\\jenkins\""
 else
-    DIRNAME=$(echo ${JOB_NAME} | sed 's/\(.*\)\/.*/\1/g')
+    DIRNAME=$(echo "${JOB_NAME}" | sed 's/\(.*\)\/.*/\1/g')
     TESTDIR="\"c:\\Users\\jenkins\\$DIRNAME\\tests\""
 fi
 
 MAX_TRY=50
 try_run() {
-    for i in $(seq $MAX_TRY); do
+    for _ in $(seq $MAX_TRY); do
         if "$@"; then
             return
         fi
@@ -30,33 +30,33 @@ try_run() {
 prepare_bin() {
     PKGD=$BASEDIR/packaging/cfengine-nova/pkg
     P=$PKGD/$DIRNAME
-    rm -rf $PKGD
-    mkdir -p $P/bin
+    rm -rf "$PKGD"
+    mkdir -p "$P"/bin
 
-    cp -a "$PREFIX/bin"/* $P/bin
-    cp -a "$BASEDIR/cfengine/dist$PREFIX/bin"/* $P/bin
+    cp -a "$PREFIX/bin"/* "$P"/bin
+    cp -a "$BASEDIR/cfengine/dist$PREFIX/bin"/* "$P"/bin
 
     case "$ARCH" in
-    x86) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll ;;
-    x64) cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.x86_64.dll $P/bin/cf.events.dll ;;
+    x86) cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.i686.dll "$P"/bin/cf.events.dll ;;
+    x64) cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.x86_64.dll "$P"/bin/cf.events.dll ;;
     *)
         echo "Unknown architecture: $ARCH"
         exit 1
         ;;
     esac
 
-    cp $BASEDIR/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs $P
+    cp "$BASEDIR"/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs "$P"
 
     (
-        cd $PKGD
-        zip -r $DIRNAME.zip $DIRNAME
+        cd "$PKGD"
+        zip -r "$DIRNAME".zip "$DIRNAME"
     ) || false
 }
 
 prepare_tests() {
     TESTD=$BASEDIR/core/tests
     (
-        cd $TESTD
+        cd "$TESTD"
         zip -r tests.zip .
     ) || false
 }
@@ -75,7 +75,7 @@ post_put() {
 }
 
 put() {
-    try_run pre_put $1
-    try_run put_zip $1
-    try_run post_put $1
+    try_run pre_put "$1"
+    try_run put_zip "$1"
+    try_run post_put "$1"
 }
