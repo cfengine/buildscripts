@@ -5,7 +5,7 @@
 # test report saying that there were no tests to report.
 
 for repo in core nova; do
-    cat << EOF > "$BASEDIR/$repo/tests/unit/no_tests.xml"
+    cat <<EOF >"$BASEDIR/$repo/tests/unit/no_tests.xml"
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuite name="no_tests_to_report">
 <testcase name="no_tests" />
