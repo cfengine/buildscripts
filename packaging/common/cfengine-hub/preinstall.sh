@@ -397,13 +397,13 @@ if [ -d $PREFIX/httpd/htdocs ]; then
     # Purge all files in httpd/htdocs with exceptions listed in preserve_during_upgrade.txt
     cf_console echo "Keeping only what's listed in preserve_during_upgrade.txt file"
     PRESERVE_FILTER="`generate_preserve_filter`"
-    find "$PREFIX/httpd/htdocs" $PRESERVE_FILTER -type f -print0 | xargs -0 rm
+    find "$PREFIX/httpd/htdocs" $PRESERVE_FILTER -type f -print0 | xargs --no-run-if-empty -0 rm
   elif [ -d $PREFIX/share/GUI ]; then
     # Remove only files copied from share/GUI to httpd/htdocs
     cf_console echo "Using share/GUI as template"
     ( cd $PREFIX/share/GUI
       # Make list of files in share/GUI and remove "them" from httpd/htdocs
-      find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs -0 rm -f )
+      find -type f -print0 | ( cd ../../httpd/htdocs/ && xargs --no-run-if-empty -0 rm -f )
     )
   else
     # Purge all files in httpd/htdocs with hardcoded exceptions:
@@ -413,7 +413,7 @@ if [ -d $PREFIX/httpd/htdocs ]; then
     find "$PREFIX/httpd/htdocs" -not \( -path "$PREFIX/httpd/htdocs/public/tmp" -prune \) \
 	    -not \( -name "cf_robot.php" \) \
 	    -not \( -name "settings.ldap.php" \) \
-	    -type f -print0 | xargs -0 -r rm
+	    -type f -print0 | xargs --no-run-if-empty -0 rm
   fi
   if [ -d $PREFIX/share/GUI -a "x${PKG_TYPE}" = "xrpm" ]; then
     # Make sure old files are not copied over together with new files later
