@@ -113,6 +113,7 @@ fi
 #     - argv[1] = --define
 #     - argv[2] = a b
 eval $RPMBUILD_CMD -bb \
+  --define "'_system_ssl $SYSTEM_SSL'" \
   --define "'_topdir $BASEDIR/$PKGNAME'" \
   --define "'version $VERSION'" \
   --define "'buildprefix $BUILDPREFIX'" \
