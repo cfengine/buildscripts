@@ -17,6 +17,9 @@ fi
 # compilation targets. However, if CROSS_TARGET is already set in the
 # environment it will take precedence.
 detect_cross_target() {
+    # shellcheck disable=SC2154
+    # > label is referenced but not assigned.
+    # This file is sourced by other scripts. label is assigned elsewhere.
     case "$label" in
     *_x86_64_mingw*)
         CROSS_TARGET=${CROSS_TARGET:-x64-mingw}

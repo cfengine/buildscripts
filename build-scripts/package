@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 . version
@@ -55,12 +55,12 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
 (
     if [ "$PROJECT-$ROLE" = "nova-hub" ]; then
         if test -f "$BASEDIR/mission-portal/vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php"; then
-            cd $BASEDIR/mission-portal
+            cd "$BASEDIR"/mission-portal
             # Add Red Hat Text font to TCPDF library that we use in Mission Portal for PDF generation
-            $PREFIX/httpd/php/bin/php --version # diagnostic for ENT-12777, keep for future reference
-            $PREFIX/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Regular.ttf
-            $PREFIX/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Bold.ttf
-            $PREFIX/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Italic.ttf
+            "$PREFIX"/httpd/php/bin/php --version # diagnostic for ENT-12777, keep for future reference
+            "$PREFIX"/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Regular.ttf
+            "$PREFIX"/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Bold.ttf
+            "$PREFIX"/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Italic.ttf
         fi
     fi
 )
@@ -68,10 +68,10 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
 if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
     safe_prefix="$(echo "$BUILDPREFIX" | sed -e 's:/::g')"
     file_to_patch=$P/../common/script-templates/$PACKAGING-script-common.sh
-    if [ -f $file_to_patch ]; then
+    if [ -f "$file_to_patch" ]; then
         # replace PREFIX in *-script-common.sh file
-        sed "s:/var/cfengine:$BUILDPREFIX:" $file_to_patch >$file_to_patch.new
-        mv $file_to_patch.new $file_to_patch
+        sed "s:/var/cfengine:$BUILDPREFIX:" "$file_to_patch" >"$file_to_patch".new
+        mv "$file_to_patch".new "$file_to_patch"
     fi
 fi
 
@@ -161,10 +161,12 @@ rpm | lpp)
         -e "/^%postun\$/r $POSTREMOVE" \
         "$SPECIN" >"$SPEC"
 
+    # shellcheck disable=SC2044
+    # TODO: CFE-4584
     for i in $(find "$BASEDIR/buildscripts/packaging/$PKG" ! -name "*.spec"); do
         (
             cd "$BASEDIR/$PKG/SOURCES"
-            ln -sf "$i"
+            ln -sf "$i" .
         ) || false
     done
 
@@ -178,7 +180,7 @@ rpm | lpp)
         --define "'_topdir $BASEDIR/$PKG'" \
         --define "'buildprefix $BUILDPREFIX'" \
         --define "'_basedir $BASEDIR'" \
-        $RPMBUILD_OPTIONS "$SPEC"
+        "$RPMBUILD_OPTIONS" "$SPEC"
 
     if [ "$PACKAGING" = lpp ]; then
         # Create AIX bff packages
@@ -195,8 +197,12 @@ rpm | lpp)
         [ -d BUILDROOT ] && cd BUILDROOT
         # test that there are 0 or 1 $PKG-* dirs
         # note that * must be unquoted!
-        [ "$(ls -1d "$PKG"-* | wc -l)" -lt 2 ] || exit 1
-        [ -d "$PKG"-* ] && cd "$PKG"-*
+        for p in "$PKG"-*; do
+            if [ -d "$p" ]; then
+                # If there are more $PKG-* dirs, then the next cd will (most likely) fail
+                cd "$p" || fatal "More than 1 $PKG-* dirs"
+            fi
+        done
         # $LOCAL_PREFIX is $PREFIX without first slash, i.e. var/cfengine
         # $LOCAL_DIR is first (outermost) dir in $LOCAL_PREFIX, i.e. var
         LOCAL_PREFIX="$(echo "$PREFIX" | sed 's_^/__')"
@@ -284,15 +290,21 @@ solaris)
         cat "$P/solaris/prototype.head"
         # Replace last two words with "root root" and filter out directories that
         # aren't ours.
-        sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp | egrep "^([^d]|d none $PREFIX)"
+        sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp | grep -E "^([^d]|d none $PREFIX)"
     ) >prototype
 
     ARCH="$(uname -p)"
     sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION$safe_prefix/g" "$P/solaris/pkginfo.in" >"$BASEDIR/$PKG/pkg/pkginfo"
 
+    # shellcheck disable=SC2094
+    # > Make sure not to read and write the same file in the same pipeline.
+    # The second argument is just treated as a "type" argument, the file is not read from.
     "$P/../common/produce-script" "$PKG" preinstall pkg >preinstall
+    # shellcheck disable=SC2094
     "$P/../common/produce-script" "$PKG" postinstall pkg >postinstall
+    # shellcheck disable=SC2094
     "$P/../common/produce-script" "$PKG" preremove pkg >preremove
+    # shellcheck disable=SC2094
     "$P/../common/produce-script" "$PKG" postremove pkg >postremove
 
     pkgmk -o -r "$(pwd)" -d "$BASEDIR/$PKG/pkg"
@@ -316,9 +328,9 @@ freebsd)
     echo "@comment pkg-plist,v 1.00 $(date)" >>pkg-plist
     echo "@comment ORIGIN:sysutils/cfengine-nova" >>pkg-plist
     pkgdir="$BASEDIR/$PKG/pkg/"
-    for f in $(find "$BASEDIR/$PKG/pkg/" | egrep -v 'pkg-comment|pkg-descr|pkg-plist.foot|pkg-plist'); do
+    for f in $(find "$BASEDIR/$PKG/pkg/" | grep -Ev 'pkg-comment|pkg-descr|pkg-plist.foot|pkg-plist'); do
 
-        destf="${f#$pkgdir}"
+        destf="${f#"$pkgdir"}"
         if [ -f "$destf" ]; then
             echo "$destf" >>pkg-plist
         fi
@@ -340,7 +352,7 @@ freebsd)
     cat tmp >>CONTENTS
     rm plist-head tmp
     mv CONTENTS ./+CONTENTS
-    tar cjvf "cfengine-nova-$VERSION\_1.tbz" +CONTENTS +DESC +COMMENT *
+    tar cjvf "cfengine-nova-$VERSION\_1.tbz" +CONTENTS +DESC +COMMENT -- *
     ;;
 hpux)
     ARCH="$UNAME_M"

@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 . version
@@ -50,35 +50,35 @@ fi
 CANDLE="wine $WIXPATH/candle.exe"
 LIGHT="wine $WIXPATH/light.exe"
 
-if [ -z $JOB_NAME ]; then
+if [ -z "$JOB_NAME" ]; then
     DIRNAME=build-$VERSION-$ARCH
 else
-    DIRNAME=$(echo ${JOB_NAME} | sed 's/\(.*\)\/.*/\1/g')
+    DIRNAME=$(echo "${JOB_NAME}" | sed 's/\(.*\)\/.*/\1/g')
 fi
 
 PKGD=$BASEDIR/packaging/cfengine-nova/pkg
 P=$PKGD/$DIRNAME
 
 pre() {
-    rm -rf $PKGD
-    mkdir -p $P/bin
-    mkdir -p $P/ssl
+    rm -rf "$PKGD"
+    mkdir -p "$P"/bin
+    mkdir -p "$P"/ssl
 
-    cp -a $BUILDPREFIX/bin/* $P/bin
-    cp -a $BUILDPREFIX/ssl/* $P/ssl
-    cp -a $BASEDIR/cfengine/dist$BUILDPREFIX/bin/* $P/bin
+    cp -a "$BUILDPREFIX"/bin/* "$P"/bin
+    cp -a "$BUILDPREFIX"/ssl/* "$P"/ssl
+    cp -a "$BASEDIR"/cfengine/dist"$BUILDPREFIX"/bin/* "$P"/bin
 
     # TODO make not hard-coded paths for debian/ubuntu installations of mingw
     # I couldn't find an easy way to dynamically find the path to this dll so hard-coded
     # it is. :(
     case "$ARCH" in
     x86)
-        cp -a /usr/i686-w64-mingw32/lib/libwinpthread-1.dll $P/bin/libwinpthread-1.dll
-        cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.i686.dll $P/bin/cf.events.dll
+        cp -a /usr/i686-w64-mingw32/lib/libwinpthread-1.dll "$P"/bin/libwinpthread-1.dll
+        cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.i686.dll "$P"/bin/cf.events.dll
         ;;
     x64)
-        cp -a /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll $P/bin/libwinpthread-1.dll
-        cp -a $BASEDIR/enterprise/libcfenterprise/cf.events.x86_64.dll $P/bin/cf.events.dll
+        cp -a /usr/x86_64-w64-mingw32/lib/libwinpthread-1.dll "$P"/bin/libwinpthread-1.dll
+        cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.x86_64.dll "$P"/bin/cf.events.dll
         ;;
     *)
         echo "Unknown architecture: $ARCH"
@@ -86,20 +86,20 @@ pre() {
         ;;
     esac
 
-    cp $BASEDIR/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs $P
+    cp "$BASEDIR"/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs "$P"
     # OpenSSL libs have different names on x32 and x64 platforms:
     # on 32-bit platforms: libcrypto_1_1.dll     and libssl_1_1.dll
     # on 64-bit platforms: libcrypto_1_1_x64.dll and libssl_1_1_x64.dll
     # So in cfengine-nova.wxs we have names for 64-bit platforms,
     # and on 32-bit platforms we remove the -x64 suffix.
     if [ "$ARCH" = "x86" ]; then
-        sed -i '/lib\(crypto\|ssl\)/s/[_-]x64//g' $P/cfengine-nova.wxs
+        sed -i '/lib\(crypto\|ssl\)/s/[_-]x64//g' "$P"/cfengine-nova.wxs
     fi
 }
 
 candle() {
     REVISION="$1"
-    $CANDLE -dCfSourceDir=. -dCfVersion=$REVISION -dCfArch=$ARCH cfengine-nova.wxs
+    $CANDLE -dCfSourceDir=. -dCfVersion="$REVISION" -dCfArch="$ARCH" cfengine-nova.wxs
 }
 
 light() {
@@ -107,13 +107,13 @@ light() {
 }
 
 package() {
-    cd $P
+    cd "$P"
 
-    if [ -z $EXPLICIT_VERSION ]; then
+    if [ -z "$EXPLICIT_VERSION" ]; then
         # First make sure VERSION does not contain a 4th dot, since on windows we'll
         # add one later (plus they can only be numeric); so convert
         # 3.10.0a.abcdef to 3.10.0a.
-        VERSION=$(echo $VERSION | sed -e 's/\([^.]*\.[^.]*\.[^.]*\).*/\1/')
+        VERSION=$(echo "$VERSION" | sed -e 's/\([^.]*\.[^.]*\.[^.]*\).*/\1/')
 
         case $BUILD_TYPE in
         RELEASE)
@@ -138,20 +138,20 @@ package() {
 
     # convert any alphabets in revison to int as no alphabets are allowed in windows package version
     while true; do
-        alphabet=$(echo $REVISION | sed -e 's/[^a-zA-Z]*\([a-zA-Z]*\).*/\1/')
+        alphabet=$(echo "$REVISION" | sed -e 's/[^a-zA-Z]*\([a-zA-Z]*\).*/\1/')
         if [ -n "$alphabet" ]; then
             convert=$(printf '%d' "'$alphabet")
-            REVISION=$(echo $REVISION | sed -e "s/$alphabet/$convert/")
+            REVISION=$(echo "$REVISION" | sed -e "s/$alphabet/$convert/")
         else
             break
         fi
     done
 
     # ensure all revision components are 4 digits max (MSI allows each part to be up to 65534, but we limit it to 9999)
-    REVISION=$(echo $REVISION | tr '.' '\n' | sed 's/\(....\).*/\1/' | tr '\n' '.' | sed 's/\.$//')
+    REVISION=$(echo "$REVISION" | tr '.' '\n' | sed 's/\(....\).*/\1/' | tr '\n' '.' | sed 's/\.$//')
 
     # ensure revision has exactly 4 components - add .0.0.0 at the end and cut unneded parts
-    REVISION=$(echo $REVISION.0.0.0 | cut -d '.' -f 1-4)
+    REVISION=$(echo "$REVISION".0.0.0 | cut -d '.' -f 1-4)
 
     # Wix tools have a ridiculously short maximum file length of 128 characters.
     # This is easily exceeded when Jenkins workspace paths are involved. Luckily
@@ -163,9 +163,9 @@ package() {
     # more likely to find free letters at the bottom end, so count backwards.
     WORKSPACE_DRIVE=
     for letter in y x w v u t s r q p o n m l k j i h g f e d; do
-        if [ ! -e $HOME/.wine/dosdevices/$letter: ]; then
+        if [ ! -e "$HOME"/.wine/dosdevices/$letter: ]; then
             WORKSPACE_DRIVE=$letter:
-            ln -s $PWD $HOME/.wine/dosdevices/$WORKSPACE_DRIVE
+            ln -s "$PWD" "$HOME"/.wine/dosdevices/$WORKSPACE_DRIVE
             break
         fi
     done
@@ -180,15 +180,15 @@ package() {
 
     # Make sure the drive letter from above is cleaned up in case this build slave
     # is reused.
-    rm -f $HOME/.wine/dosdevices/$WORKSPACE_DRIVE
+    rm -f "$HOME"/.wine/dosdevices/$WORKSPACE_DRIVE
 
     return $ret
 }
 
 post() {
-    mkdir -p $BASEDIR/cfengine-nova
-    mv $P/cfengine-nova.msi $BASEDIR/cfengine-nova
-    cd $BASEDIR/cfengine-nova
+    mkdir -p "$BASEDIR"/cfengine-nova
+    mv "$P"/cfengine-nova.msi "$BASEDIR"/cfengine-nova
+    cd "$BASEDIR"/cfengine-nova
 
     # For some reason candle is giving file no permissions at all.
     chmod 644 cfengine-nova.msi
@@ -204,10 +204,10 @@ post() {
 
     case $ARCH in
     x86)
-        mv cfengine-nova.msi $PKGNAME-i686.msi
+        mv cfengine-nova.msi "$PKGNAME-i686.msi"
         ;;
     x64)
-        mv cfengine-nova.msi $PKGNAME-x86_64.msi
+        mv cfengine-nova.msi "$PKGNAME-x86_64.msi"
         ;;
     esac
 }
