@@ -36,6 +36,8 @@ export PROJECT
 # Otherwise, we build it.
 if [ x"$SYSTEM_SSL" = x ]
 then
+    # default to using cfengine openssl
+    SYSTEM_SSL=0
     # We don't bundle OpenSSL on some redhat-derived systems due to incompatability with libpam and our openssl.
     _OS_MAJOR_VERSION="$(echo "$OS_VERSION" | cut -d. -f1)"
     if [ "$OS" = "rhel" ] && expr "$_OS_MAJOR_VERSION" ">=" "8" >/dev/null
