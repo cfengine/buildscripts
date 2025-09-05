@@ -112,9 +112,7 @@ run_and_print_on_failure ./configure
 echo "$(basename "$0"): Debug: Running make dist on masterfiles repository..."
 run_and_print_on_failure make dist # source tarball
 echo "$(basename "$0"): Debug: Running make tar-package on masterfiles repository..."
-run_and_print_on_failure make tar-package # package tarball (containing all
-# files as if they were installed
-# under "prefix".)
+run_and_print_on_failure make tar-package # package tarball (containing all files as if they were installed under "prefix".)
 mv cfengine-masterfiles*.tar.gz "$BASEDIR"/output/tarballs/
 echo "$(basename "$0"): Debug: Running make distclean on masterfiles repository..."
 run_and_print_on_failure make distclean

@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
@@ -12,8 +12,8 @@ chroot)
     LOGIN_COMMAND="sudo chroot $CHROOT_ROOT /run-in-home-dir.sh"
     TESTMACHINE_URI=$CHROOT_ROOT
 
-    sudo umount ${CHROOT_ROOT}proc || true
-    mount_procfs ${CHROOT_ROOT}proc
+    sudo umount "${CHROOT_ROOT}"proc || true
+    mount_procfs "${CHROOT_ROOT}"proc
     ;;
 *)
     # Add VMs, etc here.
@@ -40,10 +40,11 @@ case "$TEST_MACHINE" in
 chroot)
     # Fuser has special output. The PIDs arrive on stdout, and all the ornaments
     # arrive on stderr, so all we have to do is to grep for PID numbers.
-    for pid in $(sudo $FUSER $CHROOT_ROOT 2>/dev/null | sed -e 's/[^ 0-9]//g'); do
+    for pid in $(sudo "$FUSER" "$CHROOT_ROOT" 2>/dev/null | sed -e 's/[^ 0-9]//g'); do
         # Minilogd may sometimes launch on RedHat without any user
         # intervention. Ignore that.
-        if ps -ef | egrep "^ *[^ ]+ +$pid" | grep minilogd; then
+        # shellcheck disable=SC2009
+        if ps -ef | grep -E "^ *[^ ]+ +$pid" | grep minilogd; then
             continue
         fi
         # gpg-agent sometimes is spawned on suse during our tests.
@@ -67,13 +68,14 @@ chroot)
             echo "Error: Found processes left behind in the chroot. I'm killing them, but the build will fail, so clean up your mess!"
             echo "Found PID $pid. Info from 'ps -ef'"
             echo "--------------"
-            ps -ef | grep $pid | grep -v grep
+            # shellcheck disable=SC2009
+            ps -ef | grep "$pid" | grep -v grep
             echo "--------------"
         )
     done
 
-    sudo $FUSER -k $CHROOT_ROOT || true
-    sudo umount ${CHROOT_ROOT}proc || true
+    sudo "$FUSER" -k "$CHROOT_ROOT" || true
+    sudo umount "${CHROOT_ROOT}"proc || true
     ;;
 esac
 
@@ -81,19 +83,19 @@ esac
 INCLUDES='--include=test.* --include=summary.*'
 # Note: Don't use sudo or "rsync -a", because we don't want root-owned files
 # to show up in the results.
-rsync -rv $INCLUDES --exclude="*" \
-    $TESTMACHINE_URI$BASEDIR/core/tests/acceptance/ \
-    $BASEDIR/core/tests/acceptance/ \
+rsync -rv "$INCLUDES" --exclude="*" \
+    "$TESTMACHINE_URI$BASEDIR"/core/tests/acceptance/ \
+    "$BASEDIR"/core/tests/acceptance/ \
     >>/tmp/rsync.log
 
-if [ $PROJECT = nova ]; then
-    rsync -rv $INCLUDES --exclude="*" \
-        $TESTMACHINE_URI$BASEDIR/enterprise/tests/acceptance/ \
-        $BASEDIR/enterprise/tests/acceptance/ \
+if [ "$PROJECT" = nova ]; then
+    rsync -rv "$INCLUDES" --exclude="*" \
+        "$TESTMACHINE_URI$BASEDIR"/enterprise/tests/acceptance/ \
+        "$BASEDIR"/enterprise/tests/acceptance/ \
         >>/tmp/rsync.log
-    rsync -rv $INCLUDES --exclude="*" \
-        $TESTMACHINE_URI$BASEDIR/masterfiles/tests/acceptance/ \
-        $BASEDIR/masterfiles/tests/acceptance/ \
+    rsync -rv "$INCLUDES" --exclude="*" \
+        "$TESTMACHINE_URI$BASEDIR"/masterfiles/tests/acceptance/ \
+        "$BASEDIR"/masterfiles/tests/acceptance/ \
         >>/tmp/rsync.log
 fi
 

@@ -1,11 +1,14 @@
 #!/bin/sh -x
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
 SOURCE_TARBALL="$BASEDIR/output/tarballs/cfengine-3.*.tar.gz"
-MASTERFILES_TARBALL=$(ls $BASEDIR/output/tarballs/cfengine-masterfiles*.tar.gz | grep -v 'pkg.tar.gz$')
+# shellcheck disable=SC2010
+# > Don't use ls | grep. Use a glob or a for loop with a condition to allow non-alphanumeric filenames.
+# TODO: CFE-4587
+MASTERFILES_TARBALL=$(ls "$BASEDIR"/output/tarballs/cfengine-masterfiles*.tar.gz | grep -v 'pkg.tar.gz$')
 
 # DELETE the git-checked-out directories, they are tainted with
 # ./configure artifacts anyway.  The tarballs are unpacked and symlinked
@@ -23,17 +26,23 @@ if [ -e "$BASEDIR/core/" ] || [ -e "$BASEDIR/masterfiles/" ]; then
     exit 1
 fi
 
-if [ x$PROJECT = xcommunity ]; then
+if [ "$PROJECT" = community ]; then
     sudo rm -rf "$BASEDIR/enterprise" "$BASEDIR/nova" "$BASEDIR/mission-portal"
 fi
 
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
 echo "UNPACKING SOURCE TARBALL AND SYMLINKING core"
-cd $BASEDIR
+cd "$BASEDIR"
+# shellcheck disable=SC2086
+# > Double quote to prevent globbing and word splitting.
+# We want globbing here
 gzip -dc $SOURCE_TARBALL | tar -xf -
 ln -s cfengine-3* core
 
 echo "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
+# shellcheck disable=SC2086
+# > Double quote to prevent globbing and word splitting.
+# We want globbing here
 gzip -dc $MASTERFILES_TARBALL | tar -xf -
 ln -s cfengine-masterfiles-* masterfiles

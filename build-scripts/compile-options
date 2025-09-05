@@ -5,8 +5,8 @@
 
 # Autodect PROJECT if not set
 
-if [ x"$PROJECT" = x ]; then
-    case x"$JOB_NAME" in
+if [ -z "$PROJECT" ]; then
+    case "$JOB_NAME" in
     *-community-*) PROJECT=community ;;
     *-enterprise-*) PROJECT=nova ;;
     *-hub-*) PROJECT=nova ;;
@@ -17,8 +17,8 @@ fi
 # If still not set, then either we are running outside Jenkins, or this
 # is not a main "build" type job (it could be the bootstrap job).
 # Do directory-based auto-detection.
-if [ x"$PROJECT" = x ]; then
-    if [ -d $BASEDIR/nova ]; then
+if [ -z "$PROJECT" ]; then
+    if [ -d "$BASEDIR"/nova ]; then
         PROJECT=nova
     else
         PROJECT=community
@@ -31,7 +31,7 @@ export PROJECT
 # When running manually, you can just export this variable.
 # It's a flag: if it's set to 1 - then we use system OpenSSL.
 # Otherwise, we build it.
-if [ x"$SYSTEM_SSL" = x ]; then
+if [ -z "$SYSTEM_SSL" ]; then
     # We don't bundle OpenSSL on some redhat-derived systems due to incompatability with libpam and our openssl.
     _OS_MAJOR_VERSION="$(echo "$OS_VERSION" | cut -d. -f1)"
     if [ "$OS" = "rhel" ] && expr "$_OS_MAJOR_VERSION" ">=" "8" >/dev/null; then
@@ -43,6 +43,9 @@ if [ x"$SYSTEM_SSL" = x ]; then
         fi
     fi
     # Detect using system ssl when running a Jenkins job
+    # shellcheck disable=SC2154
+    # > label is referenced but not assigned.
+    # This file is sourced by other scripts. label is assigned elsewhere.
     if expr x"$label" ":" ".*systemssl" >/dev/null; then
         SYSTEM_SSL=1
     fi
@@ -82,7 +85,7 @@ solaris)
 esac
 
 # When we don't bundle OpenSSL, then we need to pull it from /usr/lib64.
-if [ x"$SYSTEM_SSL" = x1 ]; then
+if [ "$SYSTEM_SSL" = 1 ]; then
     LDFLAGS="$LDFLAGS -L/usr/lib64"
 fi
 export LDFLAGS
@@ -96,8 +99,11 @@ EMBEDDED_DB="lmdb"
 
 ############### Fill in build dependencies in DEPS variable ################
 
+# shellcheck disable=SC2034
+# > DEPS appears unused. Verify use (or export if used externally).
+# This file is sourced by other scripts that uses it
 DEPS=
-[ $OS_FAMILY = mingw ] && var_append DEPS "pthreads-w32 libgnurx"
+[ "$OS_FAMILY" = mingw ] && var_append DEPS "pthreads-w32 libgnurx"
 
 # libgcc_s.so is needed before we compile any other dependency
 #             on some platforms!
@@ -107,7 +113,7 @@ esac
 
 var_append DEPS "$EMBEDDED_DB pcre2"
 
-if ! [ x"$SYSTEM_SSL" = x1 ]; then
+if [ "$SYSTEM_SSL" != 1 ]; then
     # FIXME: Why do we need zlib?
     # ANSWER: Openssl uses it optionally, TODO DISABLE
     var_append DEPS "zlib openssl"
@@ -156,7 +162,7 @@ agent) ROLE=agent ;;
 hub) ROLE=hub ;;
 *)
     # Not running under Jenkins?
-    if [ x"$JENKINS_SERVER_COOKIE" = x ]; then
+    if [ -z "$JENKINS_SERVER_COOKIE" ]; then
         case "$PROJECT-$ARCH-$OS-${OS_VERSION}" in
         community-*) ROLE=agent ;;
         # We do not support 32 bits hubs anymore
@@ -220,7 +226,12 @@ esac
 # unit files for it?
 case "$OS_FAMILY" in
 linux) WITH_SYSTEMD=yes ;;
-*) WITH_SYSTEMD=no ;;
+*)
+    # shellcheck disable=SC2034
+    # > DEPS appears unused. Verify use (or export if used externally).
+    # This file is sourced by other scripts that uses it.
+    WITH_SYSTEMD=no
+    ;;
 esac
 
 case "$OS_FAMILY" in
