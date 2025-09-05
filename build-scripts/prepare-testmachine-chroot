@@ -116,6 +116,6 @@ sudo mkdir -p "${CHROOT_ROOT}proc"
 # For a fully functional chroot, these devices should be mounted.
 if [ ! -e "${CHROOT_ROOT}dev" ]; then
     sudo mkdir -p "${CHROOT_ROOT}dev"
-    sudo dd if=/dev/urandom of="${CHROOT_ROOT}dev/urandom bs=1048576 count=10"
-    sudo dd if=/dev/urandom of="${CHROOT_ROOT}dev/random bs=1048576 count=10"
+    sudo dd if=/dev/urandom of="${CHROOT_ROOT}dev/urandom" bs=1048576 count=10
+    sudo dd if=/dev/urandom of="${CHROOT_ROOT}dev/random" bs=1048576 count=10
 fi
