@@ -27,17 +27,7 @@ jobs:
       - name: Save commit hash before
         run: echo "COMMIT_HASH_BEFORE=$(git log -1 --format=%H)">> $GITHUB_ENV
       - name: Format shell scripts
-        run: |
-          grep -Erl '^(#!/(bin|usr/bin)/(env )?(sh|bash))' build-scripts/ | while read -r file; do
-              if shfmt --diff --indent 4 "$file"; then
-                  echo "No formatting needed for file '$file'"
-              else
-                  echo "Formatting file '$file'..."
-                  shfmt --write --indent 4 "$file"
-                  git add "$file"
-                  git commit -m "$(basename "$file"): formatted script with shfmt"
-              fi
-          done
+        run: make format
       - name: Save commit hash after
         run: echo "COMMIT_HASH_AFTER=$(git log -1 --format=%H)">> $GITHUB_ENV
       - name: Create Pull Request
