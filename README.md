@@ -142,7 +142,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.10 | 2.6.10 | 2.6.10 | Enterprise agent only    |
 | [OpenSSL](https://openssl.org/)                                                   | 3.0.17 | 3.5.2  | 3.5.2  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | 8.45   | -      | -      |                          |
-| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.45  | 10.46  |                          |
+| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.46  | 10.46  |                          |
 | [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 | [SASL2](https://www.cyrusimap.org/sasl/)                                          | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
 | [zlib](https://www.zlib.net/)                                                     | 1.3.1  | 1.3.1  | 1.3.1  |                          |
@@ -156,9 +156,9 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [Apache](https://httpd.apache.org/)                 | 2.4.65 | 2.4.65 | 2.4.65 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
-| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.50.1 | 2.50.1 | 2.51.0 |
+| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.51.0 | 2.51.0 | 2.51.0 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.1  | 2.7.1  |
-| [PHP](https://php.net/)                             | 8.3.24 | 8.3.24 | 8.4.12 |
+| [PHP](https://php.net/)                             | 8.3.25 | 8.3.25 | 8.4.12 |
 | [PostgreSQL](https://www.postgresql.org/)           | 15.14  | 16.10  | 17.6   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.66.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
