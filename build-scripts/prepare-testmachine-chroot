@@ -118,4 +118,11 @@ if [ ! -e "${CHROOT_ROOT}dev" ]; then
     sudo mkdir -p "${CHROOT_ROOT}dev"
     sudo dd if=/dev/urandom of="${CHROOT_ROOT}dev/urandom" bs=1048576 count=10
     sudo dd if=/dev/urandom of="${CHROOT_ROOT}dev/random" bs=1048576 count=10
+
+    if [ "$OS_FAMILY" = aix ]; then
+        # This device is needed for the lscfg command to work on AIX.
+        # We use that command to get number of cores in the detect-environment script.
+        sudo mkdir -p "$CHROOT_ROOT"dev
+        sudo cp -R /dev/nvram "$CHROOT_ROOT"dev/nvram
+    fi
 fi
