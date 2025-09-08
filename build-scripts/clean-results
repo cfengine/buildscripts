@@ -1,6 +1,6 @@
 #!/bin/sh -ex
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . version
 
 # This script is designed to clean up old directories, specifically keeping the

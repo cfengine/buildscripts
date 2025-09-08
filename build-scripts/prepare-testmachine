@@ -1,12 +1,12 @@
 #!/bin/sh -x
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
 case "$TEST_MACHINE" in
 chroot)
-    $BASEDIR/buildscripts/build-scripts/prepare-testmachine-chroot
+    "$BASEDIR"/buildscripts/build-scripts/prepare-testmachine-chroot
     ;;
 *)
     # Add VMs, etc here.

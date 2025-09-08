@@ -62,12 +62,12 @@ check_and_install_perl() {
     fi
 
     if ! $PERL -e 'use List::Util qw(pairs);'; then
-        log_debug $PERL has List::Util that does not export pairs. Needs to be at least version 1.29 for OpenSSL version 3.3.2.
+        log_debug "$PERL has List::Util that does not export pairs. Needs to be at least version 1.29 for OpenSSL version 3.3.2."
         PERL_OK="no"
     fi
 
     if [ "$PERL_OK" != "yes" ]; then
-        log_debug $PERL is too old or modules are missing, building new one from source...
+        log_debug "$PERL is too old or modules are missing, building new one from source..."
 
         # -fno-stack-protector: Ensure built perl will not depend on libssp.so
         if echo | gcc -E -fno-stack-protector - >/dev/null 2>&1; then
@@ -110,10 +110,10 @@ check_and_install_perl() {
             "$PERL_EXTRA_FLAGS" "$PERL_CFLAGS" "$PERL_LDFLAGS" "$PERL_LDDLFLAGS"
 
         log_debug Running make on perl project...
-        run_and_print_on_failure $MAKE
+        run_and_print_on_failure "$MAKE"
 
         log_debug Running make install on perl project...
-        run_and_print_on_failure $MAKE install
+        run_and_print_on_failure "$MAKE" install
         PERL=$HOME/perl-my/bin/perl
     fi
 
@@ -182,7 +182,7 @@ for dep in $DEPS; do
 
     # If package cache did not have the packages
     if [ -z "$package_files" ]; then
-        log_debug Building package $dep...
+        log_debug "Building package $dep..."
         # BUILD the packages
         if [ "$dep" = "lmdb" ] && [ "$BUILD_TYPE" != "RELEASE" ]; then
             # Always build LMDB with debug symbols in non-release builds.
@@ -204,12 +204,12 @@ for dep in $DEPS; do
         # CACHE the newly built package
         # shellcheck disable=SC2086
         log_debug Caching package $dep...
-        pkg-cache putpkg "$dep-$version" $package_files
+        pkg-cache putpkg "$dep-$version" "$package_files"
 
         # CLEAN UP
         # shellcheck disable=SC2086
         log_debug Removing package files for $dep...
-        rm -f $package_files
+        rm -f "$package_files"
 
         # Now the package should be in the local cache
         package_files=$(pkg-cache listpkgfiles "$dep-$version")
@@ -221,7 +221,7 @@ for dep in $DEPS; do
     # INSTALL the packages
     # shellcheck disable=SC2086
     log_debug Installing package files for $dep...
-    install_pkg_files $package_files
+    install_pkg_files "$package_files"
 
     # keep 50 most recent packages to preserve disk space
     pkg-cache keep_newest 50
