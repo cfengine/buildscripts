@@ -34,24 +34,24 @@ nova)
 esac
 
 echo "$(basename "$0"): Debug: Running make in core repo..."
-run_and_print_on_failure $MAKE -C "$BASEDIR"/core -k
+run_and_print_on_failure "$MAKE" -C "$BASEDIR"/core -k
 echo "$(basename "$0"): Debug: Running make install in core repo..."
-run_and_print_on_failure $MAKE -C "$BASEDIR"/core install DESTDIR="$BASEDIR"/cfengine/dist
+run_and_print_on_failure "$MAKE" -C "$BASEDIR"/core install DESTDIR="$BASEDIR"/cfengine/dist
 
 if [ "$NOVA" = yes ]; then
     echo "$(basename "$0"): Debug: Running make in enterprise repo..."
-    run_and_print_on_failure $MAKE -C "$BASEDIR"/enterprise -k
+    run_and_print_on_failure "$MAKE" -C "$BASEDIR"/enterprise -k
     echo "$(basename "$0"): Debug: Running make install in enterprise repo..."
-    run_and_print_on_failure $MAKE -C "$BASEDIR"/enterprise install DESTDIR="$BASEDIR"/cfengine/dist
+    run_and_print_on_failure "$MAKE" -C "$BASEDIR"/enterprise install DESTDIR="$BASEDIR"/cfengine/dist
     if [ "$ROLE" = hub ]; then
         echo "$(basename "$0"): Debug: Running make in nova repo..."
-        run_and_print_on_failure $MAKE -C "$BASEDIR"/nova -k
+        run_and_print_on_failure "$MAKE" -C "$BASEDIR"/nova -k
         echo "$(basename "$0"): Debug: Running make install in nova repo..."
-        run_and_print_on_failure $MAKE -C "$BASEDIR"/nova install DESTDIR="$BASEDIR"/cfengine/dist
+        run_and_print_on_failure "$MAKE" -C "$BASEDIR"/nova install DESTDIR="$BASEDIR"/cfengine/dist
         echo "$(basename "$0"): Debug: Running make install in masterfiles repo..."
-        run_and_print_on_failure $MAKE -C "$BASEDIR"/masterfiles install DESTDIR="$BASEDIR"/cfengine/dist
+        run_and_print_on_failure "$MAKE" -C "$BASEDIR"/masterfiles install DESTDIR="$BASEDIR"/cfengine/dist
     fi
 else
     echo "$(basename "$0"): Debug: Running make install in masterfiles repo..."
-    run_and_print_on_failure $MAKE -C "$BASEDIR"/masterfiles install DESTDIR="$BASEDIR"/cfengine/dist
+    run_and_print_on_failure "$MAKE" -C "$BASEDIR"/masterfiles install DESTDIR="$BASEDIR"/cfengine/dist
 fi

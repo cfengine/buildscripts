@@ -1,6 +1,6 @@
 #!/bin/sh -x
 
-. $(dirname "$0")/functions
+. "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
@@ -25,12 +25,12 @@ esac
 # This way we avoid errorneously replacing "/." in the
 # middle of BASEDIR like "/home/jenkins/.jenkinsdir/etc"
 # (Google Cloud Jenkins plugin likes to create them)
-BASEDIR_NO_DOT="$(echo $BASEDIR | sed -e 's,/\./,/,g;s,/\.$,,')"
+BASEDIR_NO_DOT="$(echo "$BASEDIR" | sed -e 's,/\./,/,g;s,/\.$,,')"
 touch .keepalive-echo
 (while test -e .keepalive-echo; do
     sleep 60
     echo Keep alive
 done) &
-sudo rsync -avR $EXCLUDES --delete --delete-excluded "$BASEDIR_NO_DOT/" $TESTMACHINE_URI >/tmp/rsync.log
-sudo rsync -avR $EXCLUDES --delete --delete-excluded "$PREFIX/" $TESTMACHINE_URI >>/tmp/rsync.log
+sudo rsync -avR "$EXCLUDES" --delete --delete-excluded "$BASEDIR_NO_DOT/" "$TESTMACHINE_URI" | sudo tee /tmp/rsync.log
+sudo rsync -avR "$EXCLUDES" --delete --delete-excluded "$PREFIX/" "$TESTMACHINE_URI" | sudo tee -a /tmp/rsync.log
 rm .keepalive-echo
