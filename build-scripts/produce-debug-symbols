@@ -60,7 +60,7 @@ done
 
 # Write the installation script
 log_debug "Writing the installation script"
-cat <<EOF >> $PAYLOAD_DIR/install-ds.sh
+cat <<EOF >>$PAYLOAD_DIR/install-ds.sh
 #!/bin/sh
 # Install debug symbols for executables
 for i in \`ls exe/*.gz\`; do
@@ -77,7 +77,7 @@ EOF
 
 # Write the decompression script
 log_debug "Writing the decompression script"
-cat <<EOF >> decompress-ds.sh
+cat <<EOF >>decompress-ds.sh
 #!/bin/sh
 echo "Installing debug symbols"
 TMPDIR=\`mktemp -d /tmp/ds.XXXXXX\`; export TMPDIR
@@ -97,7 +97,7 @@ EOF
 
 # Write the uninstall script
 log_debug "Writing the uninstall script"
-cat <<EOF >> $PAYLOAD_DIR/uninstall-ds.sh
+cat <<EOF >>$PAYLOAD_DIR/uninstall-ds.sh
 #!/bin/sh
 echo "Uninstalling debug symbols"
 rm -f "$PREFIX"/bin/*.\$DEBUG_SUFFIX
