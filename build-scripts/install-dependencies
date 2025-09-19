@@ -202,14 +202,18 @@ for dep in $DEPS; do
         fi
 
         # CACHE the newly built package
+        log_debug "Caching package $dep..."
         # shellcheck disable=SC2086
-        log_debug Caching package $dep...
-        pkg-cache putpkg "$dep-$version" "$package_files"
+        # > Double quote to prevent globbing and word splitting.
+        # We want word splitting
+        pkg-cache putpkg "$dep-$version" $package_files
 
         # CLEAN UP
+        log_debug "Removing package files for $dep..."
         # shellcheck disable=SC2086
-        log_debug Removing package files for $dep...
-        rm -f "$package_files"
+        # > Double quote to prevent globbing and word splitting.
+        # We want word splitting
+        rm -f $package_files
 
         # Now the package should be in the local cache
         package_files=$(pkg-cache listpkgfiles "$dep-$version")
@@ -219,9 +223,11 @@ for dep in $DEPS; do
     fi
 
     # INSTALL the packages
+    log_debug "Installing package files for $dep..."
     # shellcheck disable=SC2086
-    log_debug Installing package files for $dep...
-    install_pkg_files "$package_files"
+    # > Double quote to prevent globbing and word splitting.
+    # We want word splitting
+    install_pkg_files $package_files
 
     # keep 50 most recent packages to preserve disk space
     pkg-cache keep_newest 50
