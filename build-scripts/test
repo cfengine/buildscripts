@@ -4,15 +4,21 @@
 . detect-environment
 . compile-options
 
+# $NO_TEST and $NO_ACCEPTANCE_TESTS are usually set by Jenkins
 if [ "true" = "$NO_TESTS" ] || [ "true" = "$NO_ACCEPTANCE_TESTS" ]; then
+    # In order to keep Jenkins happy, we create an empty test report saying that there were no tests to report.
     create-empty-test
     exit 0
 fi
 
 if [ -n "$TEST_MACHINE" ]; then
+    # Prepares the test machine by creating a chroot environment.
     local_script_general prepare-testmachine
+    # Copies $BASEDIR containing everything we need
     local_script_general transfer-to-testmachine
+    # Will change root and call test-on-thismachine from the remote host
     local_script_general test-on-testmachine
 else
+    # Will run unit tests and/or acceptance tests
     local_script_general test-on-thismachine
 fi
