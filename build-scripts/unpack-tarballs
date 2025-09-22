@@ -1,5 +1,29 @@
 #!/bin/sh -x
 
+#
+# BE CAREFUL!
+# This script will delete your CFEngine repositories if you are running it locally.
+#
+# Normally you would run autogen script first:
+#   $ PROJECT=community ./buildscripts/build-scripts/autogen
+#
+# Then build tarballs with something like:
+#   $ BUILD_TYPE=DEBUG ./buildscripts/build-scripts/bootstrap-tarballs
+#
+# This will create three tarballs:
+# $ tree output/tarballs/
+# output/tarballs/
+# ├── cfengine-3.27.0a.55f1c495f.tar.gz
+# ├── cfengine-masterfiles-3.27.0a.2655c7b89-1.pkg.tar.gz
+# ├── cfengine-masterfiles-3.27.0a.2655c7b89.tar.gz
+# └── sha256sums.61691.txt
+#
+# 1 directory, 4 files
+#
+# Then you can unpack these tarballs with this script:
+#   $ PROJECT=community ./buildscripts/build-scripts/unpack-tarballs
+#
+
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
