@@ -51,6 +51,7 @@ if [ -e "$BASEDIR/core/" ] || [ -e "$BASEDIR/masterfiles/" ]; then
 fi
 
 if [ "$PROJECT" = community ]; then
+    log_debug "This is a community build: Ensuring that enterprise, nova and mission-portal are not here"
     sudo rm -rf "$BASEDIR/enterprise" "$BASEDIR/nova" "$BASEDIR/mission-portal"
 fi
 
