@@ -15,13 +15,13 @@ MASTERFILES_TARBALL=$(ls "$BASEDIR"/output/tarballs/cfengine-masterfiles*.tar.gz
 # into place. That way unpacking of tarballs on all platforms is
 # verified.
 
-echo "Ensuring that core and masterfiles are not here"
+log_debug "Ensuring that core and masterfiles are not here"
 sudo rm -rf "$BASEDIR/core" "$BASEDIR/masterfiles"
 if [ -e "$BASEDIR/core/" ] || [ -e "$BASEDIR/masterfiles/" ]; then
-    echo 'core or masterfiles not deleted!'
-    echo "core:"
+    log_error 'core or masterfiles not deleted!'
+    log_error "core:"
     find "$BASEDIR/core/"
-    echo "masterfiles:"
+    log_error "masterfiles:"
     find "$BASEDIR/masterfiles/"
     exit 1
 fi
@@ -32,7 +32,7 @@ fi
 
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
-echo "UNPACKING SOURCE TARBALL AND SYMLINKING core"
+log_debug "UNPACKING SOURCE TARBALL AND SYMLINKING core"
 cd "$BASEDIR"
 # shellcheck disable=SC2086
 # > Double quote to prevent globbing and word splitting.
@@ -40,7 +40,7 @@ cd "$BASEDIR"
 gzip -dc $SOURCE_TARBALL | tar -xf -
 ln -s cfengine-3* core
 
-echo "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
+log_debug "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
 # shellcheck disable=SC2086
 # > Double quote to prevent globbing and word splitting.
 # We want globbing here
