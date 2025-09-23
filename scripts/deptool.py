@@ -236,6 +236,8 @@ class DepsReader:
         """Returns a sorted list of dependencies for given ref, for example: `["lcov", "libgnurx", "pthreads-w32"]`.
         Assumes the proper ref is checked out by `self.buildscripts_repo`.
         """
+        # TODO: get value of $EMBEDDED_DB from file
+        embedded_db = "lmdb"
         if ref == "3.7.x":
             options_file = self.buildscripts_repo.get_file(
                 "build-scripts/install-dependencies"
@@ -262,6 +264,7 @@ class DepsReader:
         # in the middle we also do some clean-ups
         only_deps = (
             " ".join(only_deps)
+            .replace("$EMBEDDED_DB", embedded_db)
             .replace("libgcc ", "")
             .split(" ")
         )
