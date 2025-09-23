@@ -3,6 +3,8 @@
 . "$(dirname "$0")"/functions
 . version
 
+log_debug "Fetching test results from build machine..."
+
 BUILDMACHINE="$1"
 
 # Make sure destination directory exits
