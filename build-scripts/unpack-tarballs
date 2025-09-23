@@ -1,4 +1,28 @@
-#!/bin/sh -x
+#!/bin/sh
+
+#
+# BE CAREFUL!
+# This script will delete your CFEngine repositories if you are running it locally.
+#
+# Normally you would run autogen script first:
+#   $ PROJECT=community ./buildscripts/build-scripts/autogen
+#
+# Then build tarballs with something like:
+#   $ BUILD_TYPE=DEBUG ./buildscripts/build-scripts/bootstrap-tarballs
+#
+# This will create three tarballs:
+# $ tree output/tarballs/
+# output/tarballs/
+# ├── cfengine-3.27.0a.55f1c495f.tar.gz
+# ├── cfengine-masterfiles-3.27.0a.2655c7b89-1.pkg.tar.gz
+# ├── cfengine-masterfiles-3.27.0a.2655c7b89.tar.gz
+# └── sha256sums.61691.txt
+#
+# 1 directory, 4 files
+#
+# Then you can unpack these tarballs with this script:
+#   $ PROJECT=community ./buildscripts/build-scripts/unpack-tarballs
+#
 
 . "$(dirname "$0")"/functions
 . detect-environment
@@ -15,24 +39,25 @@ MASTERFILES_TARBALL=$(ls "$BASEDIR"/output/tarballs/cfengine-masterfiles*.tar.gz
 # into place. That way unpacking of tarballs on all platforms is
 # verified.
 
-echo "Ensuring that core and masterfiles are not here"
+log_debug "Ensuring that core and masterfiles are not here"
 sudo rm -rf "$BASEDIR/core" "$BASEDIR/masterfiles"
 if [ -e "$BASEDIR/core/" ] || [ -e "$BASEDIR/masterfiles/" ]; then
-    echo 'core or masterfiles not deleted!'
-    echo "core:"
+    log_error 'core or masterfiles not deleted!'
+    log_error "core:"
     find "$BASEDIR/core/"
-    echo "masterfiles:"
+    log_error "masterfiles:"
     find "$BASEDIR/masterfiles/"
     exit 1
 fi
 
 if [ "$PROJECT" = community ]; then
+    log_debug "This is a community build: Ensuring that enterprise, nova and mission-portal are not here"
     sudo rm -rf "$BASEDIR/enterprise" "$BASEDIR/nova" "$BASEDIR/mission-portal"
 fi
 
 # NATIVE TAR is being used on purpose, and *not* GNU TAR.
 
-echo "UNPACKING SOURCE TARBALL AND SYMLINKING core"
+log_debug "UNPACKING SOURCE TARBALL AND SYMLINKING core"
 cd "$BASEDIR"
 # shellcheck disable=SC2086
 # > Double quote to prevent globbing and word splitting.
@@ -40,7 +65,7 @@ cd "$BASEDIR"
 gzip -dc $SOURCE_TARBALL | tar -xf -
 ln -s cfengine-3* core
 
-echo "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
+log_debug "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
 # shellcheck disable=SC2086
 # > Double quote to prevent globbing and word splitting.
 # We want globbing here
