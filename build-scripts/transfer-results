@@ -3,8 +3,6 @@
 . "$(dirname "$0")"/functions
 . version
 
-set -x
-
 BUILDMACHINE="$1"
 
 # Make sure destination directory exits
