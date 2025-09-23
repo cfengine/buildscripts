@@ -12,7 +12,7 @@ chroot)
     LOGIN_COMMAND="sudo chroot $CHROOT_ROOT /run-in-home-dir.sh"
     TESTMACHINE_URI=$CHROOT_ROOT
 
-    sudo umount "${CHROOT_ROOT}"proc || true
+    sudo umount "${CHROOT_ROOT}"proc >/dev/null 2>&1 || true
     mount_procfs "${CHROOT_ROOT}"proc
     ;;
 *)
@@ -67,8 +67,8 @@ chroot)
         )
     done
 
-    sudo "$FUSER" -k "$CHROOT_ROOT" || true
-    sudo umount "${CHROOT_ROOT}"proc || true
+    sudo "$FUSER" -k "$CHROOT_ROOT" >/dev/null 2>&1 || true
+    sudo umount "${CHROOT_ROOT}"proc >/dev/null 2>&1 || true
     ;;
 esac
 
