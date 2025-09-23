@@ -23,16 +23,21 @@ get test.xml" | $SFTP "$1"
 }
 
 # Create $PREFIX/bin directory and by necessary files into it and compresses it into a .zip file
+log_debug "Preparing bin directory..."
 prepare_bin
 
 # Puts the test into a .zip file
+log_debug "Preparing tests..."
 prepare_tests
 
 # Copies the .zip files into the test machine
+log_debug "Copying bin & test directory to WIX machine..."
 put "$WIX_MACHINE"
 
 # Executes the tests on the test machine
+log_debug "Executing tests on WIX machine..."
 execute_test "$WIX_MACHINE"
 
 # Transfers the test results to this machine
+log_debug "Fetching results from WIX machine..."
 try_run get_testresult "$WIX_MACHINE"
