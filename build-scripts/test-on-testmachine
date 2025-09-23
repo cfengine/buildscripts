@@ -22,13 +22,15 @@ chroot)
     ;;
 esac
 
-# We need to perform several cleanup tasks if doing a chroot test run, so wrap this in an if.
+# We still need to perform several cleanup tasks after doing a chroot test run.
+# So wrap the test execution in an if so that we can proceed with clean-up on error.
 if remote_script_general "$SCRIPT" "$LOGIN_COMMAND" "$BASEDIR"; then
     return_code=0
 else
     return_code=$?
 fi
 
+# Look for lingering processes after running tests.
 case "$TEST_MACHINE" in
 chroot)
     # Fuser has special output. The PIDs arrive on stdout, and all the ornaments
@@ -67,6 +69,7 @@ chroot)
         )
     done
 
+    # Kill the lingering process
     sudo "$FUSER" -k "$CHROOT_ROOT" >/dev/null 2>&1 || true
     sudo umount "${CHROOT_ROOT}"proc >/dev/null 2>&1 || true
     ;;
