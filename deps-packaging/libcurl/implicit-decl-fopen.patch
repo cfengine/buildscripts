@@ -1,0 +1,12 @@
+diff -ruN curl-8.16.0/lib/altsvc.c curl-8.16.0-modified/lib/altsvc.c
+--- curl-8.16.0/lib/altsvc.c	2025-09-10 07:43:43.000000000 +0200
++++ curl-8.16.0-modified/lib/altsvc.c	2025-09-23 12:31:02.073633250 +0200
+@@ -27,6 +27,8 @@
+  */
+ #include "curl_setup.h"
+ 
++#include <stdio.h> /* fopen() */
++
+ #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
+ #include <curl/curl.h>
+ #include "urldata.h"
