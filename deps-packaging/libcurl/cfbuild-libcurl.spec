@@ -1,4 +1,4 @@
-%define curl_version 8.15.0
+%define curl_version 8.16.0
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
@@ -18,8 +18,8 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
 
-# we don't bundle OpenSSL on RHEL 8 (and newer in the future)
-%if %{?rhel}%{!?rhel:0} > 7
+# we don't bundle OpenSSL on RHEL 8 & SUSE 15 (and newer in the future)
+%if %{?rhel}%{!?rhel:0} > 7 || %{?suse_version}%{!?suse_version:0} >= 1500
 %define ssl_prefix /usr
 %else
 %define ssl_prefix %{prefix}
@@ -45,6 +45,11 @@ mkdir -p %{_builddir}
     LD_RUN_PATH="%{prefix}/lib"
 
 %build
+
+# Implicit declaration of function 'fopen' after upgrading to curl 8.16.0.
+# This is only needed for AIX 7.1.
+# However, it does not hurt to apply it for every one.
+patch -p1 < %{_topdir}/SOURCES/implicit-decl-fopen.patch
 
 make
 
