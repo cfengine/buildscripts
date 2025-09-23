@@ -26,13 +26,5 @@ prepare_bin
 prepare_tests
 put "$WIX_MACHINE"
 
-case $ARCH in
-x86)
-    execute_test "$WIX_MACHINE"
-    try_run get_testresult "$WIX_MACHINE"
-    ;;
-x64)
-    execute_test "$WIX_MACHINE"
-    try_run get_testresult "$WIX_MACHINE"
-    ;;
-esac
+execute_test "$WIX_MACHINE"
+try_run get_testresult "$WIX_MACHINE"
