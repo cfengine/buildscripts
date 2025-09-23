@@ -39,23 +39,35 @@ chroot)
     # Fuser has special output. The PIDs arrive on stdout, and all the ornaments
     # arrive on stderr, so all we have to do is to grep for PID numbers.
     for pid in $(sudo "$FUSER" "$CHROOT_ROOT" 2>/dev/null | sed -e 's/[^ 0-9]//g'); do
-        # Minilogd may sometimes launch on RedHat without any user
-        # intervention. Ignore that.
-        # shellcheck disable=SC2009
-        if ps -ef | grep -E "^ *[^ ]+ +$pid" | grep minilogd; then
-            continue
-        fi
-        # gpg-agent sometimes is spawned on suse during our tests.
-        # This happens only in chroot. Ignore that.
-        if grep suse /etc/os-release && ps -o command --pid "$pid" | grep "gpg-agent --homedir /var/tmp/zypp.*zypp-trusted.*--daemon"; then
-            continue
-        fi
+        case "$OS" in
+        rhel)
+            # Minilogd may sometimes launch on RedHat without any user
+            # intervention. Ignore that.
+            # shellcheck disable=SC2009
+            if ps -ef | grep -E "^ *[^ ]+ +$pid" | grep minilogd; then
+                continue
+            fi
+            ;;
+        suse)
 
-        # gpg-agent sometimes is spawned on Ubuntu 24 during our tests.
-        # This happens only in chroot. Ignore that.
-        if grep "Ubuntu 24" /etc/os-release && ps -o command --pid "$pid" | grep "gpg-agent --homedir /etc/apt/sources.list.d/.gnupg-temp --use-standard-socket --daemon"; then
-            continue
-        fi
+            # gpg-agent sometimes is spawned on suse during our tests.
+            # This happens only in chroot. Ignore that.
+            if ps -o command --pid "$pid" | grep "gpg-agent --homedir /var/tmp/zypp.*zypp-trusted.*--daemon"; then
+                continue
+            fi
+            ;;
+        ubuntu)
+            # gpg-agent sometimes is spawned on Ubuntu 24 during our tests.
+            # This happens only in chroot. Ignore that.
+            case "$OS_VERSION" in
+            24*)
+                if ps -o command --pid "$pid" | grep "gpg-agent --homedir /etc/apt/sources.list.d/.gnupg-temp --use-standard-socket --daemon"; then
+                    continue
+                fi
+                ;;
+            esac
+            ;;
+        esac
 
         # Leaving processes behind is an error. It should never happen.
         return_code=1
