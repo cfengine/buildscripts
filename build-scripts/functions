@@ -132,6 +132,19 @@ grep_q() {
     grep "$@" >/dev/null
 }
 
+grep_c() {
+    case $UNAME_S in
+    "HP-UX"|SunOS)
+        # There is no -C option on HP-UX and Solaris
+        grep "$@"
+        ;;
+    *)
+        # Print two lines of context
+        grep -C "$@"
+        ;;
+    esac
+}
+
 #
 # Dealing with packages. For platform-specific functions it's preferred
 # to have them as a separate script under deps-packaging directory.
@@ -582,10 +595,11 @@ run_and_print_on_failure() {
     local exit_code=0
     if "$@" >"$temp_output_file" 2>&1; then
         # Filter output on Warnings/Errors and add two lines of context
-        if grep -q -E '([Ww]arning:|[Ee]rror:)' "$temp_output_file"; then
+        regex='([Ww]arning:|[Ee]rror:)'
+        if grep_q -E "$regex" "$temp_output_file"; then
             log_debug "Found warnings/errors in output from command:" "$@"
             echo "--- Start of Warnings/Errors ---"
-            grep -C2 -E '([Ww]arning:|[Ee]rror:)' "$temp_output_file"
+            grep_c 2 -E "$regex" "$temp_output_file"
             echo "--- End of Warnings/Errors ---"
         fi
     else
