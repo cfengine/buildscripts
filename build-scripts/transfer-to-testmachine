@@ -1,5 +1,23 @@
 #!/bin/sh -x
 
+#
+# This script transfers the build artifacts and source files to a test machine for running tests in an isolated environment.
+#
+# Currently supports:
+# - chroot test environments (TEST_MACHINE=chroot)
+#
+# The script uses rsync to efficiently sync files from:
+# - $BASEDIR: The main build directory containing source and build artifacts
+# - $PREFIX: The installation prefix directory
+#
+# Environment variables:
+# - TEST_MACHINE: Type of test machine (currently only 'chroot' supported)
+# - BASEDIR: Base directory containing the build (auto-detected)
+# - PREFIX: Installation prefix directory (from compile-options)
+#
+# The script maintains a keepalive echo to prevent timeouts during long transfers
+#
+
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
