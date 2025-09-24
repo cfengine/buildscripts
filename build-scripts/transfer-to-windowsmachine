@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #
 # Transfer CFEngine binaries and tests to a Windows test machine
 # Packages binaries and test files as ZIP archives and uploads them via SFTP
