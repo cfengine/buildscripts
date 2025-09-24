@@ -1,12 +1,20 @@
-diff -ruN curl-8.16.0/lib/altsvc.c curl-8.16.0-modified/lib/altsvc.c
---- curl-8.16.0/lib/altsvc.c	2025-09-10 07:43:43.000000000 +0200
-+++ curl-8.16.0-modified/lib/altsvc.c	2025-09-23 12:31:02.073633250 +0200
-@@ -27,6 +27,8 @@
-  */
- #include "curl_setup.h"
- 
-+#include <stdio.h> /* fopen() */
+diff -ruN curl-8.16.0/lib/curl_mem_undef.h curl-8.16.0-modified/lib/curl_mem_undef.h
+--- curl-8.16.0/lib/curl_mem_undef.h    2025-09-10 07:43:43.000000000 +0200
++++ curl-8.16.0-modified/lib/curl_mem_undef.h   2025-09-24 16:51:34.546034324 +0200
+@@ -44,6 +44,8 @@
+ #undef socketpair
+ #endif
+
++#ifdef CURLDEBUG
 +
- #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_ALTSVC)
- #include <curl/curl.h>
- #include "urldata.h"
+ #undef fopen
+ #ifdef CURL_FOPEN
+ #define fopen(fname, mode) CURL_FOPEN(fname, mode)
+@@ -51,5 +53,7 @@
+ #undef fdopen
+ #undef fclose
+
++#endif /* CURLDEBUG */
++
+ #undef HEADER_CURL_MEMORY_H
+ #undef HEADER_CURL_MEMDEBUG_H

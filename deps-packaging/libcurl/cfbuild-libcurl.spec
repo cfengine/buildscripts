@@ -46,9 +46,7 @@ mkdir -p %{_builddir}
 
 %build
 
-# Implicit declaration of function 'fopen' after upgrading to curl 8.16.0.
-# This is only needed for AIX 7.1.
-# However, it does not hurt to apply it for every one.
+# Fix implicit declaration of function 'fopen' after upgrading to curl 8.16.0.
 patch -p1 < %{_topdir}/SOURCES/implicit-decl-fopen.patch
 
 make
