@@ -30,11 +30,16 @@ fi
 # Used for network operations that might fail temporarily
 MAX_TRY=50
 try_run() {
+    attempt=1
+    log_debug "Starting retry wrapper for: $*"
     for _ in $(seq $MAX_TRY); do
         if "$@"; then
+            log_debug "Command succeeded on attempt $attempt: $*"
             return
         fi
+        attempt=$((attempt + 1))
     done
+    log_error "Command failed after $MAX_TRY attempts: $*"
     return 1
 }
 
@@ -54,7 +59,7 @@ prepare_bin() {
     x86) cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.i686.dll "$P"/bin/cf.events.dll ;;
     x64) cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.x86_64.dll "$P"/bin/cf.events.dll ;;
     *)
-        echo "Unknown architecture: $ARCH"
+        log_error "Unknown architecture: $ARCH"
         exit 1
         ;;
     esac
@@ -99,7 +104,23 @@ post_put() {
 # Main upload function - coordinates cleanup, upload, and extraction
 # Uses try_run for each step to handle network failures gracefully
 put() {
-    try_run pre_put "$1"
-    try_run put_zip "$1"
-    try_run post_put "$1"
+    target="$1"
+    log_debug "Starting transfer to Windows machine: $target"
+
+    if ! try_run pre_put "$target"; then
+        log_error "Failed to clean up previous deployment on $target"
+        return 1
+    fi
+
+    if ! try_run put_zip "$target"; then
+        log_error "Failed to upload files to $target"
+        return 1
+    fi
+
+    if ! try_run post_put "$target"; then
+        log_error "Failed to extract files on $target"
+        return 1
+    fi
+
+    log_debug "Successfully completed transfer to $target"
 }
