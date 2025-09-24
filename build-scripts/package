@@ -1,24 +1,31 @@
 #!/bin/sh -x
+#
+# CFEngine package build script
+# Creates distribution packages (RPM, DEB, Solaris, FreeBSD, HP-UX, MSI, AIX) from compiled CFEngine binaries
 
+# Source common build functions and environment configuration
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 . version
 
-# Select what to build
+# Determine package name and build options based on project type and role
 
 case "$PROJECT-$ROLE" in
 community-*)
+    # Community edition package - basic CFEngine
     PKG=cfengine-community
     DEB_BUILD_OPTIONS=
     RPMBUILD_OPTIONS=
     ;;
 nova-hub)
+    # Enterprise Hub package - includes things like Mission Portal
     PKG=cfengine-nova-hub
     DEB_BUILD_OPTIONS=
     RPMBUILD_OPTIONS="--define 'with_expansion 1'"
     ;;
 nova-agent)
+    # Enterprise Agent package - client-only installation
     PKG=cfengine-nova
     DEB_BUILD_OPTIONS=
     RPMBUILD_OPTIONS=
@@ -29,13 +36,16 @@ nova-agent)
     ;;
 esac
 
+# Configure debug/release build options for different package formats
 case "$BUILD_TYPE" in
 DEBUG)
+    # Debug build - disable optimization, keep debug symbols
     DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS noopt nostrip"
     RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_optimize 0'"
     RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_debugsym 1'"
     ;;
 RELEASE | CODE_COVERAGE)
+    # Release/Coverage build - keep symbols
     DEB_BUILD_OPTIONS="nostrip"
     ;;
 *)
@@ -44,14 +54,16 @@ RELEASE | CODE_COVERAGE)
     ;;
 esac
 
-# Clean -devel packages, so their contents doesn't end up in our packages, set env variable for dev trouble shooting
+# Remove development packages to prevent their contents from being included in production packages
+# Can be skipped for debugging by setting LEAVE_DEVEL_PACKAGES=yes
 if [ "x$LEAVE_DEVEL_PACKAGES" != "xyes" ]; then
     uninstall_cfbuild_devel
 fi
-# Build it
 
+# Path to packaging spec files and scripts
 P="$BASEDIR/buildscripts/packaging/$PKG"
 
+# Enterprise Hub specific setup - configure fonts for PDF generation in Mission Portal
 (
     if [ "$PROJECT-$ROLE" = "nova-hub" ]; then
         if test -f "$BASEDIR/mission-portal/vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php"; then
@@ -65,48 +77,57 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
     fi
 )
 
+# Handle custom installation prefix (default is /var/cfengine)
 if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
     safe_prefix="$(echo "$BUILDPREFIX" | sed -e 's:/::g')"
     file_to_patch=$P/../common/script-templates/$PACKAGING-script-common.sh
     if [ -f "$file_to_patch" ]; then
-        # replace PREFIX in *-script-common.sh file
+        # Update installation scripts to use custom prefix
         sed "s:/var/cfengine:$BUILDPREFIX:" "$file_to_patch" >"$file_to_patch".new
         mv "$file_to_patch".new "$file_to_patch"
     fi
 fi
 
+# Parse version string to separate main version from supplementary version
+# Format: MAIN_VERSION~SUPP_VERSION (e.g., 3.27.0~build1)
 case "$VERSION" in
 *~*)
-    # everything before the tilde
-    MAIN_VERSION="${VERSION%\~*}"
-    # everything after the tilde
-    SUPP_VERSION="${VERSION#*~}"
+    # Split on tilde character
+    MAIN_VERSION="${VERSION%\~*}" # everything before the tilde
+    SUPP_VERSION="${VERSION#*~}"  # everything after the tilde
     ;;
 *)
+    # No tilde, use entire version as main
     MAIN_VERSION="${VERSION}"
     SUPP_VERSION=""
     ;;
 esac
 
+# Main packaging switch - handle different package formats based on target OS
 case "$PACKAGING" in
 rpm | lpp)
+    # RPM packaging (Red Hat, SUSE) and LPP packaging (AIX)
+    # Create standard RPM build directory structure
     mkdir -p "$BASEDIR/$PKG/BUILD"
     mkdir -p "$BASEDIR/$PKG/RPMS"
     mkdir -p "$BASEDIR/$PKG/SOURCES"
     mkdir -p "$BASEDIR/$PKG/SRPMS"
 
+    # Set paths for spec file and installation scripts
     SPEC="$P/$PKG.spec"
     PREINSTALL="$P/generated.preinstall"
     POSTINSTALL="$P/generated.postinstall"
     PREREMOVE="$P/generated.preremove"
     POSTREMOVE="$P/generated.postremove"
 
+    # Use AIX-specific spec template for LPP packaging
     if [ "$PACKAGING" = lpp ]; then
         SPECIN="$P/$PKG.spec.aix.in"
     else
         SPECIN="$P/$PKG.spec.in"
     fi
 
+    # Generate installation/removal scripts from templates
     "$P/../common/produce-script" "$PKG" preinstall rpm >"$PREINSTALL"
     "$P/../common/produce-script" "$PKG" postinstall rpm >"$POSTINSTALL"
     "$P/../common/produce-script" "$PKG" preremove rpm >"$PREREMOVE"
@@ -114,12 +135,12 @@ rpm | lpp)
 
     RPM_VERSION="$MAIN_VERSION"
 
-    # Set RPM_RELEASE, which sets the "release" tag in the RPM spec
-    # file, which is an incremental version of the specific package in
-    # case it is rebuilt and re-released for any reason.
+    # Determine RPM release number based on build type and version info
+    # RPM_RELEASE is used for the "Release:" field in the spec file
+    # This allows rebuilds of the same version with incremental release numbers
 
     if [ -z "$SUPP_VERSION" ]; then
-
+        # Standard versioning without supplementary version
         if [ "$BUILD_TYPE" = "RELEASE" ]; then
             RPM_RELEASE="$RELEASE"
         else
@@ -127,8 +148,7 @@ rpm | lpp)
         fi
 
     else
-        # SUPP_VERSION is the part of the git tag after the dash, e.g. build1
-
+        # Supplementary version present (e.g., build1)
         if [ "$BUILD_TYPE" = "RELEASE" ]; then
             RPM_RELEASE="$SUPP_VERSION"
         else
@@ -136,13 +156,15 @@ rpm | lpp)
         fi
     fi
 
-    # determine the system-provided versions of dependencies we build against so we can Require them later in our RPM spec files.
+    # These are used to set minimum required versions in the RPM spec
     if [ "$OS" = "rhel" ]; then
+        # Get SELinux policy version for compatibility requirements
         SELINUX_POLICY_VERSION=$(rpm -q --qf '%{VERSION}\n' selinux-policy)
         if [ -z "$SELINUX_POLICY_VERSION" ]; then
             echo "error: unable to determine selinux-policy package version"
             exit 1
         fi
+        # Get OpenSSL version to ensure compatibility
         OPENSSL_VERSION=$(rpm -q --provides openssl-libs | grep OPENSSL_ | sed 's/^.*_\([0-9.]*\).*$/\1/' | sort -n | tail -1)
         if [ -z "$OPENSSL_VERSION" ]; then
             echo "error: unable to determine openssl package version"
@@ -150,6 +172,7 @@ rpm | lpp)
         fi
     fi
 
+    # Generate RPM spec file from template, substituting version info and scripts
     sed \
         -e "s/@@VERSION@@/$RPM_VERSION/g" \
         -e "s/@@RELEASE@@/$safe_prefix$RPM_RELEASE/g" \
@@ -161,6 +184,7 @@ rpm | lpp)
         -e "/^%postun\$/r $POSTREMOVE" \
         "$SPECIN" >"$SPEC"
 
+    # Link all packaging files (except spec files) to SOURCES directory
     # shellcheck disable=SC2044
     # TODO: CFE-4584
     for i in $(find "$BASEDIR/buildscripts/packaging/$PKG" ! -name "*.spec"); do
@@ -170,12 +194,9 @@ rpm | lpp)
         ) || false
     done
 
-    # eval and double quoting is needed to separate args,
-    # example cmd --define 'a b':
-    #     - argv[1] = --define
-    #     - argv[2] = a b
-    # Also note that $RPMBUILD_OPTIONS might have spaces
-    # which must be preserved
+    # Build the RPM package using rpmbuild
+    # eval is needed to preserve spaces in arguments within quotes
+    # Example: --define 'with_expansion 1' needs to be passed as two args
     eval rpmbuild -bb \
         --define "'_topdir $BASEDIR/$PKG'" \
         --define "'buildprefix $BUILDPREFIX'" \
@@ -183,122 +204,139 @@ rpm | lpp)
         "$RPMBUILD_OPTIONS" "$SPEC"
 
     if [ "$PACKAGING" = lpp ]; then
-        # Create AIX bff packages
+        # AIX-specific: Create BFF (Backup File Format) packages for AIX
         chmod +x "$P/$PKG.bff.sh"
         "$P/$PKG.bff.sh" "$RPM_VERSION-$safe_prefix$RPM_RELEASE" "$BASEDIR" "$PREFIX"
     else
-        # Create TAR package
+        # Create generic TAR package for non-package-manager installations
         TARBALL="$BASEDIR/$PKG/RPMS/$PKG-$VERSION-$safe_prefix$RPM_RELEASE.$ARCH.pkg.tar.gz"
-        # RHEL4 and RHEL6 have buildroot in different folders.
-        # Below lines try to be careful about finding it.
-        # Note that `mv` command will fail and abort the build
-        # if it was found incorrectly (doesn't have expected subdirs)
+
+        # Navigate to build root
         cd "$BASEDIR/$PKG/"
         [ -d BUILDROOT ] && cd BUILDROOT
-        # test that there are 0 or 1 $PKG-* dirs
-        # note that * must be unquoted!
+
+        # Find the package directory (should be exactly one)
         for p in "$PKG"-*; do
             if [ -d "$p" ]; then
-                # If there are more $PKG-* dirs, then the next cd will (most likely) fail
                 cd "$p" || fatal "More than 1 $PKG-* dirs"
             fi
         done
-        # $LOCAL_PREFIX is $PREFIX without first slash, i.e. var/cfengine
-        # $LOCAL_DIR is first (outermost) dir in $LOCAL_PREFIX, i.e. var
+
+        # Prepare directory structure for tar package
+        # Strip leading slash from PREFIX to get relative path
         LOCAL_PREFIX="$(echo "$PREFIX" | sed 's_^/__')"
         LOCAL_DIR="$(echo "$LOCAL_PREFIX" | sed 's_/.*__')"
+
+        # Move system files to CFEngine's share directory
         mkdir -p "$LOCAL_PREFIX/share/usr/lib/systemd"
         mv usr/lib/systemd/system "$LOCAL_PREFIX/share/usr/lib/systemd/"
         mkdir -p "$LOCAL_PREFIX/share/etc"
         for dir in etc/init.d etc/sysconfig etc/profile.d; do
             test -d $dir && mv $dir "$LOCAL_PREFIX/share/etc"
         done
+
+        # Create compressed tar archive and file list
         tar czvf "$TARBALL" "$LOCAL_DIR" >"$TARBALL.filelist"
     fi
     ;;
 
 deb)
+    # Debian/Ubuntu package creation
+    # Update paths in debian control files for custom prefix
     if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
-        #change the base path of cfengine files
         for i in "$P/debian"/*; do
             sed -i "s:/var/cfengine:$BUILDPREFIX:" "$i"
         done
     fi
 
+    # Prepare clean packaging directory
     rm -rf "$BASEDIR/$PKG/pkg"
     mkdir -p "$BASEDIR/$PKG/pkg"
     cp -a "$P"/* "$BASEDIR/$PKG/pkg"
 
+    # Set DEB version based on build type
     if [ "$BUILD_TYPE" = "RELEASE" ]; then
         DEB_VERSION="$VERSION-$RELEASE"
     else
-        DEB_VERSION="$VERSION~$BUILD_NUMBER"
+        DEB_VERSION="$VERSION~$BUILD_NUMBER" # Tilde ensures dev versions sort before release
     fi
 
-    # on debian/ubuntu, $OS_VERSION contains too many details.
-    # leave only major version:
-    # 7.0 => 7
-    # 16.04 => 16
+    # Extract major version from OS_VERSION (e.g., 16.04 -> 16, 7.0 -> 7)
+    # This is appended to package name for OS-specific builds
+    # TODO: Define this in detect-environment script (CFE-4586)
     os_version_major="${OS_VERSION%%.*}"
 
+    # Generate debian changelog with version info
     sed -e "s/@@VERSION@@/$DEB_VERSION$safe_prefix.$OS$os_version_major/" "$BASEDIR/$PKG/pkg/debian/changelog.in" >"$BASEDIR/$PKG/pkg/debian/changelog"
 
+    # Generate debian package maintainer scripts
     "$P/../common/produce-script" "$PKG" preinstall deb >"$BASEDIR/$PKG/pkg/debian/$PKG.preinst"
     "$P/../common/produce-script" "$PKG" postinstall deb >"$BASEDIR/$PKG/pkg/debian/$PKG.postinst"
     "$P/../common/produce-script" "$PKG" preremove deb >"$BASEDIR/$PKG/pkg/debian/$PKG.prerm"
     "$P/../common/produce-script" "$PKG" postremove deb >"$BASEDIR/$PKG/pkg/debian/$PKG.postrm"
 
+    # Build the DEB package
     (
         cd "$BASEDIR/$PKG/pkg"
         export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"
-        dpkg-buildpackage -b -us -uc -rfakeroot
+        dpkg-buildpackage -b -us -uc -rfakeroot # -b: binary only, -us/-uc: don't sign
     ) || false
 
-    # Create TAR package
+    # Also create generic TAR package for manual installation
     TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION$safe_prefix.$ARCH.pkg.tar.gz"
     cd "$BASEDIR/$PKG/pkg/debian/tmp/"
-    # $LOCAL_PREFIX is $PREFIX without first slash, i.e. var/cfengine
-    # $LOCAL_DIR is first (outermost) dir in $LOCAL_PREFIX, i.e. var
+
+    # Prepare directory structure (same as RPM tar package)
+    # Strip leading slash from PREFIX to get relative path
     LOCAL_PREFIX="$(echo "$PREFIX" | sed 's_^/__')"
     LOCAL_DIR="$(echo "$LOCAL_PREFIX" | sed 's_/.*__')"
+
+    # Move system files to CFEngine's share directory
     mkdir -p "$LOCAL_PREFIX/share/usr/lib/systemd"
     mv usr/lib/systemd/system "$LOCAL_PREFIX/share/usr/lib/systemd/"
     mkdir -p "$LOCAL_PREFIX/share/etc"
     for dir in etc/init.d etc/sysconfig etc/profile.d; do
         test -d $dir && mv $dir "$LOCAL_PREFIX/share/etc"
     done
+
+    # Create compressed tar archive and file list
     tar czvf "$TARBALL" "$LOCAL_DIR" >"$TARBALL.filelist"
     ;;
 
 solaris)
+    # Solaris package creation
+
+    # Prepare clean packaging directory
     sudo rm -rf "$BASEDIR/$PKG/pkg"
     mkdir -p "$BASEDIR/$PKG/pkg"
 
+    # Copy CFEngine files to package staging area
     rsync -lpr "$BASEDIR/cfengine/dist"/* "$BASEDIR/$PKG/pkg/"
     rsync -lpr "$PREFIX/bin"/* "$BASEDIR/$PKG/pkg$PREFIX/bin/"
     rsync -lpr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib/"
 
     cd "$BASEDIR/$PKG/pkg"
-    # IMPORTANT: Before this step, do not copy any files into the current
-    # directory that shouldn't be in the package, otherwise they will be
-    # included as package files.
+
+    # Generate package prototype file listing all files
+    # pkgproto scans the indicated paths and generates prototype(4) file entries that may be used as input to the pkgmk(1) command.
+    # IMPORTANT: Any files in current dir after this will be included in package
     pkgproto .=/ >../prototype.tmp
     mv ../prototype.tmp .
 
-    # Paste several things together in the prototype.
+    # Build final prototype file with proper ownership
     (
-        cat "$P/solaris/prototype.head"
-        # Replace last two words with "root root" and filter out directories that
-        # aren't ours.
+        cat "$P/solaris/prototype.head" # Package header info
+        # Set ownership to root:root and filter for CFEngine directories only
         sed -e 's/^\([fd].* \)[^ ][^ ]*  *[^ ][^ ]*$/\1root root/' prototype.tmp | grep -E "^([^d]|d none $PREFIX)"
     ) >prototype
 
+    # Generate package info file
     ARCH="$(uname -p)"
     sed -e "s/@@PKG@@/$PKG/g;s/@@ARCH@@/$ARCH/g;s/@@VERSION@@/$VERSION$safe_prefix/g" "$P/solaris/pkginfo.in" >"$BASEDIR/$PKG/pkg/pkginfo"
 
+    # Generate package installation scripts
     # shellcheck disable=SC2094
-    # > Make sure not to read and write the same file in the same pipeline.
-    # The second argument is just treated as a "type" argument, the file is not read from.
+    # ^ The file is being created, not read
     "$P/../common/produce-script" "$PKG" preinstall pkg >preinstall
     # shellcheck disable=SC2094
     "$P/../common/produce-script" "$PKG" postinstall pkg >postinstall
@@ -307,63 +345,86 @@ solaris)
     # shellcheck disable=SC2094
     "$P/../common/produce-script" "$PKG" postremove pkg >postremove
 
+    # Build the Solaris package
     pkgmk -o -r "$(pwd)" -d "$BASEDIR/$PKG/pkg"
+
+    # Set package filename based on build type
     if [ "$BUILD_TYPE" = "RELEASE" ]; then
         NAME="$PKG-$VERSION.$RELEASE-solaris$OS_VERSION-$ARCH.pkg"
     else
         NAME="$PKG-$VERSION-solaris$OS_VERSION-$ARCH.pkg"
     fi
+
+    # Create the final package file
     pkgtrans -o -s "$BASEDIR/$PKG/pkg" "$BASEDIR/$PKG/$NAME" "CFE$PKG"
     ;;
 freebsd)
+    # FreeBSD package creation
+
+    # Prepare clean packaging directory
     rm -rf "$BASEDIR/$PKG/pkg"
     mkdir -p "$BASEDIR/$PKG/pkg$PREFIX"
 
+    # Copy package metadata and CFEngine files
     cp -pr "$P/freebsd"/* "$BASEDIR/$PKG/pkg/"
     cp -pr "$BASEDIR/cfengine/dist$PREFIX"/* "$BASEDIR/$PKG/pkg$PREFIX"
     cp -pr "$PREFIX/bin"/* "$BASEDIR/$PKG/pkg$PREFIX/bin"
     cp -pr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib"
 
     cd "$BASEDIR/$PKG/pkg"
+
+    # Generate package packing list (pkg-plist)
     echo "@comment pkg-plist,v 1.00 $(date)" >>pkg-plist
     echo "@comment ORIGIN:sysutils/cfengine-nova" >>pkg-plist
     pkgdir="$BASEDIR/$PKG/pkg/"
-    for f in $(find "$BASEDIR/$PKG/pkg/" | grep -Ev 'pkg-comment|pkg-descr|pkg-plist.foot|pkg-plist'); do
 
+    # Add all files to packing list (excluding metadata files)
+    for f in $(find "$BASEDIR/$PKG/pkg/" | grep -Ev 'pkg-comment|pkg-descr|pkg-plist.foot|pkg-plist'); do
         destf="${f#"$pkgdir"}"
         if [ -f "$destf" ]; then
             echo "$destf" >>pkg-plist
         fi
     done
 
+    # Append footer to packing list
     cat pkg-plist.foot >>pkg-plist
 
+    # Create initial FreeBSD package
     /usr/sbin/pkg_create -j -f "${pkgdir}/pkg-plist" -c "${pkgdir}/pkg-comment" -d "${pkgdir}/pkg-descr" -p "${pkgdir}" "${pkgdir}/cfengine-nova-$VERSION$safe_prefix\_1.tbz"
 
     cd "$pkgdir/"
 
+    # Repackage with corrected paths
+    # Extract the created package
     tar xvf "cfengine-nova-$VERSION\_1.tbz"
 
+    # Fix the CONTENTS file to use root as base directory
     head -n 2 ./+CONTENTS >plist-head
     sed '1,3d' ./+CONTENTS >tmp
     rm ./+CONTENTS
     cat plist-head >CONTENTS
-    echo "@cwd /" >>CONTENTS
+    echo "@cwd /" >>CONTENTS # Set current working directory to root
     cat tmp >>CONTENTS
     rm plist-head tmp
     mv CONTENTS ./+CONTENTS
+
+    # Recreate the package with corrected paths
     tar cjvf "cfengine-nova-$VERSION\_1.tbz" +CONTENTS +DESC +COMMENT -- *
     ;;
 hpux)
+    # HP-UX depot package creation
     ARCH="$UNAME_M"
     OS_VER="$UNAME_R"
 
+    # Prepare clean packaging directory
     rm -rf "$BASEDIR/$PKG/pkg"
     mkdir -p "$BASEDIR/$PKG/pkg$PREFIX"
 
+    # Copy CFEngine distribution files
     cp -pr "$BASEDIR/cfengine/dist"/* "$BASEDIR/$PKG/pkg"
     cp -pr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib"
 
+    # Generate HP-UX depot installation scripts
     PREINSTALL="$BASEDIR/$PKG/pkg/generated.preinstall"
     POSTINSTALL="$BASEDIR/$PKG/pkg/generated.postinstall"
     PREREMOVE="$BASEDIR/$PKG/pkg/generated.preremove"
@@ -376,19 +437,26 @@ hpux)
 
     cd "$BASEDIR/$PKG/pkg/"
 
+    # Set package filename based on build type
     if [ "$BUILD_TYPE" = "RELEASE" ]; then
         NAME="$PKG-$VERSION.$RELEASE$safe_prefix-$OS_VER-$ARCH"
     else
         NAME="$PKG-$VERSION$safe_prefix-$OS_VER-$ARCH"
     fi
 
+    # Generate PSF (Product Specification File) for HP-UX
     "$P/hpux/psf.pl" . "$PKG" "$VERSION" >"$BASEDIR/$PKG/$PKG-$VERSION$safe_prefix.psf"
+
+    # Create HP-UX depot package using swpackage
     /usr/sbin/swpackage -s "$BASEDIR/$PKG/$PKG-$VERSION$safe_prefix.psf" -x media_type=tape @ "$BASEDIR/$PKG/pkg/$NAME.depot"
     ;;
 msi)
+    # Windows MSI package creation
+    # Delegate to dedicated MSI packaging script
     package-msi
     ;;
 *)
+    # Unsupported packaging system
     echo "Unknown packaging system: $PACKAGING"
     exit 1
     ;;
