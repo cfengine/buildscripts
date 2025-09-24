@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 #
 # This script transfers the build artifacts and source files to a test machine for running tests in an isolated environment.
