@@ -12,4 +12,5 @@
 
 BUILDMACHINE="$1"
 
+log_debug "Transferring project to remote build machine..."
 rsync -acvr --exclude=output --exclude=".git" --delete "$BASEDIR"/ "$BUILDMACHINE":build >rsync.log
