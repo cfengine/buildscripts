@@ -196,8 +196,21 @@ hub)
     ROLE=hub
     ;;
 *)
-    log_error "Bad EXPLICIT_ROLE '$EXPLICIT_ROLE': defaulting to 'agent'"
-    ROLE=agent
+    log_error "Bad or unset EXPLICIT_ROLE '$EXPLICIT_ROLE': attempting autodetection"
+    case x"$label" in
+    x)
+        log_debug "label is not set, assuming that this is not the main build job; Setting ROLE=agent."
+        ROLE=agent
+        ;;
+    *_HUB_*)
+        log_debug "Autodetected hub role based on '_HUB_' in Jenkins label."
+        ROLE=hub
+        ;;
+    *)
+        log_error "Autodetection failed for label '$label': defaulting to 'agent'"
+        ROLE=agent
+        ;;
+    esac
     ;;
 esac
 
