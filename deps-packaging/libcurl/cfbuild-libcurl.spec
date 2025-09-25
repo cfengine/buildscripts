@@ -1,4 +1,4 @@
-%define curl_version 8.15.0
+%define curl_version 8.16.0
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
@@ -44,6 +44,9 @@ mkdir -p %{_builddir}
     LD_RUN_PATH="%{prefix}/lib"
 
 %build
+
+# Fix implicit declaration of function 'fopen' after upgrading to curl 8.16.0.
+patch -p1 < %{_topdir}/SOURCES/implicit-decl-fopen.patch
 
 make
 
