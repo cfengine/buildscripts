@@ -136,6 +136,7 @@ grep_c() {
     case $UNAME_S in
     "HP-UX" | SunOS)
         # There is no -C option on HP-UX and Solaris
+        shift
         grep "$@"
         ;;
     *)
