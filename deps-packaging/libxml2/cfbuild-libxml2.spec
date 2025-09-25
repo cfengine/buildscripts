@@ -34,6 +34,8 @@ fi
     LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
 
 %build
+
+patch -p1 < %{_topdir}/SOURCES/no-arg-in-deprecated.patch
 make
 
 %install
