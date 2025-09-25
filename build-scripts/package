@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #
 # CFEngine package build script
 # Creates distribution packages (RPM, DEB, Solaris, FreeBSD, HP-UX, MSI, AIX) from compiled CFEngine binaries
