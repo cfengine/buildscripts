@@ -30,7 +30,7 @@ then
     chmod a+x configure
 fi
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
-    CPPFLAGS="-I%{prefix}/include" \
+    CPPFLAGS="-I%{prefix}/include -D_LINUX_SOURCE_COMPAT" \
     LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
 
 %build
@@ -83,5 +83,3 @@ CFEngine Build Automation -- libxml2 -- development files
 %prefix/lib/pkgconfig
 
 %changelog
-
-
