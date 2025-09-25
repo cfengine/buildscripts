@@ -31,7 +31,7 @@ nova-agent)
     RPMBUILD_OPTIONS=
     ;;
 *)
-    echo "Unknown packaging type: $PROJECT-$ROLE"
+    log_error "Unknown packaging type: $PROJECT-$ROLE"
     exit 42
     ;;
 esac
@@ -49,14 +49,14 @@ RELEASE | CODE_COVERAGE)
     DEB_BUILD_OPTIONS="nostrip"
     ;;
 *)
-    echo "Unknown build type: $BUILD_TYPE"
+    log_error "Unknown build type: $BUILD_TYPE"
     exit 42
     ;;
 esac
 
 # Remove development packages to prevent their contents from being included in production packages
 # Can be skipped for debugging by setting LEAVE_DEVEL_PACKAGES=yes
-if [ "x$LEAVE_DEVEL_PACKAGES" != "xyes" ]; then
+if [ "$LEAVE_DEVEL_PACKAGES" != yes ]; then
     uninstall_cfbuild_devel
 fi
 
@@ -78,7 +78,7 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
 )
 
 # Handle custom installation prefix (default is /var/cfengine)
-if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
+if [ "$BUILDPREFIX" != /var/cfengine ]; then
     safe_prefix="$(echo "$BUILDPREFIX" | sed -e 's:/::g')"
     file_to_patch=$P/../common/script-templates/$PACKAGING-script-common.sh
     if [ -f "$file_to_patch" ]; then
@@ -108,10 +108,9 @@ case "$PACKAGING" in
 rpm | lpp)
     # RPM packaging (Red Hat, SUSE) and LPP packaging (AIX)
     # Create standard RPM build directory structure
-    mkdir -p "$BASEDIR/$PKG/BUILD"
-    mkdir -p "$BASEDIR/$PKG/RPMS"
-    mkdir -p "$BASEDIR/$PKG/SOURCES"
-    mkdir -p "$BASEDIR/$PKG/SRPMS"
+    for _dir in BUILD RPMS SOURCES SRPMS; do
+        mkdir -p "$BASEDIR/$PKG/$_dir"
+    done
 
     # Set paths for spec file and installation scripts
     SPEC="$P/$PKG.spec"
@@ -141,7 +140,7 @@ rpm | lpp)
 
     if [ -z "$SUPP_VERSION" ]; then
         # Standard versioning without supplementary version
-        if [ "$BUILD_TYPE" = "RELEASE" ]; then
+        if [ "$BUILD_TYPE" = RELEASE ]; then
             RPM_RELEASE="$RELEASE"
         else
             RPM_RELEASE="$BUILD_NUMBER"
@@ -149,7 +148,7 @@ rpm | lpp)
 
     else
         # Supplementary version present (e.g., build1)
-        if [ "$BUILD_TYPE" = "RELEASE" ]; then
+        if [ "$BUILD_TYPE" = RELEASE ]; then
             RPM_RELEASE="$SUPP_VERSION"
         else
             RPM_RELEASE="$SUPP_VERSION.$BUILD_NUMBER"
@@ -157,17 +156,17 @@ rpm | lpp)
     fi
 
     # These are used to set minimum required versions in the RPM spec
-    if [ "$OS" = "rhel" ]; then
+    if [ "$OS" = rhel ]; then
         # Get SELinux policy version for compatibility requirements
         SELINUX_POLICY_VERSION=$(rpm -q --qf '%{VERSION}\n' selinux-policy)
         if [ -z "$SELINUX_POLICY_VERSION" ]; then
-            echo "error: unable to determine selinux-policy package version"
+            log_error "Unable to determine selinux-policy package version"
             exit 1
         fi
         # Get OpenSSL version to ensure compatibility
         OPENSSL_VERSION=$(rpm -q --provides openssl-libs | grep OPENSSL_ | sed 's/^.*_\([0-9.]*\).*$/\1/' | sort -n | tail -1)
         if [ -z "$OPENSSL_VERSION" ]; then
-            echo "error: unable to determine openssl package version"
+            log_error "Unable to determine openssl package version"
             exit 1
         fi
     fi
@@ -243,7 +242,7 @@ rpm | lpp)
 deb)
     # Debian/Ubuntu package creation
     # Update paths in debian control files for custom prefix
-    if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
+    if [ "$BUILDPREFIX" != /var/cfengine ]; then
         for i in "$P/debian"/*; do
             sed -i "s:/var/cfengine:$BUILDPREFIX:" "$i"
         done
@@ -255,7 +254,7 @@ deb)
     cp -a "$P"/* "$BASEDIR/$PKG/pkg"
 
     # Set DEB version based on build type
-    if [ "$BUILD_TYPE" = "RELEASE" ]; then
+    if [ "$BUILD_TYPE" = RELEASE ]; then
         DEB_VERSION="$VERSION-$RELEASE"
     else
         DEB_VERSION="$VERSION~$BUILD_NUMBER" # Tilde ensures dev versions sort before release
@@ -438,7 +437,7 @@ hpux)
     cd "$BASEDIR/$PKG/pkg/"
 
     # Set package filename based on build type
-    if [ "$BUILD_TYPE" = "RELEASE" ]; then
+    if [ "$BUILD_TYPE" = RELEASE ]; then
         NAME="$PKG-$VERSION.$RELEASE$safe_prefix-$OS_VER-$ARCH"
     else
         NAME="$PKG-$VERSION$safe_prefix-$OS_VER-$ARCH"
@@ -457,7 +456,7 @@ msi)
     ;;
 *)
     # Unsupported packaging system
-    echo "Unknown packaging system: $PACKAGING"
+    log_error "Unknown packaging system: $PACKAGING"
     exit 1
     ;;
 esac
