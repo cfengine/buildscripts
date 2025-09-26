@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 . "$(dirname "$0")"/functions
 . detect-environment
@@ -22,17 +22,22 @@ get test.log" | $SFTP "$1"
 get test.xml" | $SFTP "$1"
 }
 
+# Create $PREFIX/bin directory and by necessary files into it and compresses it into a .zip file
+log_debug "Preparing bin directory..."
 prepare_bin
+
+# Puts the test into a .zip file
+log_debug "Preparing tests..."
 prepare_tests
+
+# Copies the .zip files into the test machine
+log_debug "Copying bin & test directory to WIX machine..."
 put "$WIX_MACHINE"
 
-case $ARCH in
-x86)
-    execute_test "$WIX_MACHINE"
-    try_run get_testresult "$WIX_MACHINE"
-    ;;
-x64)
-    execute_test "$WIX_MACHINE"
-    try_run get_testresult "$WIX_MACHINE"
-    ;;
-esac
+# Executes the tests on the test machine
+log_debug "Executing tests on WIX machine..."
+execute_test "$WIX_MACHINE"
+
+# Transfers the test results to this machine
+log_debug "Fetching results from WIX machine..."
+try_run get_testresult "$WIX_MACHINE"
