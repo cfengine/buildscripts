@@ -2,7 +2,7 @@
 
 # Synchronizes local project directory to remote build machine
 # Usage: ./buildscripts/build-scripts/transfer-to-buildmachine <BUILD_MACHINE>
-# 
+#
 # This script:
 # - Excludes 'output' and '.git' directories
 # - Deletes files on remote that don't exist locally (--delete flag)
