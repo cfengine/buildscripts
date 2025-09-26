@@ -1,4 +1,22 @@
-#!/bin/sh -x
+#!/bin/sh
+
+#
+# This script transfers the build artifacts and source files to a test machine for running tests in an isolated environment.
+#
+# Currently supports:
+# - chroot test environments (TEST_MACHINE=chroot)
+#
+# The script uses rsync to efficiently sync files from:
+# - $BASEDIR: The main build directory containing source and build artifacts
+# - $PREFIX: The installation prefix directory
+#
+# Environment variables:
+# - TEST_MACHINE: Type of test machine (currently only 'chroot' supported)
+# - BASEDIR: Base directory containing the build (auto-detected)
+# - PREFIX: Installation prefix directory (from compile-options)
+#
+# The script maintains a keepalive echo to prevent timeouts during long transfers
+#
 
 . "$(dirname "$0")"/functions
 . detect-environment
@@ -9,10 +27,11 @@ chroot)
     # Don't lose the trailing slash!
     TESTMACHINE_URI=$HOME/testmachine-chroot/
     EXCLUDES="--exclude testmachine-chroot --exclude .git"
+    log_debug "Using chroot test machine at: $TESTMACHINE_URI"
     ;;
 *)
     # Add VMs, etc here.
-    echo "Only chroot test machines are supported at the moment."
+    log_error "Unsupported test machine type: $TEST_MACHINE. Only chroot test machines are supported at the moment."
     exit 1
     ;;
 esac
@@ -26,12 +45,15 @@ esac
 # middle of BASEDIR like "/home/jenkins/.jenkinsdir/etc"
 # (Google Cloud Jenkins plugin likes to create them)
 BASEDIR_NO_DOT="$(echo "$BASEDIR" | sed -e 's,/\./,/,g;s,/\.$,,')"
+
+log_debug "Starting keepalive process for long transfer"
 touch .keepalive-echo
 (while test -e .keepalive-echo; do
     sleep 60
     echo Keep alive
 done) &
 
+log_debug "Transferring BASEDIR contents: $BASEDIR_NO_DOT/ -> $TESTMACHINE_URI"
 # shellcheck disable=SC2086
 # > Double quote to prevent globbing and word splitting.
 # We want word splitting here
@@ -39,8 +61,20 @@ done) &
 # shellcheck disable=SC2024
 # > sudo doesn't affect redirects. Use ..| sudo tee file
 # We don't care
-sudo rsync -avR $EXCLUDES --delete --delete-excluded "$BASEDIR_NO_DOT/" $TESTMACHINE_URI >/tmp/rsync.log
+if ! sudo rsync -avR $EXCLUDES --delete --delete-excluded "$BASEDIR_NO_DOT/" $TESTMACHINE_URI >/tmp/rsync.log; then
+    log_error "Failed to transfer BASEDIR contents"
+    rm .keepalive-echo
+    exit 1
+fi
+
+log_debug "Transferring PREFIX contents: $PREFIX/ -> $TESTMACHINE_URI"
 # shellcheck disable=SC2086
 # shellcheck disable=SC2024
-sudo rsync -avR $EXCLUDES --delete --delete-excluded "$PREFIX/" $TESTMACHINE_URI >>/tmp/rsync.log
+if ! sudo rsync -avR $EXCLUDES --delete --delete-excluded "$PREFIX/" $TESTMACHINE_URI >>/tmp/rsync.log; then
+    log_error "Failed to transfer PREFIX contents"
+    rm .keepalive-echo
+    exit 1
+fi
+
 rm .keepalive-echo
+log_debug "Transfer to test machine completed successfully"
