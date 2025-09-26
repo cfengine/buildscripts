@@ -1,10 +1,11 @@
-#!/bin/sh -x
+#!/bin/sh
 
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 . version
 
+# Special handling for Windows
 case "$OS" in
 mingw)
     if [ "no" != "$ESCAPETEST" ]; then
@@ -15,6 +16,8 @@ mingw)
     ;;
 esac
 
+# Launches an interactive shell for debugging purposes.
+# This is useful for developers who want to inspect the environment mid-build.
 if [ "$TEST_SHELL" = "1" ]; then
     if [ -n "$SHELL" ]; then
         "$SHELL" -i
@@ -23,25 +26,33 @@ if [ "$TEST_SHELL" = "1" ]; then
     else
         /bin/sh -i
     fi
-    echo "Forcing failure to interrupt build..."
+    log_debug "Forcing failure to interrupt build..."
     exit 1
-else
-    if [ "$TESTS" = all ]; then
-        chmod -R g-w "$BASEDIR"/core/tests/acceptance/*
-        chmod -R g-w "$BASEDIR"/masterfiles/tests/acceptance/*
-        chmod -R g-w "$BASEDIR"/masterfiles/lib/*
-        chmod -R g-w "$BASEDIR"/masterfiles/inventory/*
-        if [ "$PROJECT" != "community" ]; then
-            chmod -R g-w "$BASEDIR"/enterprise/tests/acceptance/*
-        fi
-        for project in $(projects_to_test); do
-            # Unfortunately VERBOSE env variable is being used by both
-            # "testall" script and automake. As a result, setting VERBOSE=1
-            # causes testall to pass "1" as an argument to cf-agent!
-            # Workarount: VERBOSE=-I
-            NETWORK_TESTS=0 $MAKE -C "$BASEDIR"/"$project" VERBOSE=-I check
-        done
-    elif [ "$TESTS" = unit ]; then
-        $MAKE -C "$BASEDIR"/core/tests/unit VERBOSE=-I check
+fi
+
+if [ "$TESTS" = all ]; then
+    # Run all tests
+
+    # Make sure tests are not writable by others.
+    # Otherwise, the agent will refuse to run them due to security concerns.
+    chmod -R g-w "$BASEDIR"/core/tests/acceptance/*
+    chmod -R g-w "$BASEDIR"/masterfiles/tests/acceptance/*
+    chmod -R g-w "$BASEDIR"/masterfiles/lib/*
+    chmod -R g-w "$BASEDIR"/masterfiles/inventory/*
+
+    # Enterprise repo will not be there in a community build
+    if [ "$PROJECT" != "community" ]; then
+        chmod -R g-w "$BASEDIR"/enterprise/tests/acceptance/*
     fi
+
+    for project in $(projects_to_test); do
+        # Unfortunately VERBOSE env variable is being used by both
+        # "testall" script and automake. As a result, setting VERBOSE=1
+        # causes testall to pass "1" as an argument to cf-agent!
+        # Workaround: VERBOSE=-I
+        NETWORK_TESTS=0 $MAKE -C "$BASEDIR"/"$project" VERBOSE=-I check
+    done
+elif [ "$TESTS" = unit ]; then
+    # Run only unit tests
+    $MAKE -C "$BASEDIR"/core/tests/unit VERBOSE=-I check
 fi
