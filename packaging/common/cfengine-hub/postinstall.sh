@@ -794,11 +794,16 @@ if [ ! -f $PREFIX/state/pg/data/postgresql.conf ]; then
   else
     pgconfig_type="PostgreSQL default"
   fi
+  cf_console echo "No existing postgresql.conf, initializing Postgres"
   init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"
 fi
 if is_upgrade && [ -d "$BACKUP_DIR/data" ]; then
+  cf_console echo "Upgrade and BACKUP_DIR/data is present, proceeding with full database migration."
   do_migration "$new_pgconfig_file" "$pgconfig_type"
+else
+  cf_console echo "Major version of PostgreSQL did not change so simple migration will occur."
 fi
+
 
 (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl -w -D $PREFIX/state/pg/data -l /var/log/postgresql.log start")
 
