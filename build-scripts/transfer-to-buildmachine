@@ -1,7 +1,16 @@
-#!/bin/sh -x
+#!/bin/sh
+
+# Synchronizes local project directory to remote build machine
+# Usage: ./buildscripts/build-scripts/transfer-to-buildmachine <BUILD_MACHINE>
+# 
+# This script:
+# - Excludes 'output' and '.git' directories
+# - Deletes files on remote that don't exist locally (--delete flag)
+# - Logs rsync output to 'rsync.log' file
 
 . "$(dirname "$0")"/functions
 
 BUILDMACHINE="$1"
 
+log_debug "Transferring project to remote build machine..."
 rsync -acvr --exclude=output --exclude=".git" --delete "$BASEDIR"/ "$BUILDMACHINE":build >rsync.log
