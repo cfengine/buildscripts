@@ -196,7 +196,7 @@ hub)
     ROLE=hub
     ;;
 *)
-    log_error "Bad or unset EXPLICIT_ROLE '$EXPLICIT_ROLE': attempting autodetection"
+    log_debug "Bad or unset EXPLICIT_ROLE '$EXPLICIT_ROLE': attempting autodetection"
     case x"$label" in
     x)
         log_debug "label is not set, assuming that this is not the main build job; Setting ROLE=agent."
@@ -207,7 +207,7 @@ hub)
         ROLE=hub
         ;;
     *)
-        log_error "Autodetection failed for label '$label': defaulting to 'agent'"
+        log_debug "Autodetection failed for label '$label': defaulting to 'agent'"
         ROLE=agent
         ;;
     esac
