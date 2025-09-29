@@ -1,4 +1,4 @@
-%define postgresql_version 17.6
+%define postgresql_version 18.0
 
 Summary: CFEngine Build Automation -- postgresql
 Name: cfbuild-postgresql
