@@ -136,11 +136,11 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libcurl](https://curl.se/download.html)                                          | 8.16.0 | 8.16.0 | 8.16.0 |                          |
 | [libgnurx](https://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.18   | 1.18   | 1.18   | Needed by libxml2        |
-| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.0 | 2.14.6 | 2.15.0 |                          |
+| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.0 | 2.15.0 | 2.15.0 |                          |
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.33 | 0.9.33 | 0.9.33 |                          |
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.10 | 2.6.10 | 2.6.10 | Enterprise agent only    |
-| [OpenSSL](https://openssl.org/)                                                   | 3.0.17 | 3.5.2  | 3.5.3  |                          |
+| [OpenSSL](https://openssl.org/)                                                   | 3.0.17 | 3.5.3  | 3.5.3  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | 8.45   | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.46  | 10.46  |                          |
 | [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
@@ -157,8 +157,8 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.51.0 | 2.51.0 | 2.51.0 |
-| [libexpat](https://libexpat.github.io/)             | -      | 2.7.1  | 2.7.2  |
-| [PHP](https://php.net/)                             | 8.3.26 | 8.3.25 | 8.4.13 |
+| [libexpat](https://libexpat.github.io/)             | -      | 2.7.3  | 2.7.2  |
+| [PHP](https://php.net/)                             | 8.3.26 | 8.3.26 | 8.4.13 |
 | [PostgreSQL](https://www.postgresql.org/)           | 15.14  | 16.10  | 17.6   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.67.1 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
