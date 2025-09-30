@@ -86,9 +86,9 @@ prepare_tests() {
 }
 
 # Clean up previous deployment directories on Windows machine
-# Note: '|| :' ensures this doesn't fail if directories don't exist
+# Note: '|| true' ensures this doesn't fail if directories don't exist
 pre_put() {
-    $SSH "$1" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME tests" || :
+    $SSH "$1" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME tests" || true
 }
 
 # Upload ZIP files to Windows machine via SFTP
