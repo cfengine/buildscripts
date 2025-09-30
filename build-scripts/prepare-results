@@ -10,6 +10,10 @@
 . compile-options
 . version
 
+log_debug "--- Preparing build results and test artifacts ---"
+log_debug "Output directory: $OUTDIR"
+log_debug "Packaging format: $PACKAGING"
+
 # Create output directory if it doesn't exist
 mkdir -p "$OUTDIR"
 
@@ -17,6 +21,7 @@ mkdir -p "$OUTDIR"
 # Iterates through community, nova (enterprise agent), and nova-hub directories
 for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
     if [ -d "$BASEDIR"/$dir ]; then
+        log_debug "Collecting packages from $dir"
         # Copy packages based on platform-specific packaging format
         case "$PACKAGING" in
         rpm)
@@ -44,7 +49,7 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
             cp "$HOME"/lppdir/out/*.bff "$OUTDIR"
             ;;
         *)
-            echo "Unknown packaging system: $PACKAGING"
+            log_error "Unknown packaging system: $PACKAGING"
             exit 1
             ;;
         esac
@@ -56,8 +61,11 @@ done
 # projects_to_test returns the list of projects that should be tested (defined in functions) based on $PROJECT (community/nova) and $ROLE (agent/hub)
 for project in $(projects_to_test); do
     if [ -f "$BASEDIR"/"$project"/tests/acceptance/summary.log ]; then
+        log_debug "Collecting test results from $project"
         cp "$BASEDIR"/"$project"/tests/acceptance/summary.log "$OUTDIR"/"$project"-summary.log
         cp "$BASEDIR"/"$project"/tests/acceptance/test.log "$OUTDIR"/"$project"-test.log
         cp "$BASEDIR"/"$project"/tests/acceptance/test.xml "$OUTDIR"/"$project"-test.xml
     fi
 done
+
+log_debug "--- Build results preparation complete ---"
