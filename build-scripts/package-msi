@@ -14,9 +14,11 @@
 WIXPATH="$HOME/wix"
 
 # Check if WiX tools are installed, install them if not present
+log_debug "Checking for WiX tools at $WIXPATH"
 if [ -f "$WIXPATH/candle.exe" ] && [ -f "$WIXPATH/light.exe" ]; then
-    echo "Wix Tools are installed at $WIXPATH"
+    log_debug "WiX tools found - candle.exe and light.exe are present"
 else
+    log_debug "WiX tools not found - starting installation"
     (
         # Download prerequisites from build artifacts cache server
         cd /tmp || exit
@@ -61,11 +63,14 @@ CANDLE="wine $WIXPATH/candle.exe"
 LIGHT="wine $WIXPATH/light.exe"
 
 # Determine build directory name based on Jenkins job or version/arch
+log_debug "Determining build directory name (JOB_NAME=$JOB_NAME, VERSION=$VERSION, ARCH=$ARCH)"
 if [ -z "$JOB_NAME" ]; then
     DIRNAME=build-$VERSION-$ARCH
+    log_debug "No JOB_NAME set, using DIRNAME=$DIRNAME"
 else
     # Extract first part of Jenkins job name (before the slash)
     DIRNAME=$(echo "${JOB_NAME}" | sed 's/\(.*\)\/.*/\1/g')
+    log_debug "Using Jenkins job name, DIRNAME=$DIRNAME"
 fi
 
 # Set up packaging directory paths
@@ -75,19 +80,26 @@ P=$PKGD/$DIRNAME
 # pre() - Prepare the packaging directory structure and copy all required files
 # This function sets up the directory layout for the MSI package build
 pre() {
+    log_debug "Preparing packaging directory structure"
+
     # Clean up any existing packaging directory and create fresh structure
+    log_debug "Removing existing packaging directory: $PKGD"
     rm -rf "$PKGD"
     mkdir -p "$P"/bin
     mkdir -p "$P"/ssl
 
     # Copy CFEngine binaries and SSL files from build prefix
+    log_debug "Copying binaries from $BUILDPREFIX/bin to $P/bin"
     cp -a "$BUILDPREFIX"/bin/* "$P"/bin
+    log_debug "Copying SSL files from $BUILDPREFIX/ssl to $P/ssl"
     cp -a "$BUILDPREFIX"/ssl/* "$P"/ssl
+    log_debug "Copying dist binaries from $BASEDIR/cfengine/dist$BUILDPREFIX/bin"
     cp -a "$BASEDIR"/cfengine/dist"$BUILDPREFIX"/bin/* "$P"/bin
 
     # Copy MinGW runtime DLL and architecture-specific event DLL
     # TODO: make not hard-coded paths for debian/ubuntu installations of mingw
     # These paths are currently hard-coded as there's no easy way to dynamically find them
+    log_debug "Copying MinGW runtime DLLs for architecture: $ARCH"
     case "$ARCH" in
     x86)
         # 32-bit: Copy i686 MinGW pthread DLL and 32-bit event DLL
@@ -100,7 +112,7 @@ pre() {
         cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.x86_64.dll "$P"/bin/cf.events.dll
         ;;
     *)
-        echo "Unknown architecture: $ARCH"
+        log_error "Unknown architecture: $ARCH"
         exit 1
         ;;
     esac
@@ -128,6 +140,7 @@ pre() {
 #   CfArch: Architecture (x86 or x64)
 candle() {
     REVISION="$1"
+    log_debug "Running candle with REVISION=$REVISION, ARCH=$ARCH"
     $CANDLE -dCfSourceDir=. -dCfVersion="$REVISION" -dCfArch="$ARCH" cfengine-nova.wxs
 }
 
@@ -138,14 +151,17 @@ candle() {
 #   -sice:ICE20: Suppress ICE20 validation (makes sure you have the necessary dialogs defined to handle things like showing a friendly message when the user cancels the install)
 #   -ext WixUtilExtension: Include WiX utility extension for additional functionality
 light() {
+    log_debug "Running light to link WiX object into MSI"
     $LIGHT -sval -sice:ICE20 -ext WixUtilExtension cfengine-nova.wixobj
 }
 
 # package() - Main packaging function that creates the MSI installer
 package() {
+    log_debug "Creating MSI installer"
     cd "$P"
 
     # Determine the package revision number based on build configuration
+    log_debug "Determining package revision (BUILD_TYPE=$BUILD_TYPE, VERSION=$VERSION)"
     if [ -z "$EXPLICIT_VERSION" ]; then
         # First make sure VERSION does not contain a 4th dot, since on Windows we'll
         # add one later (plus they can only be numeric); so convert
@@ -180,6 +196,7 @@ package() {
     # Convert alphabetic characters to numeric
     # MSI version numbers must be purely numeric
     # Example: 3.10.0a becomes 3.10.097 (where 'a' = ASCII 97)
+    log_debug "Transforming $REVISION to only numeric characters by replacing alphabet characters to their ASCII value"
     while true; do
         alphabet=$(echo "$REVISION" | sed -e 's/[^a-zA-Z]*\([a-zA-Z]*\).*/\1/')
         if [ -n "$alphabet" ]; then
@@ -205,10 +222,12 @@ package() {
 
     # Find an available drive letter for Wine mapping
     # Start from Y: and work backwards (Z: is typically mapped to root /)
+    log_debug "Finding available Wine drive letter for path limitation workaround"
     WORKSPACE_DRIVE=
     for letter in y x w v u t s r q p o n m l k j i h g f e d; do
         if [ ! -e "$HOME"/.wine/dosdevices/$letter: ]; then
             WORKSPACE_DRIVE=$letter:
+            log_debug "Using Wine drive letter $WORKSPACE_DRIVE mapped to $PWD"
             # Create symlink from Wine drive letter to current directory
             ln -s "$PWD" "$HOME"/.wine/dosdevices/$WORKSPACE_DRIVE
             break
@@ -221,6 +240,7 @@ package() {
     fi
 
     # Run WiX compilation and linking steps
+    log_debug "Starting WiX compilation and linking with final REVISION=$REVISION"
     ret=0
     candle "$REVISION" && light || ret=$?
 
@@ -233,6 +253,7 @@ package() {
 # post() - Post-processing function to finalize the MSI package
 # Moves the generated MSI to the output directory and renames it appropriately
 post() {
+    log_debug "Finalizing MSI package"
     # Create output directory and move the MSI file there
     mkdir -p "$BASEDIR"/cfengine-nova
     mv "$P"/cfengine-nova.msi "$BASEDIR"/cfengine-nova
@@ -254,6 +275,7 @@ post() {
     esac
 
     # Rename MSI file with architecture suffix
+    log_debug "Renaming MSI file for architecture $ARCH with PKGNAME=$PKGNAME"
     case $ARCH in
     x86)
         # 32-bit: Add i686 suffix
@@ -267,6 +289,8 @@ post() {
 }
 
 # Main execution flow:
+log_debug "--- Starting MSI package build process ---"
 pre     # Prepare packaging directory and copy files
 package # Build the MSI using WiX tools
 post    # Finalize and rename the MSI package
+log_debug "--- MSI package build completed ----"
