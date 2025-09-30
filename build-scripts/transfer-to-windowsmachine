@@ -26,18 +26,20 @@ else
     TESTDIR="\"c:\\Users\\jenkins\\$DIRNAME\\tests\""
 fi
 
-# Retry wrapper function - attempts command up to 50 times
+# Retry wrapper function - attempts command up to 10 times
 # Used for network operations that might fail temporarily
-MAX_TRY=50
+MAX_TRY=10
 try_run() {
     attempt=1
     log_debug "Starting retry wrapper for: $*"
-    for _ in $(seq $MAX_TRY); do
+    for i in $(seq $MAX_TRY); do
         if "$@"; then
             log_debug "Command succeeded on attempt $attempt: $*"
             return
         fi
+        log_debug "Attempt [$i/$MAX_TRY] failed for: $*"
         attempt=$((attempt + 1))
+        sleep 1
     done
     log_error "Command failed after $MAX_TRY attempts: $*"
     return 1
