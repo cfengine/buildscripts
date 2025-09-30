@@ -10,8 +10,6 @@
 . compile-options
 . version
 
-set -x
-
 # Create output directory if it doesn't exist
 mkdir -p "$OUTDIR"
 
