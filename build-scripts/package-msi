@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 #
 # package-msi: Build Windows MSI installer package for CFEngine using WiX Toolset
 # This script creates a Windows installer (.msi) file for CFEngine Nova
