@@ -17,10 +17,10 @@
 
 # Only produce debug symbols for RELEASE builds
 if [ "$BUILD_TYPE" != "RELEASE" ]; then
-    echo "Debug symbols not requested"
+    log_debug "Debug symbols not requested"
     exit 0
 else
-    echo "Producing debug symbols"
+    log_debug "Producing debug symbols"
 fi
 
 # Locate binaries and libraries to extract debug symbols from
@@ -36,12 +36,12 @@ EXECUTABLES_PAYLOAD_DIR=$PAYLOAD_DIR/exe
 LIBRARIES_PAYLOAD_DIR=$PAYLOAD_DIR/lib
 
 # Print build information
-echo "EXECUTABLES_DIR  = $EXECUTABLES_DIR"
-echo "EXECUTABLES_LIST = $EXECUTABLES_LIST"
-echo "LIBRARIES_DIR    = $LIBRARIES_DIR"
-echo "LIBRARIES_LIST   = $LIBRARIES_LIST"
-echo "DEBUG_SUFFIX     = $DEBUG_SUFFIX"
-echo "PAYLOAD_DIR      = $PAYLOAD_DIR"
+log_debug "EXECUTABLES_DIR  = $EXECUTABLES_DIR"
+log_debug "EXECUTABLES_LIST = $EXECUTABLES_LIST"
+log_debug "LIBRARIES_DIR    = $LIBRARIES_DIR"
+log_debug "LIBRARIES_LIST   = $LIBRARIES_LIST"
+log_debug "DEBUG_SUFFIX     = $DEBUG_SUFFIX"
+log_debug "PAYLOAD_DIR      = $PAYLOAD_DIR"
 
 # Create temporary directories to store the extracted debug symbols
 mkdir $PAYLOAD_DIR
@@ -51,7 +51,7 @@ mkdir $LIBRARIES_PAYLOAD_DIR
 # Process executables: extract debug symbols, strip binaries, and add debug links
 # Debug symbols will be installed in the same directory as executables for easier debugging
 for i in $EXECUTABLES_LIST; do
-    echo "Taking debug symbols from: $i and putting it into: $i.$DEBUG_SUFFIX"
+    log_debug "Taking debug symbols from: $i and putting it into: $i.$DEBUG_SUFFIX"
     # Extract debug information into a separate file
     objcopy --only-keep-debug "$i" "$i.$DEBUG_SUFFIX"
     # Remove debug symbols from the binary to reduce size
@@ -68,7 +68,7 @@ done
 # Process libraries: same procedure as executables
 # Debug symbols will be installed in the same directory as libraries
 for i in $LIBRARIES_LIST; do
-    echo "Taking debug symbols from: $i and putting it into: $i.$DEBUG_SUFFIX"
+    log_debug "Taking debug symbols from: $i and putting it into: $i.$DEBUG_SUFFIX"
     objcopy --only-keep-debug "$i" "$i.$DEBUG_SUFFIX"
     strip --strip-debug --strip-unneeded "$i"
     objcopy --add-gnu-debuglink="$i.$DEBUG_SUFFIX" "$i"
@@ -129,7 +129,7 @@ EOF
 
 # Create the self-extracting package by combining the wrapper script and payload
 # The resulting .bsx file is a shell script with an embedded tar.gz archive
-echo "Creating the self extracting script"
+log_debug "Creating the self extracting script"
 tar cf payload.tar $PAYLOAD_DIR
 if [ -e "payload.tar" ]; then
     gzip payload.tar
@@ -137,10 +137,10 @@ if [ -e "payload.tar" ]; then
         # Concatenate the shell script and the compressed archive
         cat decompress-ds.sh payload.tar.gz >cfengine-ds-"$OS"-"$OS_VERSION"-"$ARCH".bsx
     else
-        echo "File not found"
+        log_error "File not found"
         exit 1
     fi
-    echo "cfengine-ds-$OS-$OS_VERSION-$ARCH.bsx created"
+    log_debug "cfengine-ds-$OS-$OS_VERSION-$ARCH.bsx created"
 fi
 
 # Move the package to the output directory
@@ -153,6 +153,6 @@ rm -f install-ds.sh
 rm -f uninstall-ds.sh
 rm -rf $PAYLOAD_DIR
 
-echo "Debug symbols produced."
+log_debug "Debug symbols produced."
 
 exit 0
