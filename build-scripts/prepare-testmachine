@@ -18,6 +18,8 @@
 . detect-environment
 . compile-options
 
+log_debug "Preparing test machine (TEST_MACHINE=$TEST_MACHINE)"
+
 # Dispatch to appropriate test machine preparation script
 case "$TEST_MACHINE" in
 chroot)
@@ -26,7 +28,7 @@ chroot)
     ;;
 *)
     # Add VMs, etc here.
-    echo "Only chroot test machines are supported at the moment."
+    log_error "Unsupported test machine type: $TEST_MACHINE: Only chroot test machines are supported at the moment."
     exit 1
     ;;
 esac
