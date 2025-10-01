@@ -409,7 +409,7 @@ fatal() {
 }
 
 log_info() {
-    echo "INFO:" "$@" 1>&2
+    echo "$(basename "$0"): info:" "$@" 1>&2
 }
 
 # Append a space and string $2 to variable $1, for example:
