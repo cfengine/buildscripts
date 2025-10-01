@@ -1,58 +1,82 @@
-#!/bin/sh -x
+#!/bin/sh
+#
+# Transfer CFEngine binaries and tests to a Windows test machine
+# Packages binaries and test files as ZIP archives and uploads them via SFTP
+# for testing CFEngine on Windows environments
 
-# assume `. `dirname "$0"`/functions` was executed by caller
+# assume `. "$(dirname "$0")"/functions` was executed by caller
 test -z "$PREFIX" && exit 1
 
+# Configure SSH/SFTP with batch mode (no password prompts) and skip host key checking
 SSH="ssh -o BatchMode=yes -o StrictHostKeyChecking=no"
 SFTP="sftp -o BatchMode=yes -o StrictHostKeyChecking=no"
 
+# Windows paths for 7-Zip extraction tool and Jenkins user home
 SEVENZIP="\"c:/program files/7-zip/7z\""
 HOMEPATH="\"c:\\Users\\jenkins\""
 
+# Determine directory names based on whether this is a CI job or manual build
 if [ -z "$JOB_NAME" ]; then
+    # Manual build: use version and architecture in directory name
     DIRNAME=build-$VERSION-$ARCH
     TESTDIR="\"c:\\Users\\jenkins\""
 else
+    # CI build: extract job name prefix (before first slash)
     DIRNAME=$(echo "${JOB_NAME}" | sed 's/\(.*\)\/.*/\1/g')
     TESTDIR="\"c:\\Users\\jenkins\\$DIRNAME\\tests\""
 fi
 
-MAX_TRY=50
+# Retry wrapper function - attempts command up to 10 times
+# Used for network operations that might fail temporarily
+MAX_TRY=10
 try_run() {
-    for _ in $(seq $MAX_TRY); do
+    attempt=1
+    log_debug "Starting retry wrapper for: $*"
+    for i in $(seq $MAX_TRY); do
         if "$@"; then
+            log_debug "Command succeeded on attempt $attempt: $*"
             return
         fi
+        log_debug "Attempt [$i/$MAX_TRY] failed for: $*"
+        attempt=$((attempt + 1))
+        sleep 1
     done
+    log_error "Command failed after $MAX_TRY attempts: $*"
     return 1
 }
 
+# Package CFEngine binaries into a ZIP file for Windows deployment
 prepare_bin() {
     PKGD=$BASEDIR/packaging/cfengine-nova/pkg
     P=$PKGD/$DIRNAME
     rm -rf "$PKGD"
     mkdir -p "$P"/bin
 
+    # Copy core binaries and distribution binaries
     cp -a "$PREFIX/bin"/* "$P"/bin
     cp -a "$BASEDIR/cfengine/dist$PREFIX/bin"/* "$P"/bin
 
+    # Copy architecture-specific event DLL
     case "$ARCH" in
     x86) cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.i686.dll "$P"/bin/cf.events.dll ;;
     x64) cp -a "$BASEDIR"/enterprise/libcfenterprise/cf.events.x86_64.dll "$P"/bin/cf.events.dll ;;
     *)
-        echo "Unknown architecture: $ARCH"
+        log_error "Unknown architecture: $ARCH"
         exit 1
         ;;
     esac
 
+    # Copy Windows installer configuration file
     cp "$BASEDIR"/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs "$P"
 
+    # Create ZIP archive of the prepared directory
     (
         cd "$PKGD"
         zip -r "$DIRNAME".zip "$DIRNAME"
     ) || false
 }
 
+# Package test suite files into a ZIP archive
 prepare_tests() {
     TESTD=$BASEDIR/core/tests
     (
@@ -61,21 +85,44 @@ prepare_tests() {
     ) || false
 }
 
+# Clean up previous deployment directories on Windows machine
+# Note: '|| true' ensures this doesn't fail if directories don't exist
 pre_put() {
-    $SSH "$1" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME tests" || :
+    $SSH "$1" cmd /c "cd $HOMEPATH && rmdir /s /q $DIRNAME tests" || true
 }
 
+# Upload ZIP files to Windows machine via SFTP
 put_zip() {
     echo "put $P.zip" | $SFTP "$1"
     echo "put $BASEDIR/core/tests/tests.zip" | $SFTP "$1"
 }
 
+# Extract uploaded ZIP files on Windows machine using 7-Zip
+# -y: assume Yes on all queries, -o: output directory, -r: recurse subdirectories
 post_put() {
     $SSH "$1" cmd /c "cd $HOMEPATH && $SEVENZIP x -y $DIRNAME.zip && $SEVENZIP x -y tests.zip -o$TESTDIR -r"
 }
 
+# Main upload function - coordinates cleanup, upload, and extraction
+# Uses try_run for each step to handle network failures gracefully
 put() {
-    try_run pre_put "$1"
-    try_run put_zip "$1"
-    try_run post_put "$1"
+    target="$1"
+    log_debug "Starting transfer to Windows machine: $target"
+
+    if ! try_run pre_put "$target"; then
+        log_error "Failed to clean up previous deployment on $target"
+        return 1
+    fi
+
+    if ! try_run put_zip "$target"; then
+        log_error "Failed to upload files to $target"
+        return 1
+    fi
+
+    if ! try_run post_put "$target"; then
+        log_error "Failed to extract files on $target"
+        return 1
+    fi
+
+    log_debug "Successfully completed transfer to $target"
 }
