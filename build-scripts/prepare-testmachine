@@ -1,4 +1,4 @@
-#!/bin/sh -x
+#!/bin/sh
 
 # Prepare a test machine environment for running CFEngine tests
 # Called by the test script when TEST_MACHINE is set
