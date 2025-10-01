@@ -1,11 +1,27 @@
 #!/bin/sh -x
 
+# Prepare a test machine environment for running CFEngine tests
+# Called by the test script when TEST_MACHINE is set
+#
+# Environment Variables:
+#   TEST_MACHINE - Type of test machine to prepare (e.g., 'chroot')
+#
+# Description:
+#   This script dispatches to the appropriate test machine preparation script
+#   based on the TEST_MACHINE environment variable. Currently supports:
+#   - chroot: Creates/configures a chroot environment for isolated testing
+#
+#   Additional test machine types (VMs, containers, etc.) can be added here.
+
+# Load shared functions and environment configuration
 . "$(dirname "$0")"/functions
 . detect-environment
 . compile-options
 
+# Dispatch to appropriate test machine preparation script
 case "$TEST_MACHINE" in
 chroot)
+    # Prepare a chroot-based test environment
     "$BASEDIR"/buildscripts/build-scripts/prepare-testmachine-chroot
     ;;
 *)
