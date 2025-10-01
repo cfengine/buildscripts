@@ -191,7 +191,7 @@ uninstall_cfbuild() {
     freebsd) uninstall_freebsd_pkgs 'cfbuild-.*' ;;
     hpux) uninstall_hpux_pkgs 'cfbuild-.*' ;;
     *)
-        echo "Unknown packaging system: $DEP_PACKAGING"
+        log_error "Unknown packaging system: $DEP_PACKAGING"
         exit 1
         ;;
     esac
@@ -204,7 +204,7 @@ uninstall_cfbuild_devel() {
     freebsd) uninstall_freebsd_pkgs 'cfbuild-.*-devel' ;;
     hpux) uninstall_hpux_pkgs 'cfbuild-.*-devel' ;;
     *)
-        echo "Unknown packaging system: $DEP_PACKAGING"
+        log_error "Unknown packaging system: $DEP_PACKAGING"
         exit 42
         ;;
     esac
@@ -214,7 +214,7 @@ query_pkg() {
     rpm) rpm -qa --provides | grep_q "^$1 " ;;
     deb) dpkg -s "$1" 2>&1 | grep_q '^Status: .*ok installed' ;;
     *)
-        echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
+        log_error "query_pkg() not implemented for $DEP_PACKAGING"
         exit 1
         ;;
     esac
@@ -227,7 +227,7 @@ run() {
     if "$@" >>"build-remote.log" 2>&1; then
         :
     else
-        echo "Failed. See the build-remote.log. Last lines are:"
+        log_error "$NAME failed. See the build-remote.log. Last lines are:"
         tail build-remote.log
         exit 1
     fi
