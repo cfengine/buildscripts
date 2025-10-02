@@ -47,7 +47,8 @@ fi
 mkdir -p /usr/local/sbin
 for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-net cf-check cf-support;
 do
-  if [ -f $PREFIX/bin/$i ]; then
+  if [ `os_type` != redhat ] && [ -x $PREFIX/bin/$i ]; then
+    # These links are handled in .spec file for RedHat
     ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
   fi
 
