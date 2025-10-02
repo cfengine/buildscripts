@@ -1,16 +1,28 @@
 #!/bin/sh
 
-. "$(dirname "$0")"/functions
-. detect-environment
+# Prepare build artifacts and test results for collection/archival.
+# This script collects built packages and test results from various locations
+# and copies them to a single output directory ($OUTDIR) for easy retrieval.
+
+# Source required configuration and utility files
+. "$(dirname "$0")"/functions # $OUTDIR, $BASEDIR
+. detect-environment          # $PACKAGING
 . compile-options
 . version
 
-set -x
+log_debug "--- Preparing build results and test artifacts ---"
+log_debug "Output directory: $OUTDIR"
+log_debug "Packaging format: $PACKAGING"
 
+# Create output directory if it doesn't exist
 mkdir -p "$OUTDIR"
 
+# Collect built packages from each CFEngine edition directory
+# Iterates through community, nova (enterprise agent), and nova-hub directories
 for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
     if [ -d "$BASEDIR"/$dir ]; then
+        log_debug "Collecting packages from $dir"
+        # Copy packages based on platform-specific packaging format
         case "$PACKAGING" in
         rpm)
             cp "$BASEDIR"/$dir/RPMS/*/*.rpm "$OUTDIR"
@@ -37,7 +49,7 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
             cp "$HOME"/lppdir/out/*.bff "$OUTDIR"
             ;;
         *)
-            echo "Unknown packaging system: $PACKAGING"
+            log_error "Unknown packaging system: $PACKAGING"
             exit 1
             ;;
         esac
@@ -45,10 +57,15 @@ for dir in cfengine-community cfengine-nova cfengine-nova-hub; do
     fi
 done
 
+# Collect test results from each tested project
+# projects_to_test returns the list of projects that should be tested (defined in functions) based on $PROJECT (community/nova) and $ROLE (agent/hub)
 for project in $(projects_to_test); do
     if [ -f "$BASEDIR"/"$project"/tests/acceptance/summary.log ]; then
+        log_debug "Collecting test results from $project"
         cp "$BASEDIR"/"$project"/tests/acceptance/summary.log "$OUTDIR"/"$project"-summary.log
         cp "$BASEDIR"/"$project"/tests/acceptance/test.log "$OUTDIR"/"$project"-test.log
         cp "$BASEDIR"/"$project"/tests/acceptance/test.xml "$OUTDIR"/"$project"-test.xml
     fi
 done
+
+log_debug "--- Build results preparation complete ---"
