@@ -32,9 +32,9 @@ detect_cross_target() {
     esac
 
     if [ -n "$CROSS_TARGET" ]; then
-        echo "Detected cross target $CROSS_TARGET"
+        log_debug "Detected cross target $CROSS_TARGET"
     else
-        echo "No cross target detected"
+        log_debug "No cross target detected"
     fi
 }
 
@@ -91,7 +91,7 @@ detect_os() {
             OS_VERSION=$UNAME_R
             ;;
         *)
-            echo "Unable to detect operating system: $UNAME_S"
+            log_error "Unable to detect operating system: $UNAME_S"
             exit 42
             ;;
         esac
@@ -101,12 +101,12 @@ detect_os() {
         OS=mingw
         ;;
     *)
-        echo "Unknown cross-compilation target: $CROSS_TARGET"
+        log_error "Unknown cross-compilation target: $CROSS_TARGET"
         exit 42
         ;;
     esac
 
-    echo "Detected OS $OS $OS_VERSION"
+    log_debug "Detected OS $OS $OS_VERSION"
     export OS OS_VERSION
 }
 
@@ -129,7 +129,7 @@ detect_distribution() {
             OS=rhel
             ;;
         *)
-            echo "Error: Could not determine Linux distro from /etc/redhat-release: $REL"
+            log_error "Could not determine Linux distro from /etc/redhat-release: $REL"
             exit 42
             ;;
         esac
@@ -141,7 +141,7 @@ detect_distribution() {
 
         # Make sure we actually found a match
         if [ -z "$version_string" ]; then
-            echo "Error: Could not determine version number from /etc/redhat-release: $REL"
+            log_error "Could not determine version number from /etc/redhat-release: $REL"
             exit 42
         fi
         OS_VERSION=$version_string
@@ -173,7 +173,7 @@ detect_distribution() {
         case "$REL" in
         [0-9][0-9].[0-9][0-9]) ;;
         *)
-            echo "Unknown Ubuntu release: $REL"
+            log_error "Unknown Ubuntu release: $REL"
             exit 42
             ;;
         esac
@@ -188,7 +188,7 @@ detect_distribution() {
 
         REL=$(cat /etc/debian_version)
         if ! echo "$REL" | grep -E '^[0-9]+\.[0-9]+(\.[0-9]+)?$' >/dev/null; then
-            echo "Unable to detect version of Debian: $REL"
+            log_error "Unable to detect version of Debian: $REL"
             exit 42
         fi
 
@@ -222,12 +222,12 @@ detect_distribution() {
     fi
 
     if [ -z "$OS" ]; then
-        echo "Failed to detect Linux distribution"
+        log_error "Failed to detect Linux distribution"
         exit 42
     fi
 
     if [ -z "$OS_VERSION" ]; then
-        echo "Failed to detect Linux distribution version"
+        log_error "Failed to detect Linux distribution version"
         exit 42
     fi
 }
@@ -252,7 +252,7 @@ detect_packaging() {
     elif [ -f /usr/sbin/swinstall ]; then
         DEP_PACKAGING=hpux
     else
-        echo "Unknown packaging system"
+        log_error "Unknown packaging system"
         exit 42
     fi
 
@@ -268,8 +268,8 @@ detect_packaging() {
         ;;
     esac
 
-    echo "Detected dependency packaging $DEP_PACKAGING"
-    echo "Detected packaging $PACKAGING"
+    log_debug "Detected dependency packaging $DEP_PACKAGING"
+    log_debug "Detected packaging $PACKAGING"
     export DEP_PACKAGING PACKAGING
 }
 
@@ -293,7 +293,8 @@ detect_arch() {
             ARCH=i86pc
             ;;
         *)
-            echo "Unknown Solaris architecture: $UNAME_M"
+            log_error "Unknown Solaris architecture: $UNAME_M"
+            exit 42
             ;;
         esac
         ;;
@@ -305,7 +306,7 @@ detect_arch() {
         ARCH=$UNAME_M
         ;;
     *)
-        echo "Unknown packaging system"
+        log_error "Unknown packaging system"
         exit 42
         ;;
     esac
@@ -322,12 +323,12 @@ detect_arch() {
         ARCH=x64
         ;;
     *)
-        echo "Unknown cross-compilation target: $CROSS_TARGET"
+        log_error "Unknown cross-compilation target: $CROSS_TARGET"
         exit 42
         ;;
     esac
 
-    echo "Detected architecture $ARCH"
+    log_debug "Detected architecture $ARCH"
     export ARCH
 }
 
@@ -341,9 +342,9 @@ detect_tools() {
 
     if $MAKE -v | grep GNU; then
         export MAKE
-        echo "Detected make path $MAKE"
+        log_debug "Detected make path $MAKE"
     else
-        echo "Error: GNU Make not found"
+        log_error "GNU Make not found"
         exit 42
     fi
 
@@ -353,12 +354,12 @@ detect_tools() {
     # systems. We use it to kill processes that can mess with the build process.
     FUSER=$(func_whereis fuser)
     export FUSER
-    echo "Detected fuser path $FUSER"
+    log_debug "Detected fuser path $FUSER"
 
     # We use patch to apply patches to the dependencies.
     PATCH=$(func_whereis gpatch patch)
     export PATCH
-    echo "Detected patch path $PATCH"
+    log_debug "Detected patch path $PATCH"
 }
 
 # This function appends the -j/--jobs option to the MAKEFLAGS environment
@@ -368,29 +369,29 @@ detect_tools() {
 detect_cores() {
     case "$OS_FAMILY" in
     aix)
-        echo "Detected OS family is aix"
+        log_debug "Detected OS family is aix"
         NUM_CORES="$(lscfg | grep -c proc)"
         ;;
     solaris)
-        echo "Detected OS family is solaris"
+        log_debug "Detected OS family is solaris"
         NUM_CORES="$(psrinfo | wc -l)"
         ;;
     linux)
-        echo "Detected OS family is linux"
+        log_debug "Detected OS family is linux"
         NUM_CORES="$(grep -c '^processor' /proc/cpuinfo)"
         ;;
     hpux)
-        echo "Detected OS family is hpux"
+        log_debug "Detected OS family is hpux"
         NUM_CORES="$(ioscan -k -C processor | grep -c processor)"
         ;;
     *)
-        echo "Detected OS family is UNKNOWN, defaulting amount of CPU cores to 1"
+        log_debug "Detected OS family is UNKNOWN, defaulting amount of CPU cores to 1"
         NUM_CORES=1
         ;;
     esac
 
     # Make number of jobs one higher than core count, to account for I/O, network, etc.
-    echo "Detected amount of CPU cores is $NUM_CORES"
+    log_debug "Detected amount of CPU cores is $NUM_CORES"
     MAKEFLAGS="${MAKEFLAGS:--j$((NUM_CORES + 1))}"
     export MAKEFLAGS
 }

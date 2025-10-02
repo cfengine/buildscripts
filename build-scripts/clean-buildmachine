@@ -12,11 +12,10 @@
 uninstall_cfbuild
 
 if [ -z "$PREFIX" ] || [ "$PREFIX" = "/" ]; then
-    echo "$(basename "$0"): Error: \$PREFIX is not defined, is empty, or is set to the root directory. Aborting to prevent accidental deletion."
-    exit 1
+    fatal "\$PREFIX is not defined, is empty, or is set to the root directory. Aborting to prevent accidental deletion."
 fi
 
-echo "$(basename "$0"): Debug: Cleaning build host by deleting $PREFIX"
+log_debug "Cleaning build host by deleting $PREFIX"
 case $OS in
 aix)
     sudo rm -rf "$PREFIX"/*

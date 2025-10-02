@@ -94,12 +94,12 @@ cd "$BASEDIR"/core
 rm -f cfengine-3.*.tar.gz
 git rev-parse HEAD >"$BASEDIR"/output/core-commitID
 # Configure in order to run "make dist", deleted later.
-echo "$(basename "$0"): Debug: Running configure on core repository..."
+log_debug "Running configure on core repository..."
 run_and_print_on_failure ./configure -C
-echo "$(basename "$0"): Debug: Running make dist on core repository..."
+log_debug "Running make dist on core repository..."
 run_and_print_on_failure make dist
 mv cfengine-3.*.tar.gz "$BASEDIR"/output/tarballs/
-echo "$(basename "$0"): Debug: Running make distclean on core repository..."
+log_debug "Running make distclean on core repository..."
 run_and_print_on_failure make distclean
 
 # Build tarballs from masterfiles repository
@@ -107,14 +107,14 @@ cd "$BASEDIR"/masterfiles
 rm -f cfengine-masterfiles*.tar.gz
 git rev-parse HEAD >"$BASEDIR"/output/masterfiles-commitID
 # Configure in order to run "make dist", deleted later.
-echo "$(basename "$0"): Debug: Running configure on masterfiles repository..."
+log_debug "Running configure on masterfiles repository..."
 run_and_print_on_failure ./configure
-echo "$(basename "$0"): Debug: Running make dist on masterfiles repository..."
+log_debug "Running make dist on masterfiles repository..."
 run_and_print_on_failure make dist # source tarball
-echo "$(basename "$0"): Debug: Running make tar-package on masterfiles repository..."
+log_debug "Running make tar-package on masterfiles repository..."
 run_and_print_on_failure make tar-package # package tarball (containing all files as if they were installed under "prefix".)
 mv cfengine-masterfiles*.tar.gz "$BASEDIR"/output/tarballs/
-echo "$(basename "$0"): Debug: Running make distclean on masterfiles repository..."
+log_debug "Running make distclean on masterfiles repository..."
 run_and_print_on_failure make distclean
 
 # Compute a checksum list that can be used to verify the integrity of the
@@ -126,7 +126,7 @@ sha256sum -- *.tar.gz >sha256sums.txt
 CKSUM=$(sum sha256sums.txt | cut -d ' ' -f 1)
 mv sha256sums.txt sha256sums."$CKSUM".txt
 
-echo "$(basename "$0"): Debug: Installing javascript npm dependencies..."
+log_debug "Installing javascript npm dependencies..."
 (
     if test -f "$BASEDIR"/mission-portal/public/scripts/package.json; then
         cd "$BASEDIR"/mission-portal/public/scripts
@@ -142,7 +142,7 @@ echo "$(basename "$0"): Debug: Installing javascript npm dependencies..."
     fi
 )
 
-echo "$(basename "$0"): Debug: Installing PHP composer dependencies from mission-portal repository..."
+log_debug "Installing PHP composer dependencies from mission-portal repository..."
 (
     if test -f "$BASEDIR"/mission-portal/composer.json; then
         cd "$BASEDIR"/mission-portal
@@ -151,7 +151,7 @@ echo "$(basename "$0"): Debug: Installing PHP composer dependencies from mission
     fi
 )
 
-echo "$(basename "$0"): Debug: Installing PHP composer dependencies from nova repository..."
+log_debug "Installing PHP composer dependencies from nova repository..."
 (
     if test -f "$BASEDIR"/nova/api/http/composer.json; then
         cd "$BASEDIR"/nova/api/http
@@ -160,7 +160,7 @@ echo "$(basename "$0"): Debug: Installing PHP composer dependencies from nova re
     fi
 )
 
-echo "$(basename "$0"): Debug: Compiling Mission Portal styles..."
+log_debug "Compiling Mission Portal styles..."
 (
     if test -f "$BASEDIR"/mission-portal/public/themes/default/bootstrap/cfengine_theme.less; then
         cd "$BASEDIR"/mission-portal/public/themes/default/bootstrap
@@ -168,7 +168,7 @@ echo "$(basename "$0"): Debug: Compiling Mission Portal styles..."
     fi
 )
 
-echo "$(basename "$0"): Debug: Installing LDAP API PHP composer dependencies..."
+log_debug "Installing LDAP API PHP composer dependencies..."
 (
     if test -f "$BASEDIR"/mission-portal/ldap/composer.json; then
         cd "$BASEDIR"/mission-portal/ldap
