@@ -14,11 +14,11 @@
 #
 # ^ When building community you won't need enterprise, nova.
 #
-# The script can be run as follows:
-# ```
-# $ PROJECT=[enterprise|community] EXPLICIT_ROLE=[hub|agent] BUILD_TYPE=[DEBUG|RELEASE] ./buildscripts/build-scripts/install-dependencies
-# ```
-#
+# The script can be run as described in the usage message below:
+
+usage() {
+  echo "Usage: PROJECT=[nova|community] EXPLICIT_ROLE=[hub|agent] BUILD_TYPE=[DEBUG|RELEASE] $0"
+}
 
 . "$(dirname "$0")"/functions
 . detect-environment
@@ -155,7 +155,9 @@ for dep in $DEPS; do
         tests=yes
         ;;
     *)
-        fatal "Unknown build type: $BUILD_TYPE"
+        log_error "Unknown build type: $BUILD_TYPE"
+        usage
+        exit 1
         ;;
     esac
 
@@ -171,6 +173,7 @@ for dep in $DEPS; do
     esac
 
     # Add $PREFIX to version of built dependencies so they get different package names and are distinguishable from each
+    # Note that this revision file is created by build-scripts/autogen
     revision=$(cat "$BASEDIR"/buildscripts/deps-packaging/revision)
     if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
         safe_prefix="+$(echo "$PREFIX" | sed 's:/::g')"
