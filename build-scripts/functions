@@ -5,21 +5,23 @@
 # script. It will *ensure* your script is executing under POSIX shell,
 # and provide some portability and utility functions. Use like this:
 #
-# . `dirname "$0"`/functions
+# . "$(dirname "$0")"/functions
 #
 
-#
-# NOTE: In this file, do not use $(), as Solaris /bin/sh will choke on
-#       it *before* executing.
-#
-
-#
-# Detect and replace non-POSIX shell
-#
+# try_exec: Attempt to execute a command if it exists
+# Args:
+#   $1 - Command to check for
+#   $@ - Full command with arguments to execute
+# Returns:
+#   Does not return if successful (execs into new process)
 try_exec() {
     type "$1" >/dev/null 2>&1 && exec "$@"
 }
 
+# broken_posix_shell: Test if the current shell has broken POSIX 'local' support
+# Returns:
+#   0 if shell is broken (e.g., Solaris /bin/sh)
+#   1 if shell has proper POSIX local support
 broken_posix_shell() {
     unset foo
     # shellcheck disable=SC3043
@@ -45,7 +47,12 @@ if [ "$_IS_FUNCTIONS_SOURCED" = yes ]; then
     exit 101
 fi
 
-# Preparatory step: export all variables needed
+# export_variables: Set up and export all environment variables needed for builds
+# This function configures:
+#   - System information (UNAME_S, UNAME_R, UNAME_M)
+#   - Build directories (BASEDIR, BUILDPREFIX, PREFIX, OUTDIR)
+#   - PATH with platform-specific additions
+# Called automatically when this file is sourced
 export_variables() {
     #
     # See more examples at https://en.wikipedia.org/wiki/Uname
@@ -128,10 +135,22 @@ export_variables
 # TODO make it platform-dependent, add other platforms besides Solaris.
 SECONDARY_PATHS="/sbin /usr/sbin  /usr/sfw/bin" #"/opt/csw/gnu /usr/ccs/bin"
 
+# grep_q: Grep with quiet output (no stdout)
+# Args:
+#   $@ - All grep arguments
+# Returns:
+#   Exit code from grep
 grep_q() {
     grep "$@" >/dev/null
 }
 
+# grep_c: Portable grep with context lines
+# On HP-UX and Solaris (which lack -C option), falls back to plain grep
+# Args:
+#   $1 - Number of context lines (ignored on HP-UX/Solaris)
+#   $@ - Remaining grep arguments
+# Returns:
+#   Matching lines with context
 grep_c() {
     case $UNAME_S in
     "HP-UX" | SunOS)
@@ -140,7 +159,7 @@ grep_c() {
         grep "$@"
         ;;
     *)
-        # Print two lines of context
+        # Print $1 lines of context
         grep -C "$@"
         ;;
     esac
@@ -151,24 +170,39 @@ grep_c() {
 # to have them as a separate script under deps-packaging directory.
 #
 
+# uninstall_rpms: Remove RPM packages matching a pattern
+# Args:
+#   $1 - Package name pattern (regex)
 uninstall_rpms() {
     PKGS=$(rpm -qa --queryformat "%{Name}-%{Version}\n" | grep "^$1" || true)
     if [ -n "$PKGS" ]; then
         retry_wrapper sudo rpm -e "$PKGS"
     fi
 }
+
+# uninstall_debs: Remove Debian packages matching a pattern
+# Args:
+#   $1 - Package name pattern (regex)
 uninstall_debs() {
     PKGS=$(dpkg -l | tail -n+6 | awk '{print $2}' | grep "^$1" || true)
     if [ -n "$PKGS" ]; then
         retry_wrapper sudo dpkg --purge "$PKGS"
     fi
 }
+
+# uninstall_solaris_pkgs: Remove Solaris packages matching a pattern
+# Args:
+#   $1 - Package name pattern (regex)
 uninstall_solaris_pkgs() {
     PKGS=$(pkginfo | awk '{print $2}' | grep "^$1$" || true)
     if [ -n "$PKGS" ]; then
         retry_wrapper sudo /usr/sbin/pkgrm -n "$PKGS"
     fi
 }
+
+# uninstall_hpux_pkgs: Remove HP-UX packages matching a pattern
+# Args:
+#   $1 - Package name pattern (regex)
 uninstall_hpux_pkgs() {
     PKGS=$(swlist | awk '{print $1}' | grep "^$1$" || true)
 
@@ -176,6 +210,10 @@ uninstall_hpux_pkgs() {
         sudo /usr/sbin/swremove "$p"
     done
 }
+
+# uninstall_freebsd_pkgs: Remove FreeBSD packages matching a pattern
+# Args:
+#   $1 - Package name pattern (regex)
 uninstall_freebsd_pkgs() {
     PKGS=$(pkg_info | awk '{print $1}' | grep "^$1" || true)
     if [ -n "$PKGS" ]; then
@@ -183,6 +221,8 @@ uninstall_freebsd_pkgs() {
     fi
 }
 
+# uninstall_cfbuild: Remove all cfbuild packages (runtime and devel)
+# Uses the appropriate uninstall function based on $DEP_PACKAGING
 uninstall_cfbuild() {
     case "$DEP_PACKAGING" in
     rpm) uninstall_rpms 'cfbuild-.*' ;;
@@ -191,11 +231,14 @@ uninstall_cfbuild() {
     freebsd) uninstall_freebsd_pkgs 'cfbuild-.*' ;;
     hpux) uninstall_hpux_pkgs 'cfbuild-.*' ;;
     *)
-        echo "Unknown packaging system: $DEP_PACKAGING"
+        log_error "Unknown packaging system: $DEP_PACKAGING"
         exit 1
         ;;
     esac
 }
+
+# uninstall_cfbuild_devel: Remove cfbuild development packages
+# Uses the appropriate uninstall function based on $DEP_PACKAGING
 uninstall_cfbuild_devel() {
     case "$DEP_PACKAGING" in
     rpm) uninstall_rpms 'cfbuild-.*-devel' ;;
@@ -204,22 +247,34 @@ uninstall_cfbuild_devel() {
     freebsd) uninstall_freebsd_pkgs 'cfbuild-.*-devel' ;;
     hpux) uninstall_hpux_pkgs 'cfbuild-.*-devel' ;;
     *)
-        echo "Unknown packaging system: $DEP_PACKAGING"
+        log_error "Unknown packaging system: $DEP_PACKAGING"
         exit 42
         ;;
     esac
 }
+
+# query_pkg: Check if a package is installed
+# Args:
+#   $1 - Package name to query
+# Returns:
+#   0 if package is installed, 1 otherwise
 query_pkg() {
     case "$DEP_PACKAGING" in
     rpm) rpm -qa --provides | grep_q "^$1 " ;;
     deb) dpkg -s "$1" 2>&1 | grep_q '^Status: .*ok installed' ;;
     *)
-        echo "ERROR query_pkg not implemented for $DEP_PACKAGING"
+        log_error "query_pkg() not implemented for $DEP_PACKAGING"
         exit 1
         ;;
     esac
 }
 
+# run: Execute a command and log output, failing with log tail on error
+# Args:
+#   $1 - Descriptive name of the operation
+#   $@ - Command to execute
+# Output:
+#   Appends stdout/stderr to build-remote.log
 run() {
     NAME="$1"
     shift
@@ -227,22 +282,39 @@ run() {
     if "$@" >>"build-remote.log" 2>&1; then
         :
     else
-        echo "Failed. See the build-remote.log. Last lines are:"
+        log_error "$NAME failed. See the build-remote.log. Last lines are:"
         tail build-remote.log
         exit 1
     fi
 }
 
+# local_script_general: Execute a build script locally without log tail (see run())
+# Args:
+#   $1 - Script name (relative to build-scripts/)
+# Uses:
+#   $HOST - Passed as argument to script
 local_script_general() {
     SCRIPT="$1"
     "$BASEDIR/buildscripts/build-scripts/$SCRIPT" "$HOST"
 }
 
+# local_script: Execute a build script locally with log tail (see run())
+# Args:
+#   $1 - Script name (relative to build-scripts/)
+# Uses:
+#   $HOST - Passed as argument to script
 local_script() {
     SCRIPT="$1"
     run "$SCRIPT" "$BASEDIR/buildscripts/build-scripts/$SCRIPT" "$HOST"
 }
 
+# remote_script_general: Execute a build script on a remote host via SSH
+# Args:
+#   $1 - Script name (relative to build-scripts/)
+#   $2 - Login command (e.g., "ssh -o BatchMode=yes $HOST" or "sudo chroot $CHROOT_ROOT /run-in-home-dir.sh")
+#   $3 - Base directory on remote host
+# Exports:
+#   Various build environment variables to remote host
 remote_script_general() {
     SCRIPT="$1"
     LOGIN_COMMAND="$2"
@@ -285,11 +357,22 @@ remote_script_general() {
     (eval "$LOGIN_COMMAND" env "$ENVVARS" "$SCRIPT_BASEDIR"/buildscripts/build-scripts/"$SCRIPT")
 }
 
+# remote_script: Execute a build script on remote host with logging
+# Args:
+#   $1 - Script name (relative to build-scripts/)
+# Uses:
+#   $HOST - Remote hostname for SSH connection
 remote_script() {
     SCRIPT="$1"
     run "$SCRIPT" remote_script_general "$SCRIPT" "ssh -o BatchMode=yes $HOST" build
 }
 
+# projects_to_test: List CFEngine projects to test based on PROJECT and ROLE
+# Returns:
+#   Space-separated list of project names to stdout
+# Uses:
+#   $PROJECT - 'community' or 'enterprise'
+#   $ROLE - 'hub' or 'agent'
 projects_to_test() {
     if test "$PROJECT" = "community"; then
         echo "core masterfiles"
@@ -302,10 +385,18 @@ projects_to_test() {
     fi
 }
 
+# generate_chroot_transfer_script: Generate rsync filter rules for chroot creation
+#
 # This function generates a set of file-filtering rules to be used with the rsync --filter option.
 # The filtering rules lists files or directories that should be included (+) and excluded (-) when creating a chroot environment.
 # The chroot command is used to change the root directory for a process in order to test it in an isolated environment.
 # The first rule that matches a file or directory takes precedence over any subsequent.
+#
+# Returns:
+#   rsync filter rules to stdout
+# Uses:
+#   $OS_FAMILY - Operating system family (aix, solaris, linux, hpux, etc.)
+#   $PREFIX - Installation prefix to exclude
 generate_chroot_transfer_script() {
     # These rules are processed in a "first that matches" fashion.
 
@@ -376,7 +467,11 @@ EOF
     echo "- /*"
 }
 
-# One argument: Where to mount it.
+# mount_procfs: Mount the /proc filesystem in a chroot environment
+# Args:
+#   $1 - Mount point directory path
+# Uses:
+#   $OS - Operating system name
 mount_procfs() {
     case "$OS" in
     aix)
@@ -399,7 +494,10 @@ mount_procfs() {
 # Generic utility and portability functions
 #
 
-# Exit with an error. If error code is not specified, just "exit 1".
+# fatal: Exit with an error message and optional exit code
+# Args:
+#   $1 - Error message
+#   $2 - Exit code (optional, defaults to 1)
 # Examples:
 #     fatal "install failed" 42
 #     fatal "exiting with default error code"
@@ -408,18 +506,30 @@ fatal() {
     exit "${2-1}"
 }
 
+# log_info: Print an informational message to stderr
+# Args:
+#   $@ - Message to log
 log_info() {
-    echo "INFO:" "$@" 1>&2
+    echo "$(basename "$0"): info:" "$@" 1>&2
 }
 
-# Append a space and string $2 to variable $1, for example:
-# func_append V "blah" is equivalent to  V="$V blah".
+# var_append: Append a string to a variable with a space separator
+# Args:
+#   $1 - Variable name
+#   $2 - String to append
+# Example:
+#   var_append V "blah"  # equivalent to V="$V blah"
 var_append() {
     eval "$1=\$$1"\\ \$2
 }
 
-# Return True if string $2 exists in variable $1.
-# WARNING: $2 may not contain special characters like spaces etc.
+# var_contains: Check if a variable contains a specific string
+# Args:
+#   $1 - Variable name
+#   $2 - String to search for
+# Returns:
+#   0 if found, 1 if not found
+# WARNING: $2 may not contain special characters like spaces
 var_contains() {
     eval "case \$$1 in
         *\"$2\"*)  true  ;;
@@ -427,9 +537,13 @@ var_contains() {
     esac"
 }
 
-# Check that $1 command exists in PATH, and print its full path, else
-# return error.  If it has many arguments, continue to
-# check for $2 command, etc, before giving up.
+# func_which: Find command in PATH and print its full path
+# Args:
+#   $@ - Command names to search for (tries each in order)
+# Returns:
+#   0 and prints first path found (stops search), 1 if not found
+# Example:
+#   func_which gcc cc  # tries gcc first, then cc
 func_which() {
     while [ x"$1" != x ]; do
         if command -v "$1" 2>/dev/null; then
@@ -440,8 +554,13 @@ func_which() {
     return 1
 }
 
-# Same as func_which, but search for $1 command in all possible paths,
-# not only PATH. If not found, search for $2, etc.
+# func_whereis: Find command in PATH and SECONDARY_PATHS
+# Args:
+#   $@ - Command names to search for (tries each in order)
+# Returns:
+#   0 and prints path if found, 1 if not found
+# Uses:
+#   $SECONDARY_PATHS - Additional directories to search
 func_whereis() {
     while [ x"$1" != x ]; do
         # First, search in PATH
@@ -462,7 +581,14 @@ func_whereis() {
     return 1
 }
 
-# Only works as mktemp -d /path/to/tmpdir.XXXX
+# func_mktemp: Create a temporary directory
+# Args:
+#   $1 - Must be "-d" flag
+#   $2 - Template path with XXXX pattern (e.g., /tmp/dir.XXXX)
+# Returns:
+#   Path to created directory
+# Note:
+#   Fallback implementation for systems without mktemp command
 func_mktemp() {
     # Only works as mktemp -d
     [ "$1" != -d ] && fatal "func_mktemp: error, first argument must be -d"
@@ -489,8 +615,13 @@ func_mktemp() {
     fi
 }
 
-# mktempdir TEMPLATE
-# Example: mktempdir /tmp/dir.XXXXXX
+# mktempdir: Portable wrapper for creating temporary directories
+# Args:
+#   $1 - Template path with XXXX pattern (e.g., /tmp/dir.XXXXXX)
+# Returns:
+#   Path to created directory
+# Example:
+#   mktempdir /tmp/dir.XXXXXX
 mktempdir() {
     [ "$1" = "" ] && fatal "mktempdir: TEMPLATE directory argument missing"
 
@@ -505,7 +636,11 @@ mktempdir() {
     $my_mktemp -d "$1"
 }
 
-# Print the sha256sum of $1 or stdin.
+# func_sha256: Calculate SHA-256 hash in a platform independent way
+# Args:
+#   $1 - File to hash (optional, uses stdin if omitted)
+# Returns:
+#   SHA-256 hash as hexadecimal string
 func_sha256() {
     if func_which sha256sum >/dev/null; then
         sha256sum "$@" | cut -d ' ' -f 1
@@ -518,7 +653,13 @@ func_sha256() {
     fi
 }
 
-# Decompresses $1 or stdin to stdout
+# func_decompress: Decompress files to stdout based on file extension
+# Args:
+#   $1 - File to decompress (or uses stdin if omitted)
+# Returns:
+#   Decompressed content to stdout
+# Supported:
+#   .gz, .tgz (gzip), .bz2 (bzip2)
 func_decompress() {
     case "$1" in
     *.gz | *.tgz) gzip -dc "$@" ;;
@@ -528,9 +669,14 @@ func_decompress() {
     esac
 }
 
-# retry_wrapper: This function tries to execute the given command,
-#                retrying in case of failure.
-# WARNING: do not pipe the output as stdout is altered!
+# retry_wrapper: Execute a command with automatic retries on failure
+# Args:
+#   $@ - Command to execute with arguments
+# Returns:
+#   0 on success, last exit code on final failure
+# Retries:
+#   Up to 5 attempts with 30 second pauses
+# WARNING: Do not pipe the output as stdout is altered!
 retry_wrapper() {
     operation="$*"
     [ "$operation" = "" ] && fatal "retry_wrapper: no arguments"
@@ -564,6 +710,9 @@ retry_wrapper() {
     return "$err_ret"
 }
 
+# rm_if_empty: Remove a file if it exists and is empty
+# Args:
+#   $1 - Path to file to check and potentially remove
 rm_if_empty() {
     if [ -f "$1" ] && [ ! -s "$1" ]; then
         echo "Removing empty file: $1" 1>&2
@@ -571,8 +720,13 @@ rm_if_empty() {
     fi
 }
 
-# Use this function on verbose commands to silence the output unless it returns
-# a non-zero exit code
+# run_and_print_on_failure: Run command and only show output on failure or warnings
+# Args:
+#   $@ - Command to execute with arguments
+# Returns:
+#   Exit code from command
+# Output:
+#   Normally silent; shows warnings/errors on success, full output on failure
 run_and_print_on_failure() {
     # shellcheck disable=SC3043
     local temp_output_file
@@ -616,10 +770,16 @@ run_and_print_on_failure() {
     return $exit_code
 }
 
+# log_debug: Print a debug message with script name prefix
+# Args:
+#   $@ - Debug message
 log_debug() {
     echo "$(basename "$0"): debug:" "$@"
 }
 
+# log_error: Print an error message to stderr with script name prefix
+# Args:
+#   $@ - Error message
 log_error() {
     echo "$(basename "$0"): error:" "$@" >&2
 }
