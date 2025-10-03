@@ -420,66 +420,6 @@ solaris)
     log_debug "Creating final package with pkgtrans"
     pkgtrans -o -s "$BASEDIR/$PKG/pkg" "$BASEDIR/$PKG/$NAME" "CFE$PKG"
     ;;
-freebsd)
-    # FreeBSD package creation
-    log_debug "Creating FreeBSD package for $PKG"
-
-    # Prepare clean packaging directory
-    log_debug "Preparing clean packaging directory"
-    rm -rf "$BASEDIR/$PKG/pkg"
-    mkdir -p "$BASEDIR/$PKG/pkg$PREFIX"
-
-    # Copy package metadata and CFEngine files
-    log_debug "Copying package metadata and CFEngine files"
-    cp -pr "$P/freebsd"/* "$BASEDIR/$PKG/pkg/"
-    cp -pr "$BASEDIR/cfengine/dist$PREFIX"/* "$BASEDIR/$PKG/pkg$PREFIX"
-    cp -pr "$PREFIX/bin"/* "$BASEDIR/$PKG/pkg$PREFIX/bin"
-    cp -pr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib"
-
-    cd "$BASEDIR/$PKG/pkg"
-
-    # Generate package packing list (pkg-plist)
-    log_debug "Generating FreeBSD packing list"
-    echo "@comment pkg-plist,v 1.00 $(date)" >>pkg-plist
-    echo "@comment ORIGIN:sysutils/cfengine-nova" >>pkg-plist
-    pkgdir="$BASEDIR/$PKG/pkg/"
-
-    # Add all files to packing list (excluding metadata files)
-    for f in $(find "$BASEDIR/$PKG/pkg/" | grep -Ev 'pkg-comment|pkg-descr|pkg-plist.foot|pkg-plist'); do
-        destf="${f#"$pkgdir"}"
-        if [ -f "$destf" ]; then
-            echo "$destf" >>pkg-plist
-        fi
-    done
-
-    # Append footer to packing list
-    cat pkg-plist.foot >>pkg-plist
-
-    # Create initial FreeBSD package
-    log_debug "Creating initial FreeBSD package with pkg_create"
-    /usr/sbin/pkg_create -j -f "${pkgdir}/pkg-plist" -c "${pkgdir}/pkg-comment" -d "${pkgdir}/pkg-descr" -p "${pkgdir}" "${pkgdir}/cfengine-nova-$VERSION$safe_prefix\_1.tbz"
-
-    cd "$pkgdir/"
-
-    # Repackage with corrected paths
-    log_debug "Repackaging with corrected paths"
-    # Extract the created package
-    tar xvf "cfengine-nova-$VERSION\_1.tbz"
-
-    # Fix the CONTENTS file to use root as base directory
-    head -n 2 ./+CONTENTS >plist-head
-    sed '1,3d' ./+CONTENTS >tmp
-    rm ./+CONTENTS
-    cat plist-head >CONTENTS
-    echo "@cwd /" >>CONTENTS # Set current working directory to root
-    cat tmp >>CONTENTS
-    rm plist-head tmp
-    mv CONTENTS ./+CONTENTS
-
-    # Recreate the package with corrected paths
-    log_debug "Creating final FreeBSD package"
-    tar cjvf "cfengine-nova-$VERSION\_1.tbz" +CONTENTS +DESC +COMMENT -- *
-    ;;
 hpux)
     # HP-UX depot package creation
     log_debug "Creating HP-UX depot package for $PKG"
