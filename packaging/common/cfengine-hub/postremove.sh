@@ -26,10 +26,12 @@ if [ -f /usr/lib64/php5/extensions/cfmod.so ]; then
     rm -f /usr/lib64/php5/extensions/cfengine-enterprise-api.so
 fi
 
-for i in cf-agent cf-key cf-secret cf-promises cf-execd cf-serverd cf-monitord cf-net cf-check cf-support;
-do
+if [ `os_type` != redhat ]; then
+  # These links are handled in .spec file for RedHat
+  for i in cf-agent cf-key cf-secret cf-promises cf-execd cf-serverd cf-monitord cf-net cf-check cf-support; do
     rm -f /usr/local/sbin/$i || true
-done
+  done
+fi
 
 # unload SELinux policy if not upgrading
 if ! is_upgrade; then

@@ -77,6 +77,14 @@ rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-hub.service
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-reactor.service
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-postgres.service
 
+# Create symlinks to /usr/local/sbin and /usr/sbin
+mkdir -p $RPM_BUILD_ROOT/usr/local/sbin
+mkdir -p $RPM_BUILD_ROOT/usr/sbin
+for binary in cf-agent cf-check cf-execd cf-key cf-monitord cf-net cf-promises cf-runagent cf-secret cf-serverd cf-support; do
+  ln -sf %{prefix}/bin/$binary $RPM_BUILD_ROOT/usr/local/sbin/$binary
+  ln -sf %{prefix}/bin/$binary $RPM_BUILD_ROOT/usr/sbin/$binary
+done
+
 %clean
 #rm -rf $RPM_BUILD_ROOT
 
@@ -155,6 +163,33 @@ rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-postgres.service
 /usr/lib/systemd/system/cf-execd.service
 /usr/lib/systemd/system/cf-monitord.service
 /usr/lib/systemd/system/cf-serverd.service
+
+# Symlinks to /usr/local/sbin (backward compatibility)
+%defattr(755,root,root,755)
+/usr/local/sbin/cf-agent
+/usr/local/sbin/cf-check
+/usr/local/sbin/cf-execd
+/usr/local/sbin/cf-key
+/usr/local/sbin/cf-monitord
+/usr/local/sbin/cf-net
+/usr/local/sbin/cf-promises
+/usr/local/sbin/cf-runagent
+/usr/local/sbin/cf-secret
+/usr/local/sbin/cf-serverd
+/usr/local/sbin/cf-support
+
+# Symlinks to /usr/sbin (included in secure_path)
+/usr/sbin/cf-agent
+/usr/sbin/cf-check
+/usr/sbin/cf-execd
+/usr/sbin/cf-key
+/usr/sbin/cf-monitord
+/usr/sbin/cf-net
+/usr/sbin/cf-promises
+/usr/sbin/cf-runagent
+/usr/sbin/cf-secret
+/usr/sbin/cf-serverd
+/usr/sbin/cf-support
 
 # Documentation
 %defattr(644,root,root,755)

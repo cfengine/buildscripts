@@ -276,7 +276,8 @@ for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord c
          cf-net cf-check cf-support \
          cfbs;
 do
-  if [ -f $PREFIX/bin/$i -a -d /usr/local/sbin ]; then
+  if [ `os_type` != redhat ] && [ -x $PREFIX/bin/$i ] && [ -d /usr/local/sbin ]; then
+    # These links are handled in .spec file for RedHat
     ln -sf $PREFIX/bin/$i /usr/local/sbin/$i || true
   fi
   if [ -f /usr/share/man/man8/$i.8.gz ]; then
