@@ -578,6 +578,7 @@ func_whereis() {
         # Command $1 not found, search for next argument
         shift
     done
+    log_error "Could not find any of commands $@"
     return 1
 }
 
