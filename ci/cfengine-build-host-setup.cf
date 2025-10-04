@@ -143,6 +143,9 @@ bundle agent cfengine_build_host_setup
     (redhat_9).(yum_dnf_conf_ok)::
       "perl-Sys-Hostname" comment => "Needed by __04_examples_outputs_check_outputs_cf";
 
+    (redhat_10).(yum_dnf_conf_ok)::
+      "patch";
+
     suse|opensuse|sles::
       "binutils";
       "gdb";
