@@ -219,14 +219,7 @@ rpm | lpp)
 
     # Link all packaging files (except spec files) to SOURCES directory
     log_debug "Linking packaging files to SOURCES directory"
-    # shellcheck disable=SC2044
-    # TODO: CFE-4584
-    for i in $(find "$BASEDIR/buildscripts/packaging/$PKG" ! -name "*.spec"); do
-        (
-            cd "$BASEDIR/$PKG/SOURCES"
-            ln -sf "$i" .
-        ) || false
-    done
+    find "$BASEDIR/buildscripts/packaging/$PKG" ! -name "*.spec" -exec ln -sf {} "$BASEDIR/$PKG/SOURCES" \;
 
     # Build the RPM package using rpmbuild
     # eval is needed to preserve spaces in arguments within quotes
