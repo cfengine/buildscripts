@@ -22,6 +22,7 @@ endif
 build: build-stamp
 build-stamp:
 	dh_testdir
+	patch -p1 < $(CURDIR)/_set_printf_count_output.patch
 
 	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
