@@ -1,0 +1,14 @@
+diff -ruN openssl-3.6.0/include/internal/numbers.h openssl-3.6.0-modified/include/internal/numbers.h
+--- openssl-3.6.0/include/internal/numbers.h	2025-10-01 14:11:48.000000000 +0200
++++ openssl-3.6.0-modified/include/internal/numbers.h	2025-10-07 13:12:00.081227741 +0200
+@@ -106,6 +106,10 @@
+ #  define OSSL_UINTMAX_MAX __MAXUINT__(ossl_uintmax_t)
+ # endif
+ 
++# ifndef LLONG_MAX
++#  define LLONG_MAX __MAXINT__(long long)
++# endif
++
+ /* Fix for cross compiling 64-bit PowerPC on OS X 10.4 */
+ # if defined(__APPLE__) && defined(_ARCH_PPC64)
+ #  ifdef SIZE_MAX
