@@ -139,7 +139,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.33 | 0.9.33 | 0.9.33 |                          |
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.10 | 2.6.10 | 2.6.10 | Enterprise agent only    |
-| [OpenSSL](https://openssl.org/)                                                   | 3.0.17 | 3.5.3  | 3.6.0  |                          |
+| [OpenSSL](https://openssl.org/)                                                   | 3.0.17 | 3.6.0  | 3.6.0  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | 8.45   | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.46  | 10.46  |                          |
 | [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
