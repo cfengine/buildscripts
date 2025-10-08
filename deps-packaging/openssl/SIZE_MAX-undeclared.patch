@@ -1,0 +1,11 @@
+diff -ruN openssl-3.0.18/crypto/evp/bio_ok.c openssl-3.0.18-modified/crypto/evp/bio_ok.c
+--- openssl-3.0.18/crypto/evp/bio_ok.c	2025-09-30 15:12:07.000000000 +0200
++++ openssl-3.0.18-modified/crypto/evp/bio_ok.c	2025-10-08 18:21:10.258670389 +0200
+@@ -78,6 +78,7 @@
+ #include <openssl/rand.h>
+ #include "internal/endian.h"
+ #include "crypto/evp.h"
++#include "internal/numbers.h"   /* includes SIZE_MAX */
+ 
+ static int ok_write(BIO *h, const char *buf, int num);
+ static int ok_read(BIO *h, char *buf, int size);
