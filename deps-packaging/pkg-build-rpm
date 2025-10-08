@@ -112,6 +112,10 @@ fi
 # example cmd --define 'a b':
 #     - argv[1] = --define
 #     - argv[2] = a b
+
+# We have /var/cfengine/lib in RPATHS which should be OK
+# but maybe a bug in check-rpaths? https://github.com/rpm-software-management/rpm/issues/3982
+export QA_RPATHS=$(( 0x0001|0x0002 ))
 eval rpmbuild -bb \
   --define "'_topdir $BASEDIR/$PKGNAME'" \
   --define "'version $VERSION'" \
