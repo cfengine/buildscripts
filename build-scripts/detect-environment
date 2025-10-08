@@ -39,11 +39,12 @@ detect_cross_target() {
 }
 
 # This function exports operating system specific variables:
-#  - OS          usually contains a specific distribution (e.g. Debian)
-#  - OS_VERSION  operating system version (but is not always defined)
+#  - OS                usually contains a specific distribution (e.g. Debian)
+#  - OS_VERSION        operating system version (but is not always defined)
+#  - OS_VERSION_MAJOR  the major (first part of) operating system version (defined if OS_VERSION is)
 #
 # Furthermore, the following variable is set, but it's not exported:
-#  - OS_FAMILY   usually contains the kernel name (e.g. Linux)
+#  - OS_FAMILY         usually contains the kernel name (e.g. Linux)
 detect_os() {
     case "$CROSS_TARGET" in
     '')
@@ -106,8 +107,13 @@ detect_os() {
         ;;
     esac
 
+    # Extract major version from OS_VERSION (e.g. 16.04 -> 16, 7.0 -> 7, 10.2.3 -> 10)
+    if [ -n "$OS_VERSION" ]; then
+        OS_VERSION_MAJOR="${OS_VERSION%%.*}"
+    fi
+
     log_debug "Detected OS $OS $OS_VERSION"
-    export OS OS_VERSION
+    export OS OS_VERSION OS_VERSION_MAJOR
 }
 
 # The uname command does not reveal the specific distribution on Linux. Hence,

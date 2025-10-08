@@ -90,7 +90,7 @@ yes)
 esac
 
 # RHEL 8 requires an SELinux policy
-if [ "$OS" = "rhel" ] && [ "${OS_VERSION%\.*}" -gt "7" ]; then
+if [ "$OS" = "rhel" ] && [ "$OS_VERSION_MAJOR" -ge "8" ]; then
     var_append ARGS "--with-selinux-policy"
 fi
 
