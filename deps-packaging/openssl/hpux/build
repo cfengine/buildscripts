@@ -10,6 +10,7 @@ OSD=${BUILD_ROOT}/cfbuild-openssl-devel${PREFIX}
 # To pick up libgcc_s.so.1, which is apparently not in dyld path.
 export LD_LIBRARY_PATH=$PREFIX/lib
 
+$PATCH -p1 < fixed-undeclared-identifier.patch
 
 # Configure
 
