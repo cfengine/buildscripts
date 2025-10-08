@@ -59,13 +59,11 @@ chroot)
         ubuntu)
             # gpg-agent sometimes is spawned on Ubuntu 24 during our tests.
             # This happens only in chroot. Ignore that.
-            case "$OS_VERSION" in
-            24*)
+            if [ "$OS_VERSION_MAJOR" = "24" ]; then
                 if ps -o command --pid "$pid" | grep "gpg-agent --homedir /etc/apt/sources.list.d/.gnupg-temp --use-standard-socket --daemon"; then
                     continue
                 fi
-                ;;
-            esac
+            fi
             ;;
         esac
 

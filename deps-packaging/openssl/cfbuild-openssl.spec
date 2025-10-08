@@ -55,7 +55,7 @@ fi
 HACK_FLAGS=
 if [ $OS = centos ]  ||  [ $OS = rhel ]
 then
-    if [ `echo $OS_VERSION | cut -d. -f1` = 4 ]
+    if [ "$OS_VERSION_MAJOR" = "4" ]
     then
         HACK_FLAGS=-D_GNU_SOURCE                              # CentOS 4 issue
     fi

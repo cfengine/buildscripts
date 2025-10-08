@@ -24,7 +24,7 @@ mkdir -p %{_builddir}
 
 case "$OS" in
     rhel|centos)
-        if [ $(echo $OS_VERSION | cut -d. -f1) = 7 ]
+        if [ "$OS_VERSION_MAJOR" = "7" ]
         then
             # Fixes the following compilation error on rhel 7:
             # 15:05:28 compat/posix.h:159:24: fatal error: sys/random.h: No such file or directory
