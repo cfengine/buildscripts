@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
 
+ready_flag=/etc/cfengine-buildhost-ready.flag
+if [ -f "$ready_flag" ]; then
+  echo "Found $ready_flag file so skipping build host setup script and policy."
+  exit 0
+fi
+
 # Use the newest CFEngine version we can
 CFE_VERSION=3.26.0
 if [ -f /etc/centos-release ]; then
