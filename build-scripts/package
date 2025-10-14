@@ -298,15 +298,12 @@ deb)
         log_debug "Development DEB version: $DEB_VERSION"
     fi
 
-    # Extract major version from OS_VERSION (e.g., 16.04 -> 16, 7.0 -> 7)
-    # This is appended to package name for OS-specific builds
-    # TODO: Define this in detect-environment script (CFE-4586)
-    os_version_major="${OS_VERSION%%.*}"
-    log_debug "OS version major: $os_version_major"
+    # The OS major version is appended to package name for OS-specific builds
+    log_debug "OS version major: $OS_VERSION_MAJOR"
 
     # Generate debian changelog with version info
     log_debug "Generating debian changelog"
-    sed -e "s/@@VERSION@@/$DEB_VERSION$safe_prefix.$OS$os_version_major/" "$BASEDIR/$PKG/pkg/debian/changelog.in" >"$BASEDIR/$PKG/pkg/debian/changelog"
+    sed -e "s/@@VERSION@@/$DEB_VERSION$safe_prefix.$OS$OS_VERSION_MAJOR/" "$BASEDIR/$PKG/pkg/debian/changelog.in" >"$BASEDIR/$PKG/pkg/debian/changelog"
 
     # Generate debian package maintainer scripts
     log_debug "Generating debian maintainer scripts"
