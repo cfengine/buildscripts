@@ -17,7 +17,7 @@
 # The script can be run as described in the usage message below:
 
 usage() {
-  echo "Usage: PROJECT=[nova|community] EXPLICIT_ROLE=[hub|agent] BUILD_TYPE=[DEBUG|RELEASE] $0"
+    echo "Usage: PROJECT=[nova|community] EXPLICIT_ROLE=[hub|agent] BUILD_TYPE=[DEBUG|RELEASE] $0"
 }
 
 . "$(dirname "$0")"/functions
