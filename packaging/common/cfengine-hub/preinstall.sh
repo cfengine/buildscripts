@@ -15,8 +15,8 @@ if is_upgrade; then
     fi
 fi
 
-# When PostgreSQL changes major version we need to migrate. CFEngine 3.25 uses PostgreSQL 17.0 so any version 3.24 or older needs migration.
-if is_upgrade && egrep '^3\.([6-9]|1[0-9]|2[0-4])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
+# When PostgreSQL changes major version we need to migrate. CFEngine 3.27 uses PostgreSQL 18.0 so any version 3.26 or older needs migration.
+if is_upgrade && egrep '^3\.([6-9]|1[0-9]|2[0-6])\.' "$PREFIX/UPGRADED_FROM.txt" >/dev/null && [ -d "$PREFIX/state/pg/data" ]; then
   alias migrating_postgres='true'
 else
   alias migrating_postgres='false'
