@@ -6,6 +6,7 @@
 # type = <deb|rpm|depot|bff|pkg>
 # action = <install|remove>
 #
+# script-header.sh
 # <type>-script-common.sh
 # <type>-script-common-<action>.sh
 # script-common.sh
@@ -33,6 +34,7 @@ include_script()
   fi
 }
 
+include_script "$TEMPLATEDIR/script-header.sh"
 include_script "$TEMPLATEDIR/$PKG_TYPE-script-common.sh"
 
 case "$PKG_TYPE" in
