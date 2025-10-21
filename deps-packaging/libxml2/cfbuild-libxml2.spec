@@ -35,7 +35,6 @@ fi
 
 %build
 
-patch -p1 < %{_topdir}/SOURCES/no-arg-in-deprecated.patch
 make
 
 %install
