@@ -15,9 +15,6 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	#patch -p1 < ../xx
-	#patch -p1 < ../yy
-
 	make -f win32/Makefile.gcc PREFIX=$(DEB_HOST_GNU_TYPE)-
 
 	touch build-stamp
