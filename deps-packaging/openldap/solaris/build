@@ -9,8 +9,6 @@ OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
 
 # Patch
 
-#patch -p0 -i configure.patch configure
-
 # Configure
 
 ./configure --prefix=$PREFIX --enable-shared --disable-slapd --disable-backends \
