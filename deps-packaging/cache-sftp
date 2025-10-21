@@ -106,11 +106,6 @@ main()
             fatal  "$MYNAME $cmd:  requires exactly one word as argument: dirname"  2
         fi
 
-        # case "$dirname" in
-        #     *)   basedirname=.                ;  leafdirname="$dirname"       ;;
-        #     */*) basedirname="${filename%/*}" ;  leafdirname="${dirname##*/}" ;;
-        # esac
-
         # Canonicalised dirname
         canondirname=`echo $dirname | sed 's|/|_|g'`
 
