@@ -56,9 +56,7 @@ jobs:
           title: "Updated dependencies (${{ matrix.branch }})"
           body: "Automated dependency updates for the ${{ matrix.branch }} branch"
           reviewers: |
-            olehermanse
             larsewi
             craigcomstock
-            aleksandrychev
           branch: update-dependencies-action-${{ matrix.branch }}
           branch-suffix: timestamp

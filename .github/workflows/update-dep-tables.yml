@@ -46,7 +46,6 @@ jobs:
           title: Updated Markdown dependency tables
           body: Automated updates to the README.md Markdown dependency tables using [the `update_dep_tables` workflow](https://github.com/cfengine/buildscripts/blob/master/.github/workflows/update-dep-tables.yml).
           reviewers: |
-            olehermanse
             larsewi
             craigcomstock
           branch: update-dependency-tables
