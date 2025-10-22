@@ -1,4 +1,4 @@
-%define libxml_version 2.15.0
+%define libxml_version 2.15.1
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
@@ -35,7 +35,6 @@ fi
 
 %build
 
-patch -p1 < %{_topdir}/SOURCES/no-arg-in-deprecated.patch
 make
 
 %install
