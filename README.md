@@ -135,7 +135,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libcurl](https://curl.se/download.html)                                          | 8.16.0 | 8.16.0 | 8.16.0 |                          |
 | [libgnurx](https://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.18   | 1.18   | 1.18   | Needed by libxml2        |
-| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.0 | 2.15.0 | 2.15.1 |                          |
+| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.1 | 2.15.1 | 2.15.1 |                          |
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.33 | 0.9.33 | 0.9.33 |                          |
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.10 | 2.6.10 | 2.6.10 | Enterprise agent only    |
@@ -155,7 +155,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [Apache](https://httpd.apache.org/)                 | 2.4.65 | 2.4.65 | 2.4.65 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
-| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.51.0 | 2.51.0 | 2.51.1 |
+| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.51.1 | 2.51.1 | 2.51.1 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.3  | 2.7.3  |
 | [PHP](https://php.net/)                             | 8.3.26 | 8.3.26 | 8.4.13 |
 | [PostgreSQL](https://www.postgresql.org/)           | 15.14  | 16.10  | 18.0   |
