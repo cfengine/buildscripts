@@ -1,4 +1,4 @@
-name: shellcheck
+name: Lint with shellcheck
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  check:
+  lint:
     runs-on: ubuntu-latest
     permissions:
       contents: read
