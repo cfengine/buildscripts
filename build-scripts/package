@@ -178,6 +178,8 @@ case "$PACKAGING" in
     #     - argv[2] = a b
     # Also note that $RPMBUILD_OPTIONS might have spaces
     # which must be preserved
+    # rhel-10 rpmbuild is more picky about /var/cfengine/lib RPATH we need
+    export QA_RPATHS=2 # this is a set of bit flags, we just want 0x0002 here
     eval "$RPMBUILD_CMD" -bb \
       --define "'_topdir $BASEDIR/$PKG'" \
       --define "'buildprefix $BUILDPREFIX'" \
