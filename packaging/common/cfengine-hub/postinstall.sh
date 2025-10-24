@@ -997,10 +997,7 @@ chmod 0700 -R $PREFIX/httpd/htdocs/ldap/config
 
 # changed permissions and owner of PHP and JS dependencies
 chown root:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/vendor
-chown root:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/public/scripts/node_modules
-
 chmod -R ug=rX,o= $PREFIX/httpd/htdocs/vendor # 440 for files, 550 for dirs
-chmod -R ug=rX,o= $PREFIX/httpd/htdocs/public/scripts/node_modules
 
 ##
 # Start Apache server (and php-fpm if present)

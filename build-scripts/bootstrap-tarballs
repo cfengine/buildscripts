@@ -137,8 +137,8 @@ log_debug "Installing javascript npm dependencies..."
         run_and_print_on_failure npm ci --prefix "$BASEDIR"/mission-portal/public/scripts/
         # build react components
         run_and_print_on_failure npm run build --prefix "$BASEDIR"/mission-portal/public/scripts/
-        # remove the packages specified in devDependencies
-        run_and_print_on_failure npm prune --omit=dev --prefix "$BASEDIR"/mission-portal/public/scripts/
+        # remove node_modules since the bundles are already built
+        run_and_print_on_failure rm -rf "$BASEDIR"/mission-portal/public/scripts/node_modules
     fi
 )
 
