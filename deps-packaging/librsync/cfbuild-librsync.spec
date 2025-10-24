@@ -53,7 +53,6 @@ touch -t 0001010102 ar-lib
 ./configure --prefix=%{prefix} --enable-shared --disable-static
 
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/librsync.a
-rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/librsync.la
 
 %build
 
@@ -63,6 +62,7 @@ make
 rm -rf ${RPM_BUILD_ROOT}
 
 make install DESTDIR=${RPM_BUILD_ROOT}
+rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/librsync.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -91,7 +91,6 @@ CFEngine Build Automation -- librsync -- development files
 %{prefix}/include/*.h
 
 %dir %{prefix}/lib
-%{prefix}/lib/*.la
 %{prefix}/lib/pkgconfig
 
 %changelog

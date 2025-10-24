@@ -21,7 +21,6 @@ mkdir -p %{_builddir}
 ./configure --prefix=%{prefix} --enable-shared --disable-static
 
 rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libleech.a
-rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libleech.la
 
 %build
 
@@ -31,6 +30,7 @@ make
 rm -rf ${RPM_BUILD_ROOT}
 
 make install DESTDIR=${RPM_BUILD_ROOT}
+rm -f ${RPM_BUILD_ROOT}%{prefix}/lib/libleech.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -59,6 +59,5 @@ CFEngine Build Automation -- leech -- development files
 %{prefix}/include/*.h
 
 %dir %{prefix}/lib
-%{prefix}/lib/*.la
 
 %changelog
