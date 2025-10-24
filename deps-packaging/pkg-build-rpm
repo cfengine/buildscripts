@@ -76,11 +76,15 @@ if [ $TARGET != native ]; then
   exit 42
 fi
 
+# deps packages may result in binaries without debug symbols even when debugsym=yes aka BUILD_TYPE=DEBUG
+# to avoid rpmbuild errors when this occurs, allow empties
+RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define '_empty_manifest_terminate_build 0'"
+
 case "$TESTS" in
   no)
-    RPMBUILD_OPTIONS="--define 'with_testsuite 0'";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_testsuite 0'";;
   yes)
-    RPMBUILD_OPTIONS="--define 'with_testsuite 1'";;
+    RPMBUILD_OPTIONS="$RPMBUILD_OPTIONS --define 'with_testsuite 1'";;
   *)
     fatal "Unknown tests option: $TESTS";;
 esac
@@ -112,6 +116,12 @@ fi
 # example cmd --define 'a b':
 #     - argv[1] = --define
 #     - argv[2] = a b
+
+# We have /var/cfengine/lib in RPATHS which should be OK
+# We asked in https://github.com/rpm-software-management/rpm/issues/3982, and it seems allowing this is OK
+# 0x0002 - contains an invalid RPATH - in our case /var/cfengine/lib is OK so allow it as an exception
+# Here we only want to specify this one flag: 0x0002. Sadly these scripts run on POSIX shell (especially e.g. aix71 runs as /bin/sh which is ksh) so no bitwise operators. Add them together manually to a decimal integer.
+export QA_RPATHS=2 # 0x0002 all by itself, no &(ands)
 eval $RPMBUILD_CMD -bb \
   --define "'_system_ssl $SYSTEM_SSL'" \
   --define "'_topdir $BASEDIR/$PKGNAME'" \
