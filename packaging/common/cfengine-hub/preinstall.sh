@@ -136,7 +136,7 @@ fi
 if is_upgrade; then
   cf_console platform_service cfengine3 stop
   # CFE-2278: Migrate to split units
-  if [ -x /bin/systemctl ] && [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
+  if use_systemd && [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
     # When using systemd, the services are split in two, and although both will
     # stop due to the command above, the web part may only do so after some
     # delay, which may cause problems in an upgrade situation, since this script

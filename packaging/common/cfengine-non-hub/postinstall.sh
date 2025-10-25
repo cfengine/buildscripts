@@ -1,4 +1,4 @@
-if command -v systemctl 2>/dev/null && systemctl is-system-running; then
+if use_systemd; then
   # This is important in case any of the units have been replaced by the package
   # and we call them in the postinstall script.
   if ! /bin/systemctl daemon-reload; then
@@ -69,7 +69,7 @@ case `os_type` in
     #
     # Register CFEngine initscript, if not yet.
     #
-    if command -v systemctl 2>/dev/null && systemctl is-system-running; then
+    if use_systemd; then
       # Reload systemd config to pick up newly installed units
       /bin/systemctl daemon-reload > /dev/null 2>&1
       # Enable cfengine3 service (starts all the other services)
