@@ -56,8 +56,12 @@ chown -R jenkins /home/jenkins
 
 echo "checking for CFEngine install..."
 if [ -d /var/cfengine ]; then
-  echo "Error: CFEngine already installed on this host. Will not proceed trying to setup build host with CFEngine temporary install."
-  exit 1
+  echo "Found CFEngine install at /var/cfengine"
+  if ! /var/cfengine/bin/cf-agent -V; then
+    echo "Failed to run cf-agent -V, will exit."
+    exit 1
+  fi
+  echo "Found working cf-agent. Will proceed."
 fi
 
 function cleanup()
@@ -116,17 +120,21 @@ cd ..
 echo "Install any distribution upgrades"
 if [ -f /etc/os-release ]; then
   if grep rhel /etc/os-release; then
-    yum upgrade --assumeyes
+    yum update --assumeyes
+    alias software='yum install --assumeyes'
   elif grep debian /etc/os-release; then
     DEBIAN_FRONTEND=noninteractive apt upgrade --yes && DEBIAN_FRONTEND=noninteractive apt autoremove --yes
+    alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
   elif grep suse /etc/os-release; then
     zypper -n update
+    alias software='zypper install -y'
   else
     echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
     exit 1
   fi
 elif [ -f /etc/redhat-release ]; then
-  yum upgrade --assumeyes
+  yum update --assumeyes
+  alias software='yum install --assumeyes'
 else
   echo "No /etc/os-release or /etc/redhat-release so cant determine platform."
   exit 1
@@ -166,6 +174,28 @@ else
   chmod +x quick-install-cfengine-enterprise.sh
   export CFEngine_Enterprise_Package_Version="$CFE_VERSION"
   bash ./quick-install-cfengine-enterprise.sh agent
+fi
+
+# if cf-agent not installed, try cf-remote --version master
+if [ ! -x /var/cfengine/bin/cf-agent ]; then
+  echo "quick install didn't install cf-agent, try cf-remote"
+  # could try pipx or various package names for different distributions, or uv
+  if software pipx; then
+    pipx install cf-remote
+    export PATH=$HOME/.local/bin:$PATH
+    cf-remote --version master install --clients localhost
+  fi
+fi
+
+if [ ! -x /var/cfengine/bin/cf-agent ]; then
+  echo "quickinstall and cf-remote didn't install cf-agent, try from source"
+  CFE_VERSION=3.26.0 # need to use an actualy release which has a checksum for masterfiles download
+  rm -rf core # just in case we are repeating the script
+  git clone --recursive --depth 1 https://github.com/cfengine/core
+  (
+    cd core
+    ./ci/install.sh
+  )
 fi
 
 # get masterfiles
