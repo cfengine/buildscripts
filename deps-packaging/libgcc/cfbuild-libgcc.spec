@@ -32,7 +32,6 @@ if [ "$(uname -v)" -eq 7 ]; then
 else
   echo > libatomic-files
 fi
-#cp  /opt/freeware/lib/gcc/powerpc-ibm-aix*.0.0/4.*/libstdc++.a $RPM_BUILD_ROOT%{prefix}/lib/
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -51,7 +50,5 @@ rm -rf $RPM_BUILD_ROOT
 %dir %prefix/lib
 
 %prefix/lib/libgcc_s.a
-#%prefix/lib/libstdc++.a
-
 
 %changelog

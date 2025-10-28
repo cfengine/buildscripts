@@ -1,7 +1,7 @@
 Source: cfbuild-apache
 Section: libs
 Priority: optional
-Maintainer: CFEngine Packager <patuch@cfengine.com>
+Maintainer: CFEngine Packager <packager@cfengine.com>
 Build-Depends: debhelper
 Standards-Version: 3.8.4
 
@@ -16,4 +16,3 @@ Section: libdevel
 Architecture: any
 Description: CFEngine Build Automation -- cfbuild-apache-devel
  CFEngine Build Automation -- cfbuild-apache-devel
-

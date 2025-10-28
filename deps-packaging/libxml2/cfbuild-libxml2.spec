@@ -23,7 +23,7 @@ export PATH=/opt/freeware/bin:$PATH # to use newer version of tar on aix platfor
 
 SYS=`uname -s`
 
-if expr \( "z$SYS" = 'zAIX' \) \| \( "`cat /etc/redhat-release`" : '.* [45]\.' \)
+if expr \( "z$SYS" = 'zAIX' \)
 then
     mv configure configure.bak
     sed 's/ *-Wno-array-bounds//' configure.bak >configure

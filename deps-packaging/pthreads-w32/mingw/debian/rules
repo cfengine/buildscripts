@@ -14,8 +14,6 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	#patch -p1 < 0001-Fix-struct-timespec-redifinition-for-MinGW.patch
-	#patch -p1 < cvs-20120509.patch
 	make CROSS=$(DEB_HOST_GNU_TYPE)- LFLAGS="$(LDFLAGS)" clean GC-inlined
 
 	touch build-stamp
