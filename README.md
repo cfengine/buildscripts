@@ -141,7 +141,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.10 | 2.6.10 | 2.6.10 | Enterprise agent only    |
 | [OpenSSL](https://openssl.org/)                                                   | 3.0.18 | 3.6.0  | 3.6.0  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | 8.45   | -      | -      |                          |
-| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.46  | 10.46  |                          |
+| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | -      | 10.46  | 10.47  |                          |
 | [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 | [SASL2](https://www.cyrusimap.org/sasl/)                                          | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
 | [zlib](https://www.zlib.net/)                                                     | 1.3.1  | 1.3.1  | 1.3.1  |                          |
@@ -157,9 +157,9 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.51.1 | 2.51.1 | 2.51.1 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.3  | 2.7.3  |
-| [PHP](https://php.net/)                             | 8.3.26 | 8.3.26 | 8.4.13 |
+| [PHP](https://php.net/)                             | 8.3.26 | 8.3.26 | 8.4.14 |
 | [PostgreSQL](https://www.postgresql.org/)           | 15.14  | 16.10  | 18.0   |
-| [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.67.1 |
+| [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.68.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
 
 - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
