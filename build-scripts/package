@@ -227,7 +227,7 @@ rpm | lpp)
     log_debug "Building RPM package with rpmbuild"
     # rhel-10 rpmbuild is more picky about /var/cfengine/lib RPATH we need
     export QA_RPATHS=2 # this is a set of bit flags, we just want 0x0002 here
-    eval rpmbuild -bb \
+||||||| parent of 83ae5fa (Adjusted CFEngine package script to allow /var/cfengine/lib RPATH in binaries)
         --define "'_topdir $BASEDIR/$PKG'" \
         --define "'buildprefix $BUILDPREFIX'" \
         --define "'_basedir $BASEDIR'" \
