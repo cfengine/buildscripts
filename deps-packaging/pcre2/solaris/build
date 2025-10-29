@@ -9,7 +9,7 @@ PCD=${BUILD_ROOT}/cfbuild-pcre2-devel${PREFIX}
 
 # Configure
 
-./configure --prefix=${PREFIX} --enable-shared --disable-static
+./configure --prefix=${PREFIX} --enable-shared --disable-static --disable-symvers
 
 # Build
 
