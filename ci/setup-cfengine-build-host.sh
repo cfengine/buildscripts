@@ -80,9 +80,14 @@ function cleanup()
     echo "No supported package manager to uninstall cfengine."
     exit 1
   fi
-  echo "Ensuring CFEngine fully uninstalled/cleaned up"
-# keep these logs around for debugging failed setup runs
-#  rm -rf /var/cfengine /opt/cfengine /var/log/CFE* /var/log/postgresql.log || true
+  echo "Cleaning up CFEngine install by moving to /var/bak.cfengine and /opt/bak.cfengine"
+  rm -rf /var/bak.cfengine
+  mv /var/cfengine /var/bak.cfengine || true
+  rm -rf /opt/bak.cfengine
+  mv /opt/cfengine /opt/bak.cfengine || true
+  mv /var/log/CFE* /var/bak.cfengine/ ||| true
+  mv /var/log/postgresql.log /var/bak.cfengine || true
+
   if command -v pkill; then
     pkill -9 cf-agent || true
     pkill -9 cf-serverd || true
