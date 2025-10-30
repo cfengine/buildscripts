@@ -27,6 +27,6 @@
 # The `xargs` puts each line as the argument of `rm -rf` to remove the remaining
 # files
 
-(cd "${BASEDIR}/../../../output/${SCHEDULER}" &&
+(cd "${BASEDIR}/output/${SCHEDULER}" &&
     find . -mindepth 1 -maxdepth 1 -type d -and -not -name '.*' -printf '%T@ %f\n' |
     sort -n | head -n-5 | awk '{print $2}' | xargs --no-run-if-empty rm -rf) || true
