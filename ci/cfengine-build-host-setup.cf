@@ -14,8 +14,14 @@ bundle agent cfengine_build_host_setup
     ubuntu_20::
       "autoconf" comment => "because on arm ubuntu-20 we need to reconfigure the debian-9 bootstrapped configure scripts.";
       "shellcheck" comment => "not sure why only ubuntu-20 needed this.";
-    debian.(!debian_12.!ubuntu_22.!ubuntu_24)::
+    debian.(!debian_13.!debian_12.!ubuntu_22.!ubuntu_24.!ubuntu_25)::
       "python" comment => "debian>=12 and ubuntu>=22 only has python3";
+
+    debian_13|ubuntu_25::
+      "ntpsec";
+
+    debian.(!debian_13.!ubuntu_25)::
+      "ntp";
 
     debian|ubuntu::
       "libltdl7" package_policy => "delete";
@@ -33,10 +39,9 @@ bundle agent cfengine_build_host_setup
       "libexpat1-dev";
       "libmodule-load-conditional-perl";
       "libpam0g-dev";
-      "ntp";
       "pkg-config";
       "psmisc";
-      "python3-pip";
+      "python3-pip" comment => "this will bring in python3 if needed on debian>=12 and ubuntu>=22";
       "python3-psycopg2";
       "rsync" comment => "added for debian-10";
       "systemd-coredump" comment => "added step to jenkins testing-pr job to query for coredumps on failures";
