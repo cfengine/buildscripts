@@ -16,8 +16,9 @@ if test -f "mission-portal/public/scripts/package.json"; then
 	npm ci
 	# build react components
 	npm run build
-	# remove the packages specified in devDependencies
-	npm prune --omit=dev
+	# remove node_modules since the bundles are already built
+	# we do not need them to be presented in the package
+	rm -rf node_modules
 fi
 )
 
