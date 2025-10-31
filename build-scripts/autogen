@@ -67,8 +67,8 @@ done
 
 # Create revision files (containing the N first hex decimals from the last
 # commit of the current branch)
-./"$(dirname "$0")/revision-file"
+"$(dirname "$0")/revision-file"
 
 # Compare versions between the CFEngine repositories to make sure they
 # match
-./"$(dirname "$0")/compare-versions"
+"$(dirname "$0")/compare-versions"
