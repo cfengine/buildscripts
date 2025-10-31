@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
+thisdir="$(dirname "$0")"
 
 # Use the newest CFEngine version we can
 CFE_VERSION=3.26.0
@@ -97,19 +98,20 @@ trap cleanup SIGTERM
 
 echo "Using buildscripts commit:"
 # we have very old platforms with old git that doesn't understand -C option so cd/cd .. it is
-cd buildscripts
-# buildscripts is owned by jenkins so in order to run rev-parse command as root (this script is run with sudo) we must make it safe if git is used
-if [ -d /home/jenkins/buildscripts/.git ]; then
-  if command -v git >/dev/null; then
-    git config --global --add safe.directory /home/jenkins/buildscripts
-    # show what version of buildscripts we are using
-    git rev-parse HEAD
-  else
-    echo "buildscripts/.git is present but git is not installed"
-    exit 1
+(
+  cd "$thisdir"/..
+  # buildscripts is owned by jenkins so in order to run rev-parse command as root (this script is run with sudo) we must make it safe if git is used
+  if [ -d /home/jenkins/buildscripts/.git ]; then
+    if command -v git >/dev/null; then
+      git config --global --add safe.directory /home/jenkins/buildscripts
+      # show what version of buildscripts we are using
+      git rev-parse HEAD
+    else
+      echo "buildscripts/.git is present but git is not installed"
+      exit 1
+    fi
   fi
-fi
-cd ..
+)
 
 echo "Install distribution upgrades and set software alias for platform"
 if [ -f /etc/os-release ]; then
@@ -166,11 +168,11 @@ if ! /var/cfengine/bin/cf-agent -V; then
     urlget https://s3.amazonaws.com/cfengine.packages/quick-install-cfengine-enterprise.sh
     # log sha256 checksum expected and actuall for debugging purposes
     echo "Expected quick install checksum: "
-    cat ./buildscripts/ci/quick-install-cfengine-enterprise.sh.sha256
+    cat "$thisdir"/quick-install-cfengine-enterprise.sh.sha256
     echo "Actual quick install checksum: "
     sha256sum quick-install-cfengine-enterprise.sh
   
-    sha256sum --check ./buildscripts/ci/quick-install-cfengine-enterprise.sh.sha256
+    sha256sum --check "$thisdir"/quick-install-cfengine-enterprise.sh.sha256
     chmod +x quick-install-cfengine-enterprise.sh
     export CFEngine_Enterprise_Package_Version="$CFE_VERSION"
     bash ./quick-install-cfengine-enterprise.sh agent
@@ -208,7 +210,7 @@ fi
 # get masterfiles
 urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-"$CFE_VERSION"/misc/cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz
 
-sha256sum --check ./buildscripts/ci/cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz.sha256
+sha256sum --check "$thisdir"/cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz.sha256
 
 tar xf cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz
 cp -a masterfiles/* /var/cfengine/inputs/
