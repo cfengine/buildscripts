@@ -85,7 +85,7 @@ function cleanup()
   mv /var/cfengine /var/bak.cfengine || true
   rm -rf /opt/bak.cfengine
   mv /opt/cfengine /opt/bak.cfengine || true
-  mv /var/log/CFE* /var/bak.cfengine/ ||| true
+  mv /var/log/CFE* /var/bak.cfengine/ || true
   mv /var/log/postgresql.log /var/bak.cfengine || true
 
   if command -v pkill; then
