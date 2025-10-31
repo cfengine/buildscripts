@@ -14,8 +14,14 @@ bundle agent cfengine_build_host_setup
     ubuntu_20::
       "autoconf" comment => "because on arm ubuntu-20 we need to reconfigure the debian-9 bootstrapped configure scripts.";
       "shellcheck" comment => "not sure why only ubuntu-20 needed this.";
-    debian.(!debian_12.!ubuntu_22.!ubuntu_24)::
+    debian.(!debian_13.!debian_12.!ubuntu_22.!ubuntu_24.!ubuntu_25)::
       "python" comment => "debian>=12 and ubuntu>=22 only has python3";
+
+    debian_13|ubuntu_25::
+      "ntpsec";
+
+    debian.(!debian_13.!ubuntu_25)::
+      "ntp";
 
     debian|ubuntu::
       "libltdl7" package_policy => "delete";
@@ -33,10 +39,9 @@ bundle agent cfengine_build_host_setup
       "libexpat1-dev";
       "libmodule-load-conditional-perl";
       "libpam0g-dev";
-      "ntp";
       "pkg-config";
       "psmisc";
-      "python3-pip";
+      "python3-pip" comment => "this will bring in python3 if needed on debian>=12 and ubuntu>=22";
       "python3-psycopg2";
       "rsync" comment => "added for debian-10";
       "systemd-coredump" comment => "added step to jenkins testing-pr job to query for coredumps on failures";
@@ -114,10 +119,10 @@ bundle agent cfengine_build_host_setup
       "perl-Data-Dumper";
       "perl-Digest-MD5";
 
-    (redhat_7|centos_7|redhat_9).(yum_dnf_conf_ok)::
+    (redhat_7|centos_7|redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "python3-pip";
 
-    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "perl-ExtUtils-MakeMaker";
       "perl-IO-Compress" comment => "provides perl(IO::Uncompress::Gunzip) needed by lcov dependency package";
       "psmisc";
@@ -133,15 +138,19 @@ bundle agent cfengine_build_host_setup
       "libopenssl-devel" -> { "ENT-12528" }
         comment => "like redhat, suse 15+ needs to build with system openssl.";
 
-    (redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
+    (redhat_8|centos_8|redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "java-1.8.0-openjdk-headless" package_policy => "delete",
         comment => "Installing Development Tools includes this jdk1.8 which we do not want.";
       "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
       "openssl-devel";
 
-    (redhat_9).(yum_dnf_conf_ok)::
+    (redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "perl-Sys-Hostname" comment => "Needed by __04_examples_outputs_check_outputs_cf";
+
+    redhat_10.(yum_dnf_conf_ok)::
+      "patch";
+      "perl-FindBin" comment => "Needed by postgresql 18";
 
     suse|opensuse|sles::
       "binutils";
@@ -167,25 +176,25 @@ bundle agent cfengine_build_host_setup
     linux::
       "have_tmp_mount" expression => returnszero("mount | grep '/tmp'", "useshell");
       "have_coredumpctl" expression => returnszero("command -v coredumpctl", "useshell");
-      "missing_opt_jdk21" expression => not(fileexists("/opt/jdk-21.0.1"));
+      "missing_opt_jdk21" expression => not(fileexists("/opt/jdk-21.0.8"));
     (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
-      "yum_conf_ok" expression => returnszero("grep best=False /etc/yum.conf", "useshell");
+      "yum_conf_ok" expression => returnszero("grep best=False /etc/yum.conf >/dev/null", "useshell");
     redhat_6|centos_6|redhat_7|centos_7::
       "yum_conf_ok" expression => "any"; # rhel/centos-6 and 7 do not support --nobest or best property in yum.conf
     redhat_8|centos_8::
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
-    redhat_8|centos_8|redhat_9::
+    redhat_8|centos_8|redhat_9|redhat_10::
       "redhat_has_python3" expression => returnszero("command -v python3 >/dev/null", "useshell");
-      "dnf_conf_ok" expression => returnszero("grep best=False /etc/dnf/dnf.conf", "useshell");
-    redhat_8|centos_8|redhat_9::
+      "dnf_conf_ok" expression => returnszero("grep best=False /etc/dnf/dnf.conf >/dev/null", "useshell");
+    redhat_8|centos_8|redhat_9|redhat_10::
       "have_perl_package_installed" expression => returnszero("rpm -q perl >/dev/null", "useshell");
-    redhat_9::
+    redhat_9|redhat_10::
       "have_python3_pip_package_installed" expression => returnszero("rpm -q python3-pip >/dev/null", "useshell");
     !(redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok.dnf_conf_ok)::
       "yum_dnf_conf_ok" expression => "any";
     (redhat_6|centos_6|redhat_7|centos_7).(yum_conf_ok)::
       "yum_dnf_conf_ok" expression => "any";
-    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "have_development_tools" expression => returnszero("yum groups list installed | grep 'Development Tools' >/dev/null", "useshell"),
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
 
@@ -200,18 +209,18 @@ bundle agent cfengine_build_host_setup
         contain => in_shell;
     missing_opt_jdk21::
       "sh $(this.promise_dirname)/linux-install-jdk21.sh" contain => in_shell;
-    (redhat_7|centos_7|redhat_8|centos_8|redhat_9).(!have_development_tools).(yum_dnf_conf_ok)::
+    (redhat_7|centos_7|redhat_8|centos_8|redhat_9|redhat_10).(!have_development_tools).(yum_dnf_conf_ok)::
       "yum groups install -y 'Development Tools'" contain => in_shell;
     (redhat_8|centos_8).!have_fakeroot:: # special fakeroot, missing from _8 an d up?
       "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
         contain => in_shell;
-    (redhat_8|centos_8|redhat_9).!redhat_has_python3::
+    (redhat_8|centos_8|redhat_9|redhat_10).!redhat_has_python3::
       "yum install -y python3" -> { "CFE-4313" }
         contain => in_shell,
         comment => "workaround for yum package_method trying to install python3-*.* which causes conflicts.";
-    (redhat_8|centos_8|redhat_9).!yum_conf_ok::
+    (redhat_8|centos_8|redhat_9|redhat_10).!yum_conf_ok::
       "sed -i '/best=True/s/True/False/' /etc/yum.conf" contain => in_shell;
-    (redhat_8|centos_8|redhat_9).!dnf_conf_ok::
+    (redhat_8|centos_8|redhat_9|redhat_10).!dnf_conf_ok::
       "sed -i '/best=True/s/True/False/' /etc/dnf/dnf.conf" contain => in_shell;
 
 
@@ -241,7 +250,7 @@ root - core unlimited
 * - core unlimited
 ");
 
-    ubuntu_16|ubuntu_18|redhat_9::
+    ubuntu_16|ubuntu_18|redhat_9|redhat_10::
       "/etc/hosts" -> { "ENT-12437" }
         edit_line => regex_replace("127.0.0.1 localhost localhost.localdomain","127.0.0.1 localhost.localdomain"),
         comment => "In order for some check_outputs peers related tests to work, hostname -f must match sys.fqhost so remove localhost and leave localhost.localdomain";
@@ -279,19 +288,25 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
         create => "true",
         perms => mog("400", "root", "root");
 
+    redhat_10::
+      "/usr/lib/rpm/redhat/macros"
+        edit_line => insert_lines("%_empty_manifest_terminate_build 0"),
+        depends_on => { "rpm_build_installed" };
+    redhat_8|centos_8|redhat_9|centos_9|redhat_10::
+      "/usr/lib/rpm/redhat/macros"
+        edit_line => comment_lines_matching("%_enable_debug_packages 0", "#"),
+        depends_on => { "rpm_build_installed" };
+
   commands:
     sles_15::
       "zypper --non-interactive install --allow-downgrade ncurses-devel"
         comment => "Special case mentioned elsewhere in this policy. ncurses-devel requires a downgrade as of July 25 2025",
         contain => in_shell;
-    (redhat_8|centos_8|redhat_9).(!have_perl_package_installed).(yum_dnf_conf_ok)::
+    (redhat_8|centos_8|redhat_9|redhat_10).(!have_perl_package_installed).(yum_dnf_conf_ok)::
       "yum install -y perl" contain => in_shell,
         comment => "even though rhel8/9 come with /bin/perl perl >= 5.8.8 is needed by cfbuild-lcov-1.16-1.noarch. So the package must be installed.";
-    redhat_9.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
+    redhat_9|redhat_10.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
       "yum install -y python3-pip" contain => in_shell;
-    redhat_8|centos_8|redhat_9|centos_9::
-      "sudo sed -ri 's/^%_enable_debug_packages/#\0/' /usr/lib/rpm/redhat/macros" contain => in_shell,
-        depends_on => { "rpm_build_installed" };
 
     mingw_build_host.!have_i386_architecture::
       "${paths.dpkg} --add-architecture i386";
