@@ -184,15 +184,21 @@ fi
 # if cf-agent not installed, try cf-remote --version master
 if [ ! -x /var/cfengine/bin/cf-agent ]; then
   echo "quick install didn't install cf-agent, try cf-remote"
-  # could try pipx or various package names for different distributions, or uv
+  # try pipx first for debian as pip won't work.
+  # If that fails to install CFEngine then try python3-pip for redhats.
   if software pipx; then
     pipx install cf-remote
     export PATH=$HOME/.local/bin:$PATH
+  elif software python3-pip; then
+    pip install cf-remote
+  fi
+  if command -v cf-remote >/dev/null; then
     cf-remote --version master install --clients localhost
   fi
 fi
 
 if [ ! -x /var/cfengine/bin/cf-agent ]; then
+  software git
   echo "quickinstall and cf-remote didn't install cf-agent, try from source"
   CFE_VERSION=3.26.0 # need to use an actualy release which has a checksum for masterfiles download
   rm -rf core # just in case we are repeating the script
