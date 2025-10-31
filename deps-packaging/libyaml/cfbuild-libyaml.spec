@@ -33,6 +33,7 @@ $MAKE
 %install
 rm -rf ${RPM_BUILD_ROOT}
 $MAKE DESTDIR=${RPM_BUILD_ROOT} install
+rm -rf ${RPM_BUILD_ROOT}%{prefix}/lib/libyaml.la
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -65,7 +66,6 @@ CFEngine Build Automation -- lmdb -- development files
 %dir %{prefix}/lib
 %{prefix}/lib/pkgconfig
 %{prefix}/lib/*.a
-%{prefix}/lib/*.la
 
 %changelog
 

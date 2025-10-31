@@ -129,7 +129,7 @@ detect_distribution() {
             # CentOS Linux release 7.6.1810 (Core)
             OS=centos
             ;;
-        "Red Hat Enterprise Linux "*)
+        "Red Hat Enterprise Linux "*|"Rocky Linux release "*)
             # Example output for RHEL:
             # Red Hat Enterprise Linux release 8.10 (Ootpa)
             OS=rhel
