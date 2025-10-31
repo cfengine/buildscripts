@@ -8,11 +8,11 @@ log_debug "Fetching test results from build machine..."
 BUILDMACHINE="$1"
 
 # Make sure destination directory exits
-mkdir -p "$BASEDIR"/../../../output/"${SCHEDULER}"/"${BUILD_NUMBER}"
+mkdir -p "$BASEDIR"/output/"${SCHEDULER}"/"${BUILD_NUMBER}"
 
 # Copy files from test machine to this machine
 rsync -avr --delete "$BUILDMACHINE:build/output/*" \
-    "$BASEDIR"/../../../output/"${SCHEDULER}"/"${BUILD_NUMBER}" \
+    "$BASEDIR"/output/"${SCHEDULER}"/"${BUILD_NUMBER}" \
     >/tmp/rsync.log
 
 # Remove results from test machine
