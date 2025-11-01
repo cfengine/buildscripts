@@ -30,7 +30,7 @@ elif [ -f /etc/os-release ]; then
     fi
   fi
   if [ "$ID" = "ubuntu" ]; then
-    _version=$(echo "$VERSION_ID" | cut -d. -f1)
+    _version="$(echo "$VERSION_ID" | cut -d. -f1)"
     if [ "$_version" -lt "16" ]; then
       echo "Platform $ID $VERSION_ID is too old."
       exit 9
