@@ -63,10 +63,11 @@ rm -f $RPM_BUILD_ROOT%{prefix}/bin/curl
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/wcurl
 rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 
-# For el9+ and suse-15+ we started seeing issues from other packages not expecting init scripts
-%if %{?rhel}%{!?rhel:0} >= 9 || %{?suse_version}%{!?suse_version:0} >= 1500
+# For el8+ and suse-15+ we started seeing issues from other packages not expecting init scripts
+%if %{?rhel}%{!?rhel:0} >= 8 || %{?suse_version}%{!?suse_version:0} >= 1500
 rm -f $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
 rm -f $RPM_BUILD_ROOT/etc/init.d/cfengine3
+rm -f $RPM_BUILD_ROOT/etc/init.d/cf-php-fpm
 rm -f $RPM_BUILD_ROOT/etc/profile.d/cfengine3.sh
 %endif
 
@@ -149,12 +150,13 @@ done
 %endif
 
 # Globally installed configs, scripts
-%if %{?rhel}%{!?rhel:0} < 9 && %{?suse_version}%{!?suse_version:0} < 1500
+%if %{?rhel}%{!?rhel:0} < 8 && %{?suse_version}%{!?suse_version:0} < 1500
 %attr(644,root,root) /etc/sysconfig/cfengine3
 %attr(755,root,root) /etc/profile.d/cfengine3.sh
 # ENT-11901
-# For el9+ and suse15+ we started seeing issues from other packages not expecting init scripts
+# For el8+ and suse15+ we started seeing issues from other packages not expecting init scripts
 %attr(755,root,root) /etc/init.d/cfengine3
+%attr(755,root,root) /etc/init.d/cf-php-fpm
 %endif
 
 # Systemd units

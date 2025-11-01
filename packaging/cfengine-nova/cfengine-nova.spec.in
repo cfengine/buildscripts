@@ -57,6 +57,9 @@ mkdir -p $RPM_BUILD_ROOT%{prefix}
 cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
+# for cfengine-nova (client) we never want cf-php-fpm service, that is only for cfengine-nova-hub
+rm -f $RPM_BUILD_ROOT/etc/init.d/cf-php-fpm
+
 # ENT-11901
 # For el9+ and suse-15+ we started seeing issues from other packages not expecting init scripts
 %if %{?rhel}%{!?rhel:0} >= 9 || %{?suse_version}%{!?suse_version:0} >= 1500

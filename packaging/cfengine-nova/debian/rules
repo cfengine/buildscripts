@@ -38,7 +38,8 @@ install: build
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/openssl
 	rm -f $(CURDIR)/debian/tmp$(PREFIX)/bin/curl
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/ssl
-
+# remove hub-specific files
+	rm -f $(CURDIR)/debian/tmp/etc/init.d/cf-php-fpm
 
 # Debian is different
 

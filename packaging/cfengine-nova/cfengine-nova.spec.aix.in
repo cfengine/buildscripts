@@ -42,6 +42,9 @@ rm -f $RPM_BUILD_ROOT%{prefix}/bin/openssl
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/curl
 rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 
+# For client we never want hub-specific things
+rm -f $RPM_BUILD_ROOT/init.d/cf-php-fpm
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
