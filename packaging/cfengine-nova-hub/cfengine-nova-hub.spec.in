@@ -82,10 +82,12 @@ cp -a %{prefix}/* $RPM_BUILD_ROOT%{prefix}
 cp -a %{_basedir}/cfengine/dist/* $RPM_BUILD_ROOT
 
 # ENT-11901
-# For el9+ we started seeing issues from other packages not expecting init scripts
-%if %{?rhel}%{!?rhel:0} >= 9
+# For el8+ we started seeing issues from other packages not expecting init scripts
+# If sysvinit scripts other than cfengine3 are present, such as cf-php-fpm, they will fail with systemctl operations due to not supporting chkconfig.
+%if %{?rhel}%{!?rhel:0} >= 8
 rm -f $RPM_BUILD_ROOT/etc/sysconfig/cfengine3
 rm -f $RPM_BUILD_ROOT/etc/init.d/cfengine3
+rm -f $RPM_BUILD_ROOT/etc/init.d/cf-php-fpm
 rm -f $RPM_BUILD_ROOT/etc/profile.d/cfengine.sh
 %endif
 # Remove useless stuff
@@ -347,9 +349,11 @@ exit 0
 # Initscript, other configuration
 %defattr(755,root,root,755)
 # ENT-11901
-# For el9+ we started seeing issues from other packages not expecting init scripts
-%if %{?rhel}%{!?rhel:0} < 9
+# For el8+ we started seeing issues from other packages not expecting init scripts
+# ENT-13319 we found that rhel-8 also exhibited this behavior so adjusted el9+ to el8+
+%if %{?rhel}%{!?rhel:0} < 8
 /etc/init.d/cfengine3
+/etc/init.d/cf-php-fpm
 /etc/profile.d/cfengine.sh
 %attr(644,root,root) /etc/sysconfig/cfengine3
 %endif
