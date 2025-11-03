@@ -8,7 +8,7 @@
 . "$(dirname "$0")"/functions
 . version
 
-LNK="$BASEDIR/../../../output/$SCHEDULER/current"
+LNK="$BASEDIR/output/$SCHEDULER/current"
 log_debug "Creating soft link from $BUILD_NUMBER to $LNK"
 rm -f "$LNK"
 ln -fs "$BUILD_NUMBER" "$LNK"
