@@ -225,6 +225,8 @@ rpm | lpp)
     # eval is needed to preserve spaces in arguments within quotes
     # Example: --define 'with_expansion 1' needs to be passed as two args
     log_debug "Building RPM package with rpmbuild"
+    # rhel-10 rpmbuild is more picky about /var/cfengine/lib RPATH we need
+    export QA_RPATHS=2 # this is a set of bit flags, we just want 0x0002 here
     eval rpmbuild -bb \
         --define "'_topdir $BASEDIR/$PKG'" \
         --define "'buildprefix $BUILDPREFIX'" \

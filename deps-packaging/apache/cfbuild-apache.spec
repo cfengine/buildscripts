@@ -8,6 +8,7 @@ Release: 1
 Source0: httpd-%{apache_version}.tar.gz
 Source1: httpd.conf
 Patch0:  apachectl.patch
+Patch1: fixed-implicit-decl-gettid.patch
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -21,7 +22,8 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n httpd-%{apache_version}
 
-%patch0 -p0
+%patch -P 0
+%patch -P 1 -p1
 
 CPPFLAGS=-I%{buildprefix}/include
 
