@@ -17,10 +17,11 @@ Requires: coreutils
 Recommends: gzip
 %endif
 
-# we require selinux-policy package version that matches or exceeds our build system version
-# this guarantees that our compiled selinux policy will work.
+# We add a recommends for the selinux-policy package version that matches or exceeds our build system version.
+# This increases the likelihood that our compiled selinux policy will work.
+# By making this a weak dependency we allow the package to install on systems with an older selinux-policy version.
 %if %{?rhel}%{!?rhel:0} >= 8
-Requires: selinux-policy >= @@SELINUX_POLICY_VERSION@@
+Recommends: selinux-policy >= @@SELINUX_POLICY_VERSION@@
 %endif
 
 AutoReqProv: no
@@ -147,6 +148,7 @@ done
 %prefix/selinux/cfengine-enterprise.pp
 %prefix/selinux/cfengine-enterprise.te
 %prefix/selinux/cfengine-enterprise.fc
+%prefix/selinux/label-binaries-unconfined.sh
 %endif
 
 # Globally installed configs, scripts
