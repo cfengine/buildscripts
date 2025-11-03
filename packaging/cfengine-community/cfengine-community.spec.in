@@ -138,6 +138,7 @@ rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-postgres.service
 %prefix/selinux/cfengine-enterprise.pp
 %prefix/selinux/cfengine-enterprise.te
 %prefix/selinux/cfengine-enterprise.fc
+%prefix/selinux/label-binaries-unconfined.sh
 %endif
 
 # Globally installed configs, scripts
