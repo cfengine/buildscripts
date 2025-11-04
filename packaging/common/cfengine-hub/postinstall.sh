@@ -1060,7 +1060,10 @@ if [ -n "$httpds" ]; then
   fi
 fi
 
-(cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m smart" || su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data -m fast")
+# wait 5 minutes for smart shutdown to happen, on slower machines it might take a while
+if ! (cd /tmp && su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data --timeout=300 -m smart"); then
+  su cfpostgres -c "$PREFIX/bin/pg_ctl stop -D $PREFIX/state/pg/data --timeout=300 -m fast"
+fi
 
 # Have to be careful here because httpd/php/bin wants to be root:root
 chown root:$MP_APACHE_USER $PREFIX/httpd/php
