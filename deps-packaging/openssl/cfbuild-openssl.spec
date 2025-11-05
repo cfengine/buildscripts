@@ -7,6 +7,7 @@ Release: 1
 Source0: openssl-%{openssl_version}.tar.gz
 Patch0: 0006-Add-latomic-on-AIX-7.patch
 Patch1: 0008-Define-_XOPEN_SOURCE_EXTENDED-as-1.patch
+Patch2: 0010-Update-sha512-x86_64-pl.patch
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -22,6 +23,7 @@ mkdir -p %{_builddir}
 
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 
