@@ -23,8 +23,8 @@ Recommends: gzip
 Requires: selinux-policy >= @@SELINUX_POLICY_VERSION@@
 %endif
 
-# we don't bundle OpenSSL on RHEL 8 (and newer in the future)
-%if %{?rhel}%{!?rhel:0} == 8
+# We don't bundle OpenSSL on RHEL >= 8 and SuSE >= 15
+%if 0%{?SYSTEM_SSL}
 Requires: libssl.so.1.1()(64bit) libssl.so.1.1(OPENSSL_1_1_0)(64bit) libssl.so.1.1(OPENSSL_1_1_1)(64bit)
 Requires: libcrypto.so.1.1()(64bit) libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)
 %endif
