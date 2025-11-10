@@ -45,9 +45,6 @@ mkdir -p %{_builddir}
 
 %build
 
-# Fix implicit declaration of function 'fopen' after upgrading to curl 8.17.0.
-patch -p1 < %{_topdir}/SOURCES/implicit-decl-fopen.patch
-
 make
 
 %install
