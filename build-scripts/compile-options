@@ -90,7 +90,7 @@ esac
 
 # When we don't bundle OpenSSL, then we need to pull it from /usr/lib64.
 if [ "$SYSTEM_SSL" = 1 ]; then
-    LDFLAGS="$LDFLAGS -L/usr/lib64"
+    LDFLAGS="-L/usr/lib64 $LDFLAGS"
 fi
 export LDFLAGS
 
