@@ -90,6 +90,7 @@ function cleanup()
   fi
   ls -l /home
   chown -R jenkins /home/jenkins
+  echo "Done with cleanup()"
 }
 
 trap cleanup ERR
@@ -190,7 +191,7 @@ if ! /var/cfengine/bin/cf-agent -V; then
     pip install cf-remote
   fi
   if command -v cf-remote >/dev/null; then
-    cf-remote --version master install --clients localhost
+    cf-remote --log-level info --version master install --clients localhost || true
   fi
 fi
 
@@ -227,6 +228,8 @@ cp -a masterfiles/* /var/cfengine/inputs/
   grep -i error: promises.log && exit 1
   /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a promises.log
   grep -i error: promises.log && exit 1
+  echo "Done evaluating policy. End of promies.log:"
+  tail promises.log
 )
 
 cleanup
