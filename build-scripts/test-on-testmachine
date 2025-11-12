@@ -29,8 +29,8 @@ log_debug "Executing tests on test machine..."
 if remote_script_general "$SCRIPT" "$LOGIN_COMMAND" "$BASEDIR"; then
     return_code=0
 else
-    log_debug "Failed to execute tests on test machine..."
     return_code=$?
+    log_debug "Failed to execute tests on test machine..."
 fi
 
 # Look for lingering processes after running tests.
