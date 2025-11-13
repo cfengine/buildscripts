@@ -127,17 +127,18 @@ then
 
   fi
   if ! cf_console semodule -n -i "$PREFIX/selinux/cfengine-enterprise.pp"; then
-    cf_console echo "warning! semodule import failed, examine /var/log/CFE*log and \
-consider installing selinux-policy-devel package and \
-rebuilding policy with: \
-\
-cd $PREFIX/selinux \
-make -f /usr/share/selinux/devel/Makefile -j1 \
-semodule -n -i $PREFIX/selinux/cfengine-enterprise.pp \
-\
-and then restarting services with  \
-\
-systemctl restart cfengine3"
+    cf_console echo "warning! semodule import failed, as a fallback all binaries in $PREFIX will be labeled bin_t aka unconfined. \
+The semodule import failure should be examined in /var/log/CFE*log and reported so that properly confined CFEngine can be setup."
+    if ! command -v semanage; then
+      cf_console echo "warning! semanage import failed and semodule command is not available. Please install the package policycoreutils-python-utils and run $PREFIX/selinux/label-binaries-unconfined.sh manually immediately after install and restart services with systemctl restart cfengine3."
+    else
+      cf_console echo "Labeling CFEngine binaries may take some time. Please wait."
+      if ! "$PREFIX"/selinux/label-binaries-unconfined.sh "$PREFIX"; then
+        cf_console echo "warning! fallback to label all binaries unconfined has failed. CFEngine may not properly operate with selinux set to enforcing."
+      else
+        cf_console echo "notice! CFEngine binaries are set to unconfined."
+      fi
+    fi
   fi
   if /usr/sbin/selinuxenabled; then
     /usr/sbin/load_policy
