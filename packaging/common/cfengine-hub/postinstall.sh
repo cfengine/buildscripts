@@ -1025,7 +1025,7 @@ true "Provisioning CFE_ROBOT user in the system"
   echo "INSERT INTO users (username, password, salt, roles)
         VALUES ('CFE_ROBOT', 'SHA=$CFE_ROBOT_PW_HASH', '$CFE_ROBOT_PW_SALT', '{cf_remoteagent}')
         ON CONFLICT (username, external)
-        DO UPDATE 
+        DO UPDATE
         SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT'" | "$PREFIX/bin/psql" cfsettings
  )
 true "Successfully provisioned CFE_ROBOT user"
