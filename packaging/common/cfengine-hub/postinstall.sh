@@ -996,8 +996,10 @@ chown $MP_APACHE_USER:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/ldap
 chmod 0700 -R $PREFIX/httpd/htdocs/ldap/config
 
 # changed permissions and owner of PHP and JS dependencies
-chown root:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/vendor
-chmod -R ug=rX,o= $PREFIX/httpd/htdocs/vendor # 440 for files, 550 for dirs
+if [ -f $PREFIX/httpd/htdocs/vendor ]; then
+    chown root:$MP_APACHE_USER -R $PREFIX/httpd/htdocs/vendor
+    chmod -R ug=rX,o= $PREFIX/httpd/htdocs/vendor # 440 for files, 550 for dirs
+fi
 
 ##
 # Start Apache server (and php-fpm if present)
@@ -1023,7 +1025,7 @@ true "Provisioning CFE_ROBOT user in the system"
   echo "INSERT INTO users (username, password, salt, roles)
         VALUES ('CFE_ROBOT', 'SHA=$CFE_ROBOT_PW_HASH', '$CFE_ROBOT_PW_SALT', '{cf_remoteagent}')
         ON CONFLICT (username, external)
-        DO UPDATE 
+        DO UPDATE
         SET password = 'SHA=$CFE_ROBOT_PW_HASH', salt = '$CFE_ROBOT_PW_SALT'" | "$PREFIX/bin/psql" cfsettings
  )
 true "Successfully provisioned CFE_ROBOT user"
