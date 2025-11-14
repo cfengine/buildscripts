@@ -95,19 +95,28 @@ INCLUDES='--include=test.* --include=summary.*'
 # Note: Don't use sudo or "rsync -a", because we don't want root-owned files
 # to show up in the results.
 log_debug "Collecting test results from core repo..."
-rsync -rv "$INCLUDES" --exclude="*" \
+# shellcheck disable=SC2086
+# > Double quote to prevent globbing and word splitting.
+# We want word splitting
+rsync -rv $INCLUDES --exclude="*" \
     "$TESTMACHINE_URI$BASEDIR"/core/tests/acceptance/ \
     "$BASEDIR"/core/tests/acceptance/ \
     >>/tmp/rsync.log
 
 if [ "$PROJECT" = nova ]; then
     log_debug "Collecting test results from enterprise repo..."
-    rsync -rv "$INCLUDES" --exclude="*" \
+    # shellcheck disable=SC2086
+    # > Double quote to prevent globbing and word splitting.
+    # We want word splitting
+    rsync -rv $INCLUDES --exclude="*" \
         "$TESTMACHINE_URI$BASEDIR"/enterprise/tests/acceptance/ \
         "$BASEDIR"/enterprise/tests/acceptance/ \
         >>/tmp/rsync.log
     log_debug "Collecting test results from masterfiles repo..."
-    rsync -rv "$INCLUDES" --exclude="*" \
+    # shellcheck disable=SC2086
+    # > Double quote to prevent globbing and word splitting.
+    # We want word splitting
+    rsync -rv $INCLUDES --exclude="*" \
         "$TESTMACHINE_URI$BASEDIR"/masterfiles/tests/acceptance/ \
         "$BASEDIR"/masterfiles/tests/acceptance/ \
         >>/tmp/rsync.log
