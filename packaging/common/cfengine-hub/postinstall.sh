@@ -6,22 +6,19 @@ then
   if command -v /usr/sbin/selinuxenabled >/dev/null &&
       /usr/sbin/selinuxenabled;
   then
-    command -v semodule >/dev/null || cf_console echo "warning! selinuxenabled exists and returns 0 but semodule not found"
-    test -x /usr/sbin/load_policy  || cf_console echo "warning! selinuxenabled exists and returns 0 but load_policy not found"
-    test -x /usr/sbin/restorecon   || cf_console echo "warning! selinuxenabled exists and returns 0 but restorecon not found"
+    command -v semodule >/dev/null || cf_console echo "warning: selinuxenabled exists and returns 0 but semodule not found"
+    test -x /usr/sbin/load_policy  || cf_console echo "warning: selinuxenabled exists and returns 0 but load_policy not found"
+    test -x /usr/sbin/restorecon   || cf_console echo "warning: selinuxenabled exists and returns 0 but restorecon not found"
   fi
   if ! cf_console semodule -n -i "$PREFIX/selinux/cfengine-enterprise.pp"; then
-    cf_console echo "warning! semodule import failed, examine /var/log/CFE*log and \
-consider installing selinux-policy-devel package and \
-rebuilding policy with: \
-\
-cd $PREFIX/selinux \
-make -f /usr/share/selinux/devel/Makefile -j1 \
-semodule -n -i $PREFIX/selinux/cfengine-enterprise.pp \
-\
-and then restarting services with  \
-\
-systemctl restart cfengine3"
+    cf_console echo "warning: cfengine-enterprise semodule install failed, will attempt to install cfengine-enterprise-unconfined instead. \
+The install failure should be examined in /var/log/CFEngine-Install.log and any issues reported as bugs at https://northerntech.atlassian.net/jira/software/c/projects/CFE/issues/."
+
+    if ! cf_console semodule -n -i "$PREFIX/selinux/cfengine-enterprise-unconfined.pp"; then
+      cf_console echo "warning: cfengine-enterprise-unconfined semodule failed to install. As a last attempt you can install the semanage program (probably policycoreutils-python-utils package) and run $PREFIX/selinux/label-binaries-unconfined.sh."
+    else
+      cf_console echo "info: cfengine-enterprise-unconfined semodule is installed. This allows CFEngine binaries to run unconfined which is not ideal. Please report issues with default cfengine-enterprise selinux module."
+    fi
   fi
   if /usr/sbin/selinuxenabled; then
     /usr/sbin/load_policy
@@ -33,7 +30,7 @@ if [ -x /bin/systemctl ]; then
   # This is important in case any of the units have been replaced by the package
   # and we call them in the postinstall script.
   if ! /bin/systemctl daemon-reload; then
-    cf_console echo "warning! /bin/systemctl daemon-reload failed."
+    cf_console echo "warning: /bin/systemctl daemon-reload failed."
     cf_console echo "systemd seems to be installed, but not working."
     cf_console echo "Relevant parts of CFEngine installation will fail."
     cf_console echo "Please fix systemd or use other ways to start CFEngine."
