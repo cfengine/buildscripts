@@ -23,10 +23,17 @@ chroot)
     ;;
 esac
 
+SCRIPT_BASEDIR="$(
+    cd "$(dirname "$0")"
+    pwd
+)"                                            # /home/user/whatever/buildscripts/build-scripts
+SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever/buildscripts
+SCRIPT_BASEDIR="$(dirname "$SCRIPT_BASEDIR")" # /home/user/whatever
+
 # We still need to perform several cleanup tasks after doing a chroot test run.
 # So wrap the test execution in an if so that we can proceed with clean-up on error.
 log_debug "Executing tests on test machine..."
-if remote_script_general "$SCRIPT" "$LOGIN_COMMAND" "$BASEDIR"; then
+if remote_script_general "$SCRIPT" "$LOGIN_COMMAND" "$SCRIPT_BASEDIR"; then
     return_code=0
 else
     return_code=$?
