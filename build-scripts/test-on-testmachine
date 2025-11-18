@@ -110,6 +110,15 @@ rsync -rv $INCLUDES --exclude="*" \
     "$BASEDIR"/core/tests/acceptance/ \
     >>/tmp/rsync.log
 
+log_debug "Collecting test results from masterfiles repo..."
+# shellcheck disable=SC2086
+# > Double quote to prevent globbing and word splitting.
+# We want word splitting
+rsync -rv $INCLUDES --exclude="*" \
+    "$TESTMACHINE_URI$BASEDIR"/masterfiles/tests/acceptance/ \
+    "$BASEDIR"/masterfiles/tests/acceptance/ \
+    >>/tmp/rsync.log
+
 if [ "$PROJECT" = nova ]; then
     log_debug "Collecting test results from enterprise repo..."
     # shellcheck disable=SC2086
@@ -118,14 +127,6 @@ if [ "$PROJECT" = nova ]; then
     rsync -rv $INCLUDES --exclude="*" \
         "$TESTMACHINE_URI$BASEDIR"/enterprise/tests/acceptance/ \
         "$BASEDIR"/enterprise/tests/acceptance/ \
-        >>/tmp/rsync.log
-    log_debug "Collecting test results from masterfiles repo..."
-    # shellcheck disable=SC2086
-    # > Double quote to prevent globbing and word splitting.
-    # We want word splitting
-    rsync -rv $INCLUDES --exclude="*" \
-        "$TESTMACHINE_URI$BASEDIR"/masterfiles/tests/acceptance/ \
-        "$BASEDIR"/masterfiles/tests/acceptance/ \
         >>/tmp/rsync.log
 fi
 
