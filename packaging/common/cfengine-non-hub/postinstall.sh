@@ -125,7 +125,12 @@ then
     test -x /usr/sbin/restorecon   || cf_console echo "warning: selinuxenabled exists and returns 0 but restorecon not found"
 
   fi
-  if ! cf_console semodule -n -i "$PREFIX/selinux/cfengine-enterprise.pp"; then
+  if cf_console semodule --list-modules | grep cfengine-enterprise-unconfined; then
+    if ! cf_console semodule --remove cfengine-enterprise-unconfined; then
+      cf_console echo "warning: unable to remove cfengine-enterprise-unconfined selinux module. The next steps may not work as well given this failure."
+    fi
+  fi
+  if ! cf_console semodule --noreload --install "$PREFIX/selinux/cfengine-enterprise.pp"; then
     cf_console echo "warning: cfengine-enterprise semodule install failed, will attempt to install cfengine-enterprise-unconfined instead. \
 The install failure should be examined in /var/log/CFEngine-Install.log and any issues reported as bugs at https://northerntech.atlassian.net/jira/software/c/projects/CFE/issues/."
 
