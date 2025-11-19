@@ -40,8 +40,19 @@ sudo apt-get -qy install bison flex binutils build-essential fakeroot ntp \
 sudo apt-get -qq purge apache* "postgresql*" redis*
 
 # packages needed for installing Mission portal dependencies
-# remove any nodejs or node- packages currently in place
-sudo apt-get remove -qy 'nodejs*' 'node-*'
-# replace with exact version we want
-wget -O - https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -qy nodejs
+
+MINIMUM_NODE_VERSION=20
+echo "Check for at least $MINIMUM_NODE_VERSION node version"
+if command -v node; then
+  # vMAJOR.MINOR.PATCH
+  _major=$(node --version | cut -dv -f2 | cut -d. -f1)
+  if [ "$_major" -lt "$MINIMUM_NODE_VERSION" ]; then
+    echo "We need at least node version $MINIMUM_NODE_VERSION and found $_major. Will attempt to install from nodesource"
+
+    # remove any nodejs or node- packages currently in place
+    sudo apt-get remove -qy 'nodejs*' 'node-*'
+    # replace with exact version we want
+    wget -O - https://deb.nodesource.com/setup_20.x | sudo -E bash -
+    sudo apt-get install -qy nodejs
+  fi
+fi
