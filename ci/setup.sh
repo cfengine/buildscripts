@@ -1,6 +1,6 @@
+#!/bin/sh
 # setup build host on ubuntu 22
 set -ex
-PREFIX=/var/cfengine
 
 # Github Actions provides machines with various packages installed,
 # what confuses our build system into thinking that it's an RPM distro.
