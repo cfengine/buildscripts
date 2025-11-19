@@ -1,0 +1,11 @@
+name: craigs check
+on:
+  pull_request:
+
+jobs:
+  dts:
+    secrets: inherit
+    uses: ./.github/workflows/deployment-tests.yml
+    permissions:
+      contents: read
+      pull-requests: read
