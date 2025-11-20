@@ -1,3 +1,5 @@
+cf_console "CRAIG sees that selinux-policy installed package is $(rpm -qa selinux-policy)"
+cf_console "CRAIG looks for SELINUX_POLICY_VERSION, finds ${SELINUX_POLICY_VERSION}"
 if is_upgrade; then
   # This is nice to know to provide fixes for bugs in already released
   # package scripts.

@@ -20,7 +20,8 @@ Recommends: gzip
 # we require selinux-policy package version that matches or exceeds our build system version
 # this guarantees that our compiled selinux policy will work.
 %if %{?rhel}%{!?rhel:0} >= 8
-Requires: selinux-policy >= @@SELINUX_POLICY_VERSION@@
+Requires(post): selinux-policy >= @@SELINUX_POLICY_VERSION@@
+%define SELINUX_POLICY_VERSION=@@SELINUX_POLICY_VERSION@@
 %endif
 
 # we don't bundle OpenSSL on RHEL 8 (and newer in the future)
