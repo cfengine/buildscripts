@@ -45,6 +45,15 @@ bundle agent cfengine_build_host_setup
       "python3-psycopg2";
       "rsync" comment => "added for debian-10";
       "systemd-coredump" comment => "added step to jenkins testing-pr job to query for coredumps on failures";
+# core/ci/dependencies.sh is run on some systems where quickinstall and cf-remote cannot install an agent to run this policy so we must remove some system packages that we also build since both install to /usr as a prefix.
+      "libattr1-dev" package_policy => "delete";
+      "libssl-dev" package_policy => "delete";
+      "libpcre2-dev" package_policy => "delete";
+      "libacl1-dev" package_policy => "delete";
+      "libpam0g-dev" package_policy => "delete";
+      "libyaml-dev" package_policy => "delete";
+      "libxml2-dev" package_policy => "delete";
+      "librsync-dev" package_policy => "delete";
 
     ubuntu_20::
       "libncurses5";
