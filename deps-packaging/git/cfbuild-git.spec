@@ -36,6 +36,9 @@ case "$OS" in
         ;;
 esac
 
+# On RHEL the macro PATH_MAX is in linux/limits.h, not limits.h
+patch -p1 < %{_topdir}/SOURCES/fixed-undeclared-identifier-PATH_MAX.patch
+
 make CURL_LDFLAGS="-lcurl"
 
 %install
