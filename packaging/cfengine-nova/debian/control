@@ -12,7 +12,7 @@ Provides: cfengine3, cfengine-community
 Conflicts: cfengine3, cfengine-community, cfengine-nova
 Replaces: cfengine3, cfengine-community, cfengine-nova
 Recommends: gzip
-Description: CFEngine Nova : The next generation tool for data centre.
+Description: CFEngine Nova : The next generation tool for data centers.
  CFEngine, or the configuration engine is an agent/software robot and a
  very high level language for building expert systems to administrate
  and configure large computer networks. CFEngine uses the idea of
