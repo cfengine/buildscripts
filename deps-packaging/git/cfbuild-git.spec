@@ -1,4 +1,4 @@
-%define git_version 2.51.2
+%define git_version 2.52.0
 
 Summary: CFEngine Build Automation -- git
 Name: cfbuild-git
@@ -35,6 +35,9 @@ case "$OS" in
         fi
         ;;
 esac
+
+# On RHEL the macro PATH_MAX is in linux/limits.h, not limits.h
+patch -p1 < %{_topdir}/SOURCES/fixed-undeclared-identifier-PATH_MAX.patch
 
 make CURL_LDFLAGS="-lcurl"
 
