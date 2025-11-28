@@ -9,6 +9,10 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
 
 # Build
 
+# This patch effectively reverts commit https://github.com/curl/curl/commit/74fdc1185f40c2fe2253043ff3f563fbbd4b43ed
+# that does not work for us, since we use the gcc compiler.
+$PATCH -p1 < 'Revert-configure-add-mt-for-pthread-support-on-HP-UX.patch'
+
 # autotools on hpux 11.23 with gcc 4.2.3 uses -std=gnu99 which excludes _LARGEFILE_SOURCE required for fseeko()
 # see https://www.gnu.org/software/libc/manual/html_node/Feature-Test-Macros.html for reference on _LARGEFILE_SOURCE
 

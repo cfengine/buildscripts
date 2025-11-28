@@ -1,0 +1,12 @@
+diff -ruN curl-8.17.0/configure curl-8.17.0-modified/configure
+--- curl-8.17.0/configure	2025-11-05 08:00:46.000000000 +0100
++++ curl-8.17.0-modified/configure	2025-11-24 10:30:02.624381820 +0100
+@@ -44414,7 +44414,7 @@
+ 
+       case $host in
+         *-hp-hpux*)
+-          CFLAGS="$CFLAGS -mt"
++          USE_THREADS_POSIX=""
+           ;;
+         *)
+           ;;
