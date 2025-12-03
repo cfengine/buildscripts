@@ -166,6 +166,7 @@ cp %{_basedir}/nova/db/schema.sql $RPM_BUILD_ROOT%prefix/share/db/
 cp %{_basedir}/nova/db/schema_settings.sql $RPM_BUILD_ROOT%prefix/share/db/
 cp %{_basedir}/nova/db/ootb_settings.sql $RPM_BUILD_ROOT%prefix/share/db/
 cp %{_basedir}/nova/db/ootb_import.sql $RPM_BUILD_ROOT%prefix/share/db/
+cp %{_basedir}/nova/db/revoke_unsafe_functions.sql $RPM_BUILD_ROOT%prefix/share/db/
 mkdir -p $RPM_BUILD_ROOT/var/log/
 touch $RPM_BUILD_ROOT/var/log/postgresql.log
 

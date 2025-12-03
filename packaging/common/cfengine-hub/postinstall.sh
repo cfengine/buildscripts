@@ -889,6 +889,7 @@ else
     # cfdb schema relies on cfsettings already existing for a foreign data wrapper association for shared and personal host groups tables
     chown cfpostgres "$PREFIX/share/db/schema.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/schema.sql" && chown root "$PREFIX/share/db/schema.sql"
     chown cfpostgres "$PREFIX/share/db/ootb_import.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/ootb_import.sql" && chown root "$PREFIX/share/db/ootb_import.sql"
+    chown cfpostgres "$PREFIX/share/db/revoke_unsafe_functions.sql" && su cfpostgres -c "$PREFIX/bin/psql cfdb -f $PREFIX/share/db/revoke_unsafe_functions.sql" && chown root "$PREFIX/share/db/revoke_unsafe_functions.sql"
   )
 
   (

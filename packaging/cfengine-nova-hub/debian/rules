@@ -75,6 +75,7 @@ install: build
 	cp $(BASEDIR)/nova/db/schema_settings.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
 	cp $(BASEDIR)/nova/db/ootb_settings.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
 	cp $(BASEDIR)/nova/db/ootb_import.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
+	cp $(BASEDIR)/nova/db/revoke_unsafe_functions.sql $(CURDIR)/debian/tmp$(PREFIX)/share/db/
 
 # ENT-2708, ENT-2846
 	chmod 600 $(CURDIR)/debian/tmp$(PREFIX)/share/GUI/application/config/*.php
