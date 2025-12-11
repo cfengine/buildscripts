@@ -9,6 +9,10 @@ TTD=${BUILD_ROOT}/cfbuild-libcurl-devel${PREFIX}
 
 # Build
 
+# This patch effectively reverts commit https://github.com/curl/curl/commit/74fdc1185f40c2fe2253043ff3f563fbbd4b43ed
+# that does not work for us, since we use the gcc compiler.
+$PATCH -p1 < 'Revert-configure-add-mt-for-pthread-support-on-HP-UX.patch'
+
 ./configure --prefix=$PREFIX \
     --with-sysroot=$PREFIX \
     --with-ssl=$PREFIX \
