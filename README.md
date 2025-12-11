@@ -132,7 +132,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.12   | 3.12   | 3.12   |                          |
 | [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.3.2  | 2.3.2  | 2.3.2  |                          |
 | [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.5.2  | 2.5.2  | 2.5.2  |                          |
-| [libcurl](https://curl.se/download.html)                                          | 8.16.0 | 8.16.0 | 8.17.0 |                          |
+| [libcurl](https://curl.se/download.html)                                          | 8.17.0 | 8.16.0 | 8.17.0 |                          |
 | [libgnurx](https://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.18   | 1.18   | 1.18   | Needed by libxml2        |
 | [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.1 | 2.15.1 | 2.15.1 |                          |
@@ -155,13 +155,13 @@ We use the systems bundled SSL for these platforms.
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
 | :-------------------------------------------------- | :----- | :----- | :----- |
-| [Apache](https://httpd.apache.org/)                 | 2.4.65 | 2.4.65 | 2.4.65 |
+| [Apache](https://httpd.apache.org/)                 | 2.4.66 | 2.4.65 | 2.4.65 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
-| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.51.1 | 2.51.1 | 2.52.0 |
+| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.52.0 | 2.51.1 | 2.52.0 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.3  | 2.7.3  |
-| [PHP](https://php.net/)                             | 8.3.27 | 8.3.27 | 8.4.14 |
-| [PostgreSQL](https://www.postgresql.org/)           | 15.14  | 16.10  | 18.1   |
+| [PHP](https://php.net/)                             | 8.3.28 | 8.3.27 | 8.4.14 |
+| [PostgreSQL](https://www.postgresql.org/)           | 15.15  | 16.10  | 18.1   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.68.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
 
