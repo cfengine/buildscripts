@@ -50,7 +50,6 @@ bundle agent cfengine_build_host_setup
       "libssl-dev" package_policy => "delete";
       "libpcre2-dev" package_policy => "delete";
       "libacl1-dev" package_policy => "delete";
-      "libpam0g-dev" package_policy => "delete";
       "libyaml-dev" package_policy => "delete";
       "libxml2-dev" package_policy => "delete";
       "librsync-dev" package_policy => "delete";
