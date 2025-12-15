@@ -155,7 +155,7 @@ We use the systems bundled SSL for these platforms.
 
 | CFEngine version                                    | 3.21.x | 3.24.x | master |
 | :-------------------------------------------------- | :----- | :----- | :----- |
-| [Apache](https://httpd.apache.org/)                 | 2.4.66 | 2.4.66 | 2.4.65 |
+| [Apache](https://httpd.apache.org/)                 | 2.4.66 | 2.4.66 | 2.4.66 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.52.0 | 2.52.0 | 2.52.0 |
