@@ -29,10 +29,7 @@
 . compile-options
 
 SOURCE_TARBALL="$BASEDIR/output/tarballs/cfengine-3.*.tar.gz"
-# shellcheck disable=SC2010
-# > Don't use ls | grep. Use a glob or a for loop with a condition to allow non-alphanumeric filenames.
-# TODO: CFE-4587
-MASTERFILES_TARBALL=$(ls "$BASEDIR"/output/tarballs/cfengine-masterfiles*.tar.gz | grep -v 'pkg.tar.gz$')
+MASTERFILES_TARBALL=$(find "$BASEDIR"/output/tarballs/ -name 'cfengine-masterfiles*.tar.gz' -a ! \( -name '*pkg.tar.gz' \))
 
 # DELETE the git-checked-out directories, they are tainted with
 # ./configure artifacts anyway.  The tarballs are unpacked and symlinked
