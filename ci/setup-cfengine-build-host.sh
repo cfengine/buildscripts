@@ -107,29 +107,33 @@ else
   exit 1
 fi
 
+echo "Installing cf-remote for possible package install and masterfiles download"
+# try pipx first for debian as pip won't work.
+# If that fails to install CFEngine then try python3-pip for redhats.
+if software pipx; then
+  pipx install cf-remote
+  export PATH=$HOME/.local/bin:$PATH
+elif software python3-pip; then
+  pip install cf-remote
+fi
+export PATH=/usr/local/bin:$PATH # add /usr/local/bin for pip/pipx installed cf-remote
+
+if ! command -v cf-remote; then
+  echo "cf-remote was not installed, it is required so exiting now"
+  exit 42
+fi
+
 echo "Checking for pre-installed CFEngine (chicken/egg problem)"
 # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
 if ! /var/cfengine/bin/cf-agent -V; then
   echo "No existing CFEngine install found, try cf-remote..."
-  # try pipx first for debian as pip won't work.
-  # If that fails to install CFEngine then try python3-pip for redhats.
-  if software pipx; then
-    pipx install cf-remote
-    export PATH=$HOME/.local/bin:$PATH
-  elif software python3-pip; then
-    pip install cf-remote
-  fi
-  export PATH=/usr/local/bin:$PATH # add /usr/local/bin for pip/pipx installed cf-remote
-  if command -v cf-remote >/dev/null; then
-    cf-remote --log-level info --version master install --clients localhost || true
-  fi
+  cf-remote --log-level info --version master install --clients localhost || true
 fi
 
 if [ ! -x /var/cfengine/bin/cf-agent ]; then
   echo "cf-remote didn't install CFEngine, build from source..."
   software git
   echo "cf-remote didn't install cf-agent, try from source"
-  CFE_VERSION=3.26.0 # need to use an actualy release which has a checksum for masterfiles download
   rm -rf core # just in case we are repeating the script
   git clone --recursive --depth 1 https://github.com/cfengine/core
   (
@@ -139,11 +143,9 @@ if [ ! -x /var/cfengine/bin/cf-agent ]; then
 fi
 
 # get masterfiles
-urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-"$CFE_VERSION"/misc/cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz
-
-sha256sum --check "$thisdir"/cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz.sha256
-
-tar xf cfengine-masterfiles-"$CFE_VERSION"-1.pkg.tar.gz
+rm -rf cfengine-masterfiles*tar.gz
+cf-remote download masterfiles --output-dir .
+tar xf cfengine-masterfiles-*tar.gz
 cp -a masterfiles/* /var/cfengine/inputs/
 
 # run three times to ensure all is done
