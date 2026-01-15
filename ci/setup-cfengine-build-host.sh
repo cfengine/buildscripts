@@ -190,6 +190,7 @@ if ! /var/cfengine/bin/cf-agent -V; then
   elif software python3-pip; then
     pip install cf-remote
   fi
+  export PATH=/usr/local/bin:$PATH # add /usr/local/bin for pip/pipx installed cf-remote
   if command -v cf-remote >/dev/null; then
     cf-remote --log-level info --version master install --clients localhost || true
   fi
