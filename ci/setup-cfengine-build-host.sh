@@ -114,7 +114,14 @@ if software pipx; then
   pipx install cf-remote
   export PATH=$HOME/.local/bin:$PATH
 elif software python3-pip; then
-  pip install cf-remote
+  if command -v pip; then
+    pip install cf-remote
+  elif command -v pip3; then
+    pip3 install cf-remote
+  else
+    echo "failure: neither pip nor pip3 seem to be available."
+    exit 42
+  fi
 fi
 export PATH=/usr/local/bin:$PATH # add /usr/local/bin for pip/pipx installed cf-remote
 
