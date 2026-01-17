@@ -130,6 +130,7 @@ else
   # try pipx first for debian as pip won't work.
   # If that fails to install CFEngine then try python3-pip for redhats.
   PIP=""
+  software python3-venv || true # on ubuntu-20 this is needed, debian-12 it is not but won't hurt
   if software pipx; then
     PIP=pipx
     export PATH=$HOME/.local/bin:$PATH
@@ -149,6 +150,7 @@ else
   fi
   export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
 
+  $PIP uninstall cf-remote || true # just in case a previous is there and would cause the install to fail
   $PIP install cf-remote
 
   if ! command -v cf-remote; then
