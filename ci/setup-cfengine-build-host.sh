@@ -86,6 +86,9 @@ if [ -f /etc/os-release ]; then
   elif grep debian /etc/os-release; then
     DEBIAN_FRONTEND=noninteractive apt upgrade --yes && DEBIAN_FRONTEND=noninteractive apt autoremove --yes
     alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
+    if grep stretch /etc/os-release; then
+      DEBIAN_STRETCH=1 # special case, cf-remote install needs to NOT use master as there are no packages there
+    fi
   elif grep suse /etc/os-release; then
     zypper -n update
     alias software='zypper install -y'
@@ -162,7 +165,12 @@ else
   # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
   if ! /var/cfengine/bin/cf-agent -V; then
     echo "No existing CFEngine install found, try cf-remote..."
-    cf-remote --log-level info --version master install --clients localhost || true
+    if [ -n "$DEBIAN_STRETCH" ]; then
+      _VERSION="--version 3.21.8"
+    else
+      _VERSION="--version master"
+    fi
+    cf-remote --log-level info $_VERSION install --clients localhost || true
   fi
 fi
 
