@@ -45,7 +45,10 @@ bundle agent cfengine_build_host_setup
       "python3-psycopg2";
       "rsync" comment => "added for debian-10";
       "systemd-coredump" comment => "added step to jenkins testing-pr job to query for coredumps on failures";
+
 # core/ci/dependencies.sh is run on some systems where quickinstall and cf-remote cannot install an agent to run this policy so we must remove some system packages that we also build since both install to /usr as a prefix.
+# we do need these still installed on bootstrap-pr hosts though, so guard against that class
+    debian.!bootstrap_pr_host::
       "libattr1-dev" package_policy => "delete";
       "libssl-dev" package_policy => "delete";
       "libpcre2-dev" package_policy => "delete";
@@ -69,6 +72,7 @@ bundle agent cfengine_build_host_setup
     (debian_10|debian_11).systemssl_build_host::
       "libssl-dev";
     debian.bootstrap_pr_host::
+      "libssl-dev"; # bootstrap_pr host needs this to configure before we build openssl ourselves
       "librsync-dev"; # bootstrap_pr host needs this to run configure and make dist
       "autoconf-archive" comment => "Required to resolve the AX_PTHREAD macro";
 

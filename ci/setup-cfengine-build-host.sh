@@ -16,6 +16,9 @@ fi
 mkdir -p /home/jenkins
 chown -R jenkins /home/jenkins
 
+# cleanup any previous runs cfengine-masterfiles tar balls
+rm -rf cfengine-masterfiles*
+
 function cleanup()
 {
   set -ex
@@ -83,6 +86,9 @@ if [ -f /etc/os-release ]; then
   elif grep debian /etc/os-release; then
     DEBIAN_FRONTEND=noninteractive apt upgrade --yes && DEBIAN_FRONTEND=noninteractive apt autoremove --yes
     alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
+    if grep stretch /etc/os-release; then
+      DEBIAN_STRETCH=1 # special case, cf-remote install needs to NOT use master as there are no packages there
+    fi
   elif grep suse /etc/os-release; then
     zypper -n update
     alias software='zypper install -y'
@@ -107,34 +113,65 @@ else
   exit 1
 fi
 
-echo "Installing cf-remote for possible package install and masterfiles download"
-# try pipx first for debian as pip won't work.
-# If that fails to install CFEngine then try python3-pip for redhats.
-if software pipx; then
-  pipx install cf-remote
-  export PATH=$HOME/.local/bin:$PATH
-elif software python3-pip; then
-  if command -v pip; then
-    pip install cf-remote
-  elif command -v pip3; then
-    pip3 install cf-remote
+if grep 6.10 /etc/issue; then
+  # special case of centos-6, cf-remote depends on urllib3 which depends on openssl 1.1.1+ that is not available
+  # generally we rely on cf-remote to install cfengine-nova and download masterfiles so here we must provide for both of those
+  echo "Found CentOS 6.10 so installing via hard-coded package URL..."
+
+  if [ ! -x /var/cfengine/bin/cf-agent ]; then
+    rm -rf cfengine-nova*rpm
+    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/agent/agent_rhel6_x86_64/cfengine-nova-3.24.3-1.el6.x86_64.rpm
+    rpm -i cfengine-nova-3.24.3-1.el6.x86_64.rpm
+  fi
+  urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/misc/cfengine-masterfiles-3.24.3-1.pkg.tar.gz
+fi
+
+if [ -x /var/cfengine/bin/cf-agent ]; then
+  echo "Case of pre-installed CFEngine so skipping cf-remote install and assuming download of masterfiles earlier in the script."
+else
+  echo "Installing cf-remote for possible package install and masterfiles download"
+  # try pipx first for debian as pip won't work.
+  # If that fails to install CFEngine then try python3-pip for redhats.
+  PIP=""
+  software python3-venv || true # on ubuntu-20 this is needed, debian-12 it is not but won't hurt
+  if software pipx; then
+    PIP=pipx
+    export PATH=$HOME/.local/bin:$PATH
+  elif software python3-pip; then
+    if command -v pip; then
+      PIP=pip
+    elif command -v pip3; then
+      PIP=pip3
+    fi
+  elif software python-pip; then
+    if command -v pip; then
+      PIP=pip
+    fi
   else
-    echo "failure: neither pip nor pip3 seem to be available."
+    echo "Tried installing pipx, python3-pip and python-pip, none of which resulted in pipx, pip3 or pip being available. Exiting."
+    exit 23
+  fi
+  export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
+
+  $PIP uninstall cf-remote || true # just in case a previous is there and would cause the install to fail
+  $PIP install cf-remote
+
+  if ! command -v cf-remote; then
+    echo "cf-remote was not installed, it is required so exiting now"
     exit 42
   fi
-fi
-export PATH=/usr/local/bin:$PATH # add /usr/local/bin for pip/pipx installed cf-remote
 
-if ! command -v cf-remote; then
-  echo "cf-remote was not installed, it is required so exiting now"
-  exit 42
-fi
-
-echo "Checking for pre-installed CFEngine (chicken/egg problem)"
-# We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
-if ! /var/cfengine/bin/cf-agent -V; then
-  echo "No existing CFEngine install found, try cf-remote..."
-  cf-remote --log-level info --version master install --clients localhost || true
+  echo "Checking for pre-installed CFEngine (chicken/egg problem)"
+  # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
+  if ! /var/cfengine/bin/cf-agent -V; then
+    echo "No existing CFEngine install found, try cf-remote..."
+    if [ -n "$DEBIAN_STRETCH" ]; then
+      _VERSION="--version 3.21.8"
+    else
+      _VERSION="--version master"
+    fi
+    cf-remote --log-level info $_VERSION install --clients localhost || true
+  fi
 fi
 
 if [ ! -x /var/cfengine/bin/cf-agent ]; then
@@ -149,9 +186,10 @@ if [ ! -x /var/cfengine/bin/cf-agent ]; then
   )
 fi
 
-# get masterfiles
-rm -rf cfengine-masterfiles*tar.gz
-cf-remote download masterfiles --output-dir .
+# download masterfiles if not already present (such as in case of centos-6 above, hard-coded 3.24.3 download)
+if ! ls cfengine-masterfiles*gz; then
+  cf-remote download masterfiles --output-dir .
+fi
 tar xf cfengine-masterfiles-*tar.gz
 cp -a masterfiles/* /var/cfengine/inputs/
 
