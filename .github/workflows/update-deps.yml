@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        branch: [master, 3.24.x]
+        branch: [master, 3.27.x, 3.24.x]
     steps:
       - name: Checks-out repository
         uses: actions/checkout@v4
