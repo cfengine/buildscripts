@@ -160,7 +160,7 @@ We use the systems bundled SSL for these platforms.
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.52.0 | 2.52.0 | 2.52.0 |
 | [libexpat](https://libexpat.github.io/)             | -      | 2.7.3  | 2.7.3  |
-| [PHP](https://php.net/)                             | 8.3.28 | 8.3.29 | 8.5.1  |
+| [PHP](https://php.net/)                             | 8.3.28 | 8.3.29 | 8.5.2  |
 | [PostgreSQL](https://www.postgresql.org/)           | 15.15  | 16.11  | 18.1   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | -      | 1.68.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.1  | 3.4.1  | 3.4.1  |
