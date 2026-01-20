@@ -174,7 +174,7 @@ if ! /var/cfengine/bin/cf-agent -V; then
   if [ -n "$DEBIAN_STRETCH" ]; then
     _VERSION="--version 3.21.8"
   else
-    _VERSION="--version master"
+    _VERSION=""
   fi
   cf-remote --log-level info $_VERSION install --clients localhost || true
 fi
