@@ -165,7 +165,7 @@ else
 fi
 export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
 
-$PIP uninstall cf-remote || true # just in case a previous is there and would cause the install to fail
+$PIP uninstall -y cf-remote || true # just in case a previous is there and would cause the install to fail
 $PIP install cf-remote || true # if this fails we will try to install from source
 
 echo "Checking for pre-installed CFEngine (chicken/egg problem)"
