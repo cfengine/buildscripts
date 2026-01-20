@@ -126,6 +126,20 @@ if grep 6.10 /etc/issue; then
   urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/misc/cfengine-masterfiles-3.24.3-1.pkg.tar.gz
 fi
 
+if grep suse /etc/os-release; then
+  if grep -i version=\"12 /etc/os-release; then
+    echo "SUSE-12 found, cf-remote cannot be installed here so download directly similar to CentOS-6."
+    if [ ! -x /var/cfengine/bin/cf-agent ]; then
+      urlget https://cfengine-package-repos.s3.amazonaws.com/pub/gpg.key
+      rpm --import gpg.key
+      rm -rf cfengine-nova*rpm
+      urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/agent/agent_suse12_x86_64/cfengine-nova-3.24.3-1.suse12.x86_64.rpm
+      zypper in -y cfengine-nova-3.24.3-1.suse12.x86_64.rpm
+    fi
+    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/misc/cfengine-masterfiles-3.24.3-1.pkg.tar.gz
+  fi
+fi
+
 echo "Installing cf-remote for possible package install and masterfiles download"
 # try pipx first for debian as pip won't work.
 # If that fails to install CFEngine then try python3-pip for redhats.
