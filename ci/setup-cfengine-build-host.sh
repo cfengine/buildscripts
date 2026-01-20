@@ -126,52 +126,43 @@ if grep 6.10 /etc/issue; then
   urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/misc/cfengine-masterfiles-3.24.3-1.pkg.tar.gz
 fi
 
-if [ -x /var/cfengine/bin/cf-agent ]; then
-  echo "Case of pre-installed CFEngine so skipping cf-remote install and assuming download of masterfiles earlier in the script."
+echo "Installing cf-remote for possible package install and masterfiles download"
+# try pipx first for debian as pip won't work.
+# If that fails to install CFEngine then try python3-pip for redhats.
+PIP=""
+software python3-venv || true # on ubuntu-20 this is needed, debian-12 it is not but won't hurt
+if software pipx; then
+  PIP=pipx
+  export PATH=$HOME/.local/bin:$PATH
+elif software python3-pip; then
+  if command -v pip; then
+    PIP=pip
+  elif command -v pip3; then
+    PIP=pip3
+  fi
+elif software python-pip; then
+  if command -v pip; then
+    PIP=pip
+  fi
 else
-  echo "Installing cf-remote for possible package install and masterfiles download"
-  # try pipx first for debian as pip won't work.
-  # If that fails to install CFEngine then try python3-pip for redhats.
-  PIP=""
-  software python3-venv || true # on ubuntu-20 this is needed, debian-12 it is not but won't hurt
-  if software pipx; then
-    PIP=pipx
-    export PATH=$HOME/.local/bin:$PATH
-  elif software python3-pip; then
-    if command -v pip; then
-      PIP=pip
-    elif command -v pip3; then
-      PIP=pip3
-    fi
-  elif software python-pip; then
-    if command -v pip; then
-      PIP=pip
-    fi
+  echo "Tried installing pipx, python3-pip and python-pip, none of which resulted in pipx, pip3 or pip being available. Exiting."
+  exit 23
+fi
+export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
+
+$PIP uninstall cf-remote || true # just in case a previous is there and would cause the install to fail
+$PIP install cf-remote || true # if this fails we will try to install from source
+
+echo "Checking for pre-installed CFEngine (chicken/egg problem)"
+# We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
+if ! /var/cfengine/bin/cf-agent -V; then
+  echo "No existing CFEngine install found, try cf-remote..."
+  if [ -n "$DEBIAN_STRETCH" ]; then
+    _VERSION="--version 3.21.8"
   else
-    echo "Tried installing pipx, python3-pip and python-pip, none of which resulted in pipx, pip3 or pip being available. Exiting."
-    exit 23
+    _VERSION="--version master"
   fi
-  export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
-
-  $PIP uninstall cf-remote || true # just in case a previous is there and would cause the install to fail
-  $PIP install cf-remote
-
-  if ! command -v cf-remote; then
-    echo "cf-remote was not installed, it is required so exiting now"
-    exit 42
-  fi
-
-  echo "Checking for pre-installed CFEngine (chicken/egg problem)"
-  # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
-  if ! /var/cfengine/bin/cf-agent -V; then
-    echo "No existing CFEngine install found, try cf-remote..."
-    if [ -n "$DEBIAN_STRETCH" ]; then
-      _VERSION="--version 3.21.8"
-    else
-      _VERSION="--version master"
-    fi
-    cf-remote --log-level info $_VERSION install --clients localhost || true
-  fi
+  cf-remote --log-level info $_VERSION install --clients localhost || true
 fi
 
 if [ ! -x /var/cfengine/bin/cf-agent ]; then
@@ -188,7 +179,12 @@ fi
 
 # download masterfiles if not already present (such as in case of centos-6 above, hard-coded 3.24.3 download)
 if ! ls cfengine-masterfiles*gz; then
-  cf-remote download masterfiles --output-dir .
+  # if we are using a CFEngine pre-installed (chicken/egg) image we would skip cf-remote install so need to download directly
+  if ! command -v cf-remote; then
+    urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.27.0/misc/cfengine-masterfiles-3.27.0-1.pkg.tar.gz
+  else
+    cf-remote download masterfiles --output-dir .
+  fi
 fi
 tar xf cfengine-masterfiles-*tar.gz
 cp -a masterfiles/* /var/cfengine/inputs/
