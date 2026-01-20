@@ -127,11 +127,12 @@ if grep 6.10 /etc/issue; then
 fi
 
 if grep suse /etc/os-release; then
+  urlget https://cfengine-package-repos.s3.amazonaws.com/pub/gpg.key
+  rpm --import gpg.key
+
   if grep -i version=\"12 /etc/os-release; then
     echo "SUSE-12 found, cf-remote cannot be installed here so download directly similar to CentOS-6."
     if [ ! -x /var/cfengine/bin/cf-agent ]; then
-      urlget https://cfengine-package-repos.s3.amazonaws.com/pub/gpg.key
-      rpm --import gpg.key
       rm -rf cfengine-nova*rpm
       urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/agent/agent_suse12_x86_64/cfengine-nova-3.24.3-1.suse12.x86_64.rpm
       zypper in -y cfengine-nova-3.24.3-1.suse12.x86_64.rpm
@@ -173,6 +174,9 @@ if ! /var/cfengine/bin/cf-agent -V; then
   echo "No existing CFEngine install found, try cf-remote..."
   if [ -n "$DEBIAN_STRETCH" ]; then
     _VERSION="--version 3.21.8"
+  elif grep suse /etc/os-release; then
+    # here we must use 3.24.2 instead of 3.24.3 because 3.24.3 has libcurl 4 which depends on unavailable OPENSSL_3.2.0
+    _VERSION="--version 3.24.2" # we removed suse platforms in 3.27.0
   else
     _VERSION=""
   fi
