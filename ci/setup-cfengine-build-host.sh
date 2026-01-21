@@ -86,9 +86,6 @@ if [ -f /etc/os-release ]; then
   elif grep debian /etc/os-release; then
     DEBIAN_FRONTEND=noninteractive apt upgrade --yes && DEBIAN_FRONTEND=noninteractive apt autoremove --yes
     alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
-    if grep stretch /etc/os-release; then
-      DEBIAN_STRETCH=1 # special case, cf-remote install needs to NOT use master as there are no packages there
-    fi
   elif grep suse /etc/os-release; then
     zypper -n update
     alias software='zypper install -y'
@@ -141,39 +138,45 @@ if grep suse /etc/os-release; then
   fi
 fi
 
-echo "Installing cf-remote for possible package install and masterfiles download"
-# try pipx first for debian as pip won't work.
-# If that fails to install CFEngine then try python3-pip for redhats.
-PIP=""
-software python3-venv || true # on ubuntu-20 this is needed, debian-12 it is not but won't hurt
-if software pipx; then
-  PIP=pipx
-  export PATH=$HOME/.local/bin:$PATH
-elif software python3-pip; then
-  if command -v pip; then
-    PIP=pip
-  elif command -v pip3; then
-    PIP=pip3
-  fi
-elif software python-pip; then
-  if command -v pip; then
-    PIP=pip
-  fi
-else
-  echo "Tried installing pipx, python3-pip and python-pip, none of which resulted in pipx, pip3 or pip being available. Exiting."
-  exit 23
-fi
-export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
+if [ ! -x /var/cfengine/cf-agent ]; then
+  if ! ls cfengine-masterfiles*tar.gz; then
+    echo "Installing cf-remote for possible package install and masterfiles download"
+    # try pipx first for debian as pip won't work.
+    # If that fails to install CFEngine then try python3-pip for redhats.
+    PIP=""
+    software python3-venv || true # on ubuntu-20 this is needed, debian-12 it is not but won't hurt
+    if software pipx; then
+      PIP=pipx
+      export PATH=$HOME/.local/bin:$PATH
+    elif software python3-pip; then
+      if command -v pip; then
+        PIP=pip
+      elif command -v pip3; then
+        PIP=pip3
+      fi
+    elif software python-pip; then
+      if command -v pip; then
+        PIP=pip
+      fi
+    else
+      echo "Tried installing pipx, python3-pip and python-pip, none of which resulted in pipx, pip3 or pip being available. Exiting."
+      exit 23
+    fi
+    export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
 
-$PIP uninstall -y cf-remote || true # just in case a previous is there and would cause the install to fail
-$PIP install cf-remote || true # if this fails we will try to install from source
+    $PIP uninstall -y cf-remote || true # just in case a previous is there and would cause the install to fail
+    $PIP install cf-remote || true # if this fails we will try to install from source
+  fi # no masterfiles downloaded
+fi # no cf-agent installed
 
 echo "Checking for pre-installed CFEngine (chicken/egg problem)"
 # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
 if ! /var/cfengine/bin/cf-agent -V; then
   echo "No existing CFEngine install found, try cf-remote..."
-  if [ -n "$DEBIAN_STRETCH" ]; then
-    _VERSION="--version 3.21.8"
+  if grep -i stretch /etc/os-release; then
+    _VERSION="--version 3.21.8" # 3.27.0 and 3.24.x do not have debian 9 (stretch)
+  elif grep -i bullseye /etc/os-release; then
+    _VERSION="--version 3.24.3" # 3.27.0 has only debian > 11 (bullseye)
   elif grep suse /etc/os-release; then
     # here we must use 3.24.2 instead of 3.24.3 because 3.24.3 has libcurl 4 which depends on unavailable OPENSSL_3.2.0
     _VERSION="--version 3.24.2" # we removed suse platforms in 3.27.0
