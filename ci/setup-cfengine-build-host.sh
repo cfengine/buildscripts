@@ -86,9 +86,6 @@ if [ -f /etc/os-release ]; then
   elif grep debian /etc/os-release; then
     DEBIAN_FRONTEND=noninteractive apt upgrade --yes && DEBIAN_FRONTEND=noninteractive apt autoremove --yes
     alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
-    if grep stretch /etc/os-release; then
-      DEBIAN_STRETCH=1 # special case, cf-remote install needs to NOT use master as there are no packages there
-    fi
   elif grep suse /etc/os-release; then
     zypper -n update
     alias software='zypper install -y'
@@ -172,8 +169,10 @@ echo "Checking for pre-installed CFEngine (chicken/egg problem)"
 # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
 if ! /var/cfengine/bin/cf-agent -V; then
   echo "No existing CFEngine install found, try cf-remote..."
-  if [ -n "$DEBIAN_STRETCH" ]; then
-    _VERSION="--version 3.21.8"
+  if grep -i stretch /etc/os-release; then
+    _VERSION="--version 3.21.8" # 3.27.0 and 3.24.x do not have debian 9 (stretch)
+  elif grep -i bullseye /etc/os-release; then
+    _VERSION="--version 3.24.3" # 3.27.0 has only debian > 11 (bullseye)
   elif grep suse /etc/os-release; then
     # here we must use 3.24.2 instead of 3.24.3 because 3.24.3 has libcurl 4 which depends on unavailable OPENSSL_3.2.0
     _VERSION="--version 3.24.2" # we removed suse platforms in 3.27.0
