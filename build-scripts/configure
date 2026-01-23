@@ -113,7 +113,7 @@ DEBUG)
     ARGS="$ARGS --enable-debug"
     # Override the default "-g3 -O0" that comes with ./configure --enable-debug
     # in order to reduce the size of the packages
-    CFLAGS="-g2 -O1 $CFLAGS"
+    CFLAGS="-ggdb3 -O0 $CFLAGS"
     ;;
 *)
     fatal "Unknown BUILD_TYPE '$BUILD_TYPE'"
