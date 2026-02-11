@@ -425,15 +425,14 @@ detect_environment
 
 # Print the environment variables so that the log can be used to debug problems
 # stemming from wrong environment.
-echo
-echo
-echo "==================== Current environment ========================"
-# Print only what changed in the environment after sourcing this script
-# - Lines staring with + are kept (these are things added to env)
-# - Lines staring with +++ is filtered out (removes the "new file" header)
-# - The + character is removed
-env | sort | diff -u env_before - | grep '^\+' | grep -v '^+++' | sed 's/+//'
+env_diff="$(env | sort | diff env_before - | grep '^>' | sed 's/^> //')"
 unlink env_before
-echo "================================================================="
-echo
-echo
+if [ -n "$env_diff" ]; then
+  echo
+  echo
+  echo "==================== Current environment ========================"
+  echo "$env_diff"
+  echo "================================================================="
+  echo
+  echo
+fi
