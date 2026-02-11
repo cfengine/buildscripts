@@ -336,7 +336,7 @@ detect_tools() {
     # various dependencies have various requirements
     MAKE=$(func_whereis gmake make)
 
-    if $MAKE -v | grep GNU; then
+    if $MAKE -v | grep -q GNU; then
         export MAKE
     else
         log_error "GNU Make not found"
