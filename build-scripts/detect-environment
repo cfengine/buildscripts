@@ -30,12 +30,6 @@ detect_cross_target() {
         export CROSS_TARGET
         ;;
     esac
-
-    if [ -n "$CROSS_TARGET" ]; then
-        log_debug "Detected cross target $CROSS_TARGET"
-    else
-        log_debug "No cross target detected"
-    fi
 }
 
 # This function exports operating system specific variables:
@@ -112,7 +106,6 @@ detect_os() {
         OS_VERSION_MAJOR="${OS_VERSION%%.*}"
     fi
 
-    log_debug "Detected OS $OS $OS_VERSION"
     export OS OS_VERSION OS_VERSION_MAJOR
 }
 
@@ -274,8 +267,6 @@ detect_packaging() {
         ;;
     esac
 
-    log_debug "Detected dependency packaging $DEP_PACKAGING"
-    log_debug "Detected packaging $PACKAGING"
     export DEP_PACKAGING PACKAGING
 }
 
@@ -334,7 +325,6 @@ detect_arch() {
         ;;
     esac
 
-    log_debug "Detected architecture $ARCH"
     export ARCH
 }
 
@@ -348,7 +338,6 @@ detect_tools() {
 
     if $MAKE -v | grep GNU; then
         export MAKE
-        log_debug "Detected make path $MAKE"
     else
         log_error "GNU Make not found"
         exit 42
@@ -360,12 +349,10 @@ detect_tools() {
     # systems. We use it to kill processes that can mess with the build process.
     FUSER=$(func_whereis fuser)
     export FUSER
-    log_debug "Detected fuser path $FUSER"
 
     # We use patch to apply patches to the dependencies.
     PATCH=$(func_whereis gpatch patch)
     export PATCH
-    log_debug "Detected patch path $PATCH"
 }
 
 # This function appends the -j/--jobs option to the MAKEFLAGS environment
@@ -375,19 +362,15 @@ detect_tools() {
 detect_cores() {
     case "$OS_FAMILY" in
     aix)
-        log_debug "Detected OS family is aix"
         NUM_CORES="$(lscfg | grep -c proc)"
         ;;
     solaris)
-        log_debug "Detected OS family is solaris"
         NUM_CORES="$(psrinfo | wc -l)"
         ;;
     linux)
-        log_debug "Detected OS family is linux"
         NUM_CORES="$(grep -c '^processor' /proc/cpuinfo)"
         ;;
     hpux)
-        log_debug "Detected OS family is hpux"
         NUM_CORES="$(ioscan -k -C processor | grep -c processor)"
         ;;
     *)
@@ -397,7 +380,6 @@ detect_cores() {
     esac
 
     # Make number of jobs one higher than core count, to account for I/O, network, etc.
-    log_debug "Detected amount of CPU cores is $NUM_CORES"
     MAKEFLAGS="${MAKEFLAGS:--j$((NUM_CORES + 1))}"
     export MAKEFLAGS
 }
