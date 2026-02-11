@@ -9,7 +9,8 @@
 . "$(dirname "$0")"/functions
 . detect-environment
 
-uninstall_cfbuild
+log_debug "Removing all cfbuild packages..."
+run_and_print_on_failure uninstall_cfbuild
 
 if [ -z "$PREFIX" ] || [ "$PREFIX" = "/" ]; then
     fatal "\$PREFIX is not defined, is empty, or is set to the root directory. Aborting to prevent accidental deletion."
