@@ -754,10 +754,20 @@ run_and_print_on_failure() {
         # Filter output on Warnings/Errors and add two lines of context
         regex='([Ww]arning:|[Ee]rror:)'
         if grep_q -E "$regex" "$temp_output_file"; then
-            log_debug "Found warnings/errors in output from command:" "$@"
-            echo "--- Start of Warnings/Errors ---"
-            grep_c 2 -E "$regex" "$temp_output_file"
-            echo "--- End of Warnings/Errors ---"
+            # Known-benign patterns that are not actionable and should be suppressed:
+            # - automake subdir-objects: forward-compatibility notice, harmless
+            # - libtool install warnings: normal when using DESTDIR
+            # shellcheck disable=SC3043
+            local benign='subdir-objects|libtool: warning: remember to run|libtool: warning:.*has not been installed|libtool: install:'
+            # shellcheck disable=SC3043
+            local filtered
+            filtered=$(grep_c 2 -E "$regex" "$temp_output_file" | grep -v -E "$benign") || true
+            if [ -n "$filtered" ]; then
+                log_debug "Found warnings/errors in output from command:" "$@"
+                echo "--- Start of Warnings/Errors ---"
+                printf '%s\n' "$filtered"
+                echo "--- End of Warnings/Errors ---"
+            fi
         fi
     else
         # Print all output
