@@ -1,11 +1,13 @@
-#!/bin/sh -ex
+#!/bin/sh -e
 
 # Installs given packages
 
+. "$(dirname "$0")/../build-scripts/functions"
 
 if [ $# -eq 0 ]; then
-   echo "Usage: $0 <pkg> [<pkg> ...]"
-   exit 1
+    echo "Usage: $0 <pkg> [<pkg> ...]"
+    exit 1
 fi
 
-sudo dpkg -i "$@"
+log_debug "Installing packages: $*"
+run_and_print_on_failure sudo dpkg -i "$@"
