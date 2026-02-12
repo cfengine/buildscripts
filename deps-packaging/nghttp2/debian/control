@@ -14,5 +14,5 @@ Description: CFEngine Build Automation -- nghttp2
 Package: cfbuild-nghttp2-devel
 Section: libdevel
 Architecture: any
-Desciption: CFEngine Build Automation -- cfbuild-nghttp2-devel
+Description: CFEngine Build Automation -- cfbuild-nghttp2-devel
  CFEngine Build Automation -- cfbuild-nghttp2-devel
