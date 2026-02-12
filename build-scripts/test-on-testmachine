@@ -51,7 +51,7 @@ chroot)
             # Minilogd may sometimes launch on RedHat without any user
             # intervention. Ignore that.
             # shellcheck disable=SC2009
-            if ps -ef | grep -E "^ *[^ ]+ +$pid" | grep minilogd; then
+            if ps -ef 2>/dev/null | grep -E "^ *[^ ]+ +$pid" | grep -q minilogd; then
                 continue
             fi
             ;;
@@ -59,7 +59,7 @@ chroot)
 
             # gpg-agent sometimes is spawned on suse during our tests.
             # This happens only in chroot. Ignore that.
-            if ps -o command --pid "$pid" | grep "gpg-agent --homedir /var/tmp/zypp.*zypp-trusted.*--daemon"; then
+            if ps -o command --pid "$pid" 2>/dev/null | grep -q "gpg-agent --homedir /var/tmp/zypp.*zypp-trusted.*--daemon"; then
                 continue
             fi
             ;;
@@ -67,7 +67,7 @@ chroot)
             # gpg-agent sometimes is spawned on Ubuntu 24 during our tests.
             # This happens only in chroot. Ignore that.
             if [ "$OS_VERSION_MAJOR" = "24" ]; then
-                if ps -o command --pid "$pid" | grep "gpg-agent --homedir /etc/apt/sources.list.d/.gnupg-temp --use-standard-socket --daemon"; then
+                if ps -o command --pid "$pid" 2>/dev/null | grep -q "gpg-agent --homedir /etc/apt/sources.list.d/.gnupg-temp --use-standard-socket --daemon"; then
                     continue
                 fi
             fi

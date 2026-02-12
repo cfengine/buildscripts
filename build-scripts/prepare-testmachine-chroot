@@ -21,9 +21,9 @@ CHROOT_ROOT=$HOME/testmachine-chroot/
 sudo mkdir -p "$CHROOT_ROOT"
 
 # Clean up previous chroot state by killing any processes that are using the CHROOT_ROOT directory.
-sudo "$FUSER" -k "$CHROOT_ROOT" || true
+sudo "$FUSER" -k "$CHROOT_ROOT" >/dev/null 2>&1 || true
 # Unmount the /proc filesystem if it was previously mounted inside the chroot.
-sudo umount "${CHROOT_ROOT}proc" || true
+sudo umount "${CHROOT_ROOT}proc" >/dev/null 2>&1 || true
 
 # Tell rsync not to touch the BASEDIR and PREFIX directories
 echo "P $BASEDIR" >"$TRANSFER_SCRIPT"
