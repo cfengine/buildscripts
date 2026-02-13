@@ -412,7 +412,7 @@ unlink env_before
 if [ -n "$env_diff" ]; then
   echo
   echo
-  echo "==================== Current environment ========================"
+  echo "======= Changes to environment after sourcing this script ======="
   echo "$env_diff"
   echo "================================================================="
   echo
