@@ -410,11 +410,11 @@ detect_environment
 env_diff="$(env | sort | diff env_before - | grep '^>' | sed 's/^> //')"
 unlink env_before
 if [ -n "$env_diff" ]; then
-  echo
-  echo
-  echo "======= Changes to environment after sourcing this script ======="
-  echo "$env_diff"
-  echo "================================================================="
-  echo
-  echo
+    echo
+    echo
+    echo "======= Changes to environment after sourcing this script ======="
+    echo "$env_diff"
+    echo "================================================================="
+    echo
+    echo
 fi
