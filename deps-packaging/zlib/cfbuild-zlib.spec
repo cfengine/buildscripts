@@ -3,7 +3,6 @@ Name: cfbuild-zlib
 Version: %{version}
 Release: 1
 Source0: zlib-1.3.2.tar.gz
-Patch0: AIX_LDSHARED.patch
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -17,7 +16,6 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n zlib-1.3.2
 
-%patch0 -p1
 
 %build
 

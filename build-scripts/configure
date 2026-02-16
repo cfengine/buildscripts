@@ -63,9 +63,21 @@ case "$WITH_SYSTEMD" in
   *)    var_append ARGS "--without-systemd-service" ;;
 esac
 
-# RHEL 8 requires an SELinux policy
+# RHEL 8+ requires an SELinux policy and --without-pam to use vendored openssl
 if [ "x$OS" = "xrhel" ] && [ "${VER%\.*}" -gt "7" ]; then
   var_append ARGS "--with-selinux-policy"
+fi
+# rhel >= 7 or opensuse >= 15 need --without-pam in order to use vendored openssl
+if [ "$OS" = "rhel" ] && expr "$_OS_MAJOR_VERSION" ">=" "8" >/dev/null
+then
+    var_append ARGS "--without-pam"
+fi
+if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]
+then
+    if expr "$_OS_MAJOR_VERSION" ">=" "15"
+    then
+        var_append ARGS "--without-pam"
+    fi
 fi
 
 # Cross-compiling Windows?
