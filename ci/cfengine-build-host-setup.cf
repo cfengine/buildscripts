@@ -239,9 +239,8 @@ bundle agent cfengine_build_host_setup
   classes:
     debian_11::
       "have_pip2" expression => fileexists("/usr/local/bin/pip");
-    ubuntu_16::
-      "have_i386_architecture" expression => strcmp(execresult("${paths.dpkg} --print-foreign-architectures", "noshell"), "i386");
     ubuntu::
+      "have_i386_architecture" expression => strcmp(execresult("${paths.dpkg} --print-foreign-architectures", "noshell"), "i386");
       "localhost_localdomain_hostname_missing" expression => not(strcmp(execresult("${paths.hostname} -f", "useshell"), "localhost.localdomain"));
     opensuse|suse|sles::
       "have_$(suse_users_and_groups)_group" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/group >/dev/null", "useshell");
