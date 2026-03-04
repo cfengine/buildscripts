@@ -174,7 +174,11 @@ if [ ! -x /var/cfengine/cf-agent ]; then
     fi
     export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
 
-    $PIP uninstall -y cf-remote || true # just in case a previous is there and would cause the install to fail
+    if [ "$PIP" = "pipx" ]; then
+      $PIP uninstall cf-remote || true # no -y option in pipx
+    else
+      $PIP uninstall -y cf-remote || true
+    fi # just in case a previous is there and would cause the install to fail
     $PIP install cf-remote || true # if this fails we will try to install from source
   fi # no masterfiles downloaded
 fi # no cf-agent installed
