@@ -67,8 +67,9 @@ bundle agent cfengine_build_host_setup
 
 
     mingw_build_host::
-      "wine:i386";
       "mingw-w64";
+    mingw_build_host.have_i386_architecture::
+      "wine:i386";
     (debian_10|debian_11).systemssl_build_host::
       "libssl-dev";
     debian.bootstrap_pr_host::
@@ -320,7 +321,11 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
       "yum install -y python3-pip" contain => in_shell;
 
     mingw_build_host.!have_i386_architecture::
-      "${paths.dpkg} --add-architecture i386";
+      "${paths.dpkg} --add-architecture i386"
+        handle => "i386_arch_added";
+      "DEBIAN_FRONTEND=noninteractive apt-get update"
+        depends_on => { "i386_arch_added" },
+        contain => in_shell;
 
     ubuntu.not_in_container.localhost_localdomain_hostname_missing::
       "/usr/bin/hostnamectl set-hostname localhost.localdomain"
