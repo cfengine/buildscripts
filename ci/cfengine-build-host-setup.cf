@@ -262,6 +262,30 @@ root - core unlimited
 * - core unlimited
 ");
 
+      "/etc/ssh/sshd_config"
+        edit_line => comment_lines_matching("^PermitRootLogin\s+(?!no\s*$).*", "#"),
+        classes => if_repaired("sshd_hardened"),
+        comment => "Comment out insecure PermitRootLogin values";
+      "/etc/ssh/sshd_config"
+        edit_line => comment_lines_matching("^PasswordAuthentication\s+(?!no\s*$).*", "#"),
+        classes => if_repaired("sshd_hardened"),
+        comment => "Comment out insecure PasswordAuthentication value";
+      "/etc/ssh/sshd_config"
+        edit_line => comment_lines_matching("^KbdInteractiveAuthentication\s+(?!no\s*$).*", "#"),
+        classes => if_repaired("sshd_hardened"),
+        comment => "Comment out insecure KbdInteractiveAuthentication value (OpenSSH 8.7+)";
+      "/etc/ssh/sshd_config"
+        edit_line => comment_lines_matching("^ChallengeResponseAuthentication\s+(?!no\s*$).*", "#"),
+        classes => if_repaired("sshd_hardened"),
+        comment => "Comment out insecure ChallengeResponseAuthentication value (OpenSSH < 8.7)";
+      "/etc/ssh/sshd_config"
+        edit_line => lines_present("PermitRootLogin no
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+ChallengeResponseAuthentication no"),
+        classes => if_repaired("sshd_hardened"),
+        comment => "Ensure SSH hardening directives are present";
+
     ubuntu_16|ubuntu_18|redhat_9|redhat_10::
       "/etc/hosts" -> { "ENT-12437" }
         edit_line => regex_replace("127.0.0.1 localhost localhost.localdomain","127.0.0.1 localhost.localdomain"),
@@ -342,6 +366,12 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
       "useradd -u 2 bin" contain => in_shell;
     !have_sys_user.(suse|sles|opensuse)::
       "useradd -u 3 sys" contain => in_shell;
+
+  services:
+    sshd_hardened::
+      "sshd"
+        service_policy => "restart",
+        comment => "Restart sshd to apply hardened configuration";
 
 # skip /etc/hosts change for now, seems kind of wrong and corrupts ip6 entries like `::1 ip6-ip6-loopback`
 # maybe the following is needed to silence such errors as:     ubuntu-16-mingw-j1: sudo: unable to resolve host localhost.localdomain
