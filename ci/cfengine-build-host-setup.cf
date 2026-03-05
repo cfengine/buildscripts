@@ -24,6 +24,8 @@ bundle agent cfengine_build_host_setup
       "ntp";
 
     debian|ubuntu::
+      "fail2ban"
+        comment => "Ban IPs with repeated failed SSH auth attempts";
       "libltdl7" package_policy => "delete";
       "libltdl-dev" package_policy => "delete";
       "binutils";
@@ -126,6 +128,8 @@ bundle agent cfengine_build_host_setup
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
     (redhat|centos).(yum_dnf_conf_ok)::
       "epel-release";
+      "fail2ban"
+        comment => "Ban IPs with repeated failed SSH auth attempts";
     (redhat_7|centos_7).(yum_dnf_conf_ok)::
       "ccache";
       "fakeroot";
@@ -263,6 +267,17 @@ root - core unlimited
 * - core unlimited
 ");
 
+      "/etc/fail2ban/jail.local"
+        create => "true",
+        content => "[sshd]
+enabled = true
+port = ssh
+maxretry = 5
+bantime = 3600
+findtime = 600",
+        classes => if_repaired("fail2ban_config_changed"),
+        comment => "Configure fail2ban to ban IPs after 5 failed SSH attempts within 10 minutes";
+
       "/etc/ssh/sshd_config"
         edit_line => comment_lines_matching("^PermitRootLogin\s+(?!no\s*$).*", "#"),
         classes => if_repaired("sshd_hardened"),
@@ -373,6 +388,14 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
       "sshd"
         service_policy => "restart",
         comment => "Restart sshd to apply hardened configuration";
+    any::
+      "fail2ban"
+        service_policy => "start",
+        comment => "Ensure fail2ban is running";
+    fail2ban_config_changed::
+      "fail2ban"
+        service_policy => "restart",
+        comment => "Restart fail2ban to apply jail configuration";
 
 # skip /etc/hosts change for now, seems kind of wrong and corrupts ip6 entries like `::1 ip6-ip6-loopback`
 # maybe the following is needed to silence such errors as:     ubuntu-16-mingw-j1: sudo: unable to resolve host localhost.localdomain
