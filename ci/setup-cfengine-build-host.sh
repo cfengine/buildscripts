@@ -3,7 +3,7 @@ shopt -s expand_aliases
 thisdir="$(dirname "$0")"
 
 # install needed packages and software for a build host
-set -ex
+set -e
 if [ "$(id -u)" != "0" ]; then
   echo "$0 must be run as root"
   exit 1
@@ -21,15 +21,15 @@ rm -rf cfengine-masterfiles*
 
 function cleanup()
 {
-  set -ex
-  if command -v apt 2>/dev/null; then
+  set -e
+  if command -v apt >/dev/null 2>&1; then
     # workaround for CFE-4544, remove scriptlets call systemctl even when systemctl is-system-running returns false
     rm /bin/systemctl
     ln -s /bin/echo /bin/systemctl
     apt remove -y cfengine-nova || true
-  elif command -v yum 2>/dev/null; then
+  elif command -v yum >/dev/null 2>&1; then
     yum erase -y cfengine-nova || true
-  elif command -v zypper 2>/dev/null; then
+  elif command -v zypper >/dev/null 2>&1; then
     zypper remove -y cfengine-nova || true
   else
     echo "No supported package manager to uninstall cfengine."
@@ -43,7 +43,7 @@ function cleanup()
   mv /var/log/CFE* /var/bak.cfengine/ || true
   mv /var/log/postgresql.log /var/bak.cfengine || true
 
-  if command -v pkill; then
+  if command -v pkill >/dev/null 2>&1; then
     pkill -9 cf-agent || true
     pkill -9 cf-serverd || true
     pkill -9 cf-monitord || true
@@ -82,13 +82,13 @@ echo "Using buildscripts commit:"
 
 echo "Install distribution upgrades and set software alias for platform"
 if [ -f /etc/os-release ]; then
-  if grep rhel /etc/os-release; then
+  if grep -q rhel /etc/os-release; then
     yum update --assumeyes
     alias software='yum install --assumeyes'
-  elif grep debian /etc/os-release; then
+  elif grep -q debian /etc/os-release; then
     DEBIAN_FRONTEND=noninteractive apt upgrade --yes && DEBIAN_FRONTEND=noninteractive apt autoremove --yes
     alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
-  elif grep suse /etc/os-release; then
+  elif grep -q suse /etc/os-release; then
     zypper -n update
     alias software='zypper install -y'
   else
@@ -103,16 +103,16 @@ else
   exit 1
 fi
 
-if command -v wget; then
+if command -v wget >/dev/null 2>&1; then
   alias urlget=wget
-elif command -v curl; then
+elif command -v curl >/dev/null 2>&1; then
   alias urlget='curl -O'
 else
   echo "Error: need something to fetch URLs. Didn't find either wget or curl."
   exit 1
 fi
 
-if grep 6.10 /etc/issue; then
+if grep -q 6.10 /etc/issue 2>/dev/null; then
   # special case of centos-6, cf-remote depends on urllib3 which depends on openssl 1.1.1+ that is not available
   # generally we rely on cf-remote to install cfengine-nova and download masterfiles so here we must provide for both of those
   echo "Found CentOS 6.10 so installing via hard-coded package URL..."
@@ -125,19 +125,19 @@ if grep 6.10 /etc/issue; then
   urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/misc/cfengine-masterfiles-3.24.3-1.pkg.tar.gz
 fi
 
-if grep -u ubuntu /etc/os-release; then
-  if grep -i version=\"16 /etc/os-release; then
+if grep -q ubuntu /etc/os-release; then
+  if grep -qi version=\"16 /etc/os-release; then
     urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.8/agent/agent_ubuntu16_x86_64/cfengine-nova_3.21.8-1.ubuntu16_amd64.deb
     dpkg -i cfengine-nova_3.21.8-1.ubuntu16_amd64.deb
     urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.8/misc/cfengine-masterfiles-3.21.8-1.pkg.tar.gz
   fi
 fi
 
-if grep suse /etc/os-release; then
+if grep -q suse /etc/os-release; then
   urlget https://cfengine-package-repos.s3.amazonaws.com/pub/gpg.key
   rpm --import gpg.key
 
-  if grep -i version=\"12 /etc/os-release; then
+  if grep -qi version=\"12 /etc/os-release; then
     echo "SUSE-12 found, cf-remote cannot be installed here so download directly similar to CentOS-6."
     if [ ! -x /var/cfengine/bin/cf-agent ]; then
       rm -rf cfengine-nova*rpm
@@ -149,7 +149,7 @@ if grep suse /etc/os-release; then
 fi
 
 if [ ! -x /var/cfengine/cf-agent ]; then
-  if ! ls cfengine-masterfiles*tar.gz; then
+  if ! ls cfengine-masterfiles*tar.gz >/dev/null 2>&1; then
     echo "Installing cf-remote for possible package install and masterfiles download"
     # try pipx first for debian as pip won't work.
     # If that fails to install CFEngine then try python3-pip for redhats.
@@ -159,13 +159,13 @@ if [ ! -x /var/cfengine/cf-agent ]; then
       PIP=pipx
       export PATH=$HOME/.local/bin:$PATH
     elif software python3-pip; then
-      if command -v pip; then
+      if command -v pip >/dev/null 2>&1; then
         PIP=pip
-      elif command -v pip3; then
+      elif command -v pip3 >/dev/null 2>&1; then
         PIP=pip3
       fi
     elif software python-pip; then
-      if command -v pip; then
+      if command -v pip >/dev/null 2>&1; then
         PIP=pip
       fi
     else
@@ -174,20 +174,24 @@ if [ ! -x /var/cfengine/cf-agent ]; then
     fi
     export PATH=/usr/local/bin:$PATH # some pip/pipx use /usr/local/bin
 
-    $PIP uninstall -y cf-remote || true # just in case a previous is there and would cause the install to fail
+    if [ "$PIP" = "pipx" ]; then
+      $PIP uninstall cf-remote || true # no -y option in pipx
+    else
+      $PIP uninstall -y cf-remote || true
+    fi # just in case a previous is there and would cause the install to fail
     $PIP install cf-remote || true # if this fails we will try to install from source
   fi # no masterfiles downloaded
 fi # no cf-agent installed
 
 echo "Checking for pre-installed CFEngine (chicken/egg problem)"
 # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
-if ! /var/cfengine/bin/cf-agent -V; then
+if ! /var/cfengine/bin/cf-agent -V 2>/dev/null; then
   echo "No existing CFEngine install found, try cf-remote..."
-  if grep -i stretch /etc/os-release; then
+  if grep -qi stretch /etc/os-release; then
     _VERSION="--version 3.21.8" # 3.27.0 and 3.24.x do not have debian 9 (stretch)
-  elif grep -i bullseye /etc/os-release; then
+  elif grep -qi bullseye /etc/os-release; then
     _VERSION="--version 3.24.3" # 3.27.0 has only debian > 11 (bullseye)
-  elif grep suse /etc/os-release; then
+  elif grep -q suse /etc/os-release; then
     # here we must use 3.24.2 instead of 3.24.3 because 3.24.3 has libcurl 4 which depends on unavailable OPENSSL_3.2.0
     _VERSION="--version 3.24.2" # we removed suse platforms in 3.27.0
   else
@@ -209,9 +213,9 @@ if [ ! -x /var/cfengine/bin/cf-agent ]; then
 fi
 
 # download masterfiles if not already present (such as in case of centos-6 above, hard-coded 3.24.3 download)
-if ! ls cfengine-masterfiles*gz; then
+if ! ls cfengine-masterfiles*gz >/dev/null 2>&1; then
   # if we are using a CFEngine pre-installed (chicken/egg) image we would skip cf-remote install so need to download directly
-  if ! command -v cf-remote; then
+  if ! command -v cf-remote >/dev/null 2>&1; then
     urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.27.0/misc/cfengine-masterfiles-3.27.0-1.pkg.tar.gz
   else
     cf-remote download masterfiles --output-dir .
