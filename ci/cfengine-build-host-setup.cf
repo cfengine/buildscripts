@@ -124,8 +124,9 @@ bundle agent cfengine_build_host_setup
       "xfsprogs";
 
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
-    (redhat_7|centos_7).(yum_dnf_conf_ok)::
+    (redhat|centos).(yum_dnf_conf_ok)::
       "epel-release";
+    (redhat_7|centos_7).(yum_dnf_conf_ok)::
       "ccache";
       "fakeroot";
       "perl-JSON-PP";
