@@ -37,11 +37,11 @@ function cleanup()
   fi
   echo "Cleaning up CFEngine install by moving to /var/bak.cfengine and /opt/bak.cfengine"
   rm -rf /var/bak.cfengine
-  mv /var/cfengine /var/bak.cfengine || true
+  mv /var/cfengine /var/bak.cfengine 2>/dev/null || true
   rm -rf /opt/bak.cfengine
-  mv /opt/cfengine /opt/bak.cfengine || true
-  mv /var/log/CFE* /var/bak.cfengine/ || true
-  mv /var/log/postgresql.log /var/bak.cfengine || true
+  mv /opt/cfengine /opt/bak.cfengine 2>/dev/null || true
+  mv /var/log/CFE* /var/bak.cfengine/ 2>/dev/null || true
+  mv /var/log/postgresql.log /var/bak.cfengine 2>/dev/null || true
 
   if command -v pkill >/dev/null 2>&1; then
     pkill -9 cf-agent || true

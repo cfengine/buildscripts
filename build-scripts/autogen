@@ -61,7 +61,8 @@ for proj in $projects; do
     log_debug "Running autogen.sh for project $proj..."
     (
         cd "$BASEDIR/$proj"
-        NO_CONFIGURE=1 run_and_print_on_failure ./autogen.sh
+        export NO_CONFIGURE=1
+        run_and_print_on_failure ./autogen.sh
     )
 done
 
