@@ -128,12 +128,14 @@ bundle agent cfengine_build_host_setup
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
     (redhat|centos).(yum_dnf_conf_ok)::
       "epel-release";
-    !(redhat_7|centos_7).(yum_dnf_conf_ok)::
+    !(redhat_7|centos_7|redhat_8|centos_8).(yum_dnf_conf_ok)::
       "fail2ban"
         comment => "Ban IPs with repeated failed SSH auth attempts";
-    (redhat_7|centos_7).(yum_dnf_conf_ok)::
-      "fail2ban.noarch"
+    (redhat_7|centos_7|redhat_8|centos_8).(yum_dnf_conf_ok)::
+      "fail2ban-server"
         comment => "Ban IPs with repeated failed SSH auth attempts. On centos-7 .noarch must be specified as there are conflicting sub-packages attempted with legacy packages promise as fail2ban-*.*.";
+      "fail2ban-sendmail";
+      "fail2ban-firewalld";
       "ccache";
       "fakeroot";
       "perl-JSON-PP";
