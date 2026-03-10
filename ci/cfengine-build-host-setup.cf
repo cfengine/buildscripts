@@ -182,6 +182,17 @@ bundle agent cfengine_build_host_setup
 
   vars:
     "suse_users_and_groups" slist => { "daemon", "bin", "sys" };
+    "sshd_hardening_directives" slist => {
+      "PermitRootLogin",
+      "PasswordAuthentication",
+      "KbdInteractiveAuthentication",
+      "ChallengeResponseAuthentication",
+    };
+    "sshd_config_files" slist => findfiles("/etc/ssh/sshd_config", "/etc/ssh/sshd_config.d/*.conf");
+    debian|ubuntu::
+      "sshd_service_name" string => "ssh";
+    !(debian|ubuntu)::
+      "sshd_service_name" string => "sshd";
 
   classes:
     any::
@@ -278,29 +289,14 @@ findtime = 600",
         classes => if_repaired("fail2ban_config_changed"),
         comment => "Configure fail2ban to ban IPs after 5 failed SSH attempts within 10 minutes";
 
-      "/etc/ssh/sshd_config"
-        edit_line => comment_lines_matching("^PermitRootLogin\s+(?!no\s*$).*", "#"),
+      "$(sshd_config_files)"
+        edit_line => comment_lines_matching("^$(sshd_hardening_directives)\s+(?!no\s*$).*", "#"),
         classes => if_repaired("sshd_hardened"),
-        comment => "Comment out insecure PermitRootLogin values";
+        comment => "Comment out insecure SSH auth directives in sshd_config and drop-ins";
       "/etc/ssh/sshd_config"
-        edit_line => comment_lines_matching("^PasswordAuthentication\s+(?!no\s*$).*", "#"),
+        edit_line => prepend_if_no_line("$(sshd_hardening_directives) no"),
         classes => if_repaired("sshd_hardened"),
-        comment => "Comment out insecure PasswordAuthentication value";
-      "/etc/ssh/sshd_config"
-        edit_line => comment_lines_matching("^KbdInteractiveAuthentication\s+(?!no\s*$).*", "#"),
-        classes => if_repaired("sshd_hardened"),
-        comment => "Comment out insecure KbdInteractiveAuthentication value (OpenSSH 8.7+)";
-      "/etc/ssh/sshd_config"
-        edit_line => comment_lines_matching("^ChallengeResponseAuthentication\s+(?!no\s*$).*", "#"),
-        classes => if_repaired("sshd_hardened"),
-        comment => "Comment out insecure ChallengeResponseAuthentication value (OpenSSH < 8.7)";
-      "/etc/ssh/sshd_config"
-        edit_line => lines_present("PermitRootLogin no
-PasswordAuthentication no
-KbdInteractiveAuthentication no
-ChallengeResponseAuthentication no"),
-        classes => if_repaired("sshd_hardened"),
-        comment => "Ensure SSH hardening directives are present";
+        comment => "Ensure SSH hardening directives are at the top of sshd_config, before any Include";
 
     ubuntu_16|ubuntu_18|redhat_9|redhat_10::
       "/etc/hosts" -> { "ENT-12437" }
@@ -383,10 +379,25 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
     !have_sys_user.(suse|sles|opensuse)::
       "useradd -u 3 sys" contain => in_shell;
 
+    linux::
+      "sshd -T 2>/dev/null | grep -qiE '^PermitRootLogin no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify PermitRootLogin is disabled";
+      "sshd -T 2>/dev/null | grep -qiE '^PasswordAuthentication no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify PasswordAuthentication is disabled";
+      "sshd -T 2>/dev/null | grep -qiE '^(KbdInteractive|ChallengeResponse)Authentication no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify KbdInteractiveAuthentication (OpenSSH 8.7+) or ChallengeResponseAuthentication (older) is disabled";
+
   services:
     sshd_hardened::
-      "sshd"
+      "$(sshd_service_name)"
         service_policy => "restart",
+        handle => "sshd_restarted",
         comment => "Restart sshd to apply hardened configuration";
     any::
       "fail2ban"
