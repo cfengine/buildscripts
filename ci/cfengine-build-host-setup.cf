@@ -375,10 +375,25 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
     !have_sys_user.(suse|sles|opensuse)::
       "useradd -u 3 sys" contain => in_shell;
 
+    linux::
+      "sshd -T 2>/dev/null | grep -qiE '^PermitRootLogin no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify PermitRootLogin is disabled";
+      "sshd -T 2>/dev/null | grep -qiE '^PasswordAuthentication no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify PasswordAuthentication is disabled";
+      "sshd -T 2>/dev/null | grep -qiE '^(KbdInteractive|ChallengeResponse)Authentication no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify KbdInteractiveAuthentication (OpenSSH 8.7+) or ChallengeResponseAuthentication (older) is disabled";
+
   services:
     sshd_hardened::
       "sshd"
         service_policy => "restart",
+        handle => "sshd_restarted",
         comment => "Restart sshd to apply hardened configuration";
     any::
       "fail2ban"
