@@ -189,6 +189,10 @@ bundle agent cfengine_build_host_setup
       "ChallengeResponseAuthentication",
     };
     "sshd_config_files" slist => findfiles("/etc/ssh/sshd_config", "/etc/ssh/sshd_config.d/*.conf");
+    debian|ubuntu::
+      "sshd_service_name" string => "ssh";
+    !(debian|ubuntu)::
+      "sshd_service_name" string => "sshd";
 
   classes:
     any::
@@ -391,7 +395,7 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
 
   services:
     sshd_hardened::
-      "sshd"
+      "$(sshd_service_name)"
         service_policy => "restart",
         handle => "sshd_restarted",
         comment => "Restart sshd to apply hardened configuration";
