@@ -126,8 +126,10 @@ bundle agent cfengine_build_host_setup
       "xfsprogs";
 
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
-    (redhat|centos).(yum_dnf_conf_ok)::
-      "epel-release";
+    !(redhat_8|centos_8).(redhat|centos).(yum_dnf_conf_ok)::
+      "epel-release"
+        comment => "centos-8/rhel-8 at least in AWS has no epel-release package to install so later we will install with downloaded rpm from dl.fedoraproject.org";
+
     !(redhat_7|centos_7|redhat_8|centos_8).(yum_dnf_conf_ok)::
       "fail2ban"
         comment => "Ban IPs with repeated failed SSH auth attempts";
@@ -139,7 +141,6 @@ bundle agent cfengine_build_host_setup
       "ccache";
       "fakeroot";
       "perl-JSON-PP";
-      "perl-Data-Dumper";
       "perl-Digest-MD5";
 
     (redhat_7|centos_7|redhat_9|redhat_10).(yum_dnf_conf_ok)::
@@ -217,6 +218,11 @@ bundle agent cfengine_build_host_setup
       "yum_conf_ok" expression => "any"; # rhel/centos-6 and 7 do not support --nobest or best property in yum.conf
     redhat_8|centos_8::
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
+      "epel_release_installed" expression => returnszero("yum info --installed epel-release", "useshell");
+    (redhat_8|centos_8).have_perl::
+      "have_data_dumper" expression => returnszero("cpan -l | grep Data::Dumper", "useshell");
+      "have_data_dumper_names" expression => returnszero("cpan -l | grep Data::Dumper::Names", "useshell");
+      "have_padwalker" expression => returnszero("cpan -l | grep PadWalker", "useshell");
     redhat_8|centos_8|redhat_9|redhat_10::
       "redhat_has_python3" expression => returnszero("command -v python3 >/dev/null", "useshell");
       "dnf_conf_ok" expression => returnszero("grep best=False /etc/dnf/dnf.conf >/dev/null", "useshell");
@@ -248,6 +254,19 @@ bundle agent cfengine_build_host_setup
     (redhat_8|centos_8).!have_fakeroot:: # special fakeroot, missing from _8 an d up?
       "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
         contain => in_shell;
+    (redhat_8|centos_8).!epel_release_installed::
+      "yum install --assumeyes https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm"
+        comment => "TODO: check a sha for the epel-release-latest-8.noarch.rpm file",
+        contain => in_shell;
+    (redhat_8|centos_8).!have_data_dumper.have_perl::
+      "cpan Data::Dumper"
+      contain => in_shell;
+    (redhat_8|centos_8).!have_data_dumper_names.have_perl::
+      "cpan Data::Dumper::Names"
+      contain => in_shell;
+    (redhat_8|centos_8).!have_padwalker.have_perl::
+      "cpan PadWalker"
+      contain => in_shell;
     (redhat_8|centos_8|redhat_9|redhat_10).!redhat_has_python3::
       "yum install -y python3" -> { "CFE-4313" }
         contain => in_shell,
@@ -360,6 +379,7 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
         contain => in_shell;
     (redhat_8|centos_8|redhat_9|redhat_10).(!have_perl_package_installed).(yum_dnf_conf_ok)::
       "yum install -y perl" contain => in_shell,
+        classes => results( "bundle", "have_perl" ),
         comment => "even though rhel8/9 come with /bin/perl perl >= 5.8.8 is needed by cfbuild-lcov-1.16-1.noarch. So the package must be installed.";
     redhat_9|redhat_10.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
       "yum install -y python3-pip" contain => in_shell;
