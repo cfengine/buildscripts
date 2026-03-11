@@ -128,9 +128,14 @@ bundle agent cfengine_build_host_setup
 # note that shellcheck, fakeroot and ccache require epel-release to be installed
     (redhat|centos).(yum_dnf_conf_ok)::
       "epel-release";
+    !(redhat_7|centos_7|redhat_8|centos_8).(yum_dnf_conf_ok)::
       "fail2ban"
         comment => "Ban IPs with repeated failed SSH auth attempts";
-    (redhat_7|centos_7).(yum_dnf_conf_ok)::
+    (redhat_7|centos_7|redhat_8|centos_8).(yum_dnf_conf_ok)::
+      "fail2ban-server"
+        comment => "Ban IPs with repeated failed SSH auth attempts. On centos-7 .noarch must be specified as there are conflicting sub-packages attempted with legacy packages promise as fail2ban-*.*.";
+      "fail2ban-sendmail";
+      "fail2ban-firewalld";
       "ccache";
       "fakeroot";
       "perl-JSON-PP";
@@ -270,7 +275,10 @@ bundle agent cfengine_build_host_setup
         perms => mog( "644", "jenkins", "jenkins" ),
         content => "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
 github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
-github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=";
+github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+build-artifacts-cache.cloud.cfengine.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGahpsY8Phk2+isBmuJQjjQVlh6BNL/Qetc14g26gowV
+build-artifacts-cache.cloud.cfengine.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCdv55BmDmwEjN3izaL8intrSRJQglkv++TaQppopKCh5VkYuSpNj/W+x0vjxwL3+NNp4CAhOLYuGTFuUL8zz/H0kwWE06c3WjghpHS3NS1usiamVZN6uaJMGwDaq8fPB3WiiI/L5lLM8/ubXxfmta0UlVufHCiBH8pBQarAY5rdPDtITXzu56qIa3k9Ou7Si2r/1n37espzwsPxoBqVJg7BvzMV28MzxdmQpGP6puuPfi9tvYbtnF788le3jvGOc+3GOiwtXsv44y/PCJNhi7sFeUfxocuNbWXZ3x/UEfbN8IiUVZsUAuLQFeqr3pv4w28D+SvJHBMCFudygenmLc3th+typiFRmqam7UQif9Pa3e2FxX4ghTp1KNXBoCQluIk2j7wX9zXppSyUG6d7tPDzfu81lImuW34+bsZvYq+s+25vbAhSDdQe1lqG0Fdvvi+zbqrMYQuMfnInDrK52xNSZcfATWjudhmY6wiwdSS0XsBADmZsy3qf3ErdEabqQk=
+build-artifacts-cache.cloud.cfengine.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIzU5+SoC4gbtV3Wfw4oB6oMs5RYKGFCiS0lVeN4XQlAM8UjvyUUSflytf/vQEANv1OJs5vicslRn/iPlrvF8Mk=";
 
       "/etc/security/limits.conf"
         edit_line => lines_present("
