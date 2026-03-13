@@ -27,21 +27,6 @@ Requires(post): /usr/sbin/usermod, /bin/sed
 Requires: selinux-policy >= @@SELINUX_POLICY_VERSION@@
 %endif
 
-# we don't bundle OpenSSL on RHEL 8 (and newer in the future)
-%if %{?rhel}%{!?rhel:0} == 8
-Requires: libssl.so.1.1()(64bit) libssl.so.1.1(OPENSSL_1_1_0)(64bit) libssl.so.1.1(OPENSSL_1_1_1)(64bit)
-Requires: libcrypto.so.1.1()(64bit) libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)
-%endif
-
-# We build against systems with the latest available dependencies such as OpenSSL.
-# We use rpm -q --provides to determine the highest API present in OpenSSL and then use that as a Requires.
-# OPENSSL_VERSION is determined in build-scripts/package script.
-# This should ensure that when packages are installed with yum/dnf any required OpenSSL package upgrades will be performed or the installation will fail.
-%if %{?rhel}%{!?rhel:0} > 8
-Requires: libcrypto.so.3()(64bit) libcrypto.so.3(OPENSSL_@@OPENSSL_VERSION@@)(64bit)
-Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_@@OPENSSL_VERSION@@)(64bit)
-%endif
-
 # cfbs/Build requires Python 3.5+ (not available on RHEL 6)
 %if %{?rhel}%{!?rhel:0} == 7
 Requires: python3 >= 3.5
@@ -97,11 +82,6 @@ rm -f %{prefix}/ssl/misc/CA.pl
 rm -f %{prefix}/ssl/misc/tsget
 rm -f %{prefix}/ssl/openssl.cnf.dist
 rm -f %{prefix}/ssl/misc/tsget.pl
-
-# Add an openssl symlink if openssl binary doesn't exist
-if ! [ -f $RPM_BUILD_ROOT%{prefix}/bin/openssl ]; then
-  ln -s `which openssl` $RPM_BUILD_ROOT%{prefix}/bin/openssl
-fi
 
 # Hub does not need cf-upgrade, it is only present in host packages
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/cf-upgrade
@@ -239,12 +219,10 @@ exit 0
 # Note that prefix/bin/openssl is outside of `if`, since
 # on RHEL8 it's a symlink to a system-wide openssl binary
 %{prefix}/bin/openssl
-%if %{?rhel}%{!?rhel:0} <= 7
 %dir %{prefix}/ssl
 %{prefix}/ssl/openssl.cnf
 %{prefix}/ssl/ct_log_list.cnf
 %{prefix}/ssl/ct_log_list.cnf.dist
-%endif
 
 %prefix/bin/git
 %prefix/bin/gitk

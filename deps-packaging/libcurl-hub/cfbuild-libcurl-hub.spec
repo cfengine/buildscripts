@@ -1,4 +1,4 @@
-%define curl_version 8.17.0
+%define curl_version 8.18.0
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl-hub
@@ -19,11 +19,11 @@ mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
 
 # we don't bundle OpenSSL on RHEL 8 (and newer in the future)
-%if %{?rhel}%{!?rhel:0} > 7
-%define ssl_prefix /usr
-%else
+#%if %{?rhel}%{!?rhel:0} > 7
+#%define ssl_prefix /usr
+#%else
 %define ssl_prefix %{prefix}
-%endif
+#%endif
 
 ./configure \
     --with-sysroot=%{prefix} \
