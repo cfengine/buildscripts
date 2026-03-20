@@ -755,10 +755,10 @@ run_and_print_on_failure() {
         regex='([Ww]arning:|[Ee]rror:)'
         if grep_q -E "$regex" "$temp_output_file"; then
             # Known-benign patterns that are not actionable and should be suppressed:
-            # - automake subdir-objects: forward-compatibility notice, harmless
+            # - automake subdirectory source file warnings and subdir-objects notice
             # - libtool install warnings: normal when using DESTDIR
             # shellcheck disable=SC3043
-            local benign='subdir-objects|libtool: warning: remember to run|libtool: warning:.*has not been installed|libtool: install:'
+            local benign='is in a subdirectory|subdir-objects|libtool: warning: remember to run|libtool: warning:.*has not been installed|libtool: install:'
             # shellcheck disable=SC3043
             local filtered
             filtered=$(grep_c 2 -E "$regex" "$temp_output_file" | grep -v -E "$benign") || true
