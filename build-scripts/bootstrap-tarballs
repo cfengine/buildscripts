@@ -147,7 +147,7 @@ log_debug "Installing PHP composer dependencies from mission-portal repository..
     if test -f "$BASEDIR"/mission-portal/composer.json; then
         cd "$BASEDIR"/mission-portal
         # install PHP dependencies from composer
-        run_and_print_on_failure php /usr/bin/composer.phar install --no-dev
+        run_and_print_on_failure php /usr/bin/composer install --no-dev
     fi
 )
 
@@ -156,7 +156,7 @@ log_debug "Installing PHP composer dependencies from nova repository..."
     if test -f "$BASEDIR"/nova/api/http/composer.json; then
         cd "$BASEDIR"/nova/api/http
         # install PHP dependencies from composer
-        run_and_print_on_failure php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs
+        run_and_print_on_failure php /usr/bin/composer install --no-dev --ignore-platform-reqs
     fi
 )
 
@@ -173,6 +173,6 @@ log_debug "Installing LDAP API PHP composer dependencies..."
     if test -f "$BASEDIR"/mission-portal/ldap/composer.json; then
         cd "$BASEDIR"/mission-portal/ldap
         # install PHP dependencies from composer
-        run_and_print_on_failure php /usr/bin/composer.phar install --no-dev
+        run_and_print_on_failure php /usr/bin/composer install --no-dev
     fi
 )
