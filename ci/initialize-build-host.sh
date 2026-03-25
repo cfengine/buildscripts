@@ -21,17 +21,6 @@
 # provisioning.
 
 
-# Keys that you can use to log in to the build slaves.
-SSH_KEYS='
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCni4pKbhXkYZo0/Rz8v/pzjIfQdZTm1UtsqkTxY2OlIUiDgWIdBsYtEkYD6Z4bdGO0FfbZjwb18Sz9Dl7voVnMqavtWUN1ZVtsrutaKZ2Aa8rphSGE2dplUJGdTKjKAgL5nhBSAk5h73WcZ+vhDhv3ZNP4k+qS566BwJvhRDysSxmYaRCumOgMhk6AQ0GoYy2n7p8D/6+J3t0JnLq17MqKqC51sXZL1q9XBMCB1To4s1HYA0t2pORnm9fAU+QbJVyHwCD+Ng1/x/9Reaf9eJp8OpwE05HGbNDtlywGsov0Q/l6NCLcv+ZJTi/bjkqDlFAXXkZbmQHG1JNEzc2Df6N37D30GwI/xPwbEVu1LW4W2sKgF4lcj82A17CSL/WpJyDSB3Sm2XbJ+KjlMJLuKh7Jzp/PwDm5LBb7x91gKqcNSHrEwVOxQ4vRekOu1jKQCx8SxVY/yE88YRKgdxjT+p1eHv2Kt1pk6IC78hPFBUY538nSleem6gajRuJIDOBToAhg+VUULdJ/1bwooglFAZzZEJvwIBU4bIZ0O0OjRyxppQLzMsen9CT3QQucV49KiRas+DP7durMZHBMB9i/i28jyfouAaygGynNqB4Fo0K9rg5YLprxdI1S0FjHYucpkM8tRugiFz5moBxctthVmmvT92mai7HnLscN3Xu8TTC23w== craig_comstock@yahoo.com
-ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAy6vrcU1d/80WMFqzumFHG/dllkhakswezvKfX7KupQwpc55JyyUNpnjxLy76leuJnlTTZTaxq1CcW3lIH9CjG/rJVQLN/PLjQPLZgfvzHqS8HuVCtKynwp0Sgw9tRmrN1KcXRiQMWs3plVDJwB4HFQpb7NsC0f5fskpgxr2KRNPn058oe6VYx183Err/0Uawy64aFSiowRgvHgXgelhSDWUVkOoviKR1zB11EZ8Xr5d4s/yXDE9ehlgv2EBFdhZrqsMmhs7KdPPNDD6/El2dID7V7LKHblbtVO009VS/dlq1XUGE0IUl153ZaVm/dt4+2+NriGpI7COAU4cLxhpj9w== cmdln@tp
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/NLV9UQu5eXr/CE9NfnC6IsvLx+vvVDxpbIfOVNhBjpLHoXqLDVedAT4dn+82x+OulBXdYzZkEGoKlkBkbmxjsXBF6gX1oWFnSmdlZNEe+GqTcfRHL4+fF09oUh6tCdCBFaMLbkdA1M+UvYtJc8BZoNUXCVG/Sn0saVLDOFfmUG9ICfmVFzwcVW+X6+qfyauBC6lGtW/Bnqj6GY6VaSo94cYyLUFeUI1GbJ5sDmkFKBXn/p/1ks6eWlejcs2Q/mqqaH5sseek+0MP8qHss9HSZzbn9Iq4n1uUW43NBu242KISE/fDDqZtJs54zJmt97cDOgr+p0wglwFUT8x6Grl5 build-sstate-cache@mender
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC5MGowxEkIXVweJId1Fmxp+EL+0e19xH8OPdwfc9daepPaT8SmYqVNq+YA6/PJUUr39oGgTdX6iK2dk5JW4OqgtcwotECspW7mVfF7izLapw/bpFOWryhJmVlYXKnwg61tcmZHMtVf+cSPcljyjAH+gULA+mzivikfKl9YHoHZI1BbxcqNUz5uJxw/WiZr9BLd+ZRw7D53HpNPGlfyHZOi+DzjZmmfdk9MqA/fiEoxw2nSXBE10n9bC/dxplvOvKvNXjVPFs/UpUpanY4AGsFCWM1+7z2c8LxpWanBLHYSVLH0Ung+uJVu6gtnSK4jKwWfPuHGJ6Qi7ZQo4Uyw90rN buildmaster@buildmaster
-ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA3Jo+DWnGMqK2SoU9ZqBS/yFsrOy6GAKcMeKFV79Bp3nRCjSzgOhRI5lmTU9tSg5IHkBqiv0qjkEyaxjrV/rX5JGRrFfpJT0uuNcNvPTlhNuWnkdmv/Xy5zwU27AMdz2/kRsEPEdYWwch5wd7VV1xgxiJG0yGMCVeRpLYrUJpILt1LHMz+HYYjiz6dHxfCgcywCs7aaFS4Z//Idwm0XOnzpDpBb3tBCtQjiOY88N4xfGwUpx8A1+bq4Wg2pQ0RJxabvtLp9oJ1s5h9Be0ZUKwChAiqOlG6ATsYk/09Uwj3ypdPMjFYZ1HWuoKH1KkLmhwpw6K9Mg21loy0TEBGYIOSQ== root@buildmaster
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCtoU/75IdcahCzBY9RbSrouIHq0sWZU4xQr9wopGtZlSTOUN1CUAuNzEdTHi1ftmLIQHGGAQ/ZhPwRaToMqQVT9GM8YhRvgIpRkJacIQO85I/jQB0Tl0y5cZ2hu914zWVQ8vGCuRU3kwJncm0l1RvqFD5Nfk54McB6nHi4TSwXuOMZcRZDw5NUWu5sk0q4bCZzFHvRvledD4zHWHdkXkl1PC+E7VtemkqDkRYCES+sb8MN1wpWMmBdulYh4alVNNqfKlIIRPreDDzLa2VSNa8pX9xaPbkhOHQ3rBVWmcMW3HLe5gEhPLYDepqvLES0/+ncPLumtTET2BvmW+0uM/CD vratislav.podzimek@northern.tech
-ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCt2G+E9pt6ufosHyOUeUb6z2eaeerUaf/Z3gb/woPGA3R0j0depJnSMXcYeGAIfsdhz+TQ6pKcl42CrGfu9b0Ypuxq9CG020/D1XjuoWCR2cNx0UWd7HO9uaGZpwejXaCY1LF/0054nb5cIgJvAfMfXFSmoxy80OU9Vvc75fD1JQfjOHYaLk4UdUqeIFJ7m1l6vN8xC5AFNK1oFq4vHAfbcLEU0e4X3jeFlxeMKSGaBu/5OwAdTvJfMU+IH+D2K1ix7AGFUNmYW790IfYlm7b4hcfJdsLV5emKg416k//+w7/o4zaQBIv7y1ETV3+JDg8hJZNdrzlAxIRZOpBlKitD lars.erik.wik@northern.tech
-'
-
 start_spinner() {
     # $1 sleep time between spinner dots
     >&2 echo "spinner: will echo . every $1 seconds"
@@ -435,21 +424,6 @@ then
     exit $ret
 elif [ -z "$INIT_BUILD_HOST_SUB_INVOKATION" ]
 then
-    (
-        # Switch to newline as token separator.
-        IFS='
-'
-        # Add key, but avoid adding it more than once (important for always-on
-        # build slaves).
-        for key in $SSH_KEYS
-        do
-            if ! fgrep "$key" ~/.ssh/authorized_keys > /dev/null
-            then
-                echo "$key" >> ~/.ssh/authorized_keys
-            fi
-        done
-    )
-
     # Add build-artifacts-cache to known hosts
     KNOWN_HOSTS_FILE=~/.ssh/known_hosts
     # if fgrep build-artifacts-cache.cloud.cfengine.com $KNOWN_HOSTS_FILE  2>/dev/null
