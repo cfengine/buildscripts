@@ -1,0 +1,362 @@
+#!/usr/bin/env python3
+"""Container-based CFEngine package builder.
+
+Builds CFEngine packages inside Docker containers using the existing build
+scripts. Each build runs in a fresh ephemeral container.
+"""
+
+import argparse
+import hashlib
+import json
+import logging
+import subprocess
+import sys
+from pathlib import Path
+
+log = logging.getLogger("build-in-container")
+
+PLATFORMS = {
+    "ubuntu-20": {
+        "base_image": "ubuntu:20.04",
+        "dockerfile": "Dockerfile.debian",
+        "extra_build_args": {"NCURSES_PKGS": "libncurses5 libncurses5-dev"},
+    },
+    "ubuntu-22": {
+        "base_image": "ubuntu:22.04",
+        "dockerfile": "Dockerfile.debian",
+        "extra_build_args": {},
+    },
+    "ubuntu-24": {
+        "base_image": "ubuntu:24.04",
+        "dockerfile": "Dockerfile.debian",
+        "extra_build_args": {},
+    },
+    "debian-11": {
+        "base_image": "debian:11",
+        "dockerfile": "Dockerfile.debian",
+        "extra_build_args": {},
+    },
+    "debian-12": {
+        "base_image": "debian:12",
+        "dockerfile": "Dockerfile.debian",
+        "extra_build_args": {},
+    },
+}
+
+CONFIG_DIR = Path.home() / ".config" / "build-in-container"
+CONFIG_FILE = CONFIG_DIR / "last-config.json"
+
+HARDCODED_DEFAULTS = {
+    "platform": "ubuntu-20",
+    "project": "community",
+    "role": "agent",
+    "build_type": "DEBUG",
+}
+
+
+def load_last_config():
+    """Load last-used config, falling back to hardcoded defaults."""
+    try:
+        return json.loads(CONFIG_FILE.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        return dict(HARDCODED_DEFAULTS)
+
+
+def save_last_config(config):
+    """Persist the resolved config for next run."""
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    CONFIG_FILE.write_text(json.dumps(config, indent=2) + "\n")
+
+
+def detect_source_dir():
+    """Find the root directory containing all repos (parent of buildscripts/)."""
+    script_dir = Path(__file__).resolve().parent
+    # The script lives in buildscripts/, so the source dir is one level up
+    source_dir = script_dir.parent
+    if not (source_dir / "buildscripts").is_dir():
+        log.error(f"Cannot find buildscripts/ in {source_dir}")
+        sys.exit(1)
+    return source_dir
+
+
+def resolve_config(args):
+    """Fill in missing options from last-used config, then save."""
+    last = load_last_config()
+
+    if args.platform is None:
+        args.platform = last["platform"]
+    if args.project is None:
+        args.project = last["project"]
+    if args.role is None:
+        args.role = last["role"]
+    if args.build_type is None:
+        args.build_type = last["build_type"]
+
+    save_last_config(
+        {
+            "platform": args.platform,
+            "project": args.project,
+            "role": args.role,
+            "build_type": args.build_type,
+        }
+    )
+
+
+def dockerfile_hash(dockerfile_path):
+    """Compute SHA256 hash of a Dockerfile."""
+    return hashlib.sha256(dockerfile_path.read_bytes()).hexdigest()
+
+
+def image_needs_rebuild(image_tag, current_hash):
+    """Check if the Docker image needs rebuilding based on Dockerfile hash."""
+    result = subprocess.run(
+        [
+            "docker",
+            "inspect",
+            "--format",
+            '{{index .Config.Labels "dockerfile-hash"}}',
+            image_tag,
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return True  # Image doesn't exist
+    stored_hash = result.stdout.strip()
+    return stored_hash != current_hash
+
+
+def build_image(platform_name, platform_config, script_dir, rebuild=False):
+    """Build the Docker image for the given platform."""
+    image_tag = f"cfengine-builder-{platform_name}"
+    dockerfile_name = platform_config["dockerfile"]
+    dockerfile_path = script_dir / "container" / dockerfile_name
+    current_hash = dockerfile_hash(dockerfile_path)
+
+    if not rebuild and not image_needs_rebuild(image_tag, current_hash):
+        log.info(f"Docker image {image_tag} is up to date.")
+        return image_tag
+
+    log.info(f"Building Docker image {image_tag}...")
+    cmd = [
+        "docker",
+        "build",
+        "-f",
+        str(dockerfile_path),
+        "--build-arg",
+        f"BASE_IMAGE={platform_config['base_image']}",
+        "--label",
+        f"dockerfile-hash={current_hash}",
+        "-t",
+        image_tag,
+    ]
+
+    for key, value in platform_config.get("extra_build_args", {}).items():
+        cmd.extend(["--build-arg", f"{key}={value}"])
+
+    if rebuild:
+        cmd.append("--no-cache")
+
+    cmd.extend(["--network", "host"])
+
+    # Build context is the container/ directory
+    cmd.append(str(script_dir / "container"))
+
+    result = subprocess.run(cmd)
+    if result.returncode != 0:
+        log.error("Docker image build failed.")
+        sys.exit(1)
+
+    return image_tag
+
+
+def run_container(args, image_tag, source_dir, script_dir):
+    """Run the build inside a Docker container."""
+    output_dir = Path(args.output_dir).resolve()
+    cache_dir = Path(args.cache_dir).resolve()
+
+    # Pre-create host directories so Docker doesn't create them as root
+    output_dir.mkdir(parents=True, exist_ok=True)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+
+    cmd = ["docker", "run", "--rm", "--network", "host"]
+
+    if args.shell:
+        cmd.extend(["-it"])
+
+    # Mounts
+    cmd.extend(
+        [
+            "-v",
+            f"{source_dir}:/srv/source:ro",
+            "-v",
+            f"{cache_dir}:/home/builder/.cache/buildscripts_cache",
+            "-v",
+            f"{output_dir}:/output",
+        ]
+    )
+
+    # Environment variables
+    # JOB_BASE_NAME is used by deps-packaging/pkg-cache to derive the cache
+    # label. Format: "label=<value>". Without it, all platforms share NO_LABEL.
+    cache_label = f"label=container_{args.platform}"
+    cmd.extend(
+        [
+            "-e",
+            f"PROJECT={args.project}",
+            "-e",
+            f"BUILD_TYPE={args.build_type}",
+            "-e",
+            f"EXPLICIT_ROLE={args.role}",
+            "-e",
+            f"BUILD_NUMBER={args.build_number}",
+            "-e",
+            f"JOB_BASE_NAME={cache_label}",
+            "-e",
+            "CACHE_IS_ONLY_LOCAL=yes",
+        ]
+    )
+
+    if args.version:
+        cmd.extend(["-e", f"EXPLICIT_VERSION={args.version}"])
+
+    cmd.append(image_tag)
+
+    if args.shell:
+        cmd.append("/bin/bash")
+    else:
+        cmd.append(str(Path("/srv/source/buildscripts/build-in-container-inner")))
+
+    result = subprocess.run(cmd)
+    return result.returncode
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Build CFEngine packages in Docker containers."
+    )
+    parser.add_argument(
+        "--platform",
+        choices=list(PLATFORMS.keys()),
+        help="Target platform",
+    )
+    parser.add_argument(
+        "--project",
+        choices=["community", "nova"],
+        help="CFEngine edition (default: auto-detect from source dirs)",
+    )
+    parser.add_argument(
+        "--role",
+        choices=["agent", "hub"],
+        help="Component to build (default: agent)",
+    )
+    parser.add_argument(
+        "--build-type",
+        dest="build_type",
+        choices=["DEBUG", "RELEASE"],
+        help="Build type (default: DEBUG)",
+    )
+    parser.add_argument(
+        "--source-dir",
+        help="Root directory containing repos (default: auto-detect)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default="./output",
+        help="Output directory for packages (default: ./output)",
+    )
+    parser.add_argument(
+        "--cache-dir",
+        default=str(Path.home() / ".cache" / "buildscripts_cache"),
+        help="Dependency cache directory",
+    )
+    parser.add_argument(
+        "--rebuild-image",
+        action="store_true",
+        help="Force rebuild of Docker image (--no-cache)",
+    )
+    parser.add_argument(
+        "--shell",
+        action="store_true",
+        help="Drop into container shell for debugging",
+    )
+    parser.add_argument(
+        "--list-platforms",
+        action="store_true",
+        help="List available platforms and exit",
+    )
+    parser.add_argument(
+        "--build-number",
+        default="1",
+        help="Build number for package versioning (default: 1)",
+    )
+    parser.add_argument(
+        "--version",
+        help="Override version string",
+    )
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+    )
+
+    # --list-platforms: print and exit
+    if args.list_platforms:
+        print("Available platforms:")
+        for name, config in PLATFORMS.items():
+            print(f"  {name:15s}  ({config['base_image']})")
+        sys.exit(0)
+
+    # Detect source directory
+    if args.source_dir:
+        source_dir = Path(args.source_dir).resolve()
+    else:
+        source_dir = detect_source_dir()
+
+    script_dir = source_dir / "buildscripts"
+
+    # Fill in unspecified options from last-used config
+    resolve_config(args)
+
+    # Validate platform
+    if args.platform not in PLATFORMS:
+        log.error(f"Unknown platform '{args.platform}'")
+        sys.exit(1)
+
+    platform_config = PLATFORMS[args.platform]
+
+    # Build Docker image
+    image_tag = build_image(
+        args.platform, platform_config, script_dir, rebuild=args.rebuild_image
+    )
+
+    if not args.shell:
+        log.info(
+            f"Building {args.project} {args.role} for {args.platform} ({args.build_type})..."
+        )
+
+    # Run the container
+    rc = run_container(args, image_tag, source_dir, script_dir)
+
+    if rc != 0:
+        log.error(f"Build failed (exit code {rc}).")
+        sys.exit(rc)
+
+    if not args.shell:
+        output_dir = Path(args.output_dir).resolve()
+        packages = (
+            list(output_dir.glob("*.deb"))
+            + list(output_dir.glob("*.rpm"))
+            + list(output_dir.glob("*.pkg.tar.gz"))
+        )
+        if packages:
+            log.info("Output packages:")
+            for p in sorted(packages):
+                log.info(f"  {p}")
+        else:
+            log.warning("No packages found in output directory.")
+
+
+if __name__ == "__main__":
+    main()
