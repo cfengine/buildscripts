@@ -1,4 +1,4 @@
-%define nghttp2_version 1.68.0
+%define nghttp2_version 1.68.1
 
 Summary: CFEngine Build Automation -- nghttp2
 Name: cfbuild-nghttp2
