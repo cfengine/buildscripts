@@ -130,6 +130,44 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False):
     return image_tag
 
 
+def registry_image_ref(platform_name):
+    """Return the fully-qualified registry image reference for a platform."""
+    return f"{IMAGE_REGISTRY}/{PLATFORMS[platform_name]['image_tag']}"
+
+
+def pull_image(platform_name):
+    """Pull a pre-built image from the registry.
+
+    Returns the image reference on success or None on failure.
+    """
+    ref = registry_image_ref(platform_name)
+    log.info(f"Pulling image {ref}...")
+    result = subprocess.run(
+        ["docker", "pull", ref],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return None
+    return ref
+
+
+def push_image(platform_name, local_tag):
+    """Tag a local image with the registry reference and push it."""
+    ref = registry_image_ref(platform_name)
+    log.info(f"Tagging {local_tag} as {ref}...")
+    result = subprocess.run(["docker", "tag", local_tag, ref])
+    if result.returncode != 0:
+        log.error("Docker tag failed.")
+        sys.exit(1)
+
+    log.info(f"Pushing {ref}...")
+    result = subprocess.run(["docker", "push", ref])
+    if result.returncode != 0:
+        log.error("Docker push failed.")
+        sys.exit(1)
+
+
 def run_container(args, image_tag, source_dir, script_dir):
     """Run the build inside a Docker container."""
     output_dir = Path(args.output_dir).resolve()
