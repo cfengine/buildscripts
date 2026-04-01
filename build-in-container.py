@@ -182,7 +182,8 @@ def run_container(args, image_tag, source_dir, script_dir):
     return result.returncode
 
 
-def main():
+def parse_args():
+    """Parse and validate command-line arguments."""
     parser = argparse.ArgumentParser(
         description="Build CFEngine packages in Docker containers."
     )
@@ -247,11 +248,6 @@ def main():
     )
     args = parser.parse_args()
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(message)s",
-    )
-
     if args.list_platforms:
         print("Available platforms:")
         for name, config in PLATFORMS.items():
@@ -270,6 +266,17 @@ def main():
         missing.append("--build-type")
     if missing:
         parser.error(f"the following arguments are required: {', '.join(missing)}")
+
+    return args
+
+
+def main():
+    args = parse_args()
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+    )
 
     # Detect source directory
     if args.source_dir:
