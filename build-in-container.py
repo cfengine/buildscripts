@@ -182,45 +182,35 @@ def run_container(args, image_tag, source_dir, script_dir):
     return result.returncode
 
 
-# Custom action so --list-platforms can exit early without triggering
-# argparse's required-argument validation (same mechanism as --help).
-class ListPlatformsAction(argparse.Action):
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        print("Available platforms:")
-        for name, config in PLATFORMS.items():
-            print(f"  {name:15s}  ({config['base_image']})")
-        parser.exit()
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Build CFEngine packages in Docker containers."
     )
     parser.add_argument(
         "--platform",
-        required=True,
         choices=list(PLATFORMS.keys()),
         help="Target platform",
     )
     parser.add_argument(
         "--project",
-        required=True,
         choices=["community", "nova"],
         help="CFEngine edition",
     )
     parser.add_argument(
         "--role",
-        required=True,
         choices=["agent", "hub"],
         help="Component to build",
     )
     parser.add_argument(
         "--build-type",
         dest="build_type",
-        required=True,
         choices=["DEBUG", "RELEASE"],
         help="Build type",
+    )
+    parser.add_argument(
+        "--list-platforms",
+        action="store_true",
+        help="List available platforms and exit",
     )
     parser.add_argument(
         "--source-dir",
@@ -247,12 +237,6 @@ def main():
         help="Drop into container shell for debugging",
     )
     parser.add_argument(
-        "--list-platforms",
-        action=ListPlatformsAction,
-        nargs=0,
-        help="List available platforms and exit",
-    )
-    parser.add_argument(
         "--build-number",
         default="1",
         help="Build number for package versioning (default: 1)",
@@ -268,6 +252,25 @@ def main():
         format="%(message)s",
     )
 
+    if args.list_platforms:
+        print("Available platforms:")
+        for name, config in PLATFORMS.items():
+            print(f"  {name:15s}  ({config['base_image']})")
+        sys.exit(0)
+
+    # Validate required arguments for build mode
+    missing = []
+    if not args.platform:
+        missing.append("--platform")
+    if not args.project:
+        missing.append("--project")
+    if not args.role:
+        missing.append("--role")
+    if not args.build_type:
+        missing.append("--build-type")
+    if missing:
+        parser.error(f"the following arguments are required: {', '.join(missing)}")
+
     # Detect source directory
     if args.source_dir:
         source_dir = Path(args.source_dir).resolve()
@@ -275,10 +278,6 @@ def main():
         source_dir = detect_source_dir()
 
     script_dir = source_dir / "buildscripts"
-
-    if args.platform not in PLATFORMS:
-        log.error(f"Unknown platform '{args.platform}'")
-        sys.exit(1)
 
     platform_config = PLATFORMS[args.platform]
 
