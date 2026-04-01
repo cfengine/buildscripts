@@ -152,9 +152,25 @@ def pull_image(platform_name):
     return ref
 
 
+def image_exists_in_registry(platform_name):
+    """Check if an image tag already exists in the registry."""
+    ref = registry_image_ref(platform_name)
+    result = subprocess.run(
+        ["docker", "manifest", "inspect", ref],
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0
+
+
 def push_image(platform_name, local_tag):
     """Tag a local image with the registry reference and push it."""
     ref = registry_image_ref(platform_name)
+
+    if image_exists_in_registry(platform_name):
+        log.error(f"Image {ref} already exists. Bump IMAGE_VERSION.")
+        sys.exit(1)
+
     log.info(f"Tagging {local_tag} as {ref}...")
     result = subprocess.run(["docker", "tag", local_tag, ref])
     if result.returncode != 0:

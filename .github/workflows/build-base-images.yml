@@ -1,0 +1,31 @@
+name: Build base images
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        platform:
+          - ubuntu-20
+          - ubuntu-22
+          - ubuntu-24
+          - debian-11
+          - debian-12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        run: ./build-in-container.py --platform ${{ matrix.platform }} --push-image
