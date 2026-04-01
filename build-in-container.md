@@ -31,12 +31,12 @@ specified, defaults will:
 
 ### Required arguments
 
-| Option         | Description                                     |
-| -------------- | ----------------------------------------------- |
-| `--platform`   | Target platform (e.g. `ubuntu-22`, `debian-12`) |
-| `--project`    | `community` or `nova`                           |
-| `--role`       | `agent` or `hub`                                |
-| `--build-type` | `DEBUG` or `RELEASE`                            |
+| Option         | Description                                             |
+| -------------- | ------------------------------------------------------- |
+| `--platform`   | Target platform (e.g. `ubuntu-22`, `debian-12`)         |
+| `--project`    | `community` or `nova` (not required for `--push-image`) |
+| `--role`       | `agent` or `hub` (not required for `--push-image`)      |
+| `--build-type` | `DEBUG` or `RELEASE` (not required for `--push-image`)  |
 
 ### Optional arguments
 
@@ -47,6 +47,7 @@ specified, defaults will:
 | `--build-number`   | `1`                              | Build number for package versioning                         |
 | `--version`        | auto                             | Override version string                                     |
 | `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache) |
+| `--push-image`     |                                  | Build image and push to registry, then exit                 |
 | `--shell`          |                                  | Drop into a bash shell inside the container for debugging   |
 | `--list-platforms` |                                  | List available platforms and exit                           |
 | `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                             |
@@ -101,10 +102,34 @@ The inner script runs these steps in order:
 
 ## Docker image management
 
-The Docker image is tagged `cfengine-builder-{platform}` and rebuilt
-automatically when the Dockerfile changes (tracked via a content hash stored as
-an image label). Use `--rebuild-image` to force a full rebuild bypassing the
-Docker layer cache (useful when upstream packages change).
+By default, the script pulls a pre-built image from the container registry
+(`ghcr.io/cfengine`). If the pull fails (e.g. no network, image not yet
+published), it falls back to building the image locally.
+
+Use `--rebuild-image` to skip the registry and force a local rebuild — useful
+when iterating on the Dockerfile. The local build tracks the Dockerfile content
+hash and skips rebuilding when nothing has changed.
+
+### Container registry
+
+Images are hosted at `ghcr.io/cfengine` and versioned via `IMAGE_VERSION` in
+`build-in-container.py`. To push a new image:
+
+```bash
+# Build and push a single platform
+./build-in-container.py --platform ubuntu-22 --push-image
+```
+
+`--push-image` always builds with `--no-cache` to pick up the latest upstream
+packages, then pushes to the registry.
+
+### Updating the toolchain
+
+1. Edit `container/Dockerfile.debian` as needed
+2. Test locally with `--rebuild-image`
+3. Bump `IMAGE_VERSION` in `build-in-container.py`
+4. Commit the Dockerfile change + version bump
+5. Push new images with `--push-image` (or trigger the GitHub Actions workflow)
 
 ## Debugging
 
