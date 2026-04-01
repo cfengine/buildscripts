@@ -14,28 +14,36 @@ from pathlib import Path
 
 log = logging.getLogger("build-in-container")
 
+IMAGE_REGISTRY = "ghcr.io/cfengine"
+IMAGE_VERSION = "1"
+
 PLATFORMS = {
     "ubuntu-20": {
+        "image_tag": f"cfengine-builder-ubuntu-20:{IMAGE_VERSION}",
         "base_image": "ubuntu:20.04",
         "dockerfile": "Dockerfile.debian",
         "extra_build_args": {"NCURSES_PKGS": "libncurses5 libncurses5-dev"},
     },
     "ubuntu-22": {
+        "image_tag": f"cfengine-builder-ubuntu-22:{IMAGE_VERSION}",
         "base_image": "ubuntu:22.04",
         "dockerfile": "Dockerfile.debian",
         "extra_build_args": {},
     },
     "ubuntu-24": {
+        "image_tag": f"cfengine-builder-ubuntu-24:{IMAGE_VERSION}",
         "base_image": "ubuntu:24.04",
         "dockerfile": "Dockerfile.debian",
         "extra_build_args": {},
     },
     "debian-11": {
+        "image_tag": f"cfengine-builder-debian-11:{IMAGE_VERSION}",
         "base_image": "debian:11",
         "dockerfile": "Dockerfile.debian",
         "extra_build_args": {},
     },
     "debian-12": {
+        "image_tag": f"cfengine-builder-debian-12:{IMAGE_VERSION}",
         "base_image": "debian:12",
         "dockerfile": "Dockerfile.debian",
         "extra_build_args": {},
@@ -79,7 +87,7 @@ def image_needs_rebuild(image_tag, current_hash):
 
 def build_image(platform_name, platform_config, script_dir, rebuild=False):
     """Build the Docker image for the given platform."""
-    image_tag = f"cfengine-builder-{platform_name}"
+    image_tag = platform_config["image_tag"]
     dockerfile_name = platform_config["dockerfile"]
     dockerfile_path = script_dir / "container" / dockerfile_name
     current_hash = dockerfile_hash(dockerfile_path)
