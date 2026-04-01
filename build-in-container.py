@@ -343,10 +343,23 @@ def main():
 
     platform_config = PLATFORMS[args.platform]
 
-    # Build Docker image
-    image_tag = build_image(
-        args.platform, platform_config, script_dir, rebuild=args.rebuild_image
-    )
+    if args.push_image:
+        image_tag = build_image(
+            args.platform, platform_config, script_dir, rebuild=True
+        )
+        push_image(args.platform, image_tag)
+        return
+
+    # Resolve image: pull from registry, fall back to local build
+    if args.rebuild_image:
+        image_tag = build_image(
+            args.platform, platform_config, script_dir, rebuild=True
+        )
+    else:
+        image_tag = pull_image(args.platform)
+        if image_tag is None:
+            log.warning("Registry pull failed, building image locally...")
+            image_tag = build_image(args.platform, platform_config, script_dir)
 
     if not args.shell:
         log.info(
