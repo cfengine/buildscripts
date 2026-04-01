@@ -50,6 +50,7 @@ PLATFORMS = {
     },
 }
 
+
 def detect_source_dir():
     """Find the root directory containing all repos (parent of buildscripts/)."""
     script_dir = Path(__file__).resolve().parent
@@ -241,6 +242,11 @@ def parse_args():
         help="Force rebuild of Docker image (--no-cache)",
     )
     parser.add_argument(
+        "--push-image",
+        action="store_true",
+        help="Build image and push to registry, then exit",
+    )
+    parser.add_argument(
         "--shell",
         action="store_true",
         help="Drop into container shell for debugging",
@@ -262,18 +268,21 @@ def parse_args():
             print(f"  {name:15s}  ({config['base_image']})")
         sys.exit(0)
 
-    # Validate required arguments for build mode
-    missing = []
+    # --platform is always required (except --list-platforms handled above)
     if not args.platform:
-        missing.append("--platform")
+        parser.error("missing required argument --platform")
+
+    if args.push_image:
+        # No other arguments are required for --push-image
+        return args
+
+    # Validate remaining required arguments for build mode
     if not args.project:
-        missing.append("--project")
+        parser.error("missing required argument --project")
     if not args.role:
-        missing.append("--role")
+        parser.error("missing required argument --role")
     if not args.build_type:
-        missing.append("--build-type")
-    if missing:
-        parser.error(f"the following arguments are required: {', '.join(missing)}")
+        parser.error("missing required argument --build-type")
 
     return args
 
