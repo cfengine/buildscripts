@@ -217,7 +217,7 @@ bundle agent cfengine_build_host_setup
     redhat_8|centos_8::
       "have_fakeroot" expression => returnszero("command -v fakeroot >/dev/null", "useshell");
     (redhat|centos)::
-      "epel_release_ok" expression => returnszero("yum info --installed epel-release", "useshell");
+      "epel_release_ok" expression => returnszero("yum info installed epel-release", "useshell");
     (redhat_8|centos_8).have_perl::
       "have_data_dumper" expression => returnszero("cpan -l | grep Data::Dumper", "useshell");
       "have_data_dumper_names" expression => returnszero("cpan -l | grep Data::Dumper::Names", "useshell");
