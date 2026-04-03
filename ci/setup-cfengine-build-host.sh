@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
 set -ex
+# debug cf-remote troubles
+export CFBACKTRACE=1
 thisdir="$(dirname "$0")"
 
 # install needed packages and software for a build host
