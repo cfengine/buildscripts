@@ -200,7 +200,7 @@ if ! /var/cfengine/bin/cf-agent -V 2>/dev/null; then
   else
     _VERSION=""
   fi
-  cf-remote --log-level info $_VERSION install --clients localhost || true
+  cf-remote --log-level debug $_VERSION install --clients localhost || true
 fi
 
 if [ ! -x /var/cfengine/bin/cf-agent ]; then
