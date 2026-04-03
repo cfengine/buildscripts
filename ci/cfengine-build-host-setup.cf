@@ -288,6 +288,11 @@ bundle agent cfengine_build_host_setup
       "have_$(suse_users_and_groups)_user" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/passwd >/dev/null", "useshell");
 
   files:
+    redhat::
+      "/etc/environment"
+        edit_line => contains_literal_string("LC_ALL=C"),
+        comment => "It seems that centos-7 at least needs LC_ALL=C now, maybe due to different way we access: ProxyJump ssh commands from jenkins instead of java ssh client. 2026-04-03";
+
     linux::
       "/home/jenkins/.ssh/known_hosts"
         create => "true",
