@@ -363,7 +363,7 @@ findtime = 600",
 %sudo ALL=NOPASSWD: /usr/bin/podman
 %sudo ALL=NOPASSWD: /usr/sbin/lvs
 %sudo ALL=NOPASSWD: /usr/bin/journalctl
-jenkins_builds ALL=NOPASSWD: /usr/bin/podman
+jenkins ALL=NOPASSWD: /usr/bin/podman
 ",
         create => "true",
         perms => mog("400", "root", "root");
