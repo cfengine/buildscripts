@@ -121,7 +121,27 @@ Images are hosted at `ghcr.io/cfengine` and versioned via `IMAGE_VERSION` in
 ```
 
 `--push-image` always builds with `--no-cache` to pick up the latest upstream
-packages, then pushes to the registry.
+packages, then pushes to the registry. However, you must be logged in to
+`ghcr.io` first. You can log in with a personal access token (classic) that has
+the write:packages scope. Alternatively, trigger the GitHub Actions workflow
+which handles authentication automatically.
+
+#### GitHub Actions workflow
+
+The `build-base-images.yml` workflow builds and pushes images for every
+supported platform. It is triggered manually via `workflow_dispatch`.
+
+The workflow authenticates to `ghcr.io` using the automatic `GITHUB_TOKEN`
+provided by GitHub Actions. For this to work:
+
+- The repository must grant `GITHUB_TOKEN` write access to packages. In the
+  GitHub repository settings, go to **Actions → General → Workflow permissions**
+  and select **Read and write permissions**.
+- After the first push, each package defaults to private. To allow anonymous
+  pulls, go to the package on GitHub (**your org → Packages**), open **Package
+  settings**, and change the visibility to **Public**. This is a one-time step
+  per package — new tags (e.g. from bumping `IMAGE_VERSION`) inherit the
+  existing visibility.
 
 ### Updating the toolchain
 
@@ -129,7 +149,7 @@ packages, then pushes to the registry.
 2. Test locally with `--rebuild-image`
 3. Bump `IMAGE_VERSION` in `build-in-container.py`
 4. Commit the Dockerfile change + version bump
-5. Push new images with `--push-image` (or trigger the GitHub Actions workflow)
+5. Push new images by triggering the GitHub Actions workflow
 
 ## Debugging
 
