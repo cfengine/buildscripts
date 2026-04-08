@@ -13,6 +13,7 @@ import json
 import logging
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 log = logging.getLogger("build-in-container")
@@ -150,6 +151,44 @@ def push_image(platform_name, local_tag):
     log.info(f"Update image_version to \"{version}\" in platforms.json.")
 
 
+def latest_registry_version(image_name):
+    """Query ghcr.io for the latest tag of an image."""
+    # Anonymous token — no credentials needed for public images
+    token_url = f"https://ghcr.io/token?scope=repository:cfengine/{image_name}:pull"
+    token = json.loads(urllib.request.urlopen(token_url).read())["token"]
+
+    tags_url = f"https://ghcr.io/v2/cfengine/{image_name}/tags/list"
+    req = urllib.request.Request(
+        tags_url, headers={"Authorization": f"Bearer {token}"}
+    )
+    tags = json.loads(urllib.request.urlopen(req).read()).get("tags", [])
+    if not tags:
+        return None
+    return sorted(tags)[-1]
+
+
+def update_platform_versions(platform_name=None):
+    """Fetch latest image versions from the registry and update platforms.json."""
+    config = get_config()
+
+    platforms = [platform_name] if platform_name else list(config.keys())
+    for name in platforms:
+        image_name = config[name]["image_name"]
+        latest = latest_registry_version(image_name)
+        if latest is None:
+            log.warning(f"No tags found for {image_name}, skipping.")
+            continue
+        old = config[name]["image_version"]
+        if old == latest:
+            log.info(f"{name}: already at {latest}")
+        else:
+            config[name]["image_version"] = latest
+            log.info(f"{name}: {old} -> {latest}")
+
+    config_path = Path(__file__).resolve().parent / "platforms.json"
+    config_path.write_text(json.dumps(config, indent=2) + "\n")
+
+
 def run_container(args, image_tag, source_dir, script_dir):
     """Run the build inside a Docker container."""
     output_dir = Path(args.output_dir).resolve()
@@ -267,6 +306,11 @@ def parse_args():
         help="Build image and push to registry, then exit",
     )
     parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Fetch latest image version from registry and update platforms.json",
+    )
+    parser.add_argument(
         "--shell",
         action="store_true",
         help="Drop into container shell for debugging",
@@ -288,7 +332,11 @@ def parse_args():
             print(f"  {name:15s}  ({config['base_image']})")
         sys.exit(0)
 
-    # --platform is always required (except --list-platforms handled above)
+    if args.update:
+        # --platform is optional for --update; updates all if omitted
+        return args
+
+    # --platform is always required (except --list-platforms/--update handled above)
     if not args.platform:
         parser.error("missing required argument --platform")
 
@@ -314,6 +362,10 @@ def main():
         level=logging.INFO,
         format="%(message)s",
     )
+
+    if args.update:
+        update_platform_versions(args.platform)
+        return
 
     # Detect source directory
     if args.source_dir:

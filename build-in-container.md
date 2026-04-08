@@ -38,19 +38,22 @@ specified, defaults will:
 | `--role`       | `agent` or `hub` (not required for `--push-image`)      |
 | `--build-type` | `DEBUG` or `RELEASE` (not required for `--push-image`)  |
 
+None of the above arguments are required for `--update`.
+
 ### Optional arguments
 
-| Option             | Default                          | Description                                                 |
-| ------------------ | -------------------------------- | ----------------------------------------------------------- |
-| `--output-dir`     | `./output`                       | Where to write output packages                              |
-| `--cache-dir`      | `~/.cache/cfengine/buildscripts` | Dependency cache directory                                  |
-| `--build-number`   | `1`                              | Build number for package versioning                         |
-| `--version`        | auto                             | Override version string                                     |
-| `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache) |
-| `--push-image`     |                                  | Build image and push to registry, then exit                 |
-| `--shell`          |                                  | Drop into a bash shell inside the container for debugging   |
-| `--list-platforms` |                                  | List available platforms and exit                           |
-| `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                             |
+| Option             | Default                          | Description                                                         |
+| ------------------ | -------------------------------- | ------------------------------------------------------------------- |
+| `--output-dir`     | `./output`                       | Where to write output packages                                      |
+| `--cache-dir`      | `~/.cache/cfengine/buildscripts` | Dependency cache directory                                          |
+| `--build-number`   | `1`                              | Build number for package versioning                                 |
+| `--version`        | auto                             | Override version string                                             |
+| `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache)         |
+| `--push-image`     |                                  | Build image and push to registry, then exit                         |
+| `--update`         |                                  | Fetch latest image versions from registry and update platforms.json |
+| `--shell`          |                                  | Drop into a bash shell inside the container for debugging           |
+| `--list-platforms` |                                  | List available platforms and exit                                   |
+| `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                                     |
 
 ## Supported platforms
 
@@ -129,7 +132,18 @@ which handles authentication automatically.
 #### GitHub Actions workflow
 
 The `build-base-images.yml` workflow builds and pushes images for every
-supported platform. It is triggered manually via `workflow_dispatch`.
+supported platform. It runs weekly (Sunday at midnight UTC) and can also be
+triggered manually via `workflow_dispatch`.
+
+After the workflow pushes new images, update `platforms.json` to use them:
+
+```bash
+# Update all platforms to the latest registry version
+./build-in-container.py --update
+
+# Update a single platform
+./build-in-container.py --update --platform ubuntu-22
+```
 
 The workflow authenticates to `ghcr.io` using the automatic `GITHUB_TOKEN`
 provided by GitHub Actions. For this to work:
@@ -147,9 +161,9 @@ provided by GitHub Actions. For this to work:
 
 1. Edit `container/Dockerfile.debian` as needed
 2. Test locally with `--rebuild-image`
-3. Bump `image_version` in `platforms.json`
-4. Commit the Dockerfile change + version bump
-5. Push new images by triggering the GitHub Actions workflow
+3. Push new images by triggering the GitHub Actions workflow
+4. Run `./build-in-container.py --update` to update `platforms.json`
+5. Commit the Dockerfile change + version update
 
 ## Debugging
 
