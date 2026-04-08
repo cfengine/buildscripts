@@ -6,6 +6,7 @@ scripts. Each build runs in a fresh ephemeral container.
 """
 
 import argparse
+import datetime
 import functools
 import hashlib
 import json
@@ -128,24 +129,11 @@ def pull_image(platform_name):
     return ref
 
 
-def image_exists_in_registry(platform_name):
-    """Check if an image tag already exists in the registry."""
-    ref = registry_image_ref(platform_name)
-    result = subprocess.run(
-        ["docker", "manifest", "inspect", ref],
-        capture_output=True,
-        text=True,
-    )
-    return result.returncode == 0
-
-
 def push_image(platform_name, local_tag):
-    """Tag a local image with the registry reference and push it."""
-    ref = registry_image_ref(platform_name)
-
-    if image_exists_in_registry(platform_name):
-        log.error(f"Image {ref} already exists. Bump image_version in platforms.json.")
-        sys.exit(1)
+    """Tag a local image with a timestamped version and push it."""
+    image_name = get_config()[platform_name]["image_name"]
+    version = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ref = f"{IMAGE_REGISTRY}/{image_name}:{version}"
 
     log.info(f"Tagging {local_tag} as {ref}...")
     result = subprocess.run(["docker", "tag", local_tag, ref])
@@ -158,6 +146,8 @@ def push_image(platform_name, local_tag):
     if result.returncode != 0:
         log.error("Docker push failed.")
         sys.exit(1)
+
+    log.info(f"Update image_version to \"{version}\" in platforms.json.")
 
 
 def run_container(args, image_tag, source_dir, script_dir):
