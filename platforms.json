@@ -1,7 +1,7 @@
 {
   "ubuntu-20": {
     "image_name": "cfengine-builder-ubuntu-20",
-    "image_version": "1",
+    "image_version": "20260408T181129Z",
     "base_image": "ubuntu:20.04",
     "base_image_sha": "sha256:c664f8f86ed5a386b0a340d981b8f81714e21a8b9c73f658c4bea56aa179d54a",
     "dockerfile": "Dockerfile.debian",
@@ -11,28 +11,28 @@
   },
   "ubuntu-22": {
     "image_name": "cfengine-builder-ubuntu-22",
-    "image_version": "1",
+    "image_version": "20260408T181132Z",
     "base_image": "ubuntu:22.04",
     "base_image_sha": "sha256:4fff072216d2d3d6accc8bc09b57c33e474edd726f3f65fbadbb05647ab15fa5",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-24": {
     "image_name": "cfengine-builder-ubuntu-24",
-    "image_version": "1",
+    "image_version": "20260408T181126Z",
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:e21f810fa78c09944446ec02048605eb3ab1e4e2e261c387ecc7456b38400d79",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-11": {
     "image_name": "cfengine-builder-debian-11",
-    "image_version": "1",
+    "image_version": "20260408T181158Z",
     "base_image": "debian:11",
     "base_image_sha": "sha256:b034993190d575d4173a405e347b7c210410bf9ac4e7a84734ae37a6cb488b04",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-12": {
     "image_name": "cfengine-builder-debian-12",
-    "image_version": "1",
+    "image_version": "20260408T181114Z",
     "base_image": "debian:12",
     "base_image_sha": "sha256:ad83e02b01f4bb0c3fa818396d8bf47c0e9f5803e98bf6cbd8f772ae9e2ec4e4",
     "dockerfile": "Dockerfile.debian"
