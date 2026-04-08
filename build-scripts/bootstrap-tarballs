@@ -96,6 +96,9 @@ git rev-parse HEAD >"$BASEDIR"/output/core-commitID
 # Configure in order to run "make dist", deleted later.
 log_debug "Running configure on core repository..."
 run_and_print_on_failure ./configure -C
+# Normalize source timestamps to avoid errors like:
+# configure: error: newly created file is older than distributed files!
+find . -exec touch -t 202501010000.00 {} +
 log_debug "Running make dist on core repository..."
 run_and_print_on_failure make dist
 mv cfengine-3.*.tar.gz "$BASEDIR"/output/tarballs/
@@ -109,6 +112,9 @@ git rev-parse HEAD >"$BASEDIR"/output/masterfiles-commitID
 # Configure in order to run "make dist", deleted later.
 log_debug "Running configure on masterfiles repository..."
 run_and_print_on_failure ./configure
+# Normalize source timestamps to avoid errors like:
+# configure: error: newly created file is older than distributed files!
+find . -exec touch -t 202501010000.00 {} +
 log_debug "Running make dist on masterfiles repository..."
 run_and_print_on_failure make dist # source tarball
 log_debug "Running make tar-package on masterfiles repository..."
