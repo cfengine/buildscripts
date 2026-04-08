@@ -38,19 +38,22 @@ specified, defaults will:
 | `--role`       | `agent` or `hub` (not required for `--push-image`)      |
 | `--build-type` | `DEBUG` or `RELEASE` (not required for `--push-image`)  |
 
+None of the above arguments are required for `--update`.
+
 ### Optional arguments
 
-| Option             | Default                          | Description                                                 |
-| ------------------ | -------------------------------- | ----------------------------------------------------------- |
-| `--output-dir`     | `./output`                       | Where to write output packages                              |
-| `--cache-dir`      | `~/.cache/cfengine/buildscripts` | Dependency cache directory                                  |
-| `--build-number`   | `1`                              | Build number for package versioning                         |
-| `--version`        | auto                             | Override version string                                     |
-| `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache) |
-| `--push-image`     |                                  | Build image and push to registry, then exit                 |
-| `--shell`          |                                  | Drop into a bash shell inside the container for debugging   |
-| `--list-platforms` |                                  | List available platforms and exit                           |
-| `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                             |
+| Option             | Default                          | Description                                                         |
+| ------------------ | -------------------------------- | ------------------------------------------------------------------- |
+| `--output-dir`     | `./output`                       | Where to write output packages                                      |
+| `--cache-dir`      | `~/.cache/cfengine/buildscripts` | Dependency cache directory                                          |
+| `--build-number`   | `1`                              | Build number for package versioning                                 |
+| `--version`        | auto                             | Override version string                                             |
+| `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache)         |
+| `--push-image`     |                                  | Build image and push to registry, then exit                         |
+| `--update`         |                                  | Fetch latest image versions from registry and update platforms.json |
+| `--shell`          |                                  | Drop into a bash shell inside the container for debugging           |
+| `--list-platforms` |                                  | List available platforms and exit                                   |
+| `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                                     |
 
 ## Supported platforms
 
@@ -62,8 +65,8 @@ specified, defaults will:
 | `debian-11` | `debian:11`    |
 | `debian-12` | `debian:12`    |
 
-Adding a new Debian/Ubuntu platform requires only a new entry in the `PLATFORMS`
-dict in `build-in-container.py`. Adding a non-debian based platform (e.g.,
+Adding a new Debian/Ubuntu platform requires only a new entry in `platforms.json`.
+Adding a non-debian based platform (e.g.,
 RHEL/CentOS) requires a new `container/Dockerfile.rhel` plus platform entries.
 
 ## How it works
@@ -112,8 +115,8 @@ hash and skips rebuilding when nothing has changed.
 
 ### Container registry
 
-Images are hosted at `ghcr.io/cfengine` and versioned via `IMAGE_VERSION` in
-`build-in-container.py`. To push a new image:
+Images are hosted at `ghcr.io/cfengine` and versioned per-platform via
+`image_version` in `platforms.json`. To push a new image:
 
 ```bash
 # Build and push a single platform
@@ -129,7 +132,24 @@ which handles authentication automatically.
 #### GitHub Actions workflow
 
 The `build-base-images.yml` workflow builds and pushes images for every
-supported platform. It is triggered manually via `workflow_dispatch`.
+supported platform. It runs weekly (Sunday at midnight UTC) and can also be
+triggered manually via `workflow_dispatch`.
+
+After the workflow pushes new images, update `platforms.json` to use them:
+
+```bash
+# Update all platforms to the latest registry version
+./build-in-container.py --update
+
+# Update a single platform
+./build-in-container.py --update --platform ubuntu-22
+```
+
+The `update-base-images.yml` workflow automates this step. It runs weekly
+(Monday at midnight UTC) and can also be triggered manually. It calls
+`./build-in-container.py --update` and opens a pull request with any
+`platforms.json` changes. This workflow requires `contents: write` and
+`pull-requests: write` permissions.
 
 The workflow authenticates to `ghcr.io` using the automatic `GITHUB_TOKEN`
 provided by GitHub Actions. For this to work:
@@ -140,16 +160,16 @@ provided by GitHub Actions. For this to work:
 - After the first push, each package defaults to private. To allow anonymous
   pulls, go to the package on GitHub (**your org → Packages**), open **Package
   settings**, and change the visibility to **Public**. This is a one-time step
-  per package — new tags (e.g. from bumping `IMAGE_VERSION`) inherit the
+  per package — new tags (e.g. from bumping `image_version`) inherit the
   existing visibility.
 
 ### Updating the toolchain
 
 1. Edit `container/Dockerfile.debian` as needed
 2. Test locally with `--rebuild-image`
-3. Bump `IMAGE_VERSION` in `build-in-container.py`
-4. Commit the Dockerfile change + version bump
-5. Push new images by triggering the GitHub Actions workflow
+3. Commit and merge the Dockerfile change
+4. Push new images by triggering the `build-base-images.yml` workflow
+5. Trigger the `update-base-images.yml` workflow to open a PR updating `platforms.json`
 
 ## Debugging
 

@@ -6,49 +6,26 @@ scripts. Each build runs in a fresh ephemeral container.
 """
 
 import argparse
+import datetime
+import functools
 import hashlib
+import json
 import logging
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
 
 log = logging.getLogger("build-in-container")
 
 IMAGE_REGISTRY = "ghcr.io/cfengine"
-IMAGE_VERSION = "1"
 
-PLATFORMS = {
-    "ubuntu-20": {
-        "image_tag": f"cfengine-builder-ubuntu-20:{IMAGE_VERSION}",
-        "base_image": "ubuntu:20.04",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {"NCURSES_PKGS": "libncurses5 libncurses5-dev"},
-    },
-    "ubuntu-22": {
-        "image_tag": f"cfengine-builder-ubuntu-22:{IMAGE_VERSION}",
-        "base_image": "ubuntu:22.04",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {},
-    },
-    "ubuntu-24": {
-        "image_tag": f"cfengine-builder-ubuntu-24:{IMAGE_VERSION}",
-        "base_image": "ubuntu:24.04",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {},
-    },
-    "debian-11": {
-        "image_tag": f"cfengine-builder-debian-11:{IMAGE_VERSION}",
-        "base_image": "debian:11",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {},
-    },
-    "debian-12": {
-        "image_tag": f"cfengine-builder-debian-12:{IMAGE_VERSION}",
-        "base_image": "debian:12",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {},
-    },
-}
+
+@functools.cache
+def get_config():
+    """Load and cache platform configuration from platforms.json."""
+    config_path = Path(__file__).resolve().parent / "platforms.json"
+    return json.loads(config_path.read_text())
 
 
 def detect_source_dir():
@@ -88,7 +65,7 @@ def image_needs_rebuild(image_tag, current_hash):
 
 def build_image(platform_name, platform_config, script_dir, rebuild=False):
     """Build the Docker image for the given platform."""
-    image_tag = platform_config["image_tag"]
+    image_tag = f"{platform_config['image_name']}:{platform_config['image_version']}"
     dockerfile_name = platform_config["dockerfile"]
     dockerfile_path = script_dir / "container" / dockerfile_name
     current_hash = dockerfile_hash(dockerfile_path)
@@ -104,7 +81,7 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False):
         "-f",
         str(dockerfile_path),
         "--build-arg",
-        f"BASE_IMAGE={platform_config['base_image']}",
+        f"BASE_IMAGE={platform_config['base_image']}@{platform_config['base_image_sha']}",
         "--label",
         f"dockerfile-hash={current_hash}",
         "-t",
@@ -132,7 +109,8 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False):
 
 def registry_image_ref(platform_name):
     """Return the fully-qualified registry image reference for a platform."""
-    return f"{IMAGE_REGISTRY}/{PLATFORMS[platform_name]['image_tag']}"
+    platform = get_config()[platform_name]
+    return f"{IMAGE_REGISTRY}/{platform['image_name']}:{platform['image_version']}"
 
 
 def pull_image(platform_name):
@@ -152,24 +130,11 @@ def pull_image(platform_name):
     return ref
 
 
-def image_exists_in_registry(platform_name):
-    """Check if an image tag already exists in the registry."""
-    ref = registry_image_ref(platform_name)
-    result = subprocess.run(
-        ["docker", "manifest", "inspect", ref],
-        capture_output=True,
-        text=True,
-    )
-    return result.returncode == 0
-
-
 def push_image(platform_name, local_tag):
-    """Tag a local image with the registry reference and push it."""
-    ref = registry_image_ref(platform_name)
-
-    if image_exists_in_registry(platform_name):
-        log.error(f"Image {ref} already exists. Bump IMAGE_VERSION.")
-        sys.exit(1)
+    """Tag a local image with a timestamped version and push it."""
+    image_name = get_config()[platform_name]["image_name"]
+    version = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    ref = f"{IMAGE_REGISTRY}/{image_name}:{version}"
 
     log.info(f"Tagging {local_tag} as {ref}...")
     result = subprocess.run(["docker", "tag", local_tag, ref])
@@ -182,6 +147,46 @@ def push_image(platform_name, local_tag):
     if result.returncode != 0:
         log.error("Docker push failed.")
         sys.exit(1)
+
+    log.info(f"Update image_version to \"{version}\" in platforms.json.")
+
+
+def latest_registry_version(image_name):
+    """Query ghcr.io for the latest tag of an image."""
+    # Anonymous token — no credentials needed for public images
+    token_url = f"https://ghcr.io/token?scope=repository:cfengine/{image_name}:pull"
+    token = json.loads(urllib.request.urlopen(token_url).read())["token"]
+
+    tags_url = f"https://ghcr.io/v2/cfengine/{image_name}/tags/list"
+    req = urllib.request.Request(
+        tags_url, headers={"Authorization": f"Bearer {token}"}
+    )
+    tags = json.loads(urllib.request.urlopen(req).read()).get("tags", [])
+    if not tags:
+        return None
+    return sorted(tags)[-1]
+
+
+def update_platform_versions(platform_name=None):
+    """Fetch latest image versions from the registry and update platforms.json."""
+    config = get_config()
+
+    platforms = [platform_name] if platform_name else list(config.keys())
+    for name in platforms:
+        image_name = config[name]["image_name"]
+        latest = latest_registry_version(image_name)
+        if latest is None:
+            log.warning(f"No tags found for {image_name}, skipping.")
+            continue
+        old = config[name]["image_version"]
+        if old == latest:
+            log.info(f"{name}: already at {latest}")
+        else:
+            config[name]["image_version"] = latest
+            log.info(f"{name}: {old} -> {latest}")
+
+    config_path = Path(__file__).resolve().parent / "platforms.json"
+    config_path.write_text(json.dumps(config, indent=2) + "\n")
 
 
 def run_container(args, image_tag, source_dir, script_dir):
@@ -252,7 +257,7 @@ def parse_args():
     )
     parser.add_argument(
         "--platform",
-        choices=list(PLATFORMS.keys()),
+        choices=list(get_config().keys()),
         help="Target platform",
     )
     parser.add_argument(
@@ -301,6 +306,11 @@ def parse_args():
         help="Build image and push to registry, then exit",
     )
     parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Fetch latest image version from registry and update platforms.json",
+    )
+    parser.add_argument(
         "--shell",
         action="store_true",
         help="Drop into container shell for debugging",
@@ -318,11 +328,15 @@ def parse_args():
 
     if args.list_platforms:
         print("Available platforms:")
-        for name, config in PLATFORMS.items():
+        for name, config in get_config().items():
             print(f"  {name:15s}  ({config['base_image']})")
         sys.exit(0)
 
-    # --platform is always required (except --list-platforms handled above)
+    if args.update:
+        # --platform is optional for --update; updates all if omitted
+        return args
+
+    # --platform is always required (except --list-platforms/--update handled above)
     if not args.platform:
         parser.error("missing required argument --platform")
 
@@ -349,6 +363,10 @@ def main():
         format="%(message)s",
     )
 
+    if args.update:
+        update_platform_versions(args.platform)
+        return
+
     # Detect source directory
     if args.source_dir:
         source_dir = Path(args.source_dir).resolve()
@@ -357,7 +375,7 @@ def main():
 
     script_dir = source_dir / "buildscripts"
 
-    platform_config = PLATFORMS[args.platform]
+    platform_config = get_config()[args.platform]
 
     if args.push_image:
         image_tag = build_image(
