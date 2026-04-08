@@ -1,0 +1,42 @@
+ARG BASE_IMAGE=ubuntu:20.04
+FROM ${BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Build tools extracted from ci/cfengine-build-host-setup.cf (debian|ubuntu section)
+RUN apt-get update && apt-get install -y \
+    autoconf automake binutils bison build-essential curl debhelper \
+    dpkg-dev expat fakeroot flex gdb git libexpat1-dev \
+    libmodule-load-conditional-perl libpam0g-dev libtool \
+    pkg-config psmisc python3-pip rsync sudo systemd-coredump wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# ncurses: ubuntu-20 uses libncurses5/libncurses5-dev, newer use libncurses6/libncurses-dev
+ARG NCURSES_PKGS="libncurses6 libncurses-dev"
+RUN apt-get update && apt-get install -y ${NCURSES_PKGS} \
+    && rm -rf /var/lib/apt/lists/*
+
+# Hub build tools: Node.js 20 LTS (system nodejs is too old for modern npm
+# packages that use the node: protocol), PHP, and Composer
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs php-cli \
+    && rm -rf /var/lib/apt/lists/*
+RUN npm install -g less
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer.phar
+
+# Remove system dev libraries that conflict with bundled deps
+# (from cfengine-build-host-setup.cf lines 53-59)
+RUN apt-get purge -y \
+    libattr1-dev libssl-dev libpcre2-dev libacl1-dev \
+    libyaml-dev libxml2-dev librsync-dev 2>/dev/null || true
+
+# Create build user with passwordless sudo (needed by install-dependencies, package, etc.)
+RUN useradd -m -s /bin/bash builder \
+    && echo "builder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/builder
+
+USER builder
+WORKDIR /home/builder
+
+# Pre-create the build directory so that when a named volume is mounted here,
+# Docker initializes it with the correct ownership (builder:builder).
+RUN mkdir -p /home/builder/build
