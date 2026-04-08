@@ -192,8 +192,8 @@ echo "Checking for pre-installed CFEngine (chicken/egg problem)"
 # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
 if ! /var/cfengine/bin/cf-agent -V 2>/dev/null; then
   echo "No existing CFEngine install found, try cf-remote..."
-  if grep -qi stretch /etc/os-release; then
-    _VERSION="--version 3.21.8" # 3.27.0 and 3.24.x do not have debian 9 (stretch)
+  if grep -qi stretch /etc/os-release || grep -qi buster /etc/os-release; then
+    _VERSION="--version 3.21.8" # 3.27.0 and 3.24.x do not have debian 9 (stretch) or debian 10 (buster)
   elif grep -qi bullseye /etc/os-release; then
     _VERSION="--version 3.24.3" # 3.27.0 has only debian > 11 (bullseye)
   elif grep -q suse /etc/os-release; then
