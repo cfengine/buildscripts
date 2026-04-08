@@ -94,6 +94,10 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False):
     if rebuild:
         cmd.append("--no-cache")
 
+    docker_platform = platform_config.get("docker_platform")
+    if docker_platform:
+        cmd.extend(["--platform", docker_platform])
+
     cmd.extend(["--network", "host"])
 
     # Build context is the container/ directory
@@ -120,8 +124,13 @@ def pull_image(platform_name):
     """
     ref = registry_image_ref(platform_name)
     log.info(f"Pulling image {ref}...")
+    cmd = ["docker", "pull"]
+    docker_platform = get_config()[platform_name].get("docker_platform")
+    if docker_platform:
+        cmd.extend(["--platform", docker_platform])
+    cmd.append(ref)
     result = subprocess.run(
-        ["docker", "pull", ref],
+        cmd,
         capture_output=True,
         text=True,
     )
@@ -189,7 +198,7 @@ def update_platform_versions(platform_name=None):
     config_path.write_text(json.dumps(config, indent=2) + "\n")
 
 
-def run_container(args, image_tag, source_dir, script_dir):
+def run_container(args, image_tag, source_dir, script_dir, platform_config):
     """Run the build inside a Docker container."""
     output_dir = Path(args.output_dir).resolve()
     cache_dir = Path(args.cache_dir).resolve()
@@ -199,6 +208,10 @@ def run_container(args, image_tag, source_dir, script_dir):
     cache_dir.mkdir(parents=True, exist_ok=True)
 
     cmd = ["docker", "run", "--rm", "--network", "host"]
+
+    docker_platform = platform_config.get("docker_platform")
+    if docker_platform:
+        cmd.extend(["--platform", docker_platform])
 
     if args.shell:
         cmd.extend(["-it"])
@@ -401,7 +414,7 @@ def main():
         )
 
     # Run the container
-    rc = run_container(args, image_tag, source_dir, script_dir)
+    rc = run_container(args, image_tag, source_dir, script_dir, platform_config)
 
     if rc != 0:
         log.error(f"Build failed (exit code {rc}).")
