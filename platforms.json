@@ -1,0 +1,35 @@
+{
+  "ubuntu-20": {
+    "image_name": "cfengine-builder-ubuntu-20",
+    "image_version": "1",
+    "base_image": "ubuntu:20.04",
+    "dockerfile": "Dockerfile.debian",
+    "extra_build_args": {
+      "NCURSES_PKGS": "libncurses5 libncurses5-dev"
+    }
+  },
+  "ubuntu-22": {
+    "image_name": "cfengine-builder-ubuntu-22",
+    "image_version": "1",
+    "base_image": "ubuntu:22.04",
+    "dockerfile": "Dockerfile.debian"
+  },
+  "ubuntu-24": {
+    "image_name": "cfengine-builder-ubuntu-24",
+    "image_version": "1",
+    "base_image": "ubuntu:24.04",
+    "dockerfile": "Dockerfile.debian"
+  },
+  "debian-11": {
+    "image_name": "cfengine-builder-debian-11",
+    "image_version": "1",
+    "base_image": "debian:11",
+    "dockerfile": "Dockerfile.debian"
+  },
+  "debian-12": {
+    "image_name": "cfengine-builder-debian-12",
+    "image_version": "1",
+    "base_image": "debian:12",
+    "dockerfile": "Dockerfile.debian"
+  }
+}

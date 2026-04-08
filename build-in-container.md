@@ -62,8 +62,8 @@ specified, defaults will:
 | `debian-11` | `debian:11`    |
 | `debian-12` | `debian:12`    |
 
-Adding a new Debian/Ubuntu platform requires only a new entry in the `PLATFORMS`
-dict in `build-in-container.py`. Adding a non-debian based platform (e.g.,
+Adding a new Debian/Ubuntu platform requires only a new entry in `platforms.json`.
+Adding a non-debian based platform (e.g.,
 RHEL/CentOS) requires a new `container/Dockerfile.rhel` plus platform entries.
 
 ## How it works
@@ -112,8 +112,8 @@ hash and skips rebuilding when nothing has changed.
 
 ### Container registry
 
-Images are hosted at `ghcr.io/cfengine` and versioned via `IMAGE_VERSION` in
-`build-in-container.py`. To push a new image:
+Images are hosted at `ghcr.io/cfengine` and versioned per-platform via
+`image_version` in `platforms.json`. To push a new image:
 
 ```bash
 # Build and push a single platform
@@ -140,14 +140,14 @@ provided by GitHub Actions. For this to work:
 - After the first push, each package defaults to private. To allow anonymous
   pulls, go to the package on GitHub (**your org → Packages**), open **Package
   settings**, and change the visibility to **Public**. This is a one-time step
-  per package — new tags (e.g. from bumping `IMAGE_VERSION`) inherit the
+  per package — new tags (e.g. from bumping `image_version`) inherit the
   existing visibility.
 
 ### Updating the toolchain
 
 1. Edit `container/Dockerfile.debian` as needed
 2. Test locally with `--rebuild-image`
-3. Bump `IMAGE_VERSION` in `build-in-container.py`
+3. Bump `image_version` in `platforms.json`
 4. Commit the Dockerfile change + version bump
 5. Push new images by triggering the GitHub Actions workflow
 

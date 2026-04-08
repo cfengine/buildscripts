@@ -6,7 +6,9 @@ scripts. Each build runs in a fresh ephemeral container.
 """
 
 import argparse
+import functools
 import hashlib
+import json
 import logging
 import subprocess
 import sys
@@ -15,40 +17,13 @@ from pathlib import Path
 log = logging.getLogger("build-in-container")
 
 IMAGE_REGISTRY = "ghcr.io/cfengine"
-IMAGE_VERSION = "1"
 
-PLATFORMS = {
-    "ubuntu-20": {
-        "image_tag": f"cfengine-builder-ubuntu-20:{IMAGE_VERSION}",
-        "base_image": "ubuntu:20.04",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {"NCURSES_PKGS": "libncurses5 libncurses5-dev"},
-    },
-    "ubuntu-22": {
-        "image_tag": f"cfengine-builder-ubuntu-22:{IMAGE_VERSION}",
-        "base_image": "ubuntu:22.04",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {},
-    },
-    "ubuntu-24": {
-        "image_tag": f"cfengine-builder-ubuntu-24:{IMAGE_VERSION}",
-        "base_image": "ubuntu:24.04",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {},
-    },
-    "debian-11": {
-        "image_tag": f"cfengine-builder-debian-11:{IMAGE_VERSION}",
-        "base_image": "debian:11",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {},
-    },
-    "debian-12": {
-        "image_tag": f"cfengine-builder-debian-12:{IMAGE_VERSION}",
-        "base_image": "debian:12",
-        "dockerfile": "Dockerfile.debian",
-        "extra_build_args": {},
-    },
-}
+
+@functools.cache
+def get_config():
+    """Load and cache platform configuration from platforms.json."""
+    config_path = Path(__file__).resolve().parent / "platforms.json"
+    return json.loads(config_path.read_text())
 
 
 def detect_source_dir():
@@ -88,7 +63,7 @@ def image_needs_rebuild(image_tag, current_hash):
 
 def build_image(platform_name, platform_config, script_dir, rebuild=False):
     """Build the Docker image for the given platform."""
-    image_tag = platform_config["image_tag"]
+    image_tag = f"{platform_config['image_name']}:{platform_config['image_version']}"
     dockerfile_name = platform_config["dockerfile"]
     dockerfile_path = script_dir / "container" / dockerfile_name
     current_hash = dockerfile_hash(dockerfile_path)
@@ -132,7 +107,8 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False):
 
 def registry_image_ref(platform_name):
     """Return the fully-qualified registry image reference for a platform."""
-    return f"{IMAGE_REGISTRY}/{PLATFORMS[platform_name]['image_tag']}"
+    platform = get_config()[platform_name]
+    return f"{IMAGE_REGISTRY}/{platform['image_name']}:{platform['image_version']}"
 
 
 def pull_image(platform_name):
@@ -168,7 +144,7 @@ def push_image(platform_name, local_tag):
     ref = registry_image_ref(platform_name)
 
     if image_exists_in_registry(platform_name):
-        log.error(f"Image {ref} already exists. Bump IMAGE_VERSION.")
+        log.error(f"Image {ref} already exists. Bump image_version in platforms.json.")
         sys.exit(1)
 
     log.info(f"Tagging {local_tag} as {ref}...")
@@ -252,7 +228,7 @@ def parse_args():
     )
     parser.add_argument(
         "--platform",
-        choices=list(PLATFORMS.keys()),
+        choices=list(get_config().keys()),
         help="Target platform",
     )
     parser.add_argument(
@@ -318,7 +294,7 @@ def parse_args():
 
     if args.list_platforms:
         print("Available platforms:")
-        for name, config in PLATFORMS.items():
+        for name, config in get_config().items():
             print(f"  {name:15s}  ({config['base_image']})")
         sys.exit(0)
 
@@ -357,7 +333,7 @@ def main():
 
     script_dir = source_dir / "buildscripts"
 
-    platform_config = PLATFORMS[args.platform]
+    platform_config = get_config()[args.platform]
 
     if args.push_image:
         image_tag = build_image(
