@@ -145,6 +145,12 @@ After the workflow pushes new images, update `platforms.json` to use them:
 ./build-in-container.py --update --platform ubuntu-22
 ```
 
+The `update-base-images.yml` workflow automates this step. It runs weekly
+(Monday at midnight UTC) and can also be triggered manually. It calls
+`./build-in-container.py --update` and opens a pull request with any
+`platforms.json` changes. This workflow requires `contents: write` and
+`pull-requests: write` permissions.
+
 The workflow authenticates to `ghcr.io` using the automatic `GITHUB_TOKEN`
 provided by GitHub Actions. For this to work:
 
@@ -161,9 +167,9 @@ provided by GitHub Actions. For this to work:
 
 1. Edit `container/Dockerfile.debian` as needed
 2. Test locally with `--rebuild-image`
-3. Push new images by triggering the GitHub Actions workflow
-4. Run `./build-in-container.py --update` to update `platforms.json`
-5. Commit the Dockerfile change + version update
+3. Commit and merge the Dockerfile change
+4. Push new images by triggering the `build-base-images.yml` workflow
+5. Trigger the `update-base-images.yml` workflow to open a PR updating `platforms.json`
 
 ## Debugging
 

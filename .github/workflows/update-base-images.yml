@@ -1,0 +1,29 @@
+name: Update base image versions
+
+on:
+  schedule:
+    - cron: "0 0 * * 1" # Every Monday at midnight UTC
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Update platforms.json
+        run: ./build-in-container.py --update
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "Updated base image versions in platforms.json"
+          branch: update-base-images
+          title: "Updated base image versions"
+          body: |
+            Automated update of `image_version` in `platforms.json` to the
+            latest tags from ghcr.io.
