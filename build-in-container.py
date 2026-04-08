@@ -79,7 +79,7 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False):
         "-f",
         str(dockerfile_path),
         "--build-arg",
-        f"BASE_IMAGE={platform_config['base_image']}",
+        f"BASE_IMAGE={platform_config['base_image']}@{platform_config['base_image_sha']}",
         "--label",
         f"dockerfile-hash={current_hash}",
         "-t",
