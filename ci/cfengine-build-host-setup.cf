@@ -363,6 +363,13 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
         create => "true",
         perms => mog("400", "root", "root");
 
+    centos_7::
+      "/etc/environment"
+      comment => "centos-7 vagrant VMs have unconfigured locale that breaks some tests so force LC_ALL=C",
+      content => "LC_ALL=C",
+      create => "true",
+      perms => mog("0644", "root", "root");
+
     redhat_10::
       "/usr/lib/rpm/redhat/macros"
         edit_line => insert_lines("%_empty_manifest_terminate_build 0"),
