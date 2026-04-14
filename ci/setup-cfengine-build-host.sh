@@ -2,6 +2,11 @@
 shopt -s expand_aliases
 thisdir="$(dirname "$0")"
 
+# handle env cfengine_role
+if [ -n "$cfengine_role" ]; then
+  touch /etc/cfengine-"$cfengine_role".flag
+fi
+
 # install needed packages and software for a build host
 set -e
 if [ "$(id -u)" != "0" ]; then
