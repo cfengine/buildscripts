@@ -9,6 +9,7 @@ on:
 
 jobs:
   update_dep_tables:
+    if: contains(fromJSON('["cfengine","mendersoftware","NorthernTechHQ"]'), github.repository_owner)
     name: Update dependency tables
     runs-on: ubuntu-24.04
     permissions:
