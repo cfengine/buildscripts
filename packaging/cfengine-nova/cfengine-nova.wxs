@@ -138,11 +138,11 @@
               <Component Id='libwinpthread_1.dll' Guid='9109f8e5-fc06-4102-b287-882e66f3864e' Win64='$(var.isWin64)'>
                 <File Id='libwinpthread_1.dll' Name='libwinpthread-1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libwinpthread-1.dll' />
               </Component>
-              <Component Id='libcrypto_3_x64.dll' Guid='BEC456CE-8CEF-4E4A-B15B-585D0D2AA205' Win64='$(var.isWin64)'>
-                <File Id='libcrypto_3_x64.dll' Name='libcrypto-3-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcrypto-3-x64.dll' />
+              <Component Id='libcrypto_4_x64.dll' Guid='5f8086a9-6efd-4661-9e0a-da383615d97a' Win64='$(var.isWin64)'>
+                <File Id='libcrypto_4_x64.dll' Name='libcrypto-4-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcrypto-4-x64.dll' />
               </Component>
-              <Component Id='libssl_3_x64.dll' Guid='094AA0E1-82AD-478F-9EA0-734607617746' Win64='$(var.isWin64)'>
-                <File Id='libssl_3_x64.dll' Name='libssl-3-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libssl-3-x64.dll' />
+              <Component Id='libssl_4_x64.dll' Guid='f7483364-bcbe-442b-81ac-394d7d4e02ab' Win64='$(var.isWin64)'>
+                <File Id='libssl_4_x64.dll' Name='libssl-4-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libssl-4-x64.dll' />
               </Component>
               <Component Id='libgnurx_0.dll' Guid='18554ae8-9c92-4cc7-8e5a-7f41ed2080d6' Win64='$(var.isWin64)'>
                 <File Id='libgnurx_0.dll' Name='libgnurx-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libgnurx-0.dll' />
@@ -206,8 +206,8 @@
             <ComponentRef Id='libpcre2_8_0.dll' />
             <ComponentRef Id='pthreadGC2.dll' />
             <ComponentRef Id='libwinpthread_1.dll' />
-            <ComponentRef Id='libcrypto_3_x64.dll' />
-            <ComponentRef Id='libssl_3_x64.dll' />
+            <ComponentRef Id='libcrypto_4_x64.dll' />
+            <ComponentRef Id='libssl_4_x64.dll' />
             <ComponentRef Id='libgnurx_0.dll' />
             <ComponentRef Id='liblmdb.dll' />
             <ComponentRef Id='libyaml_0_2.dll' />
