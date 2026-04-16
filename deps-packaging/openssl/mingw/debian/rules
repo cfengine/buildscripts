@@ -22,7 +22,6 @@ endif
 build: build-stamp
 build-stamp:
 	dh_testdir
-	patch -p1 < $(CURDIR)/0001-Explicitly-define-SIO_UDP_NETRESET-for-MinGW-builds.patch
 
 	# Removed "no-psk" from the options, mingw builds breaks with it
 	CROSS_COMPILE=$(DEB_HOST_GNU_TYPE)- ./Configure \
