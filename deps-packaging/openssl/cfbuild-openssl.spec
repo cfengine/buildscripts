@@ -59,6 +59,11 @@ then
     then
         HACK_FLAGS=-D_GNU_SOURCE                              # CentOS 4 issue
     fi
+    if [ "$OS_VERSION_MAJOR" = "7" ]
+    then
+        # apparently our build doesn't quite work with devtoolset on centos so give it a hint where to find libraries with -L/opt/rh/devtoolset-11/root/usr/lib64
+        HACK_FLAGS="-L/opt/rh/devtoolset-11/root/usr/lib64"
+    fi
 fi
 
 if [ x$SYS = "xAIX" ]; then
@@ -163,8 +168,8 @@ CFEngine Build Automation -- openssl -- development files
 %{prefix}/bin/openssl
 
 %dir %{prefix}/lib
-%{prefix}/lib/libssl.so.3
-%{prefix}/lib/libcrypto.so.3
+%{prefix}/lib/libssl.so.4
+%{prefix}/lib/libcrypto.so.4
 %{prefix}/ssl/openssl.cnf
 %{prefix}/ssl/ct_log_list.cnf
 %{prefix}/ssl/ct_log_list.cnf.dist
