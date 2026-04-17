@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
+set -ex
+# debug cf-remote troubles
+export CFBACKTRACE=1
 thisdir="$(dirname "$0")"
 
 # handle env cfengine_role
@@ -207,7 +210,7 @@ if ! /var/cfengine/bin/cf-agent -V 2>/dev/null; then
   else
     _VERSION=""
   fi
-  cf-remote --log-level info $_VERSION install --clients localhost || true
+  cf-remote --log-level debug $_VERSION install --clients localhost || true
 fi
 
 if [ ! -x /var/cfengine/bin/cf-agent ]; then
