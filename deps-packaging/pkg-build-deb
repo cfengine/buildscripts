@@ -64,8 +64,13 @@ echo "$SRCFILES" | while read srcfile opts; do
     mkdir -p "$TD"
     $UNCOMPRESS $srcfile | tar -C $TD -xf -
     mv $TD/*/* $PKGDIR
-    # Also move dot files, but don't fail if there are none
-    mv $TD/*/.* $PKGDIR || true
+    # Also move dot files (.gitignore, etc.), skipping . and ..
+    for _dotfile in $TD/*/.*; do
+      case "${_dotfile##*/}" in
+        .|..) continue ;;
+        *) mv "$_dotfile" "$PKGDIR" ;;
+      esac
+    done
     rm -r "$TD"
   fi
 done
