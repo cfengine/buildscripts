@@ -158,6 +158,7 @@ bundle agent cfengine_build_host_setup
 
     suse_15::
       "libopenssl-devel" -> { "ENT-12528" }
+        depends_on => { "suse-15-libopenssl-devel-requirements-met" },
         comment => "like redhat, suse 15+ needs to build with system openssl.";
 
     (redhat_8|centos_8|redhat_9|redhat_10).(yum_dnf_conf_ok)::
@@ -384,6 +385,11 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
       "zypper --non-interactive install --allow-downgrade ncurses-devel"
         comment => "Special case mentioned elsewhere in this policy. ncurses-devel requires a downgrade as of July 25 2025",
         contain => in_shell;
+      "zypper in --oldpackage libopenssl3-3.1.4-150600.5.45.1 libcurl4-8.14.1-150600.4.40.1 openssl-3-3.1.4-150600.5.45.1 openssl-3.1.4-150600.2.1 libopenssl3-3.1.4-150600.5.45.1"
+        comment => "suse 15.7 in AWS is weird, there is no repodata for 15.7 so we use 15.6 and openssl deps are messed up so we must downgrade to enable libopenssl-devel to install",
+        contain => in_shell,
+        handle => "suse-15-libopenssl-devel-requirements-met";
+
     (redhat_8|centos_8|redhat_9|redhat_10).(!have_perl_package_installed).(yum_dnf_conf_ok)::
       "yum install -y perl" contain => in_shell,
         classes => results( "bundle", "have_perl" ),
