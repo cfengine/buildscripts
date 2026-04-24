@@ -158,7 +158,7 @@ if grep -q suse /etc/os-release; then
   fi
 fi
 
-if [ ! -x /var/cfengine/cf-agent ]; then
+if [ ! -x /var/cfengine/bin/cf-agent ]; then
   if ! ls cfengine-masterfiles*tar.gz >/dev/null 2>&1; then
     echo "Installing cf-remote for possible package install and masterfiles download"
     # try pipx first for debian as pip won't work.
