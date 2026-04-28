@@ -27,7 +27,7 @@ rc_d_path()
 
 platform_service()
 {
-  if [ -x /bin/systemctl ]; then
+  if use_systemd; then
     /bin/systemctl "$2" "$1".service
   else
     `rc_d_path`/init.d/"$1" "$2"

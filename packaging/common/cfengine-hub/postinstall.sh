@@ -29,7 +29,7 @@ systemctl restart cfengine3"
   fi
 fi
 
-if [ -x /bin/systemctl ]; then
+if use_systemd; then
   # This is important in case any of the units have been replaced by the package
   # and we call them in the postinstall script.
   if ! /bin/systemctl daemon-reload; then
@@ -1072,7 +1072,7 @@ chmod g+rX "$PREFIX/httpd/php"
 # Register CFEngine initscript, if not yet.
 #
 if ! is_upgrade; then
-  if [ -x /bin/systemctl ]; then
+  if use_systemd; then
     # Reload systemd config to pick up newly installed units
     /bin/systemctl daemon-reload > /dev/null 2>&1
     # Enable cfengine3 service (starts all the other services)
