@@ -70,7 +70,10 @@ def main(labels_f_path, exotics_f_path, run_on_exotics, only_exotics):
     else:
         labels_to_run = all_labels
 
-    if len(labels_to_run) != 0:
+    if len(labels_to_run) == 0:
+        # if no labels are found we print true to be a no-op in an expression that likely includes other elements like no exotics or specific labels
+        print("true")
+    else:
         print("(", end="")
         labels_eqs = ('label == "%s"' % label for label in sorted(labels_to_run))
         print(" || \\\n ".join(labels_eqs) + ")")
