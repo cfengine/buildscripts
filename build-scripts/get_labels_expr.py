@@ -54,7 +54,10 @@ def main(labels_f_path, exotics_f_path, run_on_exotics, only_exotics):
     else:
         labels_to_run = all_labels
 
-    if len(labels_to_run) != 0:
+    if len(labels_to_run) == 0:
+        print("No exotics were found. Returning error code 42 to indicate this.", file=sys.stderr)
+        return 42
+    else:
         print("(", end="")
         labels_eqs = ('label == "%s"' % label for label in sorted(labels_to_run))
         print(" || \\\n ".join(labels_eqs) + ")")
