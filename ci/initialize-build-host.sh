@@ -11,11 +11,11 @@
 # 2. If $(pwd)/proxy-target.txt exists, it means this is a proxy host, and the
 #    real build machine is on the host specified by the login details inside
 #    that file. If the file does not exist, we are on the build slave itself.
-#    After figuring that stuff out, this script will run either on_proxy() or
-#    the rest of the original script that sourced this file, depending on
+#    After figuring that stuff out, the script will run the rest of the original
+#    script that sources this file, depending on
 #    whether we are on the proxy or build host, respectively. Note that commands
 #    that are specified *before* this script is sourced will run on both hosts,
-#    so make sure this is sourced early, but after on_proxy() is defined.
+#    so make sure this is sourced early.
 #
 # The script is expected to be sourced early in the init-script phase after
 # provisioning.
@@ -275,15 +275,6 @@ reset_nested_vm() {
 
 if [ -f $(pwd)/proxy-target.txt ]
 then
-    ret=0
-    on_proxy || ret=$?
-    # Failure to find a function returns 127, so check for that specifically,
-    # otherwise there was an error inside the function.
-    if [ $ret -ne 0 -a $ret -ne 127 ]
-    then
-        exit $ret
-    fi
-
     # --------------------------------------------------------------------------
     # Check target machine health.
     # --------------------------------------------------------------------------
