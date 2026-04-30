@@ -371,7 +371,10 @@ then
     # job section yet.
     if [ -n "$WORKSPACE" ]
     then
+        $RSH $login rm -rf "$WORKSPACE_REMOTE" || true
+        # if the user can't delete it, try sudo, if sudo isn't available, that's ok, we tried
         $RSH  $login  sudo rm -rf "$WORKSPACE_REMOTE" || true
+        $RSH $login ls "$WORKSPACE_REMOTE" # either user or sudo should have removed it, if not, let's fail, we don't want a dirty workspace
         $RSH  $login  mkdir -p "$WORKSPACE_REMOTE"
         $RSYNC -e "$RSH"    "$WORKSPACE"/  $login:"$WORKSPACE_REMOTE"/
     fi
