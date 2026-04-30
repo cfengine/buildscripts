@@ -11,11 +11,11 @@
 # 2. If $(pwd)/proxy-target.txt exists, it means this is a proxy host, and the
 #    real build machine is on the host specified by the login details inside
 #    that file. If the file does not exist, we are on the build slave itself.
-#    After figuring that stuff out, this script will run either on_proxy() or
-#    the rest of the original script that sourced this file, depending on
+#    After figuring that stuff out, the script will run the rest of the original
+#    script that sources this file, depending on
 #    whether we are on the proxy or build host, respectively. Note that commands
 #    that are specified *before* this script is sourced will run on both hosts,
-#    so make sure this is sourced early, but after on_proxy() is defined.
+#    so make sure this is sourced early.
 #
 # The script is expected to be sourced early in the init-script phase after
 # provisioning.
@@ -275,15 +275,6 @@ reset_nested_vm() {
 
 if [ -f $(pwd)/proxy-target.txt ]
 then
-    ret=0
-    on_proxy || ret=$?
-    # Failure to find a function returns 127, so check for that specifically,
-    # otherwise there was an error inside the function.
-    if [ $ret -ne 0 -a $ret -ne 127 ]
-    then
-        exit $ret
-    fi
-
     # --------------------------------------------------------------------------
     # Check target machine health.
     # --------------------------------------------------------------------------
@@ -424,17 +415,6 @@ then
     exit $ret
 elif [ -z "$INIT_BUILD_HOST_SUB_INVOKATION" ]
 then
-    # Add build-artifacts-cache to known hosts
-    KNOWN_HOSTS_FILE=~/.ssh/known_hosts
-    # if fgrep build-artifacts-cache.cloud.cfengine.com $KNOWN_HOSTS_FILE  2>/dev/null
-    # then
-    #     :
-    # else
-        echo "build-artifacts-cache.cloud.cfengine.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC6qcxCQgtubv9WEhrAyMEFFMLLEjirk0p0Ru+vATioEIyw7gBFfOWOp/dBfsF6fuiY1vt3IsBx4u1DkS4j8x7DjB8X2dIcBia2jt2D3sBdDFb/nc7ZnWfFf/E7dWoiF0WKvxZ62RwjyZuyz9TmL1d3jlIyuRimkhgwnuRAMyymJ5YbxvvfTH01OuGS/0pkqkLAxomRyJTv6qcGr1rOPd5FuySwOO5M/tGkajJppKC+8u/RCyWfgu1khrBmi6PevXTaoJ/lQyexexZK0HVsA5G1U/+ipO18DqaCCAnHvZ/AKt+yYmoe9RtLfx0T7DHinEV1yj4ynUj7EqudCrLOorg5 root@yoctobuild-sstate-cache"  > $KNOWN_HOSTS_FILE
-        # add openssl 3.x compatible host key as well
-        echo "build-artifacts-cache.cloud.cfengine.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINMJKl282VQSz4EMMypJjATu21A9SxQA1XoTslIOID16 root@yoctobuild-sstate-cache" >> $KNOWN_HOSTS_FILE
-    # fi
-
     # Reexecute script in order to be able to collect the return code, and
     # potentially stop the slave.
     rsync -czt "$0" $HOME/commands.sh
