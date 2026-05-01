@@ -26,3 +26,13 @@ fi
 
 mkdir -p ~/.ssh
 echo "build-artifacts-cache.cloud.cfengine.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGahpsY8Phk2+isBmuJQjjQVlh6BNL/Qetc14g26gowV" >> ~/.ssh/known_hosts
+
+# /etc/profile can contain tricky things, on suse for example it includes a call to tty which will fail in CI
+# so only source /etc/profile where we absolutely need it.
+if [ "$(uname)" = "HP-UX" ] || [ "$(uname)" = "SunOS" ]; then
+  if [ -f /etc/profile ]; then
+    # running on the proxied host or not we want to make sure local customizations are taken
+    # e.g. ent-14014: custom build of ssh needed for build-artifacts-cache needed and /etc/profile has PATH=/opt/craig/bin:$PATH
+    . /etc/profile
+  fi
+fi
