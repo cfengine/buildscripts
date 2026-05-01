@@ -72,6 +72,7 @@ set_github_status()
     return 0
 }
 
+# main() as it were, begin non-function definition section of script
 if broken_posix_shell >/dev/null 2>&1; then
     try_exec /usr/xpg4/bin/sh "$0" "$@"
     echo "No compatible shell script interpreter found."
@@ -87,14 +88,14 @@ then
     trap set_github_status EXIT
 fi
 
-# Make sure error detection and verbose output is on, if they aren't already.
-set -x -e
+# Make sure error detection is on, if it isn't already
+set -e
 
 
 echo "Current user: $USER"
 echo "IP information:"
-/sbin/ifconfig -a || true
-/sbin/ip addr || true
+command -v /sbin/ifconfig 2>/dev/null && /sbin/ifconfig -a || true
+command -v /sbin/ip 2>/dev/null && /sbin/ip addr || true
 
 
 RSYNC="rsync --delete -zrlpt -T /tmp"
@@ -371,7 +372,13 @@ then
     # job section yet.
     if [ -n "$WORKSPACE" ]
     then
+        $RSH $login rm -rf "$WORKSPACE_REMOTE" || true
+        # if the user can't delete it, try sudo, if sudo isn't available, that's ok, we tried
         $RSH  $login  sudo rm -rf "$WORKSPACE_REMOTE" || true
+        if $RSH $login ls "$WORKSPACE_REMOTE"; then
+            echo "$WORKSPACE_REMOTE is not removed on build host."
+            exit 2
+        fi
         $RSH  $login  mkdir -p "$WORKSPACE_REMOTE"
         $RSYNC -e "$RSH"    "$WORKSPACE"/  $login:"$WORKSPACE_REMOTE"/
     fi
