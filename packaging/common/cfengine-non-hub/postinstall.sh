@@ -78,7 +78,7 @@ case `os_type` in
       case `os_type` in
         redhat)
           if ! is_upgrade; then
-            chkconfig --add cfengine3
+            test -x /sbin/chkconfig && test -f /etc/init.d/cfengine3 && chkconfig --add cfengine3
           fi
           ;;
         debian)
