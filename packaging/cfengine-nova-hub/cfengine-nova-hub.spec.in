@@ -31,6 +31,7 @@ Requires: selinux-policy >= @@SELINUX_POLICY_VERSION@@
 %if %{?rhel}%{!?rhel:0} == 8
 Requires: libssl.so.1.1()(64bit) libssl.so.1.1(OPENSSL_1_1_0)(64bit) libssl.so.1.1(OPENSSL_1_1_1)(64bit)
 Requires: libcrypto.so.1.1()(64bit) libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)
+Requires: openssl
 %endif
 
 # We build against systems with the latest available dependencies such as OpenSSL.
@@ -40,6 +41,7 @@ Requires: libcrypto.so.1.1()(64bit) libcrypto.so.1.1(OPENSSL_1_1_0)(64bit)
 %if %{?rhel}%{!?rhel:0} > 8
 Requires: libcrypto.so.3()(64bit) libcrypto.so.3(OPENSSL_@@OPENSSL_VERSION@@)(64bit)
 Requires: libssl.so.3()(64bit) libssl.so.3(OPENSSL_@@OPENSSL_VERSION@@)(64bit)
+Requires: openssl
 %endif
 
 # cfbs/Build requires Python 3.5+ (not available on RHEL 6)
