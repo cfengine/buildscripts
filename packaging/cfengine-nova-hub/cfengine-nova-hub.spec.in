@@ -18,7 +18,7 @@ Requires: coreutils
 %if %{?rhel}%{!?rhel:0} >= 8
 Recommends: gzip
 %endif
-Requires(pre): /usr/sbin/useradd, /usr/sbin/userdel, /usr/bin/getent
+Requires(pre): /usr/sbin/useradd, /usr/sbin/userdel, /usr/bin/getent, /usr/bin/hostname
 Requires(post): /usr/sbin/usermod, /bin/sed
 
 # we require selinux-policy package version that matches or exceeds our build system version
