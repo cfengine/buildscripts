@@ -220,6 +220,7 @@ bundle agent cfengine_build_host_setup
       "missing_java" expression => not(fileexists("/usr/bin/java"));
 @if minimum_version(3.23)
       "insufficient_java_version" expression => version_compare( "${java_version}", "<", "21.0.0" );
+      "java_ok" expression => version_compare( "${java_version}", ">=", "21.0.0" );
 @endif
       "missing_groovy" expression => not(fileexists("/usr/bin/groovy"));
     (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
@@ -258,10 +259,12 @@ bundle agent cfengine_build_host_setup
       "sysctl kernel.core_pattern='|/lib/systemd/systemd-coredump %p %u %g %s %t %e'" -> { "ENT-12669" }
         comment => "Ensure that core_pattern is proper for systemd-coredump if coredumpctl is present.",
         contain => in_shell;
-    containers_host.missing_groovy::
+    containers_host.missing_groovy.java_ok::
       "sh $(this.promise_dirname)/linux-install-groovy.sh" contain => in_shell;
-    missing_java|insufficient_java_version::
-      "sh $(this.promise_dirname)/linux-install-jdk21.sh" contain => in_shell;
+    missing_java.insufficient_java_version::
+      "sh $(this.promise_dirname)/linux-install-jdk21.sh"
+        contain => in_shell,
+        classes => results( "bundle", "java" );
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9|redhat_10).(!have_development_tools).(yum_dnf_conf_ok)::
       "yum groups install -y 'Development Tools'" contain => in_shell;
     (redhat_8|centos_8).!have_fakeroot:: # special fakeroot, missing from _8 an d up?

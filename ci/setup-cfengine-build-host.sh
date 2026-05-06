@@ -245,7 +245,7 @@ cp -a masterfiles/* /var/cfengine/inputs/
     grep -i error: promises.log && exit 1
     /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a promises.log
     grep -i error: promises.log && exit 1
-    echo "Done evaluating policy. End of promies.log:"
+    echo "Done evaluating policy. End of promises.log:"
     tail promises.log
 )
 
