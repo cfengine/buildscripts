@@ -261,7 +261,7 @@ bundle agent cfengine_build_host_setup
         contain => in_shell;
     containers_host.missing_groovy.java_ok::
       "sh $(this.promise_dirname)/linux-install-groovy.sh" contain => in_shell;
-    missing_java.insufficient_java_version::
+    missing_java|insufficient_java_version::
       "sh $(this.promise_dirname)/linux-install-jdk21.sh"
         contain => in_shell,
         classes => results( "bundle", "java" );
