@@ -84,6 +84,7 @@ bundle agent cfengine_build_host_setup
       "autoconf-archive" comment => "Required to resolve the AX_PTHREAD macro";
 
     debian.containers_host:: # in jenkins, CONTAINER labeled nodes are capable of running container builds like valgrind-check and static-check
+      "unzip" comment => "linux-install-groovy.sh needs unzip to unpack the groovy distribution archive.";
       "buildah";
       "jq";
       "make";
