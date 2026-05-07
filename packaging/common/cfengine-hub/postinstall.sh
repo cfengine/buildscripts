@@ -1082,7 +1082,7 @@ if ! is_upgrade; then
   else
     case "`os_type`" in
       redhat)
-        chkconfig --add cfengine3
+        test -x /sbin/chkconfig && test -f /etc/init.d/cfengine3 && chkconfig --add cfengine3
         ;;
       debian)
         update-rc.d cfengine3 defaults
