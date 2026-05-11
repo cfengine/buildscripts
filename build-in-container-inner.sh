@@ -81,6 +81,11 @@ install_mission_portal_deps() (
         echo "Installing LDAP API PHP dependencies..."
         (cd "$BASEDIR/mission-portal/ldap" && php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs --prefer-dist)
     fi
+
+    # Composer falls back to git clone when GitHub's anonymous zipball
+    # rate limit is hit, leaving non-reproducible .git directories in the
+    # vendor tree. Strip them.
+    find "$BASEDIR/mission-portal" "$BASEDIR/nova/api/http" -type d -name .git -path '*/vendor/*' -exec rm -rf {} +
 )
 
 # === Step runner with failure reporting ===
