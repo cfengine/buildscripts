@@ -12,6 +12,8 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	patch -p1 < $(CURDIR)/0002-Honor-SOURCE_DATE_EPOCH-in-phar.patch
+
 	./configure --prefix=$(PREFIX)/httpd/php \
 --with-config-file-scan-dir=$(PREFIX)/httpd/php/lib \
 --without-apxs2 \

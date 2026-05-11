@@ -25,6 +25,8 @@ then
   patch -p1 < %{_topdir}/SOURCES/0001-Disable-fancy-intrinsics-stuff.patch
 fi
 
+patch -p1 < %{_topdir}/SOURCES/0002-Honor-SOURCE_DATE_EPOCH-in-phar.patch
+
 %if %{?rhel}%{!?rhel:0} == 8
 CFLAGS="-fPIE"
 LDFLAGS="-pie"
