@@ -40,6 +40,15 @@ for repo in $repos; do
     fi
 done
 
+# Pin embedded build timestamps so two builds of the same source produce
+# identical binaries. Honored by OpenSSL, Apache httpd, Postgres, Python
+# (.pyc mtimes), dpkg-buildpackage, and rpmbuild.
+if [ -z "$SOURCE_DATE_EPOCH" ]; then
+    SOURCE_DATE_EPOCH=$(git -C "$BASEDIR/core" log -1 --format=%ct)
+fi
+export SOURCE_DATE_EPOCH
+echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
+
 install_mission_portal_deps() (
     set -e
 
