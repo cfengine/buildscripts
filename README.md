@@ -155,12 +155,12 @@ We use the systems bundled SSL for these platforms.
 
 | CFEngine version                                    | 3.24.x | 3.27.x | master |
 | :-------------------------------------------------- | :----- | :----- | :----- |
-| [Apache](https://httpd.apache.org/)                 | 2.4.66 | 2.4.66 | 2.4.66 |
+| [Apache](https://httpd.apache.org/)                 | 2.4.67 | 2.4.67 | 2.4.66 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.54.0 | 2.54.0 | 2.53.0 |
-| [libexpat](https://libexpat.github.io/)             | 2.8.0  | 2.8.0  | 2.7.5  |
-| [PHP](https://php.net/)                             | 8.3.30 | 8.5.5  | 8.5.4  |
+| [libexpat](https://libexpat.github.io/)             | 2.8.1  | 2.8.1  | 2.7.5  |
+| [PHP](https://php.net/)                             | 8.3.31 | 8.5.6  | 8.5.4  |
 | [PostgreSQL](https://www.postgresql.org/)           | 16.13  | 18.3   | 18.3   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.69.0 | 1.68.1 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.4.2  | 3.4.2  | 3.4.1  |
