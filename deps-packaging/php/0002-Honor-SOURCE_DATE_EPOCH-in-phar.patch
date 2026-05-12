@@ -1,0 +1,94 @@
+From: Lars Erik Wik <lars.erik.wik@northern.tech>
+Subject: [PATCH] Honor SOURCE_DATE_EPOCH in phar timestamps
+
+Phar embeds wall-clock time(NULL) into every manifest entry, making
+phar.phar non-reproducible. Honor SOURCE_DATE_EPOCH (the standard
+reproducible-builds mechanism) when set; fall back to time(NULL).
+
+Signed-off-by: Lars Erik Wik <lars.erik.wik@northern.tech>
+---
+ ext/phar/phar.c          |  2 +-
+ ext/phar/phar_internal.h | 14 ++++++++++++++
+ ext/phar/tar.c           |  2 +-
+ ext/phar/util.c          |  2 +-
+ ext/phar/zip.c           |  2 +-
+ 5 files changed, 19 insertions(+), 3 deletions(-)
+
+diff --git a/ext/phar/phar.c b/ext/phar/phar.c
+--- a/ext/phar/phar.c
++++ b/ext/phar/phar.c
+@@ -2950,7 +2950,7 @@
+ 			4: metadata-len
+ 			+: metadata
+ 		*/
+-		mytime = time(NULL);
++		mytime = phar_source_date_epoch();
+ 		phar_set_32(entry_buffer, entry->uncompressed_filesize);
+ 		phar_set_32(entry_buffer+4, mytime);
+ 		phar_set_32(entry_buffer+8, entry->compressed_filesize);
+diff --git a/ext/phar/phar_internal.h b/ext/phar/phar_internal.h
+--- a/ext/phar/phar_internal.h
++++ b/ext/phar/phar_internal.h
+@@ -22,12 +22,26 @@
+ #endif
+
+ #include <time.h>
++#include <stdlib.h>
+ #include "php.h"
+ #include "tar.h"
+ #include "pharzip.h"
+ #include "zend_hash.h"
+ #include "ext/spl/spl_directory.h"
+
++/* Reproducible-builds: honor SOURCE_DATE_EPOCH when set, else wall-clock time. */
++static inline time_t phar_source_date_epoch(void) {
++	const char *epoch = getenv("SOURCE_DATE_EPOCH");
++	if (epoch && *epoch) {
++		char *end;
++		long long t = strtoll(epoch, &end, 10);
++		if (*end == '\0' && t >= 0) {
++			return (time_t)t;
++		}
++	}
++	return time(NULL);
++}
++
+ /* PHP_ because this is public information via MINFO */
+ #define PHP_PHAR_API_VERSION      "1.1.1"
+ /* x.y.z maps to 0xyz0 */
+diff --git a/ext/phar/tar.c b/ext/phar/tar.c
+--- a/ext/phar/tar.c
++++ b/ext/phar/tar.c
+@@ -977,7 +977,7 @@
+ 	char *buf, *signature, sigbuf[8];
+
+ 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
+-	entry.timestamp = time(NULL);
++	entry.timestamp = phar_source_date_epoch();
+ 	entry.is_modified = 1;
+ 	entry.is_crc_checked = 1;
+ 	entry.is_tar = 1;
+diff --git a/ext/phar/util.c b/ext/phar/util.c
+--- a/ext/phar/util.c
++++ b/ext/phar/util.c
+@@ -700,7 +700,7 @@
+
+ 	phar_add_virtual_dirs(phar, path, path_len);
+ 	etemp.is_modified = 1;
+-	etemp.timestamp = time(0);
++	etemp.timestamp = phar_source_date_epoch();
+ 	etemp.is_crc_checked = 1;
+ 	etemp.phar = phar;
+ 	etemp.filename = zend_string_init(path, path_len, false);
+diff --git a/ext/phar/zip.c b/ext/phar/zip.c
+--- a/ext/phar/zip.c
++++ b/ext/phar/zip.c
+@@ -1253,7 +1253,7 @@
+
+ 	pass.error = &temperr;
+ 	entry.flags = PHAR_ENT_PERM_DEF_FILE;
+-	entry.timestamp = time(NULL);
++	entry.timestamp = phar_source_date_epoch();
+ 	entry.is_modified = 1;
+ 	entry.is_zip = true;
+ 	entry.phar = phar;
