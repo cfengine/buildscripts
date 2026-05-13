@@ -1,7 +1,5 @@
 # which labels to run jenkins jobs on
 
-PACKAGES_HUB_x86_64_linux_debian_11
-PACKAGES_HUB_arm_64_linux_debian_11
 PACKAGES_HUB_x86_64_linux_debian_12
 PACKAGES_HUB_arm_64_linux_debian_12
 PACKAGES_HUB_x86_64_linux_debian_13
@@ -12,14 +10,11 @@ PACKAGES_HUB_x86_64_linux_redhat_9
 PACKAGES_HUB_x86_64_linux_redhat_10
 PACKAGES_HUB_arm_64_linux_redhat_10
 
-PACKAGES_HUB_x86_64_linux_ubuntu_20
 PACKAGES_HUB_x86_64_linux_ubuntu_22
 PACKAGES_HUB_arm_64_linux_ubuntu_22
 PACKAGES_HUB_x86_64_linux_ubuntu_24
 PACKAGES_HUB_arm_64_linux_ubuntu_24
 
-PACKAGES_x86_64_linux_debian_11
-PACKAGES_arm_64_linux_debian_11
 PACKAGES_x86_64_linux_debian_12
 PACKAGES_arm_64_linux_debian_12
 PACKAGES_x86_64_linux_debian_13
