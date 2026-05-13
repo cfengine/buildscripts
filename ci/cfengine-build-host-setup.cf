@@ -74,6 +74,7 @@ bundle agent cfengine_build_host_setup
 
     mingw_build_host::
       "mingw-w64";
+      "binfmt-support" comment => "update-binfmts command needed for build-scripts/package-msi script";
     mingw_build_host.have_i386_architecture::
       "wine:i386";
     (debian_10|debian_11).systemssl_build_host::
