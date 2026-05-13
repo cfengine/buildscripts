@@ -36,5 +36,12 @@
     "base_image": "debian:12",
     "base_image_sha": "sha256:85019db29298555fd1a5f4bb57673ae989414a9884117c75d7a3e1a6cce21688",
     "dockerfile": "Dockerfile.debian"
+  },
+  "debian-13": {
+    "image_name": "cfengine-builder-debian-13",
+    "image_version": "latest",
+    "base_image": "debian:13",
+    "base_image_sha": "sha256:e2d08da6f42ef4b09b165d55528a12727aeed8240dc9edf888e3ec07e10ef9da",
+    "dockerfile": "Dockerfile.debian"
   }
 }
