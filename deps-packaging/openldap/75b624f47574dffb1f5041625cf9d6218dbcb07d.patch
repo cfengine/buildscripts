@@ -1,0 +1,108 @@
+From 75b624f47574dffb1f5041625cf9d6218dbcb07d Mon Sep 17 00:00:00 2001
+From: Simon Pichugin <simon.pichugin@gmail.com>
+Date: Thu, 30 Apr 2026 16:57:27 -0700
+Subject: [PATCH] ITS#10498 libldap: more const-correctness for OpenSSL 4
+
+---
+ libraries/libldap/tls_o.c       | 20 ++++++++++----------
+ servers/slapd/overlays/autoca.c |  7 ++++++-
+ 2 files changed, 16 insertions(+), 11 deletions(-)
+
+diff --git a/libraries/libldap/tls_o.c b/libraries/libldap/tls_o.c
+index 428bc32c85..93a7070f81 100644
+--- a/libraries/libldap/tls_o.c
++++ b/libraries/libldap/tls_o.c
+@@ -198,8 +198,8 @@ tlso_ca_list( char * bundle, char * dir, X509 *cert, STACK_OF(X509_NAME) *ca_lis
+ 		ldap_charray_free( dirs );
+ 	}
+ 	if ( cert ) {
+-		X509_NAME *xn = X509_get_subject_name( cert );
+-		xn = X509_NAME_dup( xn );
++		const X509_NAME *cxn = X509_get_subject_name( cert );
++		X509_NAME *xn = X509_NAME_dup( cxn );
+ 		if ( xn && ca_list ) {
+ 			sk_X509_NAME_push( ca_list, xn );
+ 		}
+@@ -924,7 +924,7 @@ tlso_session_my_dn( tls_session *sess, struct berval *der_dn )
+ {
+ 	tlso_session *s = (tlso_session *)sess;
+ 	X509 *x;
+-	X509_NAME *xn;
++	const X509_NAME *xn;
+ 
+ 	x = SSL_get_certificate( s );
+ 
+@@ -961,7 +961,7 @@ tlso_session_peer_dn( tls_session *sess, struct berval *der_dn )
+ {
+ 	tlso_session *s = (tlso_session *)sess;
+ 	X509 *x = tlso_get_cert( s );
+-	X509_NAME *xn;
++	const X509_NAME *xn;
+ 
+ 	if ( !x )
+ 		return LDAP_INVALID_CREDENTIALS;
+@@ -1037,7 +1037,7 @@ tlso_session_chkhost( LDAP *ld, tls_session *sess, const char *name_in )
+ 	if (chkSAN) {
+ 	i = X509_get_ext_by_NID(x, NID_subject_alt_name, -1);
+ 	if (i >= 0) {
+-		X509_EXTENSION *ex;
++		const X509_EXTENSION *ex;
+ 		STACK_OF(GENERAL_NAME) *alt;
+ 
+ 		ex = X509_get_ext(x, i);
+@@ -1143,10 +1143,10 @@ tlso_session_chkhost( LDAP *ld, tls_session *sess, const char *name_in )
+ 	}
+ 
+ 	if (ret != LDAP_SUCCESS) {
+-		X509_NAME *xn;
+-		X509_NAME_ENTRY *ne;
++		const X509_NAME *xn;
++		const X509_NAME_ENTRY *ne;
+ 		ASN1_OBJECT *obj;
+-		ASN1_STRING *cn = NULL;
++		const ASN1_STRING *cn = NULL;
+ 		char *cnstr;
+ 		int cnlen;
+ 		int navas;
+@@ -1742,8 +1742,8 @@ tlso_verify_cb( int ok, X509_STORE_CTX *ctx )
+ 	X509 *cert;
+ 	int errnum;
+ 	int errdepth;
+-	X509_NAME *subject;
+-	X509_NAME *issuer;
++	const X509_NAME *subject;
++	const X509_NAME *issuer;
+ 	char *sname;
+ 	char *iname;
+ 	char *certerr = NULL;
+diff --git a/servers/slapd/overlays/autoca.c b/servers/slapd/overlays/autoca.c
+index 43761655d2..da978c3233 100644
+--- a/servers/slapd/overlays/autoca.c
++++ b/servers/slapd/overlays/autoca.c
+@@ -44,9 +44,13 @@
+ 
+ #if OPENSSL_VERSION_NUMBER >= 0x10100000
+ #include <openssl/rsa.h>
++#ifndef X509_get_notBefore
+ #define X509_get_notBefore(x)	X509_getm_notBefore(x)
++#endif
++#ifndef X509_get_notAfter
+ #define X509_get_notAfter(x)	X509_getm_notAfter(x)
+ #endif
++#endif
+ 
+ #if OPENSSL_VERSION_MAJOR >= 3
+ #define BN_pseudo_rand(bn, bits, top, bottom)	BN_rand(bn, bits, top, bottom)
+@@ -272,7 +276,8 @@ typedef struct genargs {
+ 
+ static int autoca_gencert( Operation *op, genargs *args )
+ {
+-	X509_NAME *subj_name, *issuer_name;
++	X509_NAME *subj_name;
++	const X509_NAME *issuer_name;
+ 	X509 *subj_cert;
+ 	struct berval derdn;
+ 	unsigned char *pp;
+-- 
+GitLab
+

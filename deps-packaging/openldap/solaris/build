@@ -8,6 +8,10 @@ OL=${BUILD_ROOT}/cfbuild-openldap${PREFIX}
 OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
 
 # Patch
+$PATCH -p1 < f3b49ffa10d93e841d00f05d9f56b88078acf235.patch
+$PATCH -p1 < a599597cb3cb6d36f888bffcbd0b010a644b92c5.patch
+$PATCH -p1 < 75b624f47574dffb1f5041625cf9d6218dbcb07d.patch
+$PATCH -p1 < a704373426e37fd7f4e4beb3be451b5555799517.patch
 
 # Configure
 
