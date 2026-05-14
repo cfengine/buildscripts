@@ -1,0 +1,40 @@
+From a704373426e37fd7f4e4beb3be451b5555799517 Mon Sep 17 00:00:00 2001
+From: Howard Chu <hyc@openldap.org>
+Date: Mon, 4 May 2026 15:35:20 +0100
+Subject: [PATCH] ITS#10498 libldap: silence a couple more warnings
+
+OpenSSL 3 and 4 differ on constness here, and 4 is self-inconsistent
+between getter and d2i. Discard the useless const qualifiers.
+---
+ libraries/libldap/tls_o.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/libraries/libldap/tls_o.c b/libraries/libldap/tls_o.c
+index 93a7070f81..4dd4ff5205 100644
+--- a/libraries/libldap/tls_o.c
++++ b/libraries/libldap/tls_o.c
+@@ -557,7 +557,7 @@ tlso_ctx_init( struct ldapoptions *lo, struct ldaptls *lt, int is_server, char *
+ 						if ( is_server ) {
+ 							STACK_OF(X509_NAME) *ca_list = SSL_CTX_get_client_CA_list( ctx );
+ 							if ( ca_list ) {
+-								X509_NAME *xn = X509_get_subject_name( cert );
++								X509_NAME *xn = (X509_NAME *)X509_get_subject_name( cert );
+ 								if ( xn )
+ 									xn = X509_NAME_dup( xn );
+ 								if ( xn )
+@@ -1037,10 +1037,10 @@ tlso_session_chkhost( LDAP *ld, tls_session *sess, const char *name_in )
+ 	if (chkSAN) {
+ 	i = X509_get_ext_by_NID(x, NID_subject_alt_name, -1);
+ 	if (i >= 0) {
+-		const X509_EXTENSION *ex;
++		X509_EXTENSION *ex;
+ 		STACK_OF(GENERAL_NAME) *alt;
+ 
+-		ex = X509_get_ext(x, i);
++		ex = (X509_EXTENSION *)X509_get_ext(x, i);
+ 		alt = X509V3_EXT_d2i(ex);
+ 		if (alt) {
+ 			int n, len2 = 0;
+-- 
+GitLab
+
