@@ -21,11 +21,10 @@ mkdir -p %{_builddir}
 
 %patch0 -p0
 
-# we don't bundle OpenSSL on RHEL 8 (and newer in the future)
-%if %{?rhel}%{!?rhel:0} > 7
-CPPFLAGS=-I%{buildprefix}/include:/usr/include
-%else
+%if 0%{?SYSTEM_SSL}
 CPPFLAGS=-I%{buildprefix}/include
+%else
+CPPFLAGS=-I%{buildprefix}/include:/usr/include
 %endif
 
 #

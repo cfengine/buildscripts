@@ -5,27 +5,24 @@
 
 # Autodect PROJECT if not set
 
-if [ x"$PROJECT" = x ]
-then
+if [ x"$PROJECT" = x ]; then
     case x"$JOB_NAME" in
-        *-community-*)   PROJECT=community;;
-        *-enterprise-*)  PROJECT=nova;;
-        *-hub-*)         PROJECT=nova;;
-        *-agent-*)       PROJECT=nova;;
+    *-community-*) PROJECT=community ;;
+    *-enterprise-*) PROJECT=nova ;;
+    *-hub-*) PROJECT=nova ;;
+    *-agent-*) PROJECT=nova ;;
     esac
 fi
 
 # If still not set, then either we are running outside Jenkins, or this
 # is not a main "build" type job (it could be the bootstrap job).
 # Do directory-based auto-detection.
-if [ x"$PROJECT" = x ]
-then
-   if [ -d $BASEDIR/nova ]
-   then
-       PROJECT=nova
-   else
-       PROJECT=community
-   fi
+if [ x"$PROJECT" = x ]; then
+    if [ -d $BASEDIR/nova ]; then
+        PROJECT=nova
+    else
+        PROJECT=community
+    fi
 fi
 
 export PROJECT
@@ -34,20 +31,9 @@ export PROJECT
 # When running manually, you can just export this variable.
 # It's a flag: if it's set to 1 - then we use system OpenSSL.
 # Otherwise, we build it.
-if [ x"$SYSTEM_SSL" = x ]
-then
-    # default to using cfengine openssl
-    SYSTEM_SSL=0
-    # We don't bundle OpenSSL on some redhat-derived systems due to incompatability with libpam and our openssl.
-    _OS_MAJOR_VERSION="$(echo "$OS_VERSION" | cut -d. -f1)"
-    if [ "$OS" = "rhel" ] && expr "$_OS_MAJOR_VERSION" ">=" "8" >/dev/null
-    then
-        SYSTEM_SSL=1
-    fi
-    if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]
-    then
-        if expr "$_OS_MAJOR_VERSION" ">=" "15"
-        then
+if [ -z "$SYSTEM_SSL" ]; then
+    if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]; then
+        if [ "$OS_VERSION_MAJOR" -ge "15" ]; then
             SYSTEM_SSL=1
         fi
     fi
@@ -120,11 +106,13 @@ esac
 
 var_append DEPS "$EMBEDDED_DB pcre2"
 
-if ! [ x"$SYSTEM_SSL" = x1 ]
-then
-  # FIXME: Why do we need zlib?
-  # ANSWER: Openssl uses it optionally, TODO DISABLE
-  var_append DEPS "zlib openssl"
+if [ "$SYSTEM_SSL" != 1 ]; then
+    # zlib is a compression library which is a dependency of OpenSSL.
+    # TODO: can we remove zlib dependency? (CFE-4013)
+    var_append DEPS "zlib"
+
+    # A toolkit for TLS
+    var_append DEPS "openssl"
 fi
 
 # libsasl needed for solaris

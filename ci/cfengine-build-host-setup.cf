@@ -133,7 +133,6 @@ bundle agent cfengine_build_host_setup
       "java-17-openjdk";
       "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
-      "openssl-devel";
 
     (redhat_9).(yum_dnf_conf_ok)::
       "perl-Sys-Hostname" comment => "Needed by __04_examples_outputs_check_outputs_cf";
