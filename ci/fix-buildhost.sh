@@ -36,3 +36,10 @@ if [ "$(uname)" = "HP-UX" ] || [ "$(uname)" = "SunOS" ]; then
     . /etc/profile
   fi
 fi
+# ENT-13750 we return to vendored openssl on rpm platforms so remove possibly installed development packages
+if command -v zypper >/dev/null 2>/dev/null; then
+  sudo zypper remove -y libopenssl-devel || true
+fi
+if command -v yum >/dev/null 2>/dev/null; then
+  sudo yum erase -y openssl-devel || true
+fi
