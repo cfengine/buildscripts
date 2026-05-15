@@ -148,8 +148,6 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [librsync](https://github.com/librsync/librsync/releases)                         | -      | -      | 2.3.4  |                          |
 | [leech](https://github.com/larsewi/leech/releases)                                | -      | -      | 0.2.0  |                          |
 
-**Note:** We don't package OpenSSL for RHEL >= 8 and SuSE >= 15.
-We use the systems bundled SSL for these platforms.
 
 ### Enterprise Hub dependencies
 
