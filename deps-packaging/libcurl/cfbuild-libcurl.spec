@@ -18,8 +18,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
 
-# we don't bundle OpenSSL on RHEL 8 & SUSE 15 (and newer in the future)
-%if %{?rhel}%{!?rhel:0} > 7 || %{?suse_version}%{!?suse_version:0} >= 1500
+%if 0%{?SYSTEM_SSL}
 %define ssl_prefix /usr
 %else
 %define ssl_prefix %{prefix}
