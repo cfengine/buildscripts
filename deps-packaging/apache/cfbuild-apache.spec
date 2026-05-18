@@ -7,8 +7,19 @@ Version: %{version}
 Release: 1
 Source0: httpd-%{apache_version}.tar.gz
 Source1: httpd.conf
-Patch0:  apachectl.patch
+Patch0: apachectl.patch
 Patch1: fixed-implicit-decl-gettid.patch
+
+# begin patches for openssl 4 support from https://github.com/apache/httpd/pull/642
+Patch2: 0001-Fix-OpenSSL-4.0-compatibility-and-test-that-in-CI.patch
+Patch3: 0002-CI-add-OpenSSL-build-binaries-to-PATH.patch
+Patch4: 0003-CI-test-OpenSSL-3.x-using-Apache-Test-trunk-to-pick-.patch
+Patch5: 0004-Part-merge-of-r1915513-to-make-the-travis_run_linux..patch
+Patch6: 0005-Part-merge-of-r1919524-from-trunk.patch
+Patch7: 0006-CI-The-OpenSSL-no-engine-config-option-is-redundant-.patch
+Patch8: 0007-Cherry-pick-from-0c9cd095ce9081fd225f0da7787419e80de.patch
+Patch9: 0008-CI-Try-to-fix-ab-failures-during-OpenSSL-ech-job-set.patch
+
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -22,8 +33,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n httpd-%{apache_version}
 
-%patch -P 0
-%patch -P 1 -p1
+%autopatch -p1
 
 CPPFLAGS=-I%{buildprefix}/include
 
