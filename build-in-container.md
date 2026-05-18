@@ -42,19 +42,19 @@ None of the above arguments are required for `--update`.
 
 ### Optional arguments
 
-| Option             | Default                          | Description                                                         |
-| ------------------ | -------------------------------- | ------------------------------------------------------------------- |
-| `--output-dir`     | `./output`                       | Where to write output packages                                      |
-| `--cache-dir`      | `~/.cache/cfengine/buildscripts` | Dependency cache directory                                          |
-| `--build-number`   | `1`                              | Build number for package versioning                                 |
-| `--version`        | auto                             | Override version string                                             |
-| `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache)         |
-| `--push-image`     |                                  | Build image and push to registry, then exit                         |
-| `--update`         |                                  | Fetch latest image versions from registry and update platforms.json |
+| Option             | Default                          | Description                                                                        |
+| ------------------ | -------------------------------- | ---------------------------------------------------------------------------------- |
+| `--output-dir`     | `./output`                       | Where to write output packages                                                     |
+| `--cache-dir`      | `~/.cache/cfengine/buildscripts` | Dependency cache directory                                                         |
+| `--build-number`   | `1`                              | Build number for package versioning                                                |
+| `--version`        | auto                             | Override version string                                                            |
+| `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache)                        |
+| `--push-image`     |                                  | Build image and push to registry, then exit                                        |
+| `--update`         |                                  | Fetch latest image versions from registry and update platforms.json                |
 | `--update-sha`     |                                  | Fetch latest base image manifest digests from Docker Hub and update platforms.json |
-| `--shell`          |                                  | Drop into a bash shell inside the container for debugging           |
-| `--list-platforms` |                                  | List available platforms and exit                                   |
-| `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                                     |
+| `--shell`          |                                  | Drop into a bash shell inside the container for debugging                          |
+| `--list-platforms` |                                  | List available platforms and exit                                                  |
+| `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                                                    |
 
 ## Supported platforms
 
@@ -82,7 +82,7 @@ The new entry in `platforms.json` needs:
   image is pushed.
 - `base_image_sha`: the Docker Hub manifest digest for the `base_image`.
   Don't copy this by hand — run `./build-in-container.py --update-sha
-  --platform <new-platform>` and it will fetch the current digest from
+--platform <new-platform>` and it will fetch the current digest from
   Docker Hub and write it into `platforms.json`.
 
 Adding a non-debian based platform (e.g.,
