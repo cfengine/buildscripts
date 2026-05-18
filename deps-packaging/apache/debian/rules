@@ -13,10 +13,20 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p0 < $(CURDIR)/apachectl.patch
+	patch -p1 < $(CURDIR)/apachectl.patch
 
 	# Fixed implicit declaration of GNU extension gettid() (See ENT-13084)
 	patch -p1 < $(CURDIR)/fixed-implicit-decl-gettid.patch
+
+	# apply patches for openssl 4 support from https://github.com/apache/httpd/pull/642
+	patch -p1 < $(CURDIR)/0001-Fix-OpenSSL-4.0-compatibility-and-test-that-in-CI.patch
+	patch -p1 < $(CURDIR)/0002-CI-add-OpenSSL-build-binaries-to-PATH.patch
+	patch -p1 < $(CURDIR)/0003-CI-test-OpenSSL-3.x-using-Apache-Test-trunk-to-pick-.patch
+	patch -p1 < $(CURDIR)/0004-Part-merge-of-r1915513-to-make-the-travis_run_linux..patch
+	patch -p1 < $(CURDIR)/0005-Part-merge-of-r1919524-from-trunk.patch
+	patch -p1 < $(CURDIR)/0006-CI-The-OpenSSL-no-engine-config-option-is-redundant-.patch
+	patch -p1 < $(CURDIR)/0007-Cherry-pick-from-0c9cd095ce9081fd225f0da7787419e80de.patch
+	patch -p1 < $(CURDIR)/0008-CI-Try-to-fix-ab-failures-during-OpenSSL-ech-job-set.patch
 
 	./configure \
 --prefix=$(PREFIX)/httpd \

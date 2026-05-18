@@ -146,7 +146,7 @@ for dep in $DEPS; do
         optimize=yes
         debugsym=no
         versuffix=+untested
-        tests=no
+        tests=yes
         ;;
     RELEASE)
         optimize=yes
