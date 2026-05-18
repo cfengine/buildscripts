@@ -64,8 +64,15 @@ None of the above arguments are required for `--update`.
 | `ubuntu-24` | `ubuntu:24.04` |
 | `debian-11` | `debian:11`    |
 | `debian-12` | `debian:12`    |
+| `debian-13` | `debian:13`    |
 
-Adding a new Debian/Ubuntu platform requires only a new entry in `platforms.json`.
+Adding a new Debian/Ubuntu platform requires a new entry in `platforms.json`
+and adding the platform name to the matrix in
+`.github/workflows/build-base-images.yml` so the weekly job builds and
+pushes its image to `ghcr.io`. Without the matrix entry, no image is ever
+pushed and the `update-base-images.yml` workflow will fail with a 403 from
+`ghcr.io` when it queries tags for the missing repository.
+
 Adding a non-debian based platform (e.g.,
 RHEL/CentOS) requires a new `container/Dockerfile.rhel` plus platform entries.
 
