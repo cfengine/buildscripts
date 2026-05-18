@@ -73,6 +73,17 @@ pushes its image to `ghcr.io`. Without the matrix entry, no image is ever
 pushed and the `update-base-images.yml` workflow will fail with a 403 from
 `ghcr.io` when it queries tags for the missing repository.
 
+The new entry in `platforms.json` needs:
+
+- `image_version`: set to `"latest"` as a placeholder. The
+  `update-base-images.yml` workflow (or `./build-in-container.py --update`
+  run locally) will replace it with the real ghcr.io tag after the first
+  image is pushed.
+- `base_image_sha`: the Docker Hub manifest digest for the `base_image`.
+  Don't copy this by hand — run `./build-in-container.py --update-sha
+  --platform <new-platform>` and it will fetch the current digest from
+  Docker Hub and write it into `platforms.json`.
+
 Adding a non-debian based platform (e.g.,
 RHEL/CentOS) requires a new `container/Dockerfile.rhel` plus platform entries.
 
