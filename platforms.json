@@ -13,7 +13,7 @@
     "image_name": "cfengine-builder-ubuntu-22",
     "image_version": "20260510T004446Z",
     "base_image": "ubuntu:22.04",
-    "base_image_sha": "sha256:962f6cadeae0ea6284001009daa4cc9a8c37e75d1f5191cf0eb83fe565b63dd7",
+    "base_image_sha": "sha256:4f838adc7181d9039ac795a7d0aba05a9bd9ecd480d294483169c5def983b64d",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-24": {
