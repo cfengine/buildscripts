@@ -51,6 +51,7 @@ None of the above arguments are required for `--update`.
 | `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache)         |
 | `--push-image`     |                                  | Build image and push to registry, then exit                         |
 | `--update`         |                                  | Fetch latest image versions from registry and update platforms.json |
+| `--update-sha`     |                                  | Fetch latest base image manifest digests from Docker Hub and update platforms.json |
 | `--shell`          |                                  | Drop into a bash shell inside the container for debugging           |
 | `--list-platforms` |                                  | List available platforms and exit                                   |
 | `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                                     |
@@ -168,6 +169,20 @@ The `update-base-images.yml` workflow automates this step. It runs weekly
 `./build-in-container.py --update` and opens a pull request with any
 `platforms.json` changes. This workflow requires `contents: write` and
 `pull-requests: write` permissions.
+
+The `base_image_sha` digests in `platforms.json` pin each platform to a
+specific Docker Hub manifest. To refresh them to the current digests:
+
+```bash
+# Update all platforms
+./build-in-container.py --update-sha
+
+# Update a single platform
+./build-in-container.py --update-sha --platform ubuntu-22
+```
+
+The `update-base-image-shas.yml` workflow automates this. It runs weekly
+(Monday at 01:00 UTC) and opens a pull request with any digest changes.
 
 The workflow authenticates to `ghcr.io` using the automatic `GITHUB_TOKEN`
 provided by GitHub Actions. For this to work:
