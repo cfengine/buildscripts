@@ -12,6 +12,9 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	patch -p1 < $(CURDIR)/0003-replace-ERR_NUM_ERRORS-with-PHP_OPENSSL_ERR_BUFFER_S.patch
+	patch -p1 < $(CURDIR)/0004-ASN1_STRING-has-been-made-opaque-in-OpenSSL-4.patch
+
 	./configure --prefix=$(PREFIX)/httpd/php \
 --with-config-file-scan-dir=$(PREFIX)/httpd/php/lib \
 --without-apxs2 \
