@@ -1,3 +1,16 @@
+# Drain in-flight cf-agent before stopping the cfengine3 umbrella: otherwise
+# a running cf-agent can re-trigger cf-php-fpm (which Wants=cf-postgres),
+# leaving cf-postgres in a Restart=always loop while the package is gone.
+if use_systemd; then
+  /bin/systemctl stop cf-execd.service >/dev/null 2>&1 || true
+  t=60
+  while [ $t -gt 0 ] && pgrep -x cf-agent >/dev/null 2>&1; do
+    sleep 1
+    t=$((t - 1))
+  done
+  pkill -KILL -x cf-agent >/dev/null 2>&1 || true
+fi
+
 cf_console platform_service cfengine3 stop
 if use_systemd && [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
   # When using systemd, the services are split in two, and although both will
