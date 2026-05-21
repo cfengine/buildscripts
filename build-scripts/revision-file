@@ -49,7 +49,10 @@ esac
 # Determine which repositories should be included
 _dirs="core buildscripts buildscripts/deps-packaging"
 if test "$NOVA" = "yes"; then
-    _dirs="$_dirs enterprise nova"
+    _dirs="$_dirs enterprise"
+fi
+if [ "$NOVA" = "yes" ] && [ "$ROLE" = "hub" ]; then
+    _dirs="$_dirs nova"
 fi
 
 for _dir in $_dirs; do
