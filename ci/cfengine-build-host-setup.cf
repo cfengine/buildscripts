@@ -21,10 +21,10 @@ bundle agent cfengine_build_host_setup
       "python3";
       "python-is-python3" comment => "pipeline hosts need plain old python for buildscripts/build-scripts/get_labels_expr.py";
 
-    debian_13|ubuntu_25::
+    debian_13|ubuntu_25|ubuntu_26::
       "ntpsec";
 
-    debian.(!debian_13.!ubuntu_25)::
+    debian.(!debian_13.!ubuntu_25.!ubuntu_26)::
       "ntp";
 
     debian|ubuntu::
