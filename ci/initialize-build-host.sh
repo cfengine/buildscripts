@@ -101,6 +101,29 @@ command -v /sbin/ip 2>/dev/null && /sbin/ip addr || true
 RSYNC="rsync --delete -zrlpt -T /tmp"
 RSH="ssh -o BatchMode=yes"
 
+# Retry a command up to 5 times with a 10 second pause between attempts.
+# Used for the early proxy-target setup commands (rsync/ssh) where a brief
+# network blip to an exotic build host should not fail the entire build.
+try_run() {
+    max_tries=5
+    i=1
+    ret=0
+    while [ "$i" -le "$max_tries" ]; do
+        ret=0
+        "$@" || ret=$?
+        if [ "$ret" -eq 0 ]; then
+            return 0
+        fi
+        if [ "$i" -lt "$max_tries" ]; then
+            echo "try_run: attempt $i/$max_tries failed (exit $ret) for: $*; retrying in 10s..." >&2
+            sleep 10
+        fi
+        i=$((i + 1))
+    done
+    echo "try_run: command failed after $max_tries attempts: $*" >&2
+    return "$ret"
+}
+
 # Support launching scripts that were initially launched under bash.
 if [ -n "$BASH_VERSION" ]
 then
@@ -304,7 +327,7 @@ then
     # --------------------------------------------------------------------------
 
     # Put our currently executing script on the proxy target.
-    $RSYNC -e "$RSH"   "$0"  $login:commands-from-proxy.sh
+    try_run $RSYNC -e "$RSH"   "$0"  $login:commands-from-proxy.sh
 
     # And the important parts of the environment.
     for var in \
@@ -356,7 +379,7 @@ then
     echo "PROXIED=1" >> env.sh
     echo "export PROXIED" >> env.sh
 
-    $RSYNC -e "$RSH"    env.sh  $login:.
+    try_run $RSYNC -e "$RSH"    env.sh  $login:.
 
     # And the helper tools, including this script.
     # Note that only provisioned hosts will have this in HOME, since they use
@@ -365,7 +388,7 @@ then
     # instead, synced separately below.
     if [ -d $HOME/mender-qa ]
     then
-        $RSYNC -e "$RSH"    $HOME/mender-qa  $login:.
+        try_run $RSYNC -e "$RSH"    $HOME/mender-qa  $login:.
     fi
 
     # Copy the workspace. If there is no workspace defined, we are not in the
@@ -379,8 +402,8 @@ then
             echo "$WORKSPACE_REMOTE is not removed on build host."
             exit 2
         fi
-        $RSH  $login  mkdir -p "$WORKSPACE_REMOTE"
-        $RSYNC -e "$RSH"    "$WORKSPACE"/  $login:"$WORKSPACE_REMOTE"/
+        try_run $RSH  $login  mkdir -p "$WORKSPACE_REMOTE"
+        try_run $RSYNC -e "$RSH"    "$WORKSPACE"/  $login:"$WORKSPACE_REMOTE"/
     fi
 
     # --------------------------------------------------------------------------
