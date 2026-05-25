@@ -1,4 +1,4 @@
-%define rsync_version 3.4.2
+%define rsync_version 3.4.3
 
 Summary: CFEngine Build Automation -- rsync
 Name: cfbuild-rsync
