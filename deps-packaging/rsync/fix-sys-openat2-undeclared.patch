@@ -1,0 +1,16 @@
+Fall back to defining SYS_openat2 when the running kernel-headers don't
+export it from <asm/unistd.h>. See https://github.com/RsyncProject/rsync/issues/900.
+The syscall number 437 is correct for all Linux architectures.
+
+--- a/syscall.c
++++ b/syscall.c
+@@ -37,6 +37,9 @@
+ #ifdef __linux__
+ #include <sys/syscall.h>
+ #include <linux/openat2.h>
++#ifndef SYS_openat2
++#define SYS_openat2 437
++#endif
+ #endif
+
+ #include "ifuncs.h"
