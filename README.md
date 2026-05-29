@@ -163,7 +163,7 @@ We use the systems bundled SSL for these platforms.
 | [PHP](https://php.net/)                             | 8.3.31 | 8.5.6  | 8.5.4  |
 | [PostgreSQL](https://www.postgresql.org/)           | 16.14  | 18.4   | 18.3   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.69.0 | 1.68.1 |
-| [rsync](https://download.samba.org/pub/rsync/)      | 3.4.2  | 3.4.2  | 3.4.1  |
+| [rsync](https://download.samba.org/pub/rsync/)      | 3.4.2  | 3.4.3  | 3.4.1  |
 
 - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
