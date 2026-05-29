@@ -14,3 +14,11 @@ if [ "$(uname)" = "HP-UX" ] || [ "$(uname)" = "SunOS" ]; then
     . /etc/profile
   fi
 fi
+
+# while ENT-13750 is in progress we need to ensure that OTHER builds include openssl devel packages on redhat-based platforms
+if command -v zypper >/dev/null 2>/dev/null; then
+  sudo zypper install -y libopenssl-devel || true
+fi
+if command -v yum >/dev/null 2>/dev/null; then
+  sudo yum install -y openssl-devel || true
+fi
