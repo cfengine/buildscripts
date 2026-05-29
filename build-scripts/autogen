@@ -43,8 +43,11 @@ esac
 
 # Determine which repositories should be included
 projects="core masterfiles"
-if test "$NOVA" = "yes"; then
-    projects="$projects enterprise nova"
+if [ "$NOVA" = "yes" ]; then
+    projects="$projects enterprise"
+fi
+if [ "$NOVA" = "yes" ] && [ -d "$BASEDIR/nova" ]; then
+    projects="$projects nova"
 fi
 
 # Fail early by checking that the required repositories are present before

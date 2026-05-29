@@ -43,8 +43,11 @@ esac
 
 # Determine which repositories to compare versions between
 projects="core masterfiles"
-if test "$NOVA" = "yes"; then
-    projects="$projects enterprise nova"
+if [ "$NOVA" = "yes" ]; then
+    projects="$projects enterprise"
+fi
+if [ "$NOVA" = "yes" ] && [ -d "$BASEDIR/nova" ]; then
+    projects="$projects nova"
 fi
 
 # Compare versions between projects (yes this code also compares each project to

@@ -15,6 +15,11 @@ build-stamp:
 	patch -p0 < mingw_build_fixes.patch
 	ln -s $(PREFIX)/bin/libgnurx-0.dll .
 
+	patch -p1 < f3b49ffa10d93e841d00f05d9f56b88078acf235.patch
+	patch -p1 < a599597cb3cb6d36f888bffcbd0b010a644b92c5.patch
+	patch -p1 < 75b624f47574dffb1f5041625cf9d6218dbcb07d.patch
+	patch -p1 < a704373426e37fd7f4e4beb3be451b5555799517.patch
+
 	# Configure is unable to test memcmp for cross-compilation
 	# getaddrinfo/getnameinfo are broken in MinGW as well as socklen in2.4.36 work around it
 	ac_cv_type_socklen_t=yes \

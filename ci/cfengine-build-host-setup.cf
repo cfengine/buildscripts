@@ -21,10 +21,10 @@ bundle agent cfengine_build_host_setup
       "python3";
       "python-is-python3" comment => "pipeline hosts need plain old python for buildscripts/build-scripts/get_labels_expr.py";
 
-    debian_13|ubuntu_25::
+    debian_13|ubuntu_25|ubuntu_26::
       "ntpsec";
 
-    debian.(!debian_13.!ubuntu_25)::
+    debian.(!debian_13.!ubuntu_25.!ubuntu_26)::
       "ntp";
 
     debian|ubuntu::
@@ -162,16 +162,12 @@ bundle agent cfengine_build_host_setup
       "platform-python-devel" -> { "cfbs shebang", "ENT-11338" }
         comment => "py3_shebang_fix macro needs /usr/bin/pathfix.py from platform-python-devel package";
 
-    suse_15::
-      "libopenssl-devel" -> { "ENT-12528" }
-        comment => "like redhat, suse 15+ needs to build with system openssl.";
 
     (redhat_8|centos_8|redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "java-1.8.0-openjdk-headless" package_policy => "delete",
         comment => "Installing Development Tools includes this jdk1.8 which we do not want.";
       "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
-      "openssl-devel";
 
     (redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "perl-Sys-Hostname" comment => "Needed by __04_examples_outputs_check_outputs_cf";
@@ -345,6 +341,7 @@ findtime = 600",
         comment => "Comment out insecure SSH auth directives in sshd_config and drop-ins";
       "/etc/ssh/sshd_config"
         edit_line => prepend_if_no_line("$(sshd_hardening_directives) no"),
+        if => fileexists("/etc/ssh/sshd_config"),
         classes => if_repaired("sshd_hardened"),
         comment => "Ensure SSH hardening directives are at the top of sshd_config, before any Include";
 
