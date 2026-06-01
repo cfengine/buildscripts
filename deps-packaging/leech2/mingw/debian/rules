@@ -1,0 +1,57 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+TARGET=x86_64-pc-windows-gnu
+
+# Use the system-wide Rust toolchain installed by the build host setup.
+export RUSTUP_HOME = /opt/rust
+export PATH := /opt/rust/bin:$(PATH)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	cargo build --release --target $(TARGET)
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib
+
+	install -m 755 target/$(TARGET)/release/leech2.dll $(CURDIR)/debian/tmp$(PREFIX)/bin/
+	install -m 755 target/$(TARGET)/release/lch.exe $(CURDIR)/debian/tmp$(PREFIX)/bin/
+	install -m 644 include/leech2.h $(CURDIR)/debian/tmp$(PREFIX)/include/
+
+	# Import library for the DLL, needed to link with -lleech2
+	install -m 644 target/$(TARGET)/release/libleech2.dll.a $(CURDIR)/debian/tmp$(PREFIX)/lib/
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

@@ -42,7 +42,7 @@ P=$BUILDPREFIX
 
 ARGS="--prefix=$P --libdir=$P/lib --with-workdir=$P --sysconfdir=/etc --with-openssl=$P --with-pcre2=$P --with-librsync=$P --with-init-script --with-lmdb=$P"
 
-for dep in ldap libxml2 libyaml librsync leech libacl libvirt libcurl; do
+for dep in ldap libxml2 libyaml librsync leech2 libacl libvirt libcurl; do
     case "$DEPS" in
     *"$dep"*)
         var_append ARGS "--with-$dep=$P"

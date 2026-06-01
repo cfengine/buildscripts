@@ -35,6 +35,8 @@
 /var/cfengine/lib/liblmdb.so
 /var/cfengine/lib/libpq.so
 /var/cfengine/lib/libecpg.so
+/var/cfengine/lib/libleech2.so
+/var/cfengine/bin/lch
 /var/cfengine/lib/cfengine-*.so
 /var/cfengine/lib/apr-util-1
 /var/cfengine/lib/git-core

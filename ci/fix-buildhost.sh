@@ -49,14 +49,14 @@ fi
 # not-yet-reimaged hosts (and branches that change these deps) get what they
 # need without a reimage. Each call is guarded by an already-installed check,
 # and gated to the same platforms as the policy (ubuntu>=20, debian>=12,
-# rhel/centos>=8).
+# rhel/centos>=7).
 if [ -f /etc/os-release ]; then
   . /etc/os-release
   os_major="${VERSION_ID%%.*}"
   case "$ID" in
     ubuntu) min_major=20 ;;
     debian) min_major=12 ;;
-    rhel | centos) min_major=8 ;;
+    rhel | centos) min_major=7 ;;
     *) min_major="" ;;
   esac
   if [ -n "$min_major" ] && [ "${os_major:-0}" -ge "$min_major" ]; then

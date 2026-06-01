@@ -96,6 +96,10 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False):
 
     cmd.extend(["--network", "host"])
 
+    # Expose ci/ as a named build context so the Dockerfile can COPY --from=ci
+    # the shared toolchain installers without widening the main build context.
+    cmd.extend(["--build-context", f"ci={script_dir / 'ci'}"])
+
     # Build context is the container/ directory
     cmd.append(str(script_dir / "container"))
 

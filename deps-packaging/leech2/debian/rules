@@ -1,0 +1,64 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+VERSION=$(shell sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -1)
+
+# Use the system-wide Rust toolchain installed by the build host setup.
+export RUSTUP_HOME = /opt/rust
+export PATH := /opt/rust/bin:$(PATH)
+
+# Embed an rpath of $(PREFIX)/lib in libleech2.so so it resolves co-bundled
+# CFEngine libraries at runtime, matching the other bundled deps (enterprise's
+# rpath_test.sh requires every /var/cfengine/lib/lib*.so to carry this rpath).
+export RUSTFLAGS = -C link-arg=-Wl,-rpath,$(PREFIX)/lib
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	cargo build --release
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/lib/pkgconfig
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/include
+
+	install -m 755 target/release/libleech2.so $(CURDIR)/debian/tmp$(PREFIX)/lib/
+	install -m 755 target/release/lch $(CURDIR)/debian/tmp$(PREFIX)/bin/
+	install -m 644 include/leech2.h $(CURDIR)/debian/tmp$(PREFIX)/include/
+
+	sed -e 's|^prefix=.*|prefix=$(PREFIX)|' \
+	    -e 's|@LIBDIR@|lib|' \
+	    -e 's|@VERSION@|$(VERSION)|' \
+	    leech2.pc.in > $(CURDIR)/debian/tmp$(PREFIX)/lib/pkgconfig/leech2.pc
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

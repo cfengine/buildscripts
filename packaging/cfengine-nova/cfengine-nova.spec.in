@@ -132,6 +132,8 @@ exit 0
 %dir %prefix/lib
 %prefix/lib/lib*.so*
 %prefix/lib/cfengine-enterprise.so
+# leech2 CLI
+%prefix/bin/lch
 # Auxiliary programs
 %prefix/bin/rpmvercmp
 # LMDB utilities

@@ -269,7 +269,7 @@ bundle agent cfengine_build_host_setup
         expression => not(fileexists("/etc/cfengine-in-container.flag")),
         comment => "We use an explicit flag file that we control to avoid ambiguity about whether we are in a container or not.";
 
-    # Rust is build dependency for leech2 (gate on ubuntu>=20, debian>=12, redhat>=8)
+    # Rust is build dependency for leech2 (gate on ubuntu>=20, debian>=12, redhat>=7)
     ubuntu::
       "leech2_build_toolchain_host"
         expression => version_compare("$(sys.os_version_major)", ">=", "20");
@@ -280,7 +280,7 @@ bundle agent cfengine_build_host_setup
 
     (redhat|centos)::
       "leech2_build_toolchain_host"
-        expression => version_compare("$(sys.os_version_major)", ">=", "8");
+        expression => version_compare("$(sys.os_version_major)", ">=", "7");
 
     any::
       "have_rust"
