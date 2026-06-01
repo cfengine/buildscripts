@@ -15,7 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: sudo apt install shellcheck
-      - name: Lint sources with shellcheck
-        run: |
-          ./ci/lint.sh
+        run: sudo apt install shellcheck pipx && pipx install cfengine
+      - name: Lint files with shellcheck and CFEngine CLI
+        run: ./ci/lint.sh
