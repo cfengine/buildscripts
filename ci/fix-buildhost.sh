@@ -43,3 +43,12 @@ fi
 if command -v yum >/dev/null 2>/dev/null; then
   sudo yum erase -y openssl-devel || true
 fi
+
+# ENT-11586: provision the build host here, in the testing-pr job, instead of in
+# the Amazon EC2 init script, so failures are visible in the build log and fail
+# the build. Run on every build (setup is idempotent) so a PR can change build
+# host setup and a later build reverts it. setup-cfengine-build-host.sh is
+# Linux-only and must run as root; exotic hosts are provisioned out-of-band.
+if [ "$(uname)" = "Linux" ]; then
+  sudo "$my_dir"/setup-cfengine-build-host.sh
+fi
