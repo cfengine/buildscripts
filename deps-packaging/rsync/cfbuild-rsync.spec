@@ -6,6 +6,7 @@ Version: %{version}
 Release: 1
 Source0: rsync-%{rsync_version}.tar.gz
 Patch0:  fix-sys-openat2-undeclared.patch
+Patch1:  fix-missing-openat2-header.patch
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -19,7 +20,13 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n rsync-%{rsync_version}
 
-%patch -P 0 -p1
+# RHEL/CentOS 7's kernel-headers lack <linux/openat2.h>; inline the header
+# there. Other platforms only need the SYS_openat2 fallback.
+if { [ "$OS" = rhel ] || [ "$OS" = centos ]; } && [ "$OS_VERSION_MAJOR" = 7 ]; then
+    patch -p1 < %{_sourcedir}/fix-missing-openat2-header.patch
+else
+    patch -p1 < %{_sourcedir}/fix-sys-openat2-undeclared.patch
+fi
 
 # liblz4, libxxhash, libzstd, and libssl give rsync extra compression
 # algorithms, extra checksum algorithms, and allow use of openssl's crypto lib

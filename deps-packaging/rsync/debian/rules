@@ -12,7 +12,13 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	patch -p1 < $(CURDIR)/fix-sys-openat2-undeclared.patch
+	# Ubuntu 20.04's kernel-headers lack <linux/openat2.h>; inline the
+	# header there. Other platforms only need the SYS_openat2 fallback.
+	if [ "$$OS" = ubuntu ] && [ "$$OS_VERSION_MAJOR" = 20 ]; then \
+		patch -p1 < $(CURDIR)/fix-missing-openat2-header.patch; \
+	else \
+		patch -p1 < $(CURDIR)/fix-sys-openat2-undeclared.patch; \
+	fi
 
 	# liblz4, libxxhash, libzstd, and libssl give rsync extra compression
 	# algorithms, extra checksum algorithms, and allow use of openssl's crypto
