@@ -9,3 +9,6 @@ shellcheck_dirs build-scripts/
 
 # some dirs are "dirty" aka need some work so don't fail on those yet
 shellcheck_dirs ci/ packaging/ || true
+
+cfengine format --check
+cfengine lint --strict no ./
