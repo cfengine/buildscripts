@@ -474,7 +474,7 @@ def main():
         packages = (
             list(output_dir.glob("*.deb"))
             + list(output_dir.glob("*.rpm"))
-            + list(output_dir.glob("*.pkg.tar.gz"))
+            + list(output_dir.glob("*.tar.gz"))
         )
         if packages:
             log.info("Output packages:")
