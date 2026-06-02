@@ -17,9 +17,11 @@ RUN apt-get update && apt-get install -y ${NCURSES_PKGS} \
     && rm -rf /var/lib/apt/lists/*
 
 # Hub build tools: Node.js 20 LTS (system nodejs is too old for modern npm
-# packages that use the node: protocol), PHP, and Composer
+# packages that use the node: protocol), PHP, and Composer.
+# php-zip lets Composer extract --prefer-dist zip archives natively instead
+# of falling back to git clones (which leave non-reproducible .git dirs).
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs php-cli \
+    && apt-get install -y nodejs php-cli php-zip \
     && rm -rf /var/lib/apt/lists/*
 RUN npm install -g less
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer.phar

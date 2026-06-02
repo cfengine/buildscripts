@@ -88,6 +88,23 @@ install_mission_portal_deps() (
     find "$BASEDIR/mission-portal" "$BASEDIR/nova/api/http" -type d -name .git -path '*/vendor/*' -exec rm -rf {} +
 )
 
+# Build the masterfiles tarballs, mirroring build-scripts/bootstrap-tarballs.
+# Produces both the source tarball ("make dist") and the package tarball
+# ("make tar-package", files laid out as installed under prefix) and drops
+# them in /output alongside the platform packages.
+build_masterfiles_tarballs() (
+    set -e
+
+    cd "$BASEDIR/masterfiles"
+    rm -f cfengine-masterfiles*.tar.gz
+    # Configure so the dist targets work, matching bootstrap-tarballs (no args).
+    ./configure
+    make dist        # source tarball:  cfengine-masterfiles-<version>.tar.gz
+    make tar-package # package tarball: cfengine-masterfiles-<version>.pkg.tar.gz
+    mv cfengine-masterfiles*.tar.gz /output/
+    make distclean
+)
+
 # === Step runner with failure reporting ===
 # Disable set -e so we can capture exit codes and report which step failed.
 set +e
@@ -107,12 +124,15 @@ run_step() {
 # === Build steps ===
 run_step "01-autogen" "$BASEDIR/buildscripts/build-scripts/autogen"
 run_step "02-install-dependencies" "$BASEDIR/buildscripts/build-scripts/install-dependencies"
-if [ "$EXPLICIT_ROLE" = "hub" ]; then
+# Mission Portal is an Enterprise/nova-only component; its sources are only
+# synced when PROJECT=nova. Skip this step for community hubs.
+if [ "$PROJECT" = "nova" ] && [ "$EXPLICIT_ROLE" = "hub" ]; then
     run_step "03-mission-portal-deps" install_mission_portal_deps
 fi
 run_step "04-configure" "$BASEDIR/buildscripts/build-scripts/configure"
 run_step "05-compile" "$BASEDIR/buildscripts/build-scripts/compile"
 run_step "06-package" "$BASEDIR/buildscripts/build-scripts/package"
+run_step "07-masterfiles-tarballs" build_masterfiles_tarballs
 
 # === Copy output packages ===
 # Packages are created under $BASEDIR/<project>/ by dpkg-buildpackage / rpmbuild.
