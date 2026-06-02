@@ -33,8 +33,9 @@ install_protobuf() {
   cd -
 }
 
-if [ "$(whoami)" = "root" ]; then
-  install_protobuf
-else
-  sudo bash -c install_protobuf
+# Re-exec under sudo when not root (e.g. when sourced from fix-buildhost.sh as
+# the build user).
+if [ "$(id -u)" -ne 0 ]; then
+  exec sudo bash "$0"
 fi
+install_protobuf

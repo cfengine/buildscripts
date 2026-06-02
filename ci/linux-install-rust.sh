@@ -93,8 +93,9 @@ EOF
   chmod -R a+rX "$prefix"
 }
 
-if [ "$(whoami)" = "root" ]; then
-  install_rust "$@"
-else
-  sudo bash -c install_rust
+# Re-exec under sudo when not root (e.g. when sourced from fix-buildhost.sh as
+# the build user), preserving any cross-compilation target arguments.
+if [ "$(id -u)" -ne 0 ]; then
+  exec sudo bash "$0" "$@"
 fi
+install_rust "$@"
