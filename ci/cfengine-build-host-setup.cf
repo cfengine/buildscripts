@@ -269,6 +269,26 @@ bundle agent cfengine_build_host_setup
         expression => not(fileexists("/etc/cfengine-in-container.flag")),
         comment => "We use an explicit flag file that we control to avoid ambiguity about whether we are in a container or not.";
 
+    # Rust is build dependency for leech2 (gate on ubuntu>=20, debian>=12, redhat>=8)
+    ubuntu::
+      "leech2_build_toolchain_host"
+        expression => version_compare("$(sys.os_version_major)", ">=", "20");
+
+    debian::
+      "leech2_build_toolchain_host"
+        expression => version_compare("$(sys.os_version_major)", ">=", "12");
+
+    (redhat|centos)::
+      "leech2_build_toolchain_host"
+        expression => version_compare("$(sys.os_version_major)", ">=", "8");
+
+    any::
+      "have_rust"
+        expression => fileexists("/opt/rust/bin/rustc");
+
+      "have_protoc"
+        expression => fileexists("/usr/local/bin/protoc");
+
     linux::
       "have_tmp_mount"
         expression => returnszero("mount | grep '/tmp'", "useshell");
@@ -372,6 +392,22 @@ bundle agent cfengine_build_host_setup
       "sh $(this.promise_dirname)/linux-install-jdk21.sh"
         contain => in_shell,
         classes => results("bundle", "java");
+
+    # leech2 build toolchain: protoc and the Rust toolchain. Both installers
+    # pin a version and verify the SHA256 checksum of the downloaded tarball.
+    leech2_build_toolchain_host.!have_protoc::
+      "sh $(this.promise_dirname)/linux-install-protobuf.sh"
+        contain => in_shell,
+        comment => "Install pinned protoc; required to build the cargo-based leech2 dependency.";
+
+    # Linux builds are native, so the installer only adds the host's own Linux
+    # std. Windows is the only cross-compilation target, and only MinGW build
+    # hosts cross-compile it, so we pass that target there alone.
+    leech2_build_toolchain_host.!have_rust::
+      "sh $(this.promise_dirname)/linux-install-rust.sh"
+        args => ifelse("mingw_build_host", "x86_64-pc-windows-gnu", ""),
+        contain => in_shell,
+        comment => "Install the Rust toolchain system-wide under /opt/rust for building the cargo-based leech2 dependency.";
 
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9|redhat_10).(!have_development_tools).(yum_dnf_conf_ok)::
       "yum groups install -y 'Development Tools'" contain => in_shell;
