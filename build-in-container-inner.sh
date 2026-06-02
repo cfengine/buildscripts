@@ -124,7 +124,9 @@ run_step() {
 # === Build steps ===
 run_step "01-autogen" "$BASEDIR/buildscripts/build-scripts/autogen"
 run_step "02-install-dependencies" "$BASEDIR/buildscripts/build-scripts/install-dependencies"
-if [ "$EXPLICIT_ROLE" = "hub" ]; then
+# Mission Portal is an Enterprise/nova-only component; its sources are only
+# synced when PROJECT=nova. Skip this step for community hubs.
+if [ "$PROJECT" = "nova" ] && [ "$EXPLICIT_ROLE" = "hub" ]; then
     run_step "03-mission-portal-deps" install_mission_portal_deps
 fi
 run_step "04-configure" "$BASEDIR/buildscripts/build-scripts/configure"
