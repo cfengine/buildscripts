@@ -64,6 +64,16 @@ def parse_args():
         action="store_true",
         help="update SDK 21 on build hosts (needed by Jenkins)",
     )
+    parser.add_argument(
+        "--rust",
+        action="store_true",
+        help="update the Rust toolchain on build hosts (needed to build leech2)",
+    )
+    parser.add_argument(
+        "--protobuf",
+        action="store_true",
+        help="update protoc on build hosts (needed to build leech2)",
+    )
 
     return parser.parse_args()
 
@@ -341,6 +351,118 @@ def update_jdk21(root):
         exit(1)
 
 
+def update_rust(root):
+    base_url = "https://static.rust-lang.org/dist"
+
+    filename = os.path.join(root, "ci/linux-install-rust.sh")
+    with open(filename, "r") as f:
+        content = f.read()
+
+    old_version = re.search(r"version=([0-9]+\.[0-9]+\.[0-9]+)", content).group(1)
+    log.debug(f"Found version {old_version} in '{filename}'")
+
+    # The stable channel manifest tells us the most recent stable release.
+    manifest = requests.get(f"{base_url}/channel-rust-stable.toml").text
+    new_version = re.search(
+        r"\[pkg\.rust\]\s*\nversion = \"([0-9]+\.[0-9]+\.[0-9]+)", manifest
+    ).group(1)
+    log.debug(f"Most recent stable Rust version is {new_version}")
+
+    if old_version == new_version:
+        log.debug(
+            f"Rust toolchain is already the newest version ('{new_version}' == '{old_version}')"
+        )
+        return
+
+    # Each tarball has its checksum recorded right below a comment line that
+    # references its '.sha256' file. Refresh the version number and every SHA.
+    tarballs = [
+        "rustc-${version}-x86_64-unknown-linux-gnu.tar.gz",
+        "cargo-${version}-x86_64-unknown-linux-gnu.tar.gz",
+        "rustc-${version}-aarch64-unknown-linux-gnu.tar.gz",
+        "cargo-${version}-aarch64-unknown-linux-gnu.tar.gz",
+        "rust-std-${version}-x86_64-unknown-linux-gnu.tar.gz",
+        "rust-std-${version}-aarch64-unknown-linux-gnu.tar.gz",
+        "rust-std-${version}-x86_64-pc-windows-gnu.tar.gz",
+    ]
+    for tarball in tarballs:
+        marker = re.escape(f"{tarball}.sha256")
+        match = re.search(marker + r"\s*\n\s*\w+=([0-9a-f]{64})", content)
+        old_sha = match.group(1)
+
+        sha_file = tarball.replace("${version}", new_version) + ".sha256"
+        new_sha = requests.get(f"{base_url}/{sha_file}").text.split()[0]
+        log.debug(f"Fetched new SHA '{new_sha}' for '{sha_file}'")
+
+        content = content.replace(old_sha, new_sha, 1)
+
+    content = content.replace(f"version={old_version}", f"version={new_version}", 1)
+
+    log.debug(f"Writing changes to file '{filename}'")
+    with open(filename, "w") as f:
+        f.write(content)
+
+    if not git_commit(root, f"Updated Rust toolchain to {new_version}"):
+        log.error("Failed to commit changes after updating Rust toolchain")
+        exit(1)
+
+
+def update_protobuf(root):
+    filename = os.path.join(root, "ci/linux-install-protobuf.sh")
+    with open(filename, "r") as f:
+        content = f.read()
+
+    old_version = re.search(r"version=([0-9]+\.[0-9]+)", content).group(1)
+    log.debug(f"Found version {old_version} in '{filename}'")
+
+    # protobuf releases do not ship .sha256 files, so we determine the latest
+    # version from the GitHub releases API and compute the checksums ourselves.
+    release = requests.get(
+        "https://api.github.com/repos/protocolbuffers/protobuf/releases/latest"
+    ).json()
+    new_version = release["tag_name"].lstrip("v")
+    log.debug(f"Most recent protobuf version is {new_version}")
+
+    if old_version == new_version:
+        log.debug(
+            f"protoc is already the newest version ('{new_version}' == '{old_version}')"
+        )
+        return
+
+    base_url = (
+        f"https://github.com/protocolbuffers/protobuf/releases/download/v{new_version}"
+    )
+    for arch in ["linux-x86_64", "linux-aarch_64"]:
+        marker = re.escape(f"protoc-${{version}}-{arch}.zip")
+        match = re.search(marker + r"\s*\n\s*\w+=([0-9a-f]{64})", content)
+        old_sha = match.group(1)
+
+        zipfile = f"protoc-{new_version}-{arch}.zip"
+        path = os.path.join("/tmp", zipfile)
+        if not os.path.exists(path):
+            url = f"{base_url}/{zipfile}"
+            log.debug(f"Fetching URL '{url}'")
+            urllib.request.urlretrieve(url, path)
+
+        sha = hashlib.sha256()
+        with open(path, "rb") as f:
+            sha.update(f.read())
+        new_sha = sha.hexdigest()
+        log.debug(f"Computed new SHA '{new_sha}' for '{zipfile}'")
+
+        content = content.replace(old_sha, new_sha, 1)
+
+    content = content.replace(f"version={old_version}", f"version={new_version}", 1)
+
+    log.debug(f"Writing changes to file '{filename}'")
+    with open(filename, "w") as f:
+        f.write(content)
+
+    if not git_commit(root, f"Updated protoc to {new_version}"):
+        log.error("Failed to commit changes after updating protoc")
+        exit(1)
+
+
 def main():
     args = parse_args()
     loglevel = "DEBUG" if args.debug else "INFO"
@@ -351,6 +473,10 @@ def main():
     update_deps(args.root, args.bump, args.skip)
     if args.jdk21:
         update_jdk21(args.root)
+    if args.rust:
+        update_rust(args.root)
+    if args.protobuf:
+        update_protobuf(args.root)
 
 
 if __name__ == "__main__":

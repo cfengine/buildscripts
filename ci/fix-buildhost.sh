@@ -43,3 +43,33 @@ fi
 if command -v yum >/dev/null 2>/dev/null; then
   sudo yum erase -y openssl-devel || true
 fi
+
+# leech2 build toolchain: rust + protoc. The build-host-setup policy installs
+# these when a VM is imaged; install them here too so testing-pr builds on
+# not-yet-reimaged hosts (and branches that change these deps) get what they
+# need without a reimage. Each call is guarded by an already-installed check,
+# and gated to the same platforms as the policy (ubuntu>=20, debian>=12,
+# rhel/centos>=8).
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  os_major="${VERSION_ID%%.*}"
+  case "$ID" in
+    ubuntu) min_major=20 ;;
+    debian) min_major=12 ;;
+    rhel | centos) min_major=8 ;;
+    *) min_major="" ;;
+  esac
+  if [ -n "$min_major" ] && [ "${os_major:-0}" -ge "$min_major" ]; then
+    if [ ! -x /usr/local/bin/protoc ]; then
+      sh "$my_dir"/linux-install-protobuf.sh
+    fi
+    if [ ! -x /opt/rust/bin/rustc ]; then
+      # MinGW hosts also need the Windows cross-compilation target.
+      if [ -f /etc/cfengine-mingw-build-host.flag ]; then
+        sh "$my_dir"/linux-install-rust.sh x86_64-pc-windows-gnu
+      else
+        sh "$my_dir"/linux-install-rust.sh
+      fi
+    fi
+  fi
+fi
