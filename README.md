@@ -161,7 +161,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [PHP](https://php.net/)                             | 8.3.31 | 8.5.6  | 8.5.6  |
 | [PostgreSQL](https://www.postgresql.org/)           | 16.14  | 18.4   | 18.4   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.69.0 | 1.69.0 |
-| [rsync](https://download.samba.org/pub/rsync/)      | 3.4.2  | 3.4.3  | 3.4.3  |
+| [rsync](https://download.samba.org/pub/rsync/)      | 3.4.3  | 3.4.3  | 3.4.3  |
 
 - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
