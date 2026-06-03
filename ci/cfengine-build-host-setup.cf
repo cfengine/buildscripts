@@ -283,11 +283,8 @@ bundle agent cfengine_build_host_setup
         expression => version_compare("$(sys.os_version_major)", ">=", "8");
 
     any::
-      "have_rust"
-        expression => fileexists("/opt/rust/bin/rustc");
-
-      "have_protoc"
-        expression => fileexists("/usr/local/bin/protoc");
+      "have_rust" expression => fileexists("/opt/rust/bin/rustc");
+      "have_protoc" expression => fileexists("/usr/local/bin/protoc");
 
     linux::
       "have_tmp_mount"
