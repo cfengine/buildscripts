@@ -117,6 +117,10 @@ pre() {
         ;;
     esac
 
+    # Copy default leech2 config (ENT-14100)
+    install -d "$P"/state/.leech2
+    install -m 644 "$BASEDIR"/cfengine/dist"$BUILDPREFIX"/state/.leech2/config.json "$P"/state/.leech2/
+
     # Copy WiX source file for MSI generation
     cp "$BASEDIR"/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs "$P"
 
