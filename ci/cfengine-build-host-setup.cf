@@ -23,13 +23,20 @@ bundle agent cfengine_build_host_setup
     debian.(!debian_13.!debian_12.!ubuntu_22.!ubuntu_24.!ubuntu_25)::
       "python" comment => "debian>=12 and ubuntu>=22 only has python3";
 
-    debian_13|ubuntu_25::
+    debian.(!debian_9.!debian_10.!debian_11.!ubuntu_20.!ubuntu_18.!ubuntu_16)::
+      "python3";
+
+      "python-is-python3"
+        comment => "pipeline hosts need plain old python for buildscripts/build-scripts/get_labels_expr.py";
+
+    debian_13|ubuntu_25|ubuntu_26::
       "ntpsec";
 
-    debian.(!debian_13.!ubuntu_25)::
+    debian.(!debian_13.!ubuntu_25.!ubuntu_26)::
       "ntp";
 
     debian|ubuntu::
+      "fail2ban" comment => "Ban IPs with repeated failed SSH auth attempts";
       "libltdl7" package_policy => "delete";
       "libltdl-dev" package_policy => "delete";
       "binutils";
@@ -57,7 +64,9 @@ bundle agent cfengine_build_host_setup
       "systemd-coredump"
         comment => "added step to jenkins testing-pr job to query for coredumps on failures";
 
-      # core/ci/dependencies.sh is run on some systems where quickinstall and cf-remote cannot install an agent to run this policy so we must remove some system packages that we also build since both install to /usr as a prefix.
+    # core/ci/dependencies.sh is run on some systems where quickinstall and cf-remote cannot install an agent to run this policy so we must remove some system packages that we also build since both install to /usr as a prefix.
+    # we do need these still installed on bootstrap-pr hosts though, so guard against that class
+    debian.!bootstrap_pr_host::
       "libattr1-dev" package_policy => "delete";
       "libssl-dev" package_policy => "delete";
       "libpcre2-dev" package_policy => "delete";
@@ -75,13 +84,21 @@ bundle agent cfengine_build_host_setup
       "libncurses-dev";
 
     mingw_build_host::
-      "wine:i386";
       "mingw-w64";
+
+      "binfmt-support"
+        comment => "update-binfmts command needed for build-scripts/package-msi script";
+
+    mingw_build_host.have_i386_architecture::
+      "wine:i386";
 
     (debian_10|debian_11).systemssl_build_host::
       "libssl-dev";
 
     debian.bootstrap_pr_host::
+      "libssl-dev";
+
+      # bootstrap_pr host needs this to configure before we build openssl ourselves
       "librsync-dev";
 
       # bootstrap_pr host needs this to run configure and make dist
@@ -89,6 +106,9 @@ bundle agent cfengine_build_host_setup
 
     debian.containers_host::
       # in jenkins, CONTAINER labeled nodes are capable of running container builds like valgrind-check and static-check
+      "unzip"
+        comment => "linux-install-groovy.sh needs unzip to unpack the groovy distribution archive.";
+
       "buildah";
       "jq";
       "make";
@@ -141,12 +161,19 @@ bundle agent cfengine_build_host_setup
       "xfsprogs";
 
     # note that shellcheck, fakeroot and ccache require epel-release to be installed
+    # epel-release is installed by distribution package in rhel-7 and by URL for rhel-8+ later in commands section
     (redhat_7|centos_7).(yum_dnf_conf_ok)::
-      "epel-release";
+      "epel-release" classes => results("bundle", "epel_release");
+
+    !(redhat_7|centos_7).(redhat|centos).(yum_dnf_conf_ok).epel_release_ok::
+      "fail2ban-server"
+        comment => "Ban IPs with repeated failed SSH auth attempts. On centos/rhel 8+ we must specify individual packages instead of just fail2ban as package method will append -*.* which would include conflicting shorewall and shorewall-lite packages.";
+
+      "fail2ban-sendmail";
+      "fail2ban-firewalld";
       "ccache";
       "fakeroot";
       "perl-JSON-PP";
-      "perl-Data-Dumper";
       "perl-Digest-MD5";
 
     (redhat_7|centos_7|redhat_9|redhat_10).(yum_dnf_conf_ok)::
@@ -171,10 +198,6 @@ bundle agent cfengine_build_host_setup
       "platform-python-devel" -> { "cfbs shebang", "ENT-11338" }
         comment => "py3_shebang_fix macro needs /usr/bin/pathfix.py from platform-python-devel package";
 
-    suse_15::
-      "libopenssl-devel" -> { "ENT-12528" }
-        comment => "like redhat, suse 15+ needs to build with system openssl.";
-
     (redhat_8|centos_8|redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "java-1.8.0-openjdk-headless"
         package_policy => "delete",
@@ -182,7 +205,6 @@ bundle agent cfengine_build_host_setup
 
       "pkgconf" comment => "pkgconfig renamed to pkgconf in rhel8";
       "selinux-policy-devel" comment => "maybe add to _7 and _6?";
-      "openssl-devel";
 
     (redhat_9|redhat_10).(yum_dnf_conf_ok)::
       "perl-Sys-Hostname"
@@ -201,7 +223,33 @@ bundle agent cfengine_build_host_setup
       "rpm-build";
 
   vars:
+    "java_version_raw"
+      string => execresult("java -version 2>&1 | grep version", "useshell"),
+      unless => "missing_java";
+
+    "java_version"
+      string => nth(splitstring("${java_version_raw}", '"', 20), 1);
+
     "suse_users_and_groups" slist => { "daemon", "bin", "sys" };
+
+    "sshd_hardening_directives"
+      slist => {
+        "PermitRootLogin",
+        "PasswordAuthentication",
+        "KbdInteractiveAuthentication",
+        "ChallengeResponseAuthentication",
+      };
+
+    "sshd_config_files"
+      slist => findfiles(
+        "/etc/ssh/sshd_config", "/etc/ssh/sshd_config.d/*.conf"
+      );
+
+    debian|ubuntu::
+      "sshd_service_name" string => "ssh";
+
+    !(debian|ubuntu)::
+      "sshd_service_name" string => "sshd";
 
   classes:
     any::
@@ -221,6 +269,23 @@ bundle agent cfengine_build_host_setup
         expression => not(fileexists("/etc/cfengine-in-container.flag")),
         comment => "We use an explicit flag file that we control to avoid ambiguity about whether we are in a container or not.";
 
+    # Rust is build dependency for leech2 (gate on ubuntu>=20, debian>=12, redhat>=8)
+    ubuntu::
+      "leech2_build_toolchain_host"
+        expression => version_compare("$(sys.os_version_major)", ">=", "20");
+
+    debian::
+      "leech2_build_toolchain_host"
+        expression => version_compare("$(sys.os_version_major)", ">=", "12");
+
+    (redhat|centos)::
+      "leech2_build_toolchain_host"
+        expression => version_compare("$(sys.os_version_major)", ">=", "8");
+
+    any::
+      "have_rust" expression => fileexists("/opt/rust/bin/rustc");
+      "have_protoc" expression => fileexists("/usr/local/bin/protoc");
+
     linux::
       "have_tmp_mount"
         expression => returnszero("mount | grep '/tmp'", "useshell");
@@ -228,7 +293,16 @@ bundle agent cfengine_build_host_setup
       "have_coredumpctl"
         expression => returnszero("command -v coredumpctl", "useshell");
 
-      "missing_opt_jdk21" expression => not(fileexists("/opt/jdk-21.0.8"));
+      "missing_java" expression => not(fileexists("/usr/bin/java"));
+@if minimum_version(3.23)
+      "insufficient_java_version"
+        expression => version_compare("${java_version}", "<", "21.0.0");
+
+      "java_ok"
+        expression => version_compare("${java_version}", ">=", "21.0.0");
+@endif
+
+      "missing_groovy" expression => not(fileexists("/usr/bin/groovy"));
 
     (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
       "yum_conf_ok"
@@ -245,6 +319,24 @@ bundle agent cfengine_build_host_setup
         expression => returnszero(
           "command -v fakeroot >/dev/null", "useshell"
         );
+
+    (redhat|centos)::
+      "epel_release_ok"
+        expression => returnszero(
+          "yum info installed epel-release", "useshell"
+        );
+
+    (redhat_8|centos_8).have_perl::
+      "have_data_dumper"
+        expression => returnszero("cpan -l | grep Data::Dumper", "useshell");
+
+      "have_data_dumper_names"
+        expression => returnszero(
+          "cpan -l | grep Data::Dumper::Names", "useshell"
+        );
+
+      "have_padwalker"
+        expression => returnszero("cpan -l | grep PadWalker", "useshell");
 
     redhat_8|centos_8|redhat_9|redhat_10::
       "redhat_has_python3"
@@ -290,8 +382,29 @@ bundle agent cfengine_build_host_setup
         comment => "Ensure that core_pattern is proper for systemd-coredump if coredumpctl is present.",
         contain => in_shell;
 
-    missing_opt_jdk21::
-      "sh $(this.promise_dirname)/linux-install-jdk21.sh" contain => in_shell;
+    containers_host.missing_groovy.java_ok::
+      "sh $(this.promise_dirname)/linux-install-groovy.sh" contain => in_shell;
+
+    missing_java|insufficient_java_version::
+      "sh $(this.promise_dirname)/linux-install-jdk21.sh"
+        contain => in_shell,
+        classes => results("bundle", "java");
+
+    # leech2 build toolchain: protoc and the Rust toolchain. Both installers
+    # pin a version and verify the SHA256 checksum of the downloaded tarball.
+    leech2_build_toolchain_host.!have_protoc::
+      "sh $(this.promise_dirname)/linux-install-protobuf.sh"
+        contain => in_shell,
+        comment => "Install pinned protoc; required to build the cargo-based leech2 dependency.";
+
+    # Linux builds are native, so the installer only adds the host's own Linux
+    # std. Windows is the only cross-compilation target, and only MinGW build
+    # hosts cross-compile it, so we pass that target there alone.
+    leech2_build_toolchain_host.!have_rust::
+      "sh $(this.promise_dirname)/linux-install-rust.sh"
+        args => ifelse("mingw_build_host", "x86_64-pc-windows-gnu", ""),
+        contain => in_shell,
+        comment => "Install the Rust toolchain system-wide under /opt/rust for building the cargo-based leech2 dependency.";
 
     (redhat_7|centos_7|redhat_8|centos_8|redhat_9|redhat_10).(!have_development_tools).(yum_dnf_conf_ok)::
       "yum groups install -y 'Development Tools'" contain => in_shell;
@@ -300,6 +413,21 @@ bundle agent cfengine_build_host_setup
       # special fakeroot, missing from _8 an d up?
       "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
         contain => in_shell;
+
+    (redhat|centos).!(redhat_7|centos_7).!(redhat_6|centos_6).!epel_release_ok::
+      "yum install --assumeyes https://dl.fedoraproject.org/pub/epel/epel-release-latest-${sys.os_version_major}.noarch.rpm"
+        comment => "rhel-7 installs this with a packages promise. TODO: check a sha for the download URL somehow?",
+        classes => results("bundle", "epel_release"),
+        contain => in_shell;
+
+    (redhat_8|centos_8).!have_data_dumper.have_perl::
+      "cpan Data::Dumper" contain => in_shell;
+
+    (redhat_8|centos_8).!have_data_dumper_names.have_perl::
+      "cpan Data::Dumper::Names" contain => in_shell;
+
+    (redhat_8|centos_8).!have_padwalker.have_perl::
+      "cpan PadWalker" contain => in_shell;
 
     (redhat_8|centos_8|redhat_9|redhat_10).!redhat_has_python3::
       "yum install -y python3" -> { "CFE-4313" }
@@ -316,14 +444,13 @@ bundle agent cfengine_build_host_setup
     debian_11::
       "have_pip2" expression => fileexists("/usr/local/bin/pip");
 
-    ubuntu_16::
+    ubuntu::
       "have_i386_architecture"
         expression => strcmp(
           execresult("${paths.dpkg} --print-foreign-architectures", "noshell"),
           "i386"
         );
 
-    ubuntu::
       "localhost_localdomain_hostname_missing"
         expression => not(
           strcmp(
@@ -346,13 +473,21 @@ bundle agent cfengine_build_host_setup
         );
 
   files:
+    redhat::
+      "/etc/environment"
+        edit_line => contains_literal_string("LC_ALL=C"),
+        comment => "It seems that centos-7 at least needs LC_ALL=C now, maybe due to different way we access: ProxyJump ssh commands from jenkins instead of java ssh client. 2026-04-03";
+
     linux::
       "/home/jenkins/.ssh/known_hosts"
         create => "true",
         perms => mog("644", "jenkins", "jenkins"),
         content => "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
 github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
-github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=";
+github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+build-artifacts-cache.cloud.cfengine.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGahpsY8Phk2+isBmuJQjjQVlh6BNL/Qetc14g26gowV
+build-artifacts-cache.cloud.cfengine.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCdv55BmDmwEjN3izaL8intrSRJQglkv++TaQppopKCh5VkYuSpNj/W+x0vjxwL3+NNp4CAhOLYuGTFuUL8zz/H0kwWE06c3WjghpHS3NS1usiamVZN6uaJMGwDaq8fPB3WiiI/L5lLM8/ubXxfmta0UlVufHCiBH8pBQarAY5rdPDtITXzu56qIa3k9Ou7Si2r/1n37espzwsPxoBqVJg7BvzMV28MzxdmQpGP6puuPfi9tvYbtnF788le3jvGOc+3GOiwtXsv44y/PCJNhi7sFeUfxocuNbWXZ3x/UEfbN8IiUVZsUAuLQFeqr3pv4w28D+SvJHBMCFudygenmLc3th+typiFRmqam7UQif9Pa3e2FxX4ghTp1KNXBoCQluIk2j7wX9zXppSyUG6d7tPDzfu81lImuW34+bsZvYq+s+25vbAhSDdQe1lqG0Fdvvi+zbqrMYQuMfnInDrK52xNSZcfATWjudhmY6wiwdSS0XsBADmZsy3qf3ErdEabqQk=
+build-artifacts-cache.cloud.cfengine.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBIzU5+SoC4gbtV3Wfw4oB6oMs5RYKGFCiS0lVeN4XQlAM8UjvyUUSflytf/vQEANv1OJs5vicslRn/iPlrvF8Mk=";
 
       "/etc/security/limits.conf"
         edit_line => lines_present(
@@ -361,6 +496,30 @@ root - core unlimited
 * - core unlimited
 "
         );
+
+      "/etc/fail2ban/jail.local"
+        create => "true",
+        content => "[sshd]
+enabled = true
+port = ssh
+maxretry = 5
+bantime = 3600
+findtime = 600",
+        classes => if_repaired("fail2ban_config_changed"),
+        comment => "Configure fail2ban to ban IPs after 5 failed SSH attempts within 10 minutes";
+
+      "$(sshd_config_files)"
+        edit_line => comment_lines_matching(
+          "^$(sshd_hardening_directives)\s+(?!no\s*$).*", "#"
+        ),
+        classes => if_repaired("sshd_hardened"),
+        comment => "Comment out insecure SSH auth directives in sshd_config and drop-ins";
+
+      "/etc/ssh/sshd_config"
+        edit_line => prepend_if_no_line("$(sshd_hardening_directives) no"),
+        if => fileexists("/etc/ssh/sshd_config"),
+        classes => if_repaired("sshd_hardened"),
+        comment => "Ensure SSH hardening directives are at the top of sshd_config, before any Include";
 
     ubuntu_16|ubuntu_18|redhat_9|redhat_10::
       "/etc/hosts" -> { "ENT-12437" }
@@ -402,10 +561,17 @@ root - core unlimited
 %sudo ALL=NOPASSWD: /usr/bin/podman
 %sudo ALL=NOPASSWD: /usr/sbin/lvs
 %sudo ALL=NOPASSWD: /usr/bin/journalctl
-jenkins_builds ALL=NOPASSWD: /usr/bin/podman
+jenkins ALL=NOPASSWD: /usr/bin/podman
 ",
         create => "true",
         perms => mog("400", "root", "root");
+
+    centos_7::
+      "/etc/environment"
+        comment => "centos-7 vagrant VMs have unconfigured locale that breaks some tests so force LC_ALL=C",
+        content => "LC_ALL=C",
+        create => "true",
+        perms => mog("0644", "root", "root");
 
     redhat_10::
       "/usr/lib/rpm/redhat/macros"
@@ -426,13 +592,18 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
     (redhat_8|centos_8|redhat_9|redhat_10).(!have_perl_package_installed).(yum_dnf_conf_ok)::
       "yum install -y perl"
         contain => in_shell,
+        classes => results("bundle", "have_perl"),
         comment => "even though rhel8/9 come with /bin/perl perl >= 5.8.8 is needed by cfbuild-lcov-1.16-1.noarch. So the package must be installed.";
 
     redhat_9|redhat_10.!have_python3_pip_package_installed.(yum_dnf_conf_ok)::
       "yum install -y python3-pip" contain => in_shell;
 
     mingw_build_host.!have_i386_architecture::
-      "${paths.dpkg} --add-architecture i386";
+      "${paths.dpkg} --add-architecture i386" handle => "i386_arch_added";
+
+      "DEBIAN_FRONTEND=noninteractive apt-get update"
+        depends_on => { "i386_arch_added" },
+        contain => in_shell;
 
     ubuntu.not_in_container.localhost_localdomain_hostname_missing::
       "/usr/bin/hostnamectl set-hostname localhost.localdomain"
@@ -448,13 +619,46 @@ jenkins_builds ALL=NOPASSWD: /usr/bin/podman
       "groupadd -g 3 sys" contain => in_shell;
 
     !have_daemon_user.(suse|sles|opensuse)::
-      "useradd -u 1 daemon" contain => in_shell;
+      "useradd -u 1 daemon -g daemon" contain => in_shell;
 
     !have_bin_user.(suse|sles|opensuse)::
-      "useradd -u 2 bin" contain => in_shell;
+      "useradd -u 2 bin -g bin" contain => in_shell;
 
     !have_sys_user.(suse|sles|opensuse)::
-      "useradd -u 3 sys" contain => in_shell;
+      "useradd -u 3 sys -g sys" contain => in_shell;
+
+    linux::
+      "sshd -T 2>/dev/null | grep -qiE '^PermitRootLogin no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify PermitRootLogin is disabled";
+
+      "sshd -T 2>/dev/null | grep -qiE '^PasswordAuthentication no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify PasswordAuthentication is disabled";
+
+      "sshd -T 2>/dev/null | grep -qiE '^(KbdInteractive|ChallengeResponse)Authentication no'"
+        depends_on => { "sshd_restarted" },
+        contain => in_shell,
+        comment => "Verify KbdInteractiveAuthentication (OpenSSH 8.7+) or ChallengeResponseAuthentication (older) is disabled";
+
+  services:
+    sshd_hardened::
+      "$(sshd_service_name)"
+        service_policy => "restart",
+        handle => "sshd_restarted",
+        comment => "Restart sshd to apply hardened configuration";
+
+    any::
+      "fail2ban"
+        service_policy => "start",
+        comment => "Ensure fail2ban is running";
+
+    fail2ban_config_changed::
+      "fail2ban"
+        service_policy => "restart",
+        comment => "Restart fail2ban to apply jail configuration";
   # skip /etc/hosts change for now, seems kind of wrong and corrupts ip6 entries like `::1 ip6-ip6-loopback`
   # maybe the following is needed to silence such errors as:     ubuntu-16-mingw-j1: sudo: unable to resolve host localhost.localdomain
   #    ubuntu::
