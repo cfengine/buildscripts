@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     autoconf automake binutils bison build-essential curl debhelper \
     dpkg-dev expat fakeroot flex gdb git libexpat1-dev \
     libmodule-load-conditional-perl libpam0g-dev libtool \
-    pkg-config psmisc python3-pip rsync sudo systemd-coredump wget \
+    pkg-config psmisc python3-pip rsync sudo systemd-coredump unzip wget \
     && rm -rf /var/lib/apt/lists/*
 
 # ncurses: ubuntu-20 uses libncurses5/libncurses5-dev, newer use libncurses6/libncurses-dev
@@ -31,6 +31,12 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin -
 RUN apt-get purge -y \
     libattr1-dev libssl-dev libpcre2-dev libacl1-dev \
     libyaml-dev libxml2-dev librsync-dev 2>/dev/null || true
+
+# Rust toolchain and protobuf compiler for building the cargo-based leech2
+# dependency.
+COPY --from=ci linux-install-protobuf.sh linux-install-rust.sh /tmp/
+RUN /tmp/linux-install-protobuf.sh
+RUN /tmp/linux-install-rust.sh
 
 # Create build user with passwordless sudo (needed by install-dependencies, package, etc.)
 RUN useradd -m -s /bin/bash builder \

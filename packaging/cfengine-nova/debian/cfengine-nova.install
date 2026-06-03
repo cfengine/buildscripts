@@ -21,6 +21,8 @@
 /var/cfengine/lib/python/*
 /var/cfengine/lib/cfengine-enterprise.so
 /var/cfengine/lib/liblmdb.so
+/var/cfengine/lib/libleech2.so
+/var/cfengine/bin/lch
 /var/cfengine/share/doc
 /var/cfengine/modules
 /var/cfengine/inputs

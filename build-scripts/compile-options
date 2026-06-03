@@ -155,10 +155,10 @@ nova)
     # - Mission Portal uses LDAP for authentication functionality
     var_append DEPS "openldap"
 
-    # leech is used for efficient synchronization of tabular data.
+    # leech2 is used for efficient synchronization of tabular data.
     # - cf-hub requests state changes from cf-serverd
     # - state changes are recorded by cf-agent
-    var_append DEPS "leech"
+    var_append DEPS "leech2"
     ;;
 esac
 

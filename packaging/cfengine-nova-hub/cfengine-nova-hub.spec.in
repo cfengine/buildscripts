@@ -298,6 +298,8 @@ exit 0
 %prefix/bin/diff3
 # Auxiliary programs
 %prefix/bin/rpmvercmp
+# leech2 CLI
+%prefix/bin/lch
 #libexec of git
 %prefix/lib/git-core/*
 

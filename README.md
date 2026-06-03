@@ -146,7 +146,8 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [SASL2](https://www.cyrusimap.org/sasl/)                                          | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
 | [zlib](https://www.zlib.net/)                                                     | 1.3.2  | 1.3.2  | 1.3.2  |                          |
 | [librsync](https://github.com/librsync/librsync/releases)                         | -      | 2.3.4  | 2.3.4  |                          |
-| [leech](https://github.com/larsewi/leech/releases)                                | -      | 0.2.0  | 0.2.0  |                          |
+| [leech](https://github.com/larsewi/leech/releases)                                | -      | 0.2.0  | -      |                          |
+| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 5.0.1  |                          |
 
 
 ### Enterprise Hub dependencies
