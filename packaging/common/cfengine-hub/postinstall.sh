@@ -793,6 +793,18 @@ mkdir -p "$PREFIX/state/pg"
 chown root:cfpostgres "$PREFIX/state" "$PREFIX/state/pg"
 chmod 0750 "$PREFIX/state" "$PREFIX/state/pg"
 
+# mask cf-postgres.service while we run our own private postmaster
+# below; it is Restart=always, so a plain stop gets revived and races us for the
+# data dir, removing postmaster.pid and failing the scriptlet. Unmask via trap.
+if use_systemd; then
+  unmask_cf_postgres() {
+    /bin/systemctl unmask cf-postgres.service >/dev/null 2>&1 || true
+  }
+  trap unmask_cf_postgres EXIT
+  /bin/systemctl stop cf-postgres.service >/dev/null 2>&1 || true
+  /bin/systemctl mask cf-postgres.service >/dev/null 2>&1 || true
+fi
+
 test -z "$BACKUP_DIR" && BACKUP_DIR=$PREFIX/state/pg/backup
 if [ ! -f $PREFIX/state/pg/data/postgresql.conf ]; then
   new_pgconfig_file=`generate_new_postgres_conf`
@@ -1105,6 +1117,12 @@ fi
 # files inside /var/cfengine/state/pg/data/base/<oid> directories. ENT-10429
 if command -v restorecon >/dev/null; then
   restorecon -iR /var/cfengine /opt/cfengine
+fi
+
+# unmask cf-postgres.service before the umbrella start below
+# brings it back up. Explicit here since the start happens before the EXIT trap.
+if use_systemd; then
+  unmask_cf_postgres
 fi
 
 if is_upgrade && [ -f "$PREFIX/UPGRADED_FROM_STATE.txt" ]; then
