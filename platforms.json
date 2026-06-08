@@ -1,43 +1,45 @@
 {
   "ubuntu-20": {
     "image_name": "cfengine-builder-ubuntu-20",
-    "image_version": "20260531T005204Z",
+    "image_version": "20260607T005407Z",
     "base_image": "ubuntu:20.04",
     "base_image_sha": "sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214",
     "dockerfile": "Dockerfile.debian",
-    "extra_build_args": { "NCURSES_PKGS": "libncurses5 libncurses5-dev" }
+    "extra_build_args": {
+      "NCURSES_PKGS": "libncurses5 libncurses5-dev"
+    }
   },
   "ubuntu-22": {
     "image_name": "cfengine-builder-ubuntu-22",
-    "image_version": "20260531T005156Z",
+    "image_version": "20260607T005407Z",
     "base_image": "ubuntu:22.04",
     "base_image_sha": "sha256:4f838adc7181d9039ac795a7d0aba05a9bd9ecd480d294483169c5def983b64d",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-24": {
     "image_name": "cfengine-builder-ubuntu-24",
-    "image_version": "20260531T005151Z",
+    "image_version": "20260607T005353Z",
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-11": {
     "image_name": "cfengine-builder-debian-11",
-    "image_version": "20260531T005158Z",
+    "image_version": "20260607T005424Z",
     "base_image": "debian:11",
     "base_image_sha": "sha256:aeec37aebc55ca5cc6fcfb8d5f6ae2fd43d5017ad849e6e2fdb5325d61e144db",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-12": {
     "image_name": "cfengine-builder-debian-12",
-    "image_version": "20260531T005222Z",
+    "image_version": "20260607T005415Z",
     "base_image": "debian:12",
     "base_image_sha": "sha256:ed4fcc40bb1162b6d2d32e7bec15044d13963779abbe63f67f1cd62b06220519",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-13": {
     "image_name": "cfengine-builder-debian-13",
-    "image_version": "20260531T005150Z",
+    "image_version": "20260607T005426Z",
     "base_image": "debian:13",
     "base_image_sha": "sha256:4ae67669760b807c19f23902a3fd7c121a6a70cf2ae709035674b23e712e4d62",
     "dockerfile": "Dockerfile.debian"
