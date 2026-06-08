@@ -5,7 +5,9 @@
     "base_image": "ubuntu:20.04",
     "base_image_sha": "sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214",
     "dockerfile": "Dockerfile.debian",
-    "extra_build_args": { "NCURSES_PKGS": "libncurses5 libncurses5-dev" }
+    "extra_build_args": {
+      "NCURSES_PKGS": "libncurses5 libncurses5-dev"
+    }
   },
   "ubuntu-22": {
     "image_name": "cfengine-builder-ubuntu-22",
@@ -18,7 +20,7 @@
     "image_name": "cfengine-builder-ubuntu-24",
     "image_version": "20260531T005151Z",
     "base_image": "ubuntu:24.04",
-    "base_image_sha": "sha256:c4a8d5503dfb2a3eb8ab5f807da5bc69a85730fb49b5cfca2330194ebcc41c7b",
+    "base_image_sha": "sha256:786a8b558f7be160c6c8c4a54f9a57274f3b4fb1491cf65146521ae77ff1dc54",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-11": {
