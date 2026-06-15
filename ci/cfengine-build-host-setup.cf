@@ -301,7 +301,6 @@ bundle agent cfengine_build_host_setup
       "java_ok"
         expression => version_compare("${java_version}", ">=", "21.0.0");
 @endif
-
       "missing_groovy" expression => not(fileexists("/usr/bin/groovy"));
 
     (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
@@ -316,9 +315,7 @@ bundle agent cfengine_build_host_setup
     # rhel/centos-6 and 7 do not support --nobest or best property in yum.conf
     redhat_8|centos_8::
       "have_fakeroot"
-        expression => returnszero(
-          "command -v fakeroot >/dev/null", "useshell"
-        );
+        expression => returnszero("command -v fakeroot >/dev/null", "useshell");
 
     (redhat|centos)::
       "epel_release_ok"
@@ -462,8 +459,7 @@ bundle agent cfengine_build_host_setup
     opensuse|suse|sles::
       "have_$(suse_users_and_groups)_group"
         expression => returnszero(
-          "grep '^$(suse_users_and_groups):' /etc/group >/dev/null",
-          "useshell"
+          "grep '^$(suse_users_and_groups):' /etc/group >/dev/null", "useshell"
         );
 
       "have_$(suse_users_and_groups)_user"
@@ -659,10 +655,12 @@ jenkins ALL=NOPASSWD: /usr/bin/podman
       "fail2ban"
         service_policy => "restart",
         comment => "Restart fail2ban to apply jail configuration";
-  # skip /etc/hosts change for now, seems kind of wrong and corrupts ip6 entries like `::1 ip6-ip6-loopback`
-  # maybe the following is needed to silence such errors as:     ubuntu-16-mingw-j1: sudo: unable to resolve host localhost.localdomain
-  #    ubuntu::
-  #      "${paths.sed} -ri 's/localhost //' /etc/hosts";
+
+        # skip /etc/hosts change for now, seems kind of wrong and corrupts ip6 entries like `::1 ip6-ip6-loopback`
+        # maybe the following is needed to silence such errors as:     ubuntu-16-mingw-j1: sudo: unable to resolve host localhost.localdomain
+        #    ubuntu::
+        #      "${paths.sed} -ri 's/localhost //' /etc/hosts";
 }
+
 # todo, maybe need
 # ubuntu16-mingw: echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
