@@ -195,7 +195,11 @@ hub)
     ROLE=hub
     ;;
 *)
-    log_debug "Bad or unset EXPLICIT_ROLE '$EXPLICIT_ROLE': attempting autodetection"
+    if [ -z "$EXPLICIT_ROLE" ]; then
+        log_debug "EXPLICIT_ROLE is unset; attempting to autodetect role"
+    else
+        log_error "Bad EXPLICIT_ROLE '$EXPLICIT_ROLE'; attempting to autodetect role"
+    fi
     case x"$label" in
     x)
         log_debug "label is not set, assuming that this is not the main build job; Setting ROLE=agent."
