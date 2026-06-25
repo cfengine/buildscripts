@@ -7,12 +7,6 @@ Release: 1
 Source0: php-%{php_version}.tar.gz
 Source1: php.ini
 Source2: php-fpm.conf
-
-Patch2: 0002-Honor-SOURCE_DATE_EPOCH-in-phar.patch
-# openssl 4.0 compat patches
-Patch3: 0003-replace-ERR_NUM_ERRORS-with-PHP_OPENSSL_ERR_BUFFER_S.patch
-Patch4: 0004-ASN1_STRING-has-been-made-opaque-in-OpenSSL-4.patch
-
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -31,8 +25,7 @@ then
   patch -p1 < %{_topdir}/SOURCES/0001-Disable-fancy-intrinsics-stuff.patch
 fi
 
-# apply patches specified with PatchN above
-%autopatch -p1
+patch -p1 < %{_topdir}/SOURCES/0002-Honor-SOURCE_DATE_EPOCH-in-phar.patch
 
 %if %{?rhel}%{!?rhel:0} == 8
 CFLAGS="-fPIE"
