@@ -40,7 +40,6 @@ CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
             --disable-slapd \
             --disable-backends \
             --with-tls=openssl \
-            --without-gssapi \
             CPPFLAGS="$CPPFLAGS"
 
 %build
