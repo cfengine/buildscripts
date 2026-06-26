@@ -160,7 +160,7 @@ do
 done
 
 echo '========================================= PRINTING CLOUD-INIT LOG ==================================================='
-sed 's/^.*/>>> &/' /var/log/cloud-init-output.log || true
+sudo sed 's/^.*/>>> &/' /var/log/cloud-init-output.log || true
 echo '======================================= DONE PRINTING CLOUD-INIT LOG ================================================'
 
 if [ $attempts -le 0 ]
