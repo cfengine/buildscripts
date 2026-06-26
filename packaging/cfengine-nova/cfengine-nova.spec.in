@@ -217,8 +217,8 @@ exit 0
 %dir %prefix/inputs
 %dir %prefix/modules
 %dir %prefix/state
-%dir %prefix/state/.leech2
-%prefix/state/.leech2/config.json
+%dir %prefix/.leech2
+%prefix/.leech2/config.json
 
 
 %changelog

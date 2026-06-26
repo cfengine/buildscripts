@@ -178,13 +178,11 @@
                 <File Id='openssl.cnf' Name='openssl.cnf' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\ssl\openssl.cnf' />
               </Component>
             </Directory>
-			<!-- ===== Cfengine\state\.leech2 ===== -->
-            <Directory Id='dir_state' Name='state'>
-              <Directory Id='dir_state_leech2' Name='.leech2'>
-                <Component Id='leech2_config.json' Guid='1781E340-7772-4715-833D-DFAAE22A83EF' Win64='$(var.isWin64)'>
-                  <File Id='leech2_config.json' Name='config.json' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\state\.leech2\config.json' />
-                </Component>
-              </Directory>
+			<!-- ===== Cfengine\.leech2 ===== -->
+            <Directory Id='dir_leech2' Name='.leech2'>
+              <Component Id='leech2_config.json' Guid='1781E340-7772-4715-833D-DFAAE22A83EF' Win64='$(var.isWin64)'>
+                <File Id='leech2_config.json' Name='config.json' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\.leech2\config.json' />
+              </Component>
             </Directory>
           </Directory>
         </Directory>

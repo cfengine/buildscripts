@@ -469,10 +469,10 @@ exit 0
 %dir %prefix/outputs
 %dir %prefix/inputs
 %dir %prefix/state
-%dir %prefix/state/.leech2
+%dir %prefix/.leech2
 
 # Mode must match the cfengine-nova package, which also ships this file
 %defattr(600,root,root,700)
-%prefix/state/.leech2/config.json
+%prefix/.leech2/config.json
 
 %changelog
