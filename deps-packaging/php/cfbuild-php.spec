@@ -56,6 +56,7 @@ LDFLAGS=""
   --enable-sockets \
   --disable-mbregex \
   --enable-fpm \
+  --enable-bcmath \
   --without-layout \
   --without-sqlite3 \
   --without-bz2 \
