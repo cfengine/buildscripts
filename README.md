@@ -139,7 +139,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.35 | 0.9.35 | 0.9.35 |                          |
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.13 | 2.6.13 | 2.6.13 | Enterprise agent only    |
-| [OpenSSL](https://openssl.org/)                                                   | 3.6.2  | 3.6.2  | 4.0.0  |                          |
+| [OpenSSL](https://openssl.org/)                                                   | 3.6.2  | 3.6.2  | 4.0.1  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | -      | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | 10.47  | 10.47  | 10.47  |                          |
 | [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
@@ -154,15 +154,15 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 
 | CFEngine version                                    | 3.24.x | 3.27.x | master |
 | :-------------------------------------------------- | :----- | :----- | :----- |
-| [Apache](https://httpd.apache.org/)                 | 2.4.67 | 2.4.67 | 2.4.67 |
+| [Apache](https://httpd.apache.org/)                 | 2.4.67 | 2.4.67 | 2.4.68 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.3  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.54.0 | 2.54.0 | 2.54.0 |
 | [libexpat](https://libexpat.github.io/)             | 2.8.1  | 2.8.1  | 2.8.1  |
-| [PHP](https://php.net/)                             | 8.3.31 | 8.5.6  | 8.5.6  |
+| [PHP](https://php.net/)                             | 8.3.31 | 8.5.6  | 8.5.7  |
 | [PostgreSQL](https://www.postgresql.org/)           | 16.14  | 18.4   | 18.4   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.69.0 | 1.69.0 |
-| [rsync](https://download.samba.org/pub/rsync/)      | 3.4.3  | 3.4.3  | 3.4.3  |
+| [rsync](https://download.samba.org/pub/rsync/)      | 3.4.3  | 3.4.3  | 3.4.4  |
 
 - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
