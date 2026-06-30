@@ -471,8 +471,9 @@ exit 0
 %dir %prefix/state
 %dir %prefix/.leech2
 
-# Mode must match the cfengine-nova package, which also ships this file
+# Mode must match the cfengine-nova package, which also ships these files
 %defattr(600,root,root,700)
 %prefix/.leech2/config.json
+%prefix/.leech2/containers-mapping.json
 
 %changelog

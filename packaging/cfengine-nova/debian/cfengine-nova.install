@@ -24,6 +24,7 @@
 /var/cfengine/lib/libleech2.so
 /var/cfengine/bin/lch
 /var/cfengine/.leech2/config.json
+/var/cfengine/.leech2/containers-mapping.json
 /var/cfengine/share/doc
 /var/cfengine/modules
 /var/cfengine/inputs

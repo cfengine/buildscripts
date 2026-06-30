@@ -219,6 +219,7 @@ exit 0
 %dir %prefix/state
 %dir %prefix/.leech2
 %prefix/.leech2/config.json
+%prefix/.leech2/containers-mapping.json
 
 
 %changelog
