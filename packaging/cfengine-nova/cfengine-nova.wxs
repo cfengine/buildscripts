@@ -183,6 +183,9 @@
               <Component Id='leech2_config.json' Guid='1781E340-7772-4715-833D-DFAAE22A83EF' Win64='$(var.isWin64)'>
                 <File Id='leech2_config.json' Name='config.json' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\.leech2\config.json' />
               </Component>
+              <Component Id='leech2_containers_mapping.json' Guid='5A8C0942-B51D-448D-9A81-1459BC79A9C7' Win64='$(var.isWin64)'>
+                <File Id='leech2_containers_mapping.json' Name='containers-mapping.json' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\.leech2\containers-mapping.json' />
+              </Component>
             </Directory>
           </Directory>
         </Directory>
@@ -230,6 +233,7 @@
 	    <ComponentRef Id='openssl.cnf' />
 
 	    <ComponentRef Id='leech2_config.json' />
+	    <ComponentRef Id='leech2_containers_mapping.json' />
       </Feature>
 
       <UI>
