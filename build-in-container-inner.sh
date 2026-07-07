@@ -31,9 +31,12 @@ for repo in $repos; do
     # regardless of the host directory layout.
     # Exclude acceptance test workdirs — they contain broken symlinks left
     # over from previous test runs and are not needed for building.
+    # Also skip node_modules/vendor for hub builds.
     if [ -d "$src" ] || [ -L "$src" ]; then
         echo "Syncing $repo..."
-        sudo rsync -aL --exclude='config.cache' --exclude='workdir' --chown="$(id -u):$(id -g)" "$src/" "$BASEDIR/$repo/"
+        sudo rsync -aL --exclude='config.cache' --exclude='workdir' \
+            --exclude='node_modules' --exclude='vendor' \
+            --chown="$(id -u):$(id -g)" "$src/" "$BASEDIR/$repo/"
     else
         echo "ERROR: Required repository $repo not found" >&2
         exit 1

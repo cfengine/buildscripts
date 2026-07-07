@@ -1,0 +1,64 @@
+ARG BASE_IMAGE=rockylinux/rockylinux:9
+FROM ${BASE_IMAGE}
+
+# allow older packages when the newest has unmet deps (as build hosts do).
+RUN echo "best=False" >> /etc/dnf/dnf.conf
+
+# Enable CRB (crb on 9+, powertools on 8) + EPEL for the -devel/build packages.
+ARG CRB_REPO=crb
+RUN dnf install -y dnf-plugins-core epel-release \
+    && dnf config-manager --set-enabled ${CRB_REPO} \
+    && dnf clean all
+
+# Deps like zlib build without full debug symbols; disable debuginfo extraction
+# so rpm doesn't abort with "No debugging symbols". We don't ship debuginfo here.
+RUN echo '%debug_package %{nil}' > /etc/rpm/macros.cfengine-nodebug
+
+# Build toolchain (see redhat section of ci/cfengine-build-host-setup.cf).
+# "Development Tools" provides gcc, make, autotools, rpm-build, core perl, etc.
+RUN dnf groupinstall -y "Development Tools" \
+    && dnf install -y \
+        gcc-c++ pam-devel ncurses ncurses-devel expat expat-devel gettext \
+        rpm-build-libs selinux-policy selinux-policy-devel \
+        pkgconf pkgconf-pkg-config \
+        perl perl-Module-Load-Conditional perl-ExtUtils-MakeMaker perl-IPC-Cmd \
+        perl-IO-Compress \
+        python3 python3-pip python3-devel \
+        git rsync wget which psmisc unzip diffutils file sudo \
+    && dnf clean all
+
+# Hub tools: Node 20 (system nodejs too old for the node: protocol) + less.
+RUN curl -fsSL https://rpm.nodesource.com/setup_20.x | bash - \
+    && dnf install -y nodejs \
+    && dnf clean all
+RUN npm install -g less
+
+ARG PHP_MODULE_STREAM=""
+RUN if [ -n "${PHP_MODULE_STREAM}" ]; then \
+        dnf install -y https://rpms.remirepo.net/enterprise/remi-release-$(rpm -E %rhel).rpm \
+        && dnf module reset -y php \
+        && dnf module enable -y php:${PHP_MODULE_STREAM}; \
+    fi \
+    && dnf install -y php-cli php-xml php-mbstring \
+    && (dnf install -y php-json || true) \
+    && (dnf install -y php-zip || dnf install -y php-pecl-zip || true) \
+    && dnf clean all
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer.phar
+
+# Rust + protobuf for the cargo-based leech2 dep (prebuilt tarballs, shared with Debian).
+COPY --from=ci linux-install-protobuf.sh linux-install-rust.sh /tmp/
+RUN /tmp/linux-install-protobuf.sh
+RUN /tmp/linux-install-rust.sh
+
+# Per-version extras (rhel-8: cfbs py3_shebang_fix macro; rhel-10: patch).
+RUN if [ -n "${EXTRA_PKGS}" ]; then dnf install -y ${EXTRA_PKGS} && dnf clean all; fi
+
+# Build user with passwordless sudo (needed by install-dependencies, package, etc.)
+RUN useradd -m -s /bin/bash builder \
+    && echo "builder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/builder
+
+USER builder
+WORKDIR /home/builder
+
+# Pre-create so a volume mounted here is owned by builder, not root.
+RUN mkdir -p /home/builder/build
