@@ -205,9 +205,10 @@ index 0000000..e331a15
 +AM_CPPFLAGS = -D_POSIX_PTHREAD_SEMANTICS
 +
 +lib_LTLIBRARIES = liblmdb.la
-+liblmdb_la_SOURCES = mdb.c midl.c
++liblmdb_la_SOURCES = mdb.c midl.c module.c
 +liblmdb_la_LDFLAGS=-no-undefined -avoid-version
 +
++LDFLAGS = -ldl
 +bin_PROGRAMS = mdb_stat mdb_copy lmdump lmmgr
 +mdb_stat_LDADD = liblmdb.la
 +mdb_copy_LDADD = liblmdb.la
