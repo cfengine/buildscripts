@@ -173,7 +173,7 @@ chmod 755 $RPM_BUILD_ROOT%prefix/share/cf-support-nova-hub.sh
 # Create symlinks to /usr/local/sbin and /usr/sbin
 mkdir -p $RPM_BUILD_ROOT/usr/local/sbin
 mkdir -p $RPM_BUILD_ROOT/usr/sbin
-for binary in cf-agent cf-check cf-execd cf-hub cf-key cf-monitord cf-net cf-promises cf-reactor cf-runagent cf-secret cf-serverd cf-support cfbs; do
+for binary in cf-agent cf-check cf-execd cf-hub cf-key cf-monitord cf-net cf-promises cf-reactor cf-runagent cf-secret cf-serverd cf-support cf-watchd cfbs; do
   if [ -f $RPM_BUILD_ROOT%{prefix}/bin/$binary ]; then
     ln -sf %{prefix}/bin/$binary $RPM_BUILD_ROOT/usr/local/sbin/$binary
     ln -sf %{prefix}/bin/$binary $RPM_BUILD_ROOT/usr/sbin/$binary
@@ -221,6 +221,7 @@ exit 0
 %prefix/bin/cf-secret
 %prefix/bin/cf-serverd
 %prefix/bin/cf-support
+%prefix/bin/cf-watchd
 # Nova-only binaries
 %prefix/bin/cf-hub
 %prefix/bin/cf-reactor
@@ -363,6 +364,7 @@ exit 0
 /usr/local/sbin/cf-secret
 /usr/local/sbin/cf-serverd
 /usr/local/sbin/cf-support
+/usr/local/sbin/cf-watchd
 %if %{?rhel}%{!?rhel:0} >= 7
 /usr/local/sbin/cfbs
 %endif
@@ -381,6 +383,7 @@ exit 0
 /usr/sbin/cf-secret
 /usr/sbin/cf-serverd
 /usr/sbin/cf-support
+/usr/sbin/cf-watchd
 %if %{?rhel}%{!?rhel:0} >= 7
 /usr/sbin/cfbs
 %endif

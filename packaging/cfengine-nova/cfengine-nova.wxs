@@ -87,6 +87,9 @@
                 <Environment Id='Path' Name='Path' Value='[dir_bin]' Separator=';' Action='set' Part='last' System='yes' />
                 <File Id='cf_serverd.exe' Name='cf-serverd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-serverd.exe' />
               </Component>
+              <Component Id='cf_watchd.exe' Guid='D0017C79-0DE0-4AD6-99AC-55B2A84BF987' Win64='$(var.isWin64)'>
+                <File Id='cf_watchd.exe' Name='cf-watchd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-watchd.exe' />
+              </Component>
               <Component Id='diff.exe' Guid='A343B6FD-A0E9-468A-8678-84647C609DC6' Win64='$(var.isWin64)'>
                 <File Id='diff.exe' Name='diff.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\diff.exe' />
               </Component>
@@ -201,6 +204,7 @@
             <ComponentRef Id='cf_promises.exe' />
             <ComponentRef Id='cf_runagent.exe' />
             <ComponentRef Id='cf_serverd.exe' />
+            <ComponentRef Id='cf_watchd.exe' />
             <ComponentRef Id='cf_secret.exe' />
             <ComponentRef Id='cf_upgrade.exe' />
             <ComponentRef Id='mdb_copy.exe' />

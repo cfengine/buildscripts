@@ -273,7 +273,7 @@ fi
 
 for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent \
          cf-hub cf-reactor \
-         cf-net cf-check cf-support \
+         cf-net cf-check cf-support cf-watchd \
          cfbs;
 do
   if [ `os_type` != redhat ] && [ -x $PREFIX/bin/$i ] && [ -d /usr/local/sbin ]; then

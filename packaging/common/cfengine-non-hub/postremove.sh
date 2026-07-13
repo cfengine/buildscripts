@@ -9,7 +9,7 @@ esac
 
 if [ `os_type` != redhat ]; then
   # These links are handled in .spec file for RedHat
-  for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-net cf-check cf-support; do
+  for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-net cf-check cf-support cf-watchd; do
     rm -f /usr/local/sbin/$i || true
   done
 fi
