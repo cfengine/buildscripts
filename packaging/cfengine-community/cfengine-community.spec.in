@@ -81,7 +81,7 @@ rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-postgres.service
 # Create symlinks to /usr/local/sbin and /usr/sbin
 mkdir -p $RPM_BUILD_ROOT/usr/local/sbin
 mkdir -p $RPM_BUILD_ROOT/usr/sbin
-for binary in cf-agent cf-check cf-execd cf-key cf-monitord cf-net cf-promises cf-runagent cf-secret cf-serverd cf-support; do
+for binary in cf-agent cf-check cf-execd cf-key cf-monitord cf-net cf-promises cf-runagent cf-secret cf-serverd cf-support cf-watchd; do
   ln -sf %{prefix}/bin/$binary $RPM_BUILD_ROOT/usr/local/sbin/$binary
   ln -sf %{prefix}/bin/$binary $RPM_BUILD_ROOT/usr/sbin/$binary
 done
@@ -115,6 +115,7 @@ done
 %prefix/bin/cf-serverd
 %prefix/bin/cf-support
 %prefix/bin/cf-upgrade
+%prefix/bin/cf-watchd
 # Libraries
 %dir %prefix/lib
 %prefix/lib/lib*.so*
@@ -179,6 +180,7 @@ done
 /usr/local/sbin/cf-secret
 /usr/local/sbin/cf-serverd
 /usr/local/sbin/cf-support
+/usr/local/sbin/cf-watchd
 
 # Symlinks to /usr/sbin (included in secure_path)
 /usr/sbin/cf-agent
@@ -192,6 +194,7 @@ done
 /usr/sbin/cf-secret
 /usr/sbin/cf-serverd
 /usr/sbin/cf-support
+/usr/sbin/cf-watchd
 
 # Documentation
 %defattr(644,root,root,755)

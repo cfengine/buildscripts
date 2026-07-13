@@ -17,6 +17,7 @@
 /var/cfengine/bin/cf-secret
 /var/cfengine/bin/cf-support
 /var/cfengine/bin/cf-upgrade
+/var/cfengine/bin/cf-watchd
 /var/cfengine/lib/lib*.so.*
 /var/cfengine/lib/python/*
 /var/cfengine/lib/cfengine-enterprise.so

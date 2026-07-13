@@ -21,6 +21,7 @@
 /var/cfengine/bin/cf-secret
 /var/cfengine/bin/cf-serverd
 /var/cfengine/bin/cf-support
+/var/cfengine/bin/cf-watchd
 /var/cfengine/bin/rsync
 /var/cfengine/bin/cfengine3-nova-hub-init-d.sh
 /var/cfengine/bin/git
