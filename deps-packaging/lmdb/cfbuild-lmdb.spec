@@ -19,9 +19,9 @@ Patch0: mdb.patch
 
 %if %{?with_debugsym}%{!?with_debugsym:0}
 %define debug_package %{nil}
-%define cflags CFLAGS="-ggdb3"
+%define cflags CFLAGS="-ggdb3 -DMDB_MAXKEYSIZE=511"
 %else
-%define cflags CFLAGS=""
+%define cflags CFLAGS="-DMDB_MAXKEYSIZE=511"
 %endif
 
 %ifarch %ix86
