@@ -1,0 +1,93 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Ihor Aleksandrychiev <igor.aleksandrychev@northern.tech>
+Date: Tue, 14 Jul 2026 15:19:32 +0300
+Subject: [PATCH] Fix Windows/mingw LARGE_INTEGER usage in mdb.c
+
+lmdb 1.0.0 introduced incremental dump/load and MDB_RPAGE_CACHE
+remapping code that treats the Windows LARGE_INTEGER union as a
+scalar integer. This does not compile with mingw (x86_64-w64-mingw32),
+failing with 'invalid initializer', 'incompatible types when assigning
+to type LARGE_INTEGER' and 'used union type value where scalar is
+required' in mdb_env_copyfd0() and mdb_env_incr_loadfd().
+
+Access the .QuadPart member on Windows so the offset arithmetic and
+SetFilePointerEx() calls use the correct type.
+
+Upstream tracking: fixed upstream by ITS#10539 ("lmdb: windows cleanup",
+mdb.RE/1.0 commit 8827c7d, 2026-07-14), which landed after the LMDB_1.0.0
+tag we build from. Drop this patch once we update to an lmdb snapshot that
+includes that commit.
+Ref: https://bugs.openldap.org/show_bug.cgi?id=10539
+---
+ libraries/liblmdb/mdb.c | 22 +++++++++++++++++-----
+ 1 file changed, 17 insertions(+), 5 deletions(-)
+
+diff --git a/libraries/liblmdb/mdb.c b/libraries/liblmdb/mdb.c
+index 43fe7b9..6c7078c 100644
+--- a/libraries/liblmdb/mdb.c
++++ b/libraries/liblmdb/mdb.c
+@@ -11623,7 +11623,7 @@ mdb_env_copyfd0(MDB_env *env, HANDLE fd)
+ #endif
+ #if MDB_RPAGE_CACHE
+ #ifdef _WIN32
+-	LARGE_INTEGER	off = 0;
++	LARGE_INTEGER	off = {0};
+ #else
+ 	off_t	off = 0;
+ #endif
+@@ -11687,7 +11687,11 @@ mdb_env_copyfd0(MDB_env *env, HANDLE fd)
+ 	}
+ #if MDB_RPAGE_CACHE
+ 	if (MDB_REMAPPING(env->me_flags)) {
++#ifdef _WIN32
++		off.QuadPart = wsize;
++#else
+ 		off = wsize;
++#endif
+ 	}
+ #endif
+ 	wsize = w3 - wsize;
+@@ -11713,7 +11717,11 @@ mdb_env_copyfd0(MDB_env *env, HANDLE fd)
+ 			wsize -= len;
+ #if MDB_RPAGE_CACHE
+ 			if (MDB_REMAPPING(env->me_flags)) {
++#ifdef _WIN32
++				off.QuadPart += len;
++#else
+ 				off += len;
++#endif
+ 			}
+ #endif
+ 			continue;
+@@ -11955,7 +11963,8 @@ mdb_env_incr_loadfd(MDB_env *env, HANDLE fd)
+ 		return ENOMEM;
+ 
+ #ifdef _WIN32
+-		SetFilePointerEx(env->me_fd, 0, NULL, FILE_BEGIN);
++		off.QuadPart = 0;
++		SetFilePointerEx(env->me_fd, off, NULL, FILE_BEGIN);
+ #else
+ 		lseek(env->me_fd, 0, SEEK_SET);
+ #endif
+@@ -12020,15 +12029,18 @@ mdb_env_incr_loadfd(MDB_env *env, HANDLE fd)
+ 			ptr += rlen;
+ 			rsize -= rlen;
+ 		}
+-		off = (pg-prevpg-numprev) * env->me_psize;
+ 		rsize = numpgs * env->me_psize;
+-		if (off) {
+ #ifdef _WIN32
++		off.QuadPart = (pg-prevpg-numprev) * env->me_psize;
++		if (off.QuadPart) {
+ 			SetFilePointerEx(env->me_fd, off, NULL, FILE_CURRENT);
++		}
+ #else
++		off = (pg-prevpg-numprev) * env->me_psize;
++		if (off) {
+ 			lseek(env->me_fd, off, SEEK_CUR);
+-#endif
+ 		}
++#endif
+ 		ptr = pbuf;
+ 		while (rsize > 0) {
+ 			w2 = (rsize > MAX_WRITE) ? MAX_WRITE: rsize;
