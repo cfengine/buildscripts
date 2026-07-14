@@ -39,12 +39,15 @@ esac
 # On RHEL the macro PATH_MAX is in linux/limits.h, not limits.h
 patch -p1 < %{_topdir}/SOURCES/fixed-undeclared-identifier-PATH_MAX.patch
 
-make CURL_LDFLAGS="-lcurl"
+# git 2.55+ builds an experimental Rust libgitcore by default (needs cargo).
+# We bundle git only as a dependency and don't use those features, so disable
+# Rust to keep the pre-2.55 behavior and avoid requiring cargo in the build env.
+make NO_RUST=YesPlease CURL_LDFLAGS="-lcurl"
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
 
-make install DESTDIR=${RPM_BUILD_ROOT}
+make NO_RUST=YesPlease install DESTDIR=${RPM_BUILD_ROOT}
 
 # Removing unused files
 
