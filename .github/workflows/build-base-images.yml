@@ -20,6 +20,9 @@ jobs:
           - debian-11
           - debian-12
           - debian-13
+          - rhel-8
+          - rhel-9
+          - rhel-10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6

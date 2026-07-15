@@ -43,5 +43,37 @@
     "base_image": "debian:13",
     "base_image_sha": "sha256:d07d1b51c39f51188e60be9b64e6bf769fa94e187f092bc32b91305cfa34ba5a",
     "dockerfile": "Dockerfile.debian"
+  },
+  "rhel-8": {
+    "image_name": "cfengine-builder-rhel-8",
+    "image_version": "latest",
+    "base_image": "rockylinux/rockylinux:8",
+    "base_image_sha": "sha256:e8a49c5403b687db05d4d67333fa45808fbe74f36e683cec7abb1f7d0f2338c6",
+    "dockerfile": "Dockerfile.rhel",
+    "extra_build_args": {
+      "CRB_REPO": "powertools",
+      "PHP_MODULE_STREAM": "remi-8.3",
+      "EXTRA_PKGS": "python3-rpm-macros platform-python-devel"
+    }
+  },
+  "rhel-9": {
+    "image_name": "cfengine-builder-rhel-9",
+    "image_version": "latest",
+    "base_image": "rockylinux/rockylinux:9",
+    "base_image_sha": "sha256:8101994123cf3d0a8fee517bee7f39e555c7d92bd2d9eb3303cc988a0eeed00f",
+    "dockerfile": "Dockerfile.rhel",
+    "extra_build_args": {
+      "PHP_MODULE_STREAM": "remi-8.3"
+    }
+  },
+  "rhel-10": {
+    "image_name": "cfengine-builder-rhel-10",
+    "image_version": "latest",
+    "base_image": "rockylinux/rockylinux:10",
+    "base_image_sha": "sha256:827d37bc128288ccf160ee318bb3cb92d591164cb217e92f8bc61e3982ae1834",
+    "dockerfile": "Dockerfile.rhel",
+    "extra_build_args": {
+      "EXTRA_PKGS": "patch"
+    }
   }
 }

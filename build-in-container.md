@@ -58,14 +58,22 @@ None of the above arguments are required for `--update`.
 
 ## Supported platforms
 
-| Name        | Base image     |
-| ----------- | -------------- |
-| `ubuntu-20` | `ubuntu:20.04` |
-| `ubuntu-22` | `ubuntu:22.04` |
-| `ubuntu-24` | `ubuntu:24.04` |
-| `debian-11` | `debian:11`    |
-| `debian-12` | `debian:12`    |
-| `debian-13` | `debian:13`    |
+| Name        | Base image                 |
+| ----------- | -------------------------- |
+| `ubuntu-20` | `ubuntu:20.04`             |
+| `ubuntu-22` | `ubuntu:22.04`             |
+| `ubuntu-24` | `ubuntu:24.04`             |
+| `debian-11` | `debian:11`                |
+| `debian-12` | `debian:12`                |
+| `debian-13` | `debian:13`                |
+| `rhel-8`    | `rockylinux/rockylinux:8`  |
+| `rhel-9`    | `rockylinux/rockylinux:9`  |
+| `rhel-10`   | `rockylinux/rockylinux:10` |
+
+RHEL packages are built on Rocky Linux base images. The build scripts detect
+`OS=rhel` from `/etc/redhat-release` (which reports `Rocky Linux release ...`),
+so the produced `.rpm`s are ordinary Red Hat / rpm packages. AlmaLinux is _not_
+recognized by `build-scripts/detect-environment`, which is why Rocky is used.
 
 Adding a new Debian/Ubuntu platform requires a new entry in `platforms.json`
 and adding the platform name to the matrix in
@@ -85,8 +93,17 @@ The new entry in `platforms.json` needs:
 --platform <new-platform>` and it will fetch the current digest from
   Docker Hub and write it into `platforms.json`.
 
-Adding a non-debian based platform (e.g.,
-RHEL/CentOS) requires a new `container/Dockerfile.rhel` plus platform entries.
+Adding another RHEL-family platform (a new Rocky/RHEL major version) works the
+same way: add a `platforms.json` entry with `"dockerfile": "Dockerfile.rhel"`
+and a matrix entry, then set any per-version `extra_build_args` — `CRB_REPO`
+(`powertools` on 8, `crb` on 9+), `PHP_MODULE_STREAM` (`remi-8.3` where the
+distro's default PHP is older than 8.3; RHEL 10 already ships 8.3), and
+`EXTRA_PKGS` for version-specific packages. Note that `--update-sha` also works
+for the namespaced `rockylinux/rockylinux` base images, not just official
+Docker Hub library images.
+
+Adding an entirely different, non-RHEL/non-Debian platform family (e.g. SUSE)
+would require a new `container/Dockerfile.<family>` plus platform entries.
 
 ## How it works
 
@@ -100,8 +117,10 @@ The system has three components:
    source repos from the read-only mount, then calls the existing build scripts
    in order.
 
-3. **`container/Dockerfile.debian`** -- parameterized Dockerfile shared by all
-   Debian/Ubuntu platforms via a `BASE_IMAGE` build arg.
+3. **`container/Dockerfile.debian`** and **`container/Dockerfile.rhel`** --
+   parameterized Dockerfiles shared across platforms of the same family via a
+   `BASE_IMAGE` build arg (plus per-platform `extra_build_args` in
+   `platforms.json`, e.g. the CRB repo name and PHP module stream for RHEL).
 
 ### Container mounts
 

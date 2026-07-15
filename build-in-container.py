@@ -195,9 +195,12 @@ def update_platform_versions(platform_name=None):
 def latest_base_image_digest(base_image):
     """Fetch current manifest digest from Docker Hub for a base image."""
     # Docker Hub's v2 API path requires a namespace. Official images (ubuntu,
-    # debian, ...) live under "library/".
+    # debian, ...) carry no namespace and live under "library/"; images that
+    # already have an "org/name" namespace (e.g. rockylinux/rockylinux) are
+    # used as-is.
     repo, tag = base_image.rsplit(":", 1)
-    repo = f"library/{repo}"
+    if "/" not in repo:
+        repo = f"library/{repo}"
 
     # The v2 API requires a bearer token even for anonymous public pulls.
     token_url = (
