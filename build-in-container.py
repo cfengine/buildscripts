@@ -298,6 +298,13 @@ def run_container(args, image_tag, source_dir, script_dir):
     if args.version:
         cmd.extend(["-e", f"EXPLICIT_VERSION={args.version}"])
 
+    # Cross-compilation target (e.g. x64-mingw for Windows MSI builds). The
+    # build-scripts derive OS/PACKAGING/ARCH from CROSS_TARGET; an env-set value
+    # takes precedence over Jenkins label detection.
+    cross_target = get_config()[args.platform].get("cross_target")
+    if cross_target:
+        cmd.extend(["-e", f"CROSS_TARGET={cross_target}"])
+
     cmd.append(image_tag)
 
     if args.shell:
@@ -417,6 +424,13 @@ def parse_args():
     if not args.build_type:
         parser.error("missing required argument --build-type")
 
+    # Cross-compiled Windows (mingw) builds are always Enterprise agent builds.
+    if get_config()[args.platform].get("cross_target"):
+        if args.project != "nova":
+            parser.error(f"--platform {args.platform} requires --project nova")
+        if args.role != "agent":
+            parser.error(f"--platform {args.platform} requires --role agent")
+
     return args
 
 
@@ -481,6 +495,7 @@ def main():
         packages = (
             list(output_dir.glob("*.deb"))
             + list(output_dir.glob("*.rpm"))
+            + list(output_dir.glob("*.msi"))
             + list(output_dir.glob("*.tar.gz"))
         )
         if packages:

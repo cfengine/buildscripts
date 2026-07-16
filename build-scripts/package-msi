@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# package-msi: Build Windows MSI installer package for CFEngine using WiX Toolset
+# package-msi: Build Windows MSI installer package for CFEngine
 # This script creates a Windows installer (.msi) file for CFEngine Nova
 # It handles both x86 (32-bit) and x64 (64-bit) architectures
 
@@ -10,57 +10,8 @@
 . compile-options
 . version
 
-# Path where WiX toolset binaries will be installed
-WIXPATH="$HOME/wix"
-
-# Check if WiX tools are installed, install them if not present
-log_debug "Checking for WiX tools at $WIXPATH"
-if [ -f "$WIXPATH/candle.exe" ] && [ -f "$WIXPATH/light.exe" ]; then
-    log_debug "WiX tools found - candle.exe and light.exe are present"
-else
-    log_debug "WiX tools not found - starting installation"
-    (
-        # Download prerequisites from build artifacts cache server
-        cd /tmp || exit
-        echo '
-get /export/images/windows/wix310-binaries.zip
-get /export/images/windows/wine-folder.tar.xz
-' | sftp -b - jenkins_sftp_cache@build-artifacts-cache.cloud.cfengine.com
-
-        # Verify downloaded files
-        sha256sum -c - <<EOF || exit 42
-493145b3fac22bdf8c55142a9f96ef8136d56b38d78a2322f13f1ba11f9cf2f8  wix310-binaries.zip
-3510fd8c4ecb4a9c479dfe43849183c666f9e41b019fc7135dc8735d0032d16e  wine-folder.tar.xz
-EOF
-        # Install WiX Toolset binaries
-        mkdir -p "$WIXPATH"
-        cd "$WIXPATH" || exit
-        unzip /tmp/wix310-binaries.zip
-        chown "$USER":"$USER" -R "$WIXPATH"
-
-        # Extract pre-configured Wine environment with .NET Framework
-        # This archive contains a Wine prefix with dotnet45 already installed
-        # (created by running "winetricks dotnet45" on a fresh Wine installation)
-        cd "$HOME" || exit
-        tar -xJf /tmp/wine-folder.tar.xz
-        chown "$USER":"$USER" -R "$HOME"/.wine
-
-        # Prevent .exe files from auto launching with wine (breaks cross compile checks).
-        sudo update-binfmts --package wine --remove wine /usr/bin/wine
-    )
-fi
-
-# Wine configuration requirements for running WiX tools:
-# * You must use Wine 32-bit (wine:i386)
-# * The host must have run "winetricks dotnet45" and clicked through all the
-#   installations.
-#
-# This was tested with WiX tools 3.10.
-# Define WiX tool commands - candle.exe compiles .wxs files, light.exe links them
-#
-# TODO: ENT-13249: candle.exe and light.exe have been replaced with the single WiX build command.
-CANDLE="wine $WIXPATH/candle.exe"
-LIGHT="wine $WIXPATH/light.exe"
+# MSI packaging uses wixl (GNOME msitools), which builds Windows MSIs natively
+# on Linux - no Windows and no Wine.
 
 # Determine build directory name based on Jenkins job or version/arch
 log_debug "Determining build directory name (JOB_NAME=$JOB_NAME, VERSION=$VERSION, ARCH=$ARCH)"
@@ -136,28 +87,28 @@ pre() {
     fi
 }
 
-# candle() - Compile WiX source file (.wxs) into WiX object file (.wixobj)
+# wixl_build() - Build the MSI from the WiX source using wixl (msitools).
 # Parameters:
 #   $1 - REVISION: The version number for the MSI package
-# Defines preprocessor variables for the WiX compilation:
-#   CfSourceDir: Current directory containing files to package
-#   CfVersion: Version number for the package
-#   CfArch: Architecture (x86 or x64)
-candle() {
+# wixl preprocessor variables (-D name=value):
+#   CfSourceDir: Current directory containing files to package (".")
+#   CfVersion:   Version number for the package
+#   CfArch:      Architecture (x86 or x64) - consumed by the .wxs for e.g.
+#                OpenSSL DLL naming.
+# "-a" sets the target architecture.
+wixl_build() {
     REVISION="$1"
-    log_debug "Running candle with REVISION=$REVISION, ARCH=$ARCH"
-    $CANDLE -dCfSourceDir=. -dCfVersion="$REVISION" -dCfArch="$ARCH" cfengine-nova.wxs
-}
-
-# light() - Link WiX object file into final MSI package
-# Uses WiX linker to create the MSI from compiled object file
-# Options:
-#   -sval: Suppress validation (speeds up build)
-#   -sice:ICE20: Suppress ICE20 validation (makes sure you have the necessary dialogs defined to handle things like showing a friendly message when the user cancels the install)
-#   -ext WixUtilExtension: Include WiX utility extension for additional functionality
-light() {
-    log_debug "Running light to link WiX object into MSI"
-    $LIGHT -sval -sice:ICE20 -ext WixUtilExtension cfengine-nova.wixobj
+    case "$ARCH" in
+    x86 | x64) wixl_arch="$ARCH" ;;
+    *)
+        log_error "Unknown architecture: $ARCH"
+        exit 1
+        ;;
+    esac
+    log_debug "Running wixl with REVISION=$REVISION, ARCH=$ARCH"
+    wixl -a "$wixl_arch" \
+        -D CfSourceDir=. -D CfVersion="$REVISION" -D CfArch="$ARCH" \
+        -o cfengine-nova.msi cfengine-nova.wxs
 }
 
 # package() - Main packaging function that creates the MSI installer
@@ -220,39 +171,9 @@ package() {
     # Pad with zeros if needed, then truncate to exactly 4 components
     REVISION=$(echo "$REVISION".0.0.0 | cut -d '.' -f 1-4)
 
-    # Work around WiX's 128-character path length limitation
-    # Long Jenkins workspace paths often exceed this limit
-    # Solution: Create a Wine drive letter symlink to current directory
-    # This provides a shorter path like D:\ instead of /home/user/very/long/path
-
-    # Find an available drive letter for Wine mapping
-    # Start from Y: and work backwards (Z: is typically mapped to root /)
-    log_debug "Finding available Wine drive letter for path limitation workaround"
-    WORKSPACE_DRIVE=
-    for letter in y x w v u t s r q p o n m l k j i h g f e d; do
-        if [ ! -e "$HOME"/.wine/dosdevices/$letter: ]; then
-            WORKSPACE_DRIVE=$letter:
-            log_debug "Using Wine drive letter $WORKSPACE_DRIVE mapped to $PWD"
-            # Create symlink from Wine drive letter to current directory
-            ln -s "$PWD" "$HOME"/.wine/dosdevices/$WORKSPACE_DRIVE
-            break
-        fi
-    done
-
-    if [ -z "$WORKSPACE_DRIVE" ]; then
-        echo "Unable to find a free drive letter for Wine path."
-        exit 2
-    fi
-
-    # Run WiX compilation and linking steps
-    log_debug "Starting WiX compilation and linking with final REVISION=$REVISION"
-    ret=0
-    candle "$REVISION" && light || ret=$?
-
-    # Clean up Wine drive letter mapping to prevent conflicts in future builds
-    rm -f "$HOME"/.wine/dosdevices/$WORKSPACE_DRIVE
-
-    return $ret
+    # Build the MSI natively with wixl.
+    log_debug "Starting wixl build with final REVISION=$REVISION"
+    wixl_build "$REVISION"
 }
 
 # post() - Post-processing function to finalize the MSI package
