@@ -6,13 +6,6 @@
 # jenkins user, based on root's credentials (will copy its keys). The script is
 # expected to be sourced early in the user-data phase after provisioning.
 
-# It will also create a port forwarding rule from port 222 to localhost:22. This
-# is equivalent to logging in on port 22, but the reason this is necessary is to
-# stop Jenkins from logging in too early. If it tries to login too early, it
-# will find the port open, but the key for the jenkins user might not be
-# accepted yet, and it will give up. However, if we keep port 222 closed until
-# we know it's ready, it will keep trying and eventually succeed.
-
 # Make sure error detection and verbose output is on, if they aren't already.
 set -x -e
 
@@ -55,18 +48,6 @@ if test -f /etc/hosts; then
     sed -i -e '1s/^/127.0.0.1 localhost localhost.localdomain\n/' /etc/hosts
 else
     echo '127.0.0.1 localhost localhost.localdomain' >/etc/hosts
-fi
-
-# Open SSH port on 222.
-if type iptables >/dev/null 2>&1; then
-    iptables -t nat -I PREROUTING 1 -p tcp --dport 222 -j DNAT --to-dest :22
-    iptables -t nat -I OUTPUT 1 -p tcp --dst 127.0.0.1 --dport 222 -j DNAT --to-dest :22
-else
-    # for RHEL8: change port number in sshd_config and allow it in SELinux policy
-    yum -e 0 -d 0 -y install policycoreutils-python-utils
-    semanage port -a -t ssh_port_t -p tcp 222
-    sed -i '/Port 22/a Port 222' /etc/ssh/sshd_config
-    systemctl restart sshd
 fi
 
 apt_get() {
