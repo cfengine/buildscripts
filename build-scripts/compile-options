@@ -32,11 +32,6 @@ export PROJECT
 # It's a flag: if it's set to 1 - then we use system OpenSSL.
 # Otherwise, we build it.
 if [ -z "$SYSTEM_SSL" ]; then
-    if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]; then
-        if [ "$OS_VERSION_MAJOR" -ge "15" ]; then
-            SYSTEM_SSL=1
-        fi
-    fi
     # Detect using system ssl when running a Jenkins job
     # shellcheck disable=SC2154
     # > label is referenced but not assigned.
