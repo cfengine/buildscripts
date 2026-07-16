@@ -32,9 +32,11 @@ for repo in $repos; do
     # Exclude acceptance test workdirs — they contain broken symlinks left
     # over from previous test runs and are not needed for building.
     # Also skip node_modules/vendor for hub builds.
+    # Also skip compilation results *.o, *.lo, *.la as the local copy is likely a different platform/OS than inside the container
     if [ -d "$src" ] || [ -L "$src" ]; then
         echo "Syncing $repo..."
         sudo rsync -aL --exclude='config.cache' --exclude='workdir' \
+            --exclude='*.o' --exclude='*.lo' --exclude='*.la' \
             --exclude='node_modules' --exclude='vendor' \
             --chown="$(id -u):$(id -g)" "$src/" "$BASEDIR/$repo/"
     else
