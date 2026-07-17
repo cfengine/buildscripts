@@ -120,8 +120,8 @@ bundle agent cfengine_build_host_setup
       "gcc";
 
       "ncurses-devel"
-        if => not("sles_15"),
-        comment => "sles 15 requires a downgrade to install ncurses-devel as of July 25, 2025";
+        if => not("sles_15|sles_12"),
+        comment => "sles 12/15 require a downgrade to install ncurses-devel; handled by the commands: promise below";
 
       "pam-devel";
       "rsync";
@@ -580,9 +580,9 @@ jenkins ALL=NOPASSWD: /usr/bin/podman
         depends_on => { "rpm_build_installed" };
 
   commands:
-    sles_15::
+    sles_15|sles_12::
       "zypper --non-interactive install --allow-downgrade ncurses-devel"
-        comment => "Special case mentioned elsewhere in this policy. ncurses-devel requires a downgrade as of July 25 2025",
+        comment => "Special case mentioned elsewhere in this policy. ncurses-devel requires a downgrade (sles 15 since July 25 2025; sles 12 SP5 since 2026)",
         contain => in_shell;
 
     (redhat_8|centos_8|redhat_9|redhat_10).(!have_perl_package_installed).(yum_dnf_conf_ok)::
