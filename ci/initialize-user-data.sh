@@ -23,9 +23,10 @@ echo "jenkins ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers
 # Disable TTY requirement.
 sed -i -e 's/^\( *Defaults *requiretty *\)$/# \1/' /etc/sudoers
 
-# Copy the mender-qa repository to jenkins user.
-cp -r /root/mender-qa /home/jenkins
-cp /root/mender-qa/data/known_hosts                    /home/jenkins/.ssh/known_hosts
+# Copy the buildscripts repository to jenkins user.
+cp -r /root/buildscripts /home/jenkins
+# was copying build-artifacts-cache known host entry
+#cp /root/mender-qa/data/known_hosts                    /home/jenkins/.ssh/known_hosts
 
 
 # add authorized_keys file before chowning, so that initialize-build-host.sh can manage

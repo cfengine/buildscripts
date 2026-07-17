@@ -204,9 +204,9 @@ reset_nested_vm() {
     if sudo dmesg | grep -q "BIOS Google"
     then
 	# We're in Google Cloud, so just need to run nested-vm script again
-        if [ ! -d $HOME/mender-qa ]
+        if [ ! -d $HOME/buildscripts ]
 	then
-            echo "Where is mender-qa repo gone?"
+            echo "Where is buildscripts repo gone?"
 	    sudo ls -lap $HOME
 	    exit 1
         fi
@@ -231,6 +231,7 @@ reset_nested_vm() {
                 sudo arp -d $ip
             fi
 	fi
+        # TODO, remove this, we don't need or use or test nested-vms
 	$HOME/mender-qa/scripts/nested-vm.sh $HOME/*.qcow2
         login="`cat $(pwd)/proxy-target.txt`"
         if $RSH $login true
@@ -363,9 +364,9 @@ then
     # the repository in provisioning. Permanent hosts don't keep it in HOME,
     # in order to avoid it getting stale, and will have it in the WORKSPACE
     # instead, synced separately below.
-    if [ -d $HOME/mender-qa ]
+    if [ -d $HOME/buildscripts ]
     then
-        $RSYNC -e "$RSH"    $HOME/mender-qa  $login:.
+        $RSYNC -e "$RSH"    $HOME/buildscripts  $login:.
     fi
 
     # Copy the workspace. If there is no workspace defined, we are not in the
