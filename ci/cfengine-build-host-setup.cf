@@ -86,6 +86,11 @@ bundle agent cfengine_build_host_setup
     mingw_build_host::
       "mingw-w64";
 
+      # build-scripts/package-msi builds the MSI natively with wixl; msiinfo
+      # (msitools) is used to inspect it. No Wine, no i386. See ENT-13868.
+      "wixl";
+      "msitools";
+
       "binfmt-support"
         comment => "update-binfmts command needed for build-scripts/package-msi script";
 
