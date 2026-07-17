@@ -4,21 +4,21 @@ Date: Wed, 18 Feb 2015 09:40:20 +0100
 Subject: [PATCH 03/10] Autoconf files.
 
 ---
- libraries/liblmdb/Makefile     | 117 ---------------------------------
+ libraries/liblmdb/Makefile     | 177 ---------------------------------
  libraries/liblmdb/Makefile.am  |  13 ++++
- libraries/liblmdb/configure.ac |  42 ++++++++++++
+ libraries/liblmdb/configure.ac |  46 ++++++++++++
  libraries/liblmdb/mdb.c        |   6 ++
- 4 files changed, 61 insertions(+), 117 deletions(-)
+ 4 files changed, 65 insertions(+), 177 deletions(-)
  delete mode 100644 libraries/liblmdb/Makefile
  create mode 100644 libraries/liblmdb/Makefile.am
  create mode 100644 libraries/liblmdb/configure.ac
 
 diff --git a/libraries/liblmdb/Makefile b/libraries/liblmdb/Makefile
 deleted file mode 100644
-index f254511..0000000
---- a/libraries/liblmdb/Makefile
+index 9fd819b..0000000
+--- a/Makefile
 +++ /dev/null
-@@ -1,118 +0,0 @@
+@@ -1,177 +0,0 @@
 -# Makefile for liblmdb (Lightning memory-mapped database library).
 -
 -########################################################################
@@ -29,7 +29,7 @@ index f254511..0000000
 -# platforms; you should not need to change any of these.
 -# Read their descriptions in mdb.c if you do:
 -#
--# - MDB_USE_POSIX_SEM
+-# - MDB_USE_POSIX_MUTEX, MDB_USE_POSIX_SEM, MDB_USE_SYSV_SEM
 -# - MDB_DSYNC
 -# - MDB_FDATASYNC
 -# - MDB_FDATASYNC_WORKS
@@ -45,9 +45,18 @@ index f254511..0000000
 -THREADS = -pthread
 -OPT = -O2 -g
 -CFLAGS	= $(THREADS) $(OPT) $(W) $(XCFLAGS)
--LDLIBS	=
--SOLIBS	=
+-LDFLAGS = $(THREADS)
+-LDLIBS	= 
+-SOLIBS	= 
 -SOEXT	= .so
+-LDL		= -ldl
+-
+-LIBVER	= 1
+-ABIVER	= 0
+-VEREXT	= $(LIBVER).$(ABIVER)
+-LMDB_VERSION	= 1.0.0
+-SOFULL	= $(SOEXT).$(VEREXT)
+-
 -prefix	= /usr/local
 -exec_prefix = $(prefix)
 -bindir = $(exec_prefix)/bin
@@ -59,11 +68,20 @@ index f254511..0000000
 -########################################################################
 -
 -IHDRS	= lmdb.h
--ILIBS	= liblmdb.a liblmdb$(SOEXT)
--IPROGS	= mdb_stat mdb_copy mdb_dump mdb_load
--IDOCS	= mdb_stat.1 mdb_copy.1 mdb_dump.1 mdb_load.1
+-ILIBS	= liblmdb.a
+-ILIBS2	= liblmdb$(SOFULL)
+-IPROGS	= mdb_stat mdb_copy mdb_dump mdb_load mdb_drop
+-IDOCS	= mdb_stat.1 mdb_copy.1 mdb_dump.1 mdb_load.1 mdb_drop.1
 -PROGS	= $(IPROGS) mtest mtest2 mtest3 mtest4 mtest5
--all:	$(ILIBS) $(PROGS)
+-RPROGS	= mtest_remap mtest_enc mtest_enc2
+-SOVER	= liblmdb$(SOEXT).$(LIBVER)
+-VERSION_OPT	= -Wl,-soname,$(SOVER)
+-# For MacOSX:
+-#VERSION_OPT	= -Wl,-current_version,$(VEREXT)
+-
+-all:	$(ILIBS) $(ILIBS2) $(PROGS) lmdb.pc
+-# Requires CPPFLAGS=-DMDB_VL32 and/or -DMDB_RPAGE_CACHE
+-rall:	all $(RPROGS)
 -
 -install: $(ILIBS) $(IPROGS) $(IHDRS)
 -	mkdir -p $(DESTDIR)$(bindir)
@@ -72,34 +90,59 @@ index f254511..0000000
 -	mkdir -p $(DESTDIR)$(mandir)/man1
 -	for f in $(IPROGS); do cp $$f $(DESTDIR)$(bindir); done
 -	for f in $(ILIBS); do cp $$f $(DESTDIR)$(libdir); done
+-	for f in $(ILIBS2); do cp $$f $(DESTDIR)$(libdir); \
+-		i=`basename -s .$(ABIVER) $$f`; rm -f $(DESTDIR)$(libdir)/$$i; \
+-		ln -s $$f $(DESTDIR)$(libdir)/$$i; \
+-		i=`basename -s .$(LIBVER) $$i`; rm -f $(DESTDIR)$(libdir)/$$i; \
+-		ln -s $$f $(DESTDIR)$(libdir)/$$i; done
 -	for f in $(IHDRS); do cp $$f $(DESTDIR)$(includedir); done
 -	for f in $(IDOCS); do cp $$f $(DESTDIR)$(mandir)/man1; done
 -
 -clean:
--	rm -rf $(PROGS) *.[ao] *.[ls]o *~ testdb
+-	rm -rf $(PROGS) $(RPROGS) *.[ao] *.[ls]o *.so.* *~ testdb
 -
 -test:	all
 -	rm -rf testdb && mkdir testdb
 -	./mtest && ./mdb_stat testdb
 -
--liblmdb.a:	mdb.o midl.o
--	$(AR) rs $@ mdb.o midl.o
+-liblmdb.a:	mdb.o midl.o module.o
+-	$(AR) rs $@ mdb.o midl.o module.o
 -
--liblmdb$(SOEXT):	mdb.lo midl.lo
+-liblmdb$(SOFULL):	mdb.lo midl.lo module.lo
 -#	$(CC) $(LDFLAGS) -pthread -shared -Wl,-Bsymbolic -o $@ mdb.o midl.o $(SOLIBS)
--	$(CC) $(LDFLAGS) -pthread -shared -o $@ mdb.lo midl.lo $(SOLIBS)
+-	$(CC) $(LDFLAGS) -shared $(VERSION_OPT) -o $@ mdb.lo midl.lo module.lo $(SOLIBS) $(LDL)
+-	rm -f liblmdb$(SOEXT); ln -s $@ liblmdb$(SOEXT)
+-	rm -f $(SOVER); ln -s $@ $(SOVER)
 -
 -mdb_stat: mdb_stat.o liblmdb.a
+-	$(CC) $(LDFLAGS) -o $@ $^ $(LDL)
 -mdb_copy: mdb_copy.o liblmdb.a
+-	$(CC) $(LDFLAGS) -o $@ $^ $(LDL)
 -mdb_dump: mdb_dump.o liblmdb.a
+-	$(CC) $(LDFLAGS) -o $@ $^ $(LDL)
 -mdb_load: mdb_load.o liblmdb.a
+-	$(CC) $(LDFLAGS) -o $@ $^ $(LDL)
+-mdb_drop: mdb_drop.o liblmdb.a
+-	$(CC) $(LDFLAGS) -o $@ $^ $(LDL)
 -mtest:    mtest.o    liblmdb.a
 -mtest2:	mtest2.o liblmdb.a
 -mtest3:	mtest3.o liblmdb.a
 -mtest4:	mtest4.o liblmdb.a
 -mtest5:	mtest5.o liblmdb.a
 -mtest6:	mtest6.o liblmdb.a
+-mtest_remap:  mtest_remap.o liblmdb.a
+-mtest_enc:    mtest_enc.o chacha8.o liblmdb.a
+-mtest_enc2:	  mtest_enc2.o liblmdb.a crypto.lm
+-	$(CC) $(LDFLAGS) -pthread -o $@ $@.o liblmdb.a $(LDL)
+-mtest_enc3:	  mtest_enc3.o liblmdb.a crypto.lm
+-	$(CC) $(LDFLAGS) -pthread -o $@ $@.o liblmdb.a $(LDL)
+-mtest_enc4:	  mtest_enc4.o liblmdb.a crypto.lm
+-	$(CC) $(LDFLAGS) -pthread -o $@ $@.o liblmdb.a $(LDL)
+-
 -mplay:	mplay.o liblmdb.a
+-
+-crypto.lm:	crypto.c
+-	$(CC) -shared $(CFLAGS) -o $@ $^ -lsodium
 -
 -mdb.o: mdb.c lmdb.h midl.h
 -	$(CC) $(CFLAGS) $(CPPFLAGS) -c mdb.c
@@ -113,11 +156,27 @@ index f254511..0000000
 -midl.lo: midl.c midl.h
 -	$(CC) $(CFLAGS) -fPIC $(CPPFLAGS) -c midl.c -o $@
 -
+-module.lo: module.c lmdb.h
+-	$(CC) $(CFLAGS) -fPIC $(CPPFLAGS) -c module.c -o $@
+-
 -%:	%.o
 -	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LDLIBS) -o $@
 -
 -%.o:	%.c lmdb.h
 -	$(CC) $(CFLAGS) $(CPPFLAGS) -c $<
+-
+-lmdb.pc: Makefile
+-	@echo "prefix=$(prefix)" > $@
+-	@echo "exec_prefix=$(exec_prefix)" >>$@
+-	@echo "includedir=$(includedir)" >>$@
+-	@echo "libdir=$(libdir)" >>$@
+-	@echo >>$@
+-	@echo "Name: lmdb (OpenLDAP)" >>$@
+-	@echo "Description: OpenLDAP Lightning Memory Mapped Database library" >>$@
+-	@echo "URL: https://www.openldap.org" >>$@
+-	@echo "Version: $(LMDB_VERSION)" >>$@
+-	@echo "Cflags: $(THREADS) $(XCFLAGS)" >>$@
+-	@echo "Libs: -llmdb $(LDL) $(THREADS)" >>$@
 -
 -COV_FLAGS=-fprofile-arcs -ftest-coverage
 -COV_OBJS=xmdb.o xmidl.o
@@ -146,7 +205,7 @@ index 0000000..e331a15
 +AM_CPPFLAGS = -D_POSIX_PTHREAD_SEMANTICS
 +
 +lib_LTLIBRARIES = liblmdb.la
-+liblmdb_la_SOURCES = mdb.c midl.c
++liblmdb_la_SOURCES = mdb.c midl.c module.c
 +liblmdb_la_LDFLAGS=-no-undefined -avoid-version
 +
 +bin_PROGRAMS = mdb_stat mdb_copy lmdump lmmgr
@@ -161,7 +220,7 @@ new file mode 100644
 index 0000000..3db2251
 --- /dev/null
 +++ b/libraries/liblmdb/configure.ac
-@@ -0,0 +1,42 @@
+@@ -0,0 +1,46 @@
 +AC_INIT([hello], [1.0]) # good
 +AC_CANONICAL_TARGET
 +AM_INIT_AUTOMAKE([foreign])
@@ -184,6 +243,10 @@ index 0000000..3db2251
 +[
 +  AC_MSG_ERROR([Could not find pthreads library])
 +])
++# module.c uses dlopen() on Unix, but Windows (mingw) has no libdl and uses
++# LoadLibrary() instead. Add -ldl to LIBS only when it actually links, so the
++# mingw cross build does not fail with 'cannot find -ldl'.
++AC_CHECK_LIB([dl], [dlopen])
 +AC_CHECK_FUNCS([pthread_mutexattr_settype])
 +AC_CHECK_FUNC([pthread_mutexattr_setrobust],
 +[

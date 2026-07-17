@@ -13,7 +13,10 @@ build-stamp:
 	dh_testdir
 
 	./configure --prefix=$(PREFIX) --with-openssl=$(PREFIX) --without-iconv --with-gitconfig=$(PREFIX)/config/gitconfig --with-gitattributes=$(PREFIX)/config/gitattributes --with-zlib=$(PREFIX) --with-curl=$(PREFIX) --libexecdir=$(PREFIX)/lib
-	make CURL_LDFLAGS="-lcurl"
+	# git 2.55+ builds an experimental Rust libgitcore by default (needs cargo).
+	# We bundle git only as a dependency and don't use those features, so disable
+	# Rust to keep the pre-2.55 behavior and avoid requiring cargo in the build env.
+	make NO_RUST=YesPlease CURL_LDFLAGS="-lcurl"
 
 	touch build-stamp
 
@@ -23,7 +26,7 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+	$(MAKE) NO_RUST=YesPlease install DESTDIR=$(CURDIR)/debian/tmp
 
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/perl*
 	rm -rf $(CURDIR)/debian/tmp$(PREFIX)/lib/python*

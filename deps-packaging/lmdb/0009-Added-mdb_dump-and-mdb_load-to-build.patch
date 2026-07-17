@@ -15,7 +15,7 @@ index e331a15..736a41d 100644
 --- a/libraries/liblmdb/Makefile.am
 +++ b/libraries/liblmdb/Makefile.am
 @@ -4,9 +4,11 @@ lib_LTLIBRARIES = liblmdb.la
- liblmdb_la_SOURCES = mdb.c midl.c
+ liblmdb_la_SOURCES = mdb.c midl.c module.c
  liblmdb_la_LDFLAGS=-no-undefined -avoid-version
  
 -bin_PROGRAMS = mdb_stat mdb_copy lmdump lmmgr

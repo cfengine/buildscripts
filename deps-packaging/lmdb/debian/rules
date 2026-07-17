@@ -27,9 +27,9 @@ build-stamp:
 	# it can't without automake. Work around it by touching that file.
 	touch libraries/liblmdb/Makefile.in
 ifeq (,$(filter nostrip,$(DEB_BUILD_OPTIONS)))
-	cd libraries/liblmdb/ && sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
+	cd libraries/liblmdb/ && CFLAGS="-DMDB_MAXKEYSIZE=511" sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
 else
-	cd libraries/liblmdb/ && env CFLAGS="-ggdb3" sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
+	cd libraries/liblmdb/ && env CFLAGS="-ggdb3 -DMDB_MAXKEYSIZE=511" sh ./configure --host=$(DEB_HOST_GNU_TYPE) --prefix=$(PREFIX) $(PTHREAD) && make
 endif
 	touch build-stamp
 
