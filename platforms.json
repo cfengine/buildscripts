@@ -27,21 +27,21 @@
     "image_name": "cfengine-builder-debian-11",
     "image_version": "20260712T003724Z",
     "base_image": "debian:11",
-    "base_image_sha": "sha256:e7100042ddfd3c1fb9d4a5bf15acbdb1058d7bb3340142916d3413a5c001fc89",
+    "base_image_sha": "sha256:6cb68b1be980a0e5b19be25582b34b5cf9cb466d52d08ab4354b79051f2cd298",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-12": {
     "image_name": "cfengine-builder-debian-12",
     "image_version": "20260712T003701Z",
     "base_image": "debian:12",
-    "base_image_sha": "sha256:30482e873082e906a4908c10529180aefb6f77620aea7404b909829fadc5d168",
+    "base_image_sha": "sha256:9344f8b8992482f80cba753f323adeaf17690076c095ccff6cc9536be98185dc",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-13": {
     "image_name": "cfengine-builder-debian-13",
     "image_version": "20260712T003719Z",
     "base_image": "debian:13",
-    "base_image_sha": "sha256:d07d1b51c39f51188e60be9b64e6bf769fa94e187f092bc32b91305cfa34ba5a",
+    "base_image_sha": "sha256:fac46bff2e02f51425b6e33b0e1169f55dfb053d83511ca28aa50c09fd5ed7a4",
     "dockerfile": "Dockerfile.debian"
   },
   "rhel-8": {
