@@ -422,8 +422,6 @@ exit 0
 %dir %prefix/share
 %prefix/share/cf-support-nova-hub.sh
 %prefix/share/doc
-# Web interface
-%prefix/share/GUI
 #postgresql share
 %prefix/share/postgresql/*
 # PostgreSQL log file
