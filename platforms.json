@@ -1,7 +1,7 @@
 {
   "ubuntu-20": {
     "image_name": "cfengine-builder-ubuntu-20",
-    "image_version": "20260712T003738Z",
+    "image_version": "20260719T003650Z",
     "base_image": "ubuntu:20.04",
     "base_image_sha": "sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214",
     "dockerfile": "Dockerfile.debian",
@@ -11,42 +11,42 @@
   },
   "ubuntu-22": {
     "image_name": "cfengine-builder-ubuntu-22",
-    "image_version": "20260712T003723Z",
+    "image_version": "20260719T003634Z",
     "base_image": "ubuntu:22.04",
     "base_image_sha": "sha256:0e0a0fc6d18feda9db1590da249ac93e8d5abfea8f4c3c0c849ce512b5ef8982",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-24": {
     "image_name": "cfengine-builder-ubuntu-24",
-    "image_version": "20260712T003716Z",
+    "image_version": "20260719T003636Z",
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-11": {
     "image_name": "cfengine-builder-debian-11",
-    "image_version": "20260712T003724Z",
+    "image_version": "20260719T003634Z",
     "base_image": "debian:11",
     "base_image_sha": "sha256:e7100042ddfd3c1fb9d4a5bf15acbdb1058d7bb3340142916d3413a5c001fc89",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-12": {
     "image_name": "cfengine-builder-debian-12",
-    "image_version": "20260712T003701Z",
+    "image_version": "20260719T003630Z",
     "base_image": "debian:12",
     "base_image_sha": "sha256:30482e873082e906a4908c10529180aefb6f77620aea7404b909829fadc5d168",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-13": {
     "image_name": "cfengine-builder-debian-13",
-    "image_version": "20260712T003719Z",
+    "image_version": "20260719T003626Z",
     "base_image": "debian:13",
     "base_image_sha": "sha256:d07d1b51c39f51188e60be9b64e6bf769fa94e187f092bc32b91305cfa34ba5a",
     "dockerfile": "Dockerfile.debian"
   },
   "rhel-8": {
     "image_name": "cfengine-builder-rhel-8",
-    "image_version": "latest",
+    "image_version": "20260719T003847Z",
     "base_image": "rockylinux/rockylinux:8",
     "base_image_sha": "sha256:e8a49c5403b687db05d4d67333fa45808fbe74f36e683cec7abb1f7d0f2338c6",
     "dockerfile": "Dockerfile.rhel",
@@ -58,7 +58,7 @@
   },
   "rhel-9": {
     "image_name": "cfengine-builder-rhel-9",
-    "image_version": "latest",
+    "image_version": "20260719T003804Z",
     "base_image": "rockylinux/rockylinux:9",
     "base_image_sha": "sha256:8101994123cf3d0a8fee517bee7f39e555c7d92bd2d9eb3303cc988a0eeed00f",
     "dockerfile": "Dockerfile.rhel",
@@ -68,7 +68,7 @@
   },
   "rhel-10": {
     "image_name": "cfengine-builder-rhel-10",
-    "image_version": "latest",
+    "image_version": "20260719T003756Z",
     "base_image": "rockylinux/rockylinux:10",
     "base_image_sha": "sha256:827d37bc128288ccf160ee318bb3cb92d591164cb217e92f8bc61e3982ae1834",
     "dockerfile": "Dockerfile.rhel",
