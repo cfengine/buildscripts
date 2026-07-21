@@ -23,6 +23,7 @@ jobs:
           - rhel-8
           - rhel-9
           - rhel-10
+          - ubuntu-24-mingw
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
