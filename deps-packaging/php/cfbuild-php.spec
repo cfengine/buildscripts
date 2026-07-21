@@ -32,6 +32,9 @@ CFLAGS=""
 LDFLAGS=""
 %endif
 
+# We want php to include %{prefix}/lib in it's loader path entries
+LDFLAGS="-Wl,-rpath,%{prefix}/lib -L%{prefix}/lib $LDFLAGS"
+
 ./configure --prefix=%{prefix}/httpd/php \
   --with-config-file-scan-dir=%{prefix}/httpd/php/lib \
   --with-apxs2=%{prefix}/httpd/bin/apxs \
@@ -104,7 +107,11 @@ LDFLAGS=""
   --without-tsrm-pth \
   --without-tsrm-st \
   --without-tsrm-pthreads \
-  CPPFLAGS="-I%{prefix}/include" LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib" PKG_CONFIG_PATH="%{prefix}/lib/pkgconfig" CFLAGS="$CFLAGS" LDFLAGS="$LDFLAGS"
+  CPPFLAGS="-I%{prefix}/include" \
+  LD_RUN_PATH="%{prefix}/lib" \
+  PKG_CONFIG_PATH="%{prefix}/lib/pkgconfig" \
+  CFLAGS="$CFLAGS" \
+  LDFLAGS="$LDFLAGS"
 
 %build
 
