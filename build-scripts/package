@@ -219,10 +219,16 @@ rpm | lpp)
     log_debug "Building RPM package with rpmbuild"
     # rhel-10 rpmbuild is more picky about /var/cfengine/lib RPATH we need
     export QA_RPATHS=2 # this is a set of bit flags, we just want 0x0002 here
+    # Define _scl_prefix and _root_sysconfdir so the gcc-toolset SCL macros
+    # resolve. Left undefined, the literal %{...} they contain is parsed as an
+    # ERE interval and rpmbuild prints "Ignoring invalid regex". Both are
+    # harmless on platforms that do not use SCLs.
     eval rpmbuild -bb \
         --define "'_topdir $BASEDIR/$PKG'" \
         --define "'buildprefix $BUILDPREFIX'" \
         --define "'_basedir $BASEDIR'" \
+        --define "'_scl_prefix /opt/rh'" \
+        --define "'_root_sysconfdir /etc'" \
         "$RPMBUILD_OPTIONS" "$SPEC"
 
     if [ "$PACKAGING" = lpp ]; then
