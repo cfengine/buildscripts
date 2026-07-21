@@ -26,7 +26,9 @@
 	 <?endif?>
    <?endif?>
 
-   <Product Id='*' Name='CFEngine Nova' Language='1033'
+   <!-- ProductCode is pinned (not '*') so rebuilds of the same version are
+        byte-reproducible; package-msi derives it deterministically. ENT-13792 -->
+   <Product Id='$(var.CfProductCode)' Name='CFEngine Nova' Language='1033'
             Version='$(var.CfVersion)' Manufacturer='Northern.tech AS' UpgradeCode='B883FBCC-6F05-4AFA-98FA-CAF09BF464EA' >
 
       <Package Description='CFEngine Nova'

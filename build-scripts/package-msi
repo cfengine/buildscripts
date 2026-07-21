@@ -13,6 +13,36 @@
 # MSI packaging uses wixl (GNOME msitools), which builds Windows MSIs natively
 # on Linux - no Windows and no Wine.
 
+# Derive a deterministic GUID from a label (ENT-13792)
+deterministic_guid() {
+    printf '{%s}\n' "$(uuidgen --sha1 \
+        --namespace B883FBCC-6F05-4AFA-98FA-CAF09BF464EA \
+        --name "$1" | tr '[:lower:]' '[:upper:]')"
+}
+
+# Make the Summary Information reproducible: wixl writes a random package code
+# (property 9) and the wall-clock build time (12/13 = Created/Last saved).
+# Rewrite them to a version-derived package code and SOURCE_DATE_EPOCH.
+# (ENT-13792)
+normalize_msi_summary() {
+    msi="$1"
+    revision="$2"
+    if [ -z "$SOURCE_DATE_EPOCH" ]; then
+        log_debug "SOURCE_DATE_EPOCH unset; skipping MSI summary normalization"
+        return 0
+    fi
+    pkgcode=$(deterministic_guid "package:$revision")
+    datestr=$(TZ=UTC date -u -d "@$SOURCE_DATE_EPOCH" +"%Y/%m/%d %H:%M:%S")
+    msiinfo export "$msi" _SummaryInformation | tr -d '\r' |
+        awk -v u="$pkgcode" -v d="$datestr" -F '\t' 'BEGIN { OFS = "\t" }
+            $1 == "9"  { $2 = u }
+            $1 == "12" { $2 = d }
+            $1 == "13" { $2 = d }
+            { print }' | sed 's/$/\r/' >_summary.idt
+    msibuild "$msi" -i _summary.idt
+    rm -f _summary.idt
+}
+
 # Determine build directory name based on Jenkins job or version/arch
 log_debug "Determining build directory name (JOB_NAME=$JOB_NAME, VERSION=$VERSION, ARCH=$ARCH)"
 if [ -z "$JOB_NAME" ]; then
@@ -85,6 +115,13 @@ pre() {
     if [ "$ARCH" = "x86" ]; then
         sed -i '/lib\(crypto\|ssl\)/s/[_-]x64//g' "$P"/cfengine-nova.wxs
     fi
+
+    # Reproducible builds (ENT-13792): pin every packaged file's mtime to
+    # SOURCE_DATE_EPOCH so the CAB stores a fixed timestamp per file instead
+    # of the time each file was created.
+    if [ -n "$SOURCE_DATE_EPOCH" ]; then
+        find "$P" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
+    fi
 }
 
 # wixl_build() - Build the MSI from the WiX source using wixl (msitools).
@@ -108,7 +145,13 @@ wixl_build() {
     log_debug "Running wixl with REVISION=$REVISION, ARCH=$ARCH"
     wixl -a "$wixl_arch" \
         -D CfSourceDir=. -D CfVersion="$REVISION" -D CfArch="$ARCH" \
+        -D CfProductCode="$(deterministic_guid "product:$REVISION")" \
         -o cfengine-nova.msi cfengine-nova.wxs
+
+    # wixl still bakes a random package code and the wall-clock build time into
+    # the Summary Information; rewrite them for a byte-reproducible MSI.
+    # (ENT-13792)
+    normalize_msi_summary cfengine-nova.msi "$REVISION"
 }
 
 # package() - Main packaging function that creates the MSI installer

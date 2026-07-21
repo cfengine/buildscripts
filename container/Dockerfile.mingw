@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     autoconf automake binutils bison build-essential curl debhelper dpkg-dev \
     expat fakeroot flex gdb git libexpat1-dev libmodule-load-conditional-perl \
     libpam0g-dev libtool libncurses6 libncurses-dev pkg-config psmisc \
-    python3-pip rsync sudo systemd-coredump unzip wget \
+    python3-pip rsync sudo systemd-coredump unzip uuid-runtime wget \
     && rm -rf /var/lib/apt/lists/*
 
 # MinGW-w64 cross toolchain.
