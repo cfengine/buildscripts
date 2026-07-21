@@ -75,5 +75,13 @@
     "extra_build_args": {
       "EXTRA_PKGS": "patch"
     }
+  },
+  "ubuntu-24-mingw": {
+    "image_name": "cfengine-builder-ubuntu-24-mingw",
+    "image_version": "latest",
+    "base_image": "ubuntu:24.04",
+    "base_image_sha": "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90",
+    "dockerfile": "Dockerfile.mingw",
+    "cross_target": "x64-mingw"
   }
 }

@@ -137,14 +137,18 @@ fi
 run_step "04-configure" "$BASEDIR/buildscripts/build-scripts/configure"
 run_step "05-compile" "$BASEDIR/buildscripts/build-scripts/compile"
 run_step "06-package" "$BASEDIR/buildscripts/build-scripts/package"
-run_step "07-masterfiles-tarballs" build_masterfiles_tarballs
+# Masterfiles tarballs are platform-independent and irrelevant to a Windows MSI
+# cross build, which only emits the .msi. Skip them when cross-compiling.
+if [ -z "$CROSS_TARGET" ]; then
+    run_step "07-masterfiles-tarballs" build_masterfiles_tarballs
+fi
 
 # === Copy output packages ===
 # Packages are created under $BASEDIR/<project>/ by dpkg-buildpackage / rpmbuild.
 # Exclude deps-packaging to avoid copying dependency packages.
 find "$BASEDIR" -maxdepth 4 \
     -path "$BASEDIR/buildscripts/deps-packaging" -prune -o \
-    \( -name '*.deb' -o -name '*.rpm' -o -name '*.pkg.tar.gz' \) -print \
+    \( -name '*.deb' -o -name '*.rpm' -o -name '*.msi' -o -name '*.pkg.tar.gz' \) -print \
     -exec cp {} /output/ \;
 
 echo ""

@@ -1,0 +1,46 @@
+ARG BASE_IMAGE=ubuntu:24.04
+FROM ${BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Build tools extracted from ci/cfengine-build-host-setup.cf (debian|ubuntu section).
+RUN apt-get update && apt-get install -y \
+    autoconf automake binutils bison build-essential curl debhelper dpkg-dev \
+    expat fakeroot flex gdb git libexpat1-dev libmodule-load-conditional-perl \
+    libpam0g-dev libtool libncurses6 libncurses-dev pkg-config psmisc \
+    python3-pip rsync sudo systemd-coredump unzip wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# MinGW-w64 cross toolchain.
+RUN apt-get update && apt-get install -y mingw-w64 \
+    && rm -rf /var/lib/apt/lists/*
+
+# MSI tooling: wixl (GNOME msitools) builds Windows MSIs natively on Linux - no
+# Windows and no Wine.
+RUN apt-get update && apt-get install -y wixl msitools \
+    && rm -rf /var/lib/apt/lists/*
+
+# Remove system dev libraries that conflict with bundled deps.
+RUN apt-get purge -y \
+    libattr1-dev libssl-dev libpcre2-dev libacl1-dev libyaml-dev libxml2-dev \
+    librsync-dev 2>/dev/null || true
+
+# Rust toolchain and protobuf compiler for building the cargo-based leech2
+# dependency. On mingw hosts leech2 is cross-compiled for Windows, so we also
+# install the x86_64-pc-windows-gnu std (linux-install-rust.sh takes the target
+# triple as an argument).
+COPY --from=ci linux-install-protobuf.sh linux-install-rust.sh /tmp/
+RUN /tmp/linux-install-protobuf.sh
+RUN /tmp/linux-install-rust.sh x86_64-pc-windows-gnu
+
+# Create build user with passwordless sudo (needed by install-dependencies,
+# package, etc.)
+RUN useradd -m -s /bin/bash builder \
+    && echo "builder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/builder
+
+USER builder
+WORKDIR /home/builder
+
+# Pre-create the build directory so that when a named volume is mounted here,
+# Docker initializes it with the correct ownership (builder:builder).
+RUN mkdir -p /home/builder/build

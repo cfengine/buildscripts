@@ -9,7 +9,7 @@
    -->
 
    <!-- Input verification -->
-   <?ifndef CfSourceDir ?>
+   <?ifndef var.CfSourceDir ?>
         <?error Variable 'CfSourceDir' is not defined  ?>
    <?endif?>
 
@@ -17,177 +17,184 @@
    <?if $(var.CfArch) = x86 ?>   <!-- 'x86' or 'x64' -->
      <?define isWin64 = 'no' ?>
 	 <?define dirProgFiles = 'ProgramFilesFolder' ?>
-   <?elseif $(var.CfArch) = x64 ?>
-     <?define isWin64 = 'yes' ?>
-	 <?define dirProgFiles = 'ProgramFiles64Folder' ?>
-	<?else?>
-	 <?error Variable 'CfArch' must be set to either 'x86' or 'x64' ?>
+   <?else?>
+     <?if $(var.CfArch) = x64 ?>   <!-- wixl has no <?elseif?>; nest instead -->
+       <?define isWin64 = 'yes' ?>
+	   <?define dirProgFiles = 'ProgramFiles64Folder' ?>
+	 <?else?>
+	   <?error Variable 'CfArch' must be set to either 'x86' or 'x64' ?>
+	 <?endif?>
    <?endif?>
 
    <Product Id='*' Name='CFEngine Nova' Language='1033'
             Version='$(var.CfVersion)' Manufacturer='Northern.tech AS' UpgradeCode='B883FBCC-6F05-4AFA-98FA-CAF09BF464EA' >
 
-      <Package Description='CFEngine Nova' Platform='$(var.CfArch)'
+      <Package Description='CFEngine Nova'
                Comments='This package contains CFEngine Nova'
                Manufacturer='Northern.tech AS' InstallerVersion='200' Compressed='yes' />
 
 	  <Media Id='1' Cabinet='cfnova.cab' EmbedCab='yes' />
 
-	  <!-- Run cf-key after new installation -->
-	  <Property Id='GenerateKey' Value='empty, for now'  />
-	  <CustomAction Id='GenerateKeyPath' Property='GenerateKey' Value='&quot;C:\windows\system32\cmd.exe&quot; /c if not exist &quot;[$(var.dirProgFiles)]\Cfengine\ppkeys\localhost.pub&quot; &quot;[$(var.dirProgFiles)]\Cfengine\bin\cf-key.exe&quot;' Return='check' />
-	  <CustomAction Id='GenerateKey' BinaryKey='WixCA' DllEntry='CAQuietExec' Execute='deferred' Impersonate='no' Return='check' />
+	  <!-- Run cf-key after new installation. The historic build invoked cf-key
+	       through WixUtilExtension's CAQuietExec, which wixl does not provide, so
+	       run the installed cf-key.exe directly. cf-key does not overwrite an
+	       existing key pair, so the old "if not exist localhost.pub" guard is
+	       unnecessary. Return='ignore': key generation is best-effort (the agent
+	       generates the key pair at bootstrap if missing). -->
+	  <CustomAction Id='GenerateKey' FileKey='cf_key.exe' ExeCommand='' Execute='deferred' Impersonate='no' Return='ignore' />
 
-	  <!-- Start service if the host has already been bootstrapped -->
-	  <Property Id='RestartService' Value='Will be filled in by below tag'  />
-	  <CustomAction Id='RestartServiceCmd' Property='RestartService' Value='&quot;C:\windows\system32\cmd.exe&quot; /c if exist &quot;[$(var.dirProgFiles)]\Cfengine\policy_server.dat&quot; &quot;C:\Windows\System32\net.exe&quot; start CfengineNovaExec &amp; exit 0' Return='check' />
-	  <CustomAction Id='RestartService' BinaryKey='WixCA' DllEntry='CAQuietExec' Execute='deferred' Impersonate='no' Return='check' />
+	  <!-- The historic build also started the service on install if the host was
+	       already bootstrapped, again via CAQuietExec (unavailable in wixl). It is
+	       not reproduced: cf-execd is Start='auto' and comes up at next boot /
+	       bootstrap. -->
 
 	  <Property Id='ALLUSERS' Value='2' />
-	  <!--  Exit with success if installed version is not older -->
-	  <CustomActionRef Id='WixExitEarlyWithSuccess'/>
+	  <!-- Block installing over a newer version. The historic build used
+	       WixUtilExtension's WixExitEarlyWithSuccess to exit silently; wixl has no
+	       extensions, so block with a message instead (reuses NEWERVERSIONDETECTED
+	       from the Upgrade table below). -->
+	  <Condition Message='A newer version of CFEngine Nova is already installed.'>NOT NEWERVERSIONDETECTED</Condition>
 
 	  <Directory Id='TARGETDIR' Name='SourceDir'>
-        <Directory Id='$(var.dirProgFiles)' Name='$(var.dirProgFiles)'>
+        <Directory Id='$(var.dirProgFiles)'>
           <Directory Id='dir_Cfengine' Name='Cfengine'>
 
 			<!-- ===== Cfengine\bin ===== -->
 
             <Directory Id='dir_bin' Name='bin'>
     	      <Component Id='cf_execd.exe' Guid='563060F2-462E-4A3C-90A1-696D5E0713D2' Win64='$(var.isWin64)'>
-                <File Id='cf_execd.exe' Name='cf-execd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-execd.exe' />
+                <File Id='cf_execd.exe' Name='cf-execd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-execd.exe' />
                 <ServiceControl Id='cf_execd.exe' Name='CfengineNovaExec' Stop='uninstall' Remove='uninstall' Wait='yes' />
                 <ServiceInstall Id='cf_execd.exe' Name='CfengineNovaExec' DisplayName='Cfengine Nova Executor' Type='ownProcess' Start='auto' ErrorControl='normal' Vital='yes' Description='The executor daemon is a scheduler and wrapper for execution of cf-agent. It collects the output of the agent and can email it to a specified address.' />
               </Component>
               <Component Id='cf_agent.exe' Guid='8CEA06F4-1133-4E98-9EEF-9C1D39DEFAA5' Win64='$(var.isWin64)'>
-                <File Id='cf_agent.exe' Name='cf-agent.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-agent.exe' />
+                <File Id='cf_agent.exe' Name='cf-agent.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-agent.exe' />
               </Component>
               <Component Id='cf_check.exe' Guid='8A933D36-1C68-48E3-8A3E-391CFE9C88B4' Win64='$(var.isWin64)'>
-                <File Id='cf_check.exe' Name='cf-check.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-check.exe' />
+                <File Id='cf_check.exe' Name='cf-check.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-check.exe' />
               </Component>
               <Component Id='cf_key.exe' Guid='2E9A81B7-B10A-4D1A-BE66-F3097E3D0C32' Win64='$(var.isWin64)'>
-                <File Id='cf_key.exe' Name='cf-key.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-key.exe' />
+                <File Id='cf_key.exe' Name='cf-key.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-key.exe' />
               </Component>
               <Component Id='cf_secret.exe' Guid='9AC8695E-2525-439C-924A-D8615CDCB663' Win64='$(var.isWin64)'>
-                <File Id='cf_secret.exe' Name='cf-secret.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-secret.exe' />
+                <File Id='cf_secret.exe' Name='cf-secret.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-secret.exe' />
               </Component>
               <Component Id='cf_monitord.exe' Guid='F9E42EF0-960C-4DEC-87BB-FB0C53F18E7F' Win64='$(var.isWin64)'>
-                <File Id='cf_monitord.exe' Name='cf-monitord.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-monitord.exe' />
+                <File Id='cf_monitord.exe' Name='cf-monitord.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-monitord.exe' />
               </Component>
               <Component Id='cf_net.exe' Guid='E247749E-7C73-4E13-BF3F-315A19774635' Win64='$(var.isWin64)'>
-                <File Id='cf_net.exe' Name='cf-net.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-net.exe' />
+                <File Id='cf_net.exe' Name='cf-net.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-net.exe' />
               </Component>
               <Component Id='cf_promises.exe' Guid='D3875D39-C53D-47DF-98CC-C393353ACCCD' Win64='$(var.isWin64)'>
-                <File Id='cf_promises.exe' Name='cf-promises.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-promises.exe' />
+                <File Id='cf_promises.exe' Name='cf-promises.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-promises.exe' />
               </Component>
               <Component Id='cf_runagent.exe' Guid='89408029-9000-4BB4-A7D6-97B6E5E7B06E' Win64='$(var.isWin64)'>
-                <File Id='cf_runagent.exe' Name='cf-runagent.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-runagent.exe' />
+                <File Id='cf_runagent.exe' Name='cf-runagent.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-runagent.exe' />
               </Component>
               <Component Id='cf_serverd.exe' Guid='77B9C8CD-AB9F-480C-9141-4561D719334B' Win64='$(var.isWin64)'>
-                <Environment Id='Path' Name='Path' Value='[dir_bin]' Separator=';' Action='set' Part='last' System='yes' />
-                <File Id='cf_serverd.exe' Name='cf-serverd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-serverd.exe' />
+                <File Id='cf_serverd.exe' Name='cf-serverd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-serverd.exe' />
               </Component>
               <Component Id='cf_watchd.exe' Guid='D0017C79-0DE0-4AD6-99AC-55B2A84BF987' Win64='$(var.isWin64)'>
-                <File Id='cf_watchd.exe' Name='cf-watchd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-watchd.exe' />
+                <File Id='cf_watchd.exe' Name='cf-watchd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-watchd.exe' />
               </Component>
               <Component Id='diff.exe' Guid='A343B6FD-A0E9-468A-8678-84647C609DC6' Win64='$(var.isWin64)'>
-                <File Id='diff.exe' Name='diff.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\diff.exe' />
+                <File Id='diff.exe' Name='diff.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/diff.exe' />
               </Component>
               <Component Id='cmp.exe' Guid='587163db-db68-4c1c-9783-09d0eb938482' Win64='$(var.isWin64)'>
-                <File Id='cmp.exe' Name='cmp.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cmp.exe' />
+                <File Id='cmp.exe' Name='cmp.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cmp.exe' />
               </Component>
               <Component Id='sdiff.exe' Guid='5f25a9a9-ccf3-424b-9dcb-2574953eba92' Win64='$(var.isWin64)'>
-                <File Id='sdiff.exe' Name='sdiff.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\sdiff.exe' />
+                <File Id='sdiff.exe' Name='sdiff.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/sdiff.exe' />
               </Component>
               <Component Id='diff3.exe' Guid='73fe2642-63b1-4e98-bd4f-60594049be49' Win64='$(var.isWin64)'>
-                <File Id='diff3.exe' Name='diff3.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\diff3.exe' />
+                <File Id='diff3.exe' Name='diff3.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/diff3.exe' />
               </Component>
               <Component Id='mdb_copy.exe' Guid='E41C3638-9BBE-497D-A5A8-DB2021030113' Win64='$(var.isWin64)'>
-                <File Id='mdb_copy.exe' Name='mdb_copy.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_copy.exe' />
+                <File Id='mdb_copy.exe' Name='mdb_copy.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/mdb_copy.exe' />
               </Component>
               <Component Id='mdb_stat.exe' Guid='2F61CE79-B0E8-4351-BE3E-7AEE65FE9D8A' Win64='$(var.isWin64)'>
-                <File Id='mdb_stat.exe' Name='mdb_stat.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_stat.exe' />
+                <File Id='mdb_stat.exe' Name='mdb_stat.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/mdb_stat.exe' />
               </Component>
               <Component Id='mdb_dump.exe' Guid='AC5DC7F1-80CE-476F-877D-2D94879839E3' Win64='$(var.isWin64)'>
-                <File Id='mdb_dump.exe' Name='mdb_dump.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_dump.exe' />
+                <File Id='mdb_dump.exe' Name='mdb_dump.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/mdb_dump.exe' />
               </Component>
               <Component Id='mdb_load.exe' Guid='0C48B31C-A05D-43F5-A452-2CE6CC91E963' Win64='$(var.isWin64)'>
-                <File Id='mdb_load.exe' Name='mdb_load.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\mdb_load.exe' />
+                <File Id='mdb_load.exe' Name='mdb_load.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/mdb_load.exe' />
               </Component>
               <Component Id='lmmgr.exe' Guid='DBF87C39-43FA-4DFE-A442-D2AB5B8985F0' Win64='$(var.isWin64)'>
-                <File Id='lmmgr.exe' Name='lmmgr.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\lmmgr.exe' />
+                <File Id='lmmgr.exe' Name='lmmgr.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/lmmgr.exe' />
               </Component>
               <Component Id='lmdump.exe' Guid='F21EC031-522B-4E18-9E29-1EEA850903F0' Win64='$(var.isWin64)'>
-                <File Id='lmdump.exe' Name='lmdump.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\lmdump.exe' />
+                <File Id='lmdump.exe' Name='lmdump.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/lmdump.exe' />
               </Component>
 	      <Component Id='cf_upgrade.exe' Guid='3BF37FB0-02C2-11E4-B5F8-080027039A4C' Win64='$(var.isWin64)'>
-                <File Id='cf_upgrade.exe' Name='cf-upgrade.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf-upgrade.exe' />
+                <File Id='cf_upgrade.exe' Name='cf-upgrade.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-upgrade.exe' />
               </Component>
               <Component Id='cf.events.dll' Guid='B3FB046E-59DD-478C-B54C-F7444447B61F' Win64='$(var.isWin64)'>
-                <File Id='cf.events.dll' Name='cf.events.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\cf.events.dll' />
+                <File Id='cf.events.dll' Name='cf.events.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf.events.dll' />
               </Component>
               <Component Id='liblber.dll' Guid='E49FD9D1-1BE9-42F0-B4F7-97B12C32FB88' Win64='$(var.isWin64)'>
-                <File Id='liblber.dll' Name='liblber.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\liblber.dll' />
+                <File Id='liblber.dll' Name='liblber.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/liblber.dll' />
               </Component>
               <Component Id='libldap.dll' Guid='A49EA879-3D89-4FB0-9D53-3E35BE266DB1' Win64='$(var.isWin64)'>
-                <File Id='libldap.dll' Name='libldap.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libldap.dll' />
+                <File Id='libldap.dll' Name='libldap.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libldap.dll' />
               </Component>
               <Component Id='libpcre2_8_0.dll' Guid='A32A88D5-6E60-4852-BE95-33FF52CD276E' Win64='$(var.isWin64)'>
-                <File Id='libpcre2_8_0.dll' Name='libpcre2-8-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libpcre2-8-0.dll' />
+                <File Id='libpcre2_8_0.dll' Name='libpcre2-8-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libpcre2-8-0.dll' />
               </Component>
               <Component Id='pthreadGC2.dll' Guid='C9A99E1A-8ECE-4EAF-96DA-12B6BC298BFD' Win64='$(var.isWin64)'>
-                <File Id='pthreadGC2.dll' Name='pthreadGC2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\pthreadGC2.dll' />
+                <File Id='pthreadGC2.dll' Name='pthreadGC2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/pthreadGC2.dll' />
               </Component>
               <Component Id='libwinpthread_1.dll' Guid='9109f8e5-fc06-4102-b287-882e66f3864e' Win64='$(var.isWin64)'>
-                <File Id='libwinpthread_1.dll' Name='libwinpthread-1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libwinpthread-1.dll' />
+                <File Id='libwinpthread_1.dll' Name='libwinpthread-1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libwinpthread-1.dll' />
               </Component>
               <Component Id='libcrypto_4_x64.dll' Guid='5f8086a9-6efd-4661-9e0a-da383615d97a' Win64='$(var.isWin64)'>
-                <File Id='libcrypto_4_x64.dll' Name='libcrypto-4-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcrypto-4-x64.dll' />
+                <File Id='libcrypto_4_x64.dll' Name='libcrypto-4-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libcrypto-4-x64.dll' />
               </Component>
               <Component Id='libssl_4_x64.dll' Guid='f7483364-bcbe-442b-81ac-394d7d4e02ab' Win64='$(var.isWin64)'>
-                <File Id='libssl_4_x64.dll' Name='libssl-4-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libssl-4-x64.dll' />
+                <File Id='libssl_4_x64.dll' Name='libssl-4-x64.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libssl-4-x64.dll' />
               </Component>
               <Component Id='libgnurx_0.dll' Guid='18554ae8-9c92-4cc7-8e5a-7f41ed2080d6' Win64='$(var.isWin64)'>
-                <File Id='libgnurx_0.dll' Name='libgnurx-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libgnurx-0.dll' />
+                <File Id='libgnurx_0.dll' Name='libgnurx-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libgnurx-0.dll' />
               </Component>
               <Component Id='liblmdb.dll' Guid='9486AD9B-7189-4D90-8EDA-09E9B522CE89' Win64='$(var.isWin64)'>
-                <File Id='liblmdb.dll' Name='liblmdb.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\liblmdb.dll' />
+                <File Id='liblmdb.dll' Name='liblmdb.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/liblmdb.dll' />
               </Component>
               <Component Id='libyaml_0_2.dll' Guid='6f6ff21a-168a-11e5-b6dc-0021ccb95c52' Win64='$(var.isWin64)'>
-                <File Id='libyaml_0_2.dll' Name='libyaml-0-2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libyaml-0-2.dll' />
+                <File Id='libyaml_0_2.dll' Name='libyaml-0-2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libyaml-0-2.dll' />
               </Component>
               <Component Id='librsync_0.dll' Guid='B5300346-FF77-40BD-B1E9-8C2FEBFADF47' Win64='$(var.isWin64)'>
-                <File Id='librsync_0.dll' Name='librsync-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\librsync-0.dll' />
+                <File Id='librsync_0.dll' Name='librsync-0.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/librsync-0.dll' />
               </Component>
               <Component Id='leech2.dll' Guid='7EB6E853-F765-48D0-B388-CE90F5D4240C' Win64='$(var.isWin64)'>
-                <File Id='leech2.dll' Name='leech2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\leech2.dll' />
+                <File Id='leech2.dll' Name='leech2.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/leech2.dll' />
               </Component>
               <Component Id='lch.exe' Guid='A4ACB8FD-94D8-4909-A098-594BC9FA7732' Win64='$(var.isWin64)'>
-                <File Id='lch.exe' Name='lch.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\lch.exe' />
+                <File Id='lch.exe' Name='lch.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/lch.exe' />
               </Component>
               <Component Id='zlib1.dll' Guid='ea2e067f-5580-4167-86ba-ec89e560be80' Win64='$(var.isWin64)'>
-                <File Id='zlib1.dll' Name='zlib1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\zlib1.dll' />
+                <File Id='zlib1.dll' Name='zlib1.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/zlib1.dll' />
               </Component>
 	      <Component Id='libxml2.dll' Guid='7ae36f48-d2ad-417c-a01f-809b7613eccc' Win64='$(var.isWin64)'>
-                <File Id='libxml2.dll' Name='libxml2-16.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libxml2-16.dll' />
+                <File Id='libxml2.dll' Name='libxml2-16.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libxml2-16.dll' />
               </Component>
 	      <Component Id='libcurl_4.dll' Guid='de435dd1-1fce-424a-b6a0-dc63192e2060' Win64='$(var.isWin64)'>
-                <File Id='libcurl_4.dll' Name='libcurl-4.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\bin\libcurl-4.dll' />
+                <File Id='libcurl_4.dll' Name='libcurl-4.dll' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/libcurl-4.dll' />
               </Component>
             </Directory>
 			<!-- ===== Cfengine\ssl ===== -->
             <Directory Id='dir_ssl' Name='ssl'>
               <Component Id='openssl.cnf' Guid='51EF6C21-D0AD-4A29-9F83-B72B5DF614A5' Win64='$(var.isWin64)'>
-                <File Id='openssl.cnf' Name='openssl.cnf' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\ssl\openssl.cnf' />
+                <File Id='openssl.cnf' Name='openssl.cnf' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/ssl/openssl.cnf' />
               </Component>
             </Directory>
 			<!-- ===== Cfengine\.leech2 ===== -->
             <Directory Id='dir_leech2' Name='.leech2'>
               <Component Id='leech2_config.json' Guid='1781E340-7772-4715-833D-DFAAE22A83EF' Win64='$(var.isWin64)'>
-                <File Id='leech2_config.json' Name='config.json' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\.leech2\config.json' />
+                <File Id='leech2_config.json' Name='config.json' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/.leech2/config.json' />
               </Component>
               <Component Id='leech2_containers_mapping.json' Guid='5A8C0942-B51D-448D-9A81-1459BC79A9C7' Win64='$(var.isWin64)'>
-                <File Id='leech2_containers_mapping.json' Name='containers-mapping.json' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)\.leech2\containers-mapping.json' />
+                <File Id='leech2_containers_mapping.json' Name='containers-mapping.json' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/.leech2/containers-mapping.json' />
               </Component>
             </Directory>
           </Directory>
@@ -240,128 +247,6 @@
 	    <ComponentRef Id='leech2_containers_mapping.json' />
       </Feature>
 
-      <UI>
-          <ProgressText Action='GenerateKey'>Generating cryptographic key pair</ProgressText>
-          <TextStyle Id="DlgFont8" FaceName="Tahoma" Size="8" />
-          <Property Id="DefaultUIFont" Value="DlgFont8" />
-          <Dialog Id="ExitDlg"
-                    Width="300" Height="80"
-                    Title="CFEngine Setup">
-
-                <Control Id="Description"
-                         Type="Text"
-                         X="15"
-                         Y="10"
-                         Width="270"
-                         Height="30"
-                         Text="{\DlgFont8}[ProductName] setup has completed successfully. Click 'Finish' to exit the Setup Wizard." />
-
-                <Control Id="Finish"
-                         Type="PushButton"
-                         X="125"
-                         Y="50"
-                         Width="56"
-                         Height="17"
-                         Default="yes"
-                         Cancel="yes"
-                         Text="Finish">
-                    <Publish Event="EndDialog"
-                             Value="Exit" />
-                </Control>
-            </Dialog>
-
-       <Dialog Id="UserExitDlg"
-              Width="300"
-              Height="80"
-              Title="CFEngine Setup">
-
-          <Control Id="Description"
-                   Type="Text"
-                   X="15"
-                   Y="10"
-                   Width="270"
-                   Height="80"
-                   Text="{\DlgFont8}[ProductName] setup was interrupted. Your system has not been modified. To install this program at a later time, please run the installation again." />
-
-          <Control Id="Finish"
-                           Type="PushButton"
-                           X="125"
-                           Y="50"
-                           Width="56"
-                           Height="17"
-                           Default="yes"
-                           Cancel="yes"
-                           Text="Finish">
-                      <Publish Event="EndDialog"
-                               Value="Exit" />
-                </Control>
-            </Dialog>
-
-            <Dialog Id="FatalErrorDlg"
-                    Width="300"
-                    Height="80"
-                    Title="CFEngine Setup">
-                <Control Id="Description"
-                         Type="Text"
-                         X="15"
-                         Y="10"
-                         Width="270"
-                         Height="80"
-                         Text="{\DlgFont8}[ProductName] Setup Wizard ended prematurely because of an error. Your system has not been modified. To install this program at a later time, run Setup Wizard again." />
-                <Control Id="Finish"
-                         Type="PushButton"
-                         X="125"
-                         Y="50"
-                         Width="56"
-                         Height="17"
-                         Default="yes"
-                         Cancel="yes"
-                         Text="Finish">
-                    <Publish Event="EndDialog"
-                             Value="Exit" />
-                </Control>
-            </Dialog>
-          <Dialog Id="ProgressDlg"
-                        Width="300"
-                        Height="80"
-                        Title="CFEngine Setup"
-                        Modeless="yes">
-                    <Control Id="CancelButton"
-                             Type="PushButton"
-                             TabSkip="no"
-                             Text="Cancel"
-                             Height="17"
-                             Width="56"
-                             X="125"
-                             Y="60"
-                             Cancel="yes">
-                        <Publish Event="EndDialog"
-                                 Value="Exit" />
-                    </Control>
-                    <Control Id="MyProgressBar"
-                             Type="ProgressBar"
-                             X="70"
-                             Y="30"
-                             Width="200"
-                             Height="15"
-                             ProgressBlocks="yes">
-                        <Subscribe Event="SetProgress"
-                                   Attribute="Progress" />
-                    </Control>
-          </Dialog>
-           <InstallUISequence>
-            <Show Dialog="ExitDlg" OnExit="success" />
-            <Show Dialog="FatalErrorDlg" OnExit="error" />
-            <Show Dialog="UserExitDlg" OnExit="cancel" />
-            <Show Dialog="ProgressDlg" After="CostFinalize" />
-          </InstallUISequence>
-
-           <AdminUISequence>
-            <Show Dialog="ExitDlg" OnExit="success" />
-            <Show Dialog="FatalErrorDlg" OnExit="error" />
-            <Show Dialog="UserExitDlg" OnExit="cancel" />
-           </AdminUISequence>
-    </UI>
 
 
 	<Upgrade Id='B883FBCC-6F05-4AFA-98FA-CAF09BF464EA'>
@@ -379,13 +264,9 @@
    <InstallExecuteSequence>
      <RemoveExistingProducts Sequence='1450' />
      <InstallInitialize Sequence='1500' />
-	 <Custom Action='GenerateKeyPath' After='InstallFiles'>NOT Installed</Custom>
-	 <Custom Action='GenerateKey' After='GenerateKeyPath'>NOT Installed</Custom>
+	 <Custom Action='GenerateKey' After='InstallFiles'>NOT Installed</Custom>
 
 	 <InstallFinalize Sequence='6600' />
-
-	 <Custom Action='RestartServiceCmd' Before='InstallFinalize'>NOT Installed</Custom>
-	 <Custom Action='RestartService' After='RestartServiceCmd'>NOT Installed</Custom>
    </InstallExecuteSequence>
 
    </Product>
