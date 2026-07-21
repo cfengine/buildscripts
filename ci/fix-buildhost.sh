@@ -75,12 +75,13 @@ if [ -f /etc/os-release ]; then
 fi
 
 # MinGW hosts build the MSI with wixl (build-scripts/package-msi) and inspect it
-# with msiinfo (msitools). Installed by the build-host-setup policy at image
-# time; install here too so not-yet-reimaged mingw hosts get them without a
-# reimage. See ENT-13868.
+# with msiinfo (msitools). uuidgen (uuid-runtime) derives deterministic MSI
+# GUIDs for reproducible builds (ENT-13792). Installed by the build-host-setup
+# policy at image time; install here too so not-yet-reimaged mingw hosts get
+# them without a reimage. See ENT-13868.
 if [ -f /etc/cfengine-mingw-build-host.flag ]; then
-  if ! command -v wixl >/dev/null 2>&1 || ! command -v msiinfo >/dev/null 2>&1; then
+  if ! command -v wixl >/dev/null 2>&1 || ! command -v msiinfo >/dev/null 2>&1 || ! command -v uuidgen >/dev/null 2>&1; then
     sudo apt-get update
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y wixl msitools
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y wixl msitools uuid-runtime
   fi
 fi
