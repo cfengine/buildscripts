@@ -264,11 +264,16 @@
 	<!-- The sequence numbers are weird to avoid collisions with built-in numbers -->
 
    <InstallExecuteSequence>
-     <RemoveExistingProducts Sequence='1450' />
      <InstallInitialize Sequence='1500' />
 	 <Custom Action='GenerateKey' After='InstallFiles'>NOT Installed</Custom>
 
 	 <InstallFinalize Sequence='6600' />
+
+	 <!-- After InstallFinalize: install new files first, then remove the old
+	      product, so equal-versioned shared DLLs survive via refcounting. Early
+	      placement deletes them and breaks upgrades. Ref:
+	      https://learn.microsoft.com/en-us/windows/win32/msi/removeexistingproducts-action -->
+	 <RemoveExistingProducts Sequence='6700' />
    </InstallExecuteSequence>
 
    </Product>
