@@ -26,7 +26,9 @@
 	 <?endif?>
    <?endif?>
 
-   <Product Id='*' Name='CFEngine Nova' Language='1033'
+   <!-- ProductCode is pinned (not '*') so rebuilds of the same version are
+        byte-reproducible; package-msi derives it deterministically. ENT-13792 -->
+   <Product Id='$(var.CfProductCode)' Name='CFEngine Nova' Language='1033'
             Version='$(var.CfVersion)' Manufacturer='Northern.tech AS' UpgradeCode='B883FBCC-6F05-4AFA-98FA-CAF09BF464EA' >
 
       <Package Description='CFEngine Nova'
@@ -262,11 +264,16 @@
 	<!-- The sequence numbers are weird to avoid collisions with built-in numbers -->
 
    <InstallExecuteSequence>
-     <RemoveExistingProducts Sequence='1450' />
      <InstallInitialize Sequence='1500' />
 	 <Custom Action='GenerateKey' After='InstallFiles'>NOT Installed</Custom>
 
 	 <InstallFinalize Sequence='6600' />
+
+	 <!-- After InstallFinalize: install new files first, then remove the old
+	      product, so equal-versioned shared DLLs survive via refcounting. Early
+	      placement deletes them and breaks upgrades. Ref:
+	      https://learn.microsoft.com/en-us/windows/win32/msi/removeexistingproducts-action -->
+	 <RemoveExistingProducts Sequence='6700' />
    </InstallExecuteSequence>
 
    </Product>

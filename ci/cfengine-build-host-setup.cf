@@ -91,6 +91,10 @@ bundle agent cfengine_build_host_setup
       "wixl";
       "msitools";
 
+      # build-scripts/package-msi derives deterministic MSI GUIDs with uuidgen
+      # (uuid-runtime) for reproducible builds. See ENT-13792.
+      "uuid-runtime";
+
       "binfmt-support"
         comment => "update-binfmts command needed for build-scripts/package-msi script";
 
