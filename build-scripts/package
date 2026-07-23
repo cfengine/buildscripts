@@ -223,12 +223,17 @@ rpm | lpp)
     # resolve. Left undefined, the literal %{...} they contain is parsed as an
     # ERE interval and rpmbuild prints "Ignoring invalid regex". Both are
     # harmless on platforms that do not use SCLs.
+    #
+    # Reproducible builds (ENT-13791): pin BUILDTIME and clamp file mtimes to
+    # SOURCE_DATE_EPOCH.
     eval rpmbuild -bb \
         --define "'_topdir $BASEDIR/$PKG'" \
         --define "'buildprefix $BUILDPREFIX'" \
         --define "'_basedir $BASEDIR'" \
         --define "'_scl_prefix /opt/rh'" \
         --define "'_root_sysconfdir /etc'" \
+        --define "'use_source_date_epoch_as_buildtime 1'" \
+        --define "'clamp_mtime_to_source_date_epoch 1'" \
         "$RPMBUILD_OPTIONS" "$SPEC"
 
     if [ "$PACKAGING" = lpp ]; then
