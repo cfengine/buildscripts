@@ -55,6 +55,7 @@ None of the above arguments are required for `--update`.
 | `--shell`          |                                  | Drop into a bash shell inside the container for debugging                          |
 | `--list-platforms` |                                  | List available platforms and exit                                                  |
 | `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                                                    |
+| `--arch`           | host architecture                | Override the container architecture (see [Architecture](#architecture))            |
 
 ## Supported platforms
 
@@ -92,6 +93,10 @@ The new entry in `platforms.json` needs:
   Don't copy this by hand — run `./build-in-container.py --update-sha
 --platform <new-platform>` and it will fetch the current digest from
   Docker Hub and write it into `platforms.json`.
+- `architectures` (optional): the list of docker platforms to publish, e.g.
+  `["linux/amd64", "linux/arm64"]`. Omit it to get the multi-arch default; set
+  it only to restrict a platform to specific architectures (see
+  [Architecture](#architecture)).
 
 Adding another RHEL-family platform (a new Rocky/RHEL major version) works the
 same way: add a `platforms.json` entry with `"dockerfile": "Dockerfile.rhel"`
@@ -104,6 +109,41 @@ Docker Hub library images.
 
 Adding an entirely different, non-RHEL/non-Debian platform family (e.g. SUSE)
 would require a new `container/Dockerfile.<family>` plus platform entries.
+
+## Architecture
+
+By default the build runs on the host machine's architecture, and Docker picks
+the matching image variant automatically. Use `--arch` to override this and
+build for another architecture - the value is passed straight to Docker's
+`--platform` flag:
+
+```bash
+# Build an arm64 community agent .deb for Ubuntu 24 on an amd64 host
+./build-in-container.py --platform ubuntu-24 --project community --role agent \
+    --build-type DEBUG --arch linux/arm64
+```
+
+The registry images are published as multi-arch manifests (`linux/amd64` and
+`linux/arm64`), so `--arch` normally just pulls the matching variant. If the
+registry does not provide the requested architecture (for example an older,
+single-arch image that predates multi-arch support), the script falls back to
+building the image locally for that architecture.
+
+Building a non-host architecture - whether locally or in CI - relies on
+QEMU/binfmt emulation being registered on the build host. If it isn't set up,
+register it once with:
+
+```bash
+docker run --privileged --rm tonistiigi/binfmt --install all
+```
+
+Emulated builds are considerably slower than native ones.
+
+The set of architectures published for each platform defaults to `linux/amd64`
+and `linux/arm64`. A platform can override this with an `"architectures"` list
+in `platforms.json`. The `ubuntu-24-mingw` platform, for instance,
+cross-compiles to Windows x64 regardless of the container's architecture, so it
+is pinned to `["linux/amd64"]`.
 
 ## How it works
 
@@ -161,11 +201,10 @@ Images are hosted at `ghcr.io/cfengine` and versioned per-platform via
 ./build-in-container.py --platform ubuntu-22 --push-image
 ```
 
-`--push-image` always builds with `--no-cache` to pick up the latest upstream
-packages, then pushes to the registry. However, you must be logged in to
-`ghcr.io` first. You can log in with a personal access token (classic) that has
-the write:packages scope. Alternatively, trigger the GitHub Actions workflow
-which handles authentication automatically.
+`--push-image` uses `docker buildx build --push` to build every architecture the
+platform targets (`linux/amd64` and `linux/arm64` by default; see
+[Architecture](#architecture)) and publish them under a single multi-arch
+manifest. It always builds fresh to pick up the latest upstream packages.
 
 #### GitHub Actions workflow
 
