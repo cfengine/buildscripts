@@ -24,6 +24,14 @@ function cleanup()
 {
   set -ex
   if command -v apt 2>/dev/null; then
+    # workaround for CFE-4544, remove scriptlets call systemctl even when systemctl is-system-running returns false
+    # Replace systemctl with a no-op stub that always succeeds. We can't
+    # symlink to /bin/echo (or /bin/true): on Ubuntu 26 coreutils is the
+    # single multi-call uutils binary that dispatches on argv[0], so it
+    # would fail with "coreutils: unknown program 'systemctl'".
+    rm -f /bin/systemctl
+    printf '#!/bin/sh\nexit 0\n' > /bin/systemctl
+    chmod +x /bin/systemctl
     apt remove -y cfengine-nova || true
   elif command -v yum 2>/dev/null; then
     yum erase -y cfengine-nova || true
