@@ -145,11 +145,16 @@ if [ -f /etc/cfengine-bootstrap-pr-host.flag ]; then
   exit
 fi
 
+if [ -f /etc/cfengine-containers-host.flag ]; then
+  "$thisdir"/setup-ci-host.sh
+  exit
+fi
+
 # platforms too old to support cf-remote, use scripts instead
 if [ -f /etc/os-release ]; then
   source /etc/os-release
   if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "7" ]; then
-    "$thisdir"/setup-build-host.sh
+    "$thisdir"/setup-ci-host.sh
     exit
   fi
 fi

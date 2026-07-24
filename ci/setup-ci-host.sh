@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -e
 shopt -s expand_aliasas
+thisdir="$(dirname "$0")"
 
 packages="" # a space separated list of packages to install
 function add-pkg()
@@ -12,22 +13,51 @@ if [ -f /etc/os-release ]; then
   source /etc/os-release
     if grep -q rhel /etc/os-release; then
         yum update --assumeyes
-        alias software='yum install --assumeyes'
+        alias packages='yum install --assumeyes'
     elif grep -q debian /etc/os-release; then
-        alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
+        alias packages='DEBIAN_FRONTEND=noninteractive apt install --yes'
     elif grep -q suse /etc/os-release; then
-        alias software='zypper install -y'
+        alias packages='zypper install -y'
     else
         echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
         exit 1
     fi
 elif [ -f /etc/redhat-release ]; then
-    alias software='yum install --assumeyes'
+    alias packages='yum install --assumeyes'
     # shellcheck disable=SC1091
     source /etc/redhat-release
 else
     echo "No /etc/os-release or /etc/redhat-release so cant determine platform."
     exit 1
+fi
+
+if [ -f /etc/cfengine-containers-host.flag ]; then
+  if echo "$ID_LIKE" | grep debian && [ "$VERSION_ID" -ge "12" ]; then
+    # in jenkins, CONTAINER labeled nodes are capable of running container builds like valgrind-check and static-check
+    add-pkg unzip # linux-install-groovy.sh needs unzip to unpack the groovy distribution archive
+    add-pkg buildah
+    add-pkg jq
+    add-pkg make
+    add-pkg parallel
+    add-pkg podman
+    if ! command -v groovy; then
+      bash "$thisdir"/linux-install-groovy.sh
+    fi
+
+    # NOPASSWD is needed for various tools related to container jobs
+    rm -rf /etc/sudoers.d/999-local
+    cat >/etc/sudoers.d/999-local <<EOF
+%wheel ALL=NOPASSWD: /usr/bin/lvm-cache-stats
+%wheel ALL=NOPASSWD: /usr/bin/podman
+%sudo ALL=NOPASSWD: /usr/bin/lvm-cache-stats
+%sudo ALL=NOPASSWD: /usr/bin/podman
+%sudo ALL=NOPASSWD: /usr/sbin/lvs
+%sudo ALL=NOPASSWD: /usr/bin/journalctl
+jenkins ALL=NOPASSWD: /usr/bin/podman
+EOF
+    chmod 400 /etc/sudoers.d/999-local
+    chown root:root /etc/sudoers.d/999-local
+  fi
 fi
 
 if echo "$ID_LIKE" | grep rhel; then
@@ -118,4 +148,7 @@ if echo "$ID_LIKE" | grep rhel; then
 
 fi
 
-software $packages
+# packages is a dynamic alias set near the top of this script
+# shellcheck disable=SC2086
+# ^^^ we want space separated package names as separate args, not one arg with the space separated list
+packages $packages
