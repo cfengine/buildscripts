@@ -24,7 +24,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs php-cli php-zip \
     && rm -rf /var/lib/apt/lists/*
 RUN npm install -g less
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer.phar
+# Checksum-verified, version-pinned Composer (shared with the build hosts).
+COPY --from=ci linux-install-composer.sh /tmp/
+RUN /tmp/linux-install-composer.sh
 
 # Remove system dev libraries that conflict with bundled deps
 # (from cfengine-build-host-setup.cf lines 53-59)

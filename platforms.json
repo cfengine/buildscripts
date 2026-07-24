@@ -24,6 +24,13 @@
     "base_image_sha": "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90",
     "dockerfile": "Dockerfile.debian"
   },
+  "ubuntu-26": {
+    "image_name": "cfengine-builder-ubuntu-26",
+    "image_version": "latest",
+    "base_image": "ubuntu:26.04",
+    "base_image_sha": "sha256:3131b4cc82a783df6c9df078f86e01819a13594b865c2cad47bd1bca2b7063bb",
+    "dockerfile": "Dockerfile.debian"
+  },
   "debian-11": {
     "image_name": "cfengine-builder-debian-11",
     "image_version": "20260721T102234Z",

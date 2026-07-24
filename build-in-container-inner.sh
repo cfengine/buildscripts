@@ -67,12 +67,12 @@ install_mission_portal_deps() (
 
     if [ -f "$BASEDIR/mission-portal/composer.json" ]; then
         echo "Installing Mission Portal PHP dependencies..."
-        (cd "$BASEDIR/mission-portal" && php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs --prefer-dist)
+        (cd "$BASEDIR/mission-portal" && composer install --no-dev --ignore-platform-reqs --prefer-dist)
     fi
 
     if [ -f "$BASEDIR/nova/api/http/composer.json" ]; then
         echo "Installing Nova API PHP dependencies..."
-        (cd "$BASEDIR/nova/api/http" && php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs --prefer-dist)
+        (cd "$BASEDIR/nova/api/http" && composer install --no-dev --ignore-platform-reqs --prefer-dist)
     fi
 
     if [ -f "$BASEDIR/mission-portal/public/themes/default/bootstrap/cfengine_theme.less" ]; then
@@ -84,7 +84,7 @@ install_mission_portal_deps() (
 
     if [ -f "$BASEDIR/mission-portal/ldap/composer.json" ]; then
         echo "Installing LDAP API PHP dependencies..."
-        (cd "$BASEDIR/mission-portal/ldap" && php /usr/bin/composer.phar install --no-dev --ignore-platform-reqs --prefer-dist)
+        (cd "$BASEDIR/mission-portal/ldap" && composer install --no-dev --ignore-platform-reqs --prefer-dist)
     fi
 
     # Composer falls back to git clone when GitHub's anonymous zipball
