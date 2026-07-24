@@ -9,15 +9,28 @@ function add-pkg()
   packages+=" $*"
 }
 
+# we setup some vars for platform versions to make it easier to make choice later
+# default version is 0 so that a check can be [ "$debian" -gt "12" ] and that will skip non-debians and such
+redhat=0
+debian=0
+ubuntu=0
+suse=0
+solaris=0
+hpux=0
+aix=0
+
 if [ -f /etc/os-release ]; then
-  source /etc/os-release
+    source /etc/os-release
     if grep -q rhel /etc/os-release; then
         yum update --assumeyes
         alias packages='yum install --assumeyes'
+        redhat="$VERSION_ID"
     elif grep -q debian /etc/os-release; then
         alias packages='DEBIAN_FRONTEND=noninteractive apt install --yes'
+        debian="$VERSION_ID"
     elif grep -q suse /etc/os-release; then
         alias packages='zypper install -y'
+        suse="$VERSION_ID"
     else
         echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
         exit 1
@@ -26,13 +39,14 @@ elif [ -f /etc/redhat-release ]; then
     alias packages='yum install --assumeyes'
     # shellcheck disable=SC1091
     source /etc/redhat-release
+    redhat="$VERSION_ID"
 else
     echo "No /etc/os-release or /etc/redhat-release so cant determine platform."
     exit 1
 fi
 
 if [ -f /etc/cfengine-containers-host.flag ]; then
-  if echo "$ID_LIKE" | grep debian && [ "$VERSION_ID" -ge "12" ]; then
+  if [ "$debian" -ge "12" ]; then
     # in jenkins, CONTAINER labeled nodes are capable of running container builds like valgrind-check and static-check
     add-pkg unzip # linux-install-groovy.sh needs unzip to unpack the groovy distribution archive
     add-pkg buildah
@@ -152,3 +166,24 @@ fi
 # shellcheck disable=SC2086
 # ^^^ we want space separated package names as separate args, not one arg with the space separated list
 packages $packages
+
+if mount | grep '/tmp'; then
+  # We could check if /tmp was size 5G but not worth the trouble since this remount call just sets the maximum size of the tmpfs in virtual memory.
+  mount -o remount,size=5G /tmp
+fi
+
+# Ensure that core_pattern is proper for systemd-coredump if coredumpctl is present.
+if command -v coredumpctl >/dev/null; then
+  if [ ! -f /etc/cfengine-containers-host.flag ]; then
+    sysctl kernel.core_pattern='|/lib/systemd/systemd-coredump %p %u %g %s %t %e'
+  fi
+fi
+
+"$thisdir"/linux-install-jdk.sh # the script should skip if sufficient java is already installed
+
+# leech2 build toolchain host
+if [ "$ubuntu" -ge 20 ] || [ "$debian" -ge 12 ] || [ "$redhat" -ge 7 ]; then
+    "$thisdir"/linux-install-protobuf.sh
+    # TODO if mingw then pass along x86_64-pc-windows-gnu as an arg to install rust
+    "$thisdir"/linux-install-rust.sh
+fi
