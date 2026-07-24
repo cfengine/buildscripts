@@ -62,9 +62,10 @@ cd "$BASEDIR"
 gzip -dc $SOURCE_TARBALL | tar -xf -
 ln -s cfengine-3* core
 
-log_debug "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
+log_debug "UNPACKING MASTERFILES TARBALL: $MASTERFILES_TARBALL AND SYMLINKING masterfiles/"
 # shellcheck disable=SC2086
 # > Double quote to prevent globbing and word splitting.
 # We want globbing here
 gzip -dc $MASTERFILES_TARBALL | tar -xf -
+ls -l cfengine-masterfiles-*
 ln -s cfengine-masterfiles-* masterfiles
