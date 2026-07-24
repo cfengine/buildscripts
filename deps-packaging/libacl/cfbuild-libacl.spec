@@ -1,4 +1,4 @@
-%define acl_version 2.3.2
+%define acl_version 2.4.0
 
 Summary: CFEngine Build Automation -- libacl
 Name: cfbuild-libacl
