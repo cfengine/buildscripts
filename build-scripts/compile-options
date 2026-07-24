@@ -34,23 +34,7 @@ export PROJECT
 # When running manually, you can just export this variable.
 # It's a flag: if it's set to 1 - then we use system OpenSSL.
 # Otherwise, we build it.
-if [ x"$SYSTEM_SSL" = x ]
-then
-    # default to using cfengine openssl
-    SYSTEM_SSL=0
-    # We don't bundle OpenSSL on some redhat-derived systems due to incompatability with libpam and our openssl.
-    _OS_MAJOR_VERSION="$(echo "$OS_VERSION" | cut -d. -f1)"
-    if [ "$OS" = "rhel" ] && expr "$_OS_MAJOR_VERSION" ">=" "8" >/dev/null
-    then
-        SYSTEM_SSL=1
-    fi
-    if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]
-    then
-        if expr "$_OS_MAJOR_VERSION" ">=" "15"
-        then
-            SYSTEM_SSL=1
-        fi
-    fi
+if [ -z "$SYSTEM_SSL" ]; then
     # Detect using system ssl when running a Jenkins job
     if expr x"$label" ":" ".*systemssl" >/dev/null
     then
@@ -119,12 +103,13 @@ case "$OS_FAMILY" in
 esac
 
 var_append DEPS "$EMBEDDED_DB pcre2"
+if [ "$SYSTEM_SSL" != 1 ]; then
+    # zlib is a compression library which is a dependency of OpenSSL.
+    # TODO: can we remove zlib dependency? (CFE-4013)
+    var_append DEPS "zlib"
 
-if ! [ x"$SYSTEM_SSL" = x1 ]
-then
-  # FIXME: Why do we need zlib?
-  # ANSWER: Openssl uses it optionally, TODO DISABLE
-  var_append DEPS "zlib openssl"
+    # A toolkit for TLS
+    var_append DEPS "openssl"
 fi
 
 # libsasl needed for solaris
