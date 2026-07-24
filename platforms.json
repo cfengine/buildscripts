@@ -7,7 +7,8 @@
     "dockerfile": "Dockerfile.debian",
     "extra_build_args": {
       "NCURSES_PKGS": "libncurses5 libncurses5-dev"
-    }
+    },
+    "architectures": ["linux/amd64"]
   },
   "ubuntu-22": {
     "image_name": "cfengine-builder-ubuntu-22",
@@ -54,7 +55,8 @@
       "CRB_REPO": "powertools",
       "PHP_MODULE_STREAM": "remi-8.3",
       "EXTRA_PKGS": "python3-rpm-macros platform-python-devel"
-    }
+    },
+    "architectures": ["linux/amd64"]
   },
   "rhel-9": {
     "image_name": "cfengine-builder-rhel-9",
@@ -64,7 +66,8 @@
     "dockerfile": "Dockerfile.rhel",
     "extra_build_args": {
       "PHP_MODULE_STREAM": "remi-8.3"
-    }
+    },
+    "architectures": ["linux/amd64"]
   },
   "rhel-10": {
     "image_name": "cfengine-builder-rhel-10",
@@ -82,6 +85,7 @@
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90",
     "dockerfile": "Dockerfile.mingw",
-    "cross_target": "x64-mingw"
+    "cross_target": "x64-mingw",
+    "architectures": ["linux/amd64"]
   }
 }

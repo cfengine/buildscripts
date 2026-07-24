@@ -21,6 +21,16 @@ log = logging.getLogger("build-in-container")
 IMAGE_REGISTRY = "ghcr.io/cfengine"
 CONFIG_PATH = Path(__file__).resolve().parent / "platforms.json"
 
+# Architectures registry images are published for, unless a platform overrides
+# it with an "architectures" list in platforms.json (e.g. the mingw cross-build,
+# which always targets Windows x64 and only makes sense on amd64).
+DEFAULT_ARCHITECTURES = ["linux/amd64", "linux/arm64"]
+
+
+def platform_architectures(platform_config):
+    """Return the docker platforms a registry image is published for."""
+    return platform_config.get("architectures", DEFAULT_ARCHITECTURES)
+
 
 @functools.cache
 def get_config():
@@ -63,14 +73,25 @@ def image_needs_rebuild(image_tag, current_hash):
     return stored_hash != current_hash
 
 
-def build_image(platform_name, platform_config, script_dir, rebuild=False):
+def build_image(platform_name, platform_config, script_dir, rebuild=False, arch=None):
     """Build the Docker image for the given platform."""
     image_tag = f"{platform_config['image_name']}:{platform_config['image_version']}"
     dockerfile_name = platform_config["dockerfile"]
     dockerfile_path = script_dir / "container" / dockerfile_name
     current_hash = dockerfile_hash(dockerfile_path)
 
-    if not rebuild and not image_needs_rebuild(image_tag, current_hash):
+    # A cached local image is only reusable when BOTH its Dockerfile hash and
+    # its architecture match. The hash check (has the Dockerfile text changed?)
+    # is arch-blind, and we only ever build single-arch images locally under one
+    # shared tag. Without the arch check a leftover image from an --arch run
+    # could be silently reused for a different target — or a host-arch build
+    # could reuse an arm64 image left behind by an earlier --arch build.
+    want_arch = arch if arch else host_docker_arch()
+    if (
+        not rebuild
+        and not image_needs_rebuild(image_tag, current_hash)
+        and image_provides_arch(image_tag, want_arch)
+    ):
         log.info(f"Docker image {image_tag} is up to date.")
         return image_tag
 
@@ -87,6 +108,9 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False):
         "-t",
         image_tag,
     ]
+
+    if arch:
+        cmd.extend(["--platform", arch])
 
     for key, value in platform_config.get("extra_build_args", {}).items():
         cmd.extend(["--build-arg", f"{key}={value}"])
@@ -117,39 +141,111 @@ def registry_image_ref(platform_name):
     return f"{IMAGE_REGISTRY}/{platform['image_name']}:{platform['image_version']}"
 
 
-def pull_image(platform_name):
+def host_docker_arch():
+    """Return the Docker daemon's native architecture (e.g. "amd64", "arm64")."""
+    result = subprocess.run(
+        ["docker", "version", "--format", "{{.Server.Arch}}"],
+        capture_output=True,
+        text=True,
+    )
+    return result.stdout.strip()
+
+
+def image_provides_arch(ref, arch):
+    """Check whether a locally-present image matches the requested arch.
+
+    `arch` may be a full docker platform string ("linux/arm64") or a bare
+    architecture ("arm64"); we compare its architecture component against the
+    image's own reported architecture.
+    """
+    want = arch.rsplit("/", 1)[-1]
+    result = subprocess.run(
+        ["docker", "image", "inspect", "--format", "{{.Architecture}}", ref],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        return False
+    return result.stdout.strip() == want
+
+
+def pull_image(platform_name, arch=None):
     """Pull a pre-built image from the registry.
 
-    Returns the image reference on success or None on failure.
+    Returns the image reference on success or None on failure. When an arch is
+    requested, returns None if the registry image does not actually provide it
+    (e.g. a legacy single-arch image), so the caller can fall back to a local
+    build for the requested architecture.
     """
     ref = registry_image_ref(platform_name)
     log.info(f"Pulling image {ref}...")
+    cmd = ["docker", "pull"]
+    if arch:
+        cmd.extend(["--platform", arch])
+    cmd.append(ref)
     result = subprocess.run(
-        ["docker", "pull", ref],
+        cmd,
         capture_output=True,
         text=True,
     )
     if result.returncode != 0:
         return None
+    if arch and not image_provides_arch(ref, arch):
+        log.warning(f"Registry image {ref} does not provide {arch}.")
+        return None
     return ref
 
 
-def push_image(platform_name, local_tag):
-    """Tag a local image with a timestamped version and push it."""
-    image_name = get_config()[platform_name]["image_name"]
+def build_and_push_image(platform_name, platform_config, script_dir):
+    """Build a multi-arch image with buildx and push it to the registry.
+
+    Multi-arch manifests cannot be produced by `docker build` + `docker tag`
+    (the local image store holds a single architecture), so this uses
+    `docker buildx build --platform ... --push` to build every target
+    architecture and push them under one manifest tag. Building a non-host
+    architecture relies on QEMU/binfmt being registered on the build host.
+    """
+    image_name = platform_config["image_name"]
     version = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     ref = f"{IMAGE_REGISTRY}/{image_name}:{version}"
 
-    log.info(f"Tagging {local_tag} as {ref}...")
-    result = subprocess.run(["docker", "tag", local_tag, ref])
-    if result.returncode != 0:
-        log.error("Docker tag failed.")
-        sys.exit(1)
+    dockerfile_path = script_dir / "container" / platform_config["dockerfile"]
+    current_hash = dockerfile_hash(dockerfile_path)
+    architectures = ",".join(platform_architectures(platform_config))
 
-    log.info(f"Pushing {ref}...")
-    result = subprocess.run(["docker", "push", ref])
+    log.info(f"Building and pushing multi-arch image {ref} ({architectures})...")
+    cmd = [
+        "docker",
+        "buildx",
+        "build",
+        "--platform",
+        architectures,
+        "-f",
+        str(dockerfile_path),
+        "--build-arg",
+        f"BASE_IMAGE={platform_config['base_image']}@{platform_config['base_image_sha']}",
+        "--label",
+        f"dockerfile-hash={current_hash}",
+        "-t",
+        ref,
+    ]
+
+    for key, value in platform_config.get("extra_build_args", {}).items():
+        cmd.extend(["--build-arg", f"{key}={value}"])
+
+    # Expose ci/ as a named build context so the Dockerfile can COPY --from=ci
+    # the shared toolchain installers without widening the main build context.
+    cmd.extend(["--build-context", f"ci={script_dir / 'ci'}"])
+
+    # Build every architecture and push the resulting manifest in one step.
+    cmd.append("--push")
+
+    # Build context is the container/ directory
+    cmd.append(str(script_dir / "container"))
+
+    result = subprocess.run(cmd)
     if result.returncode != 0:
-        log.error("Docker push failed.")
+        log.error("Docker buildx build/push failed.")
         sys.exit(1)
 
     log.info(f"Update image_version to \"{version}\" in platforms.json.")
@@ -259,6 +355,9 @@ def run_container(args, image_tag, source_dir, script_dir):
 
     cmd = ["docker", "run", "--rm", "--network", "host"]
 
+    if args.arch:
+        cmd.extend(["--platform", args.arch])
+
     if args.shell:
         cmd.extend(["-it"])
 
@@ -346,6 +445,11 @@ def parse_args():
         "--list-platforms",
         action="store_true",
         help="List available platforms and exit",
+    )
+    parser.add_argument(
+        "--arch",
+        help="Override the container architecture, passed to docker's --platform "
+        "(e.g. linux/amd64, linux/arm64). Default: host architecture.",
     )
     parser.add_argument(
         "--source-dir",
@@ -461,22 +565,24 @@ def main():
     platform_config = get_config()[args.platform]
 
     if args.push_image:
-        image_tag = build_image(
-            args.platform, platform_config, script_dir, rebuild=True
-        )
-        push_image(args.platform, image_tag)
+        build_and_push_image(args.platform, platform_config, script_dir)
         return
 
-    # Resolve image: pull from registry, fall back to local build
+    # Resolve image: pull from registry, fall back to local build. The registry
+    # holds multi-arch manifests, so a pull with --platform selects the right
+    # variant; if it isn't available (e.g. a legacy single-arch image) we build
+    # the requested architecture locally.
     if args.rebuild_image:
         image_tag = build_image(
-            args.platform, platform_config, script_dir, rebuild=True
+            args.platform, platform_config, script_dir, rebuild=True, arch=args.arch
         )
     else:
-        image_tag = pull_image(args.platform)
+        image_tag = pull_image(args.platform, arch=args.arch)
         if image_tag is None:
-            log.warning("Registry pull failed, building image locally...")
-            image_tag = build_image(args.platform, platform_config, script_dir)
+            log.warning("Registry image unavailable, building image locally...")
+            image_tag = build_image(
+                args.platform, platform_config, script_dir, arch=args.arch
+            )
 
     if not args.shell:
         log.info(
