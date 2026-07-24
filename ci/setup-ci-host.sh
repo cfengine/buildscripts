@@ -165,7 +165,10 @@ fi
 # packages is a dynamic alias set near the top of this script
 # shellcheck disable=SC2086
 # ^^^ we want space separated package names as separate args, not one arg with the space separated list
+whoami
+set -x
 packages $packages
+set +x
 
 if mount | grep '/tmp'; then
   # We could check if /tmp was size 5G but not worth the trouble since this remount call just sets the maximum size of the tmpfs in virtual memory.
