@@ -70,5 +70,7 @@ set -x
 gzip -dc $MASTERFILES_TARBALL | tar -xf -
 ls -l cfengine-masterfiles-* # debug
 ls -l | grep masterfiles # debug
-ln -s cfengine-masterfiles-* masterfiles
+# the masterfiles tarball would match cfengine-masterfiles-* so find the unpacked dir specifically
+_cfmpfdir=$(find -type d -name 'cfengine-masterfiles-*')
+ln -s "$_cfmpfdir" masterfiles
 set +x
