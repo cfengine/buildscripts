@@ -1,60 +1,62 @@
 {
   "ubuntu-20": {
     "image_name": "cfengine-builder-ubuntu-20",
-    "image_version": "20260721T102253Z",
+    "image_version": "20260724T153716Z",
     "base_image": "ubuntu:20.04",
     "base_image_sha": "sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214",
     "dockerfile": "Dockerfile.debian",
     "extra_build_args": {
       "NCURSES_PKGS": "libncurses5 libncurses5-dev"
     },
-    "architectures": ["linux/amd64"]
+    "architectures": [
+      "linux/amd64"
+    ]
   },
   "ubuntu-22": {
     "image_name": "cfengine-builder-ubuntu-22",
-    "image_version": "20260721T102238Z",
+    "image_version": "20260724T153719Z",
     "base_image": "ubuntu:22.04",
     "base_image_sha": "sha256:0e0a0fc6d18feda9db1590da249ac93e8d5abfea8f4c3c0c849ce512b5ef8982",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-24": {
     "image_name": "cfengine-builder-ubuntu-24",
-    "image_version": "20260721T102234Z",
+    "image_version": "20260724T153732Z",
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-26": {
     "image_name": "cfengine-builder-ubuntu-26",
-    "image_version": "latest",
+    "image_version": "20260724T153716Z",
     "base_image": "ubuntu:26.04",
     "base_image_sha": "sha256:3131b4cc82a783df6c9df078f86e01819a13594b865c2cad47bd1bca2b7063bb",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-11": {
     "image_name": "cfengine-builder-debian-11",
-    "image_version": "20260721T102234Z",
+    "image_version": "20260724T153721Z",
     "base_image": "debian:11",
     "base_image_sha": "sha256:6cb68b1be980a0e5b19be25582b34b5cf9cb466d52d08ab4354b79051f2cd298",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-12": {
     "image_name": "cfengine-builder-debian-12",
-    "image_version": "20260721T102238Z",
+    "image_version": "20260724T153720Z",
     "base_image": "debian:12",
     "base_image_sha": "sha256:9344f8b8992482f80cba753f323adeaf17690076c095ccff6cc9536be98185dc",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-13": {
     "image_name": "cfengine-builder-debian-13",
-    "image_version": "20260721T102229Z",
+    "image_version": "20260724T153720Z",
     "base_image": "debian:13",
     "base_image_sha": "sha256:fac46bff2e02f51425b6e33b0e1169f55dfb053d83511ca28aa50c09fd5ed7a4",
     "dockerfile": "Dockerfile.debian"
   },
   "rhel-8": {
     "image_name": "cfengine-builder-rhel-8",
-    "image_version": "20260721T102801Z",
+    "image_version": "20260724T153724Z",
     "base_image": "rockylinux/rockylinux:8",
     "base_image_sha": "sha256:e8a49c5403b687db05d4d67333fa45808fbe74f36e683cec7abb1f7d0f2338c6",
     "dockerfile": "Dockerfile.rhel",
@@ -63,22 +65,26 @@
       "PHP_MODULE_STREAM": "remi-8.3",
       "EXTRA_PKGS": "python3-rpm-macros platform-python-devel"
     },
-    "architectures": ["linux/amd64"]
+    "architectures": [
+      "linux/amd64"
+    ]
   },
   "rhel-9": {
     "image_name": "cfengine-builder-rhel-9",
-    "image_version": "20260721T102426Z",
+    "image_version": "20260724T153723Z",
     "base_image": "rockylinux/rockylinux:9",
     "base_image_sha": "sha256:8101994123cf3d0a8fee517bee7f39e555c7d92bd2d9eb3303cc988a0eeed00f",
     "dockerfile": "Dockerfile.rhel",
     "extra_build_args": {
       "PHP_MODULE_STREAM": "remi-8.3"
     },
-    "architectures": ["linux/amd64"]
+    "architectures": [
+      "linux/amd64"
+    ]
   },
   "rhel-10": {
     "image_name": "cfengine-builder-rhel-10",
-    "image_version": "20260721T102302Z",
+    "image_version": "20260724T153726Z",
     "base_image": "rockylinux/rockylinux:10",
     "base_image_sha": "sha256:827d37bc128288ccf160ee318bb3cb92d591164cb217e92f8bc61e3982ae1834",
     "dockerfile": "Dockerfile.rhel",
@@ -88,11 +94,13 @@
   },
   "ubuntu-24-mingw": {
     "image_name": "cfengine-builder-ubuntu-24-mingw",
-    "image_version": "20260721T102257Z",
+    "image_version": "20260724T153731Z",
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:4fbb8e6a8395de5a7550b33509421a2bafbc0aab6c06ba2cef9ebffbc7092d90",
     "dockerfile": "Dockerfile.mingw",
     "cross_target": "x64-mingw",
-    "architectures": ["linux/amd64"]
+    "architectures": [
+      "linux/amd64"
+    ]
   }
 }
