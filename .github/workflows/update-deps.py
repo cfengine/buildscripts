@@ -60,7 +60,7 @@ def parse_args():
         "--root", default=".", help="specify build scripts root directory"
     )
     parser.add_argument(
-        "--jdk21",
+        "--jdk",
         action="store_true",
         help="update SDK 21 on build hosts (needed by Jenkins)",
     )
@@ -270,10 +270,10 @@ def update_deps(root, bump, skip):
             exit(1)
 
 
-def update_jdk21(root):
+def update_jdk(root):
     base_url = "https://download.oracle.com/java/21/archive/"
 
-    filename = os.path.join(root, "ci/linux-install-jdk21.sh")
+    filename = os.path.join(root, "ci/linux-install-jdk.sh")
     with open(filename, "r") as f:
         content = f.read()
 
@@ -471,8 +471,8 @@ def main():
     )
 
     update_deps(args.root, args.bump, args.skip)
-    if args.jdk21:
-        update_jdk21(args.root)
+    if args.jdk:
+        update_jdk(args.root)
     if args.rust:
         update_rust(args.root)
     if args.protobuf:

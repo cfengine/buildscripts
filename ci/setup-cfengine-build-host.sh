@@ -139,6 +139,12 @@ if grep -q 6.10 /etc/issue 2>/dev/null; then
     urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.24.3/misc/cfengine-masterfiles-3.24.3-1.pkg.tar.gz
 fi
 
+# Here we start replacing the use of CFEngine policy with scripts. See ENT-14330
+if [ -f /etc/cfengine-bootstrap-pr-host.flag ]; then
+  "$thisdir"/setup-bootstrap-host.sh
+  exit
+fi
+
 if grep -q ubuntu /etc/os-release; then
     if grep -qi version=\"16 /etc/os-release; then
         urlget https://cfengine-package-repos.s3.amazonaws.com/enterprise/Enterprise-3.21.8/agent/agent_ubuntu16_x86_64/cfengine-nova_3.21.8-1.ubuntu16_amd64.deb

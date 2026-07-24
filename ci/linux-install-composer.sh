@@ -1,5 +1,8 @@
 #!/bin/bash
 
+if command -v composer >/dev/null; then
+  exit
+fi
 VERSION="${COMPOSER_VERSION:-2.9.5}"
 INSTALL_DIR="${COMPOSER_INSTALL_DIR:-/usr/local/bin}"
 PHP_PATH="${PHP_BIN:-php}"
