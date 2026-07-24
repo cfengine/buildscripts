@@ -43,7 +43,9 @@ RUN if [ -n "${PHP_MODULE_STREAM}" ]; then \
     && (dnf install -y php-json || true) \
     && (dnf install -y php-zip || dnf install -y php-pecl-zip || true) \
     && dnf clean all
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer.phar
+# Checksum-verified, version-pinned Composer (shared with the build hosts).
+COPY --from=ci linux-install-composer.sh /tmp/
+RUN /tmp/linux-install-composer.sh
 
 # Rust + protobuf for the cargo-based leech2 dep (prebuilt tarballs, shared with Debian).
 COPY --from=ci linux-install-protobuf.sh linux-install-rust.sh /tmp/
