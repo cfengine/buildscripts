@@ -4,7 +4,7 @@ node_version=20.10.0
 
 npm install compare-versions
 
-node -e "import pkg from 'compare-versions'; const { compareVersions } = pkg; process.exit(compareVersions('$node_version', process.version));"
+node -e "const cv = require('compare-versions'); process.exit(cv.compareVersions('$node_version', process.version));"
 result=$?
 echo "result: $result"
 if [ "$result" != "1" ]; then

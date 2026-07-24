@@ -1,14 +1,14 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
+set -e
 
 php_version=8.3.20
 
 if command -v php; then
-  if php 'version_compare(PHP_VERSION, "$php_version") > 0 || exit(1);'; then
+  if php -r "version_compare(PHP_VERSION, \""$php_version"\") >= 0 || exit(1);"; then
+    echo "host has php version >= $php_version. will skip install."
     exit
   fi
 fi
-
-# TODO: query the package manager to see if a sufficient php version is available
 
 # install PHP 8.3 from source
 sudo apt-get -y install gcc g++ make pkg-config libxml2-dev libsqlite3-dev \

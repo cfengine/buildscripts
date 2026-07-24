@@ -36,6 +36,12 @@ EOF
   cd -
 }
 
+if command -v java; then
+  echo "java already installed, will skip install."
+  exit
+fi
+
+# TODO check version
 if [ "$(whoami)" = "root" ]; then
   install_jdk
 else
