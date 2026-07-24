@@ -123,9 +123,9 @@ bundle agent cfengine_build_host_setup
       "platform-python-devel" -> { "cfbs shebang", "ENT-11338" }
         comment => "py3_shebang_fix macro needs /usr/bin/pathfix.py from platform-python-devel package";
 
-    suse_15::
-      "libopenssl-devel" -> { "ENT-12528" }
-        comment => "like redhat, suse 15+ needs to build with system openssl.";
+    # NOTE: suse 15+ needs libopenssl-3-devel to build against system openssl (ENT-12528),
+    # but it is installed via a version-pinned command below (ENT-14345), not here, so the
+    # lower-priority oss/update repos cannot pull an SP6 -devel and downgrade openssl.
 
     (redhat_8|centos_8|redhat_9).(yum_dnf_conf_ok)::
       "java-1.8.0-openjdk-headless" package_policy => "delete",
@@ -155,6 +155,11 @@ bundle agent cfengine_build_host_setup
 
   vars:
     "suse_users_and_groups" slist => { "daemon", "bin", "sys" };
+
+    suse_15::
+      "libopenssl3_version" -> { "ENT-14345" }
+        string => execresult("/usr/bin/rpm -q --qf %{VERSION} libopenssl3", "noshell"),
+        comment => "version of the installed system openssl, used to pin libopenssl-3-devel.";
 
   classes:
     any::
@@ -203,6 +208,10 @@ bundle agent cfengine_build_host_setup
       "sed -i '/best=True/s/True/False/' /etc/yum.conf" contain => in_shell;
     (redhat_8|centos_8|redhat_9).!dnf_conf_ok::
       "sed -i '/best=True/s/True/False/' /etc/dnf/dnf.conf" contain => in_shell;
+    suse_15.!have_libopenssl_3_devel::
+      "zypper install -y libopenssl-3-devel=$(libopenssl3_version)" -> { "ENT-12528", "ENT-14345" }
+        contain => in_shell,
+        comment => "suse 15+ builds against system openssl. Pin -devel to the installed libopenssl3 version so the lower-priority oss/update repos (still SP6 3.1.4) do not pull an older -devel and downgrade the whole openssl stack.";
 
 
   classes:
@@ -215,6 +224,9 @@ bundle agent cfengine_build_host_setup
     opensuse|suse|sles::
       "have_$(suse_users_and_groups)_group" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/group >/dev/null", "useshell");
       "have_$(suse_users_and_groups)_user" expression => returnszero("grep '^$(suse_users_and_groups):' /etc/passwd >/dev/null", "useshell");
+    suse_15::
+      "have_libopenssl_3_devel" -> { "ENT-14345" }
+        expression => returnszero("rpm -q libopenssl-3-devel >/dev/null", "useshell");
 
   files:
     ubuntu_16|redhat_9::

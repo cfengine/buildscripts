@@ -17,7 +17,15 @@ fi
 
 # while ENT-13750 is in progress we need to ensure that OTHER builds include openssl devel packages on redhat-based platforms
 if command -v zypper >/dev/null 2>/dev/null; then
-  sudo zypper install -y libopenssl-devel || true
+  # ENT-14345: pin libopenssl-3-devel to the installed libopenssl3 version. Lower-priority
+  # oss/update repos still carry SP6 openssl (3.1.4), so an unpinned install picks the old
+  # -devel and tries to downgrade the whole SP7 openssl stack (3.2.3). Pinning avoids that.
+  ossl_ver=$(rpm -q --qf '%{VERSION}' libopenssl3 2>/dev/null)
+  if [ -n "$ossl_ver" ]; then
+    sudo zypper install -y "libopenssl-3-devel=${ossl_ver}" || true
+  else
+    sudo zypper install -y libopenssl-3-devel || true
+  fi
 fi
 if command -v yum >/dev/null 2>/dev/null; then
   sudo yum install -y openssl-devel || true
