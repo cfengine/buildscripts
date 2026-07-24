@@ -67,5 +67,6 @@ log_debug "UNPACKING MASTERFILES TARBALL: $MASTERFILES_TARBALL AND SYMLINKING ma
 # > Double quote to prevent globbing and word splitting.
 # We want globbing here
 gzip -dc $MASTERFILES_TARBALL | tar -xf -
-ls -l cfengine-masterfiles-*
+ls -l cfengine-masterfiles-* # debug
+ls -l | grep masterfiles # debug
 ln -s cfengine-masterfiles-* masterfiles
