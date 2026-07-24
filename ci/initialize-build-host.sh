@@ -73,6 +73,7 @@ set_github_status()
 }
 
 # main() as it were, begin non-function definition section of script
+set +x # TODO, capture current x mode and restore later
 if broken_posix_shell >/dev/null 2>&1; then
     try_exec /usr/xpg4/bin/sh "$0" "$@"
     echo "No compatible shell script interpreter found."
@@ -136,9 +137,10 @@ do
     sleep 10
 done
 
-echo '========================================= PRINTING CLOUD-INIT LOG ==================================================='
-sudo sed 's/^.*/>>> &/' /var/log/cloud-init-output.log || true
-echo '======================================= DONE PRINTING CLOUD-INIT LOG ================================================'
+# TODO, instead of printing this out ALWAYS, print it out only in case of errors
+#echo '========================================= PRINTING CLOUD-INIT LOG ==================================================='
+#sudo sed 's/^.*/>>> &/' /var/log/cloud-init-output.log || true
+#echo '======================================= DONE PRINTING CLOUD-INIT LOG ================================================'
 
 if [ $attempts -le 0 ]
 then
@@ -147,9 +149,10 @@ then
     exit 1
 fi
 
-echo '=========================================== CURRENT ENVIRONMENT ====================================================='
-export
-echo '========================================= CURRENT ENVIRONMENT END ==================================================='
+# TODO only print current environment on errors, maybe save the environment NOW and then show a diff at ERROR
+#echo '=========================================== CURRENT ENVIRONMENT ====================================================='
+#export
+#echo '========================================= CURRENT ENVIRONMENT END ==================================================='
 
 # Disable TTY requirement. This normally happens in initialize-user-data.sh, but
 # for hosts that do not support cloud user data, it may not have happened

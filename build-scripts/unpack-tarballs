@@ -62,9 +62,15 @@ cd "$BASEDIR"
 gzip -dc $SOURCE_TARBALL | tar -xf -
 ln -s cfengine-3* core
 
-log_debug "UNPACKING MASTERFILES TARBALL AND SYMLINKING masterfiles/"
+log_debug "UNPACKING MASTERFILES TARBALL: $MASTERFILES_TARBALL AND SYMLINKING masterfiles/"
 # shellcheck disable=SC2086
 # > Double quote to prevent globbing and word splitting.
 # We want globbing here
+set -x
 gzip -dc $MASTERFILES_TARBALL | tar -xf -
-ln -s cfengine-masterfiles-* masterfiles
+ls -l cfengine-masterfiles-* # debug
+ls -l | grep masterfiles # debug
+# the masterfiles tarball would match cfengine-masterfiles-* so find the unpacked dir specifically
+_cfmpfdir=$(find -type d -name 'cfengine-masterfiles-*')
+ln -s "$_cfmpfdir" masterfiles
+set +x

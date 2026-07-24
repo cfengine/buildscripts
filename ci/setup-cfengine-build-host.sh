@@ -95,9 +95,12 @@ if [ -f /etc/os-release ]; then
         yum update --assumeyes
         alias software='yum install --assumeyes'
     elif grep -q debian /etc/os-release; then
+        DEBIAN_FRONTEND=noninteractive apt update
+
         # sometimes the /boot partition is too small to handle kernel upgrade regenerations of initrd and related files on ubuntu, so allow failure first
         DEBIAN_FRONTEND=noninteractive apt upgrade --yes || true
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
+
         # and now perform the upgrade a second time after hopefully autoremove cleans up /boot partition of kernel files that cause failure
         DEBIAN_FRONTEND=noninteractive apt upgrade --yes
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
@@ -143,6 +146,20 @@ fi
 if [ -f /etc/cfengine-bootstrap-pr-host.flag ]; then
   "$thisdir"/setup-bootstrap-host.sh
   exit
+fi
+
+if [ -f /etc/cfengine-containers-host.flag ]; then
+  "$thisdir"/setup-ci-host.sh
+  exit
+fi
+
+# platforms too old to support cf-remote, use scripts instead
+if [ -f /etc/os-release ]; then
+  source /etc/os-release
+  if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "7" ]; then
+    "$thisdir"/setup-ci-host.sh
+    exit
+  fi
 fi
 
 if grep -q ubuntu /etc/os-release; then
