@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -e
-shopt -s expand_aliasas
+shopt -s expand_aliases
 thisdir="$(dirname "$0")"
 
 packages="" # a space separated list of packages to install
