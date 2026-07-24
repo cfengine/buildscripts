@@ -15,8 +15,11 @@ redhat=0
 debian=0
 ubuntu=0
 suse=0
+# shellcheck disable=SC2034
 solaris=0
+# shellcheck disable=SC2034
 hpux=0
+# shellcheck disable=SC2034
 aix=0
 
 if [ -f /etc/os-release ]; then
@@ -30,6 +33,7 @@ if [ -f /etc/os-release ]; then
         debian="$VERSION_ID"
     elif grep -q suse /etc/os-release; then
         alias packages='zypper install -y'
+        # shellcheck disable=SC2034
         suse="$VERSION_ID"
     else
         echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
@@ -163,10 +167,10 @@ if echo "$ID_LIKE" | grep rhel; then
 fi
 
 # packages is a dynamic alias set near the top of this script
-# shellcheck disable=SC2086
 # ^^^ we want space separated package names as separate args, not one arg with the space separated list
 whoami
 set -x
+# shellcheck disable=SC2086
 packages $packages
 set +x
 
@@ -189,4 +193,16 @@ if [ "$ubuntu" -ge 20 ] || [ "$debian" -ge 12 ] || [ "$redhat" -ge 7 ]; then
     "$thisdir"/linux-install-protobuf.sh
     # TODO if mingw then pass along x86_64-pc-windows-gnu as an arg to install rust
     "$thisdir"/linux-install-rust.sh
+fi
+
+if [ "$redhat" -ge 7 ]; then
+  yum groups install -y 'Development Tools'
+fi
+
+if [ "$redhat" = "8" ]; then
+  sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm
+fi
+
+if [ "$redhat" -gt 0 ] && [ "$redhat" -le 7 ]; then
+  yum install --assumeyes https://dl.fedoraproject.org/pub/epel/epel-release-latest-"$redhat".noarch.rpm
 fi
