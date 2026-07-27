@@ -36,7 +36,7 @@ function cleanup() {
         # single multi-call uutils binary that dispatches on argv[0], so it
         # would fail with "coreutils: unknown program 'systemctl'".
         rm -f /bin/systemctl
-        printf '#!/bin/sh\nexit 0\n' > /bin/systemctl
+        printf '#!/bin/sh\nexit 0\n' >/bin/systemctl
         chmod +x /bin/systemctl
         apt remove -y cfengine-nova || true
     elif command -v yum >/dev/null 2>&1; then
@@ -97,6 +97,7 @@ if [ -f /etc/os-release ]; then
     if grep -q rhel /etc/os-release; then
         yum update --assumeyes
         alias software='yum install --assumeyes'
+        alias erase-packages='yum erase --assumeyes'
     elif grep -q debian /etc/os-release; then
         DEBIAN_FRONTEND=noninteractive apt update
 
@@ -108,9 +109,11 @@ if [ -f /etc/os-release ]; then
         DEBIAN_FRONTEND=noninteractive apt upgrade --yes
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
         alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
+        alias erase-packages='DEBIAN_FRONTEND=noninteractive apt purge --yes'
     elif grep -q suse /etc/os-release; then
         zypper -n update
         alias software='zypper install -y'
+        alias erase-packages='zypper uninstall -y'
     else
         echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
         exit 1
@@ -147,22 +150,13 @@ fi
 
 # Here we start replacing the use of CFEngine policy with scripts. See ENT-14330
 if [ -f /etc/cfengine-bootstrap-pr-host.flag ]; then
-  "$thisdir"/setup-bootstrap-host.sh
-  exit
+    "$thisdir"/setup-bootstrap-host.sh
+    exit
 fi
 
 if [ -f /etc/cfengine-containers-host.flag ]; then
-  "$thisdir"/setup-ci-host.sh
-  exit
-fi
-
-# platforms too old to support cf-remote, use scripts instead
-if [ -f /etc/os-release ]; then
-  source /etc/os-release
-  if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "7" ]; then
     "$thisdir"/setup-ci-host.sh
     exit
-  fi
 fi
 
 if grep -q ubuntu /etc/os-release; then
@@ -227,8 +221,8 @@ echo "Checking for pre-installed CFEngine (chicken/egg problem)"
 # We need a cf-agent to run build host setup policy and redhat-10-arm did not have a previous package to install.
 if ! /var/cfengine/bin/cf-agent -V 2>/dev/null; then
     echo "No existing CFEngine install found, try cf-remote..."
-    if grep -qi stretch /etc/os-release || grep -qi buster /etc/os-release; then
-        _VERSION="--version 3.21.8" # 3.27.0 and 3.24.x do not have debian 9 (stretch) or debian 10 (buster)
+    if grep -qi stretch /etc/os-release || grep -qi buster /etc/os-release || grep -qi bionic /etc/os-release; then
+        _VERSION="--version 3.21.8" # 3.27.0 and 3.24.x do not have debian 9 (stretch) or debian 10 (buster) or ubuntu 18 (bionic)
     elif grep -qi bullseye /etc/os-release; then
         _VERSION="--version 3.24.3" # 3.27.0 has only debian > 11 (bullseye)
     elif grep -q suse /etc/os-release; then
@@ -237,10 +231,29 @@ if ! /var/cfengine/bin/cf-agent -V 2>/dev/null; then
     else
         _VERSION=""
     fi
-    cf-remote --log-level info "$_VERSION" install --clients localhost || true
+
+    # ENT-14373, migrate any cf-remote cache/config files to avoid dirs_exist_ok problems on old pythons
+    if [ -d "$HOME"/.cfengine/cf-remote/json ]; then
+        mkdir -p "$HOME"/.cache/cfengine/cf-remote
+        mv "$HOME"/.cfengine/cf-remote/json "$HOME"/.cache/cfengine/cf-remote/
+    fi
+    if [ -d "$HOME"/.cfengine/cf-remote/packages ]; then
+        mkdir -p "$HOME"/.cache/cfengine/cf-remote
+        mv "$HOME"/.cfengine/cf-remote/packages "$HOME"/.cache/cfengine/cf-remote/
+    fi
+    if [ -d "$HOME"/.cfengine/cf-remote ]; then
+        mkdir -p "$HOME"/.config/cfengine/cf-remote
+        mv "$HOME"/.cfengine/cf-remote/* "$HOME"/.config/cfengine/cf-remote/
+    fi
+
+    # We are passing a two-token string and need it to stay two tokens for proper argument parsing in $_VERSION
+    # shellcheck disable=SC2086
+    erase-packages cfbuild-* # in case a dirty build was left on a long-living build host
+    cf-remote --log-level info $_VERSION install --clients localhost || true
 fi
 
 if [ ! -x /var/cfengine/bin/cf-agent ]; then
+    [ -f /var/log/CFEngine-Install.log ] && tail /var/log/CFEngine-Install.log
     echo "cf-remote didn't install CFEngine, build from source..."
     software git
     echo "cf-remote didn't install cf-agent, try from source"
