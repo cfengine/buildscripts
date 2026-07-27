@@ -19,6 +19,13 @@ if ! id -u jenkins; then
     useradd jenkins -p jenkins
 fi
 mkdir -p /home/jenkins
+
+# The following is copied from prepare-testmachine-chroot
+CHROOT_ROOT=/home/jenkins/testmachine-chroot/
+fuser -k "$CHROOT_ROOT" >/dev/null 2>&1 || true
+# Unmount the /proc filesystem if it was previously mounted inside the chroot.
+umount "${CHROOT_ROOT}proc" >/dev/null 2>&1 || true
+
 chown -R jenkins /home/jenkins
 
 # cleanup any previous runs cfengine-masterfiles tar balls
@@ -246,9 +253,11 @@ if ! /var/cfengine/bin/cf-agent -V 2>/dev/null; then
         mv "$HOME"/.cfengine/cf-remote/* "$HOME"/.config/cfengine/cf-remote/
     fi
 
+
+    erase-packages cfbuild-* || true # in case a dirty build was left on a long-living build host
+
     # We are passing a two-token string and need it to stay two tokens for proper argument parsing in $_VERSION
     # shellcheck disable=SC2086
-    erase-packages cfbuild-* # in case a dirty build was left on a long-living build host
     cf-remote --log-level info $_VERSION install --clients localhost || true
 fi
 
