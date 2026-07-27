@@ -78,10 +78,12 @@ EOF
 fi
 
 if [ "$redhat" != 0 ]; then
-    if [ "$redhat" -le 7 ]; then
+    if [ "$redhat" -gt 7 ]; then
         if ! grep best=False /etc/yum.conf; then
             sed -i '/best=True/s/True/False/' /etc/yum.conf
         fi
+    fi
+    if [ "$redhat" -ge 8 ]; then
         if ! grep best=False /etc/dnf/dnf.conf; then
             sed -i '/best=True/s/True/False/' /etc/dnf/dnf.conf
         fi
