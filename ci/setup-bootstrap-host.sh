@@ -9,6 +9,8 @@ apt-get -qy update
 apt-get -qy upgrade
 apt-get -y install git autogen autoconf automake m4 make bison flex binutils libtool gcc g++ libc-dev \
            liblmdb-dev libpam0g-dev python libssl-dev libpcre3-dev psmisc curl jq unzip \
+           librsync-dev \
+           autoconf-archive \
            pigz parallel libpcre2-dev php-zip
 
 bash "$thisdir"/linux-install-php.sh
