@@ -26,8 +26,9 @@ rm -rf cfengine-masterfiles*
 
 function cleanup() {
     set -e
+    set -x
     [ -f /var/log/messages ] && tail /var/log/messages
-    command -v journalctl >/dev/null && journalctl --lines=20
+    command -v journalctl >/dev/null && journalctl | grep -P '(error|fail)'
     if command -v apt >/dev/null 2>&1; then
         # workaround for CFE-4544, remove scriptlets call systemctl even when systemctl is-system-running returns false
         # Replace systemctl with a no-op stub that always succeeds. We can't
