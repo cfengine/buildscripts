@@ -136,9 +136,10 @@ do
     sleep 10
 done
 
-echo '========================================= PRINTING CLOUD-INIT LOG ==================================================='
-sudo sed 's/^.*/>>> &/' /var/log/cloud-init-output.log || true
-echo '======================================= DONE PRINTING CLOUD-INIT LOG ================================================'
+# TODO, instead of printing this out ALWAYS, print it out only in case of errors ENT-14372
+#echo '========================================= PRINTING CLOUD-INIT LOG ==================================================='
+#sudo sed 's/^.*/>>> &/' /var/log/cloud-init-output.log || true
+#echo '======================================= DONE PRINTING CLOUD-INIT LOG ================================================'
 
 if [ $attempts -le 0 ]
 then
@@ -147,9 +148,10 @@ then
     exit 1
 fi
 
-echo '=========================================== CURRENT ENVIRONMENT ====================================================='
-export
-echo '========================================= CURRENT ENVIRONMENT END ==================================================='
+# TODO only print current environment on errors, maybe save the environment NOW and then show a diff at ERROR
+#echo '=========================================== CURRENT ENVIRONMENT ====================================================='
+#export
+#echo '========================================= CURRENT ENVIRONMENT END ==================================================='
 
 # Disable TTY requirement. This normally happens in initialize-user-data.sh, but
 # for hosts that do not support cloud user data, it may not have happened
