@@ -8,7 +8,7 @@
 #    serial execution of initialization steps. It will post the output when
 #    finished, if any.
 #
-# 2. If $HOME/proxy-target.txt exists, it means this is a proxy host, and the
+# 2. If $(pwd)/proxy-target.txt exists, it means this is a proxy host, and the
 #    real build machine is on the host specified by the login details inside
 #    that file. If the file does not exist, we are on the build slave itself.
 #    After figuring that stuff out, the script will run the rest of the original
@@ -136,9 +136,10 @@ do
     sleep 10
 done
 
-echo '========================================= PRINTING CLOUD-INIT LOG ==================================================='
-sudo sed 's/^.*/>>> &/' /var/log/cloud-init-output.log || true
-echo '======================================= DONE PRINTING CLOUD-INIT LOG ================================================'
+# TODO, instead of printing this out ALWAYS, print it out only in case of errors ENT-14372
+#echo '========================================= PRINTING CLOUD-INIT LOG ==================================================='
+#sudo sed 's/^.*/>>> &/' /var/log/cloud-init-output.log || true
+#echo '======================================= DONE PRINTING CLOUD-INIT LOG ================================================'
 
 if [ $attempts -le 0 ]
 then
@@ -147,9 +148,10 @@ then
     exit 1
 fi
 
-echo '=========================================== CURRENT ENVIRONMENT ====================================================='
-export
-echo '========================================= CURRENT ENVIRONMENT END ==================================================='
+# TODO only print current environment on errors, maybe save the environment NOW and then show a diff at ERROR
+#echo '=========================================== CURRENT ENVIRONMENT ====================================================='
+#export
+#echo '========================================= CURRENT ENVIRONMENT END ==================================================='
 
 # Disable TTY requirement. This normally happens in initialize-user-data.sh, but
 # for hosts that do not support cloud user data, it may not have happened
@@ -204,9 +206,9 @@ reset_nested_vm() {
     if sudo dmesg | grep -q "BIOS Google"
     then
 	# We're in Google Cloud, so just need to run nested-vm script again
-        if [ ! -d $HOME/mender-qa ]
+        if [ ! -d $HOME/buildscripts ]
 	then
-            echo "Where is mender-qa repo gone?"
+            echo "Where is buildscripts repo gone?"
 	    sudo ls -lap $HOME
 	    exit 1
         fi
@@ -225,14 +227,15 @@ reset_nested_vm() {
         fi
 	if [ ! -z "$login" ]
 	then
-	    ip=`sed 's/.*@//' $HOME/proxy-target.txt`
+	    ip=`sed 's/.*@//' $(pwd)/proxy-target.txt`
             if sudo arp | grep -q $ip
             then
                 sudo arp -d $ip
             fi
 	fi
+        # TODO, remove this, we don't need or use or test nested-vms
 	$HOME/mender-qa/scripts/nested-vm.sh $HOME/*.qcow2
-        login="`cat $HOME/proxy-target.txt`"
+        login="`cat $(pwd)/proxy-target.txt`"
         if $RSH $login true
         then
             echo "Nested VM is back up, it seems. Happily continuing!"
@@ -274,13 +277,13 @@ reset_nested_vm() {
     fi
 }
 
-if [ -f $HOME/proxy-target.txt ]
+if [ -f $(pwd)/proxy-target.txt ]
 then
     # --------------------------------------------------------------------------
     # Check target machine health.
     # --------------------------------------------------------------------------
 
-    login="$(cat $HOME/proxy-target.txt)"
+    login="$(cat $(pwd)/proxy-target.txt)"
 
     if [ ! -z "$login" ] && $RSH $login true
     then
@@ -363,9 +366,9 @@ then
     # the repository in provisioning. Permanent hosts don't keep it in HOME,
     # in order to avoid it getting stale, and will have it in the WORKSPACE
     # instead, synced separately below.
-    if [ -d $HOME/mender-qa ]
+    if [ -d $HOME/buildscripts ]
     then
-        $RSYNC -e "$RSH"    $HOME/mender-qa  $login:.
+        $RSYNC -e "$RSH"    $HOME/buildscripts  $login:.
     fi
 
     # Copy the workspace. If there is no workspace defined, we are not in the
