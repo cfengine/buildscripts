@@ -8,7 +8,7 @@
 #    serial execution of initialization steps. It will post the output when
 #    finished, if any.
 #
-# 2. If $(pwd)/proxy-target.txt exists, it means this is a proxy host, and the
+# 2. If $HOME/proxy-target.txt exists, it means this is a proxy host, and the
 #    real build machine is on the host specified by the login details inside
 #    that file. If the file does not exist, we are on the build slave itself.
 #    After figuring that stuff out, the script will run the rest of the original
@@ -227,7 +227,7 @@ reset_nested_vm() {
         fi
 	if [ ! -z "$login" ]
 	then
-	    ip=`sed 's/.*@//' $(pwd)/proxy-target.txt`
+	    ip=`sed 's/.*@//' $HOME/proxy-target.txt`
             if sudo arp | grep -q $ip
             then
                 sudo arp -d $ip
@@ -235,7 +235,7 @@ reset_nested_vm() {
 	fi
         # TODO, remove this, we don't need or use or test nested-vms
 	$HOME/mender-qa/scripts/nested-vm.sh $HOME/*.qcow2
-        login="`cat $(pwd)/proxy-target.txt`"
+        login="`cat $HOME/proxy-target.txt`"
         if $RSH $login true
         then
             echo "Nested VM is back up, it seems. Happily continuing!"
@@ -277,13 +277,13 @@ reset_nested_vm() {
     fi
 }
 
-if [ -f $(pwd)/proxy-target.txt ]
+if [ -f $HOME/proxy-target.txt ]
 then
     # --------------------------------------------------------------------------
     # Check target machine health.
     # --------------------------------------------------------------------------
 
-    login="$(cat $(pwd)/proxy-target.txt)"
+    login="$(cat $HOME/proxy-target.txt)"
 
     if [ ! -z "$login" ] && $RSH $login true
     then
