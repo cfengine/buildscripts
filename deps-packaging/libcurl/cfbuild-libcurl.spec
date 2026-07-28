@@ -1,4 +1,4 @@
-%define curl_version 8.17.0
+%define curl_version 8.21.0
 
 Summary: CFEngine Build Automation -- libcurl
 Name: cfbuild-libcurl
@@ -18,7 +18,7 @@ AutoReqProv: no
 mkdir -p %{_builddir}
 %setup -q -n curl-%{curl_version}
 
-%if "%{_system_ssl}" == "1"
+%if 0%{?SYSTEM_SSL}
 %define ssl_prefix /usr
 %else
 %define ssl_prefix %{prefix}

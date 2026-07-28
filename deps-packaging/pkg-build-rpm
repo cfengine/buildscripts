@@ -123,7 +123,6 @@ fi
 # Here we only want to specify this one flag: 0x0002. Sadly these scripts run on POSIX shell (especially e.g. aix71 runs as /bin/sh which is ksh) so no bitwise operators. Add them together manually to a decimal integer.
 export QA_RPATHS=2 # 0x0002 all by itself, no &(ands)
 eval $RPMBUILD_CMD -bb \
-  --define "'_system_ssl $SYSTEM_SSL'" \
   --define "'_topdir $BASEDIR/$PKGNAME'" \
   --define "'version $VERSION'" \
   --define "'buildprefix $BUILDPREFIX'" \
