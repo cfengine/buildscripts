@@ -32,15 +32,6 @@ export PROJECT
 # It's a flag: if it's set to 1 - then we use system OpenSSL.
 # Otherwise, we build it.
 if [ -z "$SYSTEM_SSL" ]; then
-    # We don't bundle OpenSSL on some redhat-derived systems due to incompatability with libpam and our openssl.
-    if [ "$OS" = "rhel" ] && [ "$OS_VERSION_MAJOR" -ge "8" ]; then
-        SYSTEM_SSL=1
-    fi
-    if [ "$OS" = "opensuse" ] || [ "$OS" = "sles" ]; then
-        if [ "$OS_VERSION_MAJOR" -ge "15" ]; then
-            SYSTEM_SSL=1
-        fi
-    fi
     # Detect using system ssl when running a Jenkins job
     # shellcheck disable=SC2154
     # > label is referenced but not assigned.
@@ -126,7 +117,6 @@ solaris | aix)
     ;;
 esac
 
-# We use system bundled SSL on RHEL >= 8
 if [ "$SYSTEM_SSL" != 1 ]; then
     # zlib is a compression library which is a dependency of OpenSSL.
     # TODO: can we remove zlib dependency? (CFE-4013)
