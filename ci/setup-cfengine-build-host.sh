@@ -26,7 +26,10 @@ fuser -k "$CHROOT_ROOT" >/dev/null 2>&1 || true
 # Unmount the /proc filesystem if it was previously mounted inside the chroot.
 umount "${CHROOT_ROOT}proc" >/dev/null 2>&1 || true
 
-chown -R jenkins /home/jenkins
+echo "Show running processes in case a race condition occurs when chowning files (happened once 2026-07-28)"
+ps -efl
+
+chown -R jenkins /home/jenkins || true
 
 # cleanup any previous runs cfengine-masterfiles tar balls
 rm -rf cfengine-masterfiles*
