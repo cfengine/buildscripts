@@ -39,5 +39,5 @@ ln -s cfengine-3* core
 echo "UNPACKING MASTERFILES TARBALL: $MASTERFILES_TARBALL AND SYMLINKING masterfiles/"
 gzip -dc $MASTERFILES_TARBALL  | tar -xf -
 # the masterfiles tarball would match cfengine-masterfiles-* so find the unpacked dir specifically
-_cfmpfdir=$(find -type d -name 'cfengine-masterfiles-*')
+_cfmpfdir=$(find . -type d -name 'cfengine-masterfiles-*')
 ln -s "$_cfmpfdir" masterfiles
