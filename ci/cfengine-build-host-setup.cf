@@ -86,6 +86,15 @@ bundle agent cfengine_build_host_setup
     mingw_build_host::
       "mingw-w64";
 
+      # build-scripts/package-msi builds the MSI natively with wixl; msiinfo
+      # (msitools) is used to inspect it. No Wine, no i386. See ENT-13868.
+      "wixl";
+      "msitools";
+
+      # build-scripts/package-msi derives deterministic MSI GUIDs with uuidgen
+      # (uuid-runtime) for reproducible builds. See ENT-13792.
+      "uuid-runtime";
+
       "binfmt-support"
         comment => "update-binfmts command needed for build-scripts/package-msi script";
 
@@ -120,8 +129,8 @@ bundle agent cfengine_build_host_setup
       "gcc";
 
       "ncurses-devel"
-        if => not("sles_15"),
-        comment => "sles 15 requires a downgrade to install ncurses-devel as of July 25, 2025";
+        if => not("sles_15|sles_12"),
+        comment => "sles 12/15 require a downgrade to install ncurses-devel; handled by the commands: promise below";
 
       "pam-devel";
       "rsync";
@@ -269,7 +278,8 @@ bundle agent cfengine_build_host_setup
         expression => not(fileexists("/etc/cfengine-in-container.flag")),
         comment => "We use an explicit flag file that we control to avoid ambiguity about whether we are in a container or not.";
 
-    # Rust is build dependency for leech2 (gate on ubuntu>=20, debian>=12, redhat>=8)
+@if minimum_version(3.23)
+    # Rust is build dependency for leech2 (gate on ubuntu>=20, debian>=12, redhat>=7)
     ubuntu::
       "leech2_build_toolchain_host"
         expression => version_compare("$(sys.os_version_major)", ">=", "20");
@@ -280,7 +290,8 @@ bundle agent cfengine_build_host_setup
 
     (redhat|centos)::
       "leech2_build_toolchain_host"
-        expression => version_compare("$(sys.os_version_major)", ">=", "8");
+        expression => version_compare("$(sys.os_version_major)", ">=", "7");
+@endif
 
     any::
       "have_rust" expression => fileexists("/opt/rust/bin/rustc");
@@ -301,7 +312,6 @@ bundle agent cfengine_build_host_setup
       "java_ok"
         expression => version_compare("${java_version}", ">=", "21.0.0");
 @endif
-
       "missing_groovy" expression => not(fileexists("/usr/bin/groovy"));
 
     (redhat|centos).!(redhat_6|centos_6|redhat_7|centos_7)::
@@ -316,9 +326,7 @@ bundle agent cfengine_build_host_setup
     # rhel/centos-6 and 7 do not support --nobest or best property in yum.conf
     redhat_8|centos_8::
       "have_fakeroot"
-        expression => returnszero(
-          "command -v fakeroot >/dev/null", "useshell"
-        );
+        expression => returnszero("command -v fakeroot >/dev/null", "useshell");
 
     (redhat|centos)::
       "epel_release_ok"
@@ -370,6 +378,11 @@ bundle agent cfengine_build_host_setup
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
 
   commands:
+    sshd_hardened::
+      'kill -1 $(pgrep -f "sshd -D")'
+        handle => "sshd_restarted",
+        contain => in_shell,
+        comment => "Reload sshd config with SIGHUP(1) to apply hardened configuration";
     have_tmp_mount::
       "mount -o remount,size=5G /tmp"
         comment => "We could check if /tmp was size 5G but not worth the trouble since this remount call just sets the maximum size of the tmpfs in virtual memory.",
@@ -386,7 +399,7 @@ bundle agent cfengine_build_host_setup
       "sh $(this.promise_dirname)/linux-install-groovy.sh" contain => in_shell;
 
     missing_java|insufficient_java_version::
-      "sh $(this.promise_dirname)/linux-install-jdk21.sh"
+      "sh $(this.promise_dirname)/linux-install-jdk.sh"
         contain => in_shell,
         classes => results("bundle", "java");
 
@@ -462,8 +475,7 @@ bundle agent cfengine_build_host_setup
     opensuse|suse|sles::
       "have_$(suse_users_and_groups)_group"
         expression => returnszero(
-          "grep '^$(suse_users_and_groups):' /etc/group >/dev/null",
-          "useshell"
+          "grep '^$(suse_users_and_groups):' /etc/group >/dev/null", "useshell"
         );
 
       "have_$(suse_users_and_groups)_user"
@@ -584,9 +596,9 @@ jenkins ALL=NOPASSWD: /usr/bin/podman
         depends_on => { "rpm_build_installed" };
 
   commands:
-    sles_15::
+    sles_15|sles_12::
       "zypper --non-interactive install --allow-downgrade ncurses-devel"
-        comment => "Special case mentioned elsewhere in this policy. ncurses-devel requires a downgrade as of July 25 2025",
+        comment => "Special case mentioned elsewhere in this policy. ncurses-devel requires a downgrade (sles 15 since July 25 2025; sles 12 SP5 since 2026)",
         contain => in_shell;
 
     (redhat_8|centos_8|redhat_9|redhat_10).(!have_perl_package_installed).(yum_dnf_conf_ok)::
@@ -644,12 +656,6 @@ jenkins ALL=NOPASSWD: /usr/bin/podman
         comment => "Verify KbdInteractiveAuthentication (OpenSSH 8.7+) or ChallengeResponseAuthentication (older) is disabled";
 
   services:
-    sshd_hardened::
-      "$(sshd_service_name)"
-        service_policy => "restart",
-        handle => "sshd_restarted",
-        comment => "Restart sshd to apply hardened configuration";
-
     any::
       "fail2ban"
         service_policy => "start",
@@ -659,10 +665,12 @@ jenkins ALL=NOPASSWD: /usr/bin/podman
       "fail2ban"
         service_policy => "restart",
         comment => "Restart fail2ban to apply jail configuration";
-  # skip /etc/hosts change for now, seems kind of wrong and corrupts ip6 entries like `::1 ip6-ip6-loopback`
-  # maybe the following is needed to silence such errors as:     ubuntu-16-mingw-j1: sudo: unable to resolve host localhost.localdomain
-  #    ubuntu::
-  #      "${paths.sed} -ri 's/localhost //' /etc/hosts";
+
+        # skip /etc/hosts change for now, seems kind of wrong and corrupts ip6 entries like `::1 ip6-ip6-loopback`
+        # maybe the following is needed to silence such errors as:     ubuntu-16-mingw-j1: sudo: unable to resolve host localhost.localdomain
+        #    ubuntu::
+        #      "${paths.sed} -ri 's/localhost //' /etc/hosts";
 }
+
 # todo, maybe need
 # ubuntu16-mingw: echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
