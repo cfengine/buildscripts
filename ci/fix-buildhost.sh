@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # it is expected that this file is sourced, not executed directly
 set -ex
-my_path="$(realpath "${BASH_SOURCE[0]}")"
-my_dir="$(dirname "$my_path")"
 
 if [ -f /etc/os-release ]; then
   source /etc/os-release
   if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "7" ]; then
-    source "$my_dir"/centos-7-setup-devtoolset-11.sh
+    if command -v realpath >/dev/null; then
+      my_path="$(realpath "${BASH_SOURCE[0]}")"
+      my_dir="$(dirname "$my_path")"
+      source "$my_dir"/centos-7-setup-devtoolset-11.sh
+    else
+      echo "FAIL: could not find realpath command on rhel/centos-7 to source needed centos-7-setup-devtoolset-11.sh"
+      exit 1
+    fi
   fi
 fi
 
