@@ -26,7 +26,11 @@ fuser -k "$CHROOT_ROOT" >/dev/null 2>&1 || true
 # Unmount the /proc filesystem if it was previously mounted inside the chroot.
 umount "${CHROOT_ROOT}proc" >/dev/null 2>&1 || true
 
-chown -R jenkins /home/jenkins
+# ENT-14386 often it seems we are experiencing a race condition with this script and something else causing trouble
+if ! chown -R jenkins /home/jenkins; then
+  echo "ENT-14386 some trouble chown -R jenkins /home/jenkins, current processes are:"
+  ps -efl
+fi
 
 # cleanup any previous runs cfengine-masterfiles tar balls
 rm -rf cfengine-masterfiles*
