@@ -421,18 +421,40 @@ init_postgres_dir()
   new_pgconfig_file="$1"
   pgconfig_type="$2"
 
-  if test -e $PREFIX/state/pg/data; then
-    if ! rm -rf $PREFIX/state/pg/data; then
-      cf_console echo "Warning: $PREFIX/state/pg/data couldn't be deleted"
+  # $PREFIX/state/pg/data is frequently a dedicated mount point. `rm -rf` then
+  # removes its contents but cannot remove the directory itself, so what matters
+  # is whether the directory ended up empty, not the exit status of `rm -rf`.
+  pg_initdb_dir=$PREFIX/state/pg/data
+  if ! reset_dir $PREFIX/state/pg/data; then
+    if ! dir_has_only_empty_dirs $PREFIX/state/pg/data; then
+      cf_console echo "Error: could not empty $PREFIX/state/pg/data."
+      cf_console echo "initdb requires an empty data directory, but it still contains:"
+      cf_console ls -lA $PREFIX/state/pg/data
+      cf_console echo "Remove these entries and retry the installation."
+      exit 1
     fi
+    # Only empty directories survived, i.e. nested mount points such as a
+    # separate volume for pg_wal or a tablespace. initdb refuses to run in a
+    # non-empty directory, so initdb elsewhere and merge the result in, which
+    # populates the nested mounts instead of trying to replace them.
+    cf_console echo "Preserving nested mount points under $PREFIX/state/pg/data:"
+    cf_console ls -A $PREFIX/state/pg/data
+    pg_initdb_dir=$PREFIX/state/pg/data.init
+    reset_dir $pg_initdb_dir || exit 1
   fi
-  mkdir -p $PREFIX/state/pg/data
   chown -R cfpostgres $PREFIX/state/pg
 
   # Note: postgres expects $PWD to be writeable, so all postgres commands
   # should be executed from cfpostgres-writeable directory.
   # /tmp is such directory on most cases
-  (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $PREFIX/state/pg/data")
+  (cd /tmp && su cfpostgres -c "$PREFIX/bin/initdb -D $pg_initdb_dir")
+  if [ "$pg_initdb_dir" != "$PREFIX/state/pg/data" ]; then
+    # `cp -a src/.` merges into the existing directories rather than replacing
+    # them, and carries over the mode initdb set on the data directory itself.
+    cp -a $pg_initdb_dir/. $PREFIX/state/pg/data/
+    rm -rf $pg_initdb_dir
+    chown -R cfpostgres $PREFIX/state/pg/data
+  fi
   touch /var/log/postgresql.log
   chown cfpostgres:cfpostgres /var/log/postgresql.log
   chmod 600 /var/log/postgresql.log
@@ -755,7 +777,13 @@ do_migration() {
   if [ "$result" = 0 ]; then
     cf_console echo "Migration done, cleaning up"
     # TODO: an option to preserve this directory
-    rm -rf "$BACKUP_DIR"
+    # BACKUP_DIR may be a mount point, where removing the directory itself fails
+    # even though its contents were removed. Under `set -e` a bare `rm -rf`
+    # would abort the postinstall right after a successful migration.
+    rm -rf "$BACKUP_DIR" 2>/dev/null || true
+    if [ -d "$BACKUP_DIR" ] && ! dir_is_empty "$BACKUP_DIR"; then
+      cf_console echo "Warning: could not fully clean $BACKUP_DIR"
+    fi
     return 0
   fi
   cf_console echo
