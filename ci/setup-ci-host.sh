@@ -111,6 +111,50 @@ EOF
     exit 0
 fi
 
+# Hosts for the build-in-container job (ENT-14361). They only run containers:
+# the target platform comes from the image, so none of the native build
+# toolchain below is wanted here.
+if [ -f /etc/cfengine-docker-host.flag ]; then
+    case "$ID" in
+        debian | ubuntu) ;;
+        *)
+            echo "docker host setup supports debian and ubuntu, not $ID"
+            exit 1
+            ;;
+    esac
+
+    # Docker CE from upstream rather than the distribution's docker.io, since
+    # build-in-container.py passes --build-context and so needs BuildKit.
+    # Follows https://docs.docker.com/engine/install/ubuntu/ ("Install using the
+    # apt repository"); the debian page has the same steps with the other URI.
+    # Installed here rather than with add-pkg: curl is needed just below, and the
+    # repository has to exist before install-packages runs.
+    packages ca-certificates curl
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL "https://download.docker.com/linux/$ID/gpg" -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
+    tee /etc/apt/sources.list.d/docker.sources << EOF
+Types: deb
+URIs: https://download.docker.com/linux/$ID
+Suites: ${UBUNTU_CODENAME:-$VERSION_CODENAME}
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+    apt-get -qy update
+
+    # docker-compose-plugin, the fifth package the documented command installs,
+    # is deliberately left out: nothing we run calls docker compose.
+    add-pkg containerd.io
+    add-pkg docker-buildx-plugin
+    add-pkg docker-ce
+    add-pkg docker-ce-cli
+    add-pkg git     # the pipeline checks the source repos out on the agent
+    add-pkg jq
+    add-pkg python3 # runs build-in-container.py
+    add-pkg rsync
+fi
+
 if [ "$redhat" != 0 ]; then
     if [ "$redhat" -gt 7 ]; then
         if ! grep best=False /etc/yum.conf; then
@@ -218,11 +262,31 @@ fi
 
 "$thisdir"/linux-install-jdk.sh # the script should skip if sufficient java is already installed
 
-# leech2 build toolchain host
-if [ "$ubuntu" -ge 20 ] || [ "$debian" -ge 12 ] || [ "$redhat" -ge 7 ]; then
-    "$thisdir"/linux-install-protobuf.sh
-    # TODO if mingw then pass along x86_64-pc-windows-gnu as an arg to install rust
-    "$thisdir"/linux-install-rust.sh
+if [ -f /etc/cfengine-docker-host.flag ]; then
+    systemctl enable --now docker
+
+    # Give jenkins access to the docker socket, per
+    # https://docs.docker.com/engine/install/linux-postinstall/.
+    groupadd -f docker
+    usermod -aG docker jenkins
+
+    # Dependency cache root for build-in-container.py's --cache-dir. Outside any
+    # workspace so that cleanWs() cannot wipe it between builds.
+    install -d -o jenkins -g jenkins /home/jenkins/cfengine-build-cache
+
+    docker --version
+    docker buildx version
+    sudo -u jenkins docker info
+fi
+
+# leech2 build toolchain host. Not on a docker host, where the toolchain belongs
+# in the build images.
+if [ ! -f /etc/cfengine-docker-host.flag ]; then
+    if [ "$ubuntu" -ge 20 ] || [ "$debian" -ge 12 ] || [ "$redhat" -ge 7 ]; then
+        "$thisdir"/linux-install-protobuf.sh
+        # TODO if mingw then pass along x86_64-pc-windows-gnu as an arg to install rust
+        "$thisdir"/linux-install-rust.sh
+    fi
 fi
 
 if [ "$redhat" -ge 7 ]; then

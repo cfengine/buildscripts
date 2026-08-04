@@ -165,7 +165,7 @@ if [ -f /etc/cfengine-bootstrap-pr-host.flag ]; then
     exit
 fi
 
-if [ -f /etc/cfengine-containers-host.flag ]; then
+if [ -f /etc/cfengine-containers-host.flag ] || [ -f /etc/cfengine-docker-host.flag ]; then
     "$thisdir"/setup-ci-host.sh
     exit
 fi
