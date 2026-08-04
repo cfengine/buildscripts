@@ -2,17 +2,19 @@
 # it is expected that this file is sourced, not executed directly
 set -ex
 
+# Resolve our own directory up front: the ci/ scripts sourced and run below live
+# next to this file. Previously this was only computed in the centos-7 branch,
+# leaving $my_dir empty for the linux-install-* calls further down. This file is
+# sourced rather than executed, so BASH_SOURCE names it where $0 names the caller.
+my_dir="$(dirname "${BASH_SOURCE[0]}")"
+if command -v realpath >/dev/null; then
+  my_dir="$(realpath "$my_dir")"
+fi
+
 if [ -f /etc/os-release ]; then
   source /etc/os-release
   if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "7" ]; then
-    if command -v realpath >/dev/null; then
-      my_path="$(realpath "${BASH_SOURCE[0]}")"
-      my_dir="$(dirname "$my_path")"
-      source "$my_dir"/centos-7-setup-devtoolset-11.sh
-    else
-      echo "FAIL: could not find realpath command on rhel/centos-7 to source needed centos-7-setup-devtoolset-11.sh"
-      exit 1
-    fi
+    source "$my_dir"/centos-7-setup-devtoolset-11.sh
   fi
 fi
 
