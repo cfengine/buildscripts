@@ -32,7 +32,13 @@ if [ -f /etc/profile ]; then
 fi
 
 mkdir -p ~/.ssh
-echo "build-artifacts-cache.cloud.cfengine.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGahpsY8Phk2+isBmuJQjjQVlh6BNL/Qetc14g26gowV" >> ~/.ssh/known_hosts
+touch ~/.ssh/known_hosts
+# Only the cache host is needed here; github.com is not contacted from a build
+# host. Which key type gets used depends on the client, so pin all of them.
+# Added one at a time, since this runs for every build on a reused host.
+grep '^build-artifacts-cache' "$my_dir"/known_hosts | while read -r key; do
+  grep -qF "$key" ~/.ssh/known_hosts || echo "$key" >> ~/.ssh/known_hosts
+done
 
 # /etc/profile can contain tricky things, on suse for example it includes a call to tty which will fail in CI
 # so only source /etc/profile where we absolutely need it.
