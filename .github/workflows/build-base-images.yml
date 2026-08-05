@@ -25,6 +25,7 @@ jobs:
           - rhel-9
           - rhel-10
           - ubuntu-24-mingw
+          - tarballs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
