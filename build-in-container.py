@@ -21,6 +21,12 @@ log = logging.getLogger("build-in-container")
 IMAGE_REGISTRY = "ghcr.io/cfengine"
 CONFIG_PATH = Path(__file__).resolve().parent / "platforms.json"
 
+# Where --sftp-key is mounted. It cannot be mounted onto ~/.ssh/id_rsa directly:
+# ssh rejects a key owned by neither the current user nor root, and the host file
+# belongs to jenkins while the container runs as builder. The inner script copies
+# it into place instead.
+SFTP_KEY_PATH = "/run/secrets/sftp-cache-key"
+
 # Architectures registry images are published for, unless a platform overrides
 # it with an "architectures" list in platforms.json (e.g. the mingw cross-build,
 # which always targets Windows x64 and only makes sense on amd64).
@@ -411,10 +417,18 @@ def run_container(args, image_tag, source_dir, script_dir):
             f"BUILD_NUMBER={args.build_number}",
             "-e",
             f"JOB_BASE_NAME=label={label}",
-            "-e",
-            "CACHE_IS_ONLY_LOCAL=yes",
         ]
     )
+
+    # The remote dependency cache is reachable by publickey only, and pkg-cache
+    # aborts the build if an upload fails, so it stays off unless a key was
+    # passed. Note that the key is readable by everything the build runs,
+    # including each dependency's own build system.
+    if args.sftp_key:
+        key = Path(args.sftp_key).resolve()
+        cmd.extend(["-v", f"{key}:{SFTP_KEY_PATH}:ro"])
+    else:
+        cmd.extend(["-e", "CACHE_IS_ONLY_LOCAL=yes"])
 
     if args.version:
         cmd.extend(["-e", f"EXPLICIT_VERSION={args.version}"])
@@ -486,6 +500,12 @@ def parse_args():
         "--cache-dir",
         default=str(Path.home() / ".cache" / "cfengine" / "buildscripts"),
         help="Dependency cache directory",
+    )
+    parser.add_argument(
+        "--sftp-key",
+        dest="sftp_key",
+        help="Private key for the remote dependency cache. Without it the build "
+        "only uses the local cache under --cache-dir.",
     )
     parser.add_argument(
         "--rebuild-image",
