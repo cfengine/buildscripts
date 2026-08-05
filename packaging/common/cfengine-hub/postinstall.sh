@@ -434,15 +434,26 @@ init_postgres_dir()
   chown cfpostgres:cfpostgres /var/log/postgresql.log
   chmod 600 /var/log/postgresql.log
 
-  if ! is_upgrade; then
-    # Not an upgrade, just use the recommended or default file (see generate_new_postgres_conf())
+  # Always use the original pg_*.conf files, they define access control to
+  # PostgreSQL. An unmatched glob expands to itself, so `test -f` is what tells
+  # us preinstall.sh made no backup to take them from.
+  preserved_pgconfig=0
+  if is_upgrade; then
+    for _pgconf in "$BACKUP_DIR"/data/pg_*.conf; do
+      test -f "$_pgconf" || continue
+      cp -a "$_pgconf" "$PREFIX/state/pg/data/"
+      chown cfpostgres "$PREFIX/state/pg/data/${_pgconf##*/}"
+      preserved_pgconfig=1
+    done
+    test $preserved_pgconfig = 1 ||
+      cf_console echo "No PostgreSQL configuration backup in $BACKUP_DIR, using freshly generated configuration files."
+  fi
+
+  if [ $preserved_pgconfig = 0 ]; then
+    cf_console echo "Installing the $pgconfig_type postgresql.conf file as $PREFIX/state/pg/data/postgresql.conf."
     cp -a "$new_pgconfig_file" $PREFIX/state/pg/data/postgresql.conf
     chown cfpostgres $PREFIX/state/pg/data/postgresql.conf
   else
-    # Always use the original pg_*.conf files, they define access control to PostgreSQL
-    cp -a "$BACKUP_DIR"/data/pg_*.conf "$PREFIX/state/pg/data/"
-    chown cfpostgres "$PREFIX"/state/pg/data/pg_*.conf
-
     # Determine which postgresql.conf file to use and put it in the right place.
     if [ -f "$BACKUP_DIR/data/postgresql.conf.modified" ]; then
       # User-modified file from the previous old version of CFEngine exists, try to use it.
@@ -817,7 +828,8 @@ if [ ! -f $PREFIX/state/pg/data/postgresql.conf ]; then
   cf_console echo "No existing postgresql.conf, initializing Postgres"
   init_postgres_dir "$new_pgconfig_file" "$pgconfig_type"
 fi
-if is_upgrade && [ -d "$BACKUP_DIR/data" ]; then
+# PG_VERSION tells us it is a real data directory and not an empty one moved aside.
+if is_upgrade && [ -f "$BACKUP_DIR/data/PG_VERSION" ]; then
   cf_console echo "Upgrade and BACKUP_DIR/data is present, proceeding with full database migration."
   do_migration "$new_pgconfig_file" "$pgconfig_type"
 else
