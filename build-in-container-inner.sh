@@ -123,6 +123,17 @@ install_mission_portal_deps() (
     find "$BASEDIR/mission-portal" "$BASEDIR/nova/api/http" -type d -name .git -path '*/vendor/*' -exec rm -rf {} +
 )
 
+# Lets whoever consumes the output check that it arrived intact. Sorted in the C
+# locale so that the list itself comes out the same every time.
+write_sha256sums() (
+    cd /output
+    # shellcheck disable=SC2094
+    # > Make sure not to read and write the same file in the same pipeline.
+    # find leaves it out by name, so the list never covers itself.
+    find . -maxdepth 1 -type f ! -name sha256sums.txt -printf '%P\n' \
+        | LC_ALL=C sort | xargs -r sha256sum > sha256sums.txt
+)
+
 # Build the source tarballs. They are the same whichever platform builds them,
 # so only this image builds them, and nothing else here does. /output is
 # <output-dir>/tarballs on the host, as the packages' /output is per label.
@@ -161,8 +172,7 @@ build_tarballs() (
         make distclean
     )
 
-    # Lets whoever consumes them check they arrived intact.
-    (cd /output && sha256sum -- *.tar.gz > sha256sums.txt)
+    write_sha256sums
 )
 
 # === Step runner with failure reporting ===
@@ -209,6 +219,8 @@ find "$BASEDIR" -maxdepth 4 \
     -path "$BASEDIR/buildscripts/deps-packaging" -prune -o \
     \( -name '*.deb' -o -name '*.rpm' -o -name '*.msi' -o -name '*.pkg.tar.gz' \) -print \
     -exec cp {} /output/ \;
+
+write_sha256sums
 
 echo ""
 echo "=== Build complete ==="
