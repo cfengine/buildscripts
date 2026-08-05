@@ -41,12 +41,16 @@ for repo in $repos; do
     # Skip revision files too: autogen only writes them when absent, so a
     # leftover from an earlier host build would key the dependency cache to
     # whatever commit that build saw.
+    # And skip output directories: --output-dir defaults to ./output, which lands
+    # inside buildscripts, and the collector at the end of this script would then
+    # pick an earlier build's packages up as if this build had made them.
     if [ -d "$src" ] || [ -L "$src" ]; then
         echo "Syncing $repo..."
         sudo rsync -aL --exclude='config.cache' --exclude='workdir' \
             --exclude='*.o' --exclude='*.lo' --exclude='*.la' \
             --exclude='node_modules' --exclude='vendor' \
             --exclude='revision' \
+            --exclude='output' \
             --chown="$(id -u):$(id -g)" "$src/" "$BASEDIR/$repo/"
     else
         echo "ERROR: Required repository $repo not found" >&2
