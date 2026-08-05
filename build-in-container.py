@@ -344,6 +344,28 @@ def update_base_image_shas(platform_name=None):
     CONFIG_PATH.write_text(json.dumps(config, indent=2) + "\n")
 
 
+def cache_label(platform_name, role, arch):
+    """Return the dependency cache namespace for a build.
+
+    deps-packaging/pkg-cache namespaces cached dependencies by JOB_BASE_NAME,
+    which a testing-pr matrix cell exports as "label=<axis value>". Building the
+    same string here puts container-built dependencies in the same namespace as
+    the ones testing-pr builds, so both jobs share buildcache.
+    """
+    hub = "_HUB" if role == "hub" else ""
+    # The labels spell the architectures x86_64 and arm_64. See labels.txt.
+    arch_token = {"amd64": "x86_64", "arm64": "arm_64"}[arch.rsplit("/", 1)[-1]]
+
+    # The cross target's label carries neither an OS version nor _linux.
+    if get_config()[platform_name].get("cross_target"):
+        return f"PACKAGES{hub}_{arch_token}_mingw"
+
+    # Platform names are <os>-<version>, matching the labels once the separator
+    # is swapped, except that the labels say redhat where we say rhel.
+    label_os = platform_name.replace("-", "_").replace("rhel_", "redhat_")
+    return f"PACKAGES{hub}_{arch_token}_linux_{label_os}"
+
+
 def run_container(args, image_tag, source_dir, script_dir):
     """Run the build inside a Docker container."""
     output_dir = Path(args.output_dir).resolve()
@@ -376,7 +398,7 @@ def run_container(args, image_tag, source_dir, script_dir):
     # Environment variables
     # JOB_BASE_NAME is used by deps-packaging/pkg-cache to derive the cache
     # label. Format: "label=<value>". Without it, all platforms share NO_LABEL.
-    cache_label = f"label=container_{args.platform}"
+    label = cache_label(args.platform, args.role, args.arch or host_docker_arch())
     cmd.extend(
         [
             "-e",
@@ -388,7 +410,7 @@ def run_container(args, image_tag, source_dir, script_dir):
             "-e",
             f"BUILD_NUMBER={args.build_number}",
             "-e",
-            f"JOB_BASE_NAME={cache_label}",
+            f"JOB_BASE_NAME=label={label}",
             "-e",
             "CACHE_IS_ONLY_LOCAL=yes",
         ]
