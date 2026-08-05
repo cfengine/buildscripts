@@ -119,7 +119,7 @@ The system has three components:
 | ---------------------------------------- | ----------------------------------------- | ---------- | ------------------------------------- |
 | Source repos (parent of `buildscripts/`) | `/srv/source`                             | read-only  | Protects host repos from modification |
 | `~/.cache/cfengine/buildscripts/`        | `/home/builder/.cache/buildscripts_cache` | read-write | Dependency cache shared across builds |
-| `./output/`                              | `/output`                                 | read-write | Output packages copied here           |
+| `./output/<label>/`                      | `/output`                                 | read-write | Output packages copied here           |
 | `--sftp-key` (when given)                | `/run/secrets/sftp-cache-key`             | read-only  | Key for the remote dependency cache   |
 
 ### Build steps
