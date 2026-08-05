@@ -123,6 +123,48 @@ install_mission_portal_deps() (
     find "$BASEDIR/mission-portal" "$BASEDIR/nova/api/http" -type d -name .git -path '*/vendor/*' -exec rm -rf {} +
 )
 
+# Build the source tarballs. They are the same whichever platform builds them,
+# so only this image builds them, and nothing else here does. /output is
+# <output-dir>/tarballs on the host, as the packages' /output is per label.
+#
+# Each tarball's timestamps follow its own repository: Makefile.am in core and in
+# masterfiles clamps every mtime in the tarball to SOURCE_DATE_EPOCH, so taking
+# it from the last commit keeps a tarball identical until its own sources change.
+build_tarballs() (
+    set -e
+
+    (
+        cd "$BASEDIR/core"
+        SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+        export SOURCE_DATE_EPOCH
+        echo "core SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
+
+        rm -f cfengine-3.*.tar.gz
+        # Configure so the dist target exists, undone again below.
+        ./configure -C
+        make dist
+        mv cfengine-3.*.tar.gz /output/
+        make distclean
+    )
+
+    (
+        cd "$BASEDIR/masterfiles"
+        SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+        export SOURCE_DATE_EPOCH
+        echo "masterfiles SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
+
+        rm -f cfengine-masterfiles*.tar.gz
+        ./configure
+        make dist        # source tarball:  cfengine-masterfiles-<version>.tar.gz
+        make tar-package # package tarball: cfengine-masterfiles-<version>.pkg.tar.gz
+        mv cfengine-masterfiles*.tar.gz /output/
+        make distclean
+    )
+
+    # Lets whoever consumes them check they arrived intact.
+    (cd /output && sha256sum -- *.tar.gz > sha256sums.txt)
+)
+
 # === Step runner with failure reporting ===
 # Disable set -e so we can capture exit codes and report which step failed.
 set +e
@@ -141,6 +183,15 @@ run_step() {
 
 # === Build steps ===
 run_step "01-autogen" "$BASEDIR/buildscripts/build-scripts/autogen"
+
+if [ "$TARBALLS" = yes ]; then
+    run_step "02-tarballs" build_tarballs
+    echo ""
+    echo "=== Build complete ==="
+    ls -lh /output/
+    exit 0
+fi
+
 run_step "02-install-dependencies" "$BASEDIR/buildscripts/build-scripts/install-dependencies"
 # Mission Portal is an Enterprise/nova-only component; its sources are only
 # synced when PROJECT=nova. Skip this step for community hubs.
