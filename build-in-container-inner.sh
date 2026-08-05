@@ -33,11 +33,15 @@ for repo in $repos; do
     # over from previous test runs and are not needed for building.
     # Also skip node_modules/vendor for hub builds.
     # Also skip compilation results *.o, *.lo, *.la as the local copy is likely a different platform/OS than inside the container
+    # Skip revision files too: autogen only writes them when absent, so a
+    # leftover from an earlier host build would key the dependency cache to
+    # whatever commit that build saw.
     if [ -d "$src" ] || [ -L "$src" ]; then
         echo "Syncing $repo..."
         sudo rsync -aL --exclude='config.cache' --exclude='workdir' \
             --exclude='*.o' --exclude='*.lo' --exclude='*.la' \
             --exclude='node_modules' --exclude='vendor' \
+            --exclude='revision' \
             --chown="$(id -u):$(id -g)" "$src/" "$BASEDIR/$repo/"
     else
         echo "ERROR: Required repository $repo not found" >&2
