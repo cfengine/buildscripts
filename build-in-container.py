@@ -74,6 +74,7 @@ def image_needs_rebuild(image_tag, current_hash):
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         return True  # Image doesn't exist
@@ -135,7 +136,7 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False, arch=
     # Build context is the container/ directory
     cmd.append(str(script_dir / "container"))
 
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     if result.returncode != 0:
         log.error("Docker image build failed.")
         sys.exit(1)
@@ -155,6 +156,7 @@ def host_docker_arch():
         ["docker", "version", "--format", "{{.Server.Arch}}"],
         capture_output=True,
         text=True,
+        check=False,
     )
     return result.stdout.strip()
 
@@ -165,6 +167,7 @@ def image_arch(ref):
         ["docker", "image", "inspect", "--format", "{{.Architecture}}", ref],
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         return None
@@ -199,6 +202,7 @@ def pull_image(platform_name, arch=None):
         cmd,
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         return None
@@ -255,7 +259,7 @@ def build_and_push_image(platform_name, platform_config, script_dir):
     # Build context is the container/ directory
     cmd.append(str(script_dir / "container"))
 
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     if result.returncode != 0:
         log.error("Docker buildx build/push failed.")
         sys.exit(1)
@@ -466,7 +470,7 @@ def run_container(args, image_tag, source_dir, script_dir, label):
     else:
         cmd.append(str(Path("/srv/source/buildscripts/build-in-container-inner.sh")))
 
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     return result.returncode
 
 
