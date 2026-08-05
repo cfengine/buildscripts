@@ -54,6 +54,23 @@ for repo in $repos; do
     fi
 done
 
+# The dependency cache is reached over sftp, so the key has to be in place
+# before install-dependencies runs. It arrives on a read-only mount owned by the
+# host user, and ssh refuses a key owned by anyone but us, hence the copy. Only
+# root can read the mode 600 original when that user is not builder, hence sudo.
+if [ -f /run/secrets/sftp-cache-key ]; then
+    echo "Installing dependency cache key..."
+    install -d -m 700 "$HOME/.ssh"
+    sudo install -m 600 -o "$(id -u)" -g "$(id -g)" \
+        /run/secrets/sftp-cache-key "$HOME/.ssh/id_rsa"
+    grep '^build-artifacts-cache' "$BASEDIR/buildscripts/ci/known_hosts" \
+        >> "$HOME/.ssh/known_hosts"
+
+    # Fail now rather than once every dependency has been built, which is when
+    # pkg-cache would first try to upload.
+    echo pwd | sftp -o BatchMode=yes -b - jenkins_sftp_cache@build-artifacts-cache.cloud.cfengine.com
+fi
+
 # Pin embedded build timestamps so two builds of the same source produce
 # identical binaries. Honored by OpenSSL, Apache httpd, Postgres, Python
 # (.pyc mtimes), dpkg-buildpackage, and rpmbuild.

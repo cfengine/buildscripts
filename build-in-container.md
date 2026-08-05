@@ -46,6 +46,7 @@ None of the above arguments are required for `--update`.
 | ------------------ | -------------------------------- | ---------------------------------------------------------------------------------- |
 | `--output-dir`     | `./output`                       | Where to write output packages                                                     |
 | `--cache-dir`      | `~/.cache/cfengine/buildscripts` | Dependency cache directory                                                         |
+| `--sftp-key`       |                                  | Private key for the remote dependency cache. Uses local cache if not specified     |
 | `--build-number`   | `1`                              | Build number for package versioning                                                |
 | `--version`        | auto                             | Override version string                                                            |
 | `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache)                        |
@@ -169,6 +170,7 @@ The system has three components:
 | Source repos (parent of `buildscripts/`) | `/srv/source`                             | read-only  | Protects host repos from modification |
 | `~/.cache/cfengine/buildscripts/`        | `/home/builder/.cache/buildscripts_cache` | read-write | Dependency cache shared across builds |
 | `./output/`                              | `/output`                                 | read-write | Output packages copied here           |
+| `--sftp-key` (when given)                | `/run/secrets/sftp-cache-key`             | read-only  | Key for the remote dependency cache   |
 
 ### Build steps
 
