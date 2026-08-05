@@ -280,7 +280,7 @@ def latest_registry_version(image_name):
     tags = json.loads(urllib.request.urlopen(req).read()).get("tags", [])
     if not tags:
         return None
-    return sorted(tags)[-1]
+    return max(tags)
 
 
 def update_platform_versions(platform_name=None):
