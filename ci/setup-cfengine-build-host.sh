@@ -110,10 +110,10 @@ if [ -f /etc/os-release ]; then
         alias software='yum install --assumeyes'
         alias erase-packages='yum erase --assumeyes'
     elif grep -q debian /etc/os-release; then
-        DEBIAN_FRONTEND=noninteractive apt update
+        DEBIAN_FRONTEND=noninteractive apt update --yes --quiet
 
         # sometimes the /boot partition is too small to handle kernel upgrade regenerations of initrd and related files on ubuntu, so allow failure first
-        DEBIAN_FRONTEND=noninteractive apt upgrade --yes || true
+        DEBIAN_FRONTEND=noninteractive apt upgrade --yes --quiet || true
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
 
         # and now perform the upgrade a second time after hopefully autoremove cleans up /boot partition of kernel files that cause failure

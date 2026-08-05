@@ -3,10 +3,41 @@ set -e
 shopt -s expand_aliases
 thisdir="$(dirname "$0")"
 
-packages="" # a space separated list of packages to install
+_packages="" # a space separated list of packages to install
 function add-pkg() {
-    packages+=" $*"
+    _packages+=" $*"
 }
+
+function install-packages() {
+  # note that "packages" is an alias defined later during OS/distribution discovery
+  # shellcheck disable=SC2086
+  packages $_packages
+}
+
+function file-line()
+{
+  file=$1
+  line=$2
+
+  touch "$file"
+  if ! grep -q "$line" "$file"; then
+    echo "Adding $line to $file"
+    echo "$line" >> "$file"
+  fi
+}
+
+function github-known-hosts()
+{
+  echo "ensuring github hostkeys are added to /home/jenkins/.ssh/known_hosts"
+  file-line /home/jenkins/.ssh/known_hosts "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl"
+  file-line /home/jenkins/.ssh/known_hosts "github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
+  file-line /home/jenkins/.ssh/known_hosts "github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk="
+  chown jenkins /home/jenkins/.ssh/known_hosts
+  chmod 0600 /home/jenkins/.ssh/known_hosts
+}
+
+echo "ensuring that github.com hostkeys are in ~/.ssh/known_hosts"
+github-known-hosts
 
 # we setup some vars for platform versions to make it easier to make choice later
 # default version is 0 so that a check can be [ "$debian" -gt "12" ] and that will skip non-debians and such
@@ -28,7 +59,7 @@ if [ -f /etc/os-release ]; then
         alias packages='yum install --assumeyes'
         redhat="$VERSION_ID"
     elif grep -q debian /etc/os-release; then
-        alias packages='DEBIAN_FRONTEND=noninteractive apt install --yes'
+        alias packages='DEBIAN_FRONTEND=noninteractive apt install --quiet --yes'
         debian="$VERSION_ID"
     elif grep -q suse /etc/os-release; then
         alias packages='zypper install -y'
@@ -57,6 +88,9 @@ if [ -f /etc/cfengine-containers-host.flag ]; then
         add-pkg make
         add-pkg parallel
         add-pkg podman
+
+        install-packages
+
         if ! command -v groovy; then
             bash "$thisdir"/linux-install-groovy.sh
         fi
@@ -75,6 +109,7 @@ EOF
         chmod 400 /etc/sudoers.d/999-local
         chown root:root /etc/sudoers.d/999-local
     fi
+    exit 0
 fi
 
 if [ "$redhat" != 0 ]; then
@@ -170,7 +205,7 @@ fi
 whoami
 set -x
 # shellcheck disable=SC2086
-packages $packages
+install-packages
 set +x
 
 if mount | grep '/tmp'; then
