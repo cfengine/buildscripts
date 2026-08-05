@@ -28,6 +28,10 @@ CONFIG_PATH = Path(__file__).resolve().parent / "platforms.json"
 # it into place instead.
 SFTP_KEY_PATH = "/run/secrets/sftp-cache-key"
 
+# The platform whose image builds the source tarballs, and only those: it is the
+# autotools in that image which decide their contents.
+TARBALLS_PLATFORM = "tarballs"
+
 # Architectures registry images are published for, unless a platform overrides
 # it with an "architectures" list in platforms.json (e.g. the mingw cross-build,
 # which always targets Windows x64 and only makes sense on amd64).
@@ -380,8 +384,10 @@ def cache_label(platform_name, role, arch):
 def run_container(args, image_tag, source_dir, script_dir, label):
     """Run the build inside a Docker container."""
     # Keep the packages in a directory of their own, so that building several
-    # platforms into one output directory does not mix them together.
-    output_dir = Path(args.output_dir).resolve() / label
+    # platforms into one output directory does not mix them together. The
+    # tarballs belong to no platform, so they sit beside those directories.
+    subdir = "tarballs" if args.tarballs else label
+    output_dir = Path(args.output_dir).resolve() / subdir
     cache_dir = Path(args.cache_dir).resolve()
 
     # Start from an empty directory so that packages left by an earlier build,
@@ -414,8 +420,6 @@ def run_container(args, image_tag, source_dir, script_dir, label):
     )
 
     # Environment variables
-    # JOB_BASE_NAME is used by deps-packaging/pkg-cache to derive the cache
-    # label. Format: "label=<value>". Without it, all platforms share NO_LABEL.
     cmd.extend(
         [
             "-e",
@@ -426,10 +430,15 @@ def run_container(args, image_tag, source_dir, script_dir, label):
             f"EXPLICIT_ROLE={args.role}",
             "-e",
             f"BUILD_NUMBER={args.build_number}",
-            "-e",
-            f"JOB_BASE_NAME=label={label}",
         ]
     )
+
+    if args.tarballs:
+        cmd.extend(["-e", "TARBALLS=yes"])
+    else:
+        # JOB_BASE_NAME is used by deps-packaging/pkg-cache to derive the cache
+        # label. Format: "label=<value>".
+        cmd.extend(["-e", f"JOB_BASE_NAME=label={label}"])
 
     # The remote dependency cache is reachable by publickey only, and pkg-cache
     # aborts the build if an upload fails, so it stays off unless a key was
@@ -513,6 +522,13 @@ def parse_args():
         help="Dependency cache directory",
     )
     parser.add_argument(
+        "--tarballs",
+        action="store_true",
+        help="Build the source tarballs, into <output-dir>/tarballs, and nothing "
+        "else. They are the same whichever platform builds them, so no other "
+        "build produces them.",
+    )
+    parser.add_argument(
         "--sftp-key",
         dest="sftp_key",
         help="Private key for the remote dependency cache. Without it the build "
@@ -563,6 +579,17 @@ def parse_args():
 
     if args.update or args.update_sha:
         # --platform is optional for these modes; updates all if omitted
+        return args
+
+    if args.tarballs:
+        # The tarballs are built from core and masterfiles alone, in an image of
+        # their own, so the platform, project and role are not choices here. The
+        # build type is: it decides their version string.
+        args.platform = TARBALLS_PLATFORM
+        args.project = "community"
+        args.role = args.role or "agent"
+        if not args.build_type:
+            parser.error("missing required argument --build-type")
         return args
 
     # --platform is always required (except --list-platforms/--update handled above)
@@ -642,7 +669,12 @@ def main():
             f"Building {args.project} {args.role} for {args.platform} ({args.build_type})..."
         )
 
-    label = cache_label(args.platform, args.role, args.arch or host_docker_arch())
+    # No dependencies are built for the tarballs, so they need no cache label.
+    label = (
+        None
+        if args.tarballs
+        else cache_label(args.platform, args.role, args.arch or host_docker_arch())
+    )
 
     # Run the container
     rc = run_container(args, image_tag, source_dir, script_dir, label)
@@ -652,7 +684,7 @@ def main():
         sys.exit(rc)
 
     if not args.shell:
-        output_dir = Path(args.output_dir).resolve() / label
+        output_dir = Path(args.output_dir).resolve() / ("tarballs" if args.tarballs else label)
         packages = (
             list(output_dir.glob("*.deb"))
             + list(output_dir.glob("*.rpm"))

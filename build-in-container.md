@@ -119,7 +119,7 @@ The system has three components:
 | ---------------------------------------- | ----------------------------------------- | ---------- | ------------------------------------- |
 | Source repos (parent of `buildscripts/`) | `/srv/source`                             | read-only  | Protects host repos from modification |
 | `~/.cache/cfengine/buildscripts/`        | `/home/builder/.cache/buildscripts_cache` | read-write | Dependency cache shared across builds |
-| `./output/<label>/`                      | `/output`                                 | read-write | Output packages copied here           |
+| `./output/{<label>,tarballs}/`           | `/output`                                 | read-write | Output packages copied here           |
 | `--sftp-key` (when given)                | `/run/secrets/sftp-cache-key`             | read-only  | Key for the remote dependency cache   |
 
 ### Build steps
@@ -132,6 +132,17 @@ The inner script runs these steps in order:
 4. **configure** -- runs `./configure` with platform-appropriate flags
 5. **compile** -- compiles and installs to the dist tree
 6. **package** -- creates `.deb` or `.rpm` packages
+
+## Source tarballs
+
+The core and masterfiles tarballs are built in a dedicated container with:
+
+```bash
+./build-in-container.py --tarballs --build-type DEBUG
+```
+
+That builds them in the `tarballs` platform's image and writes them to
+`./output/tarballs/`.
 
 ## Docker image management
 
