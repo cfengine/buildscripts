@@ -40,6 +40,9 @@ if use_systemd; then
   fi
 fi
 
+# CFE-4701: restore what preinstall exported, before anything uses the databases.
+lmdb_load_databases || cf_console echo "Warning: importing the LMDB databases failed."
+
 #
 # Make sure the cfapache user has a home folder and populate it
 #

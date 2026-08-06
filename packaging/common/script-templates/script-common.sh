@@ -180,3 +180,87 @@ on_files() {
     unset IFS
 }
 
+#
+# LMDB database migration (CFE-4701)
+#
+# LMDB 1.0 added a txnid to the page header, so it reads the meta page magic from
+# where 0.9 keeps another field and rejects 0.9 databases as MDB_INVALID.
+# CFEngine takes that for corruption and deletes them (ENT-9717).
+#
+# There is no in-place upgrade: dump with the old mdb_dump, load with the new
+# mdb_load. The dump belongs in preinstall, while the old binary is still there;
+# the new mdb_dump cannot read 0.9 either.
+#
+# A dump lives beside its database as <db>.dump. Nothing else picks those up:
+# CFEngine and cf-check both select databases by a .lmdb suffix.
+#
+# Non-fatal throughout -- a failed migration just leaves the old behaviour, which
+# is no reason to abort an upgrade. Do not rely on `set -e`: these are called as
+# `... || ...`, which suppresses errexit for the whole function body.
+#
+# The globs cover the state dir and the workdir, where pre-3.7 installations keep
+# databases CFEngine still prefers (DB_PATHS_WORKDIR in dbm_api.c). An unmatched
+# glob comes through literally, hence the `test -f`.
+
+lmdb_series() {
+    # "<major>.<minor>" of the version string on stdin. The on-disk format is
+    # stable within a series.
+    sed -n 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | head -n 1
+}
+
+lmdb_migration_needed() {
+    # True when the installed mdb_dump reports a different series than the one
+    # this package ships. Anything undeterminable is false, keeping the old
+    # behaviour.
+    test -n "$LMDB_VERSION" || return 1
+    test -x "$PREFIX/bin/mdb_dump" || return 1
+    packaged=`echo "$LMDB_VERSION" | lmdb_series`
+    installed=`"$PREFIX/bin/mdb_dump" -V 2>/dev/null | lmdb_series`
+    test -n "$packaged" && test -n "$installed" || return 1
+    test "$installed" != "$packaged"
+}
+
+lmdb_dump_databases() {
+    # Export every database with the installed (old) mdb_dump. Preinstall only.
+    for db in "$PREFIX"/state/*.lmdb "$PREFIX"/*.lmdb; do
+        test -f "$db" || continue
+        rm -f "$db.dump"
+        # Dumps hold database contents; subshell keeps the umask from leaking.
+        if ( umask 077; "$PREFIX/bin/mdb_dump" -n -f "$db.dump" "$db" ); then
+            echo "exported '$db'"
+        else
+            # Corrupt or uninitialised: nothing to preserve, leave it to cf-check
+            # rather than restoring a bad dump.
+            rm -f "$db.dump"
+            cf_console echo "Warning: could not export '$db', it will be recreated empty."
+        fi
+    done
+    return 0
+}
+
+lmdb_load_databases() {
+    # Re-import what lmdb_dump_databases() exported, with the new mdb_load.
+    # Postinstall only, before any daemon starts.
+    for dump in "$PREFIX"/state/*.lmdb.dump "$PREFIX"/*.lmdb.dump; do
+        test -f "$dump" || continue
+        db=${dump%.dump}
+        # Overwriting rather than replacing keeps the original inode, so owner,
+        # mode and SELinux label survive. umask only applies if $db is missing.
+        if ( umask 077; "$PREFIX/bin/mdb_load" -n -f "$dump" "$db.new" ) &&
+           ( umask 077; cat "$db.new" > "$db" ); then
+            echo "imported '$db'"
+            rm -f "$dump"
+        else
+            # Keep the data for recovery, but under a name the glob above will
+            # not pick up, so a later upgrade cannot restore it over a good DB.
+            mv "$dump" "$dump.failed"
+            cf_console echo "Warning: could not import '$db', it will be recreated empty."
+            cf_console echo "Exported data kept in '$dump.failed'"
+        fi
+        rm -f "$db.new" "$db.new-lock"
+        # Tidy up the old lock file. LMDB copes with a stale one, it just
+        # reinitialises it.
+        rm -f "$db-lock"
+    done
+    return 0
+}
