@@ -26,6 +26,13 @@
 # Adjust this up in case of hash collisions
 CORE_ABBREV=7
 
+# Refuse to write a revision that cannot be resolved back to a commit
+check_hash_collisions() {
+    if ! git -C "$1" show "$2" --oneline >/dev/null; then
+        fatal "abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
+    fi
+}
+
 # Parse the required argument which should be set through the environment
 # variable PROJECT
 case "$PROJECT" in
@@ -63,11 +70,7 @@ for _dir in $_dirs; do
             # Get the revision hash
             R=$(git -C "$BASEDIR/$_dir" log --abbrev=$CORE_ABBREV --pretty='format:%h' -1 -- .) || false
 
-            # Make sure there are no hash collisions
-            if ! git -C "$BASEDIR/$_dir" show "$R" --oneline >/dev/null; then
-                echo "$(basename "$0"): Error: abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
-                exit 1
-            fi
+            check_hash_collisions "$BASEDIR/$_dir" "$R"
 
             # Create the revision file
             echo "$R" | tr -d '\n' >"$BASEDIR/$_dir/revision"
