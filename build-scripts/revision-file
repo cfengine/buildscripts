@@ -82,3 +82,30 @@ for _dir in $_dirs; do
         exit 1
     fi
 done
+
+# One revision per dependency, holding the hash and the commit time. The hash
+# goes in the package version and is used as part of the key in build cache. The
+# time pins the dependency's timestamps so builds are reproducible with
+# SOURCE_DATE_EPOCH.
+#
+# The scripts beside the dependencies build all of them. Hence, a change in one
+# those count as a change to every dependency.
+for _dep_dir in "$BASEDIR"/buildscripts/deps-packaging/*/; do
+    _dep=$(basename "$_dep_dir")
+
+    log_debug "Creating revision file in deps-packaging/$_dep"
+
+    _revision=$(git -C "$BASEDIR/buildscripts" log --abbrev=$CORE_ABBREV \
+        --pretty='format:%h %ct' -1 -- "deps-packaging/$_dep" \
+        'deps-packaging/pkg-*' deps-packaging/cache-sftp deps-packaging/psf.pl) || false
+
+    if [ -z "$_revision" ]; then
+        fatal "no commit found for deps-packaging/$_dep"
+    fi
+
+    check_hash_collisions "$BASEDIR/buildscripts" "${_revision%% *}"
+
+    # Keep the newline, unlike the files above: install-dependencies reads this
+    # with "read", which fails at end of file without one.
+    echo "$_revision" >"$_dep_dir/revision"
+done
