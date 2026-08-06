@@ -13,6 +13,12 @@ patch bump is safe and a series bump is not. Series bumps are handled by
 version in `source` below via `LMDB_VERSION`. A format change *within* a series
 would need `lmdb_migration_needed()` made more specific.
 
+Windows is handled separately, since the MSI runs none of those scripts:
+`packaging/cfengine-nova/lmdb-migrate.cmd`, driven by the `LmdbSaveDumper` and
+`LmdbMigrate` custom actions in `cfengine-nova.wxs`. It needs no version
+threshold, because it probes each database with the new `mdb_dump` instead of
+comparing versions.
+
 ## Upgrading / patching
 
 From the directory above buildscripts:

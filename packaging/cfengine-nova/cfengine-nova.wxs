@@ -45,6 +45,19 @@
 	       generates the key pair at bootstrap if missing). -->
 	  <CustomAction Id='GenerateKey' FileKey='cf_key.exe' ExeCommand='' Execute='deferred' Impersonate='no' Return='ignore' />
 
+	  <!-- CFE-4701: LMDB 1.0 cannot read 0.9 databases, so dump with the old
+	       mdb_dump and load with the new one. InstallFiles overwrites
+	       mdb_dump.exe, hence the copy first. cmd.exe because wixl has no
+	       Directory CustomAction. -->
+	  <CustomAction Id='LmdbSetShell' Property='CFE_LMDB_SHELL' Value='[SystemFolder]cmd.exe' />
+	  <CustomAction Id='LmdbSaveDumper' Property='CFE_LMDB_SHELL'
+	                ExeCommand='/c copy /y &quot;[dir_bin]mdb_dump.exe&quot; &quot;[dir_bin]mdb_dump-old.exe&quot;'
+	                Execute='deferred' Impersonate='no' Return='ignore' />
+	  <!-- 'call' keeps the quotes; cmd /c strips them and breaks on "Program Files". -->
+	  <CustomAction Id='LmdbMigrate' Property='CFE_LMDB_SHELL'
+	                ExeCommand='/c call &quot;[dir_bin]lmdb-migrate.cmd&quot;'
+	                Execute='deferred' Impersonate='no' Return='ignore' />
+
 	  <!-- The historic build also started the service on install if the host was
 	       already bootstrapped, again via CAQuietExec (unavailable in wixl). It is
 	       not reproduced: cf-execd is Start='auto' and comes up at next boot /
@@ -122,6 +135,10 @@
               </Component>
               <Component Id='mdb_load.exe' Guid='0C48B31C-A05D-43F5-A452-2CE6CC91E963' Win64='$(var.isWin64)'>
                 <File Id='mdb_load.exe' Name='mdb_load.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/mdb_load.exe' />
+              </Component>
+              <!-- Driven by the LmdbMigrate custom action below. CFE-4701 -->
+              <Component Id='lmdb_migrate.cmd' Guid='F8165F21-E92A-5276-B6DA-E96F3A5D8503' Win64='$(var.isWin64)'>
+                <File Id='lmdb_migrate.cmd' Name='lmdb-migrate.cmd' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/lmdb-migrate.cmd' />
               </Component>
               <Component Id='lmmgr.exe' Guid='DBF87C39-43FA-4DFE-A442-D2AB5B8985F0' Win64='$(var.isWin64)'>
                 <File Id='lmmgr.exe' Name='lmmgr.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/lmmgr.exe' />
@@ -265,6 +282,13 @@
 
    <InstallExecuteSequence>
      <InstallInitialize Sequence='1500' />
+
+	 <!-- CFE-4701. Upgrade only. LmdbSetShell is immediate because deferred
+	      actions cannot read properties. -->
+	 <Custom Action='LmdbSetShell' After='InstallInitialize'>OLDERVERSIONBEINGUPGRADED</Custom>
+	 <Custom Action='LmdbSaveDumper' After='StopServices'>OLDERVERSIONBEINGUPGRADED</Custom>
+	 <Custom Action='LmdbMigrate' After='InstallFiles'>OLDERVERSIONBEINGUPGRADED</Custom>
+
 	 <Custom Action='GenerateKey' After='InstallFiles'>NOT Installed</Custom>
 
 	 <InstallFinalize Sequence='6600' />

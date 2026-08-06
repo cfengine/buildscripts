@@ -50,8 +50,7 @@ echo "BUILT_ON_OS=$OS"
 BUILT_ON_OS_VERSION="`expr "$OS_VERSION" : "\([0-9]*\)"`"
 echo "BUILT_ON_OS_VERSION=$BUILT_ON_OS_VERSION"
 
-# Shipped LMDB version. The install scripts compare it against the installed one
-# to decide whether the databases need a dump/reload, see
+# Shipped LMDB version, compared against the installed one by
 # lmdb_migration_needed() (CFE-4701).
 LMDB_VERSION="`sed -e 's,/*$,,' -e 's,.*/LMDB_,,' "$SCRIPTDIR/../../deps-packaging/lmdb/source" 2>/dev/null`"
 echo "LMDB_VERSION=$LMDB_VERSION"

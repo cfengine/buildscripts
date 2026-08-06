@@ -10,9 +10,8 @@ if is_upgrade; then
   cf_console platform_service cfengine3 stop
 fi
 
-# CFE-4701: export the databases while the old mdb_dump is still installed;
-# postinstall imports them. Not guarded by is_upgrade -- the Solaris pkg manager
-# can never report one, and lmdb_migration_needed() detects the case by itself.
+# CFE-4701: export while the old mdb_dump is still installed; postinstall
+# imports. Not guarded by is_upgrade -- Solaris never reports one.
 if lmdb_migration_needed; then
   cf_console echo "LMDB format changed in this release, exporting databases before upgrading."
   lmdb_dump_databases || cf_console echo "Warning: exporting the LMDB databases failed."
