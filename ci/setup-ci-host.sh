@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -e
-shopt -s expand_aliases
 thisdir="$(dirname "$0")"
 
 _packages="" # a space separated list of packages to install
@@ -9,7 +8,7 @@ function add-pkg() {
 }
 
 function install-packages() {
-  # note that "packages" is an alias defined later during OS/distribution discovery
+  # note that "packages" is a function defined later during OS/distribution discovery
   # shellcheck disable=SC2086
   packages $_packages
 }
@@ -56,13 +55,13 @@ if [ -f /etc/os-release ]; then
     source /etc/os-release
     if grep -q rhel /etc/os-release; then
         yum update --assumeyes
-        alias packages='yum install --assumeyes'
+        function packages() { yum install --assumeyes "$@"; }
         redhat="$VERSION_ID"
     elif grep -q debian /etc/os-release; then
-        alias packages='DEBIAN_FRONTEND=noninteractive apt install --quiet --yes'
+        function packages() { DEBIAN_FRONTEND=noninteractive apt install --quiet --yes "$@"; }
         debian="$VERSION_ID"
     elif grep -q suse /etc/os-release; then
-        alias packages='zypper install -y'
+        function packages() { zypper install -y "$@"; }
         # shellcheck disable=SC2034
         suse="$VERSION_ID"
     else
@@ -70,7 +69,7 @@ if [ -f /etc/os-release ]; then
         exit 1
     fi
 elif [ -f /etc/redhat-release ]; then
-    alias packages='yum install --assumeyes'
+    function packages() { yum install --assumeyes "$@"; }
     # shellcheck disable=SC1091
     source /etc/redhat-release
     redhat="$VERSION_ID"
@@ -200,11 +199,8 @@ if [ "$redhat" != 0 ]; then
 
 fi
 
-# packages is a dynamic alias set near the top of this script
-# ^^^ we want space separated package names as separate args, not one arg with the space separated list
 whoami
 set -x
-# shellcheck disable=SC2086
 install-packages
 set +x
 
