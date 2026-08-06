@@ -173,8 +173,16 @@ for dep in $DEPS; do
     esac
 
     # Add $PREFIX to version of built dependencies so they get different package names and are distinguishable from each
-    # Note that this revision file is created by build-scripts/autogen
-    revision=$(cat "$BASEDIR"/buildscripts/deps-packaging/revision)
+    #
+    # Note that this revision file is created by build-scripts/autogen. It holds
+    # the revision of this dependency and the time of that commit. The revision
+    # ends up in the package version and is used in the key on build cache. The
+    # time pins the timestamps embedded in the packages making them
+    # reproducible.
+    revision_file="$BASEDIR/buildscripts/deps-packaging/$dep/revision"
+    [ -f "$revision_file" ] || fatal "no revision file: $revision_file"
+    read -r revision SOURCE_DATE_EPOCH <"$revision_file"
+    export SOURCE_DATE_EPOCH
     if [ "$BUILDPREFIX" != "/var/cfengine" ]; then
         safe_prefix="+$(echo "$PREFIX" | sed 's:/::g')"
     fi
