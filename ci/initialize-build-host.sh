@@ -98,7 +98,7 @@ command -v /sbin/ifconfig 2>/dev/null && /sbin/ifconfig -a || true
 command -v /sbin/ip 2>/dev/null && /sbin/ip addr || true
 
 
-RSYNC="rsync --delete -zrlpt -T /tmp"
+RSYNC="rsync --delete -zrlpt"
 RSH="ssh -o BatchMode=yes"
 
 # Support launching scripts that were initially launched under bash.
