@@ -70,13 +70,12 @@ rm -rf $RPM_BUILD_ROOT%{prefix}/ssl
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-apache.service
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-php-fpm.service
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-hub.service
-rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-reactor.service
 rm -rf $RPM_BUILD_ROOT/usr/lib/systemd/system/cf-postgres.service
 
 # Create symlinks to /usr/local/sbin and /usr/sbin
 mkdir -p $RPM_BUILD_ROOT/usr/local/sbin
 mkdir -p $RPM_BUILD_ROOT/usr/sbin
-for binary in cf-agent cf-check cf-execd cf-key cf-monitord cf-net cf-promises cf-runagent cf-secret cf-serverd cf-support cf-watchd; do
+for binary in cf-agent cf-check cf-execd cf-key cf-monitord cf-net cf-promises cf-runagent cf-secret cf-serverd cf-support cf-watchd cf-reactor; do
   ln -sf %{prefix}/bin/$binary $RPM_BUILD_ROOT/usr/local/sbin/$binary
   ln -sf %{prefix}/bin/$binary $RPM_BUILD_ROOT/usr/sbin/$binary
 done
@@ -129,6 +128,7 @@ exit 0
 %prefix/bin/cf-support
 %prefix/bin/cf-upgrade
 %prefix/bin/cf-watchd
+%prefix/bin/cf-reactor
 # Libraries
 %dir %prefix/lib
 %prefix/lib/lib*.so*
@@ -193,6 +193,7 @@ exit 0
 /usr/local/sbin/cf-serverd
 /usr/local/sbin/cf-support
 /usr/local/sbin/cf-watchd
+/usr/local/sbin/cf-reactor
 
 # Symlinks to /usr/sbin (included in secure_path)
 /usr/sbin/cf-agent
@@ -207,6 +208,7 @@ exit 0
 /usr/sbin/cf-serverd
 /usr/sbin/cf-support
 /usr/sbin/cf-watchd
+/usr/sbin/cf-reactor
 
 # Documentation
 %defattr(644,root,root,755)
