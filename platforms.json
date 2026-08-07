@@ -54,6 +54,16 @@
     "base_image_sha": "sha256:fac46bff2e02f51425b6e33b0e1169f55dfb053d83511ca28aa50c09fd5ed7a4",
     "dockerfile": "Dockerfile.debian"
   },
+  "rhel-7": {
+    "image_name": "cfengine-builder-rhel-7",
+    "image_version": "latest",
+    "base_image": "centos:7",
+    "base_image_sha": "sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4",
+    "dockerfile": "Dockerfile.rhel7",
+    "architectures": [
+      "linux/amd64"
+    ]
+  },
   "rhel-8": {
     "image_name": "cfengine-builder-rhel-8",
     "image_version": "20260802T003710Z",
