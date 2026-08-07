@@ -79,7 +79,8 @@ fi
 # identical binaries. Honored by OpenSSL, Apache httpd, Postgres, Python
 # (.pyc mtimes), dpkg-buildpackage, and rpmbuild.
 if [ -z "$SOURCE_DATE_EPOCH" ]; then
-    SOURCE_DATE_EPOCH=$(git -C "$BASEDIR/core" log -1 --format=%ct)
+    # cd rather than git -C: rhel-7 has git 1.8.3.1, which predates -C
+    SOURCE_DATE_EPOCH=$(cd "$BASEDIR/core" && git log -1 --format=%ct)
 fi
 export SOURCE_DATE_EPOCH
 echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
