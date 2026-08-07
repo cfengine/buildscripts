@@ -222,9 +222,9 @@ exit 0
 %prefix/bin/cf-serverd
 %prefix/bin/cf-support
 %prefix/bin/cf-watchd
+%prefix/bin/cf-reactor
 # Nova-only binaries
 %prefix/bin/cf-hub
-%prefix/bin/cf-reactor
 
 # Only verify owner group mode maj min symlink
 # Don't verify md5, size, mtime
