@@ -26,9 +26,10 @@
 # Adjust this up in case of hash collisions
 CORE_ABBREV=7
 
-# Refuse to write a revision that cannot be resolved back to a commit
+# Refuse to write a revision that cannot be resolved back to a commit.
+# cd rather than git -C throughout: rhel-7 has git 1.8.3.1, which predates -C.
 check_hash_collisions() {
-    if ! git -C "$1" show "$2" --oneline >/dev/null; then
+    if ! (cd "$1" && git show "$2" --oneline) >/dev/null; then
         fatal "abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
     fi
 }
@@ -68,7 +69,7 @@ for _dir in $_dirs; do
             echo "$(basename "$0"): Debug: Creating revision file in $_dir"
 
             # Get the revision hash
-            R=$(git -C "$BASEDIR/$_dir" log --abbrev=$CORE_ABBREV --pretty='format:%h' -1 -- .) || false
+            R=$(cd "$BASEDIR/$_dir" && git log --abbrev=$CORE_ABBREV --pretty='format:%h' -1 -- .) || false
 
             check_hash_collisions "$BASEDIR/$_dir" "$R"
 
@@ -95,7 +96,7 @@ for _dep_dir in "$BASEDIR"/buildscripts/deps-packaging/*/; do
 
     log_debug "Creating revision file in deps-packaging/$_dep"
 
-    _revision=$(git -C "$BASEDIR/buildscripts" log --abbrev=$CORE_ABBREV \
+    _revision=$(cd "$BASEDIR/buildscripts" && git log --abbrev=$CORE_ABBREV \
         --pretty='format:%h %ct' -1 -- "deps-packaging/$_dep" \
         'deps-packaging/pkg-*' deps-packaging/cache-sftp deps-packaging/psf.pl) || false
 
