@@ -81,6 +81,7 @@ rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-report-collect.la
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-reactor-nova.la
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
 
 # Remove ssl things we don't need
@@ -222,9 +223,9 @@ exit 0
 %prefix/bin/cf-serverd
 %prefix/bin/cf-support
 %prefix/bin/cf-watchd
+%prefix/bin/cf-reactor
 # Nova-only binaries
 %prefix/bin/cf-hub
-%prefix/bin/cf-reactor
 
 # Only verify owner group mode maj min symlink
 # Don't verify md5, size, mtime
@@ -310,6 +311,7 @@ exit 0
 %prefix/lib/lib*.so*
 %prefix/lib/cfengine-enterprise.so
 %prefix/lib/cfengine-report-collect.so
+%prefix/lib/cfengine-reactor-nova.so
 
 # PHP modules
 %prefix/lib/php
