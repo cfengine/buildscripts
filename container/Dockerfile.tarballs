@@ -1,0 +1,36 @@
+# Image for the source tarballs. They are the same whichever platform builds
+# them, so they are built here once rather than by every platform.
+#
+# Debian 9, because that is what the bootstrap-pr host runs, so the tarballs come
+# out as they do today. "make dist" embeds the generated build system, so the
+# autotools version in this image decides their contents, and the configure
+# script they carry is the one every platform then runs, including the oldest
+# ones. Generating them elsewhere is therefore a compatibility risk.
+ARG BASE_IMAGE=debian:9
+FROM ${BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Stretch is archived
+RUN rm -f /etc/apt/sources.list.d/* \
+    && { echo 'deb http://archive.debian.org/debian/ stretch main contrib non-free'; \
+         echo 'deb http://archive.debian.org/debian-security/ stretch/updates main contrib non-free'; \
+       } > /etc/apt/sources.list \
+    && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+
+RUN apt-get -qy update && apt-get -y install \
+    autoconf autoconf-archive automake binutils bison curl flex g++ gcc git jq \
+    libc-dev liblmdb-dev libpam0g-dev libpcre2-dev libpcre3-dev librsync-dev \
+    libssl-dev libtool m4 make parallel pigz psmisc python rsync sudo unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create build user with passwordless sudo (the inner script rsyncs as root)
+RUN useradd -m -s /bin/bash builder \
+    && echo "builder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/builder
+
+USER builder
+WORKDIR /home/builder
+
+# Pre-create the build directory so that when a named volume is mounted here,
+# Docker initializes it with the correct ownership (builder:builder).
+RUN mkdir -p /home/builder/build

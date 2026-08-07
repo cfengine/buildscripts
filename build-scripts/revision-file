@@ -26,6 +26,14 @@
 # Adjust this up in case of hash collisions
 CORE_ABBREV=7
 
+# Refuse to write a revision that cannot be resolved back to a commit.
+# cd rather than git -C throughout: rhel-7 has git 1.8.3.1, which predates -C.
+check_hash_collisions() {
+    if ! (cd "$1" && git show "$2" --oneline) >/dev/null; then
+        fatal "abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
+    fi
+}
+
 # Parse the required argument which should be set through the environment
 # variable PROJECT
 case "$PROJECT" in
@@ -61,13 +69,9 @@ for _dir in $_dirs; do
             echo "$(basename "$0"): Debug: Creating revision file in $_dir"
 
             # Get the revision hash
-            R=$(git -C "$BASEDIR/$_dir" log --abbrev=$CORE_ABBREV --pretty='format:%h' -1 -- .) || false
+            R=$(cd "$BASEDIR/$_dir" && git log --abbrev=$CORE_ABBREV --pretty='format:%h' -1 -- .) || false
 
-            # Make sure there are no hash collisions
-            if ! git -C "$BASEDIR/$_dir" show "$R" --oneline >/dev/null; then
-                echo "$(basename "$0"): Error: abbreviated commit hash of $CORE_ABBREV is not unique. Consider increasing the value in the script $0."
-                exit 1
-            fi
+            check_hash_collisions "$BASEDIR/$_dir" "$R"
 
             # Create the revision file
             echo "$R" | tr -d '\n' >"$BASEDIR/$_dir/revision"
@@ -78,4 +82,31 @@ for _dir in $_dirs; do
         echo "$(basename "$0"): Error: Expected to find the '$_dir' directory in '$BASEDIR', but it's not there"
         exit 1
     fi
+done
+
+# One revision per dependency, holding the hash and the commit time. The hash
+# goes in the package version and is used as part of the key in build cache. The
+# time pins the dependency's timestamps so builds are reproducible with
+# SOURCE_DATE_EPOCH.
+#
+# The scripts beside the dependencies build all of them. Hence, a change in one
+# those count as a change to every dependency.
+for _dep_dir in "$BASEDIR"/buildscripts/deps-packaging/*/; do
+    _dep=$(basename "$_dep_dir")
+
+    log_debug "Creating revision file in deps-packaging/$_dep"
+
+    _revision=$(cd "$BASEDIR/buildscripts" && git log --abbrev=$CORE_ABBREV \
+        --pretty='format:%h %ct' -1 -- "deps-packaging/$_dep" \
+        'deps-packaging/pkg-*' deps-packaging/cache-sftp deps-packaging/psf.pl) || false
+
+    if [ -z "$_revision" ]; then
+        fatal "no commit found for deps-packaging/$_dep"
+    fi
+
+    check_hash_collisions "$BASEDIR/buildscripts" "${_revision%% *}"
+
+    # Keep the newline, unlike the files above: install-dependencies reads this
+    # with "read", which fails at end of file without one.
+    echo "$_revision" >"$_dep_dir/revision"
 done
