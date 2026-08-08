@@ -1,5 +1,26 @@
 # Upgrading / patching LMDB
 
+## Before changing the version: check the on-disk format
+
+LMDB has no in-place upgrade. If the new version writes a different on-disk
+format, every existing `*.lmdb` becomes unreadable, and CFEngine takes that for
+corruption and deletes it (ENT-9717).
+
+The format is stable within a `<major>.<minor>` series and changed in 1.0, so a
+patch bump is safe and a series bump is not. Series bumps are handled by
+`lmdb_dump_databases()` / `lmdb_load_databases()` in
+`packaging/common/script-templates/script-common.sh` (CFE-4701), which key off the
+version in `source` below via `LMDB_VERSION`. A format change *within* a series
+would need `lmdb_migration_needed()` made more specific.
+
+Windows is handled separately, since the MSI runs none of those scripts:
+`packaging/cfengine-nova/lmdb-migrate.cmd`, driven by the `LmdbSaveDumper` and
+`LmdbMigrate` custom actions in `cfengine-nova.wxs`. It needs no version
+threshold, because it probes each database with the new `mdb_dump` instead of
+comparing versions.
+
+## Upgrading / patching
+
 From the directory above buildscripts:
 
 ```
