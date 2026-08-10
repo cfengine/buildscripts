@@ -1,4 +1,4 @@
-%define openldap_version 2.6.13
+%define openldap_version 2.7.0
 
 Summary: CFEngine Build Automation -- openldap
 Name: cfbuild-openldap
@@ -6,7 +6,7 @@ Version: %{version}
 Release: 1
 Source0: openldap-%{openldap_version}.tgz
 Patch0:  no_Sockaddr_redefine.patch
-# patches for openssl 4.0.0 unavailable in a release as of 2.6.13
+# patches for openssl 4.0.0 unavailable in a release as of 2.7.0
 Patch1: f3b49ffa10d93e841d00f05d9f56b88078acf235.patch
 Patch2: a599597cb3cb6d36f888bffcbd0b010a644b92c5.patch
 Patch3: 75b624f47574dffb1f5041625cf9d6218dbcb07d.patch
