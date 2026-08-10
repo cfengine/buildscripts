@@ -106,6 +106,9 @@ pre() {
     # Copy WiX source file for MSI generation
     cp "$BASEDIR"/buildscripts/packaging/cfengine-nova/cfengine-nova.wxs "$P"
 
+    # LMDB database migration, driven by custom actions in the .wxs (CFE-4701)
+    install -m 755 "$BASEDIR"/buildscripts/packaging/cfengine-nova/lmdb-migrate.cmd "$P"/bin/
+
     # Handle OpenSSL library naming differences between architectures
     # OpenSSL libs have different names on x32 and x64 platforms:
     # on 32-bit platforms: libcrypto_1_1.dll     and libssl_1_1.dll

@@ -145,6 +145,13 @@ if is_upgrade; then
   fi
 fi
 
+# CFE-4701: export while the old mdb_dump is still installed; postinstall
+# imports. Not guarded by is_upgrade -- Solaris never reports one.
+if lmdb_migration_needed; then
+  cf_console echo "LMDB format changed in this release, exporting databases before upgrading."
+  lmdb_dump_databases || cf_console echo "Warning: exporting the LMDB databases failed."
+fi
+
 filter_netstat_listen()
 {
   set +e

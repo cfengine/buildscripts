@@ -180,3 +180,61 @@ on_files() {
     unset IFS
 }
 
+# LMDB migration (CFE-4701). LMDB 1.0 cannot read 0.9 databases, so dump in
+# preinstall with the old mdb_dump and load in postinstall with the new mdb_load.
+# Dumps sit beside the database as <db>.dump. Non-fatal throughout: callers use
+# `... || ...`, which disables errexit inside these functions.
+
+lmdb_series() {
+    # "<major>.<minor>" from stdin; the format is stable within a series.
+    sed -n 's/^[^0-9]*\([0-9][0-9]*\.[0-9][0-9]*\).*/\1/p' | head -n 1
+}
+
+lmdb_migration_needed() {
+    # False when undeterminable, keeping the old behaviour.
+    test -n "$LMDB_VERSION" || return 1
+    test -x "$PREFIX/bin/mdb_dump" || return 1
+    packaged=`echo "$LMDB_VERSION" | lmdb_series`
+    installed=`"$PREFIX/bin/mdb_dump" -V 2>/dev/null | lmdb_series`
+    test -n "$packaged" && test -n "$installed" || return 1
+    test "$installed" != "$packaged"
+}
+
+lmdb_dump_databases() {
+    # Preinstall only, while the old mdb_dump is still installed. The workdir
+    # glob covers pre-3.7 installs.
+    for db in "$PREFIX"/state/*.lmdb "$PREFIX"/*.lmdb; do
+        test -f "$db" || continue
+        rm -f "$db.dump"
+        if ( umask 077; "$PREFIX/bin/mdb_dump" -n -f "$db.dump" "$db" ); then
+            echo "exported '$db'"
+        else
+            # Corrupt or uninitialised: leave it to cf-check.
+            rm -f "$db.dump"
+            cf_console echo "Warning: could not export '$db', it will be recreated empty."
+        fi
+    done
+    return 0
+}
+
+lmdb_load_databases() {
+    # Postinstall only, before any daemon starts.
+    for dump in "$PREFIX"/state/*.lmdb.dump "$PREFIX"/*.lmdb.dump; do
+        test -f "$dump" || continue
+        db=${dump%.dump}
+        # Overwrite rather than replace, so owner, mode and SELinux label survive.
+        if ( umask 077; "$PREFIX/bin/mdb_load" -n -f "$dump" "$db.new" ) &&
+           ( umask 077; cat "$db.new" > "$db" ); then
+            echo "imported '$db'"
+            rm -f "$dump"
+        else
+            # .failed so a later upgrade cannot restore it over a good database.
+            mv "$dump" "$dump.failed"
+            cf_console echo "Warning: could not import '$db', it will be recreated empty."
+            cf_console echo "Exported data kept in '$dump.failed'"
+        fi
+        rm -f "$db.new" "$db.new-lock"
+        rm -f "$db-lock"
+    done
+    return 0
+}
