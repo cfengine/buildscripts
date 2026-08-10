@@ -119,6 +119,10 @@ if [ -f /etc/os-release ]; then
         # and now perform the upgrade a second time after hopefully autoremove cleans up /boot partition of kernel files that cause failure
         DEBIAN_FRONTEND=noninteractive apt upgrade --yes
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
+
+        echo "remove unattended-upgrades to increase reliability of apt operations in scripts"
+        DEBIAN_FRONTEND=noninteractive apt purge --yes unattended-upgrades
+
         alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
         alias erase-packages='DEBIAN_FRONTEND=noninteractive apt purge --yes'
     elif grep -q suse /etc/os-release; then
