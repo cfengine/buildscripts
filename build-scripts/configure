@@ -111,6 +111,10 @@ case "$BUILD_TYPE" in
     ;;
 esac
 
+if [ "$OS" = "sles" ] || expr "$OS" : ".*suse" >/dev/null
+then
+    var_append ARGS "--without-pam"
+fi
 if [ "x$OS" = "xsolaris" ]
 then
     export PKG_CONFIG_PATH="$BUILDPREFIX/lib/pkgconfig"
