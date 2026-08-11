@@ -12,6 +12,7 @@ import hashlib
 import json
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import urllib.request
@@ -377,10 +378,17 @@ def cache_label(platform_name, role, arch):
     return f"PACKAGES{hub}_{arch_token}_linux_{label_os}"
 
 
-def run_container(args, image_tag, source_dir, script_dir):
+def run_container(args, image_tag, source_dir, script_dir, label):
     """Run the build inside a Docker container."""
-    output_dir = Path(args.output_dir).resolve()
+    # Keep the packages in a directory of their own, so that building several
+    # platforms into one output directory does not mix them together.
+    output_dir = Path(args.output_dir).resolve() / label
     cache_dir = Path(args.cache_dir).resolve()
+
+    # Start from an empty directory. An earlier build's packages carry their own
+    # version and build number, so this build does not always overwrite them.
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
 
     # Pre-create host directories so Docker doesn't create them as root
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -409,9 +417,6 @@ def run_container(args, image_tag, source_dir, script_dir):
     # Environment variables
     # JOB_BASE_NAME is used by deps-packaging/pkg-cache to derive the cache
     # label. Format: "label=<value>". Without it, all platforms share NO_LABEL.
-    # The image's arch, not the host's: an amd64-only platform runs under
-    # emulation on an arm64 host, and the label has to say what it built as.
-    label = cache_label(args.platform, args.role, image_arch(image_tag))
     cmd.extend(
         [
             "-e",
@@ -645,15 +650,19 @@ def main():
             f"Building {args.project} {args.role} for {args.platform} ({args.build_type})..."
         )
 
+    # The image's arch, not the host's: an amd64-only platform runs under
+    # emulation on an arm64 host, and the label has to say what it built as.
+    label = cache_label(args.platform, args.role, image_arch(image_tag))
+
     # Run the container
-    rc = run_container(args, image_tag, source_dir, script_dir)
+    rc = run_container(args, image_tag, source_dir, script_dir, label)
 
     if rc != 0:
         log.error(f"Build failed (exit code {rc}).")
         sys.exit(rc)
 
     if not args.shell:
-        output_dir = Path(args.output_dir).resolve()
+        output_dir = Path(args.output_dir).resolve() / label
         packages = (
             list(output_dir.glob("*.deb"))
             + list(output_dir.glob("*.rpm"))
