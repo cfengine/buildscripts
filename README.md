@@ -137,8 +137,8 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.19   | 1.19   | 1.19   | Needed by libxml2        |
 | [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.3 | 2.15.3 | 2.15.3 |                          |
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
-| [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.35 | 0.9.35 | 1.0.1  |                          |
-| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.6.13 | 2.6.13 | 2.7.0  | Enterprise agent only    |
+| [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.36 | 0.9.35 | 1.0.1  |                          |
+| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.7.0  | 2.6.13 | 2.7.0  | Enterprise agent only    |
 | [OpenSSL](https://openssl.org/)                                                   | 3.6.3  | 3.6.3  | 4.0.1  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | -      | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | 10.47  | 10.47  | 10.47  |                          |
@@ -156,7 +156,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | :-------------------------------------------------- | :----- | :----- | :----- |
 | [Apache](https://httpd.apache.org/)                 | 2.4.68 | 2.4.68 | 2.4.68 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
-| [apr-util](https://apr.apache.org/)                 | 1.6.3  | 1.6.3  | 1.6.4  |
+| [apr-util](https://apr.apache.org/)                 | 1.6.4  | 1.6.3  | 1.6.4  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.55.0 | 2.55.0 | 2.55.0 |
 | [libexpat](https://libexpat.github.io/)             | 2.8.2  | 2.8.2  | 2.8.2  |
 | [PHP](https://php.net/)                             | 8.3.33 | 8.5.9  | 8.5.9  |
