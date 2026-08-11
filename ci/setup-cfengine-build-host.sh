@@ -90,16 +90,20 @@ echo "Using buildscripts commit:"
 # we have very old platforms with old git that doesn't understand -C option so cd/cd .. it is
 (
     cd "$thisdir"/..
-    # buildscripts is owned by jenkins so in order to run rev-parse command as root (this script is run with sudo) we must make it safe if git is used
-    if [ -d /home/jenkins/buildscripts/.git ]; then
+    # Not every caller clones into ~/buildscripts: fast-build-and-deploy-docs-master
+    # uses tmp-buildscripts, where the hardcoded path reported no commit at all.
+    if [ -d .git ]; then
         if command -v git >/dev/null; then
-            git config --global --add safe.directory /home/jenkins/buildscripts
+            # buildscripts is owned by jenkins so in order to run rev-parse command as root (this script is run with sudo) we must make it safe if git is used
+            git config --global --add safe.directory "$PWD"
             # show what version of buildscripts we are using
             git rev-parse HEAD
         else
             echo "buildscripts/.git is present but git is not installed"
             exit 1
         fi
+    else
+        echo "no .git in $PWD, cannot determine buildscripts commit"
     fi
 )
 

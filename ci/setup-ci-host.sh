@@ -26,7 +26,6 @@ function file-line()
 }
 
 # Replaces an existing range for the user rather than appending a second one.
-subids_changed=0
 function subid-range()
 {
   local file=$1
@@ -44,7 +43,27 @@ function subid-range()
     echo "Adding $user:$range to $file"
     echo "$user:$range" >> "$file"
   fi
-  subids_changed=1
+}
+
+# Storage keeps the mapping it was extracted with, so a wrongly mapped store
+# stays broken (no setuid bits, sudo unusable) even once /etc/subuid is right.
+# Track what the store was mapped with, not whether we edited the range.
+function remap-container-storage()
+{
+  local range=$1
+  local stamp=/var/lib/cfengine-ci-subid-mapping
+
+  if [ "$(cat "$stamp" 2>/dev/null)" = "$range" ]; then
+    return
+  fi
+
+  echo "Container storage was not mapped with $range, remapping and discarding images"
+  su - jenkins -c 'podman system migrate'
+  # migrate cannot restore setuid bits, so images must be rebuilt. Leaked
+  # working containers reference them, so remove those first.
+  su - jenkins -c 'buildah rm --all' || true
+  su - jenkins -c 'buildah rmi --all --force' || true
+  echo "$range" >"$stamp"
 }
 
 function github-known-hosts()
@@ -132,14 +151,10 @@ EOF
 
         # Without a subordinate id range, rootless container storage runs single-uid
         # and drops setuid bits while extracting layers, breaking sudo in the image.
-        subid-range /etc/subuid jenkins 100000:65536
-        subid-range /etc/subgid jenkins 100000:65536
-        if [ "$subids_changed" = 1 ]; then
-            # Remap storage and discard images extracted under the previous mapping:
-            # migrate cannot restore setuid bits, so those images must be rebuilt.
-            su - jenkins -c 'podman system migrate'
-            su - jenkins -c 'buildah rmi --all --force'
-        fi
+        subid_range=100000:65536
+        subid-range /etc/subuid jenkins "$subid_range"
+        subid-range /etc/subgid jenkins "$subid_range"
+        remap-container-storage "$subid_range"
     fi
     exit 0
 fi
