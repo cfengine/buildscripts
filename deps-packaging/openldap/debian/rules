@@ -26,6 +26,9 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
+	# for older compilers we need to patch some code
+	patch -p1 < gcc-8.5.patch
+
 	./configure --prefix=$(PREFIX) \
 	    --enable-shared \
 	    --disable-slapd \
