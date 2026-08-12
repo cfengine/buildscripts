@@ -371,8 +371,7 @@ then
         $RSYNC -e "$RSH"    $HOME/buildscripts  $login:.
     fi
 
-    # Copy the workspace. If there is no workspace defined, we are not in the
-    # job section yet.
+    echo Copy the workspace. If there is no workspace defined, we are not in the job section yet.
     if [ -n "$WORKSPACE" ]
     then
         $RSH $login rm -rf "$WORKSPACE_REMOTE" || true
@@ -383,7 +382,17 @@ then
             exit 2
         fi
         $RSH  $login  mkdir -p "$WORKSPACE_REMOTE"
-        $RSYNC -e "$RSH"    "$WORKSPACE"/  $login:"$WORKSPACE_REMOTE"/
+        echo "Copying the workspace to the build host"
+        start_spinner 600
+        if $RSYNC -e "$RSH"    "$WORKSPACE"/  $login:"$WORKSPACE_REMOTE"/; then
+            stop_spinner
+            echo "Finished copying the workspace to the build host"
+        else
+            EXIT_CODE=$?
+            echo "error: Failed to copy the workspace to the build host"
+            stop_spinner
+            exit $EXIT_CODE
+        fi
     fi
 
     # --------------------------------------------------------------------------
@@ -399,11 +408,12 @@ then
     # --------------------------------------------------------------------------
     # Collect artifacts and cleanup.
     # --------------------------------------------------------------------------
-    # Copy the workspace back after job has ended.
+    echo Copy the workspace back after job has ended.
     if [ -n "$WORKSPACE" ]
     then
         # This can take a very long time. So we need to prevent timeouts
         start_spinner 600
+        echo "Copying the workspace back after job has ended"
         if $RSYNC -e "$RSH"    $login:"$WORKSPACE_REMOTE"/  "$WORKSPACE"/; then
             stop_spinner
             echo "Finished copying the workspace back after job has ended"
