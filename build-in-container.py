@@ -704,12 +704,13 @@ def main():
             + list(output_dir.glob("*.msi"))
             + list(output_dir.glob("*.tar.gz"))
         )
-        if packages:
-            log.info("Output packages:")
-            for p in sorted(packages):
-                log.info(f"  {p}")
-        else:
-            log.warning("No packages found in output directory.")
+        if not packages:
+            log.error(f"Build produced nothing in {output_dir}.")
+            sys.exit(1)
+
+        log.info("Output packages:")
+        for p in sorted(packages):
+            log.info(f"  {p}")
 
 
 if __name__ == "__main__":
