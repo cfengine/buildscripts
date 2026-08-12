@@ -11,6 +11,9 @@ only Docker and Python 3 on the host.
 
 # Build a nova hub release package for Debian 12
 ./build-in-container.py --platform debian-12 --project nova --role hub --build-type RELEASE
+
+# Alternatively, use Jenkins labels (see build-scripts/labels.txt)
+./build-in-container.py --label PACKAGES_HUB_x86_64_linux_debian_12 --project nova --build-type RELEASE
 ```
 
 In the examples above, we run the script from inside `buildscripts/` (with
