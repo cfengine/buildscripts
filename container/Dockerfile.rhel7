@@ -1,0 +1,64 @@
+# RHEL 7 builder. Separate from Dockerfile.rhel because that one is dnf all the
+# way through -- config-manager, modules, /etc/dnf/dnf.conf -- and CentOS 7 has
+# none of it. No Rocky 7 exists, so the base is CentOS 7.
+#
+# Agent only: nothing builds PACKAGES_HUB_x86_64_linux_redhat_7, and the hub
+# toolchain could not work here anyway, since Node 20 wants glibc 2.28 and this
+# has 2.17.
+ARG BASE_IMAGE=centos:7
+FROM ${BASE_IMAGE}
+
+# CentOS 7 is EOL, so the mirrorlists are gone and everything comes from the
+# vault, as scripts/provision.sh does for the centos build hosts. Frozen
+# repositories, which suits us: the package set cannot shift under a rebuild.
+RUN sed -i 's/mirror.centos.org/vault.centos.org/; /^mirrorlist/d; s/^#baseurl/baseurl/' \
+        /etc/yum.repos.d/CentOS-Base.repo \
+    && yum -y makecache
+
+# Deps like zlib build without full debug symbols; disable debuginfo extraction
+# so rpm doesn't abort with "No debugging symbols". We don't ship debuginfo here.
+RUN echo '%debug_package %{nil}' > /etc/rpm/macros.cfengine-nodebug
+
+# Build toolchain (see the redhat section of ci/cfengine-build-host-setup.cf).
+# "Development Tools" provides gcc, make, autotools, rpm-build, core perl, etc.
+RUN yum groupinstall -y "Development Tools" \
+    && yum install -y \
+        gcc-c++ pam-devel ncurses ncurses-devel expat expat-devel gettext \
+        rpm-build-libs selinux-policy selinux-policy-devel pkgconfig \
+        perl perl-Module-Load-Conditional perl-ExtUtils-MakeMaker perl-IPC-Cmd \
+        python3 python3-pip python3-devel \
+        git rsync wget which psmisc unzip diffutils file sudo \
+    && yum clean all
+
+# Stock gcc is 4.8.5, too old to build the bundled dependencies, so bring in
+# devtoolset-11 exactly as ci/centos-7-setup-devtoolset-11.sh does on the build
+# hosts, vault repository included.
+RUN yum install -y centos-release-scl \
+    && rm -f /etc/yum.repos.d/CentOS-SCLo-scl.repo \
+    && sed -i 's,^#baseurl.*$,baseurl=https://vault.centos.org/7.9.2009/sclo/x86_64/rh/,' \
+        /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo \
+    && sed -i '/mirrorlist/d' /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo \
+    && yum install -y devtoolset-11 \
+    && yum clean all
+
+# Rust + protobuf for the cargo-based leech2 dependency (prebuilt tarballs,
+# shared with the other images).
+COPY --from=ci linux-install-protobuf.sh linux-install-rust.sh /tmp/
+RUN /tmp/linux-install-protobuf.sh
+RUN /tmp/linux-install-rust.sh
+
+# Build user with passwordless sudo (needed by install-dependencies, package, etc.)
+RUN useradd -m -s /bin/bash builder \
+    && echo "builder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/builder
+
+USER builder
+WORKDIR /home/builder
+
+# Pre-create so a volume mounted here is owned by builder, not root.
+RUN mkdir -p /home/builder/build
+
+# Everything runs through scl, or it would get the 4.8.5 gcc: the build scripts
+# are the container's command rather than a login shell, so nothing would source
+# /opt/rh/devtoolset-11/enable on its own. Letting scl do it keeps the paths it
+# computes at run time, which are more than a PATH.
+ENTRYPOINT ["scl", "enable", "devtoolset-11", "--"]

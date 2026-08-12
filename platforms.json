@@ -54,6 +54,16 @@
     "base_image_sha": "sha256:34cd9e9fd437c0a095ec39cb2e73422c9f30821b0d0848ed74fd0d43bae4d958",
     "dockerfile": "Dockerfile.debian"
   },
+  "rhel-7": {
+    "image_name": "cfengine-builder-rhel-7",
+    "image_version": "latest",
+    "base_image": "centos:7",
+    "base_image_sha": "sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4",
+    "dockerfile": "Dockerfile.rhel7",
+    "architectures": [
+      "linux/amd64"
+    ]
+  },
   "rhel-8": {
     "image_name": "cfengine-builder-rhel-8",
     "image_version": "20260809T001848Z",
@@ -99,6 +109,16 @@
     "base_image_sha": "sha256:561618e2c15bf2397621dd04f96926663a3b5616c189cf7e38db7e82f5c538ea",
     "dockerfile": "Dockerfile.mingw",
     "cross_target": "x64-mingw",
+    "architectures": [
+      "linux/amd64"
+    ]
+  },
+  "tarballs": {
+    "image_name": "cfengine-builder-tarballs",
+    "image_version": "latest",
+    "base_image": "debian:9",
+    "base_image_sha": "sha256:c5c5200ff1e9c73ffbf188b4a67eb1c91531b644856b4aefe86a58d2f0cb05be",
+    "dockerfile": "Dockerfile.tarballs",
     "architectures": [
       "linux/amd64"
     ]

@@ -12,6 +12,7 @@ import hashlib
 import json
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import urllib.request
@@ -21,6 +22,16 @@ log = logging.getLogger("build-in-container")
 
 IMAGE_REGISTRY = "ghcr.io/cfengine"
 CONFIG_PATH = Path(__file__).resolve().parent / "platforms.json"
+
+# Where --sftp-key is mounted. It cannot be mounted onto ~/.ssh/id_rsa directly:
+# ssh rejects a key owned by neither the current user nor root, and the host file
+# belongs to jenkins while the container runs as builder. The inner script copies
+# it into place instead.
+SFTP_KEY_PATH = "/run/secrets/sftp-cache-key"
+
+# The platform whose image builds the source tarballs, and only those: it is the
+# autotools in that image which decide their contents.
+TARBALLS_PLATFORM = "tarballs"
 
 # Architectures registry images are published for, unless a platform overrides
 # it with an "architectures" list in platforms.json (e.g. the mingw cross-build,
@@ -67,6 +78,7 @@ def image_needs_rebuild(image_tag, current_hash):
         ],
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         return True  # Image doesn't exist
@@ -128,7 +140,7 @@ def build_image(platform_name, platform_config, script_dir, rebuild=False, arch=
     # Build context is the container/ directory
     cmd.append(str(script_dir / "container"))
 
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     if result.returncode != 0:
         log.error("Docker image build failed.")
         sys.exit(1)
@@ -148,7 +160,21 @@ def host_docker_arch():
         ["docker", "version", "--format", "{{.Server.Arch}}"],
         capture_output=True,
         text=True,
+        check=False,
     )
+    return result.stdout.strip()
+
+
+def image_arch(ref):
+    """Return the architecture of a locally-present image, or None if absent."""
+    result = subprocess.run(
+        ["docker", "image", "inspect", "--format", "{{.Architecture}}", ref],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
     return result.stdout.strip()
 
 
@@ -159,15 +185,7 @@ def image_provides_arch(ref, arch):
     architecture ("arm64"); we compare its architecture component against the
     image's own reported architecture.
     """
-    want = arch.rsplit("/", 1)[-1]
-    result = subprocess.run(
-        ["docker", "image", "inspect", "--format", "{{.Architecture}}", ref],
-        capture_output=True,
-        text=True,
-    )
-    if result.returncode != 0:
-        return False
-    return result.stdout.strip() == want
+    return image_arch(ref) == arch.rsplit("/", 1)[-1]
 
 
 def pull_image(platform_name, arch=None):
@@ -188,6 +206,7 @@ def pull_image(platform_name, arch=None):
         cmd,
         capture_output=True,
         text=True,
+        check=False,
     )
     if result.returncode != 0:
         return None
@@ -244,7 +263,7 @@ def build_and_push_image(platform_name, platform_config, script_dir):
     # Build context is the container/ directory
     cmd.append(str(script_dir / "container"))
 
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     if result.returncode != 0:
         log.error("Docker buildx build/push failed.")
         sys.exit(1)
@@ -265,7 +284,7 @@ def latest_registry_version(image_name):
     tags = json.loads(urllib.request.urlopen(req).read()).get("tags", [])
     if not tags:
         return None
-    return sorted(tags)[-1]
+    return max(tags)
 
 
 def update_platform_versions(platform_name=None):
@@ -345,10 +364,41 @@ def update_base_image_shas(platform_name=None):
     CONFIG_PATH.write_text(json.dumps(config, indent=2) + "\n")
 
 
-def run_container(args, image_tag, source_dir, script_dir):
+def cache_label(platform_name, role, arch):
+    """Return the dependency cache namespace for a build.
+
+    deps-packaging/pkg-cache namespaces cached dependencies by JOB_BASE_NAME,
+    which a testing-pr matrix cell exports as "label=<axis value>". Building the
+    same string here puts container-built dependencies in the same namespace as
+    the ones testing-pr builds, so both jobs share buildcache.
+    """
+    hub = "_HUB" if role == "hub" else ""
+    # The labels spell the architectures x86_64 and arm_64. See labels.txt.
+    arch_token = {"amd64": "x86_64", "arm64": "arm_64"}[arch.rsplit("/", 1)[-1]]
+
+    # The cross target's label carries neither an OS version nor _linux.
+    if get_config()[platform_name].get("cross_target"):
+        return f"PACKAGES{hub}_{arch_token}_mingw"
+
+    # Platform names are <os>-<version>, matching the labels once the separator
+    # is swapped, except that the labels say redhat where we say rhel.
+    label_os = platform_name.replace("-", "_").replace("rhel_", "redhat_")
+    return f"PACKAGES{hub}_{arch_token}_linux_{label_os}"
+
+
+def run_container(args, image_tag, source_dir, script_dir, label):
     """Run the build inside a Docker container."""
-    output_dir = Path(args.output_dir).resolve()
+    # Keep the packages in a directory of their own, so that building several
+    # platforms into one output directory does not mix them together. The
+    # tarballs belong to no platform, so they sit beside those directories.
+    subdir = "tarballs" if args.tarballs else label
+    output_dir = Path(args.output_dir).resolve() / subdir
     cache_dir = Path(args.cache_dir).resolve()
+
+    # Start from an empty directory. An earlier build's packages carry their own
+    # version and build number, so this build does not always overwrite them.
+    if output_dir.exists():
+        shutil.rmtree(output_dir)
 
     # Pre-create host directories so Docker doesn't create them as root
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -375,9 +425,6 @@ def run_container(args, image_tag, source_dir, script_dir):
     )
 
     # Environment variables
-    # JOB_BASE_NAME is used by deps-packaging/pkg-cache to derive the cache
-    # label. Format: "label=<value>". Without it, all platforms share NO_LABEL.
-    cache_label = f"label=container_{args.platform}"
     cmd.extend(
         [
             "-e",
@@ -395,12 +442,25 @@ def run_container(args, image_tag, source_dir, script_dir):
             f"HOST_UID={os.getuid()}",
             "-e",
             f"HOST_GID={os.getgid()}",
-            "-e",
-            f"JOB_BASE_NAME={cache_label}",
-            "-e",
-            "CACHE_IS_ONLY_LOCAL=yes",
         ]
     )
+
+    if args.tarballs:
+        cmd.extend(["-e", "TARBALLS=yes"])
+    else:
+        # JOB_BASE_NAME is used by deps-packaging/pkg-cache to derive the cache
+        # label. Format: "label=<value>".
+        cmd.extend(["-e", f"JOB_BASE_NAME=label={label}"])
+
+    # The remote dependency cache is reachable by publickey only, and pkg-cache
+    # aborts the build if an upload fails, so it stays off unless a key was
+    # passed. Note that the key is readable by everything the build runs,
+    # including each dependency's own build system.
+    if args.sftp_key:
+        key = Path(args.sftp_key).resolve()
+        cmd.extend(["-v", f"{key}:{SFTP_KEY_PATH}:ro"])
+    else:
+        cmd.extend(["-e", "CACHE_IS_ONLY_LOCAL=yes"])
 
     if args.version:
         cmd.extend(["-e", f"EXPLICIT_VERSION={args.version}"])
@@ -419,7 +479,7 @@ def run_container(args, image_tag, source_dir, script_dir):
     else:
         cmd.append(str(Path("/srv/source/buildscripts/build-in-container-inner.sh")))
 
-    result = subprocess.run(cmd)
+    result = subprocess.run(cmd, check=False)
     return result.returncode
 
 
@@ -474,6 +534,19 @@ def parse_args():
         help="Dependency cache directory",
     )
     parser.add_argument(
+        "--tarballs",
+        action="store_true",
+        help="Build the source tarballs, into <output-dir>/tarballs, and nothing "
+        "else. They are the same whichever platform builds them, so no other "
+        "build produces them.",
+    )
+    parser.add_argument(
+        "--sftp-key",
+        dest="sftp_key",
+        help="Private key for the remote dependency cache. Without it the build "
+        "only uses the local cache under --cache-dir.",
+    )
+    parser.add_argument(
         "--rebuild-image",
         action="store_true",
         help="Force rebuild of Docker image (--no-cache)",
@@ -518,6 +591,17 @@ def parse_args():
 
     if args.update or args.update_sha:
         # --platform is optional for these modes; updates all if omitted
+        return args
+
+    if args.tarballs:
+        # The tarballs are built from core and masterfiles alone, in an image of
+        # their own, so the platform, project and role are not choices here. The
+        # build type is: it decides their version string.
+        args.platform = TARBALLS_PLATFORM
+        args.project = "community"
+        args.role = args.role or "agent"
+        if not args.build_type:
+            parser.error("missing required argument --build-type")
         return args
 
     # --platform is always required (except --list-platforms/--update handled above)
@@ -597,15 +681,23 @@ def main():
             f"Building {args.project} {args.role} for {args.platform} ({args.build_type})..."
         )
 
+    # No dependencies are built for the tarballs, so they need no cache label.
+    # The arch is the image's, not the host's, which differ under emulation.
+    label = (
+        None
+        if args.tarballs
+        else cache_label(args.platform, args.role, image_arch(image_tag))
+    )
+
     # Run the container
-    rc = run_container(args, image_tag, source_dir, script_dir)
+    rc = run_container(args, image_tag, source_dir, script_dir, label)
 
     if rc != 0:
         log.error(f"Build failed (exit code {rc}).")
         sys.exit(rc)
 
     if not args.shell:
-        output_dir = Path(args.output_dir).resolve()
+        output_dir = Path(args.output_dir).resolve() / ("tarballs" if args.tarballs else label)
         packages = (
             list(output_dir.glob("*.deb"))
             + list(output_dir.glob("*.rpm"))

@@ -9,6 +9,31 @@
 . compile-options
 . version
 
+# Pack an installed tree into $1, alongside a list of what went into it. Both the
+# rpm and the deb build make one of these, for platforms without a package
+# manager.
+#
+# Reproducible: the mtimes come from SOURCE_DATE_EPOCH rather than from whenever
+# "make install" ran, members go in sorted order, the owner is not the builder,
+# and gzip leaves out the time it ran. Sorting the list ourselves does the work
+# of --sort=name, which needs a newer tar than centos-7 has.
+create_tar_package() {
+    _tarball="$1"
+    _dir="$2"
+
+    if [ -n "$SOURCE_DATE_EPOCH" ]; then
+        find "$_dir" -exec touch -h -d "@$SOURCE_DATE_EPOCH" {} +
+    fi
+
+    # Not pipelines: sh has no pipefail, so a failing find or tar would be lost.
+    find "$_dir" >"$_tarball.filelist"
+    LC_ALL=C sort -o "$_tarball.filelist" "$_tarball.filelist"
+    tar --no-recursion --numeric-owner --owner=0 --group=0 \
+        -cf "$_tarball.tar" -T "$_tarball.filelist"
+    gzip --no-name -c "$_tarball.tar" >"$_tarball"
+    rm "$_tarball.tar"
+}
+
 # Determine package name and build options based on project type and role
 log_debug "Determining package name for PROJECT=$PROJECT ROLE=$ROLE"
 
@@ -273,7 +298,7 @@ rpm | lpp)
 
         # Create compressed tar archive and file list
         log_debug "Creating tar archive: $TARBALL"
-        tar czvf "$TARBALL" "$LOCAL_DIR" >"$TARBALL.filelist"
+        create_tar_package "$TARBALL" "$LOCAL_DIR"
     fi
     ;;
 
@@ -346,7 +371,7 @@ deb)
     done
 
     # Create compressed tar archive and file list
-    tar czvf "$TARBALL" "$LOCAL_DIR" >"$TARBALL.filelist"
+    create_tar_package "$TARBALL" "$LOCAL_DIR"
     ;;
 
 solaris)

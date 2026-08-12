@@ -23,92 +23,45 @@ specified, defaults will:
   (`~/.cache/cfengine/buildscripts`).
 - Use the current working directory for output packages (`./output/`).
 
-## Usage
+### Usage
 
+See:
+```bash
+$ ./build-in-container.py --help
 ```
-./build-in-container.py --platform PLATFORM --project PROJECT --role ROLE --build-type TYPE [OPTIONS]
-```
-
-### Required arguments
-
-| Option         | Description                                             |
-| -------------- | ------------------------------------------------------- |
-| `--platform`   | Target platform (e.g. `ubuntu-22`, `debian-12`)         |
-| `--project`    | `community` or `nova` (not required for `--push-image`) |
-| `--role`       | `agent` or `hub` (not required for `--push-image`)      |
-| `--build-type` | `DEBUG` or `RELEASE` (not required for `--push-image`)  |
-
-None of the above arguments are required for `--update`.
-
-### Optional arguments
-
-| Option             | Default                          | Description                                                                        |
-| ------------------ | -------------------------------- | ---------------------------------------------------------------------------------- |
-| `--output-dir`     | `./output`                       | Where to write output packages                                                     |
-| `--cache-dir`      | `~/.cache/cfengine/buildscripts` | Dependency cache directory                                                         |
-| `--build-number`   | `1`                              | Build number for package versioning                                                |
-| `--version`        | auto                             | Override version string                                                            |
-| `--rebuild-image`  |                                  | Force rebuild of Docker image (bypasses Docker layer cache)                        |
-| `--push-image`     |                                  | Build image and push to registry, then exit                                        |
-| `--update`         |                                  | Fetch latest image versions from registry and update platforms.json                |
-| `--update-sha`     |                                  | Fetch latest base image manifest digests from Docker Hub and update platforms.json |
-| `--shell`          |                                  | Drop into a bash shell inside the container for debugging                          |
-| `--list-platforms` |                                  | List available platforms and exit                                                  |
-| `--source-dir`     | parent of `buildscripts/`        | Root directory containing repos                                                    |
-| `--arch`           | host architecture                | Override the container architecture (see [Architecture](#architecture))            |
 
 ## Supported platforms
 
-| Name        | Base image                 |
-| ----------- | -------------------------- |
-| `ubuntu-20` | `ubuntu:20.04`             |
-| `ubuntu-22` | `ubuntu:22.04`             |
-| `ubuntu-24` | `ubuntu:24.04`             |
-| `debian-11` | `debian:11`                |
-| `debian-12` | `debian:12`                |
-| `debian-13` | `debian:13`                |
-| `rhel-8`    | `rockylinux/rockylinux:8`  |
-| `rhel-9`    | `rockylinux/rockylinux:9`  |
-| `rhel-10`   | `rockylinux/rockylinux:10` |
+See:
+```bash
+$ ./build-in-container.py --list-platforms
+```
 
-RHEL packages are built on Rocky Linux base images. The build scripts detect
-`OS=rhel` from `/etc/redhat-release` (which reports `Rocky Linux release ...`),
-so the produced `.rpm`s are ordinary Red Hat / rpm packages. AlmaLinux is _not_
-recognized by `build-scripts/detect-environment`, which is why Rocky is used.
-
-Adding a new Debian/Ubuntu platform requires a new entry in `platforms.json`
-and adding the platform name to the matrix in
+Adding a new platform normally requires a new entry in `platforms.json` and
+adding the platform name to the matrix in
 `.github/workflows/build-base-images.yml` so the weekly job builds and
-pushes its image to `ghcr.io`. Without the matrix entry, no image is ever
-pushed and the `update-base-images.yml` workflow will fail with a 403 from
-`ghcr.io` when it queries tags for the missing repository.
+pushes its image to `ghcr.io`.
 
 The new entry in `platforms.json` needs:
 
 - `image_version`: set to `"latest"` as a placeholder. The
-  `update-base-images.yml` workflow (or `./build-in-container.py --update`
-  run locally) will replace it with the real ghcr.io tag after the first
-  image is pushed.
-- `base_image_sha`: the Docker Hub manifest digest for the `base_image`.
-  Don't copy this by hand — run `./build-in-container.py --update-sha
---platform <new-platform>` and it will fetch the current digest from
-  Docker Hub and write it into `platforms.json`.
-- `architectures` (optional): the list of docker platforms to publish, e.g.
+  `update-base-images.yml` workflow will replace it with the real ghcr.io tag
+  after the first image is pushed.
+- `base_image_sha`: the Docker Hub manifest digest for the `base_image`. Don't
+  copy this by hand -- run
+  `./build-in-container.py --update-sha --platform <new-platform>` and it will
+  fetch the current digest from Docker Hub and write it into `platforms.json`.
+
+Optionally, add the following entries:
+
+- `architectures`: the list of docker platforms to publish, e.g.
   `["linux/amd64", "linux/arm64"]`. Omit it to get the multi-arch default; set
-  it only to restrict a platform to specific architectures (see
-  [Architecture](#architecture)).
+  it only to restrict or extend the architectures.
+- `extra_build_args`: allows you to add extra arguments through environment
+  variables.
 
-Adding another RHEL-family platform (a new Rocky/RHEL major version) works the
-same way: add a `platforms.json` entry with `"dockerfile": "Dockerfile.rhel"`
-and a matrix entry, then set any per-version `extra_build_args` — `CRB_REPO`
-(`powertools` on 8, `crb` on 9+), `PHP_MODULE_STREAM` (`remi-8.3` where the
-distro's default PHP is older than 8.3; RHEL 10 already ships 8.3), and
-`EXTRA_PKGS` for version-specific packages. Note that `--update-sha` also works
-for the namespaced `rockylinux/rockylinux` base images, not just official
-Docker Hub library images.
-
-Adding an entirely different, non-RHEL/non-Debian platform family (e.g. SUSE)
-would require a new `container/Dockerfile.<family>` plus platform entries.
+Adding an entirely different platform family (e.g. SUSE) would require a new
+`container/Dockerfile.<family>`.
 
 ## Architecture
 
@@ -127,7 +80,7 @@ The registry images are published as multi-arch manifests (`linux/amd64` and
 `linux/arm64`), so `--arch` normally just pulls the matching variant. If the
 registry does not provide the requested architecture (for example an older,
 single-arch image that predates multi-arch support), the script falls back to
-building the image locally for that architecture.
+building the image locally for that architecture only.
 
 Building a non-host architecture - whether locally or in CI - relies on
 QEMU/binfmt emulation being registered on the build host. If it isn't set up,
@@ -137,7 +90,7 @@ register it once with:
 docker run --privileged --rm tonistiigi/binfmt --install all
 ```
 
-Emulated builds are considerably slower than native ones.
+Please note that emulated builds are considerably slower than native ones.
 
 The set of architectures published for each platform defaults to `linux/amd64`
 and `linux/arm64`. A platform can override this with an `"architectures"` list
@@ -149,18 +102,16 @@ is pinned to `["linux/amd64"]`.
 
 The system has three components:
 
-1. **`build-in-container.py`** (Python) -- the orchestrator that runs on the host.
-   Parses arguments, builds the Docker image, and launches the container with
-   the correct mounts and environment variables.
+1. **`build-in-container.py`** (Python) -- the orchestrator that runs on the
+   host. Parses arguments, builds the Docker image, and launches the container
+   with the correct mounts and environment variables.
 
 2. **`build-in-container-inner.sh`** (Bash) -- runs inside the container. Copies
-   source repos from the read-only mount, then calls the existing build scripts
-   in order.
+   source repos from the read-only mount, then calls the build scripts in order.
 
-3. **`container/Dockerfile.debian`** and **`container/Dockerfile.rhel`** --
-   parameterized Dockerfiles shared across platforms of the same family via a
-   `BASE_IMAGE` build arg (plus per-platform `extra_build_args` in
-   `platforms.json`, e.g. the CRB repo name and PHP module stream for RHEL).
+3. **`container/Dockerfile.<family>`** -- parameterized Dockerfiles shared
+   across platforms of the same family via a `BASE_IMAGE` build arg (plus
+   per-platform `extra_build_args` in `platforms.json`.
 
 ### Container mounts
 
@@ -168,7 +119,8 @@ The system has three components:
 | ---------------------------------------- | ----------------------------------------- | ---------- | ------------------------------------- |
 | Source repos (parent of `buildscripts/`) | `/srv/source`                             | read-only  | Protects host repos from modification |
 | `~/.cache/cfengine/buildscripts/`        | `/home/builder/.cache/buildscripts_cache` | read-write | Dependency cache shared across builds |
-| `./output/`                              | `/output`                                 | read-write | Output packages copied here           |
+| `./output/{<label>,tarballs}/`           | `/output`                                 | read-write | Output packages copied here           |
+| `--sftp-key` (when given)                | `/run/secrets/sftp-cache-key`             | read-only  | Key for the remote dependency cache   |
 
 ### Build steps
 
@@ -180,6 +132,17 @@ The inner script runs these steps in order:
 4. **configure** -- runs `./configure` with platform-appropriate flags
 5. **compile** -- compiles and installs to the dist tree
 6. **package** -- creates `.deb` or `.rpm` packages
+
+## Source tarballs
+
+The core and masterfiles tarballs are built in a dedicated container with:
+
+```bash
+./build-in-container.py --tarballs --build-type DEBUG
+```
+
+That builds them in the `tarballs` platform's image and writes them to
+`./output/tarballs/`.
 
 ## Docker image management
 
@@ -239,8 +202,8 @@ specific Docker Hub manifest. To refresh them to the current digests:
 ./build-in-container.py --update-sha --platform ubuntu-22
 ```
 
-The `update-base-image-shas.yml` workflow automates this. It runs weekly
-(Monday at 01:00 UTC) and opens a pull request with any digest changes.
+The `update-base-image-shas.yml` workflow automates this. It runs weekly (Monday
+at 01:00 UTC) and opens a pull request with any digest changes.
 
 The workflow authenticates to `ghcr.io` using the automatic `GITHUB_TOKEN`
 provided by GitHub Actions. For this to work:
