@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
-thisdir="$(dirname "$0")"
+# absolute because this script changes directory below
+thisdir="$(cd "$(dirname "$0")" && pwd)"
 
 # handle env cfengine_role
 if [ -n "$cfengine_role" ]; then
@@ -14,11 +15,31 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+# Fixes and names just the root owned files. chown -R over the whole tree clears
+# setuid bits, which stripped /usr/bin/sudo inside every image in the rootless
+# container store under /home/jenkins.
+function chown-root-owned-to-jenkins()
+{
+    root_owned=$(find /home/jenkins -user root -print 2>/dev/null | head -n 20)
+    if [ -n "$root_owned" ]; then
+        echo "Root owned files in /home/jenkins (first 20), chowning all to jenkins:"
+        echo "$root_owned"
+        find /home/jenkins -user root -exec chown jenkins {} \;
+    fi
+}
+
 ls -la /home/
 if ! id -u jenkins; then
     useradd jenkins -p jenkins
 fi
 mkdir -p /home/jenkins
+
+# Work where root owns the directory. Called from the jenkins home, this script
+# used to leave the masterfiles tarball, an extracted masterfiles/, a core clone
+# and promises.log there owned by root, which is what the chown -R was for.
+setupdir=/var/tmp/cfengine-build-host-setup
+mkdir -p "$setupdir"
+cd "$setupdir"
 
 # The following is copied from prepare-testmachine-chroot
 CHROOT_ROOT=/home/jenkins/testmachine-chroot/
@@ -27,8 +48,8 @@ fuser -k "$CHROOT_ROOT" >/dev/null 2>&1 || true
 umount "${CHROOT_ROOT}proc" >/dev/null 2>&1 || true
 
 # ENT-14386 often it seems we are experiencing a race condition with this script and something else causing trouble
-if ! chown -R jenkins /home/jenkins; then
-  echo "ENT-14386 some trouble chown -R jenkins /home/jenkins, current processes are:"
+if ! chown-root-owned-to-jenkins; then
+  echo "ENT-14386 some trouble chowning /home/jenkins, current processes are:"
   ps -efl
 fi
 
@@ -78,7 +99,7 @@ function cleanup() {
         ps -efl | grep cf
     fi
     ls -l /home
-    chown -R jenkins /home/jenkins
+    chown-root-owned-to-jenkins
     echo "Done with cleanup()"
 }
 
@@ -298,16 +319,17 @@ cp -a masterfiles/* /var/cfengine/inputs/
 (
     cd "$thisdir"
     policy=./cfengine-build-host-setup.cf
+    promises="$setupdir"/promises.log
     # just to be sure, make policy read/write for our user only to avoid errors when running
     chmod 600 "$policy"
-    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
-    grep -i error: promises.log && exit 1
-    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a promises.log
-    grep -i error: promises.log && exit 1
-    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a promises.log
-    grep -i error: promises.log && exit 1
+    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee "$promises"
+    grep -i error: "$promises" && exit 1
+    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a "$promises"
+    grep -i error: "$promises" && exit 1
+    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a "$promises"
+    grep -i error: "$promises" && exit 1
     echo "Done evaluating policy. End of promises.log:"
-    tail promises.log
+    tail "$promises"
 )
 
 cleanup

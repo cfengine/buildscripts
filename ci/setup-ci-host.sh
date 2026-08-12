@@ -25,28 +25,6 @@ function file-line()
   fi
 }
 
-# Replaces an existing range for the user rather than appending a second one.
-subids_changed=0
-function subid-range()
-{
-  local file=$1
-  local user=$2
-  local range=$3
-
-  touch "$file"
-  if grep -q "^$user:$range\$" "$file"; then
-    return
-  fi
-  if grep -q "^$user:" "$file"; then
-    echo "Correcting $user range in $file to $range"
-    sed -i "s|^$user:.*|$user:$range|" "$file"
-  else
-    echo "Adding $user:$range to $file"
-    echo "$user:$range" >> "$file"
-  fi
-  subids_changed=1
-}
-
 function github-known-hosts()
 {
   echo "ensuring github hostkeys are added to /home/jenkins/.ssh/known_hosts"
@@ -129,17 +107,6 @@ jenkins ALL=NOPASSWD: /usr/bin/podman
 EOF
         chmod 400 /etc/sudoers.d/999-local
         chown root:root /etc/sudoers.d/999-local
-
-        # Without a subordinate id range, rootless container storage runs single-uid
-        # and drops setuid bits while extracting layers, breaking sudo in the image.
-        subid-range /etc/subuid jenkins 100000:65536
-        subid-range /etc/subgid jenkins 100000:65536
-        if [ "$subids_changed" = 1 ]; then
-            # Remap storage and discard images extracted under the previous mapping:
-            # migrate cannot restore setuid bits, so those images must be rebuilt.
-            su - jenkins -c 'podman system migrate'
-            su - jenkins -c 'buildah rmi --all --force'
-        fi
     fi
     exit 0
 fi
