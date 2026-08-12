@@ -6,6 +6,10 @@ Version: %{version}
 Release: 1
 Source0: openldap-%{openldap_version}.tgz
 Patch0:  no_Sockaddr_redefine.patch
+Patch1: gcc-8.5.patch
+# xlc cannot preprocess the generated symbol version scripts, and the AIX
+# linker has no use for them anyway
+Patch2: aix_symbol_version_script.patch
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -20,6 +24,8 @@ mkdir -p %{_builddir}
 %setup -q -n openldap-%{openldap_version}
 
 %patch0 -p0
+%patch1 -p1
+%patch2 -p1
 
 # Either "$LDFLAGS -L%{prefix}lib"
 # Or     "-bsvr4 $LDFLAGS -Wl,-R,%{prefix}/lib"
