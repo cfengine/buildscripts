@@ -14,6 +14,11 @@ mkdir -p "$BASEDIR"
 # Fix ownership so builder can write to them.
 sudo chown -R "$(id -u):$(id -g)" "$HOME/.cache" /output
 
+# And hand ownership back to the host user on the way out.
+if [ -n "$HOST_UID" ] && [ -n "$HOST_GID" ]; then
+    trap 'sudo chown -R "$HOST_UID:$HOST_GID" "$HOME/.cache" /output' EXIT
+fi
+
 # Prevent git "dubious ownership" errors
 git config --global --add safe.directory '*'
 
