@@ -10,6 +10,7 @@ OLD=${BUILD_ROOT}/cfbuild-openldap-devel${PREFIX}
 # Patch
 
 #patch -p0 -i configure.patch configure
+$PATCH -p1 < gcc-8.5.patch
 
 # Configure
 
