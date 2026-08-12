@@ -1,0 +1,11 @@
+--- openldap-2.7.0/build/lib-shared.mk
++++ patched-openldap/build/lib-shared.mk
+@@ -23,7 +23,7 @@
+ .c.lo:
+ 	$(LTCOMPILE_LIB) $<
+ 
+-$(LIBRARY): version.lo $(SYMBOL_VERSION_SCRIPT)
++$(LIBRARY): version.lo @DO_VERSIONED_SYMBOLS@$(SYMBOL_VERSION_SCRIPT)
+ 	$(LTLINK_LIB) -o $@ $(OBJS) version.lo $(LINK_LIBS)
+ 
+ Makefile: $(top_srcdir)/build/lib-shared.mk
