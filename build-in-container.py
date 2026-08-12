@@ -11,6 +11,7 @@ import functools
 import hashlib
 import json
 import logging
+import os
 import subprocess
 import sys
 import urllib.request
@@ -387,6 +388,13 @@ def run_container(args, image_tag, source_dir, script_dir):
             f"EXPLICIT_ROLE={args.role}",
             "-e",
             f"BUILD_NUMBER={args.build_number}",
+            # Who to give the writable mounts back to. The container builds as
+            # its own user, whose UID is not ours, so without this the packages
+            # and the cache come out owned by a stranger.
+            "-e",
+            f"HOST_UID={os.getuid()}",
+            "-e",
+            f"HOST_GID={os.getgid()}",
             "-e",
             f"JOB_BASE_NAME={cache_label}",
             "-e",
