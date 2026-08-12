@@ -386,6 +386,21 @@ def cache_label(platform_name, role, arch):
     return f"PACKAGES{hub}_{arch_token}_linux_{label_os}"
 
 
+def platform_role_arch(label):
+    """Return the (platform, role, arch) that cache_label() turns into label.
+
+    Found by trying every combination rather than by parsing the label. That
+    keeps cache_label() the only place that knows how a label is spelled, so the
+    two cannot drift apart.
+    """
+    for platform_name, platform_config in get_config().items():
+        for role in ("agent", "hub"):
+            for arch in platform_architectures(platform_config):
+                if cache_label(platform_name, role, arch) == label:
+                    return platform_name, role, arch
+    return None
+
+
 def run_container(args, image_tag, source_dir, script_dir, label):
     """Run the build inside a Docker container."""
     # Keep the packages in a directory of their own, so that building several
@@ -494,6 +509,12 @@ def parse_args():
         help="Target platform",
     )
     parser.add_argument(
+        "--label",
+        help="Build what this Jenkins build label names, e.g. "
+        "PACKAGES_HUB_x86_64_linux_debian_12. Sets --platform, --role and "
+        "--arch, so it replaces all three. See build-scripts/labels.txt.",
+    )
+    parser.add_argument(
         "--project",
         choices=["community", "nova"],
         help="CFEngine edition",
@@ -592,6 +613,17 @@ def parse_args():
     if args.update or args.update_sha:
         # --platform is optional for these modes; updates all if omitted
         return args
+
+    if args.label:
+        if args.tarballs:
+            parser.error("--label and --tarballs build different things")
+        if args.platform or args.role or args.arch:
+            parser.error("--label already sets --platform, --role and --arch")
+        found = platform_role_arch(args.label)
+        if not found:
+            parser.error(f"no platform builds {args.label}")
+        args.platform, args.role, args.arch = found
+        log.info(f"{args.label}: {args.platform} {args.role} {args.arch}")
 
     if args.tarballs:
         # The tarballs are built from core and masterfiles alone, in an image of
