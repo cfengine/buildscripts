@@ -81,7 +81,7 @@ rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/libpromises.so
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-enterprise.la
 rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-report-collect.la
-rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-reactor-nova.la
+rm -f $RPM_BUILD_ROOT%{prefix}/lib/cfengine-reactor.la
 rm -f $RPM_BUILD_ROOT%{prefix}/bin/getfacl
 
 # Remove ssl things we don't need
@@ -311,7 +311,7 @@ exit 0
 %prefix/lib/lib*.so*
 %prefix/lib/cfengine-enterprise.so
 %prefix/lib/cfengine-report-collect.so
-%prefix/lib/cfengine-reactor-nova.so
+%prefix/lib/cfengine-reactor.so
 
 # PHP modules
 %prefix/lib/php
