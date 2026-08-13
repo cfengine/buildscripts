@@ -23,7 +23,24 @@ install_protobuf() {
   fi
 
   zipfile="protoc-${version}-${arch}.zip"
-  wget --quiet "$baseurl/$zipfile"
+
+  # Retry in case of transient errors.
+  tries=3
+  while [ $tries -gt 0 ]; do
+    # -O keeps every attempt writing to the same file rather than adding a .1 suffix.
+    status=0
+    wget --quiet -O "$zipfile" "$baseurl/$zipfile" || status=$?
+    if [ $status -eq 0 ]; then
+      break
+    fi
+    tries=$((tries - 1))
+    sleep 10
+  done
+  if [ $tries -eq 0 ]; then
+    echo "wget failed with status $status: $baseurl/$zipfile" >&2
+    exit 1
+  fi
+
   echo "$sha  $zipfile" | sha256sum --check -
   # Installs bin/protoc and include/ under /usr/local.
   unzip -o "$zipfile" -d /usr/local
