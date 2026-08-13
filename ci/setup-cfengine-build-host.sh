@@ -124,7 +124,7 @@ if [ -f /etc/os-release ]; then
     elif grep -q suse /etc/os-release; then
         zypper -n update
         alias software='zypper install -y'
-        alias erase-packages='zypper uninstall -y'
+        alias erase-packages='zypper remove -y'
     else
         echo "Unknown platform ID $ID. Need this information in order to update/upgrade distribution packages."
         exit 1
@@ -132,6 +132,7 @@ if [ -f /etc/os-release ]; then
 elif [ -f /etc/redhat-release ]; then
     yum update --assumeyes
     alias software='yum install --assumeyes'
+    alias erase-packages='yum erase --assumeyes'
 else
     echo "No /etc/os-release or /etc/redhat-release so cant determine platform."
     exit 1
@@ -145,6 +146,11 @@ else
     echo "Error: need something to fetch URLs. Didn't find either wget or curl."
     exit 1
 fi
+
+# Must run before any cfengine-nova install below. The cfbuild-* packages own
+# files under /var/cfengine, so leftovers make the agent install fail on file
+# conflicts.
+erase-packages cfbuild-* || true # in case a dirty build was left on a long-living build host
 
 if grep -q 6.10 /etc/issue 2>/dev/null; then
     # special case of centos-6, cf-remote depends on urllib3 which depends on openssl 1.1.1+ that is not available
@@ -256,9 +262,6 @@ if ! /var/cfengine/bin/cf-agent -V 2>/dev/null; then
         mkdir -p "$HOME"/.config/cfengine/cf-remote
         mv "$HOME"/.cfengine/cf-remote/* "$HOME"/.config/cfengine/cf-remote/
     fi
-
-
-    erase-packages cfbuild-* || true # in case a dirty build was left on a long-living build host
 
     # We are passing a two-token string and need it to stay two tokens for proper argument parsing in $_VERSION
     # shellcheck disable=SC2086
