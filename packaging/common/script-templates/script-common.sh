@@ -238,3 +238,41 @@ lmdb_load_databases() {
     done
     return 0
 }
+
+dir_is_empty() {
+    # Returns 0 if directory $1 has no entries at all, hidden ones included.
+    # Args:
+    #   * directory to inspect
+    test "$#" -eq 1 || return 2
+    test -z "$(ls -A "$1" 2>/dev/null)"
+}
+
+dir_has_only_empty_dirs() {
+    # Returns 0 if every entry in directory $1 is itself an empty directory.
+    # After reset_dir() this is what nested mount points look like: their
+    # contents were removed but the directories themselves survive.
+    # Args:
+    #   * directory to inspect
+    test "$#" -eq 1 || return 2
+    for entry in "$1"/* "$1"/.[!.]* "$1"/..?*; do
+        test -e "$entry" || test -L "$entry" || continue
+        test -d "$entry" || return 1
+        dir_is_empty "$entry" || return 1
+    done
+    return 0
+}
+
+reset_dir() {
+    # Empty a directory and make sure it exists afterwards.
+    # The exit status of `rm -rf` is deliberately ignored: when the directory is
+    # a mount point its contents are removed but the directory itself cannot be
+    # (EBUSY). That is expected and harmless, so test the postcondition instead
+    # of trusting the exit status.
+    # Args:
+    #   * directory to empty
+    # Returns 0 if the directory exists and is empty afterwards, 1 otherwise.
+    test "$#" -eq 1 || return 2
+    rm -rf "$1" 2>/dev/null || true
+    mkdir -p "$1" || return 1
+    dir_is_empty "$1"
+}
