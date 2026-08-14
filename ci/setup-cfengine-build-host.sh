@@ -18,13 +18,15 @@ fi
 # Fixes and names just the root owned files. chown -R over the whole tree clears
 # setuid bits, which stripped /usr/bin/sudo inside every image in the rootless
 # container store under /home/jenkins.
-function chown-root-owned-to-jenkins()
-{
-    root_owned=$(find /home/jenkins -user root -print 2>/dev/null | head -n 20)
+#
+# chown -h: to avoid following symlinks
+# -path /home/jenkins/testmachine-chroot --prune: do not touch this directory
+function chown-root-owned-to-jenkins() {
+    root_owned=$(find /home/jenkins -path /home/jenkins/testmachine-chroot -prune -o -user root -print 2>/dev/null | head -n 20)
     if [ -n "$root_owned" ]; then
         echo "Root owned files in /home/jenkins (first 20), chowning all to jenkins:"
         echo "$root_owned"
-        find /home/jenkins -user root -exec chown jenkins {} \;
+        find /home/jenkins -path /home/jenkins/testmachine-chroot -prune -o -user root -exec chown -h jenkins {} \;
     fi
 }
 
