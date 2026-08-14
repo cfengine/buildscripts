@@ -239,7 +239,9 @@ if migrating_postgres; then
     exit 1
   fi
 
-  if ! diff "$BACKUP_DIR/data/postgresql.conf" "$PREFIX/share/postgresql/postgresql.conf.cfengine" > /dev/null; then
+  # An empty data directory has no postgresql.conf to compare or preserve.
+  if [ -f "$BACKUP_DIR/data/postgresql.conf" ] &&
+     ! diff "$BACKUP_DIR/data/postgresql.conf" "$PREFIX/share/postgresql/postgresql.conf.cfengine" > /dev/null; then
     # diff exits with 0 if the files are the same
     # the postgresql.conf file was modified, we should try to use it after migration
     cp -a "$BACKUP_DIR/data/postgresql.conf" "$BACKUP_DIR/data/postgresql.conf.modified"
