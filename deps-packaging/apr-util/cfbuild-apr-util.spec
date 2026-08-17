@@ -1,4 +1,4 @@
-%define apr_version 1.6.4
+%define apr_version 1.6.5
 
 Summary: CFEngine Build Automation -- apr-util
 Name: cfbuild-apr-util
