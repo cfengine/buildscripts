@@ -53,7 +53,24 @@ install_rust() {
     name="$1"
     sha="$2"
     tarball="$name.tar.gz"
-    wget --quiet "$baseurl/$tarball"
+
+    # Retry in case of transient errors.
+    tries=3
+    while [ $tries -gt 0 ]; do
+      # -O keeps every attempt writing to the same file rather than adding a .1 suffix.
+      status=0
+      wget --quiet -O "$tarball" "$baseurl/$tarball" || status=$?
+      if [ $status -eq 0 ]; then
+        break
+      fi
+      tries=$((tries - 1))
+      sleep 10
+    done
+    if [ $tries -eq 0 ]; then
+      echo "wget failed with status $status: $baseurl/$tarball" >&2
+      exit 1
+    fi
+
     echo "$sha  $tarball" | sha256sum --check -
     tar xf "$tarball"
     rm "$tarball"
