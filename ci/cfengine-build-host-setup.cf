@@ -299,7 +299,10 @@ bundle agent cfengine_build_host_setup
 
     linux::
       "have_tmp_mount"
-        expression => returnszero("mount | grep '/tmp'", "useshell");
+        comment => "Match the mount point exactly, an unqualified '/tmp' also matches
+                    mounts below it like the '/tmp/snap.rootfs_XXXXXX' that a failed
+                    snap install hook leaves behind.",
+        expression => returnszero("mount | grep -E ' on /tmp '", "useshell");
 
       "have_coredumpctl"
         expression => returnszero("command -v coredumpctl", "useshell");
