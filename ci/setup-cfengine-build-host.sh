@@ -133,20 +133,21 @@ if [ -f /etc/os-release ]; then
         alias software='yum install --assumeyes'
         alias erase-packages='yum erase --assumeyes'
     elif grep -q debian /etc/os-release; then
-        DEBIAN_FRONTEND=noninteractive apt update --yes --quiet
+        # Acquire::Retries because the archive mirrors sometimes return transient 503s
+        DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 update --yes --quiet
 
         # sometimes the /boot partition is too small to handle kernel upgrade regenerations of initrd and related files on ubuntu, so allow failure first
-        DEBIAN_FRONTEND=noninteractive apt upgrade --yes --quiet || true
+        DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 upgrade --yes --quiet || true
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
 
         # and now perform the upgrade a second time after hopefully autoremove cleans up /boot partition of kernel files that cause failure
-        DEBIAN_FRONTEND=noninteractive apt upgrade --yes
+        DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 upgrade --yes
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
 
         echo "remove unattended-upgrades to increase reliability of apt operations in scripts"
         DEBIAN_FRONTEND=noninteractive apt purge --yes unattended-upgrades
 
-        alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
+        alias software='DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 install --yes'
         alias erase-packages='DEBIAN_FRONTEND=noninteractive apt purge --yes'
     elif grep -q suse /etc/os-release; then
         zypper -n update
