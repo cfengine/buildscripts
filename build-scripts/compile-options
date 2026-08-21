@@ -142,6 +142,14 @@ var_append DEPS "libyaml"   # Library for parsing YAML
 var_append DEPS "diffutils" # Library for comparing files
 var_append DEPS "librsync"  # Library for synchronization of file
 
+# coreutils is only built for redhat/debian/windows for now
+case "$OS_FAMILY" in
+hpux | aix | solaris | freebsd) ;;
+*)
+    var_append DEPS "coreutils" # Provides a standalone 'date' binary
+    ;;
+esac
+
 # Enterprise only dependencies
 case "$PROJECT" in
 nova)

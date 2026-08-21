@@ -127,6 +127,9 @@
               <Component Id='diff3.exe' Guid='73fe2642-63b1-4e98-bd4f-60594049be49' Win64='$(var.isWin64)'>
                 <File Id='diff3.exe' Name='diff3.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/diff3.exe' />
               </Component>
+              <Component Id='date.exe' Guid='AC22A37B-81D0-451B-BC5F-5CAFA8E607E8' Win64='$(var.isWin64)'>
+                <File Id='date.exe' Name='date.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/date.exe' />
+              </Component>
               <Component Id='mdb_copy.exe' Guid='E41C3638-9BBE-497D-A5A8-DB2021030113' Win64='$(var.isWin64)'>
                 <File Id='mdb_copy.exe' Name='mdb_copy.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/mdb_copy.exe' />
               </Component>
@@ -245,6 +248,7 @@
             <ComponentRef Id='diff3.exe' />
             <ComponentRef Id='cmp.exe' />
             <ComponentRef Id='sdiff.exe' />
+            <ComponentRef Id='date.exe' />
 
             <ComponentRef Id='cf.events.dll' />
             <ComponentRef Id='liblber.dll' />

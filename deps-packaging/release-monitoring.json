@@ -2,6 +2,7 @@
   "apache": "387502",
   "apr": "95",
   "apr-util": "96",
+  "coreutils": "343",
   "diffutils": "436",
   "git": "20450",
   "libacl": "16",
