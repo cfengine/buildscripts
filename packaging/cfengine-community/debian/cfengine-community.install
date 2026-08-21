@@ -39,3 +39,4 @@
 /var/cfengine/bin/sdiff
 /var/cfengine/bin/cmp
 /var/cfengine/bin/diff3
+/var/cfengine/bin/date

@@ -154,6 +154,7 @@ exit 0
 %prefix/bin/sdiff
 %prefix/bin/cmp
 %prefix/bin/diff3
+%prefix/bin/date
 
 %if %{?rhel}%{!?rhel:0} > 7
 # SELinux policy

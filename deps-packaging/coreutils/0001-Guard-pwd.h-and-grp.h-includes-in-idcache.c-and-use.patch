@@ -1,0 +1,116 @@
+From 0c15fbcf18c0736149d06957e9058563fec065d3 Mon Sep 17 00:00:00 2001
+From: Victor Moene <victor.moene@northern.tech>
+Date: Tue, 25 Aug 2026 09:47:54 +0200
+Subject: [PATCH] Guard <pwd.h>/<grp.h> includes in idcache.c and userspec.c
+
+We only build the "date" program out of coreutils, but the build compiles
+every gnulib lib/*.c file into a single lib/libcoreutils.a used by all
+coreutils programs, regardless of whether "date" actually needs them.
+
+lib/idcache.c and lib/userspec.c unconditionally include <pwd.h> and
+<grp.h> to resolve uids/gids via the system's user and group databases.
+Native Windows (mingw-w64) ships neither header, so compiling
+lib/libcoreutils.a for date.exe failed there even though date.exe never
+references any symbol from these two files.
+
+Guard the includes, and the function bodies that depend on them, with
+the HAVE_PWD_H/HAVE_GRP_H macros that configure already defines via
+AC_CHECK_HEADERS. This way the two files compile down to empty
+translation units on platforms lacking these headers. If some other
+coreutils program actually needs the passwd/group lookups these files
+provide, linking that program will now fail with an undefined
+reference, surfacing the problem at build time instead of silently
+linking in stub declarations that could never work.
+
+Ticket: None
+Changelog: none
+---
+ lib/idcache.c  | 18 ++++++++++++++++--
+ lib/userspec.c | 18 ++++++++++++++++--
+ 2 files changed, 32 insertions(+), 4 deletions(-)
+
+diff --git a/lib/idcache.c b/lib/idcache.c
+index 5fd5f2c..327175e 100644
+--- a/lib/idcache.c
++++ b/lib/idcache.c
+@@ -22,8 +22,12 @@
+ #include <stddef.h>
+ #include <stdio.h>
+ #include <string.h>
+-#include <pwd.h>
+-#include <grp.h>
++#if HAVE_PWD_H
++# include <pwd.h>
++#endif
++#if HAVE_GRP_H
++# include <grp.h>
++#endif
+
+ #include <unistd.h>
+
+@@ -63,6 +67,14 @@ static struct userid *group_alist;
+ /* Each entry on list is a group name for which the first lookup failed.  */
+ static struct userid *nogroup_alist;
+
++/* The functions below all resolve uids/gids via the system's user and
++   group databases, so they require <pwd.h> and <grp.h>.  On platforms
++   that lack these headers (e.g. native Windows), omit them entirely
++   rather than fake up the lookups: if some program actually needs them,
++   it will fail to link, which is preferable to silently linking in a
++   passwd/group lookup that can never work.  */
++#if HAVE_PWD_H && HAVE_GRP_H
++
+ /* Translate UID to a login name, with cache, or NULL if unresolved.  */
+
+ char *
+@@ -220,3 +232,5 @@ getgidbyname (const char *group)
+   nogroup_alist = tail;
+   return NULL;
+ }
++
++#endif /* HAVE_PWD_H && HAVE_GRP_H */
+diff --git a/lib/userspec.c b/lib/userspec.c
+index 57cd023..943257a 100644
+--- a/lib/userspec.c
++++ b/lib/userspec.c
+@@ -24,8 +24,12 @@
+
+ #include <stdio.h>
+ #include <sys/types.h>
+-#include <pwd.h>
+-#include <grp.h>
++#if HAVE_PWD_H
++# include <pwd.h>
++#endif
++#if HAVE_GRP_H
++# include <grp.h>
++#endif
+
+ #if HAVE_SYS_PARAM_H
+ # include <sys/param.h>
+@@ -97,6 +101,14 @@ is_number (const char *str)
+ }
+ #endif
+
++/* Resolving a user/group spec requires looking it up via the system's
++   user and group databases, so the code below needs <pwd.h> and
++   <grp.h>.  On platforms that lack these headers (e.g. native Windows),
++   omit it entirely rather than fake up the lookups: if some program
++   actually needs it, it will fail to link, which is preferable to
++   silently linking in a passwd/group lookup that can never work.  */
++#if HAVE_PWD_H && HAVE_GRP_H
++
+ static char const *
+ parse_with_separator (char const *spec, char const *separator,
+                       uid_t *uid, gid_t *gid,
+@@ -289,6 +301,8 @@ parse_user_spec (char const *spec, uid_t *uid, gid_t *gid,
+   return parse_user_spec_warn (spec, uid, gid, username, groupname, NULL);
+ }
+
++#endif /* HAVE_PWD_H && HAVE_GRP_H */
++
+ #ifdef TEST
+
+ # define NULL_CHECK(s) ((s) == NULL ? "(null)" : (s))
+--
+2.43.0
