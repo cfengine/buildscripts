@@ -79,6 +79,7 @@ else
 fi
 
 if [ -f /etc/cfengine-containers-host.flag ]; then
+    set -x # debug for now
     if [ "$debian" -ge "12" ]; then
         # in jenkins, CONTAINER labeled nodes are capable of running container builds like valgrind-check and static-check
         add-pkg unzip # linux-install-groovy.sh needs unzip to unpack the groovy distribution archive
@@ -104,6 +105,7 @@ if [ -f /etc/cfengine-containers-host.flag ]; then
 %sudo ALL=NOPASSWD: /usr/sbin/lvs
 %sudo ALL=NOPASSWD: /usr/bin/journalctl
 jenkins ALL=NOPASSWD: /usr/bin/podman
+jenkins ALL=NOPASSWD: /home/jenkins/tmp-buildscripts/ci/setup-cfengine-build-host.sh
 EOF
         chmod 400 /etc/sudoers.d/999-local
         chown root:root /etc/sudoers.d/999-local
