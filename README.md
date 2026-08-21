@@ -156,13 +156,13 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | :-------------------------------------------------- | :----- | :----- | :----- |
 | [Apache](https://httpd.apache.org/)                 | 2.4.68 | 2.4.68 | 2.4.68 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
-| [apr-util](https://apr.apache.org/)                 | 1.6.4  | 1.6.5  | 1.6.5  |
+| [apr-util](https://apr.apache.org/)                 | 1.6.5  | 1.6.5  | 1.6.5  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.55.0 | 2.55.0 | 2.55.0 |
-| [libexpat](https://libexpat.github.io/)             | 2.8.2  | 2.8.3  | 2.8.3  |
+| [libexpat](https://libexpat.github.io/)             | 2.8.3  | 2.8.3  | 2.8.3  |
 | [PHP](https://php.net/)                             | 8.3.33 | 8.5.9  | 8.5.9  |
-| [PostgreSQL](https://www.postgresql.org/)           | 16.14  | 18.6   | 18.6   |
+| [PostgreSQL](https://www.postgresql.org/)           | 16.15  | 18.6   | 18.6   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.70.0 | 1.70.0 |
-| [rsync](https://download.samba.org/pub/rsync/)      | 3.4.4  | 3.5.0  | 3.5.0  |
+| [rsync](https://download.samba.org/pub/rsync/)      | 3.5.0  | 3.5.0  | 3.5.0  |
 
 - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
