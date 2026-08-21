@@ -143,6 +143,16 @@
               <Component Id='lmdb_migrate.cmd' Guid='F8165F21-E92A-5276-B6DA-E96F3A5D8503' Win64='$(var.isWin64)'>
                 <File Id='lmdb_migrate.cmd' Name='lmdb-migrate.cmd' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/lmdb-migrate.cmd' />
               </Component>
+              <!-- Support data collection. cf-support.cmd is the entry point a
+                   customer is told to run; it launches the .ps1 with
+                   -ExecutionPolicy Bypass so the default machine policy does
+                   not block an unsigned script. -->
+              <Component Id='cf_support.ps1' Guid='6FD91F99-35BE-4DD3-890B-B1902300F647' Win64='$(var.isWin64)'>
+                <File Id='cf_support.ps1' Name='cf-support.ps1' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-support.ps1' />
+              </Component>
+              <Component Id='cf_support.cmd' Guid='ADEF2A32-F2B3-4F72-A245-FC5913F37A07' Win64='$(var.isWin64)'>
+                <File Id='cf_support.cmd' Name='cf-support.cmd' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-support.cmd' />
+              </Component>
               <Component Id='lmmgr.exe' Guid='DBF87C39-43FA-4DFE-A442-D2AB5B8985F0' Win64='$(var.isWin64)'>
                 <File Id='lmmgr.exe' Name='lmmgr.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/lmmgr.exe' />
               </Component>
@@ -240,6 +250,8 @@
             <ComponentRef Id='mdb_copy.exe' />
             <ComponentRef Id='mdb_stat.exe' />
             <ComponentRef Id='lmmgr.exe' />
+            <ComponentRef Id='cf_support.ps1' />
+            <ComponentRef Id='cf_support.cmd' />
             <ComponentRef Id='lmdump.exe' />
             <ComponentRef Id='diff.exe' />
             <ComponentRef Id='diff3.exe' />
