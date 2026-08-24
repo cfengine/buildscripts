@@ -17,7 +17,7 @@ install_rust() {
   # Windows is the only cross-compilation target, and only on MinGW build
   # hosts, so the caller passes "x86_64-pc-windows-gnu" as an argument there.
   baseurl="https://static.rust-lang.org/dist"
-  version=1.97.1
+  version=1.98.0
   prefix=/opt/rust
   extra_targets="$@"
 
@@ -28,24 +28,24 @@ install_rust() {
   if uname -m | grep aarch64; then
     host=aarch64-unknown-linux-gnu
     # checksum from $baseurl/rustc-${version}-aarch64-unknown-linux-gnu.tar.gz.sha256
-    rustc_sha=8d9f3095a3108e38232f123645e2a0368bca67c975f8b91088004f8ffd9a6d39
+    rustc_sha=b6fdb37bc08e320bd92381e13d7311837f04a98423b8a5b678a5eb5e87c978ca
     # checksum from $baseurl/cargo-${version}-aarch64-unknown-linux-gnu.tar.gz.sha256
-    cargo_sha=cafde243518b016f825d13a5f2ca4ffd7d80f5966dfbec3539cd092c7c4f9871
+    cargo_sha=e271c3c5d50336259a166e68b60ba792a64278ab117686183be3e51a0958d34b
   else
     host=x86_64-unknown-linux-gnu
     # checksum from $baseurl/rustc-${version}-x86_64-unknown-linux-gnu.tar.gz.sha256
-    rustc_sha=1c441e430c1cca49dff54a8d59c41038bf6f79f7b8756596cb2f36511a015eba
+    rustc_sha=18ed6559de1b8ea6b77474ea86992b9a507d3a3d134d9ee017d30cf3f406e3ee
     # checksum from $baseurl/cargo-${version}-x86_64-unknown-linux-gnu.tar.gz.sha256
-    cargo_sha=90cbeb8adfe8ca0fcbe01a18bd9b99d3e5e98fd29c003032828ebf3ffba0e4ed
+    cargo_sha=18bf1598891b30dd5eb52a337d08a92b4456255ddbe4c1ab996ffb578077031c
   fi
 
   # rust-std checksums per target. These are host-architecture independent.
   # checksum from $baseurl/rust-std-${version}-x86_64-unknown-linux-gnu.tar.gz.sha256
-  std_x86_64_linux_sha=45b927ecf776b9645ca2ed5b287fc6814824a073c30c7c5d5c0ad4425295ecee
+  std_x86_64_linux_sha=8aa6405356392ce50160d1b286e86091c5e14adae3061115699c84ed4394d546
   # checksum from $baseurl/rust-std-${version}-aarch64-unknown-linux-gnu.tar.gz.sha256
-  std_aarch64_linux_sha=ceffa428fe573507418858d59add342b351730725f36f7679b251e8b68103dec
+  std_aarch64_linux_sha=a2eece726a579de1f554a2c3bcc62410226b0be55736f57c2b5430c1bc71b98f
   # checksum from $baseurl/rust-std-${version}-x86_64-pc-windows-gnu.tar.gz.sha256
-  std_x86_64_windows_sha=0e240192a91dace872d72fd2a5ad21b4be5d278b0d0281d58013e11f908fb5b6
+  std_x86_64_windows_sha=47bceabaceabc4de97e20f7470d9973fb20e844986da01b3a31cf28e24596660
 
   # Download, verify, extract and install a single component tarball, then
   # remove both the tarball and its extracted tree before moving on.
