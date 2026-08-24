@@ -1,0 +1,53 @@
+name: Mirror ci directory
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "ci/**"
+  workflow_dispatch: # Enables manual trigger
+
+concurrency:
+  group: mirror-ci
+  cancel-in-progress: true
+
+jobs:
+  mirror_ci:
+    if: contains(fromJSON('["cfengine","mendersoftware","NorthernTechHQ"]'), github.repository_owner)
+    name: Mirror ci directory to ${{ matrix.branch }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: [3.27.x, 3.24.x]
+    steps:
+      - name: Checks-out repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ matrix.branch }}
+
+      - name: Replace ci directory with the one from master
+        run: |
+          git fetch --no-tags --depth=1 origin master
+          git rm -r --quiet --ignore-unmatch ci
+          git checkout FETCH_HEAD -- ci
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          base: ${{ matrix.branch }}
+          branch: mirror-ci-${{ matrix.branch }}
+          delete-branch: true
+          signoff: true
+          commit-message: "Mirrored ci/ from master (${{ matrix.branch }})"
+          title: "Mirrored ci/ from master (${{ matrix.branch }})"
+          body: |
+            Automated mirror of the `ci/` directory from master using
+            [the `mirror-ci` workflow](https://github.com/cfengine/buildscripts/blob/master/.github/workflows/mirror-ci.yml).
+          reviewers: |
+            larsewi
+            craigcomstock
