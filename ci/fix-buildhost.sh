@@ -2,17 +2,19 @@
 # it is expected that this file is sourced, not executed directly
 set -ex
 
+# Resolve our own directory up front: the ci/ scripts sourced and run below live
+# next to this file. Previously this was only computed in the centos-7 branch,
+# leaving $my_dir empty for the linux-install-* calls further down. This file is
+# sourced rather than executed, so BASH_SOURCE names it where $0 names the caller.
+my_dir="$(dirname "${BASH_SOURCE[0]}")"
+if command -v realpath >/dev/null; then
+  my_dir="$(realpath "$my_dir")"
+fi
+
 if [ -f /etc/os-release ]; then
   source /etc/os-release
   if [ "$ID" = "centos" ] && [ "$VERSION_ID" = "7" ]; then
-    if command -v realpath >/dev/null; then
-      my_path="$(realpath "${BASH_SOURCE[0]}")"
-      my_dir="$(dirname "$my_path")"
-      source "$my_dir"/centos-7-setup-devtoolset-11.sh
-    else
-      echo "FAIL: could not find realpath command on rhel/centos-7 to source needed centos-7-setup-devtoolset-11.sh"
-      exit 1
-    fi
+    source "$my_dir"/centos-7-setup-devtoolset-11.sh
   fi
 fi
 
@@ -30,7 +32,13 @@ if [ -f /etc/profile ]; then
 fi
 
 mkdir -p ~/.ssh
-echo "build-artifacts-cache.cloud.cfengine.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGahpsY8Phk2+isBmuJQjjQVlh6BNL/Qetc14g26gowV" >> ~/.ssh/known_hosts
+touch ~/.ssh/known_hosts
+# Only the cache host is needed here; github.com is not contacted from a build
+# host. Which key type gets used depends on the client, so pin all of them.
+# Added one at a time, since this runs for every build on a reused host.
+grep '^build-artifacts-cache' "$my_dir"/known_hosts | while read -r key; do
+  grep -qF "$key" ~/.ssh/known_hosts || echo "$key" >> ~/.ssh/known_hosts
+done
 
 # /etc/profile can contain tricky things, on suse for example it includes a call to tty which will fail in CI
 # so only source /etc/profile where we absolutely need it.
@@ -47,6 +55,36 @@ if command -v zypper >/dev/null 2>/dev/null; then
 fi
 if command -v yum >/dev/null 2>/dev/null; then
   sudo yum erase -y openssl-devel || true
+fi
+
+# leech2 build toolchain: rust + protoc. The build-host-setup policy installs
+# these when a VM is imaged; install them here too so testing-pr builds on
+# not-yet-reimaged hosts (and branches that change these deps) get what they
+# need without a reimage. Each call is guarded by an already-installed check,
+# and gated to the same platforms as the policy (ubuntu>=20, debian>=12,
+# rhel/centos>=7).
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  os_major="${VERSION_ID%%.*}"
+  case "$ID" in
+    ubuntu) min_major=20 ;;
+    debian) min_major=12 ;;
+    rhel | centos) min_major=7 ;;
+    *) min_major="" ;;
+  esac
+  if [ -n "$min_major" ] && [ "${os_major:-0}" -ge "$min_major" ]; then
+    if [ ! -x /usr/local/bin/protoc ]; then
+      sh "$my_dir"/linux-install-protobuf.sh
+    fi
+    if [ ! -x /opt/rust/bin/rustc ]; then
+      # MinGW hosts also need the Windows cross-compilation target.
+      if [ -f /etc/cfengine-mingw-build-host.flag ]; then
+        sh "$my_dir"/linux-install-rust.sh x86_64-pc-windows-gnu
+      else
+        sh "$my_dir"/linux-install-rust.sh
+      fi
+    fi
+  fi
 fi
 
 # MinGW hosts build the MSI with wixl (build-scripts/package-msi) and inspect it
