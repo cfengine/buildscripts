@@ -1,12 +1,42 @@
 #!/usr/bin/env bash
 set -e
-shopt -s expand_aliases
 thisdir="$(dirname "$0")"
 
-packages="" # a space separated list of packages to install
+_packages="" # a space separated list of packages to install
 function add-pkg() {
-    packages+=" $*"
+    _packages+=" $*"
 }
+
+function install-packages() {
+  # note that "packages" is a function defined later during OS/distribution discovery
+  # shellcheck disable=SC2086
+  packages $_packages
+}
+
+function file-line()
+{
+  file=$1
+  line=$2
+
+  touch "$file"
+  if ! grep -q "$line" "$file"; then
+    echo "Adding $line to $file"
+    echo "$line" >> "$file"
+  fi
+}
+
+function github-known-hosts()
+{
+  echo "ensuring github hostkeys are added to /home/jenkins/.ssh/known_hosts"
+  grep '^github.com' "$thisdir"/known_hosts | while read -r key; do
+    file-line /home/jenkins/.ssh/known_hosts "$key"
+  done
+  chown jenkins /home/jenkins/.ssh/known_hosts
+  chmod 0600 /home/jenkins/.ssh/known_hosts
+}
+
+echo "ensuring that github.com hostkeys are in ~/.ssh/known_hosts"
+github-known-hosts
 
 # we setup some vars for platform versions to make it easier to make choice later
 # default version is 0 so that a check can be [ "$debian" -gt "12" ] and that will skip non-debians and such
@@ -25,13 +55,13 @@ if [ -f /etc/os-release ]; then
     source /etc/os-release
     if grep -q rhel /etc/os-release; then
         yum update --assumeyes
-        alias packages='yum install --assumeyes'
+        function packages() { yum install --assumeyes "$@"; }
         redhat="$VERSION_ID"
     elif grep -q debian /etc/os-release; then
-        alias packages='DEBIAN_FRONTEND=noninteractive apt install --yes'
+        function packages() { DEBIAN_FRONTEND=noninteractive apt install --quiet --yes "$@"; }
         debian="$VERSION_ID"
     elif grep -q suse /etc/os-release; then
-        alias packages='zypper install -y'
+        function packages() { zypper install -y "$@"; }
         # shellcheck disable=SC2034
         suse="$VERSION_ID"
     else
@@ -39,7 +69,7 @@ if [ -f /etc/os-release ]; then
         exit 1
     fi
 elif [ -f /etc/redhat-release ]; then
-    alias packages='yum install --assumeyes'
+    function packages() { yum install --assumeyes "$@"; }
     # shellcheck disable=SC1091
     source /etc/redhat-release
     redhat="$VERSION_ID"
@@ -57,6 +87,9 @@ if [ -f /etc/cfengine-containers-host.flag ]; then
         add-pkg make
         add-pkg parallel
         add-pkg podman
+
+        install-packages
+
         if ! command -v groovy; then
             bash "$thisdir"/linux-install-groovy.sh
         fi
@@ -75,6 +108,51 @@ EOF
         chmod 400 /etc/sudoers.d/999-local
         chown root:root /etc/sudoers.d/999-local
     fi
+    exit 0
+fi
+
+# Hosts for the build-in-container job (ENT-14361). They only run containers:
+# the target platform comes from the image, so none of the native build
+# toolchain below is wanted here.
+if [ -f /etc/cfengine-docker-host.flag ]; then
+    case "$ID" in
+        debian | ubuntu) ;;
+        *)
+            echo "docker host setup supports debian and ubuntu, not $ID"
+            exit 1
+            ;;
+    esac
+
+    # Docker CE from upstream rather than the distribution's docker.io, since
+    # build-in-container.py passes --build-context and so needs BuildKit.
+    # Follows https://docs.docker.com/engine/install/ubuntu/ ("Install using the
+    # apt repository"); the debian page has the same steps with the other URI.
+    # Installed here rather than with add-pkg: curl is needed just below, and the
+    # repository has to exist before install-packages runs.
+    packages ca-certificates curl
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL "https://download.docker.com/linux/$ID/gpg" -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
+    tee /etc/apt/sources.list.d/docker.sources << EOF
+Types: deb
+URIs: https://download.docker.com/linux/$ID
+Suites: ${UBUNTU_CODENAME:-$VERSION_CODENAME}
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+    apt-get -qy update
+
+    # docker-compose-plugin, the fifth package the documented command installs,
+    # is deliberately left out: nothing we run calls docker compose.
+    add-pkg containerd.io
+    add-pkg docker-buildx-plugin
+    add-pkg docker-ce
+    add-pkg docker-ce-cli
+    add-pkg git     # the pipeline checks the source repos out on the agent
+    add-pkg jq
+    add-pkg python3 # runs build-in-container.py
+    add-pkg rsync
 fi
 
 if [ "$redhat" != 0 ]; then
@@ -165,12 +243,9 @@ if [ "$redhat" != 0 ]; then
 
 fi
 
-# packages is a dynamic alias set near the top of this script
-# ^^^ we want space separated package names as separate args, not one arg with the space separated list
 whoami
 set -x
-# shellcheck disable=SC2086
-packages $packages
+install-packages
 set +x
 
 if mount | grep '/tmp'; then
@@ -187,11 +262,31 @@ fi
 
 "$thisdir"/linux-install-jdk.sh # the script should skip if sufficient java is already installed
 
-# leech2 build toolchain host
-if [ "$ubuntu" -ge 20 ] || [ "$debian" -ge 12 ] || [ "$redhat" -ge 7 ]; then
-    "$thisdir"/linux-install-protobuf.sh
-    # TODO if mingw then pass along x86_64-pc-windows-gnu as an arg to install rust
-    "$thisdir"/linux-install-rust.sh
+if [ -f /etc/cfengine-docker-host.flag ]; then
+    systemctl enable --now docker
+
+    # Give jenkins access to the docker socket, per
+    # https://docs.docker.com/engine/install/linux-postinstall/.
+    groupadd -f docker
+    usermod -aG docker jenkins
+
+    # Dependency cache root for build-in-container.py's --cache-dir. Outside any
+    # workspace so that cleanWs() cannot wipe it between builds.
+    install -d -o jenkins -g jenkins /home/jenkins/cfengine-build-cache
+
+    docker --version
+    docker buildx version
+    sudo -u jenkins docker info
+fi
+
+# leech2 build toolchain host. Not on a docker host, where the toolchain belongs
+# in the build images.
+if [ ! -f /etc/cfengine-docker-host.flag ]; then
+    if [ "$ubuntu" -ge 20 ] || [ "$debian" -ge 12 ] || [ "$redhat" -ge 7 ]; then
+        "$thisdir"/linux-install-protobuf.sh
+        # TODO if mingw then pass along x86_64-pc-windows-gnu as an arg to install rust
+        "$thisdir"/linux-install-rust.sh
+    fi
 fi
 
 if [ "$redhat" -ge 7 ]; then
