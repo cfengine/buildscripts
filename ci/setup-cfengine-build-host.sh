@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 shopt -s expand_aliases
-thisdir="$(dirname "$0")"
+# absolute because this script changes directory below
+thisdir="$(cd "$(dirname "$0")" && pwd)"
 
 # handle env cfengine_role
 if [ -n "$cfengine_role" ]; then
@@ -14,11 +15,33 @@ if [ "$(id -u)" != "0" ]; then
     exit 1
 fi
 
+# Fixes and names just the root owned files. chown -R over the whole tree clears
+# setuid bits, which stripped /usr/bin/sudo inside every image in the rootless
+# container store under /home/jenkins.
+#
+# chown -h: to avoid following symlinks
+# -path /home/jenkins/testmachine-chroot --prune: do not touch this directory
+function chown-root-owned-to-jenkins() {
+    root_owned=$(find /home/jenkins -path /home/jenkins/testmachine-chroot -prune -o -user root -print 2>/dev/null | head -n 20)
+    if [ -n "$root_owned" ]; then
+        echo "Root owned files in /home/jenkins (first 20), chowning all to jenkins:"
+        echo "$root_owned"
+        find /home/jenkins -path /home/jenkins/testmachine-chroot -prune -o -user root -exec chown -h jenkins {} \;
+    fi
+}
+
 ls -la /home/
 if ! id -u jenkins; then
     useradd jenkins -p jenkins
 fi
 mkdir -p /home/jenkins
+
+# Work where root owns the directory. Called from the jenkins home, this script
+# used to leave the masterfiles tarball, an extracted masterfiles/, a core clone
+# and promises.log there owned by root, which is what the chown -R was for.
+setupdir=/var/tmp/cfengine-build-host-setup
+mkdir -p "$setupdir"
+cd "$setupdir"
 
 # The following is copied from prepare-testmachine-chroot
 CHROOT_ROOT=/home/jenkins/testmachine-chroot/
@@ -27,8 +50,8 @@ fuser -k "$CHROOT_ROOT" >/dev/null 2>&1 || true
 umount "${CHROOT_ROOT}proc" >/dev/null 2>&1 || true
 
 # ENT-14386 often it seems we are experiencing a race condition with this script and something else causing trouble
-if ! chown -R jenkins /home/jenkins; then
-  echo "ENT-14386 some trouble chown -R jenkins /home/jenkins, current processes are:"
+if ! chown-root-owned-to-jenkins; then
+  echo "ENT-14386 some trouble chowning /home/jenkins, current processes are:"
   ps -efl
 fi
 
@@ -78,7 +101,7 @@ function cleanup() {
         ps -efl | grep cf
     fi
     ls -l /home
-    chown -R jenkins /home/jenkins
+    chown-root-owned-to-jenkins
     echo "Done with cleanup()"
 }
 
@@ -110,16 +133,21 @@ if [ -f /etc/os-release ]; then
         alias software='yum install --assumeyes'
         alias erase-packages='yum erase --assumeyes'
     elif grep -q debian /etc/os-release; then
-        DEBIAN_FRONTEND=noninteractive apt update
+        # Acquire::Retries because the archive mirrors sometimes return transient 503s
+        DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 update --yes --quiet
 
         # sometimes the /boot partition is too small to handle kernel upgrade regenerations of initrd and related files on ubuntu, so allow failure first
-        DEBIAN_FRONTEND=noninteractive apt upgrade --yes || true
+        DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 upgrade --yes --quiet || true
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
 
         # and now perform the upgrade a second time after hopefully autoremove cleans up /boot partition of kernel files that cause failure
-        DEBIAN_FRONTEND=noninteractive apt upgrade --yes
+        DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 upgrade --yes
         DEBIAN_FRONTEND=noninteractive apt autoremove --yes
-        alias software='DEBIAN_FRONTEND=noninteractive apt install --yes'
+
+        echo "remove unattended-upgrades to increase reliability of apt operations in scripts"
+        DEBIAN_FRONTEND=noninteractive apt purge --yes unattended-upgrades
+
+        alias software='DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 install --yes'
         alias erase-packages='DEBIAN_FRONTEND=noninteractive apt purge --yes'
     elif grep -q suse /etc/os-release; then
         zypper -n update
@@ -171,7 +199,7 @@ if [ -f /etc/cfengine-bootstrap-pr-host.flag ]; then
     exit
 fi
 
-if [ -f /etc/cfengine-containers-host.flag ]; then
+if [ -f /etc/cfengine-containers-host.flag ] || [ -f /etc/cfengine-docker-host.flag ]; then
     "$thisdir"/setup-ci-host.sh
     exit
 fi
@@ -297,16 +325,17 @@ cp -a masterfiles/* /var/cfengine/inputs/
 (
     cd "$thisdir"
     policy=./cfengine-build-host-setup.cf
+    promises="$setupdir"/promises.log
     # just to be sure, make policy read/write for our user only to avoid errors when running
     chmod 600 "$policy"
-    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee promises.log
-    grep -i error: promises.log && exit 1
-    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a promises.log
-    grep -i error: promises.log && exit 1
-    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a promises.log
-    grep -i error: promises.log && exit 1
+    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee "$promises"
+    grep -i error: "$promises" && exit 1
+    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a "$promises"
+    grep -i error: "$promises" && exit 1
+    /var/cfengine/bin/cf-agent -KIf "$policy" -b cfengine_build_host_setup | tee -a "$promises"
+    grep -i error: "$promises" && exit 1
     echo "Done evaluating policy. End of promises.log:"
-    tail promises.log
+    tail "$promises"
 )
 
 cleanup
