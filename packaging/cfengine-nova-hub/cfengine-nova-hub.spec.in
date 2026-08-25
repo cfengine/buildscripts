@@ -298,6 +298,7 @@ exit 0
 %prefix/bin/cmp
 %prefix/bin/sdiff
 %prefix/bin/diff3
+%prefix/bin/date
 # Auxiliary programs
 %prefix/bin/rpmvercmp
 # leech2 CLI

@@ -1,0 +1,12 @@
+Source: cfbuild-coreutils
+Section: libs
+Priority: optional
+Maintainer: CFEngine Packager <packager@cfengine.com>
+Build-Depends: debhelper
+Standards-Version: 3.8.4
+
+Package: cfbuild-coreutils
+Section: libs
+Architecture: any
+Description: CFEngine Build Automation -- coreutils (date)
+ CFEngine Build Automation -- coreutils (date)

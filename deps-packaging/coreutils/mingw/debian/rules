@@ -1,0 +1,52 @@
+#!/usr/bin/make -f
+
+PREFIX=$(BUILDPREFIX)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	dh_clean
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	# Native Windows (mingw-w64) has no <pwd.h>/<grp.h>. A few coreutils
+	# lib/*.c files unconditionally include them, even though date.exe never
+	# uses that functionality; patch them to only do so when the headers
+	# are actually available.
+	patch -p1 < 0001-Guard-pwd.h-and-grp.h-includes-in-idcache.c-and-use.patch
+
+	FORCE_UNSAFE_CONFIGURE=1 ./configure --host=\$(DEB_HOST_GNU_TYPE) --prefix=\$(PREFIX)
+	BUILT_SOURCES=$$(make -s -f built-sources.mk print-built-sources) && make $$BUILT_SOURCES
+	make src/date.exe
+
+	touch build-stamp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	mkdir -p $(CURDIR)/debian/tmp$(PREFIX)/bin
+	install -m 755 src/date.exe $(CURDIR)/debian/tmp$(PREFIX)/bin/date.exe
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_install --sourcedir=debian/tmp
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure
