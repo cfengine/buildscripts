@@ -28,7 +28,8 @@ fi
 if [ -f /etc/profile ]; then
   # running on the proxied host or not we want to make sure local customizations are taken
   # e.g. ent-14014: custom build of ssh needed for build-artifacts-cache needed and /etc/profile has PATH=/opt/craig/bin:$PATH
-  . /etc/profile
+  # suse's /etc/profile calls tty, which exits non-zero in CI and would kill us via set -e, so suppress errexit
+  . /etc/profile || true
 fi
 
 mkdir -p ~/.ssh
