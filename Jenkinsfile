@@ -70,6 +70,37 @@ def refspecFor(String rev) {
   return "${heads} +refs/pull/${parts[1]}/${parts[2]}:refs/remotes/origin/pr/${parts[1]}"
 }
 
+// Resolves rev to the commit to build.
+//
+// url is the repo to ask.
+// rev is what revFor returned: a branch, tag, pull/<n>/merge ref,
+// refs/... ref, or commit id.
+//
+// Returns '' when rev names no ref, as a commit id does.
+//
+// A bare name is an ls-remote pattern matched against the tail of every ref,
+// not a ref name: 'master' also matched core's CFE-159/master, which sorts
+// first and so won. Ask for the full ref, refs/heads before refs/tags before
+// refs/, and take the first that exists.
+def resolveRev(String url, String rev) {
+  def candidates = rev.startsWith('refs/') ? [rev]
+                 : ["refs/heads/${rev}", "refs/tags/${rev}", "refs/${rev}"]
+  for (ref in candidates) {
+    // An annotated tag's own ref names the tag object, its ^{} the commit.
+    def peeled = "${ref}^{}"
+    def out = sh(returnStdout: true,
+                 script: "git ls-remote '${url}' '${ref}' '${peeled}'").trim()
+    def sha = ''
+    for (line in out.readLines()) {
+      def parts = line.split()
+      if (parts[1] == peeled) { return parts[0] }
+      if (parts[1] == ref) { sha = parts[0] }
+    }
+    if (sha) { return sha }
+  }
+  return ''
+}
+
 // Runs one build in the workspace of the node the caller allocated.
 //
 // Cleans up after the previous build. Checks out each repo at its commit from
@@ -195,12 +226,7 @@ pipeline {
           sshagent(['jenkins-github']) {
             repos.each { repo ->
               def rev = revs[repo]
-              // "refs/$rev" as well, so pull/<n>/merge resolves like it does in
-              // the other jobs. No pipe: it would mask git's own exit status, and
-              // an unreachable repo would then look like an unresolvable ref.
-              def out = sh(returnStdout: true, script:
-                  "git ls-remote git@github.com:cfengine/${repo}.git '${rev}' 'refs/${rev}'").trim()
-              def sha = out ? out.readLines()[0].split()[0] : ''
+              def sha = resolveRev("git@github.com:cfengine/${repo}.git", rev)
               if (!sha) {
                 // A commit id matches no ref, which is the one case where an
                 // empty answer is fine.
