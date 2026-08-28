@@ -59,56 +59,21 @@ def revFor(String repo) {
   return (rev && rev.trim()) ? normalizeRev(rev.trim()) : defaultRev(repo)
 }
 
-// Returns the refspec to fetch a repo with. Branch heads are always fetched.
-// Pull requests live outside refs/heads. Building one means fetching its ref
-// too, or its commit is not in the clone.
-def refspecFor(String rev) {
-  def heads = '+refs/heads/*:refs/remotes/origin/*'
-  if (!(rev ==~ /^(?:refs\/)?pull\/\d+\/(merge|head)$/)) { return heads }
-  // pull/1234/merge -> [pull, 1234, merge]
-  def parts = rev.replaceAll(/^refs\//, '').split('/')
-  return "${heads} +refs/pull/${parts[1]}/${parts[2]}:refs/remotes/origin/pr/${parts[1]}"
-}
-
-// Resolves rev to the commit to build.
-//
-// url is the repo to ask.
-// rev is what revFor returned: a branch, tag, pull/<n>/merge ref,
-// refs/... ref, or commit id.
-//
-// Returns '' when rev names no ref, as a commit id does.
-//
-// A bare name is an ls-remote pattern matched against the tail of every ref,
-// not a ref name: 'master' also matched core's CFE-159/master, which sorts
-// first and so won. Ask for the full ref, refs/heads before refs/tags before
-// refs/, and take the first that exists.
-def resolveRev(String url, String rev) {
-  def candidates = rev.startsWith('refs/') ? [rev]
-                 : ["refs/heads/${rev}", "refs/tags/${rev}", "refs/${rev}"]
-  for (ref in candidates) {
-    // An annotated tag's own ref names the tag object, its ^{} the commit.
-    def peeled = "${ref}^{}"
-    def out = sh(returnStdout: true,
-                 script: "git ls-remote '${url}' '${ref}' '${peeled}'").trim()
-    def sha = ''
-    for (line in out.readLines()) {
-      def parts = line.split()
-      if (parts[1] == peeled) { return parts[0] }
-      if (parts[1] == ref) { sha = parts[0] }
-    }
-    if (sha) { return sha }
-  }
-  return ''
+// The refspec the other jobs fetch with. Branch heads are always fetched. Pull
+// requests live outside refs/heads, so building one means fetching its ref too,
+// or its commit is not in the clone.
+def refspec() {
+  return '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pull/*'
 }
 
 // Runs one build in the workspace of the node the caller allocated.
 //
-// Cleans up after the previous build. Checks out each repo at its commit from
-// shas. Builds, then archives the packages.
+// Cleans up after the previous build. Checks out each repo at its revision from
+// revs. Builds, then archives the packages.
 //
 // opts holds the build-in-container.py flags that vary per build. The flags
 // every build shares are added below.
-def containerBuild(String opts, List repos, Map shas, Map revs) {
+def containerBuild(String opts, List repos, Map revs) {
   // The container hands the directories it writes back to us as it exits, so
   // this only covers a build that never got to exit (e.g. killed).
   sh 'sudo chown -R "$(id -u):$(id -g)" "$WORKSPACE" 2>/dev/null || true'
@@ -117,10 +82,10 @@ def containerBuild(String opts, List repos, Map shas, Map revs) {
   repos.each { repo ->
     dir("src/${repo}") {
       checkout([$class: 'GitSCM',
-                branches: [[name: shas[repo]]],
+                branches: [[name: revs[repo]]],
                 userRemoteConfigs: [[url: "git@github.com:cfengine/${repo}.git",
                                      credentialsId: 'jenkins-github',
-                                     refspec: refspecFor(revs[repo])]],
+                                     refspec: refspec()]],
                 // Full history on purpose: the build reads SOURCE_DATE_EPOCH and
                 // every dependency's revision out of git log, so a shallow clone
                 // would change the timestamps it pins.
@@ -151,15 +116,10 @@ def containerBuild(String opts, List repos, Map shas, Map revs) {
 }
 
 // All filled in by Resolve refs and read by the build stages, which run on other
-// nodes. labels holds the build labels asked for. revs and shas hold what was
-// asked for, and what it resolved to:
+// nodes. labels holds the build labels asked for. revs holds the revision each
+// repo builds at:
 //
 //   revs['core'] = pull/1234/merge
-//   shas['core'] = 5dca070a98f9be...
-//
-// Nodes check out the sha, so a push mid-run cannot change what is built. The
-// rev is kept too: a sha does not say whether a pull ref has to be fetched.
-def shas = [:]
 def labels = []
 def revs = [:]
 
@@ -218,27 +178,12 @@ pipeline {
           def repos = reposFor(params.PROJECT)
           echo "Building ${labels.size()} labels:\n  ${labels.join('\n  ')}"
 
-          repos.each { repo -> revs[repo] = revFor(repo) }
-
-          // Each platform checks out on its own node, so a push while the job
-          // runs would otherwise leave them building different sources. Resolve
-          // to commits once, here, and hand those to every build.
-          sshagent(['jenkins-github']) {
-            repos.each { repo ->
-              def rev = revs[repo]
-              def sha = resolveRev("git@github.com:cfengine/${repo}.git", rev)
-              if (!sha) {
-                // A commit id matches no ref, which is the one case where an
-                // empty answer is fine.
-                if (!(rev ==~ /[0-9a-f]{7,40}/)) { error "${repo}: cannot resolve '${rev}'" }
-                sha = rev
-              }
-              shas[repo] = sha
-              echo "${repo}: ${rev} -> ${sha}"
-            }
+          repos.each { repo ->
+            revs[repo] = revFor(repo)
+            echo "${repo}: ${revs[repo]}"
           }
 
-          currentBuild.description = "${params.PROJECT} @ ${shas['core'].take(7)}: ${labels.size()} labels"
+          currentBuild.description = "${params.PROJECT} @ ${revs['core']}: ${labels.size()} labels"
         }
       }
     }
@@ -251,7 +196,7 @@ pipeline {
           // --tarballs builds core and masterfiles alone, in an image of its own,
           // and forces project and platform itself. Only the build type is ours
           // to pass: it decides the version string.
-          containerBuild('--tarballs', ['buildscripts', 'core', 'masterfiles'], shas, revs)
+          containerBuild('--tarballs', ['buildscripts', 'core', 'masterfiles'], revs)
         }
       }
     }
@@ -267,7 +212,7 @@ pipeline {
                 // The label decides the platform, the role and the container
                 // architecture, so --arch would only contradict it.
                 containerBuild("--label '${label}' --project '${params.PROJECT}'",
-                               repos, shas, revs)
+                               repos, revs)
               }
             }]
           }
