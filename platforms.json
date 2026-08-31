@@ -115,7 +115,7 @@
   },
   "tarballs": {
     "image_name": "cfengine-builder-tarballs",
-    "image_version": "20260823T001400Z",
+    "image_version": "20260830T003131Z",
     "base_image": "debian:9",
     "base_image_sha": "sha256:c5c5200ff1e9c73ffbf188b4a67eb1c91531b644856b4aefe86a58d2f0cb05be",
     "dockerfile": "Dockerfile.tarballs",
