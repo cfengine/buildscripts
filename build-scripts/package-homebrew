@@ -1,4 +1,5 @@
 #!/bin/sh
+set -ex
 
 #
 # Builds a Homebrew *bottle* (a precompiled binary tarball, see
