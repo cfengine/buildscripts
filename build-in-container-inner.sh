@@ -4,6 +4,9 @@ set -e
 # Configuration via environment variables:
 #   PROJECT, BUILD_TYPE, EXPLICIT_ROLE, BUILD_NUMBER, EXPLICIT_VERSION
 
+# let setup-cfengine-build-host.sh know we are in a container
+sudo touch /etc/cfengine-in-container.flag
+
 BASEDIR=/home/builder/build
 export BASEDIR
 export AUTOBUILD_PATH="$BASEDIR/buildscripts"
