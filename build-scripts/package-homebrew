@@ -1,0 +1,77 @@
+#!/bin/sh
+
+#
+# Builds a Homebrew *bottle* (a precompiled binary tarball, see
+# https://docs.brew.sh/Bottles) of cfengine-nova for the
+# architecture of the machine this script is run on.
+#
+# Unlike buildscripts/build-scripts/package (which drives rpmbuild/dpkg/etc
+# via buildscripts/deps-packaging), this script drives `brew`. All of the
+# actual build logic -- fetching core/enterprise/masterfiles, vendoring
+# openssl/pcre2/lmdb/librsync/libcurl/leech2, running configure/make/make
+# install -- lives in the Formula itself:
+#   buildscripts/packaging/homebrew/Formula/cfengine-nova.rb
+#
+# Usage:
+#   ./buildscripts/build-scripts/package-homebrew
+#
+# Requirements:
+#   - macOS, with Homebrew installed (https://brew.sh)
+#   - SSH access to git@github.com:cfengine/enterprise.git (it's a private
+#     repo; the formula's enterprise resource is fetched with plain `git`,
+#     so whatever SSH key/agent is already configured on this machine is
+#     what's used)
+#
+# To build both architectures for a release, run this once on Apple
+# Silicon and once on Intel (or use the GitHub Actions workflow at
+# .github/workflows/homebrew-bottle.yml, which does exactly that on
+# macos-14 and macos-13 runners).
+#
+# Output: a `<formula>--<version>.<arch>_<macos-codename>.bottle.tar.gz`
+# file and a matching `.bottle.json` receipt (used to merge the per-arch
+# bottle blocks into the formula), both written to $OUTDIR.
+
+. "$(dirname "$0")"/functions
+. detect-environment
+
+if [ "$OS_FAMILY" != darwin ]; then
+    fatal "package-homebrew only runs on macOS (detected OS_FAMILY=$OS_FAMILY)"
+fi
+
+if ! command -v brew >/dev/null 2>&1; then
+    fatal "Homebrew not found. Install it from https://brew.sh first."
+fi
+
+FORMULA="$BASEDIR/buildscripts/packaging/homebrew/Formula/cfengine-nova.rb"
+if [ ! -f "$FORMULA" ]; then
+    fatal "Formula not found at $FORMULA"
+fi
+
+OUTDIR="$BASEDIR/output/darwin-${ARCH}"
+mkdir -p "$OUTDIR"
+
+log_debug "Building bottle for cfengine-nova ($ARCH)..."
+
+# --build-bottle relaxes the formula to a relocatable prefix layout so the
+# resulting bottle can be poured on a different machine than the one that
+# built it (the default local `brew install` skips this for speed).
+run_and_print_on_failure brew install --build-bottle --formula "$FORMULA"
+
+cd "$OUTDIR" || fatal "Could not cd to $OUTDIR"
+if [ -n "$HOMEBREW_BOTTLE_ROOT_URL" ]; then
+    run_and_print_on_failure brew bottle --json --root-url="$HOMEBREW_BOTTLE_ROOT_URL" "$FORMULA"
+else
+    run_and_print_on_failure brew bottle --json "$FORMULA"
+fi
+
+log_debug "Bottle and receipt written to $OUTDIR:"
+ls -l "$OUTDIR"/*.tar.gz "$OUTDIR"/*.json 2>/dev/null || true
+
+cat <<'EOF'
+
+Next steps:
+  - Sanity check: brew uninstall cfengine-nova && brew install --build-bottle <path-to-the .tar.gz here, or re-run against the formula>
+  - To ship both architectures, gather the .bottle.json from an
+    Apple Silicon run and an Intel run and merge them into the formula
+    with `brew bottle --merge --write <both .json files>`.
+EOF

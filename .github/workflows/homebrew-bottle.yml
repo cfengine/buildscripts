@@ -1,0 +1,99 @@
+name: Build cfengine-nova Homebrew bottles
+
+# Builds a Homebrew bottle (see https://docs.brew.sh/Bottles) of the
+# CFEngine Enterprise Nova client (non-hub/agent role) for both Intel and
+# Apple Silicon macOS, using packaging/homebrew/Formula/cfengine-nova.rb.
+#
+# Requires a repository secret ENTERPRISE_DEPLOY_KEY: a private SSH key
+# (read-only deploy key is enough) authorized to clone
+# git@github.com:cfengine/enterprise.git, since that resource is fetched
+# with plain `git` inside the formula and enterprise is a private repo.
+
+on:
+  workflow_dispatch: # manual trigger, and where a release process would kick this off
+  push:
+    branches:
+      - master
+    paths:
+      - "packaging/homebrew/**"
+      - "build-scripts/package-homebrew"
+      - ".github/workflows/homebrew-bottle.yml"
+
+jobs:
+  bottle:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-13 # Intel
+            arch: x86_64
+          - runner: macos-14 # Apple Silicon
+            arch: arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout buildscripts
+        uses: actions/checkout@v4
+
+      - name: Set up SSH access to the private enterprise repo
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ENTERPRISE_DEPLOY_KEY }}
+
+      - name: Trust github.com host key
+        run: ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Install build-time tools
+        run: brew install autoconf automake libtool pkg-config bison flex rust
+
+      - name: Build bottle (${{ matrix.arch }})
+        run: ./build-scripts/package-homebrew
+
+      - name: Upload bottle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cfengine-nova-bottle-${{ matrix.arch }}
+          path: |
+            output/darwin-${{ matrix.arch }}/*.tar.gz
+            output/darwin-${{ matrix.arch }}/*.json
+          if-no-files-found: error
+
+  merge-and-open-pr:
+    needs: bottle
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout buildscripts
+        uses: actions/checkout@v4
+
+      - name: Download all bottle artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cfengine-nova-bottle-*
+          path: bottles
+          merge-multiple: true
+
+      - name: Install Homebrew (for `brew bottle --merge`)
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Merge per-arch bottle blocks into the formula
+        run: |
+          cd bottles
+          brew bottle --merge --write \
+            --formula ../packaging/homebrew/Formula/cfengine-nova.rb \
+            ./*.bottle.json
+
+      - name: Configure git user
+        run: |
+          git config user.name 'GitHub'
+          git config user.email '<noreply@github.com>'
+
+      - name: Create Pull Request
+        uses: cfengine/create-pull-request@v6
+        with:
+          title: Update cfengine-nova bottle block
+          body: |
+            Bottle block updated from the Intel (macos-13) and Apple Silicon
+            (macos-14) builds in this workflow run.
+          branch: update-homebrew-bottle
