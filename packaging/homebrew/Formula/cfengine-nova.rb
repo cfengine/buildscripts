@@ -299,8 +299,9 @@ class CfengineNova < Formula
     cd root/"core" do
       system "echo building in core, $(pwd)"
       system "./autogen.sh" if File.exist?("autogen.sh") && !File.exist?("configure")
-      system "./configure", "--prefix=#{prefix}", "--with-workdir=#{workdir}", *common_args,
+      system "bash -x configure", "--prefix=#{prefix}", "--with-workdir=#{workdir}", *common_args,
              "LDFLAGS=#{ldflags}"
+      system "echo after configure, ok?"
       system "make"
       system "make", "install"
     end
