@@ -297,6 +297,7 @@ class CfengineNova < Formula
     ldflags = "-Wl,-rpath,#{vendor}/lib -Wl,-rpath,#{lib}"
 
     cd root/"core" do
+      system "echo building in core, $(pwd)"
       system "./autogen.sh" if File.exist?("autogen.sh") && !File.exist?("configure")
       system "./configure", "--prefix=#{prefix}", "--with-workdir=#{workdir}", *common_args,
              "LDFLAGS=#{ldflags}"
@@ -305,6 +306,7 @@ class CfengineNova < Formula
     end
 
     cd root/"enterprise" do
+      system "echo building in enterprise, $(pwd)"
       system "./autogen.sh" if File.exist?("autogen.sh") && !File.exist?("configure")
       # --with-leech2 is not optional: enterprise/configure.ac hard-errors
       # ("leech2 is required by enterprise") without it. --without-ldap is
@@ -320,6 +322,7 @@ class CfengineNova < Formula
     end
 
     cd root/"masterfiles" do
+      system "echo building in masterfiles, $(pwd)"
       system "./autogen.sh" if File.exist?("autogen.sh") && !File.exist?("configure")
       system "./configure", "--prefix=#{prefix}", "--with-workdir=#{workdir}"
       system "make", "install"
