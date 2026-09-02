@@ -55,21 +55,21 @@ class CfengineNova < Formula
 
   # --- CFEngine repositories (kept side by side, as build-scripts expects) ---
 
-  resource "core" do
-    url "https://github.com/cfengine/core.git", branch: "master"
-  end
-
-  resource "enterprise" do
-    # Private repo. `brew install` shells out to plain `git clone`, so this
-    # works wherever the invoking user/CI already has SSH access configured
-    # (an ssh-agent with a deploy key, a personal key in ~/.ssh, etc). There
-    # is deliberately no token/credential handling here.
-    url "git@github.com:cfengine/enterprise.git", branch: "master", using: :git
-  end
-
-  resource "masterfiles" do
-    url "https://github.com/cfengine/masterfiles.git", branch: "master"
-  end
+#  resource "core" do
+#    url "https://github.com/cfengine/core.git", branch: "master"
+#  end
+#
+#  resource "enterprise" do
+#    # Private repo. `brew install` shells out to plain `git clone`, so this
+#    # works wherever the invoking user/CI already has SSH access configured
+#    # (an ssh-agent with a deploy key, a personal key in ~/.ssh, etc). There
+#    # is deliberately no token/credential handling here.
+#    url "git@github.com:cfengine/enterprise.git", branch: "master", using: :git
+#  end
+#
+#  resource "masterfiles" do
+#    url "https://github.com/cfengine/masterfiles.git", branch: "master"
+#  end
 
   # --- Vendored (statically bundled) dependencies ---
   #
@@ -271,9 +271,9 @@ class CfengineNova < Formula
   def build_cfengine(vendor)
     root = buildpath.parent/"cfe-root"
     root.mkpath
-    resource("core").stage(root/"core")
-    resource("enterprise").stage(root/"enterprise")
-    resource("masterfiles").stage(root/"masterfiles")
+#    resource("core").stage(root/"core")
+#    resource("enterprise").stage(root/"enterprise")
+#    resource("masterfiles").stage(root/"masterfiles")
 
     workdir = var/"cfengine"
 
