@@ -406,8 +406,7 @@ def run_container(args, image_tag, source_dir, script_dir, label):
     # Keep the packages in a directory of their own, so that building several
     # platforms into one output directory does not mix them together. The
     # tarballs belong to no platform, so they sit beside those directories.
-    subdir = "tarballs" if args.tarballs else label
-    output_dir = Path(args.output_dir).resolve() / subdir
+    output_dir = Path(args.output_dir).resolve()
     cache_dir = Path(args.cache_dir).resolve()
 
     # Start from an empty directory. An earlier build's packages carry their own
@@ -624,6 +623,21 @@ def parse_args():
             parser.error(f"no platform builds {args.label}")
         args.platform, args.role, args.arch = found
         log.info(f"{args.label}: {args.platform} {args.role} {args.arch}")
+
+    # Before we run any builds including tarballs we need to validate the platform, project and role
+    if args.project == "community":
+        if args.platform is not None and args.platform.find("HUB") > 0:
+            parser.error(f"--project {args.project} cannot have a hub platform like --platform {args.platform}")
+            sys.exit(0)
+        if args.role != "agent":
+            parser.error(f"--project {args.project} must have agent role. Got --role {args.role}")
+            sys.exit(0)
+
+    if args.platform is not None and args.platform.find("HUB") > 0:
+        if args.project != "nova":
+            parser.error(f"--platform {args.platform} is a hub platform and requires --project nova")
+        if args.role != "hub":
+            parser.error(f"--platform {args.platform} is a hub platform and requires --role hub")
 
     if args.tarballs:
         # The tarballs are built from core and masterfiles alone, in an image of

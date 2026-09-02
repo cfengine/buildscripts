@@ -1,0 +1,20 @@
+#!/bin/sh
+
+#
+# This script generates a checksums file based on items in the outputs ($OUTPUT) directory.
+#
+# Lets whoever consumes the output check that it arrived intact. Sorted in the C
+# locale so that the list itself comes out the same every time.
+
+. "$(dirname "$0")"/functions
+. detect-environment
+. compile-options
+. version
+set -e
+
+cd "$OUTPUT"
+# shellcheck disable=SC2094
+# > Make sure not to read and write the same file in the same pipeline.
+# find leaves it out by name, so the list never covers itself.
+find . -maxdepth 1 -type f ! -name sha256sums.txt -printf '%P\n' \
+    | LC_ALL=C sort | xargs -r sha256sum > sha256sums.txt

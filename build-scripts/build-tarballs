@@ -1,0 +1,110 @@
+#!/bin/sh
+
+#
+# This script builds tarballs for core and masterfiles for later use.
+#
+# Build the source tarballs. They are the same whichever platform builds them,
+# so only this image builds them, and nothing else here does.
+#
+# This script looks for two optional env vars:
+# - TARBALLS - if yes, then run this script, otherwise do not. The default is to not run this script.
+#    this variable is provided by build-in-container.py
+# - OUTPUT - optional, for container builds this should be /output. The default is <pwd>/output
+#
+# Additionally, if we are running in a Jenkins job, JOB_NAME will be set and if bootstrap-pr then the script will run fully.
+#
+# Each tarball's timestamps follow its own repository: Makefile.am in core and in
+# masterfiles clamps every mtime in the tarball to SOURCE_DATE_EPOCH, so taking
+# it from the last commit keeps a tarball identical until its own sources change.
+
+# The script expects the following repositories to exist side by side:
+# .
+# ├── buildscripts
+# ├── core
+# └── masterfiles
+# The script can be run as described in the usage message below:
+
+usage() {
+    echo "Usage: [TARBALLS=yes] $0"
+}
+
+. "$(dirname "$0")"/functions
+. detect-environment
+. compile-options
+. version
+set -e
+
+if [ -z "$TARBALLS" ] || [ "$TARBALLS" != "yes" ]; then
+  if [ -z "$JOB_NAME" ] || [ "$JOB_NAME" != "bootstrap-pr" ]; then
+    log_debug "Neither TARBALLS=yes or JOB_NAME=bootstrap-pr was in environment variables so skipping $0"
+    exit 0
+  fi
+fi
+
+if [ -z "$OUTPUT" ]; then
+  OUTPUT="$BASEDIR"/output
+fi
+
+if [ ! -d "$OUTPUT" ]; then
+  log_debug "OUTPUT dir: $OUTPUT does not exist. Creating it now."
+  mkdir -p "$OUTPUT"
+fi
+
+log_debug "OUTPUT dir is $OUTPUT"
+set -x
+
+
+log_debug "Creating destination directory for tarballs at $OUTPUT/tarballs"
+mkdir -p "$OUTPUT"/tarballs
+
+(
+set -x
+  cd "$BASEDIR/core"
+  SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+  export SOURCE_DATE_EPOCH
+  log_debug "core SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
+  
+  rm -f cfengine-3.*.tar.gz
+
+  log_debug "Writing flag file used by vagrant-pr and testing-pr: $OUTPUT/core-commitID"
+  git rev-parse HEAD > "$OUTPUT"/core-commitID
+
+  # Configure so the dist target exists, undone again below.
+  log_debug "Running ./configure -C in core..."
+  run_and_print_on_failure ./configure -C
+
+  log_debug "Running make dist in core..."
+  run_and_print_on_failure make dist
+
+  mv cfengine-3.*.tar.gz "$OUTPUT"/tarballs/
+
+  log_debug "Running make distclean in core..."
+  run_and_print_on_failure make distclean
+)
+
+(
+set -x
+  cd "$BASEDIR/masterfiles"
+  SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+  export SOURCE_DATE_EPOCH
+  log_debug "masterfiles SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
+
+  rm -f cfengine-masterfiles*.tar.gz
+
+  log_debug "Writing flag file used by vagrant-pr and testing-pr: $OUTPUT/masterfiles-commitID"
+  git rev-parse HEAD >"$OUTPUT"/masterfiles-commitID
+
+  log_debug "Running ./configure in masterfiles..."
+  run_and_print_on_failure ./configure
+
+  log_debug "Running make dist in masterfiles..."
+  run_and_print_on_failure make dist        # source tarball:  cfengine-masterfiles-<version>.tar.gz
+
+  log_debug "Running make tar-package in masterfiles..."
+  run_and_print_on_failure make tar-package # package tarball: cfengine-masterfiles-<version>.pkg.tar.gz
+
+  mv cfengine-masterfiles*.tar.gz "$OUTPUT"/tarballs/
+
+  log_debug "Running make distclean in masterfiles..."
+  run_and_print_on_failure make distclean
+)
