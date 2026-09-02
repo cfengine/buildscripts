@@ -42,7 +42,7 @@
 #     handles via its own platform code, independent of this dependency.
 #   - This formula has been written and syntax-checked but NOT build-tested
 #     end to end on real macOS hardware.
-class CfengineNovaNonHub < Formula
+class CfengineNova < Formula
   desc "CFEngine Enterprise Nova client (non-hub/agent role): cf-agent and friends"
   homepage "https://cfengine.com"
   license "COSL"

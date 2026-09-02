@@ -50,6 +50,20 @@ fi
 OUTDIR="$BASEDIR/output/darwin-${ARCH}"
 mkdir -p "$OUTDIR"
 
+log_debug "Creating temporary local tap..."
+
+TAP_NAME="northerntech/cfengine"
+TAP_DIR="$(brew --repository)/Library/Taps/northerntech/homebrew-cfengine"
+FORMULA_SRC="$(pwd)/buildscripts/packaging/homebrew/Formula/cfengine-nova.rb"
+
+if [ ! -d "$TAP_DIR" ]; then
+  brew tap-new "$TAP_NAME"
+fi
+ln -sf "$FORMULA_SRC" "$TAP_DIR/Formula/cfengine-nova.rb"
+
+brew install --build-bottle "$TAP_NAME/cfengine-nova"
+brew bottle "$TAP_NAME/cfengine-nova"
+
 log_debug "Building bottle for cfengine-nova ($ARCH)..."
 
 # --build-bottle relaxes the formula to a relocatable prefix layout so the
