@@ -199,6 +199,7 @@ class CfengineNova < Formula
         system "patch", "-p3", "-d", liblmdb, "-i", p
       end
       cd liblmdb do
+        system "pwd; ls"
         system "./configure", "--prefix=#{vendor}", "--libdir=#{vendor}/lib",
                "LDFLAGS=#{rpath_ldflags}"
         system "make"

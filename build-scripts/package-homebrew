@@ -62,7 +62,11 @@ if [ ! -d "$TAP_DIR" ]; then
 fi
 ln -sf "$FORMULA_SRC" "$TAP_DIR/Formula/cfengine-nova.rb"
 
-brew install --verbose --build-bottle "$TAP_NAME/cfengine-nova"
+brew install --verbose --build-bottle "$TAP_NAME/cfengine-nova" 2>&1 > $$.log
+if [ "$?" != "0" ]; then
+  echo "Trouble building cfengine-nova with brew install"
+  tail $$.log
+fi
 brew bottle "$TAP_NAME/cfengine-nova"
 
 log_debug "Building bottle for cfengine-nova ($ARCH)..."
