@@ -48,7 +48,7 @@ if [ -f $PREFIX/bin/cf-twin ]; then
 fi
 
 mkdir -p /usr/local/sbin
-for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-net cf-check cf-support cf-watchd cf-reactor;
+for i in cf-agent cf-promises cf-key cf-secret cf-execd cf-serverd cf-monitord cf-runagent cf-net cf-check cf-support cf-reactor;
 do
   if [ `os_type` != redhat ] && [ -x $PREFIX/bin/$i ]; then
     # These links are handled in .spec file for RedHat

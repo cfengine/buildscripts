@@ -109,9 +109,6 @@
               <Component Id='cf_serverd.exe' Guid='77B9C8CD-AB9F-480C-9141-4561D719334B' Win64='$(var.isWin64)'>
                 <File Id='cf_serverd.exe' Name='cf-serverd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-serverd.exe' />
               </Component>
-              <Component Id='cf_watchd.exe' Guid='D0017C79-0DE0-4AD6-99AC-55B2A84BF987' Win64='$(var.isWin64)'>
-                <File Id='cf_watchd.exe' Name='cf-watchd.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-watchd.exe' />
-              </Component>
               <Component Id='cf_reactor.exe' Guid='6E167190-42F7-41F0-84CF-CB67798CB69F' Win64='$(var.isWin64)'>
                 <File Id='cf_reactor.exe' Name='cf-reactor.exe' KeyPath='yes' DiskId='1' Source='$(var.CfSourceDir)/bin/cf-reactor.exe' />
               </Component>
@@ -246,7 +243,6 @@
             <ComponentRef Id='cf_promises.exe' />
             <ComponentRef Id='cf_runagent.exe' />
             <ComponentRef Id='cf_serverd.exe' />
-            <ComponentRef Id='cf_watchd.exe' />
             <ComponentRef Id='cf_reactor.exe' />
             <ComponentRef Id='cf_secret.exe' />
             <ComponentRef Id='cf_upgrade.exe' />

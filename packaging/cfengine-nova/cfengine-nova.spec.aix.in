@@ -73,7 +73,6 @@ rm -rf $RPM_BUILD_ROOT
 %prefix/bin/cf-serverd
 %prefix/bin/cf-support
 %prefix/bin/cf-upgrade
-%prefix/bin/cf-watchd
 %prefix/bin/cf-reactor
 # Libraries
 %dir %prefix/lib
