@@ -35,8 +35,7 @@ function chown-root-owned-to-jenkins() {
     fi
 }
 
-ls -la /home/
-if ! id -u jenkins; then
+if ! id -u jenkins 2>/dev/null; then
     useradd jenkins -p jenkins
 fi
 mkdir -p /home/jenkins
