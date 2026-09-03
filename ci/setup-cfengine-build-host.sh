@@ -133,6 +133,15 @@ if [ -f /etc/os-release ]; then
         alias software='yum install --assumeyes'
         alias erase-packages='yum erase --assumeyes'
     elif grep -q debian /etc/os-release; then
+        # wait for the boot-time unattended upgrades apt-get to release the apt/dpkg locks
+        timeout 300 bash -c '
+          while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 \
+             || fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do
+            echo "waiting for apt/dpkg lock to clear..."
+            sleep 5
+          done
+        ' || true
+
         # Acquire::Retries because the archive mirrors sometimes return transient 503s
         DEBIAN_FRONTEND=noninteractive apt -o Acquire::Retries=3 update --yes --quiet
 
