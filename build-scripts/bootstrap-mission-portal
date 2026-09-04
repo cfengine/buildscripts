@@ -13,6 +13,15 @@ else
     exit 0
 fi
 
+if [ -d "$BASEDIR"/mission-portal/vendor ] && \
+   [ -d "$BASEDIR"/nova/api/http/vendor ] && \
+   [ -d "$BASEDIR"/mission-portal/public/scripts/node_modules ] && \
+   [ -f "$BASEDIR"/mission-portal/public/themese/default/bootstrap/compiled/css/cfengine.less.css ] && \
+   [ -d "$BASEDIR"/mission-portal/ldap/vendor ]; then
+    log_debug "All mission-portal/nova dependencies are installed (by build-in-container.py --tarballs or bootstrap-pr job) so skipping $0"
+    exit 0
+fi
+
 if command -v composer >/dev/null; then
   COMPOSER=$(command -v composer)
 elif [ -f /usr/local/bin/composer.phar ]; then
