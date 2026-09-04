@@ -27,13 +27,19 @@ function file-line()
 
 function github-known-hosts()
 {
-  echo "ensuring github hostkeys are added to /home/jenkins/.ssh/known_hosts"
+  mkdir ~/.ssh
+  echo "ensuring github hostkeys are added to ~/.ssh/known_hosts"
   grep '^github.com' "$thisdir"/known_hosts | while read -r key; do
-    file-line /home/jenkins/.ssh/known_hosts "$key"
+    file-line ~/.ssh/known_hosts "$key"
   done
-  chown jenkins /home/jenkins/.ssh/known_hosts
-  chmod 0600 /home/jenkins/.ssh/known_hosts
+  chown $(id -un) ~/.ssh/known_hosts
+  chmod 0600 ~/.ssh/known_hosts
 }
+
+if [ "$1" = "--bootstrap" ]; then
+  # todo, setup needed dependencies for a bootstrap host
+  exit 0
+fi
 
 echo "ensuring that github.com hostkeys are in ~/.ssh/known_hosts"
 github-known-hosts

@@ -4,15 +4,20 @@ set -e
 # Configuration via environment variables:
 #   PROJECT, BUILD_TYPE, EXPLICIT_ROLE, BUILD_NUMBER, EXPLICIT_VERSION
 
+# let setup-cfengine-build-host.sh know we are in a container
+sudo touch /etc/cfengine-in-container.flag
+
 BASEDIR=/home/builder/build
 export BASEDIR
 export AUTOBUILD_PATH="$BASEDIR/buildscripts"
+OUTPUT=/output
+export OUTPUT
 
 mkdir -p "$BASEDIR"
 
 # Bind-mounted directories may be owned by the host user's UID.
 # Fix ownership so builder can write to them.
-sudo chown -R "$(id -u):$(id -g)" "$HOME/.cache" /output
+sudo chown -R "$(id -u):$(id -g)" "$HOME/.cache" "$OUTPUT"
 
 # And hand ownership back to the host user on the way out.
 if [ -n "$HOST_UID" ] && [ -n "$HOST_GID" ]; then
@@ -85,105 +90,11 @@ fi
 export SOURCE_DATE_EPOCH
 echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
 
-install_mission_portal_deps() (
-    set -e
-
-    if [ -f "$BASEDIR/mission-portal/public/scripts/package.json" ]; then
-        echo "Installing npm dependencies..."
-        npm ci --prefix "$BASEDIR/mission-portal/public/scripts/"
-        echo "Building react components..."
-        npm run build --prefix "$BASEDIR/mission-portal/public/scripts/"
-        rm -rf "$BASEDIR/mission-portal/public/scripts/node_modules"
-    fi
-
-    if [ -f "$BASEDIR/mission-portal/composer.json" ]; then
-        echo "Installing Mission Portal PHP dependencies..."
-        (cd "$BASEDIR/mission-portal" && composer install --no-dev --ignore-platform-reqs --prefer-dist)
-    fi
-
-    if [ -f "$BASEDIR/nova/api/http/composer.json" ]; then
-        echo "Installing Nova API PHP dependencies..."
-        (cd "$BASEDIR/nova/api/http" && composer install --no-dev --ignore-platform-reqs --prefer-dist)
-    fi
-
-    if [ -f "$BASEDIR/mission-portal/public/themes/default/bootstrap/cfengine_theme.less" ]; then
-        echo "Compiling Mission Portal styles..."
-        mkdir -p "$BASEDIR/mission-portal/public/themes/default/bootstrap/compiled/css"
-        (cd "$BASEDIR/mission-portal/public/themes/default/bootstrap" &&
-            lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css)
-    fi
-
-    if [ -f "$BASEDIR/mission-portal/ldap/composer.json" ]; then
-        echo "Installing LDAP API PHP dependencies..."
-        (cd "$BASEDIR/mission-portal/ldap" && composer install --no-dev --ignore-platform-reqs --prefer-dist)
-    fi
-
-    # Composer falls back to git clone when GitHub's anonymous zipball
-    # rate limit is hit, leaving non-reproducible .git directories in the
-    # vendor tree. Strip them.
-    find "$BASEDIR/mission-portal" "$BASEDIR/nova/api/http" -type d -name .git -path '*/vendor/*' -exec rm -rf {} +
-)
-
-# Lets whoever consumes the output check that it arrived intact. Sorted in the C
-# locale so that the list itself comes out the same every time.
-write_sha256sums() (
-    cd /output
-    # shellcheck disable=SC2094
-    # > Make sure not to read and write the same file in the same pipeline.
-    # find leaves it out by name, so the list never covers itself.
-    find . -maxdepth 1 -type f ! -name sha256sums.txt -printf '%P\n' \
-        | LC_ALL=C sort | xargs -r sha256sum > sha256sums.txt
-)
-
-# Build the source tarballs. They are the same whichever platform builds them,
-# so only this image builds them, and nothing else here does. /output is
-# <output-dir>/tarballs on the host, as the packages' /output is per label.
-#
-# Each tarball's timestamps follow its own repository: Makefile.am in core and in
-# masterfiles clamps every mtime in the tarball to SOURCE_DATE_EPOCH, so taking
-# it from the last commit keeps a tarball identical until its own sources change.
-build_tarballs() (
-    set -e
-
-    (
-        cd "$BASEDIR/core"
-        SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
-        export SOURCE_DATE_EPOCH
-        echo "core SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
-
-        rm -f cfengine-3.*.tar.gz
-        # Configure so the dist target exists, undone again below.
-        ./configure -C
-        make dist
-        mv cfengine-3.*.tar.gz /output/
-        make distclean
-    )
-
-    (
-        cd "$BASEDIR/masterfiles"
-        SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
-        export SOURCE_DATE_EPOCH
-        echo "masterfiles SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH"
-
-        rm -f cfengine-masterfiles*.tar.gz
-        ./configure
-        make dist        # source tarball:  cfengine-masterfiles-<version>.tar.gz
-        make tar-package # package tarball: cfengine-masterfiles-<version>.pkg.tar.gz
-        mv cfengine-masterfiles*.tar.gz /output/
-        make distclean
-    )
-
-    write_sha256sums
-)
-
-# === Step runner with failure reporting ===
-# Disable set -e so we can capture exit codes and report which step failed.
-set +e
 run_step() {
     local name="$1"
     shift
     echo "=== Running $name ==="
-    "$@"
+    "$BASEDIR/buildscripts/build-scripts/$name" "$@"
     local rc=$?
     if [ $rc -ne 0 ]; then
         echo ""
@@ -193,36 +104,27 @@ run_step() {
 }
 
 # === Build steps ===
-run_step "01-autogen" "$BASEDIR/buildscripts/build-scripts/autogen"
 
 if [ "$TARBALLS" = yes ]; then
-    run_step "02-tarballs" build_tarballs
+    run_step autogen
+    run_step generate-pull-request-file
+    run_step build-tarballs
+    run_step generate-checksum-list
     echo ""
     echo "=== Build complete ==="
-    ls -lh /output/
+    ls -lh "$OUTPUT"
     exit 0
 fi
 
-run_step "02-install-dependencies" "$BASEDIR/buildscripts/build-scripts/install-dependencies"
-# Mission Portal is an Enterprise/nova-only component; its sources are only
-# synced when PROJECT=nova. Skip this step for community hubs.
-if [ "$PROJECT" = "nova" ] && [ "$EXPLICIT_ROLE" = "hub" ]; then
-    run_step "03-mission-portal-deps" install_mission_portal_deps
-fi
-run_step "04-configure" "$BASEDIR/buildscripts/build-scripts/configure"
-run_step "05-compile" "$BASEDIR/buildscripts/build-scripts/compile"
-run_step "06-package" "$BASEDIR/buildscripts/build-scripts/package"
+NO_TESTS=true
+export NO_TESTS
 
-# === Copy output packages ===
-# Packages are created under $BASEDIR/<project>/ by dpkg-buildpackage / rpmbuild.
-# Exclude deps-packaging to avoid copying dependency packages.
-find "$BASEDIR" -maxdepth 4 \
-    -path "$BASEDIR/buildscripts/deps-packaging" -prune -o \
-    \( -name '*.deb' -o -name '*.rpm' -o -name '*.msi' -o -name '*.pkg.tar.gz' \) -print \
-    -exec cp {} /output/ \;
+for script in "$BASEDIR/buildscripts/build-scripts"/0*; do
+  name="$(basename "$script")"
+  run_step "$name"
+done
 
-write_sha256sums
 
 echo ""
 echo "=== Build complete ==="
-ls -lh /output/
+ls -lhR "$OUTPUT"/

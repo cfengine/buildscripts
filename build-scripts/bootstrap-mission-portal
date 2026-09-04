@@ -1,0 +1,88 @@
+. "$(dirname "$0")"/functions
+. detect-environment
+. compile-options
+. version
+set -e
+
+if [ "$ROLE" = hub ] || [ "$JOB_NAME" = bootstrap-pr ]; then
+    if [ ! -d "$BASEDIR/mission-portal" ] || [ ! -d "$BASEDIR/nova" ]; then
+        fatal "ROLE is $ROLE but $BASEDIR is missing mission-portal and nova repositories"
+    fi
+else
+    log_debug "ROLE ($ROLE) is not hub and JOB_NAME ($JOB_NAME) is not bootstrap-pr so skipping $0"
+    exit 0
+fi
+
+if [ -d "$BASEDIR"/mission-portal/vendor ] && \
+   [ -d "$BASEDIR"/nova/api/http/vendor ] && \
+   [ -d "$BASEDIR"/mission-portal/public/scripts/node_modules ] && \
+   [ -f "$BASEDIR"/mission-portal/public/themese/default/bootstrap/compiled/css/cfengine.less.css ] && \
+   [ -d "$BASEDIR"/mission-portal/ldap/vendor ]; then
+    log_debug "All mission-portal/nova dependencies are installed (by build-in-container.py --tarballs or bootstrap-pr job) so skipping $0"
+    exit 0
+fi
+
+if command -v composer >/dev/null; then
+  COMPOSER=$(command -v composer)
+elif [ -f /usr/local/bin/composer.phar ]; then
+  COMPOSER=/usr/local/bin/composer.phar
+else
+  fatal "Could not find composer command in PATH or at /usr/local/bin/composer.phar"
+  exit 1
+fi
+
+log_debug "Installing javascript npm dependencies..."
+(
+    if test -f "$BASEDIR"/mission-portal/public/scripts/package.json; then
+        cd "$BASEDIR"/mission-portal/public/scripts
+        # display node & npm versions
+        npm --version
+        node --version
+        # install dependencies from npmjs
+        run_and_print_on_failure npm ci --prefix "$BASEDIR"/mission-portal/public/scripts/
+        # build react components
+        run_and_print_on_failure npm run build --prefix "$BASEDIR"/mission-portal/public/scripts/
+        # remove node_modules since the bundles are already built
+        run_and_print_on_failure rm -rf "$BASEDIR"/mission-portal/public/scripts/node_modules
+    fi
+)
+
+log_debug "Installing PHP composer dependencies from mission-portal repository..."
+(
+    if test -f "$BASEDIR"/mission-portal/composer.json; then
+        cd "$BASEDIR"/mission-portal
+        # install PHP dependencies from composer
+        run_and_print_on_failure "$COMPOSER" install --no-dev
+    fi
+)
+
+log_debug "Installing PHP composer dependencies from nova repository..."
+(
+    if test -f "$BASEDIR"/nova/api/http/composer.json; then
+        cd "$BASEDIR"/nova/api/http
+        # install PHP dependencies from composer
+        run_and_print_on_failure "$COMPOSER" install --no-dev --ignore-platform-reqs
+    fi
+)
+
+log_debug "Compiling Mission Portal styles..."
+(
+    if test -f "$BASEDIR"/mission-portal/public/themes/default/bootstrap/cfengine_theme.less; then
+        cd "$BASEDIR"/mission-portal/public/themes/default/bootstrap
+        run_and_print_on_failure npx -p less lessc --compress ./cfengine_theme.less ./compiled/css/cfengine.less.css
+    fi
+)
+
+log_debug "Installing LDAP API PHP composer dependencies..."
+(
+    if test -f "$BASEDIR"/mission-portal/ldap/composer.json; then
+        cd "$BASEDIR"/mission-portal/ldap
+        # install PHP dependencies from composer
+        run_and_print_on_failure php "$COMPOSER" install --no-dev
+    fi
+)
+
+# Composer falls back to git clone when GitHub's anonymous zipball
+# rate limit is hit, leaving non-reproducible .git directories in the
+# vendor tree. Strip them.
+find "$BASEDIR/mission-portal" "$BASEDIR/nova/api/http" -type d -name .git -path '*/vendor/*' -exec rm -rf {} +

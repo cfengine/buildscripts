@@ -1,0 +1,5 @@
+#!/bin/sh
+
+set -ex
+thisdir="$(dirname "$0")"
+sudo bash "$thisdir"/../ci/setup-cfengine-build-host.sh
