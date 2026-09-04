@@ -177,8 +177,8 @@ exit 0
 /usr/lib/systemd/system/cfengine3.service
 /usr/lib/systemd/system/cf-execd.service
 /usr/lib/systemd/system/cf-monitord.service
-/usr/lib/systemd/system/cf-serverd.service
 /usr/lib/systemd/system/cf-reactor.service
+/usr/lib/systemd/system/cf-serverd.service
 
 # Symlinks to /usr/local/sbin (backward compatibility)
 %defattr(755,root,root,755)
