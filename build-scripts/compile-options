@@ -74,6 +74,11 @@ solaris)
         export CFLAGS
     fi
     ;;
+darwin)
+    # Apple's linker (ld64/ld-prime) doesn't understand GNU ld's "-R" rpath
+    # spelling used in the default case below; it needs "-rpath" instead.
+    LDFLAGS="-L$BUILDPREFIX/lib -Wl,-rpath,$BUILDPREFIX/lib"
+    ;;
 *)
     LDFLAGS="-L$BUILDPREFIX/lib -Wl,-R$BUILDPREFIX/lib"
     ;;
@@ -167,7 +172,7 @@ esac
 
 # Non-exotics dependencies
 case "$OS_FAMILY" in
-hpux | aix | solaris | freebsd | mingw) ;;
+hpux | aix | solaris | freebsd | mingw | darwin) ;;
 *)
     # Library for managing Extended Attributes (xattrs) on filesystems
     var_append DEPS "libattr"
