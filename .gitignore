@@ -3,3 +3,4 @@ revision
 *.html
 ci/cache
 ci/packages
+contrib/nix/flake.lock
