@@ -132,16 +132,16 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.12   | 3.12   | 3.12   |                          |
 | [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.4.0  | 2.4.0  | 2.4.0  |                          |
 | [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.6.0  | 2.6.0  | 2.6.0  |                          |
-| [libcurl](https://curl.se/download.html)                                          | 8.21.0 | 8.21.0 | 8.21.0 |                          |
+| [libcurl](https://curl.se/download.html)                                          | 8.21.0 | 8.21.0 | 8.22.0 |                          |
 | [libgnurx](https://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.19   | 1.19   | 1.19   | Needed by libxml2        |
-| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.3 | 2.15.3 | 2.15.3 |                          |
+| [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.3 | 2.15.3 | 2.15.4 |                          |
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.36 | 0.9.36 | 1.0.1  |                          |
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.7.0  | 2.7.0  | 2.7.0  | Enterprise agent only    |
 | [OpenSSL](https://openssl.org/)                                                   | 3.6.4  | 3.6.4  | 4.0.2  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | -      | -      | -      |                          |
-| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | 10.47  | 10.47  | 10.47  |                          |
+| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | 10.47  | 10.47  | 10.48  |                          |
 | [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 | [SASL2](https://www.cyrusimap.org/sasl/)                                          | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
 | [zlib](https://www.zlib.net/)                                                     | 1.3.2  | 1.3.2  | 1.3.2  |                          |
@@ -158,7 +158,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.5  | 1.6.5  | 1.6.5  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.55.0 | 2.55.0 | 2.55.0 |
-| [libexpat](https://libexpat.github.io/)             | 2.8.3  | 2.8.3  | 2.8.3  |
+| [libexpat](https://libexpat.github.io/)             | 2.8.3  | 2.8.3  | 2.8.4  |
 | [PHP](https://php.net/)                             | 8.3.33 | 8.5.10 | 8.5.10 |
 | [PostgreSQL](https://www.postgresql.org/)           | 16.15  | 18.6   | 18.6   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.70.0 | 1.70.0 |
