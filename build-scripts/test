@@ -4,13 +4,17 @@
 . detect-environment
 . compile-options
 
-# $NO_TEST and $NO_ACCEPTANCE_TESTS are usually set by Jenkins
+# NO_TESTS and NO_ACCEPTANCE_TESTS are usually set by Jenkins
 if [ "true" = "$NO_TESTS" ] || [ "true" = "$NO_ACCEPTANCE_TESTS" ]; then
     # In order to keep Jenkins happy, we create an empty test report saying that there were no tests to report.
-    log_debug "Creating empty test (\$NO_TESTS=$NO_TEST, \$NO_ACCEPTANCE_TESTS=$NO_ACCEPTANCE_TESTS)"
+    log_debug "Creating empty test (\$NO_TESTS=$NO_TESTS, \$NO_ACCEPTANCE_TESTS=$NO_ACCEPTANCE_TESTS)"
     create-empty-test
     exit 0
 fi
+
+# pre-reqs during a build, clean all packages and re-install from packages built in $HOME/.cache probably
+"$BASEDIR"/buildscripts/build-scripts/clean-buildmachine
+"$BASEDIR"/buildscripts/build-scripts/install-dependencies
 
 if [ -n "$TEST_MACHINE" ]; then
     # Prepares the test machine by creating a chroot environment.

@@ -79,8 +79,8 @@ for _dir in $_dirs; do
             echo "$(basename "$0"): Debug: Revision file already exists in $_dir"
         fi
     else
-        echo "$(basename "$0"): Error: Expected to find the '$_dir' directory in '$BASEDIR', but it's not there"
-        exit 1
+        # just a warning below, to enable just building with buildscripts for dependencies only without any other repositories like core, etc.
+        echo "$(basename "$0"): Warning: Expected to find the '$_dir' directory in '$BASEDIR', but it's not there"
     fi
 done
 

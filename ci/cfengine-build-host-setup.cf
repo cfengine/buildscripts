@@ -36,7 +36,10 @@ bundle agent cfengine_build_host_setup
       "ntp";
 
     debian|ubuntu::
-      "fail2ban" comment => "Ban IPs with repeated failed SSH auth attempts";
+      "fail2ban"
+        comment => "Ban IPs with repeated failed SSH auth attempts",
+        if => "not_in_container";
+
       "libltdl7" package_policy => "delete";
       "libltdl-dev" package_policy => "delete";
       "binutils";
@@ -176,10 +179,11 @@ bundle agent cfengine_build_host_setup
 
     !(redhat_7|centos_7).(redhat|centos).(yum_dnf_conf_ok).epel_release_ok::
       "fail2ban-server"
-        comment => "Ban IPs with repeated failed SSH auth attempts. On centos/rhel 8+ we must specify individual packages instead of just fail2ban as package method will append -*.* which would include conflicting shorewall and shorewall-lite packages.";
+        comment => "Ban IPs with repeated failed SSH auth attempts. On centos/rhel 8+ we must specify individual packages instead of just fail2ban as package method will append -*.* which would include conflicting shorewall and shorewall-lite packages.",
+        if => "not_in_container";
 
-      "fail2ban-sendmail";
-      "fail2ban-firewalld";
+      "fail2ban-sendmail" if => "not_in_container";
+      "fail2ban-firewalld" if => "not_in_container";
       "ccache";
       "fakeroot";
       "perl-JSON-PP";
@@ -277,7 +281,6 @@ bundle agent cfengine_build_host_setup
       "not_in_container"
         expression => not(fileexists("/etc/cfengine-in-container.flag")),
         comment => "We use an explicit flag file that we control to avoid ambiguity about whether we are in a container or not.";
-
 @if minimum_version(3.23)
     # Rust is build dependency for leech2 (gate on ubuntu>=20, debian>=12, redhat>=7)
     ubuntu::
@@ -292,7 +295,6 @@ bundle agent cfengine_build_host_setup
       "leech2_build_toolchain_host"
         expression => version_compare("$(sys.os_version_major)", ">=", "7");
 @endif
-
     any::
       "have_rust" expression => fileexists("/opt/rust/bin/rustc");
       "have_protoc" expression => fileexists("/usr/local/bin/protoc");
@@ -381,11 +383,12 @@ bundle agent cfengine_build_host_setup
         comment => "note: centos-7 has installed instead of --installed argument, and that works on rhel-8 and rhel-9 so go with the sub-command instead of option";
 
   commands:
-    sshd_hardened::
+    sshd_hardened.not_in_container::
       'kill -1 $(pgrep -f "sshd -D")'
         handle => "sshd_restarted",
         contain => in_shell,
         comment => "Reload sshd config with SIGHUP(1) to apply hardened configuration";
+
     have_tmp_mount::
       "mount -o remount,size=5G /tmp"
         comment => "We could check if /tmp was size 5G but not worth the trouble since this remount call just sets the maximum size of the tmpfs in virtual memory.",
@@ -513,6 +516,7 @@ root - core unlimited
         );
 
       "/etc/fail2ban/jail.local"
+        if => "not_in_container",
         create => "true",
         content => "[sshd]
 enabled = true
@@ -524,6 +528,7 @@ findtime = 600",
         comment => "Configure fail2ban to ban IPs after 5 failed SSH attempts within 10 minutes";
 
       "$(sshd_config_files)"
+        if => "not_in_container",
         edit_line => comment_lines_matching(
           "^$(sshd_hardening_directives)\s+(?!no\s*$).*", "#"
         ),
@@ -532,7 +537,7 @@ findtime = 600",
 
       "/etc/ssh/sshd_config"
         edit_line => prepend_if_no_line("$(sshd_hardening_directives) no"),
-        if => fileexists("/etc/ssh/sshd_config"),
+        if => and("not_in_container", fileexists("/etc/ssh/sshd_config")),
         classes => if_repaired("sshd_hardened"),
         comment => "Ensure SSH hardening directives are at the top of sshd_config, before any Include";
 
@@ -642,7 +647,7 @@ jenkins ALL=NOPASSWD: /usr/bin/podman
     !have_sys_user.(suse|sles|opensuse)::
       "useradd -u 3 sys -g sys" contain => in_shell;
 
-    linux::
+    linux.not_in_container::
       "sshd -T 2>/dev/null | grep -qiE '^PermitRootLogin no'"
         depends_on => { "sshd_restarted" },
         contain => in_shell,
@@ -659,12 +664,12 @@ jenkins ALL=NOPASSWD: /usr/bin/podman
         comment => "Verify KbdInteractiveAuthentication (OpenSSH 8.7+) or ChallengeResponseAuthentication (older) is disabled";
 
   services:
-    any::
+    not_in_container::
       "fail2ban"
         service_policy => "start",
         comment => "Ensure fail2ban is running";
 
-    fail2ban_config_changed::
+    fail2ban_config_changed.not_in_container::
       "fail2ban"
         service_policy => "restart",
         comment => "Restart fail2ban to apply jail configuration";

@@ -8,7 +8,7 @@
 # This script, on the other hand, is meant to be run on all hosts to make sure that make dist works everywhere.
 # However, it's currently only used in our GitHub workflows and is not a part of the Jenkins PR pipeline (I think).
 #
-# The source tarballs a built into $OUTDIR (defined in the functions script).
+# The source tarballs a built into $OUTPUT (defined in the functions script).
 #
 # The script expects the following repositories to exist side by side:
 # .
@@ -26,15 +26,17 @@
 . detect-environment
 . compile-options
 
+cd "$BASEDIR"
+
 for repo in core masterfiles; do
     log_debug "Running target make dist in $repo repository..."
-    (cd $repo && run_and_print_on_failure "$MAKE" V=1 dist)
+    (cd "$repo" && run_and_print_on_failure "$MAKE" V=1 dist)
 done
 
 # Copy to the directory that's being uploaded to buildcache
 
-mkdir -p "$OUTDIR"
-cp core/*.tar.gz masterfiles/*.tar.gz "$OUTDIR"
+mkdir -p "$OUTPUT"
+cp core/*.tar.gz masterfiles/*.tar.gz "$OUTPUT"
 rm core/*.tar.gz masterfiles/*.tar.gz
 
 echo '
@@ -45,4 +47,4 @@ sure that "make dist" works everywhere.
 The release tarball is generated from the "bootstrap-*-community"
 jenkins jobs, running only on one buildslave. It should be located under
 the "output/tarballs" directory of that job.
-' >"$OUTDIR"/TARBALLS.txt
+' >"$OUTPUT"/TARBALLS.txt

@@ -44,6 +44,9 @@ RUN /tmp/linux-install-rust.sh
 RUN useradd -m -s /bin/bash builder \
     && echo "builder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/builder
 
+# let setup-cfengine-build-host.sh know that we are in a container
+RUN touch /etc/cfengine-in-container.flag
+
 USER builder
 WORKDIR /home/builder
 

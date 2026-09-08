@@ -50,7 +50,7 @@ fi
 # export_variables: Set up and export all environment variables needed for builds
 # This function configures:
 #   - System information (UNAME_S, UNAME_R, UNAME_M)
-#   - Build directories (BASEDIR, BUILDPREFIX, PREFIX, OUTDIR)
+#   - Build directories (BASEDIR, BUILDPREFIX, PREFIX, OUTPUT)
 #   - PATH with platform-specific additions
 # Called automatically when this file is sourced
 export_variables() {
@@ -75,8 +75,10 @@ export_variables() {
         esac
 
         AUTOBUILD_PATH=$(dirname "$SCRIPTDIR")
-
+    else
+        SCRIPTDIR="$AUTOBUILD_PATH"/build-scripts
     fi
+    export SCRIPTDIR
     BASEDIR=$(dirname "$AUTOBUILD_PATH")
     export BASEDIR
 
@@ -122,10 +124,11 @@ export_variables() {
         ACCEPT_INFERIOR_RM_PROGRAM=yes
         export ACCEPT_INFERIOR_RM_PROGRAM
     fi
-
-    # Final destination of generated buildscripts output
-    OUTDIR="$BASEDIR/output/${OS}-${OS_VERSION}-${ARCH}"
-    export OUTDIR
+    if [ -z "$OUTPUT" ]; then
+      echo "No OUTPUT env var defined so setting to default of $BASEDIR/output"
+      OUTPUT="$BASEDIR/output"
+    fi
+    export OUTPUT
 }
 
 export_variables
