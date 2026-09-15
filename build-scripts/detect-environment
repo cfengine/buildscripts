@@ -250,6 +250,16 @@ detect_packaging() {
         esac
     elif [ -f /usr/sbin/swinstall ]; then
         DEP_PACKAGING=hpux
+    elif [ "$UNAME_S" = Darwin ]; then
+        # NOTE: there is no pkg-build-darwin/pkg-find-darwin/pkg-install-darwin
+        # (the native-package flavor other platforms use from
+        # install-dependencies) -- see packaging/homebrew/README.md. This
+        # value only lets detect-environment/compile-options/configure run
+        # to completion on macOS; install-dependencies will still fail if
+        # invoked directly, since there's nothing to build dependency
+        # packages with. The Homebrew formula builds dependencies itself
+        # instead.
+        DEP_PACKAGING=darwin
     else
         log_error "Unknown packaging system"
         exit 42
@@ -300,6 +310,10 @@ detect_arch() {
         ARCH=$UNAME_M
         ;;
     hpux)
+        ARCH=$UNAME_M
+        ;;
+    darwin)
+        # arm64 (Apple Silicon) or x86_64 (Intel), same values Homebrew itself uses
         ARCH=$UNAME_M
         ;;
     *)
