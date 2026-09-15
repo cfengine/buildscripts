@@ -23,6 +23,11 @@ export PATH=/opt/freeware/bin:$PATH # to use newer version of tar on aix platfor
 
 SYS=`uname -s`
 
+# libxml2 2.15.4 aborts when pkg-config is missing. We don't need it here.
+mv configure configure.bak
+sed 's/.*"pkg-config not found".*/:/' configure.bak >configure
+chmod a+x configure
+
 if expr \( "z$SYS" = 'zAIX' \) \| \( "`cat /etc/redhat-release`" : '.* [45]\.' \)
 then
     mv configure configure.bak

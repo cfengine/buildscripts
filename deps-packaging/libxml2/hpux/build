@@ -12,8 +12,9 @@ CPPFLAGS="-I${PREFIX}/include"
 
 # Configure
 
+# libxml2 2.15.4 aborts when pkg-config is missing. We don't need it here.
 mv configure configure.bak
-sed 's/ *-Wno-array-bounds//' configure.bak >configure
+sed -e 's/ *-Wno-array-bounds//' -e 's/.*"pkg-config not found".*/:/' configure.bak >configure
 chmod a+x configure
 ./configure CPPFLAGS="$CPPFLAGS" --prefix=${PREFIX} --without-python --without-iconv --without-lzma --without-zlib --with-iso8859x
 
