@@ -1,4 +1,4 @@
-%define libxml_version 2.15.3
+%define libxml_version 2.15.4
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
@@ -31,7 +31,7 @@ then
 fi
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
     CPPFLAGS="-I%{prefix}/include -D_LINUX_SOURCE_COMPAT" \
-    LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
+    LD_RUN_PATH="%{prefix}/lib"
 
 %build
 make
