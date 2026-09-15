@@ -18,6 +18,10 @@
 # ```
 #
 
+# note that this script should be a no-op if an artifacts.tgz is present
+thisdir="$(dirname "$0")"
+bash "$thisdir"/../ci/setup-ci-host.sh --bootstrap
+
 # Get the BASEDIR variable holding the path to where our repos are checked out
 . "$(dirname "$0")/functions"
 
@@ -61,11 +65,15 @@ done
 # Run autogen.sh on each repository
 for proj in $projects; do
     # autogen.sh is quite verbose, so only print the output in case of failure
-    log_debug "Running autogen.sh for project $proj..."
     (
         cd "$BASEDIR/$proj"
-        export NO_CONFIGURE=1
-        run_and_print_on_failure ./autogen.sh
+        if [ ! -f configure ] || [ ! -f CFVERSION ]; then
+            log_debug "Running autogen.sh for project $proj..."
+            export NO_CONFIGURE=1
+            run_and_print_on_failure ./autogen.sh
+        else
+            log_debug "Skipping autogen.sh in $proj as configure and/or CFVERSION files already exist"
+        fi
     )
 done
 

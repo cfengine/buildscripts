@@ -54,6 +54,10 @@ fi
 # themselves, however, in my opinion it reads better this way)
 for proj_i in $projects; do
     for proj_j in $projects; do
+        if [ ! -f "$BASEDIR/$proj_i/CFVERSION" ]; then
+            echo "Missing CFVERSION file in $BASEDIR/$proj_i"
+            exit 1
+        fi
         # The CFVERSION file is read into the tr command which removes
         # whitespace and the sed command extracts the major, minor & patch
         # version number from the string.

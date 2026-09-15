@@ -28,8 +28,21 @@
 . detect-environment
 . compile-options
 
-SOURCE_TARBALL="$BASEDIR/output/tarballs/cfengine-3.*.tar.gz"
+if [ ! -d "$BASEDIR"/output/tarballs ]; then
+  echo "No $BASEDIR/output/tarballs so skipping $0"
+  exit 0
+fi
+
+SOURCE_TARBALL="$(ls "$BASEDIR"/output/tarballs/cfengine-3.*.tar.gz)"
+log_debug "found SOURCE_TARBALL=$SOURCE_TARBALL"
+
 MASTERFILES_TARBALL=$(find "$BASEDIR"/output/tarballs/ -name 'cfengine-masterfiles*.tar.gz' -a ! \( -name '*pkg.tar.gz' \))
+log_debug "found MASTERFILES_TARBALL=$MASTERFILES_TARBALL"
+
+if [ ! -f "$SOURCE_TARBALL" ] || [ ! -f "$MASTERFILES_TARBALL" ]; then
+    echo "Did not find SOURCE_TARBALL: $SOURCE_TARBALL or MASTERFILES_TARBALL: $MASTERFILES_TARBALL so skipping $0 script"
+    exit 0
+fi
 
 # DELETE the git-checked-out directories, they are tainted with
 # ./configure artifacts anyway.  The tarballs are unpacked and symlinked

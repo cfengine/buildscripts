@@ -28,6 +28,10 @@ RUN apt-get -qy update && apt-get -y install \
 RUN useradd -m -s /bin/bash builder \
     && echo "builder ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/builder
 
+# let setup-cfengine-build-host.sh know we are in a container and bootstrapping
+RUN touch /etc/cfengine-in-container.flag
+RUN touch /etc/cfengine-bootstrap-pr-host.flag
+
 USER builder
 WORKDIR /home/builder
 

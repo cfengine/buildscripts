@@ -1,0 +1,19 @@
+set -ex
+. "$(dirname "$0")"/functions
+
+REPOS="core masterfiles"
+if test "$PROJECT" = "nova"; then
+  REPOS="$REPOS enterprise"
+fi
+if [ "$PROJECT" = "nova" ] && [ "$EXPLICIT_ROLE" = "hub" ]; then
+  REPOS="$REPOS nova mission-portal"
+fi
+
+cd "$BASEDIR"
+
+for repo in $REPOS; do
+  if [ ! -d "$BASEDIR/$repo" ]; then
+    echo "cloning $repo at pwd $(pwd)"
+    git clone git@github.com:cfengine/$repo --recursive
+  fi
+done

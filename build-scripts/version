@@ -19,11 +19,11 @@
 # repository. The script is executed when you run the autogen.sh.
 CORE_VERSION=$(cat "$BASEDIR"/core/CFVERSION)
 VERSION="${EXPLICIT_VERSION:-$CORE_VERSION}"
-echo "$(basename $0): Debug: Detected CFEngine version number $VERSION"
+log_debug "Detected CFEngine version number $VERSION"
 
 # The RELEASE number is the actual release of the package. It starts as 1 and
 # would incremented each time you create a new release of the CFEngine package
 # of the same version.
 RELEASE="${EXPLICIT_RELEASE:-1}"
 export RELEASE
-echo "$(basename $0): Debug: Detected CFEngine package release number $RELEASE"
+log_debug "Detected CFEngine package release number $RELEASE"
