@@ -9,6 +9,10 @@ LXD=${BUILD_ROOT}/cfbuild-libxml2-devel${PREFIX}
 
 # Configure
 
+# libxml2 2.15.4 aborts when pkg-config is missing. We don't need it here.
+mv configure configure.bak
+sed 's/.*"pkg-config not found".*/:/' configure.bak >configure
+chmod a+x configure
 ./configure --prefix=${PREFIX} --without-python --without-lzma --without-zlib
 
 # Build

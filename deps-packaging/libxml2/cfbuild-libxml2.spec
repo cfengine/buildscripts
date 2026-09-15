@@ -1,4 +1,4 @@
-%define libxml_version 2.15.3
+%define libxml_version 2.15.4
 
 Summary: CFEngine Build Automation -- libxml2
 Name: cfbuild-libxml2
@@ -23,6 +23,11 @@ export PATH=/opt/freeware/bin:$PATH # to use newer version of tar on aix platfor
 
 SYS=`uname -s`
 
+# libxml2 2.15.4 aborts when pkg-config is missing. We don't need it here.
+mv configure configure.bak
+sed 's/.*"pkg-config not found".*/:/' configure.bak >configure
+chmod a+x configure
+
 if expr \( "z$SYS" = 'zAIX' \) \| \( "`cat /etc/redhat-release`" : '.* [45]\.' \)
 then
     mv configure configure.bak
@@ -31,7 +36,7 @@ then
 fi
 ./configure --prefix=%{prefix} --without-python --enable-shared --disable-static --with-zlib=%{prefix} \
     CPPFLAGS="-I%{prefix}/include -D_LINUX_SOURCE_COMPAT" \
-    LD_LIBRARY_PATH="%{prefix}/lib" LD_RUN_PATH="%{prefix}/lib"
+    LD_RUN_PATH="%{prefix}/lib"
 
 %build
 
