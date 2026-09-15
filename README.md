@@ -137,8 +137,8 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.19   | 1.19   | 1.19   | Needed by libxml2        |
 | [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.3 | 2.15.3 | 2.15.4 |                          |
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
-| [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.36 | 0.9.36 | 1.0.1  |                          |
-| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.7.0  | 2.7.0  | 2.7.0  | Enterprise agent only    |
+| [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.36 | 0.9.36 | 1.0.2  |                          |
+| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.7.0  | 2.7.0  | 2.7.1  | Enterprise agent only    |
 | [OpenSSL](https://openssl.org/)                                                   | 3.6.4  | 3.6.4  | 4.0.2  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | -      | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | 10.47  | 10.47  | 10.48  |                          |
