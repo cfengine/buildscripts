@@ -89,7 +89,7 @@ fetch_file()
         # response body instead of erroring, which used to go unnoticed
         # because every prior host had wget (which follows redirects by
         # default) and never fell through to this fallback.
-        [ -f "$OUTFILE" ]  || curl -L "$URL$FILENAME" >"$OUTFILE"
+        [ -f "$OUTFILE" ]  || $CURL -L "$URL$FILENAME" >"$OUTFILE"
         rm_if_empty "$OUTFILE"
 
         # Some wget (1.9.1 on AIX) return 0 even when they failed! So we
