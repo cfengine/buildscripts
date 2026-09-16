@@ -1,0 +1,58 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-libcurl.spec (the actively maintained recipe used on
+# Linux), adapted for macOS. This is the agent-only curl build (no CLI
+# binary); see ../../libcurl-hub for the hub's separate build.
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-libcurl${PREFIX}
+TTD_ROOT=${BUILD_ROOT}/cfbuild-libcurl-devel
+TTD=${TTD_ROOT}${PREFIX}
+
+if [ "$SYSTEM_SSL" = 1 ]; then
+    SSL_PREFIX=/usr
+else
+    SSL_PREFIX=${PREFIX}
+fi
+
+# Configure
+
+# Force our bundled OpenSSL rather than Apple's SecureTransport/LibreSSL, and
+# avoid every optional dependency we don't bundle for macOS (nghttp2, ldap,
+# gssapi, libssh2, etc), matching the Linux flags above.
+./configure \
+    --with-sysroot=${PREFIX} \
+    --with-ssl=${SSL_PREFIX} \
+    --with-zlib=${PREFIX} \
+    --disable-ldap \
+    --disable-ldaps \
+    --disable-ntlm \
+    --without-gnutls \
+    --without-gssapi \
+    --without-libpsl \
+    --without-librtmp \
+    --without-libssh2 \
+    --without-nghttp2 \
+    --without-winidn \
+    --prefix=${PREFIX} \
+    CPPFLAGS="-I${PREFIX}/include -DAF_LOCAL=AF_UNIX" \
+    DYLD_LIBRARY_PATH="${PREFIX}/lib"
+
+# Build
+
+${MAKE:-make}
+
+# Install
+
+${MAKE:-make} install DESTDIR=${TTD_ROOT}
+rm -rf ${TTD}/share
+rm -f ${TTD}/lib/libcurl.a
+rm -f ${TTD}/lib/libcurl.la
+
+# Package
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/*.dylib ${TT}/lib

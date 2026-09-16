@@ -1,0 +1,94 @@
+#!/bin/sh
+
+# Builds a dependency for macOS.
+#
+# Unlike the other pkg-build-* scripts, there's no real macOS package manager
+# suited to installing/uninstalling many locally-built packages during a
+# build (installer(8)/pkgutil(8) work in terms of receipts for a single
+# distributable product, not an iterative package database). So instead we
+# produce a plain tarball, containing the payload plus a "+MANIFEST" file
+# listing every payload path (mirrors how pkg-build-freebsd bundles
+# +CONTENTS/+DESC/+COMMENT alongside the payload in its .tbz). See
+# pkg-install-macos for how the manifest is used.
+
+set -e
+
+case `dirname "$0"` in
+  .)
+    SCRIPTDIR=`pwd`;;
+  *)
+    case "$0" in
+      /*) SCRIPTDIR=`dirname "$0"`;;
+      *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
+    esac;;
+esac
+
+BASEDIR=`dirname "$SCRIPTDIR"`
+BASEDIR=`dirname "$BASEDIR"`
+
+PATH="$PATH:$SCRIPTDIR"
+
+PKGNAME="$1"
+TESTS="$2"
+TARGET="$3"
+OPTIMIZE="$4"
+DEBUGSYM="$5"
+VERSION="$6"
+
+P=$BASEDIR/buildscripts/deps-packaging/$PKGNAME
+PKGDIR=$BASEDIR/$PKGNAME/pkg
+
+rm -rf "$PKGDIR"
+mkdir -p "$PKGDIR"
+
+pkg-get-src "$P" | while read -r srcfile opts; do
+  # macOS ships bsdtar, which auto-detects gzip/bzip2/xz compression on its
+  # own (unlike GNU tar's freebsd/hpux counterparts, which need an explicit
+  # decompressor piped in) -- no standalone "xz" binary ships with macOS, so
+  # this also avoids needing one for the .tar.xz sources (libxml2, diffutils).
+  if [ "x$opts" = xsubdir ]; then
+    tar xf "$srcfile" -C "$PKGDIR"
+  else
+    TD=$(mktemp -d "${TMPDIR:-/tmp}/pkg-build-macos.XXXXXX")
+    tar xf "$srcfile" -C "$TD"
+    mv "$TD"/*/* "$PKGDIR"
+    rm -rf "$TD"
+  fi
+done
+
+cp -R "$P"/* "$PKGDIR"
+
+ARCH=$(uname -m)
+
+(
+  cd "$PKGDIR"
+  BUILD_ROOT="$PKGDIR/out" TESTS="$TESTS" OPTIMIZE="$OPTIMIZE" DEBUGSYM="$DEBUGSYM" \
+    "$P/darwin/build"
+)
+
+for package in $(cat "$P/darwin/packages"); do
+  pkgroot="$PKGDIR/out/$package"
+  [ -d "$pkgroot" ] || continue
+
+  # The manifest is generated into its own directory rather than straight
+  # into $pkgroot: writing "$pkgroot/+MANIFEST" first and populating it via a
+  # pipe redirected there would have the shell create (truncate) that file
+  # before the "find" on the other end of the pipe ever runs, so find would
+  # see -- and list -- the still-empty manifest file as one of its own
+  # entries.
+  #
+  # Lists every payload path relative to $pkgroot (i.e. relative to "/" once
+  # installed), sorted for reproducible tarball member ordering. Includes
+  # symlinks (-type l), not just regular files: shared libraries install as
+  # e.g. libz.1.3.2.dylib with libz.dylib/libz.1.dylib symlinks pointing to
+  # it, and other bundled dependencies link against the unversioned name.
+  manifest_dir=$(mktemp -d "${TMPDIR:-/tmp}/pkg-build-macos-manifest.XXXXXX")
+  (cd "$pkgroot" && find . \( -type f -o -type l \) | sed 's|^\./||' | LC_ALL=C sort) >"$manifest_dir/+MANIFEST"
+
+  # tar's -C applies to the files listed after it, and each subsequent -C is
+  # relative to the previous one rather than to the original cwd, so both
+  # must be absolute here.
+  tarball="$BASEDIR/$PKGNAME/$package-$VERSION-$ARCH.macos.tar.gz"
+  tar czf "$tarball" -C "$manifest_dir" +MANIFEST -C "$pkgroot" $(cat "$manifest_dir/+MANIFEST")
+  rm -rf "$manifest_dir"
+done

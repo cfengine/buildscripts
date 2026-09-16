@@ -31,6 +31,12 @@ case `os_type` in
   aix)
     /usr/bin/rm -f /etc/rc.d/rc2.d/K05cfengine3 /etc/rc.d/rc2.d/S97cfengine3
     ;;
+
+  darwin)
+    rm -f `rc_d_path`/com.cfengine.cf-execd.plist \
+          `rc_d_path`/com.cfengine.cf-monitord.plist \
+          `rc_d_path`/com.cfengine.cf-serverd.plist
+    ;;
 esac
 
 exit 0

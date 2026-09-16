@@ -1,0 +1,32 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-libyaml.spec (the actively maintained recipe used on
+# Linux), adapted for macOS. libyaml-mingw-fix.patch and
+# hpux-header-fix.patch are specific to their respective platforms and are
+# not needed here, matching what the Linux spec does.
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-libyaml${PREFIX}
+TTD_ROOT=${BUILD_ROOT}/cfbuild-libyaml-devel
+TTD=${TTD_ROOT}${PREFIX}
+
+# Configure
+
+./configure --prefix=${PREFIX}
+
+# Build
+
+${MAKE:-make}
+
+# Install
+
+${MAKE:-make} DESTDIR=${TTD_ROOT} install
+rm -rf ${TTD}/lib/libyaml.la
+
+# Package
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/*.dylib ${TT}/lib

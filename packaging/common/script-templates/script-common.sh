@@ -3,7 +3,7 @@ export LC_ALL=C # overrides all other env vars: https://www.gnu.org/software/lib
 # Upgrade detection is a mess. It is often difficult to tell, especially from
 # the postinstall script, so we use the package-upgrade.txt file to remember.
 case "$PKG_TYPE" in
-  depot|deb|bff)
+  depot|deb|bff|macos)
     case "$SCRIPT_TYPE" in
       preinstall|preremove)
         if native_is_upgrade; then
