@@ -63,8 +63,14 @@ fetch_file()
     OUTFILE="$TMPDIR/$FILENAME"
     [ -n "$OPTS" ] && OUTFILE="$TMPDIR/$OPTS" # to rename the URL
     rm_if_empty "$OUTFILE"
-    WGET=`func_whereis wget`
-    CURL=`func_whereis curl`
+    # `|| true` inside the substitution, not after it: under "set -e",
+    # "VAR=$(failing-command)" aborts the whole script immediately (the
+    # assignment's exit status is that of the substitution), so on a host
+    # missing wget (e.g. macOS, which ships neither wget nor a real package
+    # manager to install it from) this would otherwise kill the script before
+    # ever trying the curl fallback below.
+    WGET=`func_whereis wget || true`
+    CURL=`func_whereis curl || true`
 
     for URL in $URLS
     do
@@ -78,7 +84,12 @@ fetch_file()
         rm_if_empty "$OUTFILE"
 
         # try with curl
-        [ -f "$OUTFILE" ]  || curl "$URL$FILENAME" >"$OUTFILE"
+        # -L: several sources (e.g. GitHub release assets) 302-redirect to
+        # the actual download URL; without it curl saves the empty redirect
+        # response body instead of erroring, which used to go unnoticed
+        # because every prior host had wget (which follows redirects by
+        # default) and never fell through to this fallback.
+        [ -f "$OUTFILE" ]  || curl -L "$URL$FILENAME" >"$OUTFILE"
         rm_if_empty "$OUTFILE"
 
         # Some wget (1.9.1 on AIX) return 0 even when they failed! So we
