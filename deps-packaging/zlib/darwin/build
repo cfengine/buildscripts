@@ -1,0 +1,35 @@
+#!/bin/sh -e
+
+# Mirrors the %build/%install steps of ../cfbuild-zlib.spec (the actively
+# maintained recipe, used on Linux via rpm/deb), adapted for macOS: no
+# DESTDIR support in zlib's Makefile, so we override "prefix=" like the other
+# non-DESTDIR platform builds do (see ../hpux/build).
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TZ=${BUILD_ROOT}/cfbuild-zlib${PREFIX}
+TZD=${BUILD_ROOT}/cfbuild-zlib-devel${PREFIX}
+
+# Configure
+
+./configure --prefix=${PREFIX}
+
+# Build
+
+${MAKE:-make}
+
+# Test intentionally skipped: TESTS=no on darwin (see compile-options).
+
+# Install
+
+${MAKE:-make} install prefix=${TZD}
+
+# Package
+
+rm -f ${TZD}/lib/libz.a
+rm -rf ${TZD}/share
+
+mkdir -p ${TZ}/lib
+mv ${TZD}/lib/*.dylib ${TZ}/lib

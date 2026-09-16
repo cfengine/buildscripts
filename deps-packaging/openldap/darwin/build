@@ -1,0 +1,49 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-openldap.spec (the actively maintained recipe used on
+# Linux), adapted for macOS.
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-openldap${PREFIX}
+TTD_ROOT=${BUILD_ROOT}/cfbuild-openldap-devel
+TTD=${TTD_ROOT}${PREFIX}
+
+# Patch
+
+$PATCH -p0 <no_Sockaddr_redefine.patch
+$PATCH -p1 <gcc-8.5.patch
+
+# Configure
+
+CPPFLAGS="-I${PREFIX}/include" \
+./configure --prefix=${PREFIX} \
+    --enable-shared \
+    --disable-slapd \
+    --disable-backends \
+    --with-tls=openssl \
+    --without-gssapi
+
+# Build
+
+${MAKE:-make} -C include
+${MAKE:-make} -C libraries
+
+# Install
+
+${MAKE:-make} -C include install DESTDIR=${TTD_ROOT}
+${MAKE:-make} -C libraries install DESTDIR=${TTD_ROOT}
+
+# Removing unused files
+
+rm -rf ${TTD}/etc
+rm -f ${TTD}/lib/*.a
+rm -f ${TTD}/lib/*.la
+rm -f ${TTD}/lib/pkgconfig/*.pc
+
+# Package
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/*.dylib ${TT}/lib

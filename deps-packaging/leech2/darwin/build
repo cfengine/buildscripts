@@ -1,0 +1,56 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-leech2.spec (the actively maintained recipe used on
+# Linux), adapted for macOS. leech2 is a Rust/cargo project (unlike every
+# other bundled dependency), and this is the first non-Linux/mingw port of
+# it: install Rust (ci/macos-install-rust.sh) and protoc
+# (ci/macos-install-protobuf.sh, needed to compile the .proto files in
+# build.rs) on the build host before this script runs.
+#
+# cargo names the "cdylib" crate-type output after the platform's native
+# convention automatically: libleech2.so on Linux, libleech2.dylib here.
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-leech2${PREFIX}
+TTD=${BUILD_ROOT}/cfbuild-leech2-devel${PREFIX}
+
+# Use the system-wide Rust toolchain installed by the build host setup.
+export RUSTUP_HOME=/opt/rust
+export PATH=/opt/rust/bin:$PATH
+
+# Embed an rpath of ${PREFIX}/lib in libleech2.dylib so it resolves
+# co-bundled CFEngine libraries at runtime, matching every other bundled dep
+# (enterprise's rpath_test.sh requires every /var/cfengine/lib/lib*.dylib to
+# carry this rpath).
+export RUSTFLAGS="-C link-arg=-Wl,-rpath,${PREFIX}/lib"
+
+# Cargo's release profile strips debug info via `rust-objcopy`, which needs
+# libLLVM.dylib from the "llvm-tools-preview" rustup component. That
+# component isn't installed (see ci/macos-install-rust.sh -- it's skipped on
+# purpose to keep disk usage down), so the strip step fails and Cargo falls
+# back to shipping the unstripped binary/library with just a warning. This
+# disables the strip attempt outright instead of silently failing every
+# build, matching what actually happens: leech2/lch ship unstripped here.
+export CARGO_PROFILE_RELEASE_STRIP=false
+cargo build --release
+
+# Package
+
+mkdir -p ${TT}/bin
+mkdir -p ${TT}/lib
+mkdir -p ${TTD}/lib/pkgconfig
+mkdir -p ${TTD}/include
+
+install -m 755 target/release/libleech2.dylib ${TT}/lib/
+install -m 755 target/release/lch ${TT}/bin/
+install -m 644 include/leech2.h ${TTD}/include/
+
+LEECH2_VERSION=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)
+
+sed -e "s|^prefix=.*|prefix=${PREFIX}|" \
+    -e "s|@LIBDIR@|lib|" \
+    -e "s|@VERSION@|${LEECH2_VERSION}|" \
+    leech2.pc.in >${TTD}/lib/pkgconfig/leech2.pc
