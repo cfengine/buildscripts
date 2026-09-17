@@ -66,14 +66,46 @@ def refspec() {
   return '+refs/heads/*:refs/remotes/origin/* +refs/pull/*:refs/remotes/origin/pull/*'
 }
 
+// Publishes output/<subdir> to buildcache, which serves it from
+// packages/build-in-container/. Nothing consumes these yet: the tests still use
+// the packages testing-pr builds.
+//
+// buildcache picks up whatever appears in /home/jenkins/output, so we upload to
+// /home/jenkins/upload and move the tree over once every file has arrived.
+def publishPackages(String subdir) {
+  if (!params.PACKAGE_UPLOAD_DIRECTORY?.trim()) { return }
+
+  // Not 'nightly-pipeline' anywhere in the name: buildcache makes a release out
+  // of a directory whose name has it, and we do not want to release these
+  // packages yet.
+  def staging = "build-in-container-${subdir}-${env.BUILD_NUMBER}"
+  def remote = "upload/${staging}/build-in-container/${params.PACKAGE_UPLOAD_DIRECTORY.trim()}"
+
+  sshPublisher(
+      // The key for buildcache is on the Jenkins controller, not on the
+      // container hosts this build runs on.
+      alwaysPublishFromMaster: true,
+      failOnError: true,
+      publishers: [sshPublisherDesc(
+          configName: 'buildcache.cfengine.com',
+          verbose: true,
+          transfers: [sshTransfer(
+              sourceFiles: "output/${subdir}/**",
+              removePrefix: 'output',
+              remoteDirectory: remote,
+              execCommand: "mkdir -p output && mv 'upload/${staging}' output/",
+              execTimeout: 120000)])])
+}
+
 // Runs one build in the workspace of the node the caller allocated.
 //
 // Cleans up after the previous build. Checks out each repo at its revision from
-// revs. Builds, then archives the packages.
+// revs. Builds, then archives and publishes the packages.
 //
-// opts holds the build-in-container.py flags that vary per build. The flags
-// every build shares are added below.
-def containerBuild(String opts, List repos, Map revs) {
+// subdir is what the build writes under output/: the label, or tarballs. opts
+// holds the build-in-container.py flags that vary per build. The flags every
+// build shares are added below.
+def containerBuild(String subdir, String opts, List repos, Map revs) {
   // The container hands the directories it writes back to us as it exits, so
   // this only covers a build that never got to exit (e.g. killed).
   sh 'sudo chown -R "$(id -u):$(id -g)" "$WORKSPACE" 2>/dev/null || true'
@@ -113,6 +145,7 @@ def containerBuild(String opts, List repos, Map revs) {
   }
 
   archiveArtifacts artifacts: 'output/**', fingerprint: true
+  publishPackages(subdir)
 }
 
 // All filled in by Resolve refs and read by the build stages, which run on other
@@ -166,6 +199,8 @@ pipeline {
            description: 'BUILD_NUMBER for the build, which a DEBUG build puts in the package version.')
     string(name: 'EXPLICIT_VERSION', defaultValue: '',
            description: 'Override the version string the build derives from the sources. Leave empty for the usual behaviour.')
+    string(name: 'PACKAGE_UPLOAD_DIRECTORY', defaultValue: '',
+           description: 'Directory under http://buildcache.cfengine.com/packages/build-in-container/ to publish the packages to. Leave empty to only archive them.')
   }
 
   stages {
@@ -196,7 +231,7 @@ pipeline {
           // --tarballs builds core and masterfiles alone, in an image of its own,
           // and forces project and platform itself. Only the build type is ours
           // to pass: it decides the version string.
-          containerBuild('--tarballs', ['buildscripts', 'core', 'masterfiles'], revs)
+          containerBuild('tarballs', '--tarballs', ['buildscripts', 'core', 'masterfiles'], revs)
         }
       }
     }
@@ -211,7 +246,8 @@ pipeline {
               node("CONTAINER_PACKAGES_${archOf(label)}") {
                 // The label decides the platform, the role and the container
                 // architecture, so --arch would only contradict it.
-                containerBuild("--label '${label}' --project '${params.PROJECT}'",
+                containerBuild(label,
+                               "--label '${label}' --project '${params.PROJECT}'",
                                repos, revs)
               }
             }]
