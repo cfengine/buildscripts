@@ -1,0 +1,68 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-openssl.spec (the actively maintained recipe used on
+# Linux), adapted for macOS. No "target=" override is passed to Configure:
+# it auto-detects "darwin64-x86_64-cc"/"darwin64-arm64-cc" on its own from
+# uname, and that target already does the right thing with dylib install
+# names (based on --prefix/--libdir), same as every other platform.
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+OS=${BUILD_ROOT}/cfbuild-openssl${PREFIX}
+OSD_ROOT=${BUILD_ROOT}/cfbuild-openssl-devel
+OSD=${OSD_ROOT}${PREFIX}
+
+# Patch
+
+$PATCH -p1 <0006-Add-latomic-on-AIX-7.patch
+$PATCH -p1 <0008-Define-_XOPEN_SOURCE_EXTENDED-as-1.patch
+
+# Configure
+
+DEBUG_CONFIG_FLAGS=
+DEBUG_CFLAGS=
+if [ "$OPTIMIZE" = no ]; then
+    DEBUG_CONFIG_FLAGS="no-asm -DPURIFY"
+    DEBUG_CFLAGS="-g2 -O1 -fno-omit-frame-pointer"
+fi
+
+# Note: as of now, config_flags_hub.txt and config_flags_agent.txt files are
+# identical (CFE-4042).
+GLOBAL_CONFIG_FLAGS=$(cat config_flags_$ROLE.txt)
+
+${PERL:-perl} ./Configure $GLOBAL_CONFIG_FLAGS \
+         $DEBUG_CONFIG_FLAGS \
+         --prefix=${PREFIX} \
+         $DEBUG_CFLAGS \
+         $LDFLAGS \
+         --libdir=lib
+
+${PERL:-perl} configdata.pm --dump
+
+# Build
+
+${MAKE:-make} depend
+${MAKE:-make}
+
+# Install
+
+${MAKE:-make} DESTDIR=${OSD_ROOT} install_sw
+${MAKE:-make} DESTDIR=${OSD_ROOT} install_ssldirs
+
+# Package
+
+rm -f ${OSD}/bin/c_rehash
+rm -rf ${OSD}/ssl/misc/CA.pl
+rm -rf ${OSD}/ssl/misc/tsget
+rm -rf ${OSD}/ssl/misc/tsget.pl
+rm -rf ${OSD}/ssl/openssl.cnf.dist
+rm -rf ${OSD}/lib/cmake
+rm -f ${OSD}/lib/libssl.a
+rm -f ${OSD}/lib/libcrypto.a
+
+mkdir -p ${OS}/bin ${OS}/lib ${OS}/ssl
+mv ${OSD}/bin/openssl ${OS}/bin
+mv ${OSD}/lib/*.dylib ${OS}/lib
+mv ${OSD}/ssl/* ${OS}/ssl

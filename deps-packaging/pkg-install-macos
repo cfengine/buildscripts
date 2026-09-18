@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# Installs macOS dependency packages built by pkg-build-macos.
+#
+# There's no real system package database to install into (see
+# pkg-build-macos for why), so this script maintains its own minimal
+# file-registry under $BASEDIR/.cfbuild-macos-db: one "<pkgname>.filelist"
+# file per installed package, listing every path it put down (relative to
+# "/"). uninstall_macos_pkgs() in build-scripts/functions reads that same
+# registry to remove packages later.
+
+set -e
+
+if [ $# -eq 0 ]; then
+  echo "Usage: $0 <pkg> [<pkg> ...]" >&2
+  exit 1
+fi
+
+case `dirname "$0"` in
+  .)
+    SCRIPTDIR=`pwd`;;
+  *)
+    case "$0" in
+      /*) SCRIPTDIR=`dirname "$0"`;;
+      *) SCRIPTDIR=`pwd`/`dirname "$0"`;;
+    esac;;
+esac
+
+BASEDIR=`dirname "$SCRIPTDIR"`
+BASEDIR=`dirname "$BASEDIR"`
+
+PREFIX=${BUILDPREFIX:-/var/cfengine}
+REGISTRY="$BASEDIR/.cfbuild-macos-db"
+mkdir -p "$REGISTRY"
+
+# Bootstrap the shared install prefix once, matching what each dependency's
+# own build already does the first time it needs it (e.g. openssl's
+# "sudo mkdir %{prefix} && sudo chmod 777 %{prefix}").
+if [ ! -d "$PREFIX" ]; then
+  sudo mkdir -p "$PREFIX"
+  sudo chown "$(id -u):$(id -g)" "$PREFIX"
+fi
+
+for pkg in "$@"; do
+  pkgfile=$(basename "$pkg")
+  # Strip the trailing "-<version>-<arch>.macos.tar.gz" that pkg-build-macos
+  # appends, to get back the bare package name, e.g. "cfbuild-zlib-devel".
+  pkgname=$(echo "$pkgfile" | sed -E 's/-[^-]+-[^-]+\.macos\.tar\.gz$//')
+
+  # Remove any previous install of this package first (upgrade/rebuild case),
+  # same idea as FreeBSD's "pkg_info && pkg_delete" before "pkg_add".
+  oldlist="$REGISTRY/$pkgname.filelist"
+  if [ -f "$oldlist" ]; then
+    while IFS= read -r f; do
+      rm -f "/$f"
+    done <"$oldlist"
+    rm -f "$oldlist"
+  fi
+
+  tar xzf "$pkg" -O +MANIFEST >"$oldlist"
+  # -P (--absolute-paths): without it, bsdtar refuses to extract through any
+  # intermediate symlink in the destination path -- and on macOS /var itself
+  # is a symlink to /private/var, so every single extraction under $PREFIX
+  # would otherwise fail with "Cannot extract through symlink".
+  tar xzPf "$pkg" -C / --exclude='+MANIFEST'
+done

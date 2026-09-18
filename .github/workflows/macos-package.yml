@@ -1,0 +1,58 @@
+name: Deployment tests for built package
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  macos_package:
+    name: Build a CFEngine community agent pkg file for MacOS
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Together Action
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/together-javascript-action
+          ref: main
+          ssh-key: ${{ secrets.GH_ACTIONS_SSH_DEPLOY_KEY_TOGETHER_REPO }}
+          ssh-known-hosts: github.com
+
+      - name: Action step
+        uses: ./
+        id: together
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout Core
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/core
+          path: core
+          ref: ${{steps.together.outputs.core || github.base_ref}}
+          submodules: recursive
+
+      - name: Checkout Masterfiles
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/masterfiles
+          path: masterfiles
+          ref: ${{steps.together.outputs.masterfiles || github.base_ref}}
+
+      - name: Checkout Buildscripts
+        uses: actions/checkout@v3
+        with:
+          repository: cfengine/buildscripts
+          path: buildscripts
+          ref: ${{steps.together.outputs.buildscripts || github.base_ref}}
+          fetch-depth: 20
+
+      - name: Build package natively
+        id: build_package
+        run: |
+          ./buildscripts/ci/build-macos.sh
