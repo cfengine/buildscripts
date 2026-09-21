@@ -118,12 +118,14 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
 if [ "$BUILDPREFIX" != /var/cfengine ]; then
     log_debug "Custom prefix detected: $BUILDPREFIX"
     safe_prefix="$(echo "$BUILDPREFIX" | sed -e 's:/::g')"
-    file_to_patch=$P/../common/script-templates/$PACKAGING-script-common.sh
-    if [ -f "$file_to_patch" ]; then
-        # Update installation scripts to use custom prefix
-        log_debug "Patching script template: $file_to_patch"
-        sed "s:/var/cfengine:$BUILDPREFIX:" "$file_to_patch" >"$file_to_patch".new
-        mv "$file_to_patch".new "$file_to_patch"
+    source_script=$P/../common/script-templates/$PACKAGING-script-common.sh
+    patched_script=$P/../common/script-templates/patched-$PACKAGING-script-common.sh
+    if [ -f "$source_script" ]; then
+        # Patch installation scripts for custom prefix, create patched-$PACKAGING-script-common.sh which is not version tracked
+        log_debug "Patching from source: $source_script to patched script: $patched_script"
+        sed "s:/var/cfengine:$BUILDPREFIX:" "$source_script" >"$patched_script"
+    else
+        log_error "Source $PACKAGING-script-common.sh not available at $source_script"
     fi
 else
     log_debug "Using default prefix: /var/cfengine"
