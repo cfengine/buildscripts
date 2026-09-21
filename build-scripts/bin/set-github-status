@@ -61,7 +61,7 @@ function set_status() {
     # curl 7.88 ish supports --header @file but apparently 7.52 (on bootstrap vm (deb-9)) does not, so compose a script
     curl_script_file="$(mktemp)"
     chmod 600 "$curl_script_file"
-    echo -n "curl --fail --insecure -X POST --header \"Authorization: Bearer " >"$curl_script_file"
+    echo -n "curl --fail-with-body --insecure -X POST --header \"Authorization: Bearer " >"$curl_script_file"
     _dir=$(readlink -e "$(dirname "$0")")
     "$_dir"/get-pr-token "$1" >>"$curl_script_file"
     echo -n "\" $2 --data " >>"$curl_script_file"
@@ -82,7 +82,7 @@ function set_status() {
   \"description\" : \"$description\",
   \"context\" : \"$job_spec\"
 }
-EOF" >>"$curl_script_file"
+EOF" | tee -a "$curl_script_file"
         )
     fi
 
