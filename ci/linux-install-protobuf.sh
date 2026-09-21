@@ -9,17 +9,17 @@ install_protobuf() {
   # The release archives do not ship .sha256 files, so the checksums below are
   # computed by us (and refreshed by the dependency update script).
   cd /opt
-  version=36.1
+  version=36.2
   baseurl="https://github.com/protocolbuffers/protobuf/releases/download/v${version}"
 
   if uname -m | grep aarch64; then
     arch=linux-aarch_64
     # sha256sum of protoc-${version}-linux-aarch_64.zip
-    sha=237a68856edf1bd28b6204bddd0596c1cf46d298bc29c620012540b2e44c73e7
+    sha=8b8f18bd2b30346efbc698dd5a73dd7c805f3ef8380f6dfc95c768f3f1852f6a
   else
     arch=linux-x86_64
     # sha256sum of protoc-${version}-linux-x86_64.zip
-    sha=c4bc672d9d49214dc8cafdceadf4df92182d6ca8e3ec65a56b2d7de5602669b4
+    sha=121f6c7afe1d4d0e3ea6aab9432038599250134cbf4474cb1167d2c7decd4278
   fi
 
   zipfile="protoc-${version}-${arch}.zip"
