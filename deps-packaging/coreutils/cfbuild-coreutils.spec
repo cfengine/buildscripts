@@ -1,4 +1,4 @@
-%define coreutils_version 9.11
+%define coreutils_version 9.12
 
 Summary: CFEngine Build Automation -- coreutils (date)
 Name: cfbuild-coreutils
