@@ -21,7 +21,7 @@ mkdir -p %{_builddir}
 # liblz4, libxxhash, libzstd, and libssl give rsync extra compression
 # algorithms, extra checksum algorithms, and allow use of openssl's crypto lib
 # for (potentially) faster MD4/MD5 checksums.
-./configure --prefix=%{prefix} --with-included-zlib=%{prefix} CPPFLAGS="-I%{prefix}/include" --disable-xxhash --disable-zstd --disable-lz4
+./configure --prefix=%{prefix} --with-included-zlib=%{prefix} CPPFLAGS="-I%{prefix}/include" --disable-xxhash --disable-zstd --disable-lz4 --disable-idn
 
 %build
 
