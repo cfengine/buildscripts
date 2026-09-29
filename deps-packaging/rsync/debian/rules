@@ -15,7 +15,7 @@ build-stamp:
 	# liblz4, libxxhash, libzstd, and libssl give rsync extra compression
 	# algorithms, extra checksum algorithms, and allow use of openssl's crypto
 	# lib for (potentially) faster MD4/MD5 checksums.
-	./configure --prefix=$(PREFIX) --with-included-zlib=$(PREFIX) CPPFLAGS=-I$(PREFIX)/include --disable-xxhash --disable-zstd --disable-lz4
+	./configure --prefix=$(PREFIX) --with-included-zlib=$(PREFIX) CPPFLAGS=-I$(PREFIX)/include --disable-xxhash --disable-zstd --disable-lz4 --disable-idn
 
 	make
 
