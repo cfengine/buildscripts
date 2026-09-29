@@ -459,6 +459,7 @@ EOF
 - /run/*
 + /run
 - /var/lib/lxcfs
+- /var/lib/docker*
 EOF
         ;;
     esac
