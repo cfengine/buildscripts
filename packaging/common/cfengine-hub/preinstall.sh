@@ -38,6 +38,12 @@ fi
 
 if migrating_postgres; then
   mkdir -p "$BACKUP_DIR"
+
+  # during migration cfpostgres user will need to execute/list files in BACKUP_DIR so ensure it has access via cfpostgres group
+  /usr/bin/getent group cfpostgres >/dev/null || /usr/sbin/groupadd -r cfpostgres
+  chown :cfpostgres "$BACKUP_DIR"
+  chmod 770 "$BACKUP_DIR"
+
   # Try to check if free space on $BACKUP_DIR drive is not less than $PREFIX/state/pg/data contains
   if command -v df >/dev/null && command -v du >/dev/null && command -v awk >/dev/null; then
     # We have enough commands to test it.
