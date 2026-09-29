@@ -147,7 +147,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [zlib](https://www.zlib.net/)                                                     | 1.3.2  | 1.3.2  | 1.3.2  |                          |
 | [librsync](https://github.com/librsync/librsync/releases)                         | -      | 2.3.4  | 2.3.4  |                          |
 | [leech](https://github.com/larsewi/leech/releases)                                | -      | 0.2.0  | -      | Enterprise               |
-| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 5.5.1  | Enterprise               |
+| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 5.5.2  | Enterprise               |
 
 
 ### Enterprise Hub dependencies
@@ -158,11 +158,11 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.5  | 1.6.5  | 1.6.5  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.55.0 | 2.55.0 | 2.55.0 |
-| [libexpat](https://libexpat.github.io/)             | 2.8.4  | 2.8.4  | 2.8.4  |
-| [PHP](https://php.net/)                             | 8.3.33 | 8.5.10 | 8.5.10 |
+| [libexpat](https://libexpat.github.io/)             | 2.8.4  | 2.8.5  | 2.8.5  |
+| [PHP](https://php.net/)                             | 8.3.33 | 8.5.11 | 8.5.11 |
 | [PostgreSQL](https://www.postgresql.org/)           | 16.15  | 18.6   | 18.6   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.70.0 | 1.70.0 |
-| [rsync](https://download.samba.org/pub/rsync/)      | 3.5.0  | 3.5.0  | 3.5.0  |
+| [rsync](https://download.samba.org/pub/rsync/)      | 3.5.0  | 3.5.1  | 3.5.1  |
 
 - [MinGW-w64](https://sourceforge.net/projects/mingw-w64/) **OUTDATED** needed
   for [redmine#2932](https://dev.cfengine.com/issues/2932)
