@@ -100,7 +100,8 @@ def publishPackages(String subdir) {
 // Runs one build in the workspace of the node the caller allocated.
 //
 // Cleans up after the previous build. Checks out each repo at its revision from
-// revs. Builds, then archives and publishes the packages.
+// revs. Builds, then publishes the packages, or archives them if there is no
+// PACKAGE_UPLOAD_DIRECTORY.
 //
 // subdir is what the build writes under output/: the label, or tarballs. opts
 // holds the build-in-container.py flags that vary per build. The flags every
@@ -144,8 +145,11 @@ def containerBuild(String subdir, String opts, List repos, Map revs) {
     """
   }
 
-  archiveArtifacts artifacts: 'output/**', fingerprint: true
-  publishPackages(subdir)
+  if (params.PACKAGE_UPLOAD_DIRECTORY?.trim()) {
+    publishPackages(subdir)
+  } else {
+    archiveArtifacts artifacts: 'output/**', fingerprint: true
+  }
 }
 
 // All filled in by Resolve refs and read by the build stages, which run on other
@@ -170,7 +174,7 @@ pipeline {
     disableConcurrentBuilds()
     timeout(time: 8, unit: 'HOURS')
     // Packages are large; keep logs longer than the artifacts.
-    buildDiscarder(logRotator(numToKeepStr: '50', artifactNumToKeepStr: '10'))
+    buildDiscarder(logRotator(numToKeepStr: '50', artifactNumToKeepStr: '2'))
   }
 
   parameters {
@@ -200,7 +204,7 @@ pipeline {
     string(name: 'EXPLICIT_VERSION', defaultValue: '',
            description: 'Override the version string the build derives from the sources. Leave empty for the usual behaviour.')
     string(name: 'PACKAGE_UPLOAD_DIRECTORY', defaultValue: '',
-           description: 'Directory under http://buildcache.cfengine.com/packages/build-in-container/ to publish the packages to. Leave empty to only archive them.')
+           description: 'Directory under http://buildcache.cfengine.com/packages/build-in-container/ to publish the packages to. Leave empty to archive them in Jenkins instead.')
   }
 
   stages {
