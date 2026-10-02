@@ -1,0 +1,30 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-diffutils.spec (the actively maintained recipe used on
+# Linux), adapted for macOS.
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-diffutils${PREFIX}
+
+# Patch
+
+$PATCH -p1 <0001-Adjusted-configure-script-for-cross-compiling-with-m.patch
+
+# Configure
+
+./configure --prefix=${PREFIX}
+
+# Build
+
+${MAKE:-make}
+
+# Install
+
+${MAKE:-make} install DESTDIR=${TT%$PREFIX}
+
+# Package
+
+rm -rf ${TT}/share

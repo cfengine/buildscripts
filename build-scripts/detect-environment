@@ -70,6 +70,7 @@ detect_os() {
         Darwin)
             OS_FAMILY=darwin
             OS=darwin
+            OS_VERSION=$(sw_vers -productVersion)
             ;;
         FreeBSD)
             OS_FAMILY=freebsd
@@ -236,7 +237,15 @@ detect_distribution() {
 # detected, then the "pkg-build-rpm" script will be called from the
 # "install-dependencies" script.
 detect_packaging() {
-    if [ -f /bin/rpm ]; then
+    if [ "$UNAME_S" = Darwin ]; then
+        # macOS has no package manager suitable for the iterative
+        # build-then-install-locally workflow the other DEP_PACKAGING values
+        # use (rpm/dpkg/pkg_add/etc all maintain a real system package
+        # database). pkg-build-macos/pkg-find-macos/pkg-install-macos use a
+        # plain tarball format with their own lightweight file-registry
+        # instead, see deps-packaging/pkg-install-macos.
+        DEP_PACKAGING=macos
+    elif [ -f /bin/rpm ]; then
         DEP_PACKAGING=rpm
     elif [ -f /usr/bin/dpkg ]; then
         DEP_PACKAGING=deb
@@ -261,6 +270,9 @@ detect_packaging() {
         ;;
     mingw)
         PACKAGING=msi
+        ;;
+    darwin)
+        PACKAGING=macos
         ;;
     *)
         PACKAGING=$DEP_PACKAGING
@@ -300,6 +312,10 @@ detect_arch() {
         ARCH=$UNAME_M
         ;;
     hpux)
+        ARCH=$UNAME_M
+        ;;
+    macos)
+        # arm64 on Apple Silicon, x86_64 on Intel Macs.
         ARCH=$UNAME_M
         ;;
     *)
@@ -372,6 +388,9 @@ detect_cores() {
         ;;
     hpux)
         NUM_CORES="$(ioscan -k -C processor | grep -c processor)"
+        ;;
+    darwin)
+        NUM_CORES="$(sysctl -n hw.ncpu)"
         ;;
     *)
         log_debug "Detected OS family is UNKNOWN, defaulting amount of CPU cores to 1"

@@ -1,0 +1,67 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-librsync.spec (the actively maintained recipe used on
+# Linux), adapted for macOS.
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-librsync${PREFIX}
+TTD_ROOT=${BUILD_ROOT}/cfbuild-librsync-devel
+TTD=${TTD_ROOT}${PREFIX}
+
+# Patch: applies the generated autotools build system.
+
+for i in 00*.patch; do
+    $PATCH -p1 <"$i"
+done
+
+# Set correct file permissions after patching files into existence.
+chmod +x ar-lib compile config.guess config.sub configure depcomp \
+    install-sh libtool ltmain.sh missing
+
+# Make sure timestamps are correct after patching files into existence, so
+# automake/autoconf isn't triggered to regenerate them (we don't ship those
+# tools on the build host).
+touch -t 0001010100 configure.ac
+touch -t 0001010100 Makefile.am
+touch -t 0001010100 m4/lt~obsolete.m4
+touch -t 0001010100 m4/ltversion.m4
+touch -t 0001010100 m4/ltsugar.m4
+touch -t 0001010100 m4/ltoptions.m4
+touch -t 0001010100 m4/libtool.m4
+
+touch -t 0001010101 aclocal.m4
+touch -t 0001010101 config.guess
+touch -t 0001010101 config.sub
+touch -t 0001010101 ltmain.sh
+touch -t 0001010101 Makefile.in
+touch -t 0001010101 install-sh
+touch -t 0001010101 missing
+touch -t 0001010101 depcomp
+touch -t 0001010101 config.hin
+
+touch -t 0001010102 configure
+touch -t 0001010102 libtool
+touch -t 0001010102 compile
+touch -t 0001010102 ar-lib
+
+# Configure
+
+./configure --prefix=${PREFIX} --enable-shared --disable-static
+
+# Build
+
+${MAKE:-make}
+
+# Install
+
+${MAKE:-make} install DESTDIR=${TTD_ROOT}
+rm -f ${TTD}/lib/librsync.la
+rm -f ${TTD}/lib/librsync.a
+
+# Package
+
+mkdir -p ${TT}/lib
+mv ${TTD}/lib/*.dylib ${TT}/lib
