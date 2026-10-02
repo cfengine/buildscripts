@@ -38,6 +38,13 @@ sudo mkdir -p ${CHROOT_ROOT}run
 
 sudo mkdir -p ${CHROOT_ROOT}root
 
+# rsync may skip chmod on device files since this patch, so copy the modes
+# from the host: https://github.com/RsyncProject/rsync/commit/808daef3e9a7
+if [ "$OS_FAMILY" = linux ]; then
+    (cd /dev && sudo find . -xdev \( -type c -o -type b \) \
+        -exec chmod --reference=/dev/{} "${CHROOT_ROOT}dev/{}" \;)
+fi
+
 # Safeguard to terminate operation if we have somehow ended up outside the
 # chroot, so we don't start running unsafe tests there.
 sudo touch ${CHROOT_ROOT}inside-chroot.txt
