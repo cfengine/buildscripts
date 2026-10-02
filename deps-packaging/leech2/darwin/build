@@ -18,8 +18,8 @@ TT=${BUILD_ROOT}/cfbuild-leech2${PREFIX}
 TTD=${BUILD_ROOT}/cfbuild-leech2-devel${PREFIX}
 
 # Use the system-wide Rust toolchain installed by the build host setup.
-export RUSTUP_HOME=/opt/rust
-export PATH=/opt/rust/bin:$PATH
+export RUSTUP_HOME="$HOME/.cache/cfengine/buildscripts"/rust
+export PATH="$HOME/.cache/cfengine/buildscripts"/rust/bin:$PATH
 
 # Embed an rpath of ${PREFIX}/lib in libleech2.dylib so it resolves
 # co-bundled CFEngine libraries at runtime, matching every other bundled dep

@@ -39,6 +39,14 @@ export PROJECT="${PROJECT:-community}"
 export EXPLICIT_ROLE="${EXPLICIT_ROLE:-agent}"
 export BUILD_TYPE="${BUILD_TYPE:-DEBUG}"
 
+if [ -d /var/cfengine ]; then
+    echo "Warning: an installation of CFEngine has been detected. In order to build CFEngine this directory must not exist."
+    find /var/cfengine
+    echo "Moving aside"
+    sudo mv /var/cfengine /var/$(date +%F-%T-cfengine)
+fi
+
+
 repo_list="buildscripts core masterfiles"
 if [ "$PROJECT" = nova ]; then
     repo_list="$repo_list nova enterprise"
@@ -46,6 +54,9 @@ if [ "$PROJECT" = nova ]; then
     "$BASEDIR/buildscripts/ci/macos-install-protobuf.sh"
     "$BASEDIR/buildscripts/ci/macos-install-rust.sh"
 fi
+
+sudo mkdir -p /var/cfengine
+sudo chown -R ${USER} /var/cfengine
 
 for repo in $repo_list; do
     if [ ! -d "$BASEDIR/$repo" ]; then

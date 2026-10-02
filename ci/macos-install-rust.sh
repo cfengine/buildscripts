@@ -12,7 +12,7 @@ install_rust() {
   # Apple Silicon, x86_64 on Intel), there's no cross-compilation target here.
   baseurl="https://static.rust-lang.org/dist"
   version=1.98.1
-  prefix=/opt/rust
+  prefix="$HOME/.cache/cfengine/buildscripts/rust"
 
   workdir="$(mktemp -d)"
   trap 'rm -rf "$workdir"' EXIT
@@ -27,7 +27,8 @@ install_rust() {
     # checksum from $baseurl/rust-std-${version}-aarch64-apple-darwin.tar.gz.sha256
     std_sha=840484e8f9c2a8ed024b706262a1257bb07d9617670a1fc90020536282950690
     # checksum from $baseurl/llvm-tools-${version}-aarch64-apple-darwin.tar.gz.sha256
-    llvm_tools_sha=5742de7a64f3140425716de60230793a33130bb845708da9bde077f30746b8b6
+    # see below about optional inclusion of llvm-tools
+#    llvm_tools_sha=5742de7a64f3140425716de60230793a33130bb845708da9bde077f30746b8b6
   else
     host=x86_64-apple-darwin
     # checksum from $baseurl/rustc-${version}-x86_64-apple-darwin.tar.gz.sha256
@@ -37,7 +38,8 @@ install_rust() {
     # checksum from $baseurl/rust-std-${version}-x86_64-apple-darwin.tar.gz.sha256
     std_sha=af7ffb3b408aa2f6a6940fc83ea6dc9c3e919d18f1b04f1a581b7896441e8b78
     # checksum from $baseurl/llvm-tools-${version}-x86_64-apple-darwin.tar.gz.sha256
-    llvm_tools_sha=0daa860666209a06024039824b0dbe6115d39b19bff7d23e013090c1759d178e
+    # see below about optional inclusion of llvm-tools
+#    llvm_tools_sha=0daa860666209a06024039824b0dbe6115d39b19bff7d23e013090c1759d178e
   fi
 
   # Download, verify, extract and install a single component tarball, then
@@ -88,20 +90,12 @@ install_rust() {
   # nothing) for binaries that already work fine unstripped -- so it's off by
   # default. Uncomment to get real stripped output instead.
   # install_component "llvm-tools-${version}-${host}" "$llvm_tools_sha"
-
-  mkdir -p /etc/profile.d
-  tee /etc/profile.d/rust.sh <<EOF
-export PATH=\$PATH:$prefix/bin
-EOF
-
-  chown -R root:wheel "$prefix"
-  # Make sure it's readable by the build user.
-  chmod -R a+rX "$prefix"
 }
 
+# maybe don't run as root
 # Re-exec under sudo when not root (e.g. when sourced from fix-buildhost.sh as
 # the build user).
-if [ "$(id -u)" -ne 0 ]; then
-  exec sudo bash "$0" "$@"
-fi
+#if [ "$(id -u)" -ne 0 ]; then
+#  exec sudo bash "$0" "$@"
+#fi
 install_rust "$@"

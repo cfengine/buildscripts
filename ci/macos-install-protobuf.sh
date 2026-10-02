@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -e
 
+PROTOBUF_PREFIX="$HOME/.cache/cfengine/buildscripts/protobuf"
 install_protobuf() {
   # Install the protoc compiler "manually" from the official prebuilt
   # release, verifying the SHA256 checksum of the zip. protoc is needed to
   # build the cargo-based leech2 dependency. Mirrors linux-install-protobuf.sh,
   # adapted for macOS (curl instead of wget, "shasum -a 256" instead of
   # sha256sum, and installs under /usr/local like Homebrew would).
-  cd /usr/local
+  mkdir -p "$PROTOBUF_PREFIX"
+  cd "$PROTOBUF_PREFIX"
   version=36.1
   baseurl="https://github.com/protocolbuffers/protobuf/releases/download/v${version}"
 
@@ -48,12 +50,13 @@ install_protobuf() {
   unzip -o "$zipfile"
   rm "$zipfile"
 
-  chmod a+rx /usr/local/bin/protoc
+  chmod a+rx "$PROTOBUF_PREFIX"/bin/protoc
 }
 
+# maybe don't run as root since we are installing in .cache/cfengine/buildscripts/protobuf instead of /usr/local to not clobber homebrew or something
 # Re-exec under sudo when not root (e.g. when sourced from fix-buildhost.sh as
 # the build user).
-if [ "$(id -u)" -ne 0 ]; then
-  exec sudo bash "$0"
-fi
+#if [ "$(id -u)" -ne 0 ]; then
+#  exec sudo bash "$0"
+#fi
 install_protobuf
