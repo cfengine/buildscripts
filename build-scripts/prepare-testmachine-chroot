@@ -56,6 +56,13 @@ if [ $RETURN_CODE -ne 0 ] && [ $RETURN_CODE -ne 24 ]; then
     exit $RETURN_CODE
 fi
 
+# rsync may skip chmod on device files since this patch, so copy the modes
+# from the host: https://github.com/RsyncProject/rsync/commit/808daef3e9a7
+if [ "$OS_FAMILY" = linux ]; then
+    (cd /dev && sudo find . -xdev \( -type c -o -type b \) \
+        -exec chmod --reference=/dev/{} "${CHROOT_ROOT}dev/{}" \;)
+fi
+
 # Create and set permissions for essential directories inside chroot
 for d in tmp var/tmp run root; do
     sudo mkdir -p "${CHROOT_ROOT}${d}"
