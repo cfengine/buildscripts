@@ -38,7 +38,6 @@ BASEDIR="$(cd "$(dirname "$0")/../../" && pwd)"
 export PROJECT="${PROJECT:-community}"
 export EXPLICIT_ROLE="${EXPLICIT_ROLE:-agent}"
 export BUILD_TYPE="${BUILD_TYPE:-DEBUG}"
-export BUILDPREFIX="${BUILDPREFIX:-$HOME/.cache/buildscripts_cache/cfengine-$PROJECT-$BUILD_TYPE-prefix}"
 
 repo_list="buildscripts core masterfiles"
 if [ "$PROJECT" = nova ]; then
