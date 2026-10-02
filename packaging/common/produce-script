@@ -58,13 +58,13 @@ echo "LMDB_VERSION=$LMDB_VERSION"
 
 case "$SCRIPT_TYPE" in
   *install)
-    include_script "$TEMPLATEDIR/patched-$PKG_TYPE-script-common-install.sh"
+    include_script "$TEMPLATEDIR/$PKG_TYPE-script-common-install.sh"
     include_script "$TEMPLATEDIR/script-common.sh"
     include_script "$TEMPLATEDIR/script-common-install.sh"
     include_script "$TEMPLATEDIR/script-common-$SCRIPT_TYPE.sh"
     ;;
   *remove)
-    include_script "$TEMPLATEDIR/patched-$PKG_TYPE-script-common-remove.sh"
+    include_script "$TEMPLATEDIR/$PKG_TYPE-script-common-remove.sh"
     include_script "$TEMPLATEDIR/script-common.sh"
     include_script "$TEMPLATEDIR/script-common-remove.sh"
     include_script "$TEMPLATEDIR/script-common-$SCRIPT_TYPE.sh"
