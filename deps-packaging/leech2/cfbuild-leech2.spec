@@ -1,4 +1,4 @@
-%define leech2_version 5.5.2
+%define leech2_version 5.5.3
 
 Summary: CFEngine Build Automation -- leech2
 Name: cfbuild-leech2
