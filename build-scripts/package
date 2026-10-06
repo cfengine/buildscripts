@@ -104,7 +104,7 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
     if [ "$PROJECT-$ROLE" = "nova-hub" ]; then
         log_debug "Configuring fonts for Enterprise Hub"
         if test -f "$BASEDIR/mission-portal/vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php"; then
-            cd "$BASEDIR"/mission-portal
+            cd "$BASEDIR"/mission-portal || exit
             # Add Red Hat Text font to TCPDF library that we use in Mission Portal for PDF generation
             "$PREFIX"/httpd/php/bin/php --version # diagnostic for ENT-12777, keep for future reference
             "$PREFIX"/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Regular.ttf
@@ -275,8 +275,8 @@ rpm | lpp)
         log_debug "TAR package path: $TARBALL"
 
         # Navigate to build root
-        cd "$BASEDIR/$PKG/"
-        [ -d BUILDROOT ] && cd BUILDROOT
+        cd "$BASEDIR/$PKG/" || exit
+        [ -d BUILDROOT ] && cd BUILDROOT || exit
 
         # Find the package directory (should be exactly one)
         for p in "$PKG"-*; do
@@ -348,7 +348,7 @@ deb)
     log_debug "Building DEB package with dpkg-buildpackage"
     log_debug "DEB_BUILD_OPTIONS: $DEB_BUILD_OPTIONS"
     (
-        cd "$BASEDIR/$PKG/pkg"
+        cd "$BASEDIR/$PKG/pkg" || exit
         export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"
         dpkg-buildpackage -b -us -uc -rfakeroot # -b: binary only, -us/-uc: don't sign
     ) || false
@@ -357,7 +357,7 @@ deb)
     log_debug "Creating generic TAR package for DEB build"
     TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION$safe_prefix.$ARCH.pkg.tar.gz"
     log_debug "TAR package path: $TARBALL"
-    cd "$BASEDIR/$PKG/pkg/debian/tmp/"
+    cd "$BASEDIR/$PKG/pkg/debian/tmp/" || exit
 
     # Prepare directory structure (same as RPM tar package)
     # Strip leading slash from PREFIX to get relative path
@@ -391,7 +391,7 @@ solaris)
     rsync -lpr "$PREFIX/bin"/* "$BASEDIR/$PKG/pkg$PREFIX/bin/"
     rsync -lpr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib/"
 
-    cd "$BASEDIR/$PKG/pkg"
+    cd "$BASEDIR/$PKG/pkg" || exit
 
     # Generate package prototype file listing all files
     # pkgproto scans the indicated paths and generates prototype(4) file entries that may be used as input to the pkgmk(1) command.
@@ -471,7 +471,7 @@ hpux)
     "$P/../common/produce-script" "$PKG" preremove depot >"$PREREMOVE"
     "$P/../common/produce-script" "$PKG" postremove depot >"$POSTREMOVE"
 
-    cd "$BASEDIR/$PKG/pkg/"
+    cd "$BASEDIR/$PKG/pkg/" || exit
 
     # Set package filename based on build type
     if [ "$BUILD_TYPE" = RELEASE ]; then
