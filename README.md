@@ -139,9 +139,9 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
 | [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.36 | 0.9.36 | 1.0.2  |                          |
 | [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.7.1  | 2.7.1  | 2.7.1  | Enterprise agent only    |
-| [OpenSSL](https://openssl.org/)                                                   | 3.6.5  | 3.6.4  | 4.0.3  |                          |
+| [OpenSSL](https://openssl.org/)                                                   | 3.6.5  | 3.6.5  | 4.0.3  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | -      | -      | -      |                          |
-| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | 10.49  | 10.48  | 10.49  |                          |
+| [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | 10.49  | 10.49  | 10.49  |                          |
 | [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
 | [SASL2](https://www.cyrusimap.org/sasl/)                                          | 2.1.28 | 2.1.28 | 2.1.28 | Solaris Enterprise agent |
 | [zlib](https://www.zlib.net/)                                                     | 1.3.2  | 1.3.2  | 1.3.2  |                          |
@@ -154,10 +154,10 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 
 | CFEngine version                                    | 3.24.x | 3.27.x | master |
 | :-------------------------------------------------- | :----- | :----- | :----- |
-| [Apache](https://httpd.apache.org/)                 | 2.4.69 | 2.4.68 | 2.4.69 |
+| [Apache](https://httpd.apache.org/)                 | 2.4.69 | 2.4.69 | 2.4.69 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.5  | 1.6.5  | 1.6.5  |
-| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.56.0 | 2.55.0 | 2.56.0 |
+| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.56.0 | 2.56.0 | 2.56.0 |
 | [libexpat](https://libexpat.github.io/)             | 2.8.5  | 2.8.5  | 2.8.5  |
 | [PHP](https://php.net/)                             | 8.3.35 | 8.5.11 | 8.5.11 |
 | [PostgreSQL](https://www.postgresql.org/)           | 16.15  | 18.6   | 18.6   |
