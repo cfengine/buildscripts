@@ -3,6 +3,11 @@ FROM ${BASE_IMAGE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Debian 11 is EOL and its packages have moved to archive.debian.org.
+RUN if grep -q VERSION_CODENAME=bullseye /etc/os-release; then \
+        sed -i 's/deb.debian.org/archive.debian.org/' /etc/apt/sources.list; \
+    fi
+
 # Build tools extracted from ci/cfengine-build-host-setup.cf (debian|ubuntu section)
 RUN apt-get update && apt-get install -y \
     autoconf automake binutils bison build-essential curl debhelper \
