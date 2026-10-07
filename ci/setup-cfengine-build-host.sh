@@ -30,6 +30,12 @@ function chown-root-owned-to-jenkins() {
     fi
 }
 
+# ENT-14720 on fresh SUSE instances something on the image runs zypper at boot
+# and can still hold the lock when we start, failing our zypper calls with
+# "System management is locked by the application with pid NNNN (zypper)."
+# Make zypper (including calls from cf-agent below) wait for the lock instead.
+export ZYPP_LOCK_TIMEOUT=300
+
 ls -la /home/
 if ! id -u jenkins; then
     useradd jenkins -p jenkins
