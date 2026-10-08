@@ -1,7 +1,7 @@
 {
   "ubuntu-20": {
     "image_name": "cfengine-builder-ubuntu-20",
-    "image_version": "20260823T001418Z",
+    "image_version": "20261007T124241Z",
     "base_image": "ubuntu:20.04",
     "base_image_sha": "sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214",
     "dockerfile": "Dockerfile.debian",
@@ -14,49 +14,49 @@
   },
   "ubuntu-22": {
     "image_name": "cfengine-builder-ubuntu-22",
-    "image_version": "20260823T001412Z",
+    "image_version": "20261007T124240Z",
     "base_image": "ubuntu:22.04",
     "base_image_sha": "sha256:5ec03bb3441e8b0bf3b4f9cd4629a1ae763010dc3035bb8da3ae6cf026486401",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-24": {
     "image_name": "cfengine-builder-ubuntu-24",
-    "image_version": "20260823T001403Z",
+    "image_version": "20261007T124235Z",
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-26": {
     "image_name": "cfengine-builder-ubuntu-26",
-    "image_version": "20260823T001407Z",
+    "image_version": "20261007T124238Z",
     "base_image": "ubuntu:26.04",
     "base_image_sha": "sha256:f144425ff09be612d6d9ad965196e9cdc23dae1f42110a8a11a3e9a8198759f7",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-11": {
     "image_name": "cfengine-builder-debian-11",
-    "image_version": "20260823T001403Z",
+    "image_version": "20261007T124246Z",
     "base_image": "debian:11",
     "base_image_sha": "sha256:6f519a81440354a85eb592c5f32109ab80605f6b892455983a6f618bf87fabe9",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-12": {
     "image_name": "cfengine-builder-debian-12",
-    "image_version": "20260823T001402Z",
+    "image_version": "20261007T124244Z",
     "base_image": "debian:12",
     "base_image_sha": "sha256:f37a335e82bca302e955fa39f9dfe28f1be618f016f8a2b56318e5a5111afc26",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-13": {
     "image_name": "cfengine-builder-debian-13",
-    "image_version": "20260823T001415Z",
+    "image_version": "20261007T124245Z",
     "base_image": "debian:13",
     "base_image_sha": "sha256:9cc080028c43b27d2074d63a5f9caf7166d731494965616c1a6d2827a004585c",
     "dockerfile": "Dockerfile.debian"
   },
   "rhel-7": {
     "image_name": "cfengine-builder-rhel-7",
-    "image_version": "20260823T001408Z",
+    "image_version": "20261007T124235Z",
     "base_image": "centos:7",
     "base_image_sha": "sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4",
     "dockerfile": "Dockerfile.rhel7",
@@ -66,7 +66,7 @@
   },
   "rhel-8": {
     "image_name": "cfengine-builder-rhel-8",
-    "image_version": "20260823T001411Z",
+    "image_version": "20261007T124246Z",
     "base_image": "rockylinux/rockylinux:8",
     "base_image_sha": "sha256:e8a49c5403b687db05d4d67333fa45808fbe74f36e683cec7abb1f7d0f2338c6",
     "dockerfile": "Dockerfile.rhel",
@@ -81,7 +81,7 @@
   },
   "rhel-9": {
     "image_name": "cfengine-builder-rhel-9",
-    "image_version": "20260823T001405Z",
+    "image_version": "20261007T124249Z",
     "base_image": "rockylinux/rockylinux:9",
     "base_image_sha": "sha256:8101994123cf3d0a8fee517bee7f39e555c7d92bd2d9eb3303cc988a0eeed00f",
     "dockerfile": "Dockerfile.rhel",
@@ -94,7 +94,7 @@
   },
   "rhel-10": {
     "image_name": "cfengine-builder-rhel-10",
-    "image_version": "20260823T001407Z",
+    "image_version": "20261007T124238Z",
     "base_image": "rockylinux/rockylinux:10",
     "base_image_sha": "sha256:827d37bc128288ccf160ee318bb3cb92d591164cb217e92f8bc61e3982ae1834",
     "dockerfile": "Dockerfile.rhel",
@@ -104,7 +104,7 @@
   },
   "ubuntu-24-mingw": {
     "image_name": "cfengine-builder-ubuntu-24-mingw",
-    "image_version": "20260823T001405Z",
+    "image_version": "20261007T124258Z",
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55",
     "dockerfile": "Dockerfile.mingw",
@@ -115,7 +115,7 @@
   },
   "tarballs": {
     "image_name": "cfengine-builder-tarballs",
-    "image_version": "20260920T003145Z",
+    "image_version": "20261007T124237Z",
     "base_image": "debian:9",
     "base_image_sha": "sha256:c5c5200ff1e9c73ffbf188b4a67eb1c91531b644856b4aefe86a58d2f0cb05be",
     "dockerfile": "Dockerfile.tarballs",
