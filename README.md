@@ -147,7 +147,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [zlib](https://www.zlib.net/)                                                     | 1.3.2  | 1.3.2  | 1.3.2  |                          |
 | [librsync](https://github.com/librsync/librsync/releases)                         | -      | 2.3.4  | 2.3.4  |                          |
 | [leech](https://github.com/larsewi/leech/releases)                                | -      | 0.2.0  | -      | Enterprise               |
-| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 5.5.3  | Enterprise               |
+| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 5.6.0  | Enterprise               |
 
 
 ### Enterprise Hub dependencies
@@ -158,7 +158,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.5  | 1.6.5  | 1.6.5  |
 | [Git](https://www.kernel.org/pub/software/scm/git/) | 2.56.0 | 2.56.0 | 2.56.0 |
-| [libexpat](https://libexpat.github.io/)             | 2.8.5  | 2.8.5  | 2.8.5  |
+| [libexpat](https://libexpat.github.io/)             | 2.8.5  | 2.8.5  | 2.9.0  |
 | [PHP](https://php.net/)                             | 8.3.35 | 8.5.11 | 8.5.11 |
 | [PostgreSQL](https://www.postgresql.org/)           | 16.15  | 18.6   | 18.6   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.70.0 | 1.70.0 |
