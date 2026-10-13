@@ -471,10 +471,14 @@ exit 0
 %dir %prefix/inputs
 %dir %prefix/state
 %dir %prefix/.leech2
+%dir %prefix/.leech2/v5
 
 # Mode must match the cfengine-nova package, which also ships these files
 %defattr(600,root,root,700)
 %prefix/.leech2/config.json
 %prefix/.leech2/containers-mapping.json
+
+# Hub only: leech2 config for hosts older than protocol v6
+%prefix/.leech2/v5/config.json
 
 %changelog
