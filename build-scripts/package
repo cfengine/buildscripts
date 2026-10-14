@@ -104,7 +104,7 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
     if [ "$PROJECT-$ROLE" = "nova-hub" ]; then
         log_debug "Configuring fonts for Enterprise Hub"
         if test -f "$BASEDIR/mission-portal/vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php"; then
-            cd "$BASEDIR"/mission-portal
+            cd "$BASEDIR"/mission-portal || exit
             # Add Red Hat Text font to TCPDF library that we use in Mission Portal for PDF generation
             "$PREFIX"/httpd/php/bin/php --version # diagnostic for ENT-12777, keep for future reference
             "$PREFIX"/httpd/php/bin/php ./vendor/tecnickcom/tcpdf/tools/tcpdf_addfont.php -i ./public/themes/default/bootstrap/cfengine/font/rht/RedHatText-Regular.ttf
@@ -118,12 +118,14 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
 if [ "$BUILDPREFIX" != /var/cfengine ]; then
     log_debug "Custom prefix detected: $BUILDPREFIX"
     safe_prefix="$(echo "$BUILDPREFIX" | sed -e 's:/::g')"
-    file_to_patch=$P/../common/script-templates/$PACKAGING-script-common.sh
-    if [ -f "$file_to_patch" ]; then
-        # Update installation scripts to use custom prefix
-        log_debug "Patching script template: $file_to_patch"
-        sed "s:/var/cfengine:$BUILDPREFIX:" "$file_to_patch" >"$file_to_patch".new
-        mv "$file_to_patch".new "$file_to_patch"
+    source_script="$P/../common/script-templates/$PACKAGING-script-common.sh"
+    patched_script="$P/../common/script-templates/patched-$PACKAGING-script-common.sh"
+    if [ -f "$source_script" ]; then
+        # Patch installation scripts for custom prefix, create patched-$PACKAGING-script-common.sh which is not version tracked
+        log_debug "Patching from source: $source_script to patched script: $patched_script"
+        sed "s:/var/cfengine:$BUILDPREFIX:" "$source_script" >"$patched_script"
+    else
+        log_error "Source $PACKAGING-script-common.sh not available at $source_script"
     fi
 else
     log_debug "Using default prefix: /var/cfengine"
@@ -273,8 +275,8 @@ rpm | lpp)
         log_debug "TAR package path: $TARBALL"
 
         # Navigate to build root
-        cd "$BASEDIR/$PKG/"
-        [ -d BUILDROOT ] && cd BUILDROOT
+        cd "$BASEDIR/$PKG/" || exit
+        [ -d BUILDROOT ] && cd BUILDROOT || exit
 
         # Find the package directory (should be exactly one)
         for p in "$PKG"-*; do
@@ -346,7 +348,7 @@ deb)
     log_debug "Building DEB package with dpkg-buildpackage"
     log_debug "DEB_BUILD_OPTIONS: $DEB_BUILD_OPTIONS"
     (
-        cd "$BASEDIR/$PKG/pkg"
+        cd "$BASEDIR/$PKG/pkg" || exit
         export DEB_BUILD_OPTIONS="$DEB_BUILD_OPTIONS"
         dpkg-buildpackage -b -us -uc -rfakeroot # -b: binary only, -us/-uc: don't sign
     ) || false
@@ -355,7 +357,7 @@ deb)
     log_debug "Creating generic TAR package for DEB build"
     TARBALL="$BASEDIR/$PKG/pkg/$PKG-$DEB_VERSION$safe_prefix.$ARCH.pkg.tar.gz"
     log_debug "TAR package path: $TARBALL"
-    cd "$BASEDIR/$PKG/pkg/debian/tmp/"
+    cd "$BASEDIR/$PKG/pkg/debian/tmp/" || exit
 
     # Prepare directory structure (same as RPM tar package)
     # Strip leading slash from PREFIX to get relative path
@@ -389,7 +391,7 @@ solaris)
     rsync -lpr "$PREFIX/bin"/* "$BASEDIR/$PKG/pkg$PREFIX/bin/"
     rsync -lpr "$PREFIX/lib"/* "$BASEDIR/$PKG/pkg$PREFIX/lib/"
 
-    cd "$BASEDIR/$PKG/pkg"
+    cd "$BASEDIR/$PKG/pkg" || exit
 
     # Generate package prototype file listing all files
     # pkgproto scans the indicated paths and generates prototype(4) file entries that may be used as input to the pkgmk(1) command.
@@ -469,7 +471,7 @@ hpux)
     "$P/../common/produce-script" "$PKG" preremove depot >"$PREREMOVE"
     "$P/../common/produce-script" "$PKG" postremove depot >"$POSTREMOVE"
 
-    cd "$BASEDIR/$PKG/pkg/"
+    cd "$BASEDIR/$PKG/pkg/" || exit
 
     # Set package filename based on build type
     if [ "$BUILD_TYPE" = RELEASE ]; then
@@ -487,6 +489,109 @@ hpux)
     # Create HP-UX depot package using swpackage
     log_debug "Creating HP-UX depot package with swpackage"
     /usr/sbin/swpackage -s "$BASEDIR/$PKG/$PKG-$VERSION$safe_prefix.psf" -x media_type=tape @ "$BASEDIR/$PKG/pkg/$NAME.depot"
+    ;;
+macos)
+    # macOS installer package (.pkg) creation.
+    log_debug "Creating macOS installer package for $PKG"
+
+    # Unlike rpm/deb (many small packages tied together by the package
+    # manager's dependency resolution: cfengine-nova.rpm Requires the
+    # separate cfbuild-openssl.rpm etc, all installed side by side), macOS
+    # has no repository to fetch declared package dependencies from, and the
+    # ask here was one self-contained .pkg -- so we build a single payload
+    # merging both halves of the build:
+    #   - $BASEDIR/cfengine/dist: core/enterprise/nova/masterfiles' own "make
+    #     install" output (see build-scripts/compile's DESTDIR=cfengine/dist)
+    #   - $PREFIX: the bundled runtime dependencies (openssl, libcurl, lmdb,
+    #     ...), which install-dependencies installs for real onto this build
+    #     host's live prefix (see pkg-install-macos) so each dependency's own
+    #     build can link/run against the previous one. uninstall_cfbuild_devel
+    #     already stripped the -devel packages (headers, pkgconfig, static
+    #     libs) above, so what's left here is exactly the runtime content we
+    #     want to ship.
+    STAGE="$BASEDIR/$PKG/pkg"
+    rm -rf "$STAGE"
+    mkdir -p "$STAGE$PREFIX"
+    cp -a "$BASEDIR/cfengine/dist"/* "$STAGE/"
+    (cd "$PREFIX" && tar cf - .) | (cd "$STAGE$PREFIX" && tar xf -)
+
+    # configure always passes --with-init-script (there's no per-OS
+    # conditional for it), so core generates a Linux-style SysV init.d script
+    # regardless of platform. It's inert on macOS (nothing runs it, we use
+    # launchd instead, wired up below), so drop it rather than ship dead
+    # weight that looks like a broken install to anyone inspecting the .pkg.
+    rm -rf "$STAGE/etc/init.d" "$STAGE/etc/sysconfig" "$STAGE/etc/profile.d"
+
+    # Ship the LaunchDaemon plist templates as part of the payload so
+    # postinstall.sh (baked into the package, see the "darwin" case in
+    # packaging/common/cfengine-non-hub/postinstall.sh) can install them.
+    log_debug "Staging LaunchDaemon plists into $STAGE$PREFIX/misc/launchd"
+    mkdir -p "$STAGE$PREFIX/misc/launchd"
+    cp "$P/darwin"/*.plist "$STAGE$PREFIX/misc/launchd/"
+
+    # Generate the preinstall/postinstall scripts pkgbuild embeds in the
+    # package, and a standalone uninstall script: macOS installer packages
+    # have no built-in uninstall lifecycle, so preremove/postremove are
+    # shipped as a script an admin runs by hand instead.
+    SCRIPTSDIR="$BASEDIR/$PKG/scripts"
+    log_debug "Generating installer scripts in $SCRIPTSDIR"
+    rm -rf "$SCRIPTSDIR"
+    mkdir -p "$SCRIPTSDIR"
+    "$P/../common/produce-script" "$PKG" preinstall macos >"$SCRIPTSDIR/preinstall"
+    "$P/../common/produce-script" "$PKG" postinstall macos >"$SCRIPTSDIR/postinstall"
+
+    {
+        "$P/../common/produce-script" "$PKG" preremove macos
+        "$P/../common/produce-script" "$PKG" postremove macos
+    } >"$STAGE$PREFIX/bin/uninstall-cfengine.sh"
+
+    # produce-script's output starts with script-header.sh, which (like every
+    # other fragment) has no shebang: rpm/deb/solaris/hpux/aix all invoke
+    # their scriptlets via an explicit interpreter ("sh scriptfile"), so it
+    # never mattered there. installer(8) is different -- it execve()s
+    # preinstall/postinstall directly, and a script with no "#!" line fails
+    # immediately with ENOEXEC ("Exec format error"), which is exactly what
+    # aborted the real install attempt this was debugged from (see
+    # /var/log/install.log: "PackageKit: Error Domain=NSPOSIXErrorDomain
+    # Code=8 'Exec format error'" on ./preinstall). Prepend it here rather
+    # than in script-header.sh itself, to avoid touching every other
+    # platform's scriptlets for a need that's specific to this one.
+    for script in "$SCRIPTSDIR/preinstall" "$SCRIPTSDIR/postinstall" "$STAGE$PREFIX/bin/uninstall-cfengine.sh"; do
+        { echo '#!/bin/sh'; cat "$script"; } >"$script.tmp"
+        mv "$script.tmp" "$script"
+        chmod +x "$script"
+    done
+
+    IDENTIFIER="com.cfengine.$PKG"
+
+    # Build a component package, then wrap it in a product archive (also a
+    # .pkg): productbuild's output is what Installer.app/installer(8) expect
+    # and is the form that can later gain a distribution.xml/welcome screen
+    # or get through "productsign" for notarization.
+    COMPONENT_PKG="$BASEDIR/$PKG/$PKG-component.pkg"
+    log_debug "Building component package with pkgbuild"
+    pkgbuild \
+        --root "$STAGE" \
+        --identifier "$IDENTIFIER" \
+        --version "$VERSION" \
+        --scripts "$SCRIPTSDIR" \
+        --install-location / \
+        "$COMPONENT_PKG"
+
+    if [ "$BUILD_TYPE" = RELEASE ]; then
+        NAME="$PKG-$VERSION.$RELEASE-macos$OS_VERSION_MAJOR-$ARCH.pkg"
+    else
+        NAME="$PKG-$VERSION-macos$OS_VERSION_MAJOR-$ARCH.pkg"
+    fi
+
+    log_debug "Building product package with productbuild: $NAME"
+    productbuild \
+        --package "$COMPONENT_PKG" \
+        "$BASEDIR/$PKG/$NAME"
+
+    # Unsigned: productsign/notarytool need a Developer ID Installer
+    # certificate and notarization credentials we don't have in this build
+    # environment. Sign and notarize as a separate step before distributing.
     ;;
 msi)
     # Windows MSI package creation
