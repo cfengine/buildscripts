@@ -16,21 +16,21 @@
     "image_name": "cfengine-builder-ubuntu-22",
     "image_version": "20261018T003001Z",
     "base_image": "ubuntu:22.04",
-    "base_image_sha": "sha256:5ec03bb3441e8b0bf3b4f9cd4629a1ae763010dc3035bb8da3ae6cf026486401",
+    "base_image_sha": "sha256:0a9887931b0e38af2e3487ed39e29436b0535c4f3f52e57745baaf79d1898956",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-24": {
     "image_name": "cfengine-builder-ubuntu-24",
     "image_version": "20261018T002948Z",
     "base_image": "ubuntu:24.04",
-    "base_image_sha": "sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55",
+    "base_image_sha": "sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-26": {
     "image_name": "cfengine-builder-ubuntu-26",
     "image_version": "20261018T002946Z",
     "base_image": "ubuntu:26.04",
-    "base_image_sha": "sha256:f144425ff09be612d6d9ad965196e9cdc23dae1f42110a8a11a3e9a8198759f7",
+    "base_image_sha": "sha256:c098726dd9b9733f3e885f8de0ef375206a311b0a317eadc40d347b1115fb944",
     "dockerfile": "Dockerfile.debian"
   },
   "debian-11": {
@@ -106,7 +106,7 @@
     "image_name": "cfengine-builder-ubuntu-24-mingw",
     "image_version": "20261018T003003Z",
     "base_image": "ubuntu:24.04",
-    "base_image_sha": "sha256:534baea6a22c03a63003dbc8dbe78fe34bc0d7e595d9a9dc9834884ff530eb55",
+    "base_image_sha": "sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac",
     "dockerfile": "Dockerfile.mingw",
     "cross_target": "x64-mingw",
     "architectures": [
