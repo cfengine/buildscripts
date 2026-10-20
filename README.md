@@ -132,7 +132,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [diffutils](https://ftpmirror.gnu.org/diffutils/)                                 | 3.12   | 3.12   | 3.12   |                          |
 | [libacl](https://download.savannah.gnu.org/releases/acl/)                         | 2.4.0  | 2.4.0  | 2.4.0  |                          |
 | [libattr](https://download.savannah.gnu.org/releases/attr/)                       | 2.6.0  | 2.6.0  | 2.6.0  |                          |
-| [libcurl](https://curl.se/download.html)                                          | 8.22.0 | 8.22.0 | 8.23.0 |                          |
+| [libcurl](https://curl.se/download.html)                                          | 8.23.0 | 8.23.0 | 8.23.0 |                          |
 | [libgnurx](https://www.gnu.org/software/rx/rx.html)                               | 2.5.1  | 2.5.1  | 2.5.1  | Windows Enterprise agent |
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.19   | 1.19   | 1.19   | Needed by libxml2        |
 | [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.4 | 2.15.4 | 2.15.4 |                          |
