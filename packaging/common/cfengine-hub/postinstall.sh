@@ -606,7 +606,9 @@ migrate_db_using_dump_file() {
     safe_mv "$PREFIX/share" postgresql "$PREFIX/share.new"
     # restore old backup
     safe_cp "$BACKUP_DIR" data "$PREFIX/state/pg"
-    safe_cp "$BACKUP_DIR" bin "$PREFIX"
+    safe_cp_nolink "$BACKUP_DIR" bin "$PREFIX"
+    # Ensure restored old binaries are executable by cfpostgres.
+    chmod 755 "$PREFIX/bin"/* 2>/dev/null || true
     on_files cp "$BACKUP_DIR/lib" "$PREFIX/lib"
     safe_cp "$BACKUP_DIR/lib" postgresql "$PREFIX/lib"
     safe_cp "$BACKUP_DIR/share" postgresql "$PREFIX/share"
@@ -720,6 +722,22 @@ do_migration() {
     else
       DEBUG=0
     fi
+
+    # Preflight: verify cfpostgres can execute the old binaries before any
+    # destructive operation. If not, attempt a one-shot chmod repair.
+    if ! su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_ctl --version" >/dev/null 2>&1; then
+      cf_console echo "cfpostgres cannot execute $BACKUP_DIR/bin/pg_ctl — attempting mode repair"
+      chmod 755 "$BACKUP_DIR/bin"/* 2>/dev/null || true
+      chmod 711 "$BACKUP_DIR" "$BACKUP_DIR/bin" 2>/dev/null || true
+      if ! su cfpostgres -c "LD_LIBRARY_PATH=$BACKUP_DIR/lib/ $BACKUP_DIR/bin/pg_ctl --version" >/dev/null 2>&1; then
+        cf_console echo "ERROR: cfpostgres still cannot execute $BACKUP_DIR/bin/pg_ctl after chmod repair."
+        ls -la "$BACKUP_DIR/bin/" >&2
+        cf_console echo "Please fix permissions on $BACKUP_DIR/bin/ and retry the upgrade."
+        exit 1
+      fi
+      cf_console echo "Mode repair succeeded, continuing migration."
+    fi
+
     cd /tmp
     cf_console echo "Migrating database using pg_upgrade utility..."
     cf_console echo
