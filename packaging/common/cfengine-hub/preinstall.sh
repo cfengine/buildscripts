@@ -141,6 +141,7 @@ fi
 #stop the remaining services on upgrade
 if is_upgrade; then
   cf_console platform_service cfengine3 stop
+  terminate_cf_agents
   # CFE-2278: Migrate to split units
   if use_systemd && [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
     # When using systemd, the services are split in two, and although both will
@@ -240,7 +241,13 @@ if migrating_postgres; then
     # the postgresql.conf file was modified, we should try to use it after migration
     cp -a "$BACKUP_DIR/data/postgresql.conf" "$BACKUP_DIR/data/postgresql.conf.modified"
   fi
-  safe_cp "$PREFIX" bin "$BACKUP_DIR"
+  # Copy, don't hardlink: policy managing perms under $PREFIX/state/pg (e.g.
+  # CFE-951 in masterfiles) would otherwise change the live binaries too.
+  safe_cp_nolink "$PREFIX" bin "$BACKUP_DIR"
+  # Normalize executable permissions so cfpostgres can run old PG binaries
+  # during migration, whatever mode damage the source already had.
+  chmod 755 "$BACKUP_DIR/bin"/* 2>/dev/null || true
+  chmod 711 "$BACKUP_DIR/bin" 2>/dev/null || true
   on_files cp "$PREFIX/lib" "$BACKUP_DIR/lib"
   safe_cp "$PREFIX/lib" postgresql "$BACKUP_DIR/lib"
   safe_cp "$PREFIX/share" postgresql "$BACKUP_DIR/share"
