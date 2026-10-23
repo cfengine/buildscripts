@@ -1,0 +1,63 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-lmdb.spec (the actively maintained recipe used on
+# Linux), adapted for macOS. Follows the same layout as ../hpux/build: the
+# source tarball (openldap-LMDB_<ver>.tar.gz) is extracted flat, so patches
+# are applied with -p1 from the extraction root before "cd"-ing into
+# libraries/liblmdb (the spec applies the same patches with -p3 instead,
+# because its %setup already starts inside that subdirectory).
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+TT=${BUILD_ROOT}/cfbuild-lmdb${PREFIX}
+TTD_ROOT=${BUILD_ROOT}/cfbuild-lmdb-devel
+TTD=${TTD_ROOT}${PREFIX}
+
+for i in 00*.patch; do
+    $PATCH -p1 <"$i"
+done
+
+cd libraries/liblmdb
+
+# Executable files taken from mdb-autoconf-generated.patch, which is generated
+# from Git, and contains permission info, but patch -p1 cannot apply it.
+chmod 755 config.guess
+chmod 755 config.sub
+chmod 755 configure
+chmod 755 depcomp
+chmod 755 install-sh
+chmod 755 missing
+
+# Workaround for automake being sensitive to the order in which the generated
+# files are applied. If Makefile.in is patched before aclocal.m4 (which it is,
+# following natural file order), then it will try to rebuild Makefile.in, which
+# it can't without automake. Work around it by touching that file.
+touch Makefile.in
+
+# Configure
+
+if [ "$DEBUGSYM" = yes ]; then
+    CFLAGS="-ggdb3 -DMDB_MAXKEYSIZE=511"
+else
+    CFLAGS="-DMDB_MAXKEYSIZE=511"
+fi
+export CFLAGS
+
+./configure --prefix=${PREFIX} --libdir=${PREFIX}/lib
+
+# Build
+
+${MAKE:-make}
+
+# Install
+
+${MAKE:-make} install DESTDIR=${TTD_ROOT}
+rm -f ${TTD}/lib/liblmdb.la
+
+# Package
+
+mkdir -p ${TT}/bin ${TT}/lib
+mv ${TTD}/bin/* ${TT}/bin
+mv ${TTD}/lib/*.dylib ${TT}/lib

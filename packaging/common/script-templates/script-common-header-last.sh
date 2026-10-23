@@ -25,6 +25,11 @@ case "`os_type`" in
     aix)
         INSTLOGGROUP="system"
         ;;
+    darwin)
+        # macOS has no group literally named "root": gid 0 is called "wheel"
+        # there, and "chown root:root" fails with "illegal group name".
+        INSTLOGGROUP="wheel"
+        ;;
     *)
         INSTLOGGROUP="root"
         ;;

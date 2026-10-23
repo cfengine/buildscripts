@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  launchd equivalent of core/misc/systemd/cf-monitord.service.in. See
+  com.cfengine.cf-execd.plist for the general approach.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.cfengine.cf-monitord</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>test -f @PREFIX@/inputs/promises.cf &amp;&amp; exec @PREFIX@/bin/cf-monitord --no-fork</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>@PREFIX@/outputs/cf-monitord.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>@PREFIX@/outputs/cf-monitord.launchd.log</string>
+</dict>
+</plist>
