@@ -136,6 +136,21 @@ safe_cp() {
     return 1
 }
 
+safe_cp_nolink() {
+    # Like `safe_cp`, but never creates hardlinks, so the copy does not share
+    # mode and owner with the source. Args are same as in safe_cp.
+    test "$#" -eq 3 || return 2
+    from="$1"
+    name="$2"
+    to="$3"
+    if cp -a "$from/$name" "$to"; then
+        return 0
+    fi
+    echo "Copy failed, so removing partially-copied data and aborting"
+    rm -rf "$to/$name"
+    return 1
+}
+
 safe_mv() {
     # "safe" alternative to `mv`. Executes `safe_cp` and deletes source dir if
     # that succeeds.

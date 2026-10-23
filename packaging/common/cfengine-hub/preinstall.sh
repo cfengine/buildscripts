@@ -24,7 +24,10 @@ fi
 
 test -z "$BACKUP_DIR" && BACKUP_DIR=$PREFIX/state/pg/backup
 
-if [ -d "$BACKUP_DIR" ] && [ -n "$(ls -A "$BACKUP_DIR")" ]; then
+# A dedicated volume mounted at BACKUP_DIR contains a lost+found directory,
+# which is not stale data and must not block the upgrade.
+backup_dir_contents="$(ls -A "$BACKUP_DIR" 2>/dev/null || true)"
+if [ -d "$BACKUP_DIR" ] && [ -n "$backup_dir_contents" ] && [ "$backup_dir_contents" != "lost+found" ]; then
     # If the backup directory exists and is not empty we don't want to proceed,
     # that stale data can cause database migration problems.
     cf_console echo "Backup directory $BACKUP_DIR exists and is not empty."
@@ -242,7 +245,13 @@ if migrating_postgres; then
     # the postgresql.conf file was modified, we should try to use it after migration
     cp -a "$BACKUP_DIR/data/postgresql.conf" "$BACKUP_DIR/data/postgresql.conf.modified"
   fi
-  safe_cp "$PREFIX" bin "$BACKUP_DIR"
+  # Copy, don't hardlink: policy managing perms under $PREFIX/state/pg (e.g.
+  # CFE-951 in masterfiles) would otherwise change the live binaries too.
+  safe_cp_nolink "$PREFIX" bin "$BACKUP_DIR"
+  # Normalize executable permissions so cfpostgres can run old PG binaries
+  # during migration, whatever mode damage the source already had.
+  chmod 755 "$BACKUP_DIR/bin"/* 2>/dev/null || true
+  chmod 711 "$BACKUP_DIR/bin" 2>/dev/null || true
   on_files cp "$PREFIX/lib" "$BACKUP_DIR/lib"
   safe_cp "$PREFIX/lib" postgresql "$BACKUP_DIR/lib"
   safe_cp "$PREFIX/share" postgresql "$BACKUP_DIR/share"
