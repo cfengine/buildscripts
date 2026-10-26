@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  launchd equivalent of core/misc/systemd/cf-execd.service.in. macOS has no
+  init.d/systemd, so postinstall.sh installs this (with @PREFIX@ substituted)
+  into /Library/LaunchDaemons and loads it instead. Runs the execution
+  scheduler that drives cf-agent on a schedule, matching the "Restart=always"
+  behavior of the systemd unit via KeepAlive.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.cfengine.cf-execd</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>test -f @PREFIX@/inputs/promises.cf &amp;&amp; exec @PREFIX@/bin/cf-execd --no-fork</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>@PREFIX@/outputs/cf-execd.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>@PREFIX@/outputs/cf-execd.launchd.log</string>
+</dict>
+</plist>
