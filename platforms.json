@@ -1,7 +1,7 @@
 {
   "ubuntu-20": {
     "image_name": "cfengine-builder-ubuntu-20",
-    "image_version": "20261018T002956Z",
+    "image_version": "20261025T002942Z",
     "base_image": "ubuntu:20.04",
     "base_image_sha": "sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214",
     "dockerfile": "Dockerfile.debian",
@@ -56,7 +56,7 @@
   },
   "rhel-7": {
     "image_name": "cfengine-builder-rhel-7",
-    "image_version": "20261018T002949Z",
+    "image_version": "20261025T002931Z",
     "base_image": "centos:7",
     "base_image_sha": "sha256:be65f488b7764ad3638f236b7b515b3678369a5124c47b8d32916d6487418ea4",
     "dockerfile": "Dockerfile.rhel7",
@@ -66,7 +66,7 @@
   },
   "rhel-8": {
     "image_name": "cfengine-builder-rhel-8",
-    "image_version": "20261018T002946Z",
+    "image_version": "20261025T002943Z",
     "base_image": "rockylinux/rockylinux:8",
     "base_image_sha": "sha256:e8a49c5403b687db05d4d67333fa45808fbe74f36e683cec7abb1f7d0f2338c6",
     "dockerfile": "Dockerfile.rhel",
@@ -104,7 +104,7 @@
   },
   "ubuntu-24-mingw": {
     "image_name": "cfengine-builder-ubuntu-24-mingw",
-    "image_version": "20261018T003003Z",
+    "image_version": "20261025T002935Z",
     "base_image": "ubuntu:24.04",
     "base_image_sha": "sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac",
     "dockerfile": "Dockerfile.mingw",
@@ -115,7 +115,7 @@
   },
   "tarballs": {
     "image_name": "cfengine-builder-tarballs",
-    "image_version": "20261018T003002Z",
+    "image_version": "20261025T002951Z",
     "base_image": "debian:9",
     "base_image_sha": "sha256:c5c5200ff1e9c73ffbf188b4a67eb1c91531b644856b4aefe86a58d2f0cb05be",
     "dockerfile": "Dockerfile.tarballs",
