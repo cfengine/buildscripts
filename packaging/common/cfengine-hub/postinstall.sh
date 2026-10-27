@@ -631,7 +631,9 @@ migrate_db_using_dump_file() {
     safe_mv "$PREFIX/share" postgresql "$PREFIX/share.new"
     # restore old backup
     safe_cp "$BACKUP_DIR" data "$PREFIX/state/pg"
-    safe_cp "$BACKUP_DIR" bin "$PREFIX"
+    safe_cp_nolink "$BACKUP_DIR" bin "$PREFIX"
+    # Ensure restored old binaries are executable by cfpostgres.
+    chmod 755 "$PREFIX/bin"/* 2>/dev/null || true
     on_files cp "$BACKUP_DIR/lib" "$PREFIX/lib"
     safe_cp "$BACKUP_DIR/lib" postgresql "$PREFIX/lib"
     safe_cp "$BACKUP_DIR/share" postgresql "$PREFIX/share"
@@ -745,6 +747,14 @@ do_migration() {
     else
       DEBUG=0
     fi
+
+    # cfpostgres runs the old binaries during the migration (ENT-14899)
+    if ! su cfpostgres -c "test -x $BACKUP_DIR/bin/pg_ctl"; then
+      cf_console echo "Warning: cfpostgres can't execute the old PostgreSQL binaries, setting them to 755:"
+      cf_console ls -l "$BACKUP_DIR/bin"
+      chmod 755 "$BACKUP_DIR/bin"/*
+    fi
+
     cd /tmp
     cf_console echo "Migrating database using pg_upgrade utility..."
     cf_console echo
@@ -1150,6 +1160,7 @@ if ! [ -f "$PREFIX/UPGRADED_FROM.txt" ] || egrep '3\.([0-6]\.|7\.0)' "$PREFIX/UP
   # Versions <= 3.7.0 are unreliable in their daemon killing. Kill them one
   # more time now that we have upgraded.
   cf_console platform_service cfengine3 stop
+  terminate_cf_agents
 fi
 
 # Let's make sure all files and directories created above have correct SELinux
