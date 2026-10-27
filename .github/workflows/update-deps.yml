@@ -20,6 +20,9 @@ jobs:
       contents: write
       pull-requests: write
     strategy:
+      # Run branches one at a time to avoid HTTP 429 (Too Many Requests)
+      max-parallel: 1
+      fail-fast: false
       matrix:
         branch: [master, 3.27.x, 3.24.x]
     steps:
