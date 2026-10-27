@@ -104,6 +104,69 @@ wait_for_cf_postgres_down() {
     cd /tmp && ! su cfpostgres -c "$PREFIX/bin/psql -l" >/dev/null 2>&1
 }
 
+cf_agent_pids() {
+    # Prints the PIDs of running cf-agent processes, except our own ancestors
+    # (cf-agent may be running this package upgrade) and, where /proc tells
+    # us, processes in other mount namespaces (containers).
+    _ancestors=" "
+    _pid=$$
+    while [ -n "$_pid" ] && [ "$_pid" -gt 1 ]; do
+        _ancestors="$_ancestors$_pid "
+        _pid=$(ps -o ppid= -p "$_pid" 2>/dev/null | tr -d ' ')
+    done
+    _ns=$(readlink /proc/self/ns/mnt 2>/dev/null || true)
+    for _pid in $(pgrep -x cf-agent); do
+        case "$_ancestors" in
+            *" $_pid "*) continue ;;
+        esac
+        if [ -z "$_ns" ] || [ "$(readlink /proc/$_pid/ns/mnt 2>/dev/null)" = "$_ns" ]; then
+            echo "$_pid"
+        fi
+    done
+}
+
+terminate_cf_agents() {
+    # Call after stopping cf-execd. Stopping cf-execd doesn't stop an agent it
+    # started (systemd KillMode=process), and that agent can keep changing
+    # things, like permissions under state/pg (ENT-14899). Gives running agents
+    # up to 600s to finish, then kills them. Fails if it can't check for agents
+    # or can't kill them.
+    if ! command -v pgrep >/dev/null; then
+        cf_console echo "Error: pgrep not found, can't check for running cf-agent"
+        return 1
+    fi
+    _pids=$(cf_agent_pids)
+    if [ -z "$_pids" ]; then
+        return 0
+    fi
+    _timeout=600
+    cf_console echo "Waiting up to ${_timeout}s for cf-agent to finish:"
+    cf_console ps -o pid,etime,args -p "$(echo $_pids | tr ' ' ',')" || true
+    _waited=0
+    while [ -n "$(cf_agent_pids)" ] && [ "$_waited" -lt "$_timeout" ]; do
+        sleep 5
+        _waited=$((_waited + 5))
+    done
+    # Killing an agent can let the shell cf-execd started it from run the next
+    # one (update.cf, then promises.cf), so check a few times.
+    for _try in 1 2 3; do
+        _pids=$(cf_agent_pids)
+        if [ -z "$_pids" ]; then
+            return 0
+        fi
+        cf_console echo "Warning: killing cf-agent(s) still running after ${_timeout}s:"
+        cf_console ps -o pid,etime,args -p "$(echo $_pids | tr ' ' ',')" || true
+        kill -KILL $_pids 2>/dev/null || true
+        sleep 1
+    done
+    _pids=$(cf_agent_pids)
+    if [ -n "$_pids" ]; then
+        cf_console echo "Error: cf-agent(s) still running after being killed:"
+        cf_console ps -o pid,etime,args -p "$(echo $_pids | tr ' ' ',')" || true
+        return 1
+    fi
+}
+
 safe_cp() {
     # "safe" alternative to `cp`. Tries `cp -al` first, and if it fails - `cp -a`.
     # Deletes partially-copied files if copy operation fails.
@@ -129,6 +192,21 @@ safe_cp() {
     rm -rf "$to/$name"
     if cp -a "$from/$name" "$to"; then
         # Copy succeeded
+        return 0
+    fi
+    echo "Copy failed, so removing partially-copied data and aborting"
+    rm -rf "$to/$name"
+    return 1
+}
+
+safe_cp_nolink() {
+    # Like `safe_cp`, but never creates hardlinks, so the copy does not share
+    # mode and owner with the source. Args are same as in safe_cp.
+    test "$#" -eq 3 || return 2
+    from="$1"
+    name="$2"
+    to="$3"
+    if cp -a "$from/$name" "$to"; then
         return 0
     fi
     echo "Copy failed, so removing partially-copied data and aborting"
