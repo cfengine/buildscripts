@@ -116,8 +116,19 @@ then
     export PKG_CONFIG_PATH="$BUILDPREFIX/lib/pkgconfig"
 fi
 
-
-( cd $BASEDIR/core && env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS )
+log_debug running configure on core repo...
+# shellcheck disable=SC2086
+(
+  set +e
+  set -x
+  cd "$BASEDIR"/core
+  env $OPTS CFLAGS="$CFLAGS" ./configure $ARGS
+  rc=$?
+  if [ "$rc" != "0" ]; then
+    cat config.log
+    exit $rc
+  fi
+)
 
 if [ "x$NOVA" = "xyes" ]
 then
