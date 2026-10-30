@@ -116,7 +116,7 @@ then
     export PKG_CONFIG_PATH="$BUILDPREFIX/lib/pkgconfig"
 fi
 
-log_debug running configure on core repo...
+echo running configure on core repo...
 # shellcheck disable=SC2086
 (
   set +e
