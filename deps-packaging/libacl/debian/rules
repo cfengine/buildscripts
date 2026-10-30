@@ -1,6 +1,10 @@
 #!/usr/bin/make -f
 
 PREFIX= $(BUILDPREFIX)
+# libattr installs headers in /var/cfengine for cfbuild-libattr package
+CPPFLAGS=-I/var/cfengine/include
+
+export CPPFLAGS
 clean:
 	dh_testdir
 	dh_testroot
