@@ -137,9 +137,9 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [libiconv](https://ftp.gnu.org/gnu/libiconv/)                                     | 1.19   | 1.19   | 1.19   | Needed by libxml2        |
 | [libxml2](https://gitlab.gnome.org/GNOME/libxml2)                                 | 2.15.4 | 2.15.4 | 2.15.4 |                          |
 | [libyaml](https://pyyaml.org/wiki/LibYAML)                                        | 0.2.5  | 0.2.5  | 0.2.5  |                          |
-| [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.36 | 0.9.36 | 1.0.2  |                          |
-| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.7.1  | 2.7.1  | 2.7.1  | Enterprise agent only    |
-| [OpenSSL](https://openssl.org/)                                                   | 3.6.5  | 3.6.5  | 4.0.3  |                          |
+| [LMDB](https://github.com/LMDB/lmdb/)                                             | 0.9.36 | 0.9.36 | 1.0.3  |                          |
+| [OpenLDAP](https://www.openldap.org/software/download/OpenLDAP/openldap-release/) | 2.7.1  | 2.7.1  | 2.7.2  | Enterprise agent only    |
+| [OpenSSL](https://openssl.org/)                                                   | 3.6.5  | 3.6.5  | 4.1.0  |                          |
 | [PCRE](https://www.pcre.org/)                                                     | -      | -      | -      |                          |
 | [PCRE2](https://github.com/PCRE2Project/pcre2/releases/)                          | 10.49  | 10.49  | 10.49  |                          |
 | [pthreads-w32](https://sourceware.org/pub/pthreads-win32/)                        | 2-9-1  | 2-9-1  | 2-9-1  | Windows Enterprise agent |
@@ -147,7 +147,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [zlib](https://www.zlib.net/)                                                     | 1.3.2  | 1.3.2  | 1.3.2  |                          |
 | [librsync](https://github.com/librsync/librsync/releases)                         | -      | 2.3.4  | 2.3.4  |                          |
 | [leech](https://github.com/larsewi/leech/releases)                                | -      | 0.2.0  | -      | Enterprise               |
-| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 6.0.0  | Enterprise               |
+| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 7.0.0  | Enterprise               |
 
 
 ### Enterprise Hub dependencies
