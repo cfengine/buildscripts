@@ -1,7 +1,6 @@
 #!/usr/bin/make -f
 
 PREFIX=$(BUILDPREFIX)
-INCLUDEPREFIX=/usr/include
 
 clean:
 	dh_testdir
@@ -15,7 +14,7 @@ build-stamp:
 
 	patch -p1 -i no_fancy_gcc.patch
 
-	./configure --prefix=$(PREFIX) --includedir=$(INCLUDEPREFIX) --enable-gettext=no
+	./configure --prefix=$(PREFIX) --enable-gettext=no
 
 	make
 
