@@ -1,4 +1,4 @@
-%define openldap_version 2.7.1
+%define openldap_version 2.7.2
 
 Summary: CFEngine Build Automation -- openldap
 Name: cfbuild-openldap
@@ -6,7 +6,6 @@ Version: %{version}
 Release: 1
 Source0: openldap-%{openldap_version}.tgz
 Patch0:  no_Sockaddr_redefine.patch
-Patch1: gcc-8.5.patch
 License: MIT
 Group: Other
 Url: https://cfengine.com
@@ -21,7 +20,6 @@ mkdir -p %{_builddir}
 %setup -q -n openldap-%{openldap_version}
 
 %patch -P0 -p0
-%patch -P1 -p1
 
 CPPFLAGS=-I%{buildprefix}/include
 
