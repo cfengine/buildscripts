@@ -74,10 +74,7 @@
       "CRB_REPO": "powertools",
       "PHP_MODULE_STREAM": "remi-8.3",
       "EXTRA_PKGS": "python3-rpm-macros platform-python-devel"
-    },
-    "architectures": [
-      "linux/amd64"
-    ]
+    }
   },
   "rhel-9": {
     "image_name": "cfengine-builder-rhel-9",
@@ -87,10 +84,7 @@
     "dockerfile": "Dockerfile.rhel",
     "extra_build_args": {
       "PHP_MODULE_STREAM": "remi-8.3"
-    },
-    "architectures": [
-      "linux/amd64"
-    ]
+    }
   },
   "rhel-10": {
     "image_name": "cfengine-builder-rhel-10",
