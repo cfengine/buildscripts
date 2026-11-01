@@ -207,7 +207,8 @@ def update_version_numbers(root, pkg_name, old_version, new_version):
 
 def update_distfiles_digest(root, pkg_name):
     with open(os.path.join(root, DEPS_PACKAGING, pkg_name, "source"), "r") as f:
-        source = f.read().strip()
+        # The first URL; any others are mirrors pkg-get-src falls back to
+        source = f.read().split()[0]
 
     filename = os.path.join(root, DEPS_PACKAGING, pkg_name, "distfiles")
     with open(filename, "r") as f:
