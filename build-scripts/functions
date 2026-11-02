@@ -810,6 +810,30 @@ run_and_print_on_failure() {
     return $exit_code
 }
 
+# configure_or_print_config_log: run ./configure in the current directory, cat config.log in case of failure
+# Args:
+#   $@ - all passed to ./configure
+configure_or_print_config_log() {
+    (
+        set +e
+        ./configure > .$$.configure.log 2>&1
+        rc=$?
+        if [ "$rc" != "0" ]; then
+            echo "Failed to run ./configure $@ in $(pwd)"
+            echo "--- Start of config.log ---"
+            cat config.log
+            echo "--- End of config.log ---"
+            echo "--- Start of tail of ./configure $@ output ---"
+            tail .$$.configure.log
+            echo "--- End of tail of ./configure $@ output ---"
+            echo "--- consult the full config.log above for details ---"
+            rm -f .$$.configure.log
+            exit $rc
+        fi
+        rm -f .$$.configure.log
+    )
+}
+
 # log_debug: Print a debug message with script name prefix
 # Args:
 #   $@ - Debug message
