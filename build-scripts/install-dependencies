@@ -4,6 +4,10 @@
 # This script installs the dependencies to be bundled with CFEngine.
 # The dependencies are built into you working directory.
 #
+# This script can take one or more arguments for specific dependencies to install.
+# By default without arguments it will install all dependencies as appropriate.
+# The --download-only first argument will only download the source files and seed the build-artifacts-cache sftp cache.
+#
 # The script expects the following repositories to exist side by side:
 # .
 # ├── buildscripts
@@ -17,8 +21,15 @@
 # The script can be run as described in the usage message below:
 
 usage() {
-    echo "Usage: PROJECT=[nova|community] EXPLICIT_ROLE=[hub|agent] BUILD_TYPE=[DEBUG|RELEASE] $0"
+    echo "Usage: PROJECT=[nova|community] EXPLICIT_ROLE=[hub|agent] BUILD_TYPE=[DEBUG|RELEASE] $0 [--download-only|dependency-name]"
 }
+
+# the --download-only option is for bootstrap-pr job and similar where we want to seed the sftp build-artifacts-cache with dependency files ONCE to be re-used by many platforms
+# this avoids 429 too many requests troubles we have had with lmdb as well as increases efficiency and resilience to network flakiness of third party sources.
+if [ "$1" = "--download-only" ]; then
+    DOWNLOAD_ONLY="yes"
+    shift # get rid of this first argument so that any other arguments are used as a list of dependencies to work on
+fi
 
 . "$(dirname "$0")"/functions
 . detect-environment
@@ -120,7 +131,9 @@ check_and_install_perl() {
     export PERL
 }
 
-check_and_install_perl
+if [ "$DOWNLOAD_ONLY" != "yes" ]; then
+    check_and_install_perl
+fi
 
 # non-gnu exotics don't support sed -i,
 # and only hub or deb packages use files mentioned below
@@ -187,6 +200,11 @@ for dep in $DEPS; do
         safe_prefix="+$(echo "$PREFIX" | sed 's:/::g')"
     fi
     version=0+$revision$versuffix$crossver$safe_prefix
+
+    if [ "$DOWNLOAD_ONLY" = "yes" ]; then
+        pkg-get-src "$BASEDIR/buildscripts/deps-packaging/$dep"
+        continue
+    fi
 
     # FETCH dependency packages if needed
     package_files=$(pkg-cache listpkgfiles "$dep-$version")

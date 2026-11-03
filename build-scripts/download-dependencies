@@ -1,0 +1,13 @@
+#!/bin/sh
+
+#
+# This script downloads dependency source files to be bundled with CFEngine.
+# It calls install-dependencies with the argument --download-only.
+# This is a separate file to make it possible for bootstrap-pr in jenkins to selectively call this function only when --download-only is supported in install-dependencies script.
+#
+# See install-dependencies for expectations and usage
+
+# Here we provide JOB_BASE_NAME=label=NO_LABEL_DOWNLOAD_ONLY so that sftp cache is used, the label won't be used because we aren't dealing with built packages for deps, only the source files download.
+# We also explicitly call install-dependencies with EXPLICIT_ROLE set to agent AND hub to ensure all dependencies are cached.
+EXPLICIT_ROLE=hub JOB_BASE_NAME=label=NO_LABEL_DOWNLOAD_ONLY "$(dirname "$0")"/install-dependencies --download-only
+EXPLICIT_ROLE=agent JOB_BASE_NAME=label=NO_LABEL_DOWNLOAD_ONLY "$(dirname "$0")"/install-dependencies --download-only
