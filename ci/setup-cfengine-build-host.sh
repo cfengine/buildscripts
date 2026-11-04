@@ -317,10 +317,22 @@ if [ ! -x /var/cfengine/bin/cf-agent ]; then
     software git
     echo "cf-remote didn't install cf-agent, try from source"
     rm -rf core # just in case we are repeating the script
+
+    # Here we need to take care of some dependencies on older platforms
+    OPTS=""
+    if grep -q rhel /etc/os-release; then
+        if grep -qi version=\"8 /etc/os-release; then
+            # rhel-8 pcre2 is too old so we must install a sufficient one (10.34+) for libntech as of 2023-12-05 https://github.com/NorthernTechHQ/libntech/commit/12ddb1151629a84a5a13056ecccdc20a0d1d6a0c
+            software gcc make
+            "$thisdir"/linux-install-pcre2.sh /opt
+            OPTS="--with-pcre2=/opt/pcre2"
+        fi
+    fi
+
     git clone --recursive --depth 1 https://github.com/cfengine/core
     (
         cd core
-        ./ci/install.sh
+        OPTS="$OPTS" ./ci/install.sh
     )
 fi
 
