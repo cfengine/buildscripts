@@ -20,6 +20,10 @@ case "`uname -s`" in
 		OS_NAME=aix
 		OS_VERSION=`uname -v`
 		;;
+	Darwin)
+		OS_NAME=darwin
+		OS_VERSION=`sw_vers -productVersion | cut -d. -f1`
+		;;
 esac
 
 cmp_version()

@@ -115,6 +115,23 @@ case `os_type` in
       done
     fi
     ;;
+
+  darwin)
+    # No systemd/init.d here; install the LaunchDaemon plists shipped under
+    # $PREFIX/misc/launchd (see build-scripts/package's "macos" case) into
+    # /Library/LaunchDaemons. platform_service (macos-script-common.sh) loads
+    # them via launchctl later in this script, once we know whether this host
+    # is actually bootstrapped.
+    mkdir -p `rc_d_path`
+    for plist in $PREFIX/misc/launchd/*.plist; do
+      [ -f "$plist" ] || continue
+      name=`basename $plist`
+      sed "s|@PREFIX@|$PREFIX|g" "$plist" > "`rc_d_path`/$name"
+      chmod 644 "`rc_d_path`/$name"
+      chown root:wheel "`rc_d_path`/$name"
+    done
+    mkdir -p $PREFIX/outputs
+    ;;
 esac
 
 # (re)load SELinux policy if available and required

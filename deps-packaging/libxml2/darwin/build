@@ -1,0 +1,39 @@
+#!/bin/sh -e
+
+# Mirrors ../cfbuild-libxml2.spec (the actively maintained recipe used on
+# Linux), adapted for macOS.
+
+# Options
+
+PREFIX=${BUILDPREFIX}
+
+LX=${BUILD_ROOT}/cfbuild-libxml2${PREFIX}
+LXD_ROOT=${BUILD_ROOT}/cfbuild-libxml2-devel
+LXD=${LXD_ROOT}${PREFIX}
+
+# Configure
+
+CPPFLAGS="-I${PREFIX}/include" \
+DYLD_LIBRARY_PATH="${PREFIX}/lib" \
+./configure --prefix=${PREFIX} --without-python --enable-shared --disable-static --with-zlib=${PREFIX}
+
+# Build
+
+${MAKE:-make}
+
+# Install
+
+${MAKE:-make} install DESTDIR=${LXD_ROOT}
+
+# Package
+
+rm -f ${LXD}/bin/xmlcatalog
+rm -f ${LXD}/bin/xmllint
+rm -f ${LXD}/lib/libxml2.a
+rm -f ${LXD}/lib/libxml2.la
+rm -f ${LXD}/lib/xml2Conf.sh
+rm -rf ${LXD}/lib/cmake
+rm -rf ${LXD}/share
+
+mkdir -p ${LX}/lib
+mv ${LXD}/lib/*.dylib ${LX}/lib

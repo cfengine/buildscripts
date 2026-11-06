@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  launchd equivalent of core/misc/systemd/cf-serverd.service.in. Only runs
+  once the host has been bootstrapped as a client of a hub (policy_server.dat
+  present), matching that unit's ConditionPathExists checks.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.cfengine.cf-serverd</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/sh</string>
+    <string>-c</string>
+    <string>test -f @PREFIX@/inputs/promises.cf &amp;&amp; test -f @PREFIX@/policy_server.dat &amp;&amp; exec @PREFIX@/bin/cf-serverd --no-fork</string>
+  </array>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>StandardOutPath</key>
+  <string>@PREFIX@/outputs/cf-serverd.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>@PREFIX@/outputs/cf-serverd.launchd.log</string>
+</dict>
+</plist>
