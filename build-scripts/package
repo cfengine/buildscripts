@@ -557,7 +557,10 @@ macos)
     # than in script-header.sh itself, to avoid touching every other
     # platform's scriptlets for a need that's specific to this one.
     for script in "$SCRIPTSDIR/preinstall" "$SCRIPTSDIR/postinstall" "$STAGE$PREFIX/bin/uninstall-cfengine.sh"; do
-        { echo '#!/bin/sh'; cat "$script"; } >"$script.tmp"
+        {
+            echo '#!/bin/sh'
+            cat "$script"
+        } >"$script.tmp"
         mv "$script.tmp" "$script"
         chmod +x "$script"
     done
