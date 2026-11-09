@@ -122,14 +122,11 @@ else
     log_debug "Using default prefix: /var/cfengine"
 fi
 
-# Generate $PACKAGING-script-common.sh (not version tracked) for the build prefix
-template="$P/../common/script-templates/$PACKAGING-script-common.sh.in"
-if [ -f "$template" ]; then
+# Generate the install script snippets for the build prefix
+for template in "$P"/../common/script-templates/*.in; do
     log_debug "Generating ${template%.in} from $template"
     sed "s:@BUILD_PREFIX@:$BUILDPREFIX:g" "$template" >"${template%.in}"
-else
-    log_error "Template $PACKAGING-script-common.sh.in not available at $template"
-fi
+done
 
 # Parse version string to separate main version from supplementary version
 # Format: MAIN_VERSION~SUPP_VERSION (e.g., 3.27.0~build1)
