@@ -3,3 +3,5 @@ revision
 *.html
 ci/cache
 ci/packages
+# Generated from *.in by build-scripts/package
+packaging/common/script-templates/*-script-common.sh

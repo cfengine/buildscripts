@@ -8,7 +8,7 @@
 # rpm/deb scriptlets -- upgrade detection has to be done by looking at what's
 # already on disk, same as HP-UX/AIX do.
 
-PREFIX=/var/cfengine
+PREFIX=@BUILD_PREFIX@
 
 package_type()
 {

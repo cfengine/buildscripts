@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PREFIX=/var/cfengine
+PREFIX=@BUILD_PREFIX@
 
 package_type()
 {
