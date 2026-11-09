@@ -118,17 +118,17 @@ P="$BASEDIR/buildscripts/packaging/$PKG"
 if [ "$BUILDPREFIX" != /var/cfengine ]; then
     log_debug "Custom prefix detected: $BUILDPREFIX"
     safe_prefix="$(echo "$BUILDPREFIX" | sed -e 's:/::g')"
-    source_script="$P/../common/script-templates/$PACKAGING-script-common.sh"
-    patched_script="$P/../common/script-templates/patched-$PACKAGING-script-common.sh"
-    if [ -f "$source_script" ]; then
-        # Patch installation scripts for custom prefix, create patched-$PACKAGING-script-common.sh which is not version tracked
-        log_debug "Patching from source: $source_script to patched script: $patched_script"
-        sed "s:/var/cfengine:$BUILDPREFIX:" "$source_script" >"$patched_script"
-    else
-        log_error "Source $PACKAGING-script-common.sh not available at $source_script"
-    fi
 else
     log_debug "Using default prefix: /var/cfengine"
+fi
+
+# Generate $PACKAGING-script-common.sh (not version tracked) for the build prefix
+template="$P/../common/script-templates/$PACKAGING-script-common.sh.in"
+if [ -f "$template" ]; then
+    log_debug "Generating ${template%.in} from $template"
+    sed "s:/var/cfengine:$BUILDPREFIX:" "$template" >"${template%.in}"
+else
+    log_error "Template $PACKAGING-script-common.sh.in not available at $template"
 fi
 
 # Parse version string to separate main version from supplementary version
