@@ -126,7 +126,7 @@ fi
 template="$P/../common/script-templates/$PACKAGING-script-common.sh.in"
 if [ -f "$template" ]; then
     log_debug "Generating ${template%.in} from $template"
-    sed "s:/var/cfengine:$BUILDPREFIX:" "$template" >"${template%.in}"
+    sed "s:@BUILD_PREFIX@:$BUILDPREFIX:g" "$template" >"${template%.in}"
 else
     log_error "Template $PACKAGING-script-common.sh.in not available at $template"
 fi
