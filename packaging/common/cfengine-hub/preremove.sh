@@ -1,4 +1,7 @@
 cf_console platform_service cfengine3 stop
+if ! terminate_cf_agents; then
+  cf_console echo "Warning: continuing removal with cf-agent still running"
+fi
 if use_systemd && [ -e /usr/lib/systemd/system/cfengine3-web.service ]; then
   # When using systemd, the services are split in two, and although both will
   # stop due to the command above, the web part may only do so after some
