@@ -6,16 +6,16 @@
 # type = <deb|rpm|depot|bff|pkg>
 # action = <install|remove>
 #
-# script-header.sh
-# <type>-script-common.sh
+# script-header.sh (required)
+# <type>-script-common.sh (required)
 # note: generated from <type>-script-common.sh.in by build-scripts/package
 # <type>-script-common-<action>.sh
-# script-common.sh
+# script-common.sh (required)
 # script-common-<action>.sh
-# script-common-header-last.sh
+# script-common-header-last.sh (required)
 # ../cfengine-PROJECT[-hub]/<pre|post><install|remove>.sh
 #
-# Any script that is missing will simply be skipped.
+# A missing required script is an error. Any other missing script is skipped.
 
 if [ $# -ne 3 ]; then
   echo "Usage: $0 cfengine-PROJECT[-hub] <pre|post><install|remove> pkg-type"
@@ -35,8 +35,18 @@ include_script()
   fi
 }
 
-include_script "$TEMPLATEDIR/script-header.sh"
-include_script "$TEMPLATEDIR/$PKG_TYPE-script-common.sh"
+# Like include_script, but fails if the file is missing
+require_script()
+{
+  if [ ! -f "$1" ]; then
+    echo "$0: error: required script $1 not found" >&2
+    exit 1
+  fi
+  cat "$1"
+}
+
+require_script "$TEMPLATEDIR/script-header.sh"
+require_script "$TEMPLATEDIR/$PKG_TYPE-script-common.sh"
 
 case "$PKG_TYPE" in
     deb|rpm)
@@ -60,19 +70,19 @@ echo "LMDB_VERSION=$LMDB_VERSION"
 case "$SCRIPT_TYPE" in
   *install)
     include_script "$TEMPLATEDIR/$PKG_TYPE-script-common-install.sh"
-    include_script "$TEMPLATEDIR/script-common.sh"
+    require_script "$TEMPLATEDIR/script-common.sh"
     include_script "$TEMPLATEDIR/script-common-install.sh"
     include_script "$TEMPLATEDIR/script-common-$SCRIPT_TYPE.sh"
     ;;
   *remove)
     include_script "$TEMPLATEDIR/$PKG_TYPE-script-common-remove.sh"
-    include_script "$TEMPLATEDIR/script-common.sh"
+    require_script "$TEMPLATEDIR/script-common.sh"
     include_script "$TEMPLATEDIR/script-common-remove.sh"
     include_script "$TEMPLATEDIR/script-common-$SCRIPT_TYPE.sh"
     ;;
 esac
 
-include_script "$TEMPLATEDIR/script-common-header-last.sh"
+require_script "$TEMPLATEDIR/script-common-header-last.sh"
 
 # Not having a script is not an error. Not all scripts are used,
 # and not all projects are ported over.
