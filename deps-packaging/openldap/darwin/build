@@ -14,7 +14,6 @@ TTD=${TTD_ROOT}${PREFIX}
 # Patch
 
 $PATCH -p0 <no_Sockaddr_redefine.patch
-$PATCH -p1 <gcc-8.5.patch
 
 # Configure
 
