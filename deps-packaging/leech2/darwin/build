@@ -21,6 +21,9 @@ TTD=${BUILD_ROOT}/cfbuild-leech2-devel${PREFIX}
 export RUSTUP_HOME="$HOME/.cache/cfengine/buildscripts"/rust
 export PATH="$HOME/.cache/cfengine/buildscripts"/rust/bin:$PATH
 
+# Use the protoc installed in $HOME/.cache
+export PATH="$HOME/.cache/cfengine/buildscripts/protobuf/bin:$PATH"
+
 # Embed an rpath of ${PREFIX}/lib in libleech2.dylib so it resolves
 # co-bundled CFEngine libraries at runtime, matching every other bundled dep
 # (enterprise's rpath_test.sh requires every /var/cfengine/lib/lib*.dylib to
