@@ -4,3 +4,25 @@ updates:
     directory: /packaging/cfengine-nova-hub/
     schedule:
       interval: "daily"
+
+  - package-ecosystem: pip
+    directory: /packaging/cfengine-nova-hub/
+    target-branch: "3.27.x"
+    commit-message:
+      prefix: "3.27.x"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: pip
+    directory: /packaging/cfengine-nova-hub/
+    target-branch: "3.24.x"
+    commit-message:
+      prefix: "3.24.x"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
