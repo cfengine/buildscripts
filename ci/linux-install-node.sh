@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-node_version=20.10.0
+node_version=24.22.2
 
 npm install compare-versions
 
@@ -14,16 +14,17 @@ fi
 
 cd /opt
 sudo curl -k -O https://unofficial-builds.nodejs.org/download/release/v$node_version/node-v$node_version-linux-x64-glibc-217.tar.xz
-echo "dcfc5dfcdea4d0883bb35a4f2e09bc4745b6e689d88f4ad09d9ccc252024049b  node-v$node_version-linux-x64-glibc-217.tar.xz" | sudo tee node-v$node_version-linux-x64-glibc-217.tar.xz.sha256
+echo "2644f0845671e149b8b0705a4fdcca2993995348618dc98c681ba0c7cdf604d2  node-v$node_version-linux-x64-glibc-217.tar.xz" | sudo tee node-v$node_version-linux-x64-glibc-217.tar.xz.sha256
 sudo sha256sum --check node-v$node_version-linux-x64-glibc-217.tar.xz.sha256
 sudo tar xf node-v$node_version-linux-x64-glibc-217.tar.xz
 sudo tee /etc/profile.d/nodejs.sh << EOF
 export NODE_HOME=/opt/node-v$node_version-linux-x64-glibc-217
 export PATH=\$PATH:\$NODE_HOME/bin
 EOF
-sudo update-alternatives --install /usr/bin/node node /opt/node-v$node_version-linux-x64-glibc-217/bin/node 1
-sudo update-alternatives --install /usr/bin/npm npm /opt/node-v$node_version-linux-x64-glibc-217/bin/npm 1
-sudo update-alternatives --install /usr/bin/npx npx /opt/node-v$node_version-linux-x64-glibc-217/bin/npx 1
-sudo update-alternatives --install /usr/bin/corepack corepack /opt/node-v$node_version-linux-x64-glibc-217/bin/corepack 1
+for tool in node npm npx corepack; do
+  sudo update-alternatives --install /usr/bin/$tool $tool /opt/node-v$node_version-linux-x64-glibc-217/bin/$tool 1
+  # an older version may already be registered with the same priority, so select the new one explicitly
+  sudo update-alternatives --set $tool /opt/node-v$node_version-linux-x64-glibc-217/bin/$tool
+done
 cd /root
 
