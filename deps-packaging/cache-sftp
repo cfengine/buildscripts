@@ -72,6 +72,20 @@ sftp_stdin()
 }
 
 
+# Print sftp commands that remove the putdir upload dir tmp/$tmpdir.
+# All are prefixed with '-', since the dir is gone after a successful
+# rename.
+cleanup_tmpdir_cmds()
+{
+    for f in $dirfiles
+    do
+        echo "-rm tmp/$tmpdir/`basename $f`"
+    done
+    echo "-rm tmp/$tmpdir/.DONE"
+    echo "-rmdir tmp/$tmpdir"
+}
+
+
 print_usage()
 {
     (
@@ -187,9 +201,24 @@ main()
         echo "
             -rename tmp/$tmpdir $dirname
             "
+
+        # Remove the upload dir if the rename failed, e.g. because
+        # another build host uploaded the package first
+        cleanup_tmpdir_cmds
         } |  sftp_stdin
 
         retval=$?
+
+        # sftp aborts the batch on the first failed command (e.g. put
+        # on a full disk), so clean up in a separate session
+        if [ $retval != 0 ]
+        then
+            {
+            echo "cd $REMOTE_CACHEDIR/dirs"
+            cleanup_tmpdir_cmds
+            } |  sftp_stdin
+        fi
+
         rm $tmpdir/.DONE
         ;;
     getfile)
