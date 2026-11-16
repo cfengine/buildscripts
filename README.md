@@ -147,20 +147,20 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [zlib](https://www.zlib.net/)                                                     | 1.4    | 1.4    | 1.4    |                          |
 | [librsync](https://github.com/librsync/librsync/releases)                         | -      | 2.3.4  | 2.3.4  |                          |
 | [leech](https://github.com/larsewi/leech/releases)                                | -      | 0.2.0  | -      | Enterprise               |
-| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 7.0.3  | Enterprise               |
+| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 7.0.4  | Enterprise               |
 
 
 ### Enterprise Hub dependencies
 
 | CFEngine version                                    | 3.24.x | 3.27.x | master |
 | :-------------------------------------------------- | :----- | :----- | :----- |
-| [Apache](https://httpd.apache.org/)                 | 2.4.70 | 2.4.70 | 2.4.70 |
+| [Apache](https://httpd.apache.org/)                 | 2.4.70 | 2.4.70 | 2.4.71 |
 | [APR](https://apr.apache.org/)                      | 1.7.6  | 1.7.6  | 1.7.6  |
 | [apr-util](https://apr.apache.org/)                 | 1.6.6  | 1.6.6  | 1.6.6  |
-| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.56.0 | 2.56.0 | 2.56.0 |
+| [Git](https://www.kernel.org/pub/software/scm/git/) | 2.56.0 | 2.56.0 | 2.56.1 |
 | [libexpat](https://libexpat.github.io/)             | 2.10.0 | 2.10.0 | 2.10.0 |
 | [PHP](https://php.net/)                             | 8.3.36 | 8.5.12 | 8.5.12 |
-| [PostgreSQL](https://www.postgresql.org/)           | 16.15  | 18.6   | 18.6   |
+| [PostgreSQL](https://www.postgresql.org/)           | 16.15  | 18.6   | 18.7   |
 | [nghttp2](https://nghttp2.opg/)                     | -      | 1.71.0 | 1.71.0 |
 | [rsync](https://download.samba.org/pub/rsync/)      | 3.5.2  | 3.5.2  | 3.5.2  |
 
