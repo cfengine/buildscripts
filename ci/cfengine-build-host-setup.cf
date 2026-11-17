@@ -427,7 +427,7 @@ bundle agent cfengine_build_host_setup
 
     (redhat_8|centos_8).!have_fakeroot::
       # special fakeroot, missing from _8 an d up?
-      "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-1.23-1.fc29.x86_64.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/x86_64/fakeroot-libs-1.23-1.fc29.x86_64.rpm"
+      "sudo rpm -iv https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/${sys.arch}/fakeroot-1.23-1.fc29.${sys.arch}.rpm https://kojipkgs.fedoraproject.org//packages/fakeroot/1.23/1.fc29/${sys.arch}/fakeroot-libs-1.23-1.fc29.${sys.arch}.rpm"
         contain => in_shell;
 
     (redhat|centos).!(redhat_7|centos_7).!(redhat_6|centos_6).!epel_release_ok::
