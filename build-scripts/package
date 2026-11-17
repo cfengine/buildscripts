@@ -258,7 +258,13 @@ rpm | lpp)
         --define "'_root_sysconfdir /etc'" \
         --define "'use_source_date_epoch_as_buildtime 1'" \
         --define "'clamp_mtime_to_source_date_epoch 1'" \
-        "$RPMBUILD_OPTIONS" "$SPEC"
+        "$RPMBUILD_OPTIONS" "$SPEC" 2>&1 | tee $$.rpmbuild.log
+
+    if grep warning "$$.rpmbuild.log"; then
+        log_error "Warnings found in rpmbuild log. See above."
+        exit 1
+    fi
+    rm -f $$.rpmbuild.log
 
     if [ "$PACKAGING" = lpp ]; then
         # AIX-specific: Create BFF (Backup File Format) packages for AIX
