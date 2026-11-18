@@ -36,6 +36,21 @@ function chown-root-owned-to-jenkins() {
 # Make zypper (including calls from cf-agent below) wait for the lock instead.
 export ZYPP_LOCK_TIMEOUT=300
 
+# ENT-14783 EPEL mirrors are sometimes broken or out of sync, so retry yum update with metadata clean
+function yum-update-with-retries() {
+    attempts=3
+    for attempt in 1 2 3; do
+        yum update --assumeyes && return 0
+        if [ "$attempt" -lt "$attempts" ]; then
+            echo "yum update failed (attempt $attempt of $attempts), retrying in 30 seconds"
+            yum clean metadata || true
+            sleep 30
+        fi
+    done
+    echo "yum update failed after $attempts attempts"
+    return 1
+}
+
 ls -la /home/
 if ! id -u jenkins; then
     useradd jenkins -p jenkins
@@ -135,7 +150,7 @@ echo "Using buildscripts commit:"
 echo "Install distribution upgrades and set software alias for platform"
 if [ -f /etc/os-release ]; then
     if grep -q rhel /etc/os-release; then
-        yum update --assumeyes
+        yum-update-with-retries
         alias software='yum install --assumeyes'
         alias erase-packages='yum erase --assumeyes'
     elif grep -q debian /etc/os-release; then
@@ -173,7 +188,7 @@ if [ -f /etc/os-release ]; then
         exit 1
     fi
 elif [ -f /etc/redhat-release ]; then
-    yum update --assumeyes
+    yum-update-with-retries
     alias software='yum install --assumeyes'
     alias erase-packages='yum erase --assumeyes'
 else
