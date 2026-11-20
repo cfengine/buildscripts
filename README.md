@@ -147,7 +147,7 @@ File `install-dependencies` and the relevant subdirectories in `deps-packaging` 
 | [zlib](https://www.zlib.net/)                                                     | 1.4    | 1.4    | 1.4    |                          |
 | [librsync](https://github.com/librsync/librsync/releases)                         | -      | 2.3.4  | 2.3.4  |                          |
 | [leech](https://github.com/larsewi/leech/releases)                                | -      | 0.2.0  | -      | Enterprise               |
-| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 7.1.0  | Enterprise               |
+| [leech2](https://github.com/larsewi/leech2/releases)                              | -      | -      | 7.2.0  | Enterprise               |
 
 
 ### Enterprise Hub dependencies
