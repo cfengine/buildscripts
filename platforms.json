@@ -16,14 +16,14 @@
     "image_name": "cfengine-builder-ubuntu-22",
     "image_version": "20261122T001848Z",
     "base_image": "ubuntu:22.04",
-    "base_image_sha": "sha256:9abcaffc92a5279fff3a6a41635c0800ea33e528425fb389658806476e7defde",
+    "base_image_sha": "sha256:f64b2ffc2f10ab8f8505aa56b2664bd846cbb9df87c7e2532e30f7667021c0e6",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-24": {
     "image_name": "cfengine-builder-ubuntu-24",
     "image_version": "20261122T001851Z",
     "base_image": "ubuntu:24.04",
-    "base_image_sha": "sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8",
+    "base_image_sha": "sha256:9c7f200c07e3d4a03e7249d2c16bf66a51120fb876aa2242cf31451412543289",
     "dockerfile": "Dockerfile.debian"
   },
   "ubuntu-26": {
@@ -80,7 +80,7 @@
     "image_name": "cfengine-builder-rhel-9",
     "image_version": "20261122T001852Z",
     "base_image": "rockylinux/rockylinux:9",
-    "base_image_sha": "sha256:8101994123cf3d0a8fee517bee7f39e555c7d92bd2d9eb3303cc988a0eeed00f",
+    "base_image_sha": "sha256:bb5755f96bec05ff26165e779ec843d7167544be9e50770508f307019a6d05c4",
     "dockerfile": "Dockerfile.rhel",
     "extra_build_args": {
       "PHP_MODULE_STREAM": "remi-8.3"
@@ -90,7 +90,7 @@
     "image_name": "cfengine-builder-rhel-10",
     "image_version": "20261122T001859Z",
     "base_image": "rockylinux/rockylinux:10",
-    "base_image_sha": "sha256:827d37bc128288ccf160ee318bb3cb92d591164cb217e92f8bc61e3982ae1834",
+    "base_image_sha": "sha256:d24beedc58f79b9e0e9289fedaa4fcbcbe692b1438883a86f177fd7c51053ca8",
     "dockerfile": "Dockerfile.rhel",
     "extra_build_args": {
       "EXTRA_PKGS": "patch"
@@ -100,7 +100,7 @@
     "image_name": "cfengine-builder-ubuntu-24-mingw",
     "image_version": "20261122T001853Z",
     "base_image": "ubuntu:24.04",
-    "base_image_sha": "sha256:73b999393d07f2bf65a40373778a44dc9a6d54ad7718d29247d8ff9413c4d6a8",
+    "base_image_sha": "sha256:9c7f200c07e3d4a03e7249d2c16bf66a51120fb876aa2242cf31451412543289",
     "dockerfile": "Dockerfile.mingw",
     "cross_target": "x64-mingw",
     "architectures": [
