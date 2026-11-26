@@ -132,6 +132,24 @@ sed "s/define('ENVIRONMENT', 'development')/define('ENVIRONMENT','production')/g
 mv $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php.tmp $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php
 rm -f $RPM_BUILD_ROOT%prefix/share/GUI/public/index.php.tmp
 
+(
+  GUI="$(echo %prefix/share/GUI | sed 's,^/,,')"
+  cd $RPM_BUILD_ROOT
+  if find $GUI | grep -qE '[[:space:]*?{}%%]|\[|\]'; then
+    echo "error: unsafe filename under $GUI" >&2; exit 1
+  fi
+
+  # GUI files should be read-only and owned by root
+  echo '%%defattr(400,root,root,400)' > %{_builddir}/gui-files.list
+  # Process directories separately to indicate that they can be empty, thus avoiding conflicts with %config entries during upgrade
+  find $GUI -type d | sed 's|^|%%dir /|' >> %{_builddir}/gui-files.list
+  # Include all files except for config.php (2 cases currently)
+  find $GUI \( -type f -o -type l \) ! -name config.php | sed 's|^|/|' >> %{_builddir}/gui-files.list
+  # include %config files separately
+# We can change these configuration files as part of masterfiles policy so need to mark as configs
+  find $GUI -type f -name config.php | sed 's|^|%%config(noreplace) /|' > %{_builddir}/gui-config.list
+)
+
 # NovaBase
 mkdir -p $RPM_BUILD_ROOT%prefix/share/NovaBase
 cp -R $RPM_BUILD_ROOT%prefix/masterfiles $RPM_BUILD_ROOT%prefix/share/NovaBase/masterfiles
@@ -204,7 +222,7 @@ fi
 
 exit 0
 
-%files
+%files -f gui-files.list -f gui-config.list
 
 # Executables
 %defattr(755,root,root,755)
@@ -412,13 +430,6 @@ exit 0
 # ENT-2708, ENT-2846
 %defattr(600,root,root,700)
 %prefix/share/db/*.sql
-
-# No-one should need access to anything under share/GUI
-%defattr(400,root,root,400)
-# We can change these configuration files as part of masterfiles policy so need to mark as configs
-%config(noreplace) %prefix/share/GUI/application/config/config.php
-%config(noreplace) %prefix/share/GUI/api/modules/inventory/config/config.php
-%prefix/share/GUI
 
 # Base policy
 %defattr(644,root,root,755)
